@@ -1,32 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-	<head>
-		<title>Muck Rock</title>
-		<link rel="stylesheet" type="text/css" href="../css/main.css" />
-	</head>
-	<body>
+{% extends "base.html" %}
 
-		<div id="container">
-			<div id="header">
-				<h1>
-					Muck Rock
-				</h1>
-				<a href="#">Log in</a>
-			</div>
-			<div id="navigation">
-				<ul>
-					<li><a href="index.html">Home</a></li>
-					<li><a href="#">FOIA Requests</a></li>
-					<li><a href="#">About</a></li>
-					<li><a href="#">News</a></li>
-					<li><a href="#">Blog</a></li>
-					<li><a href="#">Contact us</a></li>
-				</ul>
-			</div>
-			<div id="content-container">
-				<div id="content">
+{% block content %}
 					<h2>
 						Welcome to Muck Rock!
 					</h2>
@@ -39,31 +14,4 @@
 					<p>
 					Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
 					</p>
-				</div>
-				<div id="aside">
-					<h3>
-						News
-					</h3>
-					<h4>We started work!</h4>
-					<p>
-					<span class="date">Feb 9, 2010</span> - We started working on the site.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan.
-					</p>
-					<h3>
-						Log in
-					</h3>
-					<form action="account.html" method="post">
-						<label for="username">User name:</label>
-						<input type="text" name="username" value="" id="username">
-						<label for="password">Password:</label>
-						<input type="password" name="password" value="" id="password">
-						<input type="submit" value="Login" />
-						<input type="hidden" name="next" value="{{ next|escape }}" />
-					</form>
-				</div>
-				<div id="footer">
-					Copyright © Muck Rock, 2010
-				</div>
-			</div>
-		</div>
-	</body>
-</html>
+{% endblock %}

@@ -1,0 +1,26 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Your Account</h1>
+<p>
+<a href="/accounts/update/">Update your information</a>
+</p>
+<table>
+	<tr>
+		<td>User Name:</td>
+		<td>{{user.username}}</td>
+	</tr>
+	<tr>
+		<td>Name:</td>
+		<td>{{user.first_name}} {{user.last_name}}</td>
+	</tr>
+	<tr>
+		<td>Email:</td>
+		<td>{{user.email}}</td>
+	</tr>
+</table>
+
+{% endblock %}
+

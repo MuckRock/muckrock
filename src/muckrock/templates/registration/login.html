@@ -1,0 +1,31 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if form.errors %}
+	{# improve error handling #}
+    <p class="error">Sorry, that's not a valid username or password</p>
+  {% endif %}
+
+  <form action="" method="post">
+		<table class="form">
+			<tr>
+				<td><label for="username">User name:</label></td>
+				<td><input type="text" name="username" value="" id="username"></td>
+			</tr>
+			<tr>
+				<td><label for="password">Password:</label></td>
+				<td><input type="password" name="password" value="" id="password"></td>
+			</tr>
+			<tr>
+				<td><input type="submit" value="Log in" /></td>
+			</tr>
+		</table>
+		<input type="hidden" name="next" value="{{ next|escape }}" />
+  </form>
+
+	<p>Don't have an account?  <a href="/accounts/register">Create one now.</a></p>
+
+{% endblock %}
+

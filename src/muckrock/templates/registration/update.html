@@ -1,0 +1,20 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if form.errors %}
+	{# improve error handling #}
+    <p class="error">Sorry, errors</p>
+		{{ form.errors }}
+  {% endif %}
+
+  <form action="" method="post">
+		<table class="form">
+			{{form.as_table}}
+		</table>
+		<input type="submit" value="Update" />
+  </form>
+
+{% endblock %}
+
