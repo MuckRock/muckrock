@@ -82,7 +82,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'muckrock.foia',
+    #'muckrock.foia',
 )
 
 EMAIL_PORT=1025
