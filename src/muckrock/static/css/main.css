@@ -39,6 +39,16 @@ table td, table th
 
 table th { background: #ecf7fd; }
 
+table.form {
+	width: auto;
+}
+
+table.form td, table.form th
+{
+	border: 0;
+	background: #fff;
+}
+
 
 #container
 {
@@ -55,14 +65,14 @@ table th { background: #ecf7fd; }
 
 #header h1 { margin: 0; }
 
-#header a
+#header #account-links { float: right; }
+#header #account-links a
 {
-	float: right;
 	color: #333;
 	text-decoration: none;
 	font-size: 80%;
 }
-#header a:hover { color: #999; }
+#header #account-links a:hover { color: #999; }
 
 #navigation
 {
@@ -127,7 +137,7 @@ table th { background: #ecf7fd; }
 
 #footer
 {
-	clear: left;
+	clear: both;
 	background: #ccc;
 	text-align: right;
 	padding: 20px;

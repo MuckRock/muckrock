@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>Muck Rock</title>
+		<link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+	</head>
+	<body>
+
+		<div id="container">
+			<div id="header">
+				<h1>
+					Muck Rock
+				</h1>
+				<span id="account-links">
+					{% if user.is_authenticated %}
+						<a href="/accounts/profile">My account</a>
+						&nbsp;|&nbsp;
+						<a href="/accounts/logout">Log out</a>
+					{% else %}
+						<a href="/accounts/login">Log in</a>
+						&nbsp;|&nbsp;
+						<a href="/accounts/register">Register</a>
+					{% endif %}
+				</span>
+				<br />
+			</div>
+			<div id="navigation">
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="#">FOIA Requests</a></li>
+					<li><a href="#">About</a></li>
+					<li><a href="#">News</a></li>
+					<li><a href="#">Blog</a></li>
+					<li><a href="#">Contact us</a></li>
+				</ul>
+			</div>
+			<div id="content-container">
+				<div id="content">
+					{% block content %}{% endblock %}
+				</div>
+				<div id="aside">
+					<h3>
+						News
+					</h3>
+					<h4>We started work!</h4>
+					<p>
+					<span class="date">Feb 9, 2010</span> - We started working on the site.  Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan.
+					</p>
+					{% if not user.is_authenticated %}
+					<h3>
+						Log in
+					</h3>
+					<form action="/accounts/login/" method="post">
+						<label for="username">User name:</label>
+						<input type="text" name="username" value="" id="username">
+						<label for="password">Password:</label>
+						<input type="password" name="password" value="" id="password">
+						<input type="submit" value="Login" />
+						<input type="hidden" name="next" value="{{ next|escape }}" />
+					</form>
+					{% endif %}
+				</div>
+				<div id="footer">
+					Copyright © Muck Rock, 2010
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
