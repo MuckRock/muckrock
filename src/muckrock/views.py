@@ -1,5 +1,7 @@
+"""
+Views for muckrock project
+"""
 
-from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
@@ -9,6 +11,8 @@ from forms import MyUserCreationForm, UserChangeForm
 
 # User handling views
 def register(request):
+    """Register a new user"""
+
     if request.method == 'POST':
         form = MyUserCreationForm(request.POST)
         if form.is_valid():
@@ -26,6 +30,8 @@ def register(request):
 
 @login_required
 def update(request):
+    """Update a users information"""
+
     if request.method == 'POST':
         form = UserChangeForm(request.POST)
         form.user = request.user

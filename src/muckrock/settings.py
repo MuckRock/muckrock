@@ -1,4 +1,7 @@
-# Django settings for muckrock project.
+"""
+Django settings for muckrock project
+"""
+
 import os
 
 DEBUG = True
@@ -85,4 +88,4 @@ INSTALLED_APPS = (
     #'muckrock.foia',
 )
 
-EMAIL_PORT=1025
+EMAIL_PORT = 1025
