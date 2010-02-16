@@ -1,4 +1,8 @@
-from django.conf.urls.defaults import *
+"""
+URL mappings for muckrock project
+"""
+
+from django.conf.urls.defaults import patterns, include
 from django.contrib import admin
 
 from django.views.generic.simple import direct_to_template
@@ -15,7 +19,8 @@ urlpatterns = patterns('',
 
     (r'^accounts/login/$',             login),
     (r'^accounts/logout/$',            logout),
-    (r'^accounts/profile/$',           direct_to_template, {'template': 'registration/profile.html'}),
+    (r'^accounts/profile/$',           direct_to_template,
+        {'template': 'registration/profile.html'}),
     (r'^accounts/register/$',          register),
     (r'^accounts/update/$',            update),
     (r'^accounts/change_pw/$',         password_change),
@@ -30,5 +35,6 @@ urlpatterns = patterns('',
 
 if settings.DEBUG:
     urlpatterns += patterns('',
-        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/static'}),
+        (r'^static/(?P<path>.*)$', 'django.views.static.serve',
+            {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/static'}),
     )
