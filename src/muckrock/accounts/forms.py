@@ -1,5 +1,5 @@
 """
-Forms for muckrock project
+Forms for accounts application
 """
 
 from django import forms
