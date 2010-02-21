@@ -6,15 +6,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
+from django.contrib.auth.forms import UserCreationForm
 
-from forms import MyUserCreationForm, UserChangeForm
+from forms import UserChangeForm
 
 # User handling views
 def register(request):
     """Register a new user"""
 
     if request.method == 'POST':
-        form = MyUserCreationForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             new_user = authenticate(username=form.cleaned_data['username'],
@@ -22,7 +23,7 @@ def register(request):
             login(request, new_user)
             return HttpResponseRedirect('/accounts/profile/')
     else:
-        form = MyUserCreationForm()
+        form = UserCreationForm()
     return render_to_response('registration/register.html', {
         'form': form,
         'user': request.user,
@@ -33,15 +34,21 @@ def update(request):
     """Update a users information"""
 
     if request.method == 'POST':
-        form = UserChangeForm(request.POST)
-        form.user = request.user
+        profile = request.user.get_profile()
+        form = UserChangeForm(request.POST, instance=profile)
         if form.is_valid():
-            for data, value in form.cleaned_data.iteritems():
-                setattr(request.user, data, value)
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.email = form.cleaned_data['email']
             request.user.save()
+
+            profile = form.save(commit=False)
+            profile.save()
+            
             return HttpResponseRedirect('/accounts/profile/')
     else:
-        form = UserChangeForm(initial=request.user.__dict__)
+        profile = request.user.get_profile()
+        form = UserChangeForm(initial=request.user.__dict__, instance=profile)
 
     return render_to_response('registration/update.html', {
         'form': form,

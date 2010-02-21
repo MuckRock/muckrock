@@ -85,7 +85,10 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
+    'django_evolution',
     #'muckrock.foia',
+    'muckrock.accounts',
 )
 
 EMAIL_PORT = 1025
+AUTH_PROFILE_MODULE = 'accounts.Profile'

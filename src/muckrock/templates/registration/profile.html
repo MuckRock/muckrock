@@ -1,6 +1,8 @@
 
 {% extends "base.html" %}
 
+{% load filters %}
+
 {% block content %}
 
 <h1>Your Account</h1>
@@ -19,6 +21,28 @@
 	<tr>
 		<td>Email:</td>
 		<td>{{user.email}}</td>
+	</tr>
+	<tr>
+		<td>Address:</td>
+		<td>
+			{{user.get_profile.address1}} <br \>
+			{% if user.get_profile.address2 %}
+				{{user.get_profile.address2}} <br \>
+			{% endif %}
+			{# if city exists, assume rest of address exists #}
+			{% if user.get_profile.city %}
+				{{user.get_profile.city}}, {{user.get_profile.state}}
+				{{user.get_profile.zip_code}}<br \>
+			{% endif %}
+		</td>
+	</tr>
+	<tr>
+		<td>Phone:</td>
+		<td>
+			{% if user.get_profile.phone %}
+				{{user.get_profile.phone|format_phone}}
+			{% endif %}
+		</td>
 	</tr>
 </table>
 
