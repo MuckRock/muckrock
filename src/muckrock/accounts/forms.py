@@ -11,6 +11,11 @@ from string import digits
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
 
+    def __init__(self, *args, **kwargs):
+        forms.ModelForm.__init__(self, *args, **kwargs)
+        # increase phone max length because we will strip out extra chars
+        self.fields['phone'].widget.attrs['maxlength'] = '20'
+
     class Meta:
         # pylint: disable-msg=R0903
         model = Profile
@@ -26,7 +31,7 @@ class ProfileForm(forms.ModelForm):
         """Validate the user entered phone number"""
         phone = self.cleaned_data['phone']
         remove = dict((ord(c), None) for c in ['(', ')', ' ', '-', '.'])
-        phone.translate(remove)
+        phone = phone.translate(remove)
         if phone[0] == '1':
             phone = phone[1:]
         if len(phone) != 10 or any(d not in digits for d in phone):
@@ -52,7 +57,7 @@ class UserChangeForm(ProfileForm):
         users = User.objects.filter(email__iexact=email)
         if len(users) == 1 and users[0] != self.instance.user:
             raise forms.ValidationError('A user with that e-mail address already exists.')
-        if len(users) > 1:
+        if len(users) > 1: # pragma: no cover
             # this should never happen
             raise forms.ValidationError('A user with that e-mail address already exists.')
 
