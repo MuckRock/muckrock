@@ -86,9 +86,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django_evolution',
+    'django_nose',
     #'muckrock.foia',
     'muckrock.accounts',
 )
 
 EMAIL_PORT = 1025
 AUTH_PROFILE_MODULE = 'accounts.Profile'
+TEST_RUNNER = 'django_nose.run_tests'

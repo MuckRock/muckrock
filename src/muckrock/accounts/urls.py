@@ -4,6 +4,7 @@ URL mappings for the accounts application
 
 from django.conf.urls.defaults import patterns
 from django.views.generic.simple import direct_to_template
+from django.contrib.auth.decorators import login_required
 import django.contrib.auth.views as auth_views
 
 import accounts.views
@@ -11,7 +12,7 @@ import accounts.views
 urlpatterns = patterns('',
     (r'^login/$',             auth_views.login),
     (r'^logout/$',            auth_views.logout),
-    (r'^profile/$',           direct_to_template,
+    (r'^profile/$',           login_required(direct_to_template),
         {'template': 'registration/profile.html'}),
     (r'^register/$',          accounts.views.register),
     (r'^update/$',            accounts.views.update),
