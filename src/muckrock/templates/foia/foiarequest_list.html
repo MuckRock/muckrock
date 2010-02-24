@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>FOIA Requests</h1>
+	<table>
+		<tr>
+			<th>Title</th>
+			<th>User</th>
+			<th>Status</th>
+			<th>Jurisdiction</th>
+		</tr>
+		{% for request in object_list %}
+		<tr>
+			<td><a href="/foia/view/{{ request.pk }}">{{ request.title }}</a></td>
+			<td>{{ request.user }}</td>
+			<td>{{ request.get_status }}</td>
+			<td>{{ request.get_jurisdiction }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}
+
