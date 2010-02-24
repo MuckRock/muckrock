@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.views.generic.simple import direct_to_template
 
 import accounts.urls
+import foia.urls
 import settings
 
 admin.autodiscover()
@@ -14,6 +15,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^$', direct_to_template, {'template': 'home.html'}),
     (r'^accounts/', include(accounts.urls)),
+    (r'^foia/', include(foia.urls)),
     (r'^admin/', include(admin.site.urls)),
 )
 

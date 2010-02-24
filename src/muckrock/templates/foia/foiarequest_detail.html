@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+	<h1>FOIA Request</h1>
+	<table>
+		<tr> <th width="30%">Title</th><td>{{ object.title }}</td> </tr>
+		<tr> <th>User</th><td>{{ object.user }}</td> </tr>
+		<tr> <th>Status</th><td>{{ object.get_status }}</td> </tr>
+		<tr> <th>Jurisdiction</th><td>{{ object.get_jurisdiction }}</td> </tr>
+		<tr> <th>Agency</th><td>{{ object.agency }}</td> </tr>
+		<tr> <th>Date submitted</th><td>{{ object.date_submitted }}</td> </tr>
+		<tr> <th>Request</th><td>{{ object.request }}</td> </tr>
+		<tr> <th>Date response received</th><td>{{ object.date_done }}</td> </tr>
+		<tr> <th>Response</th><td>{{ object.response }}</td> </tr>
+	</table>
+{% endblock %}
+
