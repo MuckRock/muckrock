@@ -49,15 +49,11 @@ def update(request):
             request.user.email = form.cleaned_data['email']
             request.user.save()
 
-            profile = form.save(commit=False)
-            profile.save()
+            profile = form.save()
             
             return HttpResponseRedirect('/accounts/profile/')
     else:
         profile = get_profile()
         form = UserChangeForm(initial=request.user.__dict__, instance=profile)
 
-    return render_to_response('registration/update.html', {
-        'form': form,
-        'user': request.user
-    })
+    return render_to_response('registration/update.html', {'form': form})
