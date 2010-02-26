@@ -5,6 +5,7 @@ Views for the accounts application
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
+from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.forms import UserCreationForm
 
@@ -24,10 +25,9 @@ def register(request):
             return HttpResponseRedirect('/accounts/profile/')
     else:
         form = UserCreationForm()
-    return render_to_response('registration/register.html', {
-        'form': form,
-        'user': request.user,
-    })
+    return render_to_response('registration/register.html',
+                              {'form': form, 'user': request.user},
+                              context_instance=RequestContext(request))
 
 @login_required
 def update(request):
@@ -56,4 +56,5 @@ def update(request):
         profile = get_profile()
         form = UserChangeForm(initial=request.user.__dict__, instance=profile)
 
-    return render_to_response('registration/update.html', {'form': form})
+    return render_to_response('registration/update.html', {'form': form},
+                              context_instance=RequestContext(request))
