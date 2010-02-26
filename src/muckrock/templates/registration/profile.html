@@ -6,9 +6,10 @@
 {% block content %}
 
 <h1>Your Account</h1>
-<p>
-<a href="/accounts/update/">Update your information</a>
-</p>
+<ul>
+	<li><a href="/accounts/update/">Update your information</a>
+	<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
+</ul>
 <table>
 	<tr>
 		<td>User Name:</td>
