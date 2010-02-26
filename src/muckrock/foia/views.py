@@ -37,14 +37,14 @@ def _foia_form_handler(request, foia, action):
                               context_instance=RequestContext(request))
 
 @login_required
-def create_foiarequest(request):
+def create(request):
     """File a new FOIA Request"""
 
     foia = FOIARequest(user = request.user)
     return _foia_form_handler(request, foia, 'New')
 
 @login_required
-def update_foiarequest(request, object_id):
+def update(request, object_id):
     """Update a started FOIA Request"""
 
     foia = get_object_or_404(FOIARequest, pk=object_id)
