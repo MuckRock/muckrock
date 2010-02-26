@@ -3,6 +3,10 @@
 
 {% block content %}
 	<h1>FOIA Requests</h1>
+	<ul>
+		<li><a href="/foia/new/">File a FOIA Request</a>
+		<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
+	</ul>
 	<table>
 		<tr>
 			<th>Title</th>
@@ -14,8 +18,8 @@
 		<tr>
 			<td><a href="/foia/view/{{ request.pk }}">{{ request.title }}</a></td>
 			<td>{{ request.user }}</td>
-			<td>{{ request.get_status }}</td>
-			<td>{{ request.get_jurisdiction }}</td>
+			<td>{{ request.get_status_display }}</td>
+			<td>{{ request.get_jurisdiction_display }}</td>
 		</tr>
 		{% endfor %}
 	</table>

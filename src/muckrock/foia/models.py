@@ -6,7 +6,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 JURISDICTIONS = (('MA', 'Massachusetts'),)
-JURISDICTIONS_DICT = dict(JURISDICTIONS)
 
 STATUS = (
     ('started', 'Started'),
@@ -15,7 +14,6 @@ STATUS = (
     ('rejected', 'Rejected'),
     ('done', 'Response received'),
 )
-STATUS_DICT = dict(STATUS)
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -36,13 +34,14 @@ class FOIARequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    def get_status(self):
-        """Format the status for output"""
-        return STATUS_DICT[self.status]
+    # use permalink here
+    def get_absolute_url(self):
+        """The url for this object"""
+        return '/foia/view/%s/' % self.pk
 
-    def get_jurisdiction(self):
-        """Format the jurisdiction for output"""
-        return JURISDICTIONS_DICT[self.jurisdiction]
+    def is_editable(self):
+        """Can this request be updated?"""
+        return self.status == 'started' or self.status == 'fix'
 
     class Meta:
         # pylint: disable-msg=R0903
