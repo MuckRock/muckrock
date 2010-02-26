@@ -34,10 +34,10 @@ class FOIARequest(models.Model):
     def __unicode__(self):
         return self.title
 
-    # use permalink here
+    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return '/foia/view/%s/' % self.pk
+        return ('foia-view', [str(self.pk)])
 
     def is_editable(self):
         """Can this request be updated?"""
