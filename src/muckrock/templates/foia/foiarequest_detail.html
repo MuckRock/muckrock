@@ -5,7 +5,7 @@
 	<h1>FOIA Request</h1>
 	{% ifequal user object.user %}
 	  {% if object.is_editable %}
-			<a href='/foia/update/{{object.pk}}/'>Update</a>
+			<p><a href='/foia/update/{{object.pk}}/'>Update</a></p>
 		{% endif %}
 	{% endifequal %}
 	<table>
