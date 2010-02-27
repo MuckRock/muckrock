@@ -5,7 +5,9 @@
 	<h1>FOIA Requests</h1>
 	<ul>
 		<li><a href="/foia/new/">File a FOIA Request</a>
+		{% if user.is_authenticated %}
 		<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
+		{% endif %}
 	</ul>
 	<table>
 		<tr>

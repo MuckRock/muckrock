@@ -12,19 +12,19 @@
 </ul>
 <table>
 	<tr>
-		<td>User Name:</td>
+		<th width="30%">User Name</th>
 		<td>{{user.username}}</td>
 	</tr>
 	<tr>
-		<td>Name:</td>
+		<th>Name</th>
 		<td>{{user.first_name}} {{user.last_name}}</td>
 	</tr>
 	<tr>
-		<td>Email:</td>
+		<th>Email</th>
 		<td>{{user.email}}</td>
 	</tr>
 	<tr>
-		<td>Address:</td>
+		<th>Address</th>
 		<td>
 			{{user.get_profile.address1}} <br \>
 			{% if user.get_profile.address2 %}
@@ -38,7 +38,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td>Phone:</td>
+		<th>Phone</th>
 		<td>
 			{% if user.get_profile.phone %}
 				{{user.get_profile.phone|format_phone}}

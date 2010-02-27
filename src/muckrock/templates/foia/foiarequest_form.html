@@ -3,12 +3,14 @@
 
 {% block content %}
 	<h1>{{action}} FOIA Request</h1>
-	<form action="" method="post">
-		<table class="form">
-			{{form.as_table}}
-		</table>
-		<input type="submit" name="submit" value="Save" />
-		<input type="submit" name="submit" value="Submit" />
-	</form>
+	<div class="form">
+  <form action="" method="post">
+		<fieldset><legend>&nbsp;{{action}} FOIA Request&nbsp;</legend>
+			{{form.as_p}}
+			<input type="submit" name="submit" value="Save" class="button" />
+			<input type="submit" name="submit" value="Submit" class="button" />
+		</fieldset>
+  </form>
+	</div>
 {% endblock %}
 

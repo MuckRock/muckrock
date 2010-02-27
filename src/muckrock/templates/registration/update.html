@@ -2,6 +2,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1>Update your information</h1>
 
   {% if form.errors %}
 	{# improve error handling #}
@@ -9,14 +10,18 @@
 		{{ form.errors }}
   {% endif %}
 
-	<a href="/accounts/change_pw/">Change password</a>
 
+	<div class="form">
   <form action="" method="post">
-		<table class="form">
-			{{form.as_table}}
-		</table>
-		<input type="submit" value="Update" />
+		<fieldset><legend>&nbsp;Update information&nbsp;</legend>
+			{{form.as_p}}
+			<input type="submit" value="Update" class="button" />
+		</fieldset>
   </form>
+	</div>
+
+	<p><a href="/accounts/change_pw/">Change password</a>
+	</p>
 
 {% endblock %}
 
