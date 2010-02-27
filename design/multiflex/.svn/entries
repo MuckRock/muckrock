@@ -1,0 +1,69 @@
+8
+
+dir
+62
+http://source.jeroenwijering.com/svn/tags/mediaplayer-3-14
+http://source.jeroenwijering.com/svn
+
+
+
+2008-01-14T14:36:28.369875Z
+61
+jeroen
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+343ee797-4041-4178-8c7d-062b6b8ad9c2
+
+mediaplayer.pdf
+file
+
+
+
+
+2008-01-14T20:10:43.000000Z
+80fabd7514ee930902e5b6099dfdc1b4
+2008-01-14T14:36:28.369875Z
+61
+jeroen
+
+mediaplayer.swf
+file
+
+
+
+
+2008-01-14T20:10:43.000000Z
+2d038b3ce86030357c710cee46c7f18d
+2008-01-14T14:20:57.804621Z
+59
+jeroen
+has-props
+
+mediaplayer.fla
+file
+
+
+
+
+2008-01-14T20:10:43.000000Z
+31ad5589d479a3660944bd8aea100e18
+2008-01-14T14:20:57.804621Z
+59
+jeroen
+has-props
+
+com
+dir
+
