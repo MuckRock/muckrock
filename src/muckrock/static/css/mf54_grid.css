@@ -18,9 +18,9 @@
 
  body {font-size:62.5%; background-color:rgb(240,240,240); font-family:arial,sans-serif;} /*Font-size: 1.0em = 10px when browser default size is 16px*/
 .container {width:978px; padding-top:10px; padding-bottom:20px; margin:0 auto; font-size:1.0em;}
-.header {width:958px; min-height:130px /*Non-IE6*/; height:auto !important /*Non-IE6*/; height:130px /*IE6*/; border-left:solid 10px rgb(200,200,200); border-right:solid 10px rgb(200,200,200); background:rgb(225,225,225) url(../img/bg_header.jpg) repeat-x /*Total header background image entered here. Height: 125px*/; font-size:1.0em;}
-.header-top {clear:both; width:958px; height:100px; background:rgb(218,218,218) url(../img/bg_header_top.jpg) repeat-x /*Top header background image entered here. Height: 100px*/; font-size:1.0em;}
-.header-bottom {clear:both; width:958px; min-height:30px /*Non-IE6*/; height:auto !important /*Non-IE6*/; height:30px /*IE6*/; background:rgb(225,225,225) url(../img/bg_header_bottom.jpg) repeat-x /*Bottom header background image entered here: Height: 25 px*/; font-size:1.0em;}
+.header {width:958px; min-height:130px /*Non-IE6*/; height:auto !important /*Non-IE6*/; height:130px /*IE6*/; border-left:solid 10px rgb(200,200,200); border-right:solid 10px rgb(200,200,200); background:rgb(225,225,225) repeat-x /*Total header background image entered here. Height: 125px*/; font-size:1.0em;}
+.header-top {clear:both; width:958px; height:100px; background:rgb(218,218,218)  repeat-x /*Top header background image entered here. Height: 100px*/; font-size:1.0em;}
+.header-bottom {clear:both; width:958px; min-height:30px /*Non-IE6*/; height:auto !important /*Non-IE6*/; height:30px /*IE6*/; background:rgb(225,225,225) repeat-x /*Bottom header background image entered here: Height: 25 px*/; font-size:1.0em;}
 .navbar {white-space:nowrap /*IE hack*/; float:left; width:958px; border-left:solid 10px rgb(200,200,200); border-right:solid 10px rgb(200,200,200); background-color:rgb(225,225,225); font-family:tahoma,arial,sans-serif; font-size:130% !important /*Non-IE6*/; font-size:120% /*IE6*/;} /*Color navigation bar normal mode*/
 .main {clear:both; width:958px; padding:10px 0 20px 0; border-left:solid 10px rgb(200,200,200); border-right:solid 10px rgb(200,200,200); background-color:rgb(200,200,200); font-size:1.0em;}
 .content {display:inline; /*Fix IE floating margin bug*/; float:left; width:676px; background-color:rgb(200,200,200); font-size:1.0em; overflow:visible !important /*Non-IE6*/; overflow:hidden /*IE6*/;}
