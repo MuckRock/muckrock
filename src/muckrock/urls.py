@@ -2,6 +2,7 @@
 URL mappings for muckrock project
 """
 
+from django.conf.urls.defaults import handler404, handler500
 from django.conf.urls.defaults import patterns, include
 from django.contrib import admin
 from django.views.generic.simple import direct_to_template
