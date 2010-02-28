@@ -38,6 +38,7 @@ class FOIARequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
+        # pylint: disable-msg=E1101
         return ('foia.views.detail', [], {'user_name': self.user.username, 'slug': self.slug})
 
     def is_editable(self):
