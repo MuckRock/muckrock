@@ -8,9 +8,8 @@ from django.test.client import Client
 import nose.tools
 
 from accounts.models import Profile
+from accounts.templatetags.filters import format_phone
 import accounts.forms
-import accounts.models
-import accounts.templatetags.filters
 
  # forms
 def test_profile_form_zip():
@@ -79,14 +78,14 @@ def test_profile_model_unicode():
     """Test profile model's __unicode__ method"""
 
     user3 = User.objects.create(username='test3', email='test3@muckrock.com')
-    profile = accounts.models.Profile(user=user3)
+    profile = Profile(user=user3)
     nose.tools.eq_(unicode(profile), u"Test3's Profile")
 
  # template filters
 def test_format_phone():
     """Test the format phone template filter"""
 
-    nose.tools.eq_(accounts.templatetags.filters.format_phone('5551234567'), '(555) 123-4567')
+    nose.tools.eq_(format_phone('5551234567'), '(555) 123-4567')
 
  # views
 def test_views():
