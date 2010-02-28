@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic import list_detail
+from django.template.defaultfilters import slugify
 
 from datetime import datetime
 
@@ -25,9 +26,11 @@ def _foia_form_handler(request, foia, action):
         form = FOIARequestForm(request.POST, instance=foia)
 
         if form.is_valid():
-            foia_request = form.save()
+            foia_request = form.save(commit=False)
+            foia_request.slug = slugify(foia_request.title)
+            foia_request.save()
 
-            return HttpResponseRedirect('/foia/view/%s/' % foia_request.pk)
+            return HttpResponseRedirect(foia_request.get_absolute_url())
 
     else:
         form = FOIARequestForm(instance=foia)
@@ -44,10 +47,11 @@ def create(request):
     return _foia_form_handler(request, foia, 'New')
 
 @login_required
-def update(request, object_id):
+def update(request, user_name, slug):
     """Update a started FOIA Request"""
 
-    foia = get_object_or_404(FOIARequest, pk=object_id)
+    user = get_object_or_404(User, username=user_name)
+    foia = get_object_or_404(FOIARequest, user=user, slug=slug)
 
     if not foia.is_editable():
         return render_to_response('error.html',
@@ -65,4 +69,13 @@ def list_by_user(request, user_name):
 
     user = User.objects.get(username=user_name)
     return list_detail.object_list(request, FOIARequest.objects.filter(user=user))
+
+def detail(request, user_name, slug):
+    """Details of a single FOIA request"""
+
+    user = get_object_or_404(User, username=user_name)
+    foia = get_object_or_404(FOIARequest, user=user, slug=slug)
+    return render_to_response('foia/foiarequest_detail.html',
+                              {'object': foia},
+                              context_instance=RequestContext(request))
 

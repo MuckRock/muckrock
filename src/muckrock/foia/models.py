@@ -20,6 +20,7 @@ class FOIARequest(models.Model):
 
     user = models.ForeignKey(User)
     title = models.CharField(max_length=30)
+    slug = models.SlugField(max_length=30)
     # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.CharField(max_length=5, choices=JURISDICTIONS)
@@ -37,7 +38,7 @@ class FOIARequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-view', [str(self.pk)])
+        return ('foia.views.detail', [], {'user_name': self.user.username, 'slug': self.slug})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -47,5 +48,6 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
+        unique_together = (('user', 'slug'),)
 
 
