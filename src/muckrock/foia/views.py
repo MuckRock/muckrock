@@ -20,17 +20,23 @@ def _foia_form_handler(request, foia, action):
 
     if request.method == 'POST':
         status_dict = {'Submit': 'submitted', 'Save': 'started'}
-        foia.date_submitted = datetime.now() if request.POST['submit'] == 'Submit' else None
-        foia.status = status_dict[request.POST['submit']],
 
-        form = FOIARequestForm(request.POST, instance=foia)
+        try:
+            foia.date_submitted = datetime.now() if request.POST['submit'] == 'Submit' else None
+            foia.status = status_dict[request.POST['submit']],
 
-        if form.is_valid():
-            foia_request = form.save(commit=False)
-            foia_request.slug = slugify(foia_request.title)
-            foia_request.save()
+            form = FOIARequestForm(request.POST, instance=foia)
 
-            return HttpResponseRedirect(foia_request.get_absolute_url())
+            if form.is_valid():
+                foia_request = form.save(commit=False)
+                foia_request.slug = slugify(foia_request.title)
+                foia_request.save()
+
+                return HttpResponseRedirect(foia_request.get_absolute_url())
+
+        except KeyError:
+            # bad post, not possible from web form
+            form = FOIARequestForm(instance=foia)
 
     else:
         form = FOIARequestForm(instance=foia)
@@ -67,7 +73,7 @@ def update(request, user_name, slug):
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
-    user = User.objects.get(username=user_name)
+    user = get_object_or_404(User, username=user_name)
     return list_detail.object_list(request, FOIARequest.objects.filter(user=user))
 
 def detail(request, user_name, slug):
