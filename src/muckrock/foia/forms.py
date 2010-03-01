@@ -14,12 +14,19 @@ class FOIARequestForm(forms.ModelForm):
 
         forms.ModelForm.clean(self)
 
+        # if no title, just return, let field error be raised
+        if 'title' not in self.cleaned_data:
+            return self.cleaned_data
+
         user = self.instance.user
         slug = slugify(self.cleaned_data['title'])
 
-        other_foia = FOIARequest.objects.filter(user=user, slug=slug)
+        other_foias = FOIARequest.objects.filter(user=user, slug=slug)
 
-        if len(other_foia) != 0:
+        if len(other_foias) == 1 and other_foias[0] != self.instance:
+            raise forms.ValidationError('You already have a FOIA request with a similar title')
+        if len(other_foias) > 1: # pragma: no cover
+            # this should never happen
             raise forms.ValidationError('You already have a FOIA request with a similar title')
 
         return self.cleaned_data
