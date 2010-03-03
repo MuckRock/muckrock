@@ -10,6 +10,7 @@ JURISDICTIONS = (('MA', 'Massachusetts'),)
 STATUS = (
     ('started', 'Started'),
     ('submitted', 'Submitted'),
+    ('processed', 'Processed'),
     ('fix', 'Fix required'),
     ('rejected', 'Rejected'),
     ('done', 'Response received'),
