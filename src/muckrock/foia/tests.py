@@ -1,5 +1,5 @@
 """
-Tests using nose for the accounts application
+Tests using nose for the FOIA application
 """
 
 from django.contrib.auth.models import User
