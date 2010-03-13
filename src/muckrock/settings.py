@@ -89,6 +89,7 @@ INSTALLED_APPS = (
     'django_nose',
     'muckrock.accounts',
     'muckrock.foia',
+    'muckrock.news',
 )
 
 EMAIL_PORT = 1025
