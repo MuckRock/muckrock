@@ -1,0 +1,15 @@
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{object.title}}</h1>
+
+<p>by {{object.author.first_name}} {{object.authoer.last_name}}</p>
+<p>published on {{object.pub_date|date}}</p>
+<p>FOIA Request: <a href="{{object.foia.get_absolute_url}}">{{object.foia.title}}</a></p>
+
+<p>{{object.body}}</p>
+
+
+{% endblock %}
