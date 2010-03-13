@@ -6,11 +6,12 @@ import os
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+EMAIL_DEBUG = DEBUG
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 ADMINS = (
-    ('Mitchell Kotler', 'mitchell.kotler@muckrock.com'),
+    ('Mitchell Kotler', 'mitch@muckrock.com'),
 )
 
 MANAGERS = ADMINS
@@ -18,7 +19,7 @@ MANAGERS = ADMINS
 DATABASE_ENGINE = 'postgresql_psycopg2'  
 DATABASE_NAME = 'muckrock'             # Or path to database file if using sqlite3.
 DATABASE_USER = 'muckrock'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'kittens'         # Not used with sqlite3.
+DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
@@ -92,6 +93,15 @@ INSTALLED_APPS = (
     'muckrock.news',
 )
 
-EMAIL_PORT = 1025
+if EMAIL_DEBUG:
+    EMAIL_PORT = 1025
+else:
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 25
+    EMAIL_HOST_USER = 'notice@muckrock.com'
+    EMAIL_HOST_PASSWORD = 'XFh3NTxdi9Hk'
+    EMAIL_SUBJECT_PREFIX = '[Muckrock] '
+    EMAIL_USE_TLS = True
+
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 TEST_RUNNER = 'django_nose.run_tests'
