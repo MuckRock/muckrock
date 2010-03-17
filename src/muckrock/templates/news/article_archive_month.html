@@ -1,18 +1,44 @@
 
-{% extends "base.html" %}
+{% extends "news/base.html" %}
 
 {% block content %}
 
-<h1>Articles for {{month|date:"F Y"}}</h1>
+<h2>Archives for {{month|date:"F Y"}}</h2>
+
+<div class="post-meta archive-pagination">
+	
+	<div class="left"><a href="/news/archives/{{previous_month|date:"Y"}}/{{previous_month|date:"b"}}/">
+			&#171; Previous page</a></div>
+	{% if next_month %}
+	<div class="right"><a href="/news/archives/{{next_month|date:"Y"}}/{{next_month|date:"b"}}/">
+			Next page &#187;</a></div>
+	{% endif %}
+
+	<div class="clearer">&nbsp;</div>
+	
+</div>
 
 {% if object_list %}
+
     {% for article in object_list %}
-    <ul>
-			<li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>
-    </ul>
+		  {% include "news/archive_post.html" %}
     {% endfor %}
+
 {% else %}
 <p>No articles were found.</p>
 {% endif %}
+
+<div class="post-meta archive-pagination">
+
+	<div class="left"><a href="/news/archives/{{previous_month|date:"Y"}}/{{previous_month|date:"b"}}/">
+			&#171; Previous page</a></div>
+	{% if next_month %}
+	<div class="right"><a href="/news/archives/{{next_month|date:"Y"}}/{{next_month|date:"b"}}/">
+			Next page &#187;</a></div>
+	{% endif %}
+
+	<div class="clearer">&nbsp;</div>
+
+</div>
 
 {% endblock %}

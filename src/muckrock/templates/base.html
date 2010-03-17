@@ -1,219 +1,180 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-
-
-<!--  Version: Multiflex-5.4 / Overview                     -->
-<!--  Type:    Design with sidebar                          -->
-<!--  Date:    March 13, 2008                               -->
-<!--  Design:  www.1234.info                                -->
-<!--  License: Fully open source without restrictions.      -->
-<!--           Please keep footer credits with the words    -->
-<!--           "Design by 1234.info". Thank you!            -->
+{% load tags %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <meta http-equiv="cache-control" content="no-cache" />
-  <meta http-equiv="expires" content="3600" />
-  <meta name="revisit-after" content="2 days" />
-  <meta name="robots" content="index,follow" />
-  <meta name="publisher" content="MuckRock" />
-  <meta name="copyright" content="MuckRock 2010" />
-  <meta name="author" content="Designed by www.1234.info / Modified: MuckRock" />
-  <meta name="distribution" content="global" />
-  <meta name="description" content="MuckRock: File and browse FOIA" />
-  <meta name="keywords" content="FOIL FOIA News" />
-  <link rel="stylesheet" type="text/css" media="screen,projection,print" href="/static/css/mf54_reset.css" />
-  <link rel="stylesheet" type="text/css" media="screen,projection,print" href="/static/css/mf54_grid.css" />
-  <link rel="stylesheet" type="text/css" media="screen,projection,print" href="/static/css/mf54_content.css" />
-  <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
-  <title>MuckRock</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<meta name="description" content=""/>
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
+	<link rel="stylesheet" type="text/css" href="/static/css/style.css" media="screen" />
+	<title>MuckRock | {% block title %}News{% endblock %}</title>
 </head>
 
-<!-- Global IE fix to avoid layout crash when single word size wider than column width -->
-<!-- Following line MUST remain as a comment to have the proper effect -->
-<!--[if IE]><style type="text/css"> body {word-wrap: break-word;}</style><![endif]-->
+<body id="top">
 
-<body>
-  <!-- CONTAINER FOR ENTIRE PAGE -->
-  <div class="container">
+<div id="network">
+	<div class="center-wrapper">
 
-    <!-- A. HEADER -->         
-    <div class="corner-page-top"></div>
-    <div class="header">
-      <div class="header-top">
-        
-        <!-- A.1 SITENAME -->      
-        <a class="sitelogo" href="/" title="Home"></a>
-        <div class="sitename">
-          <h1><a href="/" title="Home">MUCKRock</a></h1> 
-          <h2>Better than muck raking!</h2>
-        </div>
-    
-        <!-- A.2 BUTTON NAVIGATION -->
-        <div class="navbutton">
-          <ul>
-            <li><a href="#" title="RSS"><img src="/static/img/icon_rss.gif" alt="RSS-Button" /></a></li>
-          </ul>
-        </div>
+		<div class="left">{% now "l, F j, Y" %}</div>
+		<div class="right">
 
-        <!-- A.3 GLOBAL NAVIGATION -->
-        <div class="navglobal">
-          <ul>
-            <li><a href="#" title="">About</a></li>
-            <li><a href="#" title="">Contact</a></li>								
-            <li><a href="#" title="">Sitemap</a></li>								                        
-            <li><a href="#" title="">Links</a></li>								            
-          </ul>
-        </div>        
-      </div>
-    
-      <!-- A.4 BREADCRUMB and SEARCHFORM -->
-      <div class="header-bottom">
+			<ul class="tabbed" id="network-tabs">
+				{% if user.is_authenticated %}
+					<li><a href="/accounts/profile/">My Account</a></li>
+					<li><a href="/accounts/logout">Log Out</a></li>
+				{% else %}
+					<li><a href="/accounts/login/">Log in</a></li>
+					<li><a href="/accounts/register/">Register</a></li>
+				{% endif %}
+			</ul>
 
-        <!-- Breadcrumb -->
-        <ul>
-          <li class="nobullet">You are here:&nbsp;</li>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">Page</a></li>
-          <li><a href="#">Sub-Page</a></li>
-          <li><a href="#">Sub-Sub-Page</a></li>          
-        </ul>
+			<div class="clearer">&nbsp;</div>
+		
+		</div>
+		
+		<div class="clearer">&nbsp;</div>
 
-        <!-- Search form -->                  
-        <div class="searchform">
-          <form action="#" method="get">
-            <fieldset>
-              <input name="field" class="field"  value=" Enter search word ..." />
-              <input type="submit" name="button" class="button" value="Search" />
-            </fieldset>
-          </form>
-        </div>
-      </div>
-    </div>
-    <div class="corner-page-bottom"></div>
-    
-    <!-- B. NAVIGATION BAR -->
-    <div class="corner-page-top"></div>        
-    <div class="navbar">
-	
-      <!-- Navigation item -->
-      <ul>
-        <li><a href="/">Home</a></li>
-      </ul>
-      <ul>
-        <li><a href="/news/">News</a></li>
-      </ul>
-      <ul>
-        <li><a href="/foia/list/">FOIA Requests</a></li>
-      </ul>
-			{% if user.is_authenticated %}
-      <ul>
-        <li><a href="/accounts/profile/">My Account</a></li>
-      </ul>
-      <ul>
-        <li><a href="/accounts/logout/">Log out</a></li>
-      </ul>
-			{% else %}
-      <ul>
-        <li><a href="/accounts/login/">Log in</a></li>
-      </ul>
-			{% endif %}
+	</div>
+</div>
 
-      <!-- Navigation item -->
-      <ul>
-        <li><a href="#">Drop-down Menu<!--[if IE 7]><!--></a><!--<![endif]-->
-          <!--[if lte IE 6]><table><tr><td><![endif]-->
-            <ul>
-              <li><a href="#">Menu subitem 1</a></li>
-              <li><a href="#">Menu subitem 2</a></li>
-              <li><a href="#">Menu subitem 3</a></li>
-              <li><a href="#">Menu subitem 4</a></li>
-              <li><a href="#">Menu subitem 5</a></li>
-            </ul>
-          <!--[if lte IE 6]></td></tr></table></a><![endif]-->
-        </li>
-      </ul>                  
-    </div>    
-  
-    <!-- C. MAIN SECTION -->      
-    <div class="main">
-      <h1 class="pagetitle">MuckRock</h1>
+<div id="site">
+	<div class="center-wrapper">
 
-      <!-- C.1 CONTENT -->
-      <div class="content">
+		<div id="header">
 
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->
-<!-- ********************************   START OF AVAILABLE GRID STYLES   ****************************** -->
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->          
-        
+			<div class="right" id="toolbar">
+				&nbsp;
+			</div>
 
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->
-<!-- **                                                                                              ** -->
-<!-- **  1. CONTENT GRID (1-COLUMN)                                                                  ** -->
-<!-- **                                                                                              ** -->
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->
+			<div class="clearer">&nbsp;</div>
 
-        
-        <!-- CONTENT CELL -->                
-        <a id="anchor-grid-101"></a>
-        <div class="corner-content-1col-top"></div>                        
-        <div class="content-1col-nobox">
-					{% block content %}
+			<div id="site-title">
+
+				<h1><a href="/">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
+
+			</div>
+
+			<div id="navigation">
+				
+				<div id="main-nav">
+
+					<ul class="tabbed">
+						{% block main-nav %}
+						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="/">News</a></li>
+						<li class="{% active request "^/foia/" %}"><a href="/foia/">FOIA Requests</a></li>
+						{% endblock %}
+					</ul>
+
+					<div class="clearer">&nbsp;</div>
+
+				</div>
+
+				<div id="sub-nav">
+
+					{% block sub-nav %}
 					{% endblock %}
-        </div> 
-        <div class="corner-content-1col-bottom"></div>                       
 
-        
-      </div>
-      
-      
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->
-<!-- **                                                                                              ** -->
-<!-- **  4. SUBCONTENT GRID                                                                          ** -->
-<!-- **                                                                                              ** -->
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->      
-                
-                
-      <!-- C.2 SUBCONTENT -->
-      <a id="anchor-grid-401"></a>
-      <div class="subcontent">
+					<div class="clearer">&nbsp;</div>
 
-        <!-- SUBCONTENT CELL -->
-        <div class="corner-subcontent-top"></div>                        
-        <div class="subcontent-box">
-          <h1>4-01. Subcontent</h1>                  
-          <h2>Cell subtitle</h2> 
-          <p class="demo">Here comes the content. <br />See "Content Toolbox" on how to fill up content.</p>            
-          <h2>Cell subtitle</h2> 
-          <p class="demo">Here comes the content. <br />See "Content Toolbox" on how to fill up content.</p>            
-        </div>  
-        <div class="corner-subcontent-bottom"></div>                                                        
+				</div>
 
-      </div>    
-    </div>
-    
-    
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->
-<!-- *********************************   END OF AVAILABLE GRID STYLES   ******************************* -->
-<!-- ************************************************************************************************** -->
-<!-- ************************************************************************************************** -->          
-      
-      
-    <!-- D. FOOTER -->      
-    <div class="footer">
-      <p>Copyright &copy; 2010 MuckRock&nbsp;&nbsp;|&nbsp;&nbsp;All Rights Reserved</p>
-      <p class="credits">Design by <a href="http://1234.info/" title="Designer Homepage">1234.info</a> | <a href="http://validator.w3.org/check?uri=referer" title="Validate XHTML code">XHTML 1.0</a> | <a href="http://jigsaw.w3.org/css-validator/" title="Validate CSS code">CSS 2.0</a></p>
-    </div>
-    <div class="corner-page-bottom"></div>        
-  </div> 
-  
+			</div>
+
+		</div>
+
+		<div class="main" id="main-two-columns">
+
+			<div class="left" id="main-left">
+
+				{% block content %} {% endblock %}
+
+			</div>
+
+			<div class="right sidebar" id="sidebar">
+				
+				{% block sidebar %} {% endblock %}
+
+			</div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+
+		<div id="dashboard">
+
+			<div class="column left" id="column-1">
+				
+				<div class="column-content">
+				
+					<div class="column-title">About MuckRock</div>
+
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+
+					<a href="#">Learn more &#187;</a>
+
+				</div>
+
+			</div>
+
+			<div class="column left" id="column-2">
+
+				<div class="column-content">
+				
+					<div class="column-title">Follow Us (RSS)</div>
+
+					<ul class="plain-list">
+						<li><a href="#" class="feed">News</a></li>
+						<li><a href="#" class="feed">Latest Requests</a></li>
+					</ul>
+
+				</div>
+
+			</div>
+
+			<div class="column left" id="column-3">
+
+				<div class="column-content">
+				
+					<div class="column-title">Help &amp; Support</div>
+
+					<p>Quam velit dapibus quam, ornare suscipit tortor nisl ut tellus.</p>
+
+					<a href="#">Frequently Asked Questions (FAQ) &#187;</a>
+				
+				</div>
+
+			</div>
+
+			<div class="column right" id="column-4">
+
+				<div class="column-content">
+				
+					<div class="column-title">Get in touch</div>
+
+					<p>Email: <a href="info@muckrock.com">info@muckrock.com</a></p>
+
+					<a href="#">Online contact form &#187;</a>
+
+				</div>
+
+			</div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+
+		<div id="footer">
+
+			<div class="left">&copy; 2010 MuckRock <span class="text-separator">&rarr;</span> <a href="#">Home</a> <span class="text-separator">|</span><a href="/blog/">Blog</a></div>
+			<div class="right"><a href="http://templates.arcsin.se/">Website template</a> by <a href="http://arcsin.se/">Arcsin</a></div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+
+	</div>
+</div>
+
 </body>
 </html>
-

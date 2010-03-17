@@ -1,0 +1,29 @@
+
+{% extends "news/base.html" %}
+
+{% block content %}
+
+{% if latest %}
+    {% for article in latest %}
+
+			<div class="post">
+				<div class="post-title">
+					<h2><a href="{{article.get_absolute_url}}">{{article.title}}</a></h2>
+				</div>
+				<div class="post-date">{{article.pub_date|date:"g:i A, l, F j, Y"}} by
+					{{article.author.first_name}} {{article.author.last_name}}</div>
+				<div class="post-body">
+					{% autoescape off %}
+					{{article.summary}}
+					{% endautoescape %}
+					<a href="{{article.get_absolute_url}}" class="more">Read more &#187;</a>
+				</div>
+			</div>
+			<div class="content-separator"></div>
+
+    {% endfor %}
+{% else %}
+<p>No articles were found.</p>
+{% endif %}
+
+{% endblock %}
