@@ -1,23 +1,17 @@
 
-{% extends "base.html" %}
+{% extends "foia/base.html" %}
 
 {% block content %}
 	<h1>FOIA Requests</h1>
-	<ul>
-		<li><a href="/foia/new/">File a FOIA Request</a>
-		{% if user.is_authenticated %}
-		<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
-		{% endif %}
-	</ul>
-	<table>
-		<tr>
+	<table class="data-table">
+		<tr class="odd">
 			<th>Title</th>
 			<th>User</th>
 			<th>Status</th>
 			<th>Jurisdiction</th>
 		</tr>
 		{% for foia in object_list %}
-		<tr>
+		<tr class="{% cycle 'even' 'odd' %}">
 			<td><a href="/foia/view/{{ foia.user.username }}/{{ foia.slug }}/">{{ foia.title }}</a></td>
 			<td>{{ foia.user }}</td>
 			<td>{{ foia.get_status_display }}</td>

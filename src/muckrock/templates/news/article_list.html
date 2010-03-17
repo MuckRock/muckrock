@@ -1,16 +1,33 @@
 
-{% extends "base.html" %}
+{% extends "news/base.html" %}
 
 {% block content %}
 
-<h1>All Articles</h1>
+<h2>Archives</h2>
 
 {% if object_list %}
-    {% for article in object_list %}
-    <ul>
-			<li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>
-    </ul>
-    {% endfor %}
+	<div class="post-meta archive-pagination">
+		
+		<div class="left"><a href="#">&#171; Previous page</a></div>
+		<div class="right"><a href="#">Next page &#187;</a></div>
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
+	{% for article in object_list %}
+		{% include "news/archive_post.html" %}
+	{% endfor %}
+
+	<div class="post-meta archive-pagination">
+
+		<div class="left"><a href="#">&#171; Previous page</a></div>
+		<div class="right"><a href="#">Next page &#187;</a></div>
+
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+
 {% else %}
 <p>No articles were found.</p>
 {% endif %}

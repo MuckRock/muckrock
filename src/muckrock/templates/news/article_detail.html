@@ -1,15 +1,25 @@
 
-{% extends "base.html" %}
+{% extends "news/base.html" %}
 
 {% block content %}
 
-<h1>{{object.title}}</h1>
-
-<p>by {{object.author.first_name}} {{object.authoer.last_name}}</p>
-<p>published on {{object.pub_date|date}}</p>
-<p>FOIA Request: <a href="{{object.foia.get_absolute_url}}">{{object.foia.title}}</a></p>
-
-<p>{{object.body}}</p>
-
+			<div class="post">
+				<div class="post-title">
+					<h2><a href="{{object.get_absolute_url}}">{{object.title}}</a></h2>
+				</div>
+				<div class="post-date">{{object.pub_date|date:"g:i A, l, F j, Y"}} by
+					{{object.author.first_name}} {{object.author.last_name}}</div>
+				{% if object.foia %}
+				<div>
+					<p>FOIA Request: <a href="{{object.foia.get_absolute_url}}">{{object.foia.title}}</a></p>
+				</div>
+				{% endif %}
+				<div class="post-body">
+					{% autoescape off %}
+					{{object.body}}
+					{% endautoescape %}
+				</div>
+			</div>
 
 {% endblock %}
+

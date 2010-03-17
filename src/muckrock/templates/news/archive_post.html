@@ -1,0 +1,19 @@
+
+<div class="post">
+
+	<div class="archive-post-date">
+		<div class="archive-post-day">{{article.pub_date|date:"d"}}</div>
+		<div class="archive-post-month">{{article.pub_date|date:"M"|upper}}</div>
+	</div>
+
+	<div class="archive-post-title">
+		<h3><a href="{{article.get_absolute_url}}">{{article.title}}</a></h3>
+		<div class="post-date">{{article.pub_date|date:"g:i A, l, F j, Y"}} by
+			{{article.author.first_name}} {{article.author.last_name}}</div>
+	</div>
+
+	<div class="clearer">&nbsp;</div>
+
+</div>
+
+<div class="archive-separator"></div>

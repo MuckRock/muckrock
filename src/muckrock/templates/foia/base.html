@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+
+{% load tags %}
+
+{% block title %}FOIA Requests{% endblock %}
+{% block headline %}FOIA{% endblock %}
+
+{% block sub-nav %}
+<ul class="tabbed">
+	<li class="{% active request "^/foia/list/$" %}"><a href="/foia/list/">Latest</a></li>
+	<li class="{% active request "^/foia/new/" %}"><a href="/foia/new/">Submit a Request</a></li>
+	<li class="{% active request "^/foia/archives/" %}"><a href="/foia/archives/">Archives</a></li>
+	{% if user.is_authenticated %}
+	<li class="{% active request "^/foia/list/{{user}}/$" %}"><a href="/foia/list/{{user.username}}">My Requests</a></li>
+	{% endif %}
+</ul>
+{% endblock %}

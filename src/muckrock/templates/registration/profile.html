@@ -10,20 +10,20 @@
 	<li><a href="/accounts/update/">Update your information</a>
 	<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
 </ul>
-<table>
-	<tr>
+<table class="data-table">
+	<tr class="odd">
 		<th width="30%">User Name</th>
 		<td>{{user.username}}</td>
 	</tr>
-	<tr>
+	<tr class="even">
 		<th>Name</th>
 		<td>{{user.first_name}} {{user.last_name}}</td>
 	</tr>
-	<tr>
+	<tr class="odd">
 		<th>Email</th>
 		<td>{{user.email}}</td>
 	</tr>
-	<tr>
+	<tr class="even">
 		<th>Address</th>
 		<td>
 			{{user.get_profile.address1}} <br \>
@@ -37,7 +37,7 @@
 			{% endif %}
 		</td>
 	</tr>
-	<tr>
+	<tr class="odd">
 		<th>Phone</th>
 		<td>
 			{% if user.get_profile.phone %}
