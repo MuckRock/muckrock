@@ -6,17 +6,21 @@ URL mappings for muckrock project
 # these are called dynmically
 from django.conf.urls.defaults import handler404, handler500
 # pylint: enable-msg=W0611
-from django.conf.urls.defaults import patterns, include
+from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
-from django.views.generic.simple import direct_to_template
+from django.views.generic.date_based import archive_index
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls
 import muckrock.settings
+from muckrock.news.models import Article
 
 admin.autodiscover()
 
+article_args = {'queryset': Article.objects.get_published(), 'date_field': 'pub_date',
+                'allow_empty': True, 'num_latest': 5}
+
 urlpatterns = patterns('',
-    (r'^$', direct_to_template, {'template': 'home.html'}),
+    url(r'^$', archive_index, article_args),
     (r'^accounts/', include(muckrock.accounts.urls)),
     (r'^foia/', include(muckrock.foia.urls)),
     (r'^news/', include(muckrock.news.urls)),

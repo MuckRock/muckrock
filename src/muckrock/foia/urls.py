@@ -11,6 +11,7 @@ from foia.models import FOIARequest
 foia_qs = {'queryset': FOIARequest.objects.all()}
 
 urlpatterns = patterns('',
+    (r'^$',                                    list_detail.object_list, foia_qs),
     (r'^list/$',                               list_detail.object_list, foia_qs),
     (r'^list/(?P<user_name>[A-Za-z0-9_i]+)/$', views.list_by_user),
     (r'^new/$',                                views.create),
