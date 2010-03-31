@@ -97,18 +97,21 @@ def test_anon_views():
                                         jurisdiction='MA', agency='test', request='test')
 
     # get unathenticated pages
-    response = get_allowed(client, '/foia/list/', 'foia/foiarequest_list.html')
+    response = get_allowed(client, '/foia/list/', ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 3)
 
-    response = get_allowed(client, '/foia/list/test1/', 'foia/foiarequest_list.html')
+    response = get_allowed(client, '/foia/list/test1/',
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 2)
     nose.tools.ok_(all(foia.user == user1 for foia in response.context['object_list']))
 
-    response = get_allowed(client, '/foia/list/test2/', 'foia/foiarequest_list.html')
+    response = get_allowed(client, '/foia/list/test2/',
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 1)
     nose.tools.ok_(all(foia.user == user2 for foia in response.context['object_list']))
 
-    response = get_allowed(client, '/foia/view/test1/test-a/', 'foia/foiarequest_detail.html',
+    response = get_allowed(client, '/foia/view/test1/test-a/',
+                           ['foia/foiarequest_detail.html', 'foia/base.html'],
                            context = {'object': foia_a})
 
     get_404(client, '/foia/list/test3/')
@@ -138,14 +141,16 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, '/foia/new/', 'foia/foiarequest_form.html')
-    get_allowed(client, '/foia/update/test1/test-a/', 'foia/foiarequest_form.html')
+    get_allowed(client, '/foia/new/', ['foia/foiarequest_form.html', 'foia/base.html'])
+    get_allowed(client, '/foia/update/test1/test-a/',
+                ['foia/foiarequest_form.html', 'foia/base.html'])
 
     get_404(client, '/foia/update/test1/test-b/')
 
     # post authenticated pages
-    post_allowed_bad(client, '/foia/new/', 'foia/foiarequest_form.html')
-    post_allowed_bad(client, '/foia/update/test1/test-a/', 'foia/foiarequest_form.html')
+    post_allowed_bad(client, '/foia/new/', ['foia/foiarequest_form.html', 'foia/base.html'])
+    post_allowed_bad(client, '/foia/update/test1/test-a/',
+                     ['foia/foiarequest_form.html', 'foia/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_post_views():

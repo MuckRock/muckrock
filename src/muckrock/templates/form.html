@@ -1,0 +1,12 @@
+
+<table class="form">
+{% for field in form %}
+	<tr>
+		<td>{{ field.label_tag }}:</td>
+		<td>{{ field }}</td>
+		{% if field.errors %}
+		<td> <div class="error"> {{ field.errors }} </div> </td>
+		{% endif %}
+	</tr>
+{% endfor %}
+</table>

@@ -1,0 +1,21 @@
+
+
+{% extends "base.html" %}
+
+{% load tags %}
+
+{% block title %}Account Information{% endblock %}
+{% block headline %}Account Info{% endblock %}
+
+{% block sub-nav %}
+<ul class="tabbed">
+	<li class="{% active request "^/accounts/profile/" %}"><a href="/accounts/profile/">My Account</a></li>
+	<li class="{% active request "^/accounts/update/" %}"><a href="/accounts/update/">Update</a></li>
+	{% if user.is_authenticated %}
+	<li class="{% active request "^/accounts/logout/" %}"><a href="/accounts/logout/">Log Out</a></li>
+	{% else %}
+	<li class="{% active request "^/accounts/login/" %}"><a href="/accounts/login/">Log In</a></li>
+	<li class="{% active request "^/accounts/register/" %}"><a href="/accounts/register/">Register</a></li>
+	{% endif %}
+</ul>
+{% endblock %}

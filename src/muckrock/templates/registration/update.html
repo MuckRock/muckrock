@@ -1,5 +1,5 @@
 
-{% extends "base.html" %}
+{% extends "registration/base.html" %}
 
 {% block content %}
 <h1>Update your information</h1>
@@ -13,8 +13,8 @@
 
 	<div class="form">
   <form action="" method="post">
-		<fieldset><legend>&nbsp;Update information&nbsp;</legend>
-			{{form.as_p}}
+		<fieldset>
+			{% include "form.html" %}
 			<input type="submit" value="Update" class="button" />
 		</fieldset>
   </form>
