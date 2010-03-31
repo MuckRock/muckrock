@@ -1,13 +1,13 @@
 
-{% extends "base.html" %}
+{% extends "registration/base.html" %}
 
 {% block content %}
   <h1>Create an account</h1>
 
 	<div class="form">
   <form action="" method="post">
-		<fieldset><legend>&nbsp;New Account&nbsp;</legend>
-			{{form.as_p}}
+		<fieldset>
+			{% include "form.html" %}
 			<input type="submit" value="Create" class="button" />
 		</fieldset>
   </form>

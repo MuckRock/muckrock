@@ -106,10 +106,13 @@ def test_anon_views():
     client = Client()
 
     # get unathenticated pages
-    get_allowed(client, '/accounts/login/', 'registration/login.html')
-    get_allowed(client, '/accounts/register/', 'registration/register.html')
-    get_allowed(client, '/accounts/reset_pw/', 'registration/password_reset_form.html')
-    get_allowed(client, '/accounts/logout/', 'registration/logged_out.html')
+    get_allowed(client, '/accounts/login/', ['registration/login.html', 'registration/base.html'])
+    get_allowed(client, '/accounts/register/',
+                ['registration/register.html', 'registration/base.html'])
+    get_allowed(client, '/accounts/reset_pw/',
+                       ['registration/password_reset_form.html', 'registration/base.html'])
+    get_allowed(client, '/accounts/logout/',
+                ['registration/logged_out.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_unallowed_views():
@@ -123,7 +126,8 @@ def test_unallowed_views():
     get_post_unallowed(client, '/accounts/change_pw/')
 
     # post unathenticated pages
-    post_allowed_bad(client, '/accounts/register/', 'registration/register.html')
+    post_allowed_bad(client, '/accounts/register/',
+                     ['registration/register.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_register_view():
@@ -131,13 +135,15 @@ def test_register_view():
 
     client = Client()
 
-    post_allowed_bad(client, '/accounts/register/', 'registration/register.html')
+    post_allowed_bad(client, '/accounts/register/',
+                     ['registration/register.html', 'registration/base.html'])
     post_allowed(client, '/accounts/register/',
                  {'username': 'test1', 'password1': 'abc', 'password2': 'abc'},
                  'http://testserver/accounts/profile/')
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/', 'registration/profile.html')
+    get_allowed(client, '/accounts/profile/',
+                ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_login_view():
@@ -146,13 +152,15 @@ def test_login_view():
     client = Client()
     User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
 
-    post_allowed_bad(client, '/accounts/login/', 'registration/login.html')
+    post_allowed_bad(client, '/accounts/login/',
+                     ['registration/login.html', 'registration/base.html'])
     post_allowed(client, '/accounts/login/',
                  {'username': 'test1', 'password': 'abc'},
                  'http://testserver/accounts/profile/')
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/', 'registration/profile.html')
+    get_allowed(client, '/accounts/profile/',
+                ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_auth_views():
@@ -163,13 +171,18 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/', 'registration/profile.html')
-    get_allowed(client, '/accounts/update/', 'registration/update.html')
-    get_allowed(client, '/accounts/change_pw/', 'registration/password_change_form.html')
+    get_allowed(client, '/accounts/profile/',
+                ['registration/profile.html', 'registration/base.html'])
+    get_allowed(client, '/accounts/update/',
+                ['registration/update.html', 'registration/base.html'])
+    get_allowed(client, '/accounts/change_pw/',
+                ['registration/password_change_form.html', 'registration/base.html'])
 
     # post authenticated pages
-    post_allowed_bad(client, '/accounts/update/', 'registration/update.html')
-    post_allowed_bad(client, '/accounts/change_pw/', 'registration/password_change_form.html')
+    post_allowed_bad(client, '/accounts/update/',
+                     ['registration/update.html', 'registration/base.html'])
+    post_allowed_bad(client, '/accounts/change_pw/',
+                     ['registration/password_change_form.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
 def test_post_views():
@@ -209,6 +222,7 @@ def test_logout_view():
     client.login(username='test1', password='abc')
 
     # logout & check
-    get_allowed(client, '/accounts/logout/', 'registration/logged_out.html')
+    get_allowed(client, '/accounts/logout/',
+                ['registration/logged_out.html', 'registration/base.html'])
     get_post_unallowed(client, '/accounts/profile/')
 

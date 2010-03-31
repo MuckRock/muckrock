@@ -1,5 +1,5 @@
 
-{% extends "base.html" %}
+{% extends "registration/base.html" %}
 
 {% block content %}
 
@@ -9,21 +9,24 @@
     <p class="error">Sorry, that's not a valid username or password</p>
   {% endif %}
 
-	<div class="loginform">
+	<div class="form">
 		<form action="" method="post">
 			<fieldset>
-				<p>
-					<label for="username">User name:</label>
-					<input type="text" name="username" value="" id="username">
-				</p>
-				<p>
-					<label for="password">Password:</label>
-					<input type="password" name="password" value="" id="password">
-				</p>
-				<p>
-					<input type="submit" value="Log in" class="button" />
-				</p>
-				<input type="hidden" name="next" value="{{ next|escape }}" />
+				<table>
+					<tr>
+						<td><label for="username">User name:</label></td>
+						<td><input type="text" name="username" value="" id="username"></td>
+					</tr>
+					<tr>
+						<td><label for="password">Password:</label></td>
+						<td><input type="password" name="password" value="" id="password"></td>
+					</tr>
+					<tr>
+						<td><input type="submit" value="Log in" class="button" /></td>
+						<td></td>
+					</tr>
+					<input type="hidden" name="next" value="{{ next|escape }}" />
+				</table>
 			</fieldset>
 		</form>
 	</div>
