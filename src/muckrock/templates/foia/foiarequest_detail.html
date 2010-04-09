@@ -22,8 +22,16 @@
 		<tr class="even"> <th>Date response received</th><td>
 				{% if object.date_done %}
 					{{ object.date_done }}
-			  {% endif %}</td> </tr>
+				{% endif %}</td>
+		</tr>
 		<tr class="odd"> <th>Response</th><td>{{ object.response }}</td> </tr>
+		<tr class="even"> <th>Document</th>
+			<td>
+				{% if object.doc_first_page %}
+				<a href="{{object.doc_first_page.get_absolute_url}}">View document</a>
+				{% endif %}
+			</td>
+		</tr>
 	</table>
 {% endblock %}
 
