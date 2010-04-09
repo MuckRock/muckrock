@@ -4,39 +4,17 @@ Forms for accounts application
 
 from django import forms
 from django.contrib.auth.models import User
-from accounts.models import Profile
+from django.contrib.localflavor.us.forms import USZipCodeField
 
-from string import digits
+from accounts.models import Profile
 
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
-
-    def __init__(self, *args, **kwargs):
-        forms.ModelForm.__init__(self, *args, **kwargs)
-        # increase phone max length because we will strip out extra chars
-        self.fields['phone'].widget.attrs['maxlength'] = '20'
+    zip_code = USZipCodeField()
 
     class Meta:
         # pylint: disable-msg=R0903
         model = Profile
-
-    def clean_zip_code(self):
-        """Validate the user entered zip code"""
-        zip_code = self.cleaned_data['zip_code']
-        if len(zip_code) != 5 or any(d not in digits for d in zip_code):
-            raise forms.ValidationError('Zip code must be 5 digits')
-        return zip_code
-
-    def clean_phone(self):
-        """Validate the user entered phone number"""
-        phone = self.cleaned_data['phone']
-        remove = dict((ord(c), None) for c in ['(', ')', ' ', '-', '.'])
-        phone = phone.translate(remove)
-        if phone[0] == '1':
-            phone = phone[1:]
-        if len(phone) != 10 or any(d not in digits for d in phone):
-            raise forms.ValidationError('Phone number must be 10 digits')
-        return phone
 
 
 class UserChangeForm(ProfileForm):

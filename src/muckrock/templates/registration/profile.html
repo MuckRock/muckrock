@@ -1,8 +1,6 @@
 
 {% extends "registration/base.html" %}
 
-{% load filters %}
-
 {% block content %}
 
 <h1>Your Account</h1>
@@ -41,7 +39,7 @@
 		<th>Phone</th>
 		<td>
 			{% if user.get_profile.phone %}
-				{{user.get_profile.phone|format_phone}}
+				{{user.get_profile.phone}}
 			{% endif %}
 		</td>
 	</tr>

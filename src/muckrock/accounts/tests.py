@@ -8,8 +8,7 @@ from django.test.client import Client
 import nose.tools
 
 from accounts.models import Profile
-from accounts.forms import ProfileForm, UserChangeForm
-from accounts.templatetags.filters import format_phone
+from accounts.forms import UserChangeForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 
 def setup():
@@ -18,52 +17,6 @@ def setup():
     Profile.objects.all().delete()
 
  # forms
-@nose.tools.with_setup(setup)
-def test_profile_form_zip():
-    """Tests profile form zip code validation"""
-
-    form = ProfileForm()
-    form.cleaned_data = {}
-    form.cleaned_data['zip_code'] = u'01234'
-    nose.tools.eq_(form.clean_zip_code(), u'01234', 'Good zip code should return unchanged')
-    form.cleaned_data['zip_code'] = u'98765'
-    nose.tools.eq_(form.clean_zip_code(), u'98765', 'Good zip code should return unchanged')
-    # short zip code
-    form.cleaned_data['zip_code'] = u'1234'
-    nose.tools.assert_raises(ValidationError, form.clean_zip_code)
-    # long zip code
-    form.cleaned_data['zip_code'] = u'012345'
-    nose.tools.assert_raises(ValidationError, form.clean_zip_code)
-    # bad digits zip code
-    form.cleaned_data['zip_code'] = u'01a23'
-    nose.tools.assert_raises(ValidationError, form.clean_zip_code)
-
-@nose.tools.with_setup(setup)
-def test_profile_form_phone():
-    """Tests profile form zip code validation"""
-
-    form = ProfileForm()
-    form.cleaned_data = {}
-    form.cleaned_data['phone'] = u'5551234567'
-    nose.tools.eq_(form.clean_phone(), u'5551234567', 'Simple phone number')
-    form.cleaned_data['phone'] = u'555-123-4567'
-    nose.tools.eq_(form.clean_phone(), u'5551234567', 'Phone with punctuation')
-    form.cleaned_data['phone'] = u'(555) 123-4567'
-    nose.tools.eq_(form.clean_phone(), u'5551234567', 'Phone with punctuation and white space')
-    form.cleaned_data['phone'] = u'1 (555) 123-4567'
-    nose.tools.eq_(form.clean_phone(), u'5551234567', 'Phone with leading one')
-    # short phone
-    form.cleaned_data['phone'] = u'1234567890'
-    nose.tools.assert_raises(ValidationError, form.clean_phone)
-    form.cleaned_data['phone'] = u'(234) 567-890'
-    nose.tools.assert_raises(ValidationError, form.clean_phone)
-    # long phone
-    form.cleaned_data['phone'] = u'(234) 567-89011'
-    nose.tools.assert_raises(ValidationError, form.clean_phone)
-    # bad phone
-    form.cleaned_data['phone'] = u'1 (800) CALL-ATT'
-    nose.tools.assert_raises(ValidationError, form.clean_phone)
-
 @nose.tools.with_setup(setup)
 def test_user_change_form_email():
     """Tests user change form email validation"""
@@ -90,13 +43,6 @@ def test_profile_model_unicode():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     profile = Profile(user=user)
     nose.tools.eq_(unicode(profile), u"Test1's Profile")
-
- # template filters
-@nose.tools.with_setup(setup)
-def test_format_phone():
-    """Test the format phone template filter"""
-
-    nose.tools.eq_(format_phone('5551234567'), '(555) 123-4567')
 
  # views
 @nose.tools.with_setup(setup)
@@ -196,7 +142,7 @@ def test_post_views():
                  'email': 'mitch@muckrock.com',   'user': user,
                  'address1': '123 main st',       'address2': '',
                  'city': 'boston', 'state': 'MA', 'zip_code': '02140',
-                 'phone': '5551234567'}
+                 'phone': '555-123-4567'}
     post_allowed(client, '/accounts/update/', user_data, 'http://testserver/accounts/profile/')
 
     user = User.objects.get(username='test1')
