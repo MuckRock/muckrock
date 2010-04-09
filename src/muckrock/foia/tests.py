@@ -7,7 +7,7 @@ from django.test.client import Client
 from django.template.defaultfilters import slugify
 import nose.tools
 
-from foia.models import FOIARequest
+from foia.models import FOIARequest, FOIAImage
 from foia.forms import FOIARequestForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
@@ -15,6 +15,7 @@ def setup():
     """Clean the database before each test"""
     User.objects.all().delete()
     FOIARequest.objects.all().delete()
+    FOIAImage.objects.all().delete()
 
  # forms
 @nose.tools.with_setup(setup)
@@ -81,6 +82,58 @@ def test_foia_model_editable():
     test('Test 4', 'rejected', False)
     test('Test 5', 'done', False)
 
+@nose.tools.with_setup(setup)
+def test_foia_doc_model_unicode():
+    """Test FOIA Image model's __unicode__ method"""
+
+    user = User.objects.create(username='Test_User')
+    foia = FOIARequest.objects.create(user=user, title='Test 1')
+    doc = FOIAImage.objects.create(foia=foia, page=1)
+    nose.tools.eq_(unicode(doc), u'Test 1 Document Page 1')
+
+@nose.tools.with_setup(setup)
+def test_foia_doc_model_url():
+    """Test FOIA Images model's get_absolute_url method"""
+
+    user = User.objects.create(username='Test_User')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    doc = FOIAImage.objects.create(foia=foia, page=1)
+    nose.tools.eq_(doc.get_absolute_url(), '/foia/view/Test_User/Test-1/doc/1/')
+
+@nose.tools.with_setup(setup)
+def test_foia_doc_next_prev():
+    """Test FOIA Images model's next and previous methods"""
+
+    user = User.objects.create(username='Test_User')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    doc1 = FOIAImage.objects.create(foia=foia, page=1)
+    doc2 = FOIAImage.objects.create(foia=foia, page=2)
+    doc3 = FOIAImage.objects.create(foia=foia, page=3)
+    nose.tools.eq_(doc1.previous(), None)
+    nose.tools.eq_(doc1.next(), doc2)
+    nose.tools.eq_(doc2.previous(), doc1)
+    nose.tools.eq_(doc2.next(), doc3)
+    nose.tools.eq_(doc3.previous(), doc2)
+    nose.tools.eq_(doc3.next(), None)
+
+@nose.tools.with_setup(setup)
+def test_foia_doc_total_pages():
+    """Test FOIA Images model's total pages method"""
+
+    user = User.objects.create(username='Test_User')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    doc1 = FOIAImage.objects.create(foia=foia, page=1)
+    nose.tools.eq_(doc1.total_pages(), 1)
+
+    doc2 = FOIAImage.objects.create(foia=foia, page=2)
+    nose.tools.eq_(doc1.total_pages(), 2)
+    nose.tools.eq_(doc2.total_pages(), 2)
+
+    doc3 = FOIAImage.objects.create(foia=foia, page=3)
+    nose.tools.eq_(doc1.total_pages(), 3)
+    nose.tools.eq_(doc2.total_pages(), 3)
+    nose.tools.eq_(doc3.total_pages(), 3)
+
  # views
 @nose.tools.with_setup(setup)
 def test_anon_views():
@@ -95,6 +148,8 @@ def test_anon_views():
                                         jurisdiction='MA', agency='test', request='test')
     FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='started',
                                         jurisdiction='MA', agency='test', request='test')
+    doc1 = FOIAImage.objects.create(foia=foia_a, page=1)
+    FOIAImage.objects.create(foia=foia_a, page=2)
 
     # get unathenticated pages
     response = get_allowed(client, '/foia/list/', ['foia/foiarequest_list.html', 'foia/base.html'])
@@ -114,8 +169,16 @@ def test_anon_views():
                            ['foia/foiarequest_detail.html', 'foia/base.html'],
                            context = {'object': foia_a})
 
+    response = get_allowed(client, '/foia/view/test1/test-a/doc/1/',
+                           ['foia/foiarequest_doc_detail.html', 'foia/base.html'],
+                           context = {'doc': doc1})
+
     get_404(client, '/foia/list/test3/')
     get_404(client, '/foia/view/test1/test-c/')
+    get_404(client, '/foia/view/test3/test-c/')
+    get_404(client, '/foia/view/test1/test-a/doc/3/')
+    get_404(client, '/foia/view/test2/test-c/doc/1/')
+    get_404(client, '/foia/view/test3/test-c/doc/1/')
 
 @nose.tools.with_setup(setup)
 def test_unallowed_views():

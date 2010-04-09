@@ -1,0 +1,29 @@
+
+{% extends "foia/base.html" %}
+
+{% block content %}
+	<h1>{{doc.foia.title}} Document - Page {{doc.page}}/{{doc.total_pages}}</h1>
+
+	<p><a href="{{doc.foia.get_absolute_url}}">Back to FOIA Request</a></p>
+	<p><img src="/user_media/{{doc.image.name}}"></p>
+
+	<div class="post-meta archive-pagination">
+		
+		{% if doc.previous %}
+		<div class="left">
+			<a href="{{doc.previous.get_absolute_url}}">&#171; Previous page</a>
+		</div>
+		{% endif %}
+
+		{% if doc.next %}
+		<div class="right">
+			<a href="{{doc.next.get_absolute_url}}">Next page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
+{% endblock %}
+

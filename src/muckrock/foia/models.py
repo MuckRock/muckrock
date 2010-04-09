@@ -4,6 +4,7 @@ Models for the FOIA application
 
 from django.db import models
 from django.contrib.auth.models import User
+from utils import try_or_none
 
 JURISDICTIONS = (('MA', 'Massachusetts'),)
 
@@ -46,10 +47,51 @@ class FOIARequest(models.Model):
         """Can this request be updated?"""
         return self.status == 'started' or self.status == 'fix'
 
+    def doc_first_page(self):
+        """Get the first page of this requests corresponding document"""
+        # pylint: disable-msg=E1101
+        return self.images.get(page=1)
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
         unique_together = (('user', 'slug'),)
+
+class FOIAImage(models.Model):
+    """An image attached to a FOIA request"""
+    # pylint: disable-msg=E1101
+    foia = models.ForeignKey(FOIARequest, related_name='images')
+    image = models.ImageField(upload_to='foia_images')
+    page = models.SmallIntegerField(unique=True)
+
+    def __unicode__(self):
+        return '%s Document Page %d' % (self.foia.title, self.page)
+
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('foia.views.document_detail', [],
+                {'user_name': self.foia.user.username,
+                 'slug': self.foia.slug,
+                 'page': self.page})
+
+    def next(self):
+        """Get next document page"""
+        return try_or_none(self.DoesNotExist, self.foia.images.get, page=self.page + 1)
+
+    def previous(self):
+        """Get previous document page"""
+        return try_or_none(self.DoesNotExist, self.foia.images.get, page=self.page - 1)
+
+    def total_pages(self):
+        """Get total page count"""
+        return self.foia.images.count()
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['page']
+        verbose_name = 'FOIA Document Image'
+
 
 
