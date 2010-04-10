@@ -41,7 +41,7 @@ class FOIARequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable-msg=E1101
-        return ('foia.views.detail', [], {'user_name': self.user.username, 'slug': self.slug})
+        return ('foia-detail', [], {'user_name': self.user.username, 'slug': self.slug})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -71,7 +71,7 @@ class FOIAImage(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia.views.document_detail', [],
+        return ('foia-doc-detail', [],
                 {'user_name': self.foia.user.username,
                  'slug': self.foia.slug,
                  'page': self.page})

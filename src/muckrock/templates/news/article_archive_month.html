@@ -7,10 +7,10 @@
 
 <div class="post-meta archive-pagination">
 	
-	<div class="left"><a href="/news/archives/{{previous_month|date:"Y"}}/{{previous_month|date:"b"}}/">
+	<div class="left"><a href="{% url news-archive-month year=previous_month|date:"Y",month=previous_month|date:"b" %}">
 			&#171; Previous page</a></div>
 	{% if next_month %}
-	<div class="right"><a href="/news/archives/{{next_month|date:"Y"}}/{{next_month|date:"b"}}/">
+	<div class="right"><a href="{% url news-archive-month year=next_month|date:"Y",month=next_month|date:"b" %}">
 			Next page &#187;</a></div>
 	{% endif %}
 
@@ -30,10 +30,10 @@
 
 <div class="post-meta archive-pagination">
 
-	<div class="left"><a href="/news/archives/{{previous_month|date:"Y"}}/{{previous_month|date:"b"}}/">
+	<div class="left"><a href="{% url news-archive-month year=previous_month|date:"Y",month=previous_month|date:"b" %}">
 			&#171; Previous page</a></div>
 	{% if next_month %}
-	<div class="right"><a href="/news/archives/{{next_month|date:"Y"}}/{{next_month|date:"b"}}/">
+	<div class="right"><a href="{% url news-archive-month year=next_month|date:"Y",month=next_month|date:"b" %}">
 			Next page &#187;</a></div>
 	{% endif %}
 

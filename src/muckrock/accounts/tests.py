@@ -5,6 +5,7 @@ Tests using nose for the accounts application
 from django.forms import ValidationError
 from django.contrib.auth.models import User
 from django.test.client import Client
+from django.core.urlresolvers import reverse
 import nose.tools
 
 from accounts.models import Profile
@@ -52,12 +53,13 @@ def test_anon_views():
     client = Client()
 
     # get unathenticated pages
-    get_allowed(client, '/accounts/login/', ['registration/login.html', 'registration/base.html'])
-    get_allowed(client, '/accounts/register/',
+    get_allowed(client, reverse('acct-login'),
+                ['registration/login.html', 'registration/base.html'])
+    get_allowed(client, reverse('acct-register'),
                 ['registration/register.html', 'registration/base.html'])
-    get_allowed(client, '/accounts/reset_pw/',
+    get_allowed(client, reverse('acct-reset-pw'),
                        ['registration/password_reset_form.html', 'registration/base.html'])
-    get_allowed(client, '/accounts/logout/',
+    get_allowed(client, reverse('acct-logout'),
                 ['registration/logged_out.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -67,12 +69,12 @@ def test_unallowed_views():
     client = Client()
 
     # get/post authenticated pages while unauthenticated
-    get_post_unallowed(client, '/accounts/profile/')
-    get_post_unallowed(client, '/accounts/update/')
-    get_post_unallowed(client, '/accounts/change_pw/')
+    get_post_unallowed(client, reverse('acct-profile'))
+    get_post_unallowed(client, reverse('acct-update'))
+    get_post_unallowed(client, reverse('acct-change-pw'))
 
     # post unathenticated pages
-    post_allowed_bad(client, '/accounts/register/',
+    post_allowed_bad(client, reverse('acct-register'),
                      ['registration/register.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -81,14 +83,14 @@ def test_register_view():
 
     client = Client()
 
-    post_allowed_bad(client, '/accounts/register/',
+    post_allowed_bad(client, reverse('acct-register'),
                      ['registration/register.html', 'registration/base.html'])
-    post_allowed(client, '/accounts/register/',
+    post_allowed(client, reverse('acct-register'),
                  {'username': 'test1', 'password1': 'abc', 'password2': 'abc'},
-                 'http://testserver/accounts/profile/')
+                 'http://testserver' + reverse('acct-profile'))
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/',
+    get_allowed(client, reverse('acct-profile'),
                 ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -98,14 +100,14 @@ def test_login_view():
     client = Client()
     User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
 
-    post_allowed_bad(client, '/accounts/login/',
+    post_allowed_bad(client, reverse('acct-login'),
                      ['registration/login.html', 'registration/base.html'])
-    post_allowed(client, '/accounts/login/',
+    post_allowed(client, reverse('acct-login'),
                  {'username': 'test1', 'password': 'abc'},
-                 'http://testserver/accounts/profile/')
+                 'http://testserver' + reverse('acct-profile'))
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/',
+    get_allowed(client, reverse('acct-profile'),
                 ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -117,17 +119,17 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, '/accounts/profile/',
+    get_allowed(client, reverse('acct-profile'),
                 ['registration/profile.html', 'registration/base.html'])
-    get_allowed(client, '/accounts/update/',
+    get_allowed(client, reverse('acct-update'),
                 ['registration/update.html', 'registration/base.html'])
-    get_allowed(client, '/accounts/change_pw/',
+    get_allowed(client, reverse('acct-change-pw'),
                 ['registration/password_change_form.html', 'registration/base.html'])
 
     # post authenticated pages
-    post_allowed_bad(client, '/accounts/update/',
+    post_allowed_bad(client, reverse('acct-update'),
                      ['registration/update.html', 'registration/base.html'])
-    post_allowed_bad(client, '/accounts/change_pw/',
+    post_allowed_bad(client, reverse('acct-change-pw'),
                      ['registration/password_change_form.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -143,7 +145,8 @@ def test_post_views():
                  'address1': '123 main st',       'address2': '',
                  'city': 'boston', 'state': 'MA', 'zip_code': '02140',
                  'phone': '555-123-4567'}
-    post_allowed(client, '/accounts/update/', user_data, 'http://testserver/accounts/profile/')
+    post_allowed(client, reverse('acct-update'), user_data,
+        'http://testserver' + reverse('acct-profile'))
 
     user = User.objects.get(username='test1')
     profile = user.get_profile()
@@ -153,11 +156,11 @@ def test_post_views():
         if key not in ['user', 'first_name', 'last_name', 'email']:
             nose.tools.eq_(val, getattr(profile, key))
 
-    post_allowed(client, '/accounts/change_pw/',
+    post_allowed(client, reverse('acct-change-pw'),
                 {'old_password': 'abc',
                  'new_password1': '123',
                  'new_password2': '123'},
-                 'http://testserver/accounts/change_pw_done/')
+                 'http://testserver' + reverse('acct-change-pw-done'))
 
 @nose.tools.with_setup(setup)
 def test_logout_view():
@@ -168,7 +171,7 @@ def test_logout_view():
     client.login(username='test1', password='abc')
 
     # logout & check
-    get_allowed(client, '/accounts/logout/',
+    get_allowed(client, reverse('acct-logout'),
                 ['registration/logged_out.html', 'registration/base.html'])
-    get_post_unallowed(client, '/accounts/profile/')
+    get_post_unallowed(client, reverse('acct-profile'))
 

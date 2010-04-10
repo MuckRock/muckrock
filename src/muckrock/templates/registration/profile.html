@@ -5,8 +5,8 @@
 
 <h1>Your Account</h1>
 <ul>
-	<li><a href="/accounts/update/">Update your information</a>
-	<li><a href="/foia/list/{{ user.username }}/">My FOIA Requests</a>
+	<li><a href="{% url acct-update %}">Update your information</a>
+	<li><a href="{% url foia-list-user user_name=user.username %}">My FOIA Requests</a>
 </ul>
 <table class="data-table">
 	<tr class="odd">
