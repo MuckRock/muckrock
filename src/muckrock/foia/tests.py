@@ -5,6 +5,7 @@ Tests using nose for the FOIA application
 from django.contrib.auth.models import User
 from django.test.client import Client
 from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
 import nose.tools
 
 from foia.models import FOIARequest, FOIAImage
@@ -62,7 +63,8 @@ def test_foia_model_url():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1')
-    nose.tools.eq_(foia.get_absolute_url(), '/foia/view/Test_User/Test-1/')
+    nose.tools.eq_(foia.get_absolute_url(),
+        reverse('foia-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1'}))
 
 @nose.tools.with_setup(setup)
 def test_foia_model_editable():
@@ -98,7 +100,8 @@ def test_foia_doc_model_url():
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1')
     doc = FOIAImage.objects.create(foia=foia, page=1)
-    nose.tools.eq_(doc.get_absolute_url(), '/foia/view/Test_User/Test-1/doc/1/')
+    nose.tools.eq_(doc.get_absolute_url(),
+        reverse('foia-doc-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1', 'page': 1}))
 
 @nose.tools.with_setup(setup)
 def test_foia_doc_next_prev():
@@ -152,33 +155,40 @@ def test_anon_views():
     FOIAImage.objects.create(foia=foia_a, page=2)
 
     # get unathenticated pages
-    response = get_allowed(client, '/foia/list/', ['foia/foiarequest_list.html', 'foia/base.html'])
+    response = get_allowed(client, reverse('foia-list'),
+            ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 3)
 
-    response = get_allowed(client, '/foia/list/test1/',
+    response = get_allowed(client, reverse('foia-list-user', kwargs={'user_name': 'test1'}),
                            ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 2)
     nose.tools.ok_(all(foia.user == user1 for foia in response.context['object_list']))
 
-    response = get_allowed(client, '/foia/list/test2/',
+    response = get_allowed(client, reverse('foia-list-user', kwargs={'user_name': 'test2'}),
                            ['foia/foiarequest_list.html', 'foia/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 1)
     nose.tools.ok_(all(foia.user == user2 for foia in response.context['object_list']))
 
-    response = get_allowed(client, '/foia/view/test1/test-a/',
+    response = get_allowed(client,
+                           reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-a'}),
                            ['foia/foiarequest_detail.html', 'foia/base.html'],
                            context = {'object': foia_a})
 
-    response = get_allowed(client, '/foia/view/test1/test-a/doc/1/',
+    response = get_allowed(client,
+                           reverse('foia-doc-detail',
+                               kwargs={'user_name': 'test1', 'slug': 'test-a', 'page': 1}),
                            ['foia/foiarequest_doc_detail.html', 'foia/base.html'],
                            context = {'doc': doc1})
 
-    get_404(client, '/foia/list/test3/')
-    get_404(client, '/foia/view/test1/test-c/')
-    get_404(client, '/foia/view/test3/test-c/')
-    get_404(client, '/foia/view/test1/test-a/doc/3/')
-    get_404(client, '/foia/view/test2/test-c/doc/1/')
-    get_404(client, '/foia/view/test3/test-c/doc/1/')
+    get_404(client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
+    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-c'}))
+    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test3', 'slug': 'test-c'}))
+    get_404(client, reverse('foia-doc-detail',
+                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 3}))
+    get_404(client, reverse('foia-doc-detail',
+                            kwargs={'user_name': 'test2', 'slug': 'test-c', 'page': 1}))
+    get_404(client, reverse('foia-doc-detail',
+                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 1}))
 
 @nose.tools.with_setup(setup)
 def test_unallowed_views():
@@ -190,8 +200,9 @@ def test_unallowed_views():
                                jurisdiction='MA', agency='test', request='test')
 
     # get/post authenticated pages while unauthenticated
-    get_post_unallowed(client, '/foia/new/')
-    get_post_unallowed(client, '/foia/update/test1/test-a/')
+    get_post_unallowed(client, reverse('foia-create'))
+    get_post_unallowed(client, reverse('foia-update',
+                                       kwargs={'user_name': 'test1', 'slug': 'test-a'}))
 
 @nose.tools.with_setup(setup)
 def test_auth_views():
@@ -204,15 +215,17 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, '/foia/new/', ['foia/foiarequest_form.html', 'foia/base.html'])
-    get_allowed(client, '/foia/update/test1/test-a/',
+    get_allowed(client, reverse('foia-create'), ['foia/foiarequest_form.html', 'foia/base.html'])
+    get_allowed(client, reverse('foia-update', kwargs={'user_name': 'test1', 'slug': 'test-a'}),
                 ['foia/foiarequest_form.html', 'foia/base.html'])
 
-    get_404(client, '/foia/update/test1/test-b/')
+    get_404(client, reverse('foia-update', kwargs={'user_name': 'test1', 'slug': 'test-b'}))
 
     # post authenticated pages
-    post_allowed_bad(client, '/foia/new/', ['foia/foiarequest_form.html', 'foia/base.html'])
-    post_allowed_bad(client, '/foia/update/test1/test-a/',
+    post_allowed_bad(client, reverse('foia-create'),
+                     ['foia/foiarequest_form.html', 'foia/base.html'])
+    post_allowed_bad(client, reverse('foia-update',
+                                     kwargs={'user_name': 'test1', 'slug': 'test-a'}),
                      ['foia/foiarequest_form.html', 'foia/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -229,15 +242,17 @@ def test_post_views():
     foia_data = {'title': 'test b', 'jurisdiction': 'MA',
                  'agency': 'test agency', 'request': 'test request', 'submit': 'Save'}
 
-    post_allowed(client, '/foia/new/', foia_data, 'http://testserver/foia/view/test1/test-b/')
+    post_allowed(client, reverse('foia-create'), foia_data, 'http://testserver' +
+                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b'}))
     foia = FOIARequest.objects.get(title='test b')
     nose.tools.eq_(foia.status, 'started')
 
     foia_data = {'title': 'test b', 'jurisdiction': 'MA',
                  'agency': 'test agency', 'request': 'updated request', 'submit': 'Submit'}
 
-    post_allowed(client, '/foia/update/test1/test-b/', foia_data,
-                 'http://testserver/foia/view/test1/test-b/')
+    post_allowed(client, reverse('foia-update', kwargs={'user_name': 'test1', 'slug': 'test-b'}),
+                 foia_data, 'http://testserver' +
+                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b'}))
     foia = FOIARequest.objects.get(title='test b')
     nose.tools.eq_(foia.request, 'updated request')
     nose.tools.eq_(foia.status, 'submitted')

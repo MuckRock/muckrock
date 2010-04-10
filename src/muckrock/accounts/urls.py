@@ -2,7 +2,7 @@
 URL mappings for the accounts application
 """
 
-from django.conf.urls.defaults import patterns
+from django.conf.urls.defaults import patterns, url
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required
 import django.contrib.auth.views as auth_views
@@ -10,17 +10,17 @@ import django.contrib.auth.views as auth_views
 import accounts.views
 
 urlpatterns = patterns('',
-    (r'^login/$',             auth_views.login),
-    (r'^logout/$',            auth_views.logout),
-    (r'^profile/$',           login_required(direct_to_template),
-        {'template': 'registration/profile.html'}),
-    (r'^register/$',          accounts.views.register),
-    (r'^update/$',            accounts.views.update),
-    (r'^change_pw/$',         auth_views.password_change),
-    (r'^change_pw_done/$',    auth_views.password_change_done),
-    (r'^reset_pw/$',          auth_views.password_reset),
-    (r'^reset_pw_done/$',     auth_views.password_reset_done),
-    (r'^reset_pw_complete/$', auth_views.password_reset_complete),
-    (r'^reset_pw/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
-                               auth_views.password_reset_confirm),
+    url(r'^login/$',             auth_views.login, name='acct-login'),
+    url(r'^logout/$',            auth_views.logout, name='acct-logout'),
+    url(r'^profile/$',           login_required(direct_to_template),
+        {'template': 'registration/profile.html'}, name='acct-profile'),
+    url(r'^register/$',          accounts.views.register, name='acct-register'),
+    url(r'^update/$',            accounts.views.update, name='acct-update'),
+    url(r'^change_pw/$',         auth_views.password_change, name='acct-change-pw'),
+    url(r'^change_pw_done/$',    auth_views.password_change_done, name='acct-change-pw-done'),
+    url(r'^reset_pw/$',          auth_views.password_reset, name='acct-reset-pw'),
+    url(r'^reset_pw_done/$',     auth_views.password_reset_done, name='acct-reset-pw-done'),
+    url(r'^reset_pw_complete/$', auth_views.password_reset_complete, name='acct-reset-pw-complete'),
+    url(r'^reset_pw/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
+                                 auth_views.password_reset_confirm, name='acct-reset-pw-confirm'),
 )

@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.forms import UserCreationForm
+from django.core.urlresolvers import reverse
 
 from accounts.forms import UserChangeForm
 from accounts.models import Profile
@@ -22,7 +23,7 @@ def register(request):
             new_user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
-            return HttpResponseRedirect('/accounts/profile/')
+            return HttpResponseRedirect(reverse('acct-profile'))
     else:
         form = UserCreationForm()
     return render_to_response('registration/register.html',
@@ -51,7 +52,7 @@ def update(request):
 
             profile = form.save()
             
-            return HttpResponseRedirect('/accounts/profile/')
+            return HttpResponseRedirect(reverse('acct-profile'))
     else:
         profile = get_profile()
         form = UserChangeForm(initial=request.user.__dict__, instance=profile)

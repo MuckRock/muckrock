@@ -7,12 +7,10 @@
 
 <div class="post-meta archive-pagination">
 	
-	<div class="left">
-		<a href="/news/archives/{{previous_day|date:"Y"}}/{{previous_day|date:"b"}}/{{previous_day|date:"d"}}/">
+	<div class="left"><a href="{% url news-archive-day year=previous_day|date:"Y",month=previous_day|date:"b",day=previous_day|date:"d" %}">
 			&#171; Previous page</a></div>
 	{% if next_day %}
-	<div class="right">
-		<a href="/news/archives/{{next_day|date:"Y"}}/{{next_day|date:"b"}}/{{next_day|date:"d"}}">
+	<div class="right"><a href="{% url news-archive-day year=next_day|date:"Y",month=next_day|date:"b",day=next_day|date:"d" %}">
 			Next page &#187;</a></div>
 	{% endif %}
 
@@ -32,12 +30,10 @@
 
 <div class="post-meta archive-pagination">
 	
-	<div class="left">
-		<a href="/news/archives/{{previous_day|date:"Y"}}/{{previous_day|date:"b"}}/{{previous_day|date:"d"}}/">
+	<div class="left"><a href="{% url news-archive-day year=previous_day|date:"Y",month=previous_day|date:"b",day=previous_day|date:"d" %}">
 			&#171; Previous page</a></div>
 	{% if next_day %}
-	<div class="right">
-		<a href="/news/archives/{{next_day|date:"Y"}}/{{next_day|date:"b"}}/{{next_day|date:"d"}}">
+	<div class="right"><a href="{% url news-archive-day year=next_day|date:"Y",month=next_day|date:"b",day=next_day|date:"d" %}">
 			Next page &#187;</a></div>
 	{% endif %}
 

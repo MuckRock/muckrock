@@ -21,11 +21,11 @@
 
 			<ul class="tabbed" id="network-tabs">
 				{% if user.is_authenticated %}
-					<li><a href="/accounts/profile/">My Account</a></li>
-					<li><a href="/accounts/logout">Log Out</a></li>
+				<li><a href="{% url acct-profile %}">My Account</a></li>
+				<li><a href="{% url acct-logout %}">Log Out</a></li>
 				{% else %}
-					<li><a href="/accounts/login/">Log in</a></li>
-					<li><a href="/accounts/register/">Register</a></li>
+				<li><a href="{% url acct-login %}">Log in</a></li>
+				<li><a href="{% url acct-register %}">Register</a></li>
 				{% endif %}
 			</ul>
 
@@ -51,7 +51,7 @@
 
 			<div id="site-title">
 
-				<h1><a href="/">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
+				<h1><a href="{%url index%}">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
 
 			</div>
 
@@ -61,9 +61,9 @@
 
 					<ul class="tabbed">
 						{% block main-nav %}
-						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="/">News</a></li>
-						<li class="{% active request "^/foia/" %}"><a href="/foia/">FOIA Requests</a></li>
-						<li class="{% active request "^/accounts/" %}"><a href="/accounts/profile/">Account Information</a></li>
+						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="{%url index%}">News</a></li>
+						<li class="{% active request "^/foia/" %}"><a href="{%url foia-index%}">FOIA Requests</a></li>
+						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-profile%}">Account Information</a></li>
 						{% endblock %}
 					</ul>
 
@@ -168,7 +168,7 @@
 		<div id="footer">
 
 			<div class="left">&copy; 2010 MuckRock <span class="text-separator">&rarr;</span> <a href="#">Home</a> <span class="text-separator">|</span><a href="/blog/">Blog</a></div>
-			<div class="right"><a href="http://templates.arcsin.se/">Website template</a> by <a href="http://arcsin.se/">Arcsin</a></div>
+			<div class="right"></div>
 
 			<div class="clearer">&nbsp;</div>
 

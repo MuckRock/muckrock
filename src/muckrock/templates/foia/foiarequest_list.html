@@ -12,7 +12,7 @@
 		</tr>
 		{% for foia in object_list %}
 		<tr class="{% cycle 'even' 'odd' %}">
-			<td><a href="/foia/view/{{ foia.user.username }}/{{ foia.slug }}/">{{ foia.title }}</a></td>
+			<td><a href="{% url foia-detail user_name=foia.user.username,slug=foia.slug %}">{{ foia.title }}</a></td>
 			<td>{{ foia.user }}</td>
 			<td>{{ foia.get_status_display }}</td>
 			<td>{{ foia.get_jurisdiction_display }}</td>

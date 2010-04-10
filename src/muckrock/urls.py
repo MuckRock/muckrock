@@ -20,11 +20,11 @@ article_args = {'queryset': Article.objects.get_published(), 'date_field': 'pub_
                 'allow_empty': True, 'num_latest': 5}
 
 urlpatterns = patterns('',
-    url(r'^$', archive_index, article_args),
-    (r'^accounts/', include(muckrock.accounts.urls)),
-    (r'^foia/', include(muckrock.foia.urls)),
-    (r'^news/', include(muckrock.news.urls)),
-    (r'^admin/', include(admin.site.urls)),
+    url(r'^$', archive_index, article_args, name='index'),
+    url(r'^accounts/', include(muckrock.accounts.urls)),
+    url(r'^foia/', include(muckrock.foia.urls)),
+    url(r'^news/', include(muckrock.news.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 )
 
 if muckrock.settings.DEBUG:
