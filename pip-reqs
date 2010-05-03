@@ -1,6 +1,7 @@
 Django==1.1.1
-django-evolution==0.0.0
+-e svn+http://django-evolution.googlecode.com/svn/trunk/#egg=django-evolution
 django-nose==0.0.3
 nose==0.11.3
 psycopg2==2.0.14
 wsgiref==0.1.2
+pil==1.1.7
