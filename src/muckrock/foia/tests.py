@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.test.client import Client
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
+from django.core import mail
 import nose.tools
 
 from foia.models import FOIARequest, FOIAImage
@@ -17,6 +18,9 @@ def setup():
     User.objects.all().delete()
     FOIARequest.objects.all().delete()
     FOIAImage.objects.all().delete()
+
+    # clean the test mail outbox
+    mail.outbox = []
 
  # forms
 @nose.tools.with_setup(setup)
@@ -54,7 +58,7 @@ def test_foia_model_unicode():
     """Test FOIA Request model's __unicode__ method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, title='Test 1')
+    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1')
     nose.tools.eq_(unicode(foia), u'Test 1')
 
 @nose.tools.with_setup(setup)
@@ -89,7 +93,7 @@ def test_foia_doc_model_unicode():
     """Test FOIA Image model's __unicode__ method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, title='Test 1')
+    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1')
     doc = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(unicode(doc), u'Test 1 Document Page 1')
 
@@ -136,6 +140,23 @@ def test_foia_doc_total_pages():
     nose.tools.eq_(doc1.total_pages(), 3)
     nose.tools.eq_(doc2.total_pages(), 3)
     nose.tools.eq_(doc3.total_pages(), 3)
+
+@nose.tools.with_setup(setup)
+def test_foia_email():
+    """Test FOIA sending an email to the user when a FOIA request is saved"""
+
+    nose.tools.eq_(len(mail.outbox), 0)
+
+    user = User.objects.create(username='Test_User', email='user@test.com')
+    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1', status='started')
+
+    nose.tools.eq_(len(mail.outbox), 1)
+    nose.tools.eq_(mail.outbox[0].to, [user.email])
+
+    foia.status = 'submitted'
+    foia.save()
+
+    nose.tools.eq_(len(mail.outbox), 2)
 
  # views
 @nose.tools.with_setup(setup)
