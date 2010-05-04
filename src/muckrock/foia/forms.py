@@ -3,8 +3,11 @@ Forms for FOIA application
 """
 
 from django import forms
-from foia.models import FOIARequest
 from django.template.defaultfilters import slugify
+from django.forms.util import ErrorList
+
+from foia.models import FOIARequest
+
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -24,10 +27,13 @@ class FOIARequestForm(forms.ModelForm):
         other_foias = FOIARequest.objects.filter(user=user, slug=slug)
 
         if len(other_foias) == 1 and other_foias[0] != self.instance:
-            raise forms.ValidationError('You already have a FOIA request with a similar title')
+            self._errors['title'] = \
+                ErrorList(['You already have a FOIA request with a similar title'])
+
         if len(other_foias) > 1: # pragma: no cover
             # this should never happen
-            raise forms.ValidationError('You already have a FOIA request with a similar title')
+            self._errors['title'] = \
+                ErrorList(['You already have a FOIA request with a similar title'])
 
         return self.cleaned_data
 
