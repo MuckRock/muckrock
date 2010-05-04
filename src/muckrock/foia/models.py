@@ -3,7 +3,9 @@ Models for the FOIA application
 """
 
 from django.db import models
+from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from utils import try_or_none
 
 JURISDICTIONS = (('MA', 'Massachusetts'),)
@@ -93,5 +95,32 @@ class FOIAImage(models.Model):
         ordering = ['page']
         verbose_name = 'FOIA Document Image'
 
+mail_template = \
+"""
+Dear %(name)s,
 
+This mail is to let you know that your FOIA Request "%(title)s"
+has been updated.  Its current status is '%(status)s' and you may
+view the full details of the request here:
+http://www.muckrock.com%(link)s.
 
+Thanks for using MuckRock and please email us if you have any
+questions about our service!
+
+Sincerely,
+The MuckRock Team
+"""
+
+def foia_save_handler(sender, **kwargs):
+    """Log changes to FOIA Requests"""
+    # pylint: disable-msg=W0613
+
+    request = kwargs['instance']
+    msg = mail_template % {'name': request.user.get_full_name(),
+                           'title': request.title,
+                           'status': request.get_status_display(),
+                           'link': request.get_absolute_url()}
+    send_mail('[MuckRock] FOIA request has been updated',
+              msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+
+post_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
