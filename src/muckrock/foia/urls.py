@@ -8,7 +8,8 @@ from django.views.generic import list_detail
 from foia import views
 from foia.models import FOIARequest
 
-foia_qs = {'queryset': FOIARequest.objects.all()}
+foia_qs = {'queryset': FOIARequest.objects.all(),
+           'paginate_by': 10}
 
 urlpatterns = patterns('',
     url(r'^$',                              list_detail.object_list, foia_qs, name='foia-index'),

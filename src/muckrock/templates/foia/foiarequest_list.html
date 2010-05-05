@@ -3,6 +3,24 @@
 
 {% block content %}
 	<h1>FOIA Requests</h1>
+
+	<div class="post-meta archive-pagination">
+		
+		{% if page_obj.has_previous %}
+		<div class="left">
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+		</div>
+		{% endif %}
+		{% if page_obj.has_next %}
+		<div class="right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
 	<table class="data-table">
 		<tr class="odd">
 			<th>Title</th>
@@ -19,5 +37,22 @@
 		</tr>
 		{% endfor %}
 	</table>
+
+	<div class="post-meta archive-pagination">
+		
+		{% if page_obj.has_previous %}
+		<div class="left">
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+		</div>
+		{% endif %}
+		{% if page_obj.has_next %}
+		<div class="right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
 {% endblock %}
 
