@@ -5,3 +5,4 @@ nose==0.11.3
 psycopg2==2.0.14
 wsgiref==0.1.2
 pil==1.1.7
+coverage==3.3.1
