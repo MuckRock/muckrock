@@ -51,8 +51,11 @@ def test_anon_views():
     """Test public views while not logged in"""
 
     client = Client()
+    User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
 
     # get unathenticated pages
+    get_allowed(client, reverse('acct-profile', args=['test1']),
+                ['registration/profile.html', 'registration/base.html'])
     get_allowed(client, reverse('acct-login'),
                 ['registration/login.html', 'registration/base.html'])
     get_allowed(client, reverse('acct-register'),
@@ -69,7 +72,7 @@ def test_unallowed_views():
     client = Client()
 
     # get/post authenticated pages while unauthenticated
-    get_post_unallowed(client, reverse('acct-profile'))
+    get_post_unallowed(client, reverse('acct-my-profile'))
     get_post_unallowed(client, reverse('acct-update'))
     get_post_unallowed(client, reverse('acct-change-pw'))
 
@@ -87,10 +90,10 @@ def test_register_view():
                      ['registration/register.html', 'registration/base.html'])
     post_allowed(client, reverse('acct-register'),
                  {'username': 'test1', 'password1': 'abc', 'password2': 'abc'},
-                 'http://testserver' + reverse('acct-profile'))
+                 'http://testserver' + reverse('acct-my-profile'))
 
     # get authenticated pages
-    get_allowed(client, reverse('acct-profile'),
+    get_allowed(client, reverse('acct-my-profile'),
                 ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -104,10 +107,10 @@ def test_login_view():
                      ['registration/login.html', 'registration/base.html'])
     post_allowed(client, reverse('acct-login'),
                  {'username': 'test1', 'password': 'abc'},
-                 'http://testserver' + reverse('acct-profile'))
+                 'http://testserver' + reverse('acct-my-profile'))
 
     # get authenticated pages
-    get_allowed(client, reverse('acct-profile'),
+    get_allowed(client, reverse('acct-my-profile'),
                 ['registration/profile.html', 'registration/base.html'])
 
 @nose.tools.with_setup(setup)
@@ -119,7 +122,7 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, reverse('acct-profile'),
+    get_allowed(client, reverse('acct-my-profile'),
                 ['registration/profile.html', 'registration/base.html'])
     get_allowed(client, reverse('acct-update'),
                 ['registration/update.html', 'registration/base.html'])
@@ -146,7 +149,7 @@ def test_post_views():
                  'city': 'boston', 'state': 'MA', 'zip_code': '02140',
                  'phone': '555-123-4567'}
     post_allowed(client, reverse('acct-update'), user_data,
-        'http://testserver' + reverse('acct-profile'))
+        'http://testserver' + reverse('acct-my-profile'))
 
     user = User.objects.get(username='test1')
     profile = user.get_profile()
@@ -173,5 +176,5 @@ def test_logout_view():
     # logout & check
     get_allowed(client, reverse('acct-logout'),
                 ['registration/logged_out.html', 'registration/base.html'])
-    get_post_unallowed(client, reverse('acct-profile'))
+    get_post_unallowed(client, reverse('acct-my-profile'))
 

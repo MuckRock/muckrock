@@ -9,7 +9,7 @@
 
 {% block sub-nav %}
 <ul class="tabbed">
-	<li class="{% active request "^/accounts/profile/" %}"><a href="{% url acct-profile %}">My Account</a></li>
+	<li class="{% active request "^/accounts/profile/" %}"><a href="{% url acct-my-profile %}">My Account</a></li>
 	<li class="{% active request "^/accounts/update/" %}"><a href="{% url acct-update %}">Update</a></li>
 	{% if user.is_authenticated %}
 	<li class="{% active request "^/accounts/logout/" %}"><a href="{% url acct-logout %}">Log Out</a></li>

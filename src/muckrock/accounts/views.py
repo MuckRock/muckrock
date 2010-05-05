@@ -3,10 +3,11 @@ Views for the accounts application
 """
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.core.urlresolvers import reverse
 
@@ -23,7 +24,7 @@ def register(request):
             new_user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
-            return HttpResponseRedirect(reverse('acct-profile'))
+            return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         form = UserCreationForm()
     return render_to_response('registration/register.html',
@@ -42,20 +43,31 @@ def update(request):
             return Profile(user=request.user)
 
     if request.method == 'POST':
-        profile = get_profile()
-        form = UserChangeForm(request.POST, instance=profile)
+        user_profile = get_profile()
+        form = UserChangeForm(request.POST, instance=user_profile)
         if form.is_valid():
             request.user.first_name = form.cleaned_data['first_name']
             request.user.last_name = form.cleaned_data['last_name']
             request.user.email = form.cleaned_data['email']
             request.user.save()
 
-            profile = form.save()
+            user_profile = form.save()
             
-            return HttpResponseRedirect(reverse('acct-profile'))
+            return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
-        profile = get_profile()
-        form = UserChangeForm(initial=request.user.__dict__, instance=profile)
+        user_profile = get_profile()
+        form = UserChangeForm(initial=request.user.__dict__, instance=user_profile)
 
     return render_to_response('registration/update.html', {'form': form},
+                              context_instance=RequestContext(request))
+
+def profile(request, user_name=None):
+    """View a user's profile"""
+
+    if user_name:
+        user_obj = get_object_or_404(User, username=user_name)
+    else:
+        user_obj = request.user
+
+    return render_to_response('registration/profile.html', {'user_obj': user_obj},
                               context_instance=RequestContext(request))
