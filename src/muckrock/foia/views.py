@@ -74,7 +74,7 @@ def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
     user = get_object_or_404(User, username=user_name)
-    return list_detail.object_list(request, FOIARequest.objects.filter(user=user))
+    return list_detail.object_list(request, FOIARequest.objects.filter(user=user), paginate_by=10)
 
 def detail(request, user_name, slug):
     """Details of a single FOIA request"""
