@@ -21,7 +21,7 @@
 
 			<ul class="tabbed" id="network-tabs">
 				{% if user.is_authenticated %}
-				<li><a href="{% url acct-profile %}">My Account</a></li>
+				<li><a href="{% url acct-my-profile %}">My Account</a></li>
 				<li><a href="{% url acct-logout %}">Log Out</a></li>
 				{% else %}
 				<li><a href="{% url acct-login %}">Log in</a></li>
@@ -63,7 +63,7 @@
 						{% block main-nav %}
 						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="{%url index%}">News</a></li>
 						<li class="{% active request "^/foia/" %}"><a href="{%url foia-index%}">FOIA Requests</a></li>
-						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-profile%}">Account Information</a></li>
+						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-my-profile%}">Account Information</a></li>
 						{% endblock %}
 					</ul>
 

@@ -3,43 +3,51 @@
 
 {% block content %}
 
+{% ifequal user user_obj %}
 <h1>Your Account</h1>
+{% else %}
+<h1>{{user_obj.username|capfirst}}'s Account</h1>
+{% endifequal %}
 <ul>
+	{% ifequal user user_obj %}
 	<li><a href="{% url acct-update %}">Update your information</a>
-	<li><a href="{% url foia-list-user user_name=user.username %}">My FOIA Requests</a>
+	<li><a href="{% url foia-list-user user_name=user_obj.username %}">My FOIA Requests</a>
+	{% else %}
+	<li><a href="{% url foia-list-user user_name=user_obj.username %}">{{user_obj.username|capfirst}}'s FOIA Requests</a>
+	{% endifequal %}
 </ul>
 <table class="data-table">
 	<tr class="odd">
 		<th width="30%">User Name</th>
-		<td>{{user.username}}</td>
+		<td>{{user_obj.username}}</td>
 	</tr>
 	<tr class="even">
 		<th>Name</th>
-		<td>{{user.first_name}} {{user.last_name}}</td>
+		<td>{{user_obj.first_name}} {{user_obj.last_name}}</td>
 	</tr>
 	<tr class="odd">
 		<th>Email</th>
-		<td>{{user.email}}</td>
+		<td>{{user_obj.email}}</td>
 	</tr>
 	<tr class="even">
 		<th>Address</th>
 		<td>
-			{{user.get_profile.address1}} <br \>
-			{% if user.get_profile.address2 %}
-				{{user.get_profile.address2}} <br \>
+			{{user_obj.get_profile.address1}} <br \>
+			{% if user_obj.get_profile.address2 %}
+				{{user_obj.get_profile.address2}} <br \>
 			{% endif %}
 			{# if city exists, assume rest of address exists #}
-			{% if user.get_profile.city %}
-				{{user.get_profile.city}}, {{user.get_profile.state}}
-				{{user.get_profile.zip_code}}<br \>
+			{% if user_obj.get_profile.city %}
+				{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}
+				{{user_obj.get_profile.zip_code}}<br \>
 			{% endif %}
 		</td>
 	</tr>
 	<tr class="odd">
 		<th>Phone</th>
 		<td>
-			{% if user.get_profile.phone %}
-				{{user.get_profile.phone}}
+			{% if user_obj.get_profile.phone %}
+				{{user_obj.get_profile.phone}}
 			{% endif %}
 		</td>
 	</tr>
