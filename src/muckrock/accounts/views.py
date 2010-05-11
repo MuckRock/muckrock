@@ -11,8 +11,12 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.core.urlresolvers import reverse
 
+from datetime import datetime
+
 from accounts.forms import UserChangeForm
 from accounts.models import Profile
+
+MONTHLY_REQUESTS = 25
 
 def register(request):
     """Register a new user"""
@@ -24,6 +28,8 @@ def register(request):
             new_user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
+            Profile.objects.create(user=new_user, monthly_requests=MONTHLY_REQUESTS,
+                                   date_update=datetime.now())
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         form = UserCreationForm()
@@ -40,7 +46,9 @@ def update(request):
         try:
             return request.user.get_profile()
         except Profile.DoesNotExist:
-            return Profile(user=request.user)
+            # shouldn't happen
+            return Profile(user=request.user, monthly_requests=MONTHLY_REQUESTS,
+                           date_update=datetime.now())
 
     if request.method == 'POST':
         user_profile = get_profile()

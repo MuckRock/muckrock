@@ -51,6 +51,12 @@
 			{% endif %}
 		</td>
 	</tr>
+	<tr class="even">
+		<th>Monthly Requests Left</th>
+		<td>
+				{{user_obj.get_profile.get_num_requests}}
+		</td>
+	</tr>
 </table>
 
 {% endblock %}

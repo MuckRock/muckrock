@@ -8,6 +8,8 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import nose.tools
 
+from datetime import datetime
+
 from accounts.models import Profile
 from accounts.forms import UserChangeForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
@@ -24,7 +26,7 @@ def test_user_change_form_email():
 
     User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     user2 = User.objects.create(username='test2', email='tes21@muckrock.com')
-    Profile.objects.create(user=user2)
+    Profile.objects.create(user=user2, monthly_requests=10, date_update=datetime.now())
 
     form = UserChangeForm(instance=user2.get_profile())
     form.cleaned_data = {}
@@ -42,7 +44,7 @@ def test_profile_model_unicode():
     """Test profile model's __unicode__ method"""
 
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
-    profile = Profile(user=user)
+    profile = Profile(user=user, monthly_requests=10, date_update=datetime.now())
     nose.tools.eq_(unicode(profile), u"Test1's Profile")
 
  # views
@@ -118,7 +120,8 @@ def test_auth_views():
     """Test private views while logged in"""
 
     client = Client()
-    User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     client.login(username='test1', password='abc')
 
     # get authenticated pages
@@ -141,6 +144,7 @@ def test_post_views():
 
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     client.login(username='test1', password='abc')
 
     user_data = {'first_name': 'mitchell',        'last_name': 'kotler',
@@ -170,7 +174,8 @@ def test_logout_view():
     """Test the logout view"""
 
     client = Client()
-    User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     client.login(username='test1', password='abc')
 
     # logout & check
