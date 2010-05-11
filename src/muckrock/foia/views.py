@@ -14,12 +14,14 @@ from datetime import datetime
 
 from foia.forms import FOIARequestForm
 from foia.models import FOIARequest, FOIAImage
+from accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to create and update a FOIA request"""
 
     if request.method == 'POST':
         status_dict = {'Submit': 'submitted', 'Save': 'started'}
+
 
         try:
             foia.date_submitted = datetime.now() if request.POST['submit'] == 'Submit' else None
@@ -28,6 +30,7 @@ def _foia_form_handler(request, foia, action):
             form = FOIARequestForm(request.POST, instance=foia)
 
             if form.is_valid():
+                request.user.get_profile().make_request()
                 foia_request = form.save(commit=False)
                 foia_request.slug = slugify(foia_request.title)
                 foia_request.save()
@@ -37,6 +40,10 @@ def _foia_form_handler(request, foia, action):
         except KeyError:
             # bad post, not possible from web form
             form = FOIARequestForm(instance=foia)
+        except RequestLimitError:
+            # no requests left
+            return render_to_response('foia/foiarequest_error.html',
+                                      context_instance=RequestContext(request))
 
     else:
         form = FOIARequestForm(instance=foia)
@@ -49,8 +56,12 @@ def _foia_form_handler(request, foia, action):
 def create(request):
     """File a new FOIA Request"""
 
-    foia = FOIARequest(user = request.user)
-    return _foia_form_handler(request, foia, 'New')
+    if request.user.get_profile().can_request():
+        foia = FOIARequest(user = request.user)
+        return _foia_form_handler(request, foia, 'New')
+    else:
+        return render_to_response('foia/foiarequest_error.html',
+                                  context_instance=RequestContext(request))
 
 @login_required
 def update(request, user_name, slug):

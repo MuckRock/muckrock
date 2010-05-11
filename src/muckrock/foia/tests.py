@@ -9,8 +9,11 @@ from django.core.urlresolvers import reverse
 from django.core import mail
 import nose.tools
 
+from datetime import datetime
+
 from foia.models import FOIARequest, FOIAImage
 from foia.forms import FOIARequestForm
+from accounts.models import Profile
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 def setup():
@@ -231,6 +234,7 @@ def test_auth_views():
 
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
                                jurisdiction='MA', agency='test', request='test')
     client.login(username='test1', password='abc')
@@ -255,6 +259,7 @@ def test_post_views():
 
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
                                jurisdiction='MA', agency='test', request='test')
 
