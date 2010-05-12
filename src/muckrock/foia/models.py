@@ -8,7 +8,12 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from utils import try_or_none
 
-JURISDICTIONS = (('MA', 'Massachusetts'),)
+JURISDICTIONS = (
+        ('MA', 'Massachusetts'),
+        ('MA-BO', 'Boston, MA'),
+        ('MA-CM', 'Cambridge, MA'),
+        ('MA-SM', 'Somerville, MA'),
+    )
 
 STATUS = (
     ('started', 'Started'),
