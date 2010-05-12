@@ -51,7 +51,7 @@
 
 			<div id="site-title">
 
-				<h1><a href="{%url index%}">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
+				<h1><a href="{%url index%}">MuckRock</a> <span> / {% block headline %}Welcome{% endblock %}</span></h1>
 
 			</div>
 
@@ -61,7 +61,7 @@
 
 					<ul class="tabbed">
 						{% block main-nav %}
-						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="{%url index%}">News</a></li>
+						<li class="{% active request "^/news/" %}"><a href="{%url news-index%}">News</a></li>
 						<li class="{% active request "^/foia/" %}"><a href="{%url foia-index%}">FOIA Requests</a></li>
 						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-my-profile%}">Account Information</a></li>
 						{% endblock %}
@@ -74,6 +74,9 @@
 				<div id="sub-nav">
 
 					{% block sub-nav %}
+					<ul class="tabbed">
+						<li>&nbsp;</li>
+					</ul>
 					{% endblock %}
 
 					<div class="clearer">&nbsp;</div>
@@ -110,8 +113,6 @@
 				
 					<div class="column-title">About MuckRock</div>
 
-					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-
 					<a href="#">Learn more &#187;</a>
 
 				</div>
@@ -139,8 +140,6 @@
 				
 					<div class="column-title">Help &amp; Support</div>
 
-					<p>Quam velit dapibus quam, ornare suscipit tortor nisl ut tellus.</p>
-
 					<a href="#">Frequently Asked Questions (FAQ) &#187;</a>
 				
 				</div>
@@ -154,8 +153,6 @@
 					<div class="column-title">Get in touch</div>
 
 					<p>Email: <a href="mailto:info@muckrock.com">info@muckrock.com</a></p>
-
-					<a href="#">Online contact form &#187;</a>
 
 				</div>
 

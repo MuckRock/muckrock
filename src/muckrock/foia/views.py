@@ -81,12 +81,14 @@ def update(request, user_name, slug):
 
     return _foia_form_handler(request, foia, 'Update')
 
+@login_required
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
     user = get_object_or_404(User, username=user_name)
     return list_detail.object_list(request, FOIARequest.objects.filter(user=user), paginate_by=10)
 
+@login_required
 def detail(request, user_name, slug):
     """Details of a single FOIA request"""
 
@@ -96,6 +98,7 @@ def detail(request, user_name, slug):
                               {'object': foia},
                               context_instance=RequestContext(request))
 
+@login_required
 def document_detail(request, user_name, slug, page):
     """Details of a single FOIA request"""
 

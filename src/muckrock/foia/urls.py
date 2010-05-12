@@ -3,6 +3,7 @@ URL mappings for the FOIA application
 """
 
 from django.conf.urls.defaults import patterns, url
+from django.contrib.auth.decorators import login_required
 from django.views.generic import list_detail
 
 from foia import views
@@ -12,8 +13,10 @@ foia_qs = {'queryset': FOIARequest.objects.all(),
            'paginate_by': 10}
 
 urlpatterns = patterns('',
-    url(r'^$',                              list_detail.object_list, foia_qs, name='foia-index'),
-    url(r'^list/$',                         list_detail.object_list, foia_qs, name='foia-list'),
+    url(r'^$',                              login_required(list_detail.object_list),
+                                            foia_qs, name='foia-index'),
+    url(r'^list/$',                         login_required(list_detail.object_list),
+                                            foia_qs, name='foia-list'),
     url(r'^list/(?P<user_name>[\w\d_]+)/$', views.list_by_user, name='foia-list-user'),
     url(r'^new/$',                          views.create, name='foia-create'),
     url(r'^view/(?P<user_name>[\w\d_]+)/(?P<slug>[\w\d_-]+)/$',
