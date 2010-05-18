@@ -6,13 +6,17 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.template.defaultfilters import slugify
+
 from utils import try_or_none
 
+slug_tuple = lambda s: (slugify(s), s)
+
 JURISDICTIONS = (
-        ('MA', 'Massachusetts'),
-        ('MA-BO', 'Boston, MA'),
-        ('MA-CM', 'Cambridge, MA'),
-        ('MA-SM', 'Somerville, MA'),
+        slug_tuple('Massachusetts'),
+        slug_tuple('Boston, MA'),
+        slug_tuple('Cambridge, MA'),
+        slug_tuple('Somerville, MA'),
     )
 
 STATUS = (
@@ -28,11 +32,11 @@ class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=30)
-    slug = models.SlugField(max_length=30)
+    title = models.CharField(max_length=50)
+    slug = models.SlugField(max_length=50)
     # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
-    jurisdiction = models.CharField(max_length=5, choices=JURISDICTIONS)
+    jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)
     agency = models.CharField(max_length=30) # choices?
     # fees?
     request = models.TextField()
@@ -48,7 +52,8 @@ class FOIARequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable-msg=E1101
-        return ('foia-detail', [], {'user_name': self.user.username, 'slug': self.slug})
+        return ('foia-detail', [], {'jurisdiction': self.jurisdiction,
+                                    'user_name': self.user.username, 'slug': self.slug})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -63,7 +68,7 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
-        unique_together = (('user', 'slug'),)
+        unique_together = (('jurisdiction', 'user', 'slug'),)
 
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
@@ -79,7 +84,8 @@ class FOIAImage(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('foia-doc-detail', [],
-                {'user_name': self.foia.user.username,
+                {'jurisdiction': self.foia.jurisdiction,
+                 'user_name': self.foia.user.username,
                  'slug': self.foia.slug,
                  'page': self.page})
 
