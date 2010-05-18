@@ -37,7 +37,7 @@ class FOIARequest(models.Model):
     # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)
-    agency = models.CharField(max_length=30) # choices?
+    agency = models.CharField(max_length=60) # choices?
     # fees?
     request = models.TextField()
     response = models.TextField(blank=True)
