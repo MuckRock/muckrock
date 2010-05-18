@@ -87,20 +87,20 @@ def list_by_user(request, user_name):
     user = get_object_or_404(User, username=user_name)
     return list_detail.object_list(request, FOIARequest.objects.filter(user=user), paginate_by=10)
 
-def detail(request, user_name, slug):
+def detail(request, jurisdiction, user_name, slug):
     """Details of a single FOIA request"""
 
     user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
     return render_to_response('foia/foiarequest_detail.html',
                               {'object': foia},
                               context_instance=RequestContext(request))
 
-def document_detail(request, user_name, slug, page):
+def document_detail(request, jurisdiction, user_name, slug, page):
     """Details of a single FOIA request"""
 
     user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
     return render_to_response('foia/foiarequest_doc_detail.html',
