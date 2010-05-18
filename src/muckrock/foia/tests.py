@@ -33,14 +33,14 @@ def test_foia_request_form_clean():
     user2 = User.objects.create(username='test2', email='test2@muckrock.com')
 
     FOIARequest.objects.create(user=user1, title='test', slug='test', status='started',
-                                       jurisdiction='MA', agency='test', request='test')
+                                       jurisdiction='massachusetts', agency='test', request='test')
     foia2 = FOIARequest(user=user1)
     foia3 = FOIARequest(user=user2)
 
     foia_dict1 = {'title': 'test', 'slug': 'test', 'status': 'submitted',
-                  'jurisdiction': 'MA', 'agency': 'abc', 'request': 'abc'}
+                  'jurisdiction': 'massachusetts', 'agency': 'abc', 'request': 'abc'}
     foia_dict2 = {'title': 'new test', 'slug': 'new-test', 'status': 'submitted',
-                  'jurisdiction': 'MA', 'agency': 'abc', 'request': 'abc'}
+                  'jurisdiction': 'massachusetts', 'agency': 'abc', 'request': 'abc'}
 
     form = FOIARequestForm(foia_dict1, instance=foia2)
     nose.tools.assert_false(form.is_valid(),
@@ -61,7 +61,8 @@ def test_foia_model_unicode():
     """Test FOIA Request model's __unicode__ method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1')
+    foia = FOIARequest.objects.create(user=user, jurisdiction='massachusetts',
+                                      title='Test 1', slug='test-1')
     nose.tools.eq_(unicode(foia), u'Test 1')
 
 @nose.tools.with_setup(setup)
@@ -69,9 +70,10 @@ def test_foia_model_url():
     """Test FOIA Request model's get_absolute_url method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    foia = FOIARequest.objects.create(user=user, jurisdiction='massachusetts', slug='Test-1')
     nose.tools.eq_(foia.get_absolute_url(),
-        reverse('foia-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1'}))
+        reverse('foia-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1',
+                                       'jurisdiction': 'massachusetts'}))
 
 @nose.tools.with_setup(setup)
 def test_foia_model_editable():
@@ -82,6 +84,7 @@ def test_foia_model_editable():
     def test(title, status, value):
         """Test the given status"""
         foia = FOIARequest.objects.create(user=user, title=title,
+                                          jurisdiction='massachusetts',
                                           slug=slugify(title), status=status)
         nose.tools.eq_(foia.is_editable(), value)
 
@@ -96,7 +99,8 @@ def test_foia_doc_model_unicode():
     """Test FOIA Image model's __unicode__ method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1')
+    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
+                                      jurisdiction='massachusetts')
     doc = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(unicode(doc), u'Test 1 Document Page 1')
 
@@ -105,17 +109,18 @@ def test_foia_doc_model_url():
     """Test FOIA Images model's get_absolute_url method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1', jurisdiction='massachusetts')
     doc = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(doc.get_absolute_url(),
-        reverse('foia-doc-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1', 'page': 1}))
+        reverse('foia-doc-detail', kwargs={'user_name': 'Test_User', 'slug': 'Test-1', 'page': 1,
+                                           'jurisdiction': 'massachusetts'}))
 
 @nose.tools.with_setup(setup)
 def test_foia_doc_next_prev():
     """Test FOIA Images model's next and previous methods"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1', jurisdiction='massachusetts')
     doc1 = FOIAImage.objects.create(foia=foia, page=1)
     doc2 = FOIAImage.objects.create(foia=foia, page=2)
     doc3 = FOIAImage.objects.create(foia=foia, page=3)
@@ -131,7 +136,7 @@ def test_foia_doc_total_pages():
     """Test FOIA Images model's total pages method"""
 
     user = User.objects.create(username='Test_User')
-    foia = FOIARequest.objects.create(user=user, slug='Test-1')
+    foia = FOIARequest.objects.create(user=user, slug='Test-1', jurisdiction='massachusetts')
     doc1 = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(doc1.total_pages(), 1)
 
@@ -151,7 +156,8 @@ def test_foia_email():
     nose.tools.eq_(len(mail.outbox), 0)
 
     user = User.objects.create(username='Test_User', email='user@test.com')
-    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1', status='started')
+    foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1', status='started',
+                                      jurisdiction='massachusetts')
 
     nose.tools.eq_(len(mail.outbox), 1)
     nose.tools.eq_(mail.outbox[0].to, [user.email])
@@ -170,11 +176,11 @@ def test_anon_views():
     user1 = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     user2 = User.objects.create_user('test2', 'test2@muckrock.com', 'abc')
     foia_a = FOIARequest.objects.create(user=user1, title='test a', slug='test-a', status='started',
-                                        jurisdiction='MA', agency='test', request='test')
+                                        jurisdiction='massachusetts', agency='test', request='test')
     FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='started',
-                                        jurisdiction='MA', agency='test', request='test')
+                                        jurisdiction='massachusetts', agency='test', request='test')
     FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='started',
-                                        jurisdiction='MA', agency='test', request='test')
+                                        jurisdiction='massachusetts', agency='test', request='test')
     doc1 = FOIAImage.objects.create(foia=foia_a, page=1)
     FOIAImage.objects.create(foia=foia_a, page=2)
 
@@ -194,25 +200,32 @@ def test_anon_views():
     nose.tools.ok_(all(foia.user == user2 for foia in response.context['object_list']))
 
     response = get_allowed(client,
-                           reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-a'}),
+                           reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-a',
+                                                          'jurisdiction': 'massachusetts'}),
                            ['foia/foiarequest_detail.html', 'foia/base.html'],
                            context = {'object': foia_a})
 
     response = get_allowed(client,
                            reverse('foia-doc-detail',
-                               kwargs={'user_name': 'test1', 'slug': 'test-a', 'page': 1}),
+                               kwargs={'user_name': 'test1', 'slug': 'test-a', 'page': 1,
+                                       'jurisdiction': 'massachusetts'}),
                            ['foia/foiarequest_doc_detail.html', 'foia/base.html'],
                            context = {'doc': doc1})
 
     get_404(client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
-    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-c'}))
-    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test3', 'slug': 'test-c'}))
+    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-c',
+                                                   'jurisdiction': 'massachusetts'}))
+    get_404(client, reverse('foia-detail', kwargs={'user_name': 'test3', 'slug': 'test-c',
+                                                   'jurisdiction': 'massachusetts'}))
     get_404(client, reverse('foia-doc-detail',
-                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 3}))
+                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 3,
+                                    'jurisdiction': 'massachusetts'}))
     get_404(client, reverse('foia-doc-detail',
-                            kwargs={'user_name': 'test2', 'slug': 'test-c', 'page': 1}))
+                            kwargs={'user_name': 'test2', 'slug': 'test-c', 'page': 1,
+                                    'jurisdiction': 'massachusetts'}))
     get_404(client, reverse('foia-doc-detail',
-                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 1}))
+                            kwargs={'user_name': 'test3', 'slug': 'test-c', 'page': 1,
+                                    'jurisdiction': 'massachusetts'}))
 
 @nose.tools.with_setup(setup)
 def test_unallowed_views():
@@ -221,7 +234,7 @@ def test_unallowed_views():
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='MA', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='test', request='test')
 
     # get/post authenticated pages while unauthenticated
     get_post_unallowed(client, reverse('foia-create'))
@@ -236,7 +249,7 @@ def test_auth_views():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='MA', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='test', request='test')
     client.login(username='test1', password='abc')
 
     # get authenticated pages
@@ -261,24 +274,26 @@ def test_post_views():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='MA', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='test', request='test')
 
     client.login(username='test1', password='abc')
 
-    foia_data = {'title': 'test b', 'jurisdiction': 'MA',
+    foia_data = {'title': 'test b', 'jurisdiction': 'massachusetts',
                  'agency': 'test agency', 'request': 'test request', 'submit': 'Save'}
 
     post_allowed(client, reverse('foia-create'), foia_data, 'http://testserver' +
-                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b'}))
+                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b',
+                                                'jurisdiction': 'massachusetts'}))
     foia = FOIARequest.objects.get(title='test b')
     nose.tools.eq_(foia.status, 'started')
 
-    foia_data = {'title': 'test b', 'jurisdiction': 'MA',
+    foia_data = {'title': 'test b', 'jurisdiction': 'massachusetts',
                  'agency': 'test agency', 'request': 'updated request', 'submit': 'Submit'}
 
     post_allowed(client, reverse('foia-update', kwargs={'user_name': 'test1', 'slug': 'test-b'}),
                  foia_data, 'http://testserver' +
-                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b'}))
+                 reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-b',
+                                                'jurisdiction': 'massachusetts'}))
     foia = FOIARequest.objects.get(title='test b')
     nose.tools.eq_(foia.request, 'updated request')
     nose.tools.eq_(foia.status, 'submitted')
