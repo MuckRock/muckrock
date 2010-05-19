@@ -115,3 +115,5 @@ else:
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 TEST_RUNNER = 'django_nose.run_tests'
+
+MONTHLY_REQUESTS = 25

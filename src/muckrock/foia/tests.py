@@ -247,13 +247,20 @@ def test_auth_views():
 
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
-    Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
+    profile = Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
                                jurisdiction='massachusetts', agency='test', request='test')
     client.login(username='test1', password='abc')
 
     # get authenticated pages
     get_allowed(client, reverse('foia-create'), ['foia/foiarequest_form.html', 'foia/base.html'])
+
+    profile.monthly_requests = 0
+    profile.save()
+    get_allowed(client, reverse('foia-create'), ['foia/foiarequest_error.html', 'foia/base.html'])
+    profile.monthly_requests = 10
+    profile.save()
+
     get_allowed(client, reverse('foia-update', kwargs={'user_name': 'test1', 'slug': 'test-a'}),
                 ['foia/foiarequest_form.html', 'foia/base.html'])
 

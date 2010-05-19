@@ -8,7 +8,7 @@ from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 
 from datetime import datetime
 
-MONTHLY_REQUESTS = 25
+from settings import MONTHLY_REQUESTS
 
 class RequestLimitError(Exception):
     """A user has tried to submit a request when they do not have any left"""
