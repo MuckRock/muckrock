@@ -95,7 +95,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    'django_evolution',
+    'south',
     'django_nose',
     'muckrock.accounts',
     'muckrock.foia',
@@ -115,3 +115,5 @@ else:
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 TEST_RUNNER = 'django_nose.run_tests'
+
+MONTHLY_REQUESTS = 25

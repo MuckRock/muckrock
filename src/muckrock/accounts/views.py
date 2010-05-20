@@ -13,10 +13,9 @@ from django.core.urlresolvers import reverse
 
 from datetime import datetime
 
+from settings import MONTHLY_REQUESTS
 from accounts.forms import UserChangeForm
 from accounts.models import Profile
-
-MONTHLY_REQUESTS = 25
 
 @login_required
 def register(request):
