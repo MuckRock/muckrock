@@ -8,11 +8,12 @@ from django.test.client import Client
 from django.core.urlresolvers import reverse
 import nose.tools
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from accounts.models import Profile
+from muckrock.accounts.models import Profile, RequestLimitError
 from accounts.forms import UserChangeForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
+from settings import MONTHLY_REQUESTS
 
 def setup():
     """Clean the database before each test"""
@@ -46,6 +47,42 @@ def test_profile_model_unicode():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     profile = Profile(user=user, monthly_requests=10, date_update=datetime.now())
     nose.tools.eq_(unicode(profile), u"Test1's Profile")
+
+@nose.tools.with_setup(setup)
+def test_profile_get_num_requests():
+    """Test profile model's get_num_request method"""
+
+    user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    profile = Profile(user=user, monthly_requests=10, date_update=datetime.now())
+    nose.tools.eq_(profile.get_num_requests(), 10)
+    profile = Profile(user=user, monthly_requests=0,
+                      date_update=datetime.now() - timedelta(days=32))
+    nose.tools.eq_(profile.get_num_requests(), MONTHLY_REQUESTS)
+    nose.tools.ok_(datetime.now() - profile.date_update < timedelta(minutes=5))
+
+@nose.tools.with_setup(setup)
+def test_profile_can_request():
+    """Test profile model's can_request method"""
+
+    user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    profile = Profile(user=user, monthly_requests=10, date_update=datetime.now())
+    nose.tools.assert_true(profile.can_request())
+    profile = Profile(user=user, monthly_requests=0,
+                      date_update=datetime.now() - timedelta(days=32))
+    nose.tools.assert_true(profile.can_request())
+    profile = Profile(user=user, monthly_requests=0, date_update=datetime.now())
+    nose.tools.assert_false(profile.can_request())
+
+@nose.tools.with_setup(setup)
+def test_profile_make_request():
+    """Test profile model's make_request method"""
+
+    user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    profile = Profile(user=user, monthly_requests=10, date_update=datetime.now())
+    profile.make_request()
+    nose.tools.eq_(profile.monthly_requests, 9)
+    profile = Profile(user=user, monthly_requests=0, date_update=datetime.now())
+    nose.tools.assert_raises(RequestLimitError, profile.make_request)
 
  # views
 @nose.tools.with_setup(setup)
