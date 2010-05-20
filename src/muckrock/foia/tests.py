@@ -10,6 +10,7 @@ from django.core import mail
 import nose.tools
 
 from datetime import datetime
+from operator import attrgetter
 
 from foia.models import FOIARequest, FOIAImage
 from foia.forms import FOIARequestForm
@@ -176,11 +177,11 @@ def test_anon_views():
     user1 = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     user2 = User.objects.create_user('test2', 'test2@muckrock.com', 'abc')
     foia_a = FOIARequest.objects.create(user=user1, title='test a', slug='test-a', status='started',
-                                        jurisdiction='massachusetts', agency='test', request='test')
-    FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='started',
-                                        jurisdiction='massachusetts', agency='test', request='test')
-    FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='started',
-                                        jurisdiction='massachusetts', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='agency c', request='test')
+    FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='done',
+                               jurisdiction='boston-ma', agency='agency b', request='test')
+    FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='rejected',
+                               jurisdiction='cambridge-ma', agency='agency a', request='test')
     doc1 = FOIAImage.objects.create(foia=foia_a, page=1)
     FOIAImage.objects.create(foia=foia_a, page=2)
 
@@ -199,6 +200,70 @@ def test_anon_views():
     nose.tools.eq_(len(response.context['object_list']), 1)
     nose.tools.ok_(all(foia.user == user2 for foia in response.context['object_list']))
 
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'asc', 'field': 'title'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('title'))])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'desc', 'field': 'title'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('title'), reverse=True)])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'asc', 'field': 'user'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('user.username'))])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'desc', 'field': 'user'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('user.username'), reverse=True)])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'asc', 'field': 'status'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('status'))])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'desc', 'field': 'status'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('status'), reverse=True)])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'asc', 'field': 'jurisdiction'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('jurisdiction'))])
+
+    response = get_allowed(client, reverse('foia-sorted-list',
+                           kwargs={'sort_order': 'desc', 'field': 'jurisdiction'}),
+                           ['foia/foiarequest_list.html', 'foia/base.html'])
+    nose.tools.eq_(len(response.context['object_list']), 3)
+    nose.tools.eq_([f.title for f in response.context['object_list']],
+                   [f.title for f in sorted(response.context['object_list'],
+                                            key=attrgetter('jurisdiction'), reverse=True)])
+
     response = get_allowed(client,
                            reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-a',
                                                           'jurisdiction': 'massachusetts'}),
@@ -213,6 +278,7 @@ def test_anon_views():
                            context = {'doc': doc1})
 
     get_404(client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
+    get_404(client, reverse('foia-sorted-list', kwargs={'sort_order': 'asc', 'field': 'bad_field'}))
     get_404(client, reverse('foia-detail', kwargs={'user_name': 'test1', 'slug': 'test-c',
                                                    'jurisdiction': 'massachusetts'}))
     get_404(client, reverse('foia-detail', kwargs={'user_name': 'test3', 'slug': 'test-c',
