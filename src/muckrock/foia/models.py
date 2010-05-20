@@ -14,9 +14,15 @@ slug_tuple = lambda s: (slugify(s), s)
 
 JURISDICTIONS = (
         slug_tuple('Massachusetts'),
+        slug_tuple('Amherst, MA'),
         slug_tuple('Boston, MA'),
+        slug_tuple('Brookline, MA'),
         slug_tuple('Cambridge, MA'),
+        slug_tuple('Groton, MA'),
+        slug_tuple('Milford, MA'),
         slug_tuple('Somerville, MA'),
+        slug_tuple('Worcester, MA'),
+        slug_tuple('Other'),
     )
 
 STATUS = (
