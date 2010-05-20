@@ -4,7 +4,7 @@ Views for the FOIA application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic import list_detail
@@ -85,6 +85,20 @@ def list_by_user(request, user_name):
 
     user = get_object_or_404(User, username=user_name)
     return list_detail.object_list(request, FOIARequest.objects.filter(user=user), paginate_by=10)
+
+def sorted_list(request, sort_order, field):
+    """Sorted list of FOIA requests"""
+
+    if sort_order not in ['asc', 'desc']:
+        raise Http404()
+    if field not in ['title', 'status', 'user', 'jurisdiction']:
+        raise Http404()
+
+    ob_field = '-' + field if sort_order == 'desc' else field
+    return list_detail.object_list(request,
+                                   FOIARequest.objects.all().order_by(ob_field),
+                                   paginate_by=10,
+                                   extra_context={'sort_by': field, 'sort_order': sort_order})
 
 def detail(request, jurisdiction, user_name, slug):
     """Details of a single FOIA request"""
