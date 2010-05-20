@@ -22,10 +22,9 @@ def _foia_form_handler(request, foia, action):
     if request.method == 'POST':
         status_dict = {'Submit': 'submitted', 'Save': 'started'}
 
-
         try:
             foia.date_submitted = datetime.now() if request.POST['submit'] == 'Submit' else None
-            foia.status = status_dict[request.POST['submit']],
+            foia.status = status_dict[request.POST['submit']]
 
             form = FOIARequestForm(request.POST, instance=foia)
 
