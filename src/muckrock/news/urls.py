@@ -6,6 +6,7 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic import list_detail, date_based
 
 from news.models import Article
+from news.feeds import LatestEntries
 
 article_args = {'queryset': Article.objects.get_published()}
 article_date_args = dict(article_args, date_field='pub_date')
@@ -25,4 +26,5 @@ urlpatterns = patterns('',
         url(r'^archives/(?P<year>\d{4})/$',
             date_based.archive_year, dict(article_date_list_args, make_object_list=True),
             name='news-archive-year'),
+        url(r'^feeds/$', LatestEntries(), name='news-feed'),
 )

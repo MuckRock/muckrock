@@ -5,12 +5,13 @@ Tests for site level functionality and helper functions for application tests
 import nose.tools
 
  # helper functions for view testing
-def get_allowed(client, url, templates, context=None):
+def get_allowed(client, url, templates=None, context=None):
     """Test a get on a url that is allowed with the users current credntials"""
     response = client.get(url)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
-    nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
+    if templates:
+        nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
 
     if context:
         for key, value in context.iteritems():
