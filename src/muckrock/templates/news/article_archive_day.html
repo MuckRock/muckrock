@@ -42,3 +42,9 @@
 </div>
 
 {% endblock %}
+
+{% block sidebar %}
+
+<p><a href="{% url news-archive-month year=day.year,month=day|date:"b" %}">Go to {{day|date:"F, Y"}}</a></p>
+
+{% endblock %}
