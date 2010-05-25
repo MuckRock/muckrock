@@ -283,6 +283,24 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	height: 0;
 }
 
+/* Nav */
+.nav-left {
+	float: left;
+	text-align: left;
+	width: 33%;
+}
+.nav-center {
+	float: left;
+	text-align: center;
+	width: 34%;
+	color: #000000;
+}
+.nav-right {
+	float: left;
+	text-align: right;
+	width: 33%;
+}
+
 
 /* 
    Separators 

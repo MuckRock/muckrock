@@ -42,3 +42,18 @@
 </div>
 
 {% endblock %}
+
+{% block sidebar %}
+
+<p><a href="{% url news-archive-year year=month.year %}">Go to {{month|date:"Y"}}</a></p>
+
+<h2>Days</h2>
+<ul>
+	{% for day_date in date_list %}
+	<li><a href="{% url news-archive-day year=month.year,month=month|date:"b",day=day_date.day %}">
+		{{day_date.day}}
+	</a></li>
+	{% endfor %}
+</ul>
+
+{% endblock %}

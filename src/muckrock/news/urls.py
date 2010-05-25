@@ -12,11 +12,14 @@ article_args = {'queryset': Article.objects.get_published()}
 article_date_args = dict(article_args, date_field='pub_date')
 article_date_list_args = dict(article_date_args, allow_empty=True)
 
+years = [date.year for date in Article.objects.dates('pub_date', 'year')][::-1]
+
 urlpatterns = patterns('',
         url(r'^$', date_based.archive_index, dict(article_date_list_args, num_latest=5),
             name='news-index'),
         url(r'^archives/$', list_detail.object_list,
-            dict(article_args, paginate_by=10), name='news-archive'),
+            dict(article_args, paginate_by=10, extra_context={'years': years}),
+            name='news-archive'),
         url(r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[-\w\d]+)/$',
             date_based.object_detail, article_date_args, name='news-detail'),
         url(r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/$',
