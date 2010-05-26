@@ -31,7 +31,7 @@ urlpatterns = patterns('',
     url(r'^foia/', include(muckrock.foia.urls)),
     url(r'^news/', include(muckrock.news.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/', include(haystack.urls), name='search'),
+    url(r'^search/', include(haystack.urls)),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap')
 )
 

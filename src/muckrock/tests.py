@@ -57,4 +57,6 @@ def test_views():
     """Test views"""
 
     client = Client()
+    get_allowed(client, reverse('index'))
     get_allowed(client, reverse('sitemap'))
+    get_allowed(client, '/search/')
