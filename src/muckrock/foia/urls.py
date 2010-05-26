@@ -8,6 +8,7 @@ from django.views.generic import list_detail
 
 from foia import views
 from foia.models import FOIARequest
+from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 
 foia_qs = {'queryset': FOIARequest.objects.all(),
            'paginate_by': 10}
@@ -28,4 +29,6 @@ urlpatterns = patterns('',
                                         views.document_detail, name='foia-doc-detail'),
     url(r'^update/(?P<user_name>[\w\d_]+)/(?P<slug>[\w\d_-]+)/$',
                                         views.update, name='foia-update'),
+    url(r'^feeds/submitted/$',          LatestSubmittedRequests(), name='foia-submitted-feed'),
+    url(r'^feeds/completed/$',          LatestDoneRequests(), name='foia-done-feed'),
 )

@@ -34,6 +34,18 @@ STATUS = (
     ('done', 'Response received'),
 )
 
+class FOIARequestManager(models.Manager):
+    """Object manager for FOIA requests"""
+    # pylint: disable-msg=R0904
+
+    def get_submitted(self):
+        """Get all submitted FOIA requests"""
+        return self.filter(status__in=['submitted', 'processed', 'fix', 'rejected', 'done'])
+
+    def get_done(self):
+        """Get all draft news articles"""
+        return self.filter(status='done')
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
@@ -47,9 +59,10 @@ class FOIARequest(models.Model):
     # fees?
     request = models.TextField()
     response = models.TextField(blank=True)
-    # response in pdf/jpg scan of official document version
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
+
+    objects = FOIARequestManager()
 
     def __unicode__(self):
         return self.title

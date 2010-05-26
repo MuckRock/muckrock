@@ -99,6 +99,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'django_nose',
+    'haystack',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -117,5 +118,9 @@ else:
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 TEST_RUNNER = 'django_nose.run_tests'
+
+HAYSTACK_SITECONF = 'muckrock.search_sites'
+HAYSTACK_SEARCH_ENGINE = 'whoosh'
+HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 
 MONTHLY_REQUESTS = 25

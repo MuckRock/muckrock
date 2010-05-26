@@ -10,6 +10,8 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 from django.views.generic.simple import direct_to_template
 
+import haystack.urls
+
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls
 import muckrock.settings
 
@@ -21,6 +23,7 @@ urlpatterns = patterns('',
     url(r'^foia/', include(muckrock.foia.urls)),
     url(r'^news/', include(muckrock.news.urls)),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^search/', include(haystack.urls)),
 )
 
 if muckrock.settings.DEBUG:

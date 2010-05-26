@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+{% block headline %}Search{% endblock %}
+
+{% block sub-nav %}
+<ul class="tabbed">
+	<li>&nbsp;</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+    <h2>Search</h2>
+
+	<div class="form">
+  <form action="" method="get">
+		<fieldset>
+			{% include "form.html" %}
+			<input type="submit" name="submit" value="Search" class="button" />
+		</fieldset>
+  </form>
+	</div>
+        {% if query %}
+            <h3>Results</h3>
+
+            {% for result in page.object_list %}
+                <p>
+                    <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+                </p>
+            {% empty %}
+                <p>No results found.</p>
+            {% endfor %}
+        {% else %}
+            {# Show some example queries to run, maybe query syntax, something else? #}
+        {% endif %}
+    </form>
+{% endblock %}

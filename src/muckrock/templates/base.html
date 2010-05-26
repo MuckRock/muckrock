@@ -96,6 +96,14 @@
 			</div>
 
 			<div class="right sidebar" id="sidebar">
+
+				<form action="/search/" method="get">
+					{% csrf_token %}
+					<input type="text" name="q" id="id_q" />
+					<input type="submit" name="submit" value="Search" class="button" />
+				</form>
+
+				<div class="content-separator"></div>
 				
 				{% block sidebar %} {% endblock %}
 
@@ -124,7 +132,12 @@
 				<div class="column-content">
 				
 					<div class="column-title">Follow Us</div>
-					<a href="http://www.twitter.com/muckrocknews">@MuckRockNews</a>
+					<ul class="plain-list">
+						<li><a href="/news/feeds/" class="feed">Latest News</a></li>
+						<li><a href="/foia/feeds/submitted/" class="feed">Recently Submitted Requests</a></li>
+						<li><a href="/foia/feeds/completed/" class="feed">Recently Completed Requests</a></li>
+						<li><a href="http://www.twitter.com/muckrocknews" class="twitter">@MuckRockNews</a></li>
+					</ul>
 
 				</div>
 

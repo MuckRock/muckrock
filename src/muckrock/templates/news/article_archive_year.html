@@ -5,31 +5,45 @@
 
 <h2>Archives for {{year}}</h2>
 
+	<div class="post-meta archive-pagination">
+		
+		<div class="left"><a href="{% url news-archive-year year=year|add:"-1" %}">&#171; Previous page</a></div>
+		<div class="right"><a href="{% url news-archive-year year=year|add:"1" %}">Next page &#187;</a></div>
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
 {% if object_list %}
 
-	<div class="post-meta archive-pagination">
-		
-		<div class="left"><a href="#">&#171; Previous page</a></div>
-		<div class="right"><a href="#">Next page &#187;</a></div>
-
-		<div class="clearer">&nbsp;</div>
-		
-	</div>
-    {% for article in object_list %}
-		  {% include "news/archive_post.html" %}
-    {% endfor %}
-
-	<div class="post-meta archive-pagination">
-
-		<div class="left"><a href="#">&#171; Previous page</a></div>
-		<div class="right"><a href="#">Next page &#187;</a></div>
-
-		<div class="clearer">&nbsp;</div>
-
-	</div>
+	{% for article in object_list %}
+		{% include "news/archive_post.html" %}
+	{% endfor %}
 
 {% else %}
 <p>No articles were found.</p>
 {% endif %}
+
+	<div class="post-meta archive-pagination">
+
+		<div class="left"><a href="#">&#171; Previous page</a></div>
+		<div class="right"><a href="#">Next page &#187;</a></div>
+
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+
+{% endblock %}
+
+{% block sidebar %}
+
+<p><a href="{% url news-archive %}">Go to all archives</a></p>
+
+<h2>Months</h2>
+<ul>
+	{% for month_date in date_list %}
+	<li><a href="{% url news-archive-month year=year,month=month_date|date:"b" %}">{{month_date|date:"F"}}</a></li>
+	{% endfor %}
+</ul>
 
 {% endblock %}
