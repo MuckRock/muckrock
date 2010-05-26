@@ -168,6 +168,50 @@ def test_foia_email():
 
     nose.tools.eq_(len(mail.outbox), 2)
 
+ # manager
+@nose.tools.with_setup(setup)
+def test_manager_get_submitted():
+    """Test the FOIA Manager's get_submitted method"""
+    user = User.objects.create(username='Test_User')
+
+    foias = []
+    foias.append(FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
+                                            status='started', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 2', slug='test-2',
+                                            status='submitted', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 3', slug='test-3',
+                                            status='processed', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 4', slug='test-4',
+                                            status='fix', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 5', slug='test-5',
+                                            status='rejected', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 6', slug='test-6',
+                                            status='done', jurisdiction='massachusetts'))
+
+    nose.tools.eq_(set(FOIARequest.objects.get_submitted()), set(foias[1:]))
+
+@nose.tools.with_setup(setup)
+def test_manager_get_done():
+    """Test the FOIA Manager's get_done method"""
+    user = User.objects.create(username='Test_User')
+
+    foias = []
+    foias.append(FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
+                                            status='started', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 2', slug='test-2',
+                                            status='submitted', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 3', slug='test-3',
+                                            status='processed', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 4', slug='test-4',
+                                            status='fix', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 5', slug='test-5',
+                                            status='rejected', jurisdiction='massachusetts'))
+    foias.append(FOIARequest.objects.create(user=user, title='Test 6', slug='test-6',
+                                            status='done', jurisdiction='massachusetts'))
+
+    nose.tools.eq_(set(FOIARequest.objects.get_done()), set(foias[5:]))
+
+
  # views
 @nose.tools.with_setup(setup)
 def test_anon_views():
@@ -276,6 +320,25 @@ def test_anon_views():
                                        'jurisdiction': 'massachusetts'}),
                            ['foia/foiarequest_doc_detail.html', 'foia/base.html'],
                            context = {'doc': doc1})
+
+    response = get_allowed(client, reverse('foia-submitted-feed'))
+    response = get_allowed(client, reverse('foia-done-feed'))
+
+@nose.tools.with_setup(setup)
+def test_404_views():
+    """Test views that should give a 404 error"""
+
+    client = Client()
+    user1 = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
+    user2 = User.objects.create_user('test2', 'test2@muckrock.com', 'abc')
+    foia_a = FOIARequest.objects.create(user=user1, title='test a', slug='test-a', status='started',
+                               jurisdiction='massachusetts', agency='agency c', request='test')
+    FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='done',
+                               jurisdiction='boston-ma', agency='agency b', request='test')
+    FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='rejected',
+                               jurisdiction='cambridge-ma', agency='agency a', request='test')
+    FOIAImage.objects.create(foia=foia_a, page=1)
+    FOIAImage.objects.create(foia=foia_a, page=2)
 
     get_404(client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
     get_404(client, reverse('foia-sorted-list', kwargs={'sort_order': 'asc', 'field': 'bad_field'}))

@@ -136,5 +136,7 @@ def test_views():
                            ['news/article_archive_day.html', 'news/base.html'])
     nose.tools.eq_(len(response.context['object_list']), 0)
 
+    response = get_allowed(client, reverse('news-feed'))
+
     get_404(client, reverse('news-detail', kwargs={'year': 1999, 'month': 'mar',
                                                    'day': 1, 'slug': 'test-article-1'}))
