@@ -34,5 +34,5 @@ urlpatterns = patterns('',
             login_required(date_based.archive_year),
             dict(article_date_list_args, make_object_list=True),
             name='news-archive-year'),
-        url(r'^feeds/$', LatestEntries(), name='news-feed'),
+        url(r'^feeds/$', login_required(LatestEntries()), name='news-feed'),
 )
