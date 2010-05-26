@@ -11,7 +11,7 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.views.generic.simple import direct_to_template
 
-import haystack.urls
+from haystack.views import basic_search
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls
 import muckrock.settings
@@ -24,7 +24,7 @@ urlpatterns = patterns('',
     url(r'^foia/', include(muckrock.foia.urls)),
     url(r'^news/', include(muckrock.news.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/', login_required(include(haystack.urls))),
+    url(r'^search/$', login_required(basic_search)),
 )
 
 if muckrock.settings.DEBUG:
