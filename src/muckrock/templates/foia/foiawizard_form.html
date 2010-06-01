@@ -1,0 +1,14 @@
+
+{% extends "foia/base.html" %}
+
+{% block content %}
+<h1>FOIA Template Wizard</h1>
+	<div class="form">
+  <form action="" method="post">
+		<fieldset>
+			{% include "form.html" %}
+			<input type="submit" name="submit" value="Next" class="button" />
+		</fieldset>
+  </form>
+	</div>
+{% endblock %}
