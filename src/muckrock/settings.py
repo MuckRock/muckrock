@@ -81,6 +81,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 )
 
+if DEBUG:
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+
+INTERNAL_IPS = ('127.0.0.1',)
+
 ROOT_URLCONF = 'muckrock.urls'
 
 TEMPLATE_DIRS = (
@@ -100,6 +105,7 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'south',
     'django_nose',
+    'debug_toolbar',
     'haystack',
     'muckrock.accounts',
     'muckrock.foia',
