@@ -42,3 +42,37 @@ class FOIARequestForm(forms.ModelForm):
         model = FOIARequest
         fields = ['title', 'jurisdiction', 'agency', 'request']
 
+TEMPLATE_CHOICES = (
+    ('Genealogy', (
+            ('marriage', 'Marriage'),
+            ('birth', 'Birth'),
+            ('death', 'Death'),
+        )
+    ),
+    ('Crime', (
+            ('mug_shot', 'Mug Shots'),
+            ('record', 'Criminal Record'),
+            ('data', 'Data Regarding Crimes'),
+        )
+    ),
+    ('Money', (
+            ('property', 'Property Value'),
+            ('record', 'Salaris'),
+            ('data', 'Contracts'),
+        )
+    ),
+    ('none', 'None'),
+)
+
+class FOIATemplateSelectForm(forms.Form):
+    """A form to select which FOIA template you want"""
+
+    template = forms.ChoiceField(choices=TEMPLATE_CHOICES)
+
+
+class FOIAMugShotForm(forms.Form):
+    """A form to fill in a mug shot template"""
+
+    full_name = forms.CharField()
+    date_begin = forms.DateField()
+    date_end = forms.DateField()

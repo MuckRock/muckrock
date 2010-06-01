@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 
-from utils import try_or_none
+from muckrock.utils import try_or_none
 
 slug_tuple = lambda s: (slugify(s), s)
 

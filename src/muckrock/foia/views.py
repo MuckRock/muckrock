@@ -9,12 +9,15 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic import list_detail
 from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
 
 from datetime import datetime
 
-from foia.forms import FOIARequestForm
+from foia.forms import FOIARequestForm, FOIATemplateSelectForm, FOIAMugShotForm
 from foia.models import FOIARequest, FOIAImage
+from foia.utils import process_wizard_data
 from accounts.models import RequestLimitError
+from muckrock.utils import process_get
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to create and update a FOIA request"""
@@ -45,7 +48,7 @@ def _foia_form_handler(request, foia, action):
                                       context_instance=RequestContext(request))
 
     else:
-        form = FOIARequestForm(instance=foia)
+        form = FOIARequestForm(initial=process_get(request.GET), instance=foia)
 
     return render_to_response('foia/foiarequest_form.html',
                               {'form': form, 'action': action},
@@ -61,6 +64,46 @@ def create(request):
     else:
         return render_to_response('foia/foiarequest_error.html',
                                   context_instance=RequestContext(request))
+
+@login_required
+def template_wizard_start(request):
+    """File a new FOIA Request using the template wizard"""
+
+    if request.method == 'POST':
+        form = FOIATemplateSelectForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['template'] == 'none':
+                return HttpResponseRedirect(reverse('foia-create'))
+            else:
+                return HttpResponseRedirect(reverse('foia-wizard',
+                                            args=[form.cleaned_data['template']]))
+    else:
+        form = FOIATemplateSelectForm()
+
+    return render_to_response('foia/foiawizard_form.html',
+                              {'form': form},
+                              context_instance=RequestContext(request))
+
+@login_required
+def template_wizard(request, tmpl_name):
+    """Fill in the information for the particular template you have selected"""
+
+    form_dict = {'mug_shot': FOIAMugShotForm}
+    try:
+        form_class = form_dict[tmpl_name]
+    except KeyError:
+        raise Http404()
+
+    if request.method == 'POST':
+        form = form_class(request.POST)
+        if form.is_valid():
+            get_params = process_wizard_data(request, tmpl_name)
+            return HttpResponseRedirect(reverse('foia-create') + get_params)
+    else:
+        form = form_class()
+    return render_to_response('foia/foiawizard_form.html',
+                              {'form': form},
+                              context_instance=RequestContext(request))
 
 @login_required
 def update(request, user_name, slug):
