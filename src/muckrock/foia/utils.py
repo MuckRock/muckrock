@@ -1,16 +1,17 @@
 """Utility functions for the FOIA Application"""
 
-from django.http import QueryDict
-from django.template.loader import render_to_string
-from django.template import RequestContext
+def make_template_choices(template_dict):
+    """Make the data structure for the select form from the more generic data strcuture"""
+    categories = set(t.category for t in template_dict.values())
 
-def process_wizard_data(request, tmpl_name):
-    """Take the data from the FOIA wizard and prepare it for the FOIA create form"""
+    choices = []
 
-    title, request = (s.strip() for s in render_to_string('%s.txt' % tmpl_name,
-                                                          request.POST,
-                                                          RequestContext(request)).split('====='))
-    params = QueryDict('').copy()
-    params.update({'title': title, 'request': request})
+    for category in categories:
+        if category is not None:
+            templates = [t for t in template_dict.values() if t.category == category]
+            choices.append((category, [(t.id, t.name) for t in templates]))
 
-    return '?%s' % params.urlencode()
+    for template in [t for t in template_dict.values() if t.category is None]:
+        choices.append((template.id, template.name))
+
+    return choices

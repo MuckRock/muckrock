@@ -8,6 +8,7 @@
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
 	<link rel="stylesheet" type="text/css" href="/static/css/style.css" media="screen" />
+	{{ form.media }}
 	<title>MuckRock | {% block title %}News{% endblock %}</title>
 </head>
 
@@ -101,6 +102,12 @@
 		<div class="main" id="main-two-columns">
 
 			<div class="left" id="main-left">
+
+				{% if messages %}
+					{% for message in messages %}
+					<div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+					{% endfor %}
+				{% endif %}
 
 				{% block content %} {% endblock %}
 

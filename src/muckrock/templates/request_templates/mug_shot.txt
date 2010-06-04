@@ -1,20 +1,4 @@
-Mugshots of {{full_name}} between {{date_begin}} and {{date_end}}
-=====
-To Whom It May Concern:
-Pursuant to the state Freedom of Information Act, G.L.M. c.4, €7, clause 26th, I hereby request the following records:
-Any and all mug shots taken of {{full_name}} taken between the days of {{date_begin}} and {{date_end}}.
-I agree to pay reasonable search and duplication fees for the processing of this request in an amount not to exceed $10.
+{% extends "request_templates/base.txt" %}
+{% block title %}Mugshots of {{full_name}} between {{date_begin}} and {{date_end}}{% endblock %}
 
-In the event that fees do exceed $10, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, but hard copies are acceptable if more convenient.
-I also request that, if appropriate, fees be waived as we believe this request is in the public interest, as suggested but not stipulated by the recommendations of the Massachusetts Supervisor of Public Records. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com.
-Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within 10 business days, as the statute requires.
-
-Sincerely,
-
-{{user.get_full_name}}
-Filed via MuckRock.com
-185 Beacon St. #3
-Somerville, MA 02143
-
-Daytime: (857) 488 - 3081
-E-mail: requests@muckrock.com
+{% block content %}Any and all mug shots taken of {{full_name}} taken between the days of {{date_begin}} and {{date_end}}.{% endblock %}
