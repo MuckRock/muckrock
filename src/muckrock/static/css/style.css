@@ -19,7 +19,7 @@ http://templates.arcsin.se/license/
 html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, textarea, input, select {margin: 0; padding: 0; border: 0; font-weight: inherit; font-style: inherit; font-size: 100%; font-family: inherit; vertical-align: baseline;}
 table {border-collapse: collapse; border-spacing: 0;}
 caption, th, td {text-align: left; font-weight: normal;}
-table, td, th {vertical-align: middle;}
+table, td, th {vertical-align: top;}
 blockquote:before, blockquote:after, q:before, q:after {content: "";}
 blockquote, q {quotes: "" "";}
 a img {border: none;}
@@ -202,7 +202,7 @@ table.data-table tr.even td {background: #FCFCFC;}
 .text-center {text-align: center;}
 .text-separator {padding: 0 5px;}
 
-.error, .notice, .success {
+.error, .notice, .info, .success {
 	border: 1px solid #DDD;
 	margin-bottom: 1em;
 	padding: 0.6em 0.8em;
@@ -211,8 +211,8 @@ table.data-table tr.even td {background: #FCFCFC;}
 .error {background: #FBE3E4; color: #8A1F11; border-color: #FBC2C4;}
 .error a {color: #8A1F11;}
 
-.notice {background: #FFF6BF; color: #514721; border-color: #FFD324;}
-.notice a {color: #514721;}
+.notice, .info {background: #FFF6BF; color: #514721; border-color: #FFD324;}
+.notice a, .info a {color: #514721;}
 
 .success {background: #E6EFC2; color: #264409; border-color: #C6D880;}
 .success a {color: #264409;}
@@ -243,7 +243,8 @@ input.button:active {border-style: inset;}
 
 .form-error {border-color: #F00;}
 
-table.form tr td {vertical-align: baseline}
+table.form tr td {vertical-align: top;}
+span.required:after { content: "*"; }
 
 
 /* 

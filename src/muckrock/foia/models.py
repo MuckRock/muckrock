@@ -22,7 +22,6 @@ JURISDICTIONS = (
         slug_tuple('Milford, MA'),
         slug_tuple('Somerville, MA'),
         slug_tuple('Worcester, MA'),
-        slug_tuple('Other'),
     )
 
 STATUS = (
@@ -50,8 +49,8 @@ class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=50)
+    title = models.CharField(max_length=70)
+    slug = models.SlugField(max_length=70)
     # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)

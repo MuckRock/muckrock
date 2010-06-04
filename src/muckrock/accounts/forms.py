@@ -10,7 +10,7 @@ from accounts.models import Profile
 
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
-    zip_code = USZipCodeField()
+    zip_code = USZipCodeField(required=False)
 
     class Meta:
         # pylint: disable-msg=R0903

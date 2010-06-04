@@ -70,6 +70,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
 )
 
 
@@ -79,12 +80,15 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 if DEBUG:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 
 INTERNAL_IPS = ('127.0.0.1',)
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 ROOT_URLCONF = 'muckrock.urls'
 
@@ -93,8 +97,6 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(SITE_ROOT, 'templates'),
-    os.path.join(SITE_ROOT, 'templates', 'request_templates'),
-
 )
 
 INSTALLED_APPS = (
@@ -104,6 +106,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.sitemaps',
+    'django.contrib.messages',
     'south',
     'django_nose',
     'debug_toolbar',
