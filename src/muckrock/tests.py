@@ -2,6 +2,9 @@
 Tests for site level functionality and helper functions for application tests
 """
 
+from django.test.client import Client
+from django.core.urlresolvers import reverse
+
 import nose.tools
 
  # helper functions for view testing
@@ -48,3 +51,12 @@ def get_404(client, url):
     nose.tools.eq_(response.status_code, 404)
 
     return response
+
+ # tests for base level pages
+def test_views():
+    """Test views"""
+
+    client = Client()
+    get_allowed(client, reverse('index'))
+    get_allowed(client, reverse('sitemap'))
+    get_allowed(client, '/search/')

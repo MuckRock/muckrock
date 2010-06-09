@@ -4,6 +4,7 @@ General temaplate tags
 
 import re
 from django import template
+from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
@@ -36,3 +37,12 @@ def page_links(page_obj):
         links += '&nbsp;&hellip;'
 
     return '%s' % links
+
+@register.filter
+@stringfilter
+def company_title(companies):
+    """Format possibly multiple companies for the title"""
+    if '\n' in companies:
+        return companies.split('\n')[0] + ', et al'
+    else:
+        return companies

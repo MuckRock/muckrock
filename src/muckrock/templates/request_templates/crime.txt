@@ -1,0 +1,7 @@
+{% extends "request_templates/base.txt" %}
+{% block title %}Criminal Record for {{full_name}}{% endblock %}
+{% block agency %}Police{% endblock %}
+
+{% block content %}Any and all public records regarding the incarceration of {{full_name}}{% if birth_date %}, born {{birth_date}}{% endif %}.{% endblock %}
+
+
