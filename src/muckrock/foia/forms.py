@@ -302,3 +302,9 @@ class FOIAWizard(FormWizard):
         else:
             return 'foia/foiawizard_form.html'
 
+class FOIADeleteForm(forms.Form):
+    """Form to confirm deleting a FOIA Request"""
+
+    confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
+                                 help_text='This cannot be undone!')
+

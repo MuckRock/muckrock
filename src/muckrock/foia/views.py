@@ -9,10 +9,11 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic import list_detail
 from django.template.defaultfilters import slugify
+from django.core.urlresolvers import reverse
 
 from datetime import datetime
 
-from foia.forms import FOIARequestForm
+from foia.forms import FOIARequestForm, FOIADeleteForm
 from foia.models import FOIARequest, FOIAImage
 from accounts.models import RequestLimitError
 from muckrock.utils import process_get
@@ -69,6 +70,36 @@ def update(request, jurisdiction, user_name, slug):
                  context_instance=RequestContext(request))
 
     return _foia_form_handler(request, foia, 'Update')
+
+@login_required
+def delete(request, jurisdiction, user_name, slug):
+    """Delete a non-submitted FOIA Request"""
+
+    user = get_object_or_404(User, username=user_name)
+    foia = get_object_or_404(FOIARequest, user=user, slug=slug, jurisdiction=jurisdiction)
+
+    if not foia.status == 'started':
+        return render_to_response('error.html',
+                 {'message': 'You may only delete non-submitted requests.'},
+                 context_instance=RequestContext(request))
+    if foia.user != request.user:
+        return render_to_response('error.html',
+                 {'message': 'You may only delete your own requests'},
+                 context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = FOIADeleteForm(request.POST)
+        if form.is_valid():
+            foia.delete()
+            # message?
+            return HttpResponseRedirect(reverse('foia-list-user',
+                                                kwargs={'user_name': request.user.username}))
+    else:
+        form = FOIADeleteForm()
+
+    return render_to_response('foia/foiarequest_delete.html',
+                              {'form': form, 'foia': foia},
+                              context_instance=RequestContext(request))
 
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
