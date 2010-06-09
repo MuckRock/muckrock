@@ -34,14 +34,14 @@ def test_foia_request_form_clean():
     user2 = User.objects.create(username='test2', email='test2@muckrock.com')
 
     FOIARequest.objects.create(user=user1, title='test', slug='test', status='started',
-                                       jurisdiction='massachusetts', agency='test', request='test')
+                                       jurisdiction='massachusetts', agency='Clerk', request='test')
     foia2 = FOIARequest(user=user1)
     foia3 = FOIARequest(user=user2)
 
     foia_dict1 = {'title': 'test', 'slug': 'test', 'status': 'submitted',
-                  'jurisdiction': 'massachusetts', 'agency': 'abc', 'request': 'abc'}
+                  'jurisdiction': 'massachusetts', 'agency': 'Clerk', 'request': 'abc'}
     foia_dict2 = {'title': 'new test', 'slug': 'new-test', 'status': 'submitted',
-                  'jurisdiction': 'massachusetts', 'agency': 'abc', 'request': 'abc'}
+                  'jurisdiction': 'massachusetts', 'agency': 'Clerk', 'request': 'abc'}
 
     form = FOIARequestForm(foia_dict1, instance=foia2)
     nose.tools.assert_false(form.is_valid(),
@@ -220,11 +220,11 @@ def test_anon_views():
     user1 = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     user2 = User.objects.create_user('test2', 'test2@muckrock.com', 'abc')
     foia_a = FOIARequest.objects.create(user=user1, title='test a', slug='test-a', status='started',
-                               jurisdiction='massachusetts', agency='agency c', request='test')
+                               jurisdiction='massachusetts', agency='Health', request='test')
     FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='done',
-                               jurisdiction='boston-ma', agency='agency b', request='test')
+                               jurisdiction='boston-ma', agency='Finance', request='test')
     FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='rejected',
-                               jurisdiction='cambridge-ma', agency='agency a', request='test')
+                               jurisdiction='cambridge-ma', agency='Clerk', request='test')
     doc1 = FOIAImage.objects.create(foia=foia_a, page=1)
     FOIAImage.objects.create(foia=foia_a, page=2)
 
@@ -331,11 +331,11 @@ def test_404_views():
     user1 = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     user2 = User.objects.create_user('test2', 'test2@muckrock.com', 'abc')
     foia_a = FOIARequest.objects.create(user=user1, title='test a', slug='test-a', status='started',
-                               jurisdiction='massachusetts', agency='agency c', request='test')
+                               jurisdiction='massachusetts', agency='Police', request='test')
     FOIARequest.objects.create(user=user1, title='test b', slug='test-b', status='done',
-                               jurisdiction='boston-ma', agency='agency b', request='test')
+                               jurisdiction='boston-ma', agency='Health', request='test')
     FOIARequest.objects.create(user=user2, title='test c', slug='test-c', status='rejected',
-                               jurisdiction='cambridge-ma', agency='agency a', request='test')
+                               jurisdiction='cambridge-ma', agency='Finance', request='test')
     FOIAImage.objects.create(foia=foia_a, page=1)
     FOIAImage.objects.create(foia=foia_a, page=2)
 
@@ -362,7 +362,7 @@ def test_unallowed_views():
     client = Client()
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='massachusetts', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='Clerk', request='test')
 
     # get/post authenticated pages while unauthenticated
     get_post_unallowed(client, reverse('foia-create'))
@@ -378,11 +378,11 @@ def test_auth_views():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='massachusetts', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='Clerk', request='test')
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, reverse('foia-create'), ['foia/foiawizard_form.html', 'foia/base.html'])
+    get_allowed(client, reverse('foia-create'), ['foia/foiawizard_where.html', 'foia/base.html'])
 
     get_allowed(client, reverse('foia-update',
                                 kwargs={'jurisdiction': 'massachusetts',
@@ -395,7 +395,7 @@ def test_auth_views():
 
     # post authenticated pages
     post_allowed_bad(client, reverse('foia-create'),
-                     ['foia/foiawizard_form.html', 'foia/base.html'])
+                     ['foia/foiawizard_where.html', 'foia/base.html'])
     post_allowed_bad(client, reverse('foia-update',
                                      kwargs={'jurisdiction': 'massachusetts',
                                              'user_name': 'test1', 'slug': 'test-a'}),
@@ -409,7 +409,7 @@ def test_post_views():
     user = User.objects.create_user('test1', 'test1@muckrock.com', 'abc')
     Profile.objects.create(user=user, monthly_requests=10, date_update=datetime.now())
     FOIARequest.objects.create(user=user, title='test a', slug='test-a', status='started',
-                               jurisdiction='massachusetts', agency='test', request='test')
+                               jurisdiction='massachusetts', agency='Clerk', request='test')
 
     client.login(username='test1', password='abc')
 
@@ -417,7 +417,7 @@ def test_post_views():
     # tests for the wizard
 
     foia_data = {'title': 'test a', 'jurisdiction': 'massachusetts',
-                 'agency': 'test agency', 'request': 'updated request', 'submit': 'Submit'}
+                 'agency': 'Clerk', 'request': 'updated request', 'submit': 'Submit'}
 
     post_allowed(client, reverse('foia-update',
                                  kwargs={'jurisdiction': 'massachusetts',

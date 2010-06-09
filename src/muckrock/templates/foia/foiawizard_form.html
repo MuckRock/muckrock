@@ -2,7 +2,10 @@
 {% extends "foia/base.html" %}
 
 {% block content %}
-<h1>FOIA Template Wizard{% if heading %} - {{heading}}{% endif %}</h1>
+<h1>New FOIA Request</h1>
+{% if heading %}
+<h2>{{heading}}</h2>
+{% endif %}
 	<div class="form">
   <form action="" method="post">
 		<fieldset>

@@ -1,6 +1,7 @@
 {% extends "request_templates/base.txt" %}
-{% block title %}Assessor Data for {{location}} in {{year}}{% endblock %}
+{% block title %}Assessor Data for {{jurisdiction}} in {{year}}{% endblock %}
+{% block agency %}Clerk{% endblock %}
 
-{% block content %}A copy of the {{location}} assessor’s data, including parcel numbers, owner names, addresses, land values, and house values for the year {{year}}.{% endblock %}
+{% block content %}A copy of the {{jurisdiction}} assessor’s data, including parcel numbers, owner names, addresses, land values, and house values for the year {{year}}.{% endblock %}
 
 
