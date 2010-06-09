@@ -11,18 +11,22 @@ from django.template.defaultfilters import slugify
 from muckrock.utils import try_or_none
 
 slug_tuple = lambda s: (slugify(s), s)
+dup_tuple = lambda s: (s, s)
 
-JURISDICTIONS = (
-        slug_tuple('Massachusetts'),
-        slug_tuple('Amherst, MA'),
-        slug_tuple('Boston, MA'),
-        slug_tuple('Brookline, MA'),
-        slug_tuple('Cambridge, MA'),
-        slug_tuple('Groton, MA'),
-        slug_tuple('Milford, MA'),
-        slug_tuple('Somerville, MA'),
-        slug_tuple('Worcester, MA'),
-    )
+STATE_JURISDICTIONS = (
+    slug_tuple('Massachusetts'),
+)
+LOCAL_JURISDICTIONS = (
+    slug_tuple('Amherst, MA'),
+    slug_tuple('Boston, MA'),
+    slug_tuple('Brookline, MA'),
+    slug_tuple('Cambridge, MA'),
+    slug_tuple('Groton, MA'),
+    slug_tuple('Milford, MA'),
+    slug_tuple('Somerville, MA'),
+    slug_tuple('Worcester, MA'),
+)
+JURISDICTIONS = STATE_JURISDICTIONS + LOCAL_JURISDICTIONS
 
 STATUS = (
     ('started', 'Started'),
@@ -31,6 +35,17 @@ STATUS = (
     ('fix', 'Fix required'),
     ('rejected', 'Rejected'),
     ('done', 'Response received'),
+)
+
+AGENCIES = (
+    dup_tuple('Clerk'),
+    dup_tuple('Finance'),
+    dup_tuple('Fire Department'),
+    dup_tuple('Health'),
+    dup_tuple('Information Technology'),
+    dup_tuple('Planning and Inspections'),
+    dup_tuple('Police'),
+    dup_tuple('Public Works'),
 )
 
 class FOIARequestManager(models.Manager):
@@ -54,7 +69,7 @@ class FOIARequest(models.Model):
     # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)
-    agency = models.CharField(max_length=60) # choices?
+    agency = models.CharField(max_length=60, choices=AGENCIES)
     # fees?
     request = models.TextField()
     response = models.TextField(blank=True)

@@ -1,0 +1,70 @@
+
+{% extends "foia/base.html" %}
+
+{% block media %}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="/static/js/wizard_where.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1>New FOIA Request</h1>
+<h2>Where?</h2>
+{% if form.errors %}
+<div class="error">{{ form.errors }}</div>
+{% endif %}
+	<div class="form">
+  <form action="" method="post">
+		<fieldset>
+			{% csrf_token %}
+			<table class="form">
+				<tr>
+					<td>
+						<input type="radio" name="0-level" value="national" id="national" disabled="disabled" />
+						<label for="national">
+							National
+						</label>
+						<br \><em class="quiet">Coming Soon</em>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type="radio" name="0-level" value="state" id="state" />
+						<label for="state">
+							State
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<select name="0-state">
+							{% for state in state_list %}
+							<option value="{{state.0}}">{{state.1}}</option>
+							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<input type="radio" name="0-level" value="local" id="local" />
+						<label for="local">
+							Local
+						</label>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<select name="0-local">
+							{% for city in local_list %}
+							<option value="{{city.0}}">{{city.1}}</option>
+							{% endfor %}
+						</select>
+					</td>
+				</tr>
+			</table>
+			<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
+			{{ previous_fields|safe }}
+			<input type="submit" name="submit" value="Next" class="button" />
+		</fieldset>
+  </form>
+	</div>
+{% endblock %}
