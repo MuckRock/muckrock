@@ -1,0 +1,21 @@
+"""
+Sitemap for News application
+"""
+
+from django.contrib.sitemaps import Sitemap
+from news.models import Article
+
+class ArticleSitemap(Sitemap):
+    """Sitemap for Articles"""
+
+    priority = 0.7
+    changefreq = 'never'
+
+    def items(self):
+        """Return all news articles"""
+        return Article.objects.get_published()
+
+    def lastmod(self, obj):
+        """When was the article last modified?"""
+        # pylint: disable-msg=R0201
+        return obj.pub_date
