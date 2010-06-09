@@ -32,6 +32,8 @@ urlpatterns = patterns('',
                                         views.document_detail, name='foia-doc-detail'),
     url(r'^update/(?P<jurisdiction>[\w\d\_-]+)/(?P<user_name>[\w\d_]+)/(?P<slug>[\w\d_-]+)/$',
                                         views.update, name='foia-update'),
+    url(r'^delete/(?P<jurisdiction>[\w\d_-]+)/(?P<user_name>[\w\d_]+)/(?P<slug>[\w\d_-]+)/$',
+                                        views.delete, name='foia-delete'),
     url(r'^feeds/submitted/$',          LatestSubmittedRequests(), name='foia-submitted-feed'),
     url(r'^feeds/completed/$',          LatestDoneRequests(), name='foia-done-feed'),
 )
