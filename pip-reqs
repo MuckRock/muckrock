@@ -9,3 +9,4 @@ South==0.7
 ipython==0.10
 django-haystack==1.0.1-final
 whoosh==0.3.18
+django-debug-toolbar==0.8.3
