@@ -11,7 +11,7 @@ from django.views.generic import list_detail
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from foia.forms import FOIARequestForm, FOIADeleteForm
 from foia.models import FOIARequest, FOIAImage
@@ -25,7 +25,10 @@ def _foia_form_handler(request, foia, action):
         status_dict = {'Submit': 'submitted', 'Save': 'started'}
 
         try:
-            foia.date_submitted = datetime.now() if request.POST['submit'] == 'Submit' else None
+            if request.POST['submit'] == 'Submit':
+                foia.date_submitted = datetime.now()
+                foia.date_due = datetime.now() + timedelta(15)
+
             foia.status = status_dict[request.POST['submit']]
 
             form = FOIARequestForm(request.POST, instance=foia)
@@ -126,8 +129,14 @@ def detail(request, jurisdiction, user_name, slug):
 
     user = get_object_or_404(User, username=user_name)
     foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    extra_context = {'object': foia}
+    if foia.date_due:
+        extra_context['past_due'] = foia.date_due < datetime.now().date()
+    else:
+        extra_context['past_due'] = False
+
     return render_to_response('foia/foiarequest_detail.html',
-                              {'object': foia},
+                              extra_context,
                               context_instance=RequestContext(request))
 
 def document_detail(request, jurisdiction, user_name, slug, page):
