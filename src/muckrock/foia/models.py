@@ -75,6 +75,7 @@ class FOIARequest(models.Model):
     response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
+    date_due = models.DateField(blank=True, null=True)
 
     objects = FOIARequestManager()
 
