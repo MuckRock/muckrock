@@ -22,17 +22,33 @@
 					{{ object.date_submitted }}
 			  {% endif %}</td> </tr>
 		<tr class="odd"> <th>Request</th><td>{{ object.request|linebreaks }}</td> </tr>
-		<tr class="even"> <th>Date response received</th><td>
+
+		{% if object.date_due and past_due %}
+		<tr class="even"><th>Past due</th><td class="error">
+				{{ object.date_due|timesince }}
+		</td></tr>
+		{% endif %}
+		{% if object.date_due and not past_due %}
+		<tr class="even"><th>Due in</th><td>
+				{{ object.date_due|timeuntil }}
+		</td></tr>
+		{% endif %}
+		{% if not object.date_due %}
+		<tr class="even"><th>Due in</th><td>
+		</td></tr>
+		{% endif %}
+
+		<tr class="odd"> <th>Date response received</th><td>
 				{% if object.date_done %}
 					{{ object.date_done }}
 				{% endif %}</td>
 		</tr>
-		<tr class="odd"> <th>Response</th><td>
+		<tr class="even"> <th>Response</th><td>
 				{% autoescape off %}
 				{{ object.response }}
 				{% endautoescape %}
 		</td> </tr>
-		<tr class="even"> <th>Document</th>
+		<tr class="odd"> <th>Document</th>
 			<td>
 				{% if object.doc_first_page %}
 				<a href="{{object.doc_first_page.get_absolute_url}}">View document</a>

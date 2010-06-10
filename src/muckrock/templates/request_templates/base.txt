@@ -1,4 +1,4 @@
-{% block title %}{% endblock %}
+{% autoescape off%}{% block title %}{% endblock %}
 {% block agency %}{% endblock %}
 
 To Whom It May Concern:
@@ -20,4 +20,4 @@ Filed via MuckRock.com
 Somerville, MA 02143
 
 Daytime: (857) 488- 3081
-E-mail: requests@muckrock.com
+E-mail: requests@muckrock.com{% endautoescape %}
