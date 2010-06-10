@@ -75,6 +75,7 @@ class FOIARequest(models.Model):
     response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
+    date_due = models.DateField(blank=True, null=True)
 
     objects = FOIARequestManager()
 
@@ -108,7 +109,7 @@ class FOIAImage(models.Model):
     # pylint: disable-msg=E1101
     foia = models.ForeignKey(FOIARequest, related_name='images')
     image = models.ImageField(upload_to='foia_images')
-    page = models.SmallIntegerField(unique=True)
+    page = models.SmallIntegerField()
 
     def __unicode__(self):
         return '%s Document Page %d' % (self.foia.title, self.page)
@@ -138,6 +139,7 @@ class FOIAImage(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['page']
         verbose_name = 'FOIA Document Image'
+        unique_together = (('foia', 'page'),)
 
 mail_template = \
 """

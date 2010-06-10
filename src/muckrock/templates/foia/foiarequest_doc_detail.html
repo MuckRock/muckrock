@@ -5,7 +5,7 @@
 	<h1>{{doc.foia.title}} Document - Page {{doc.page}}/{{doc.total_pages}}</h1>
 
 	<p><a href="{{doc.foia.get_absolute_url}}">Back to FOIA Request</a></p>
-	<p><img src="/user_media/{{doc.image.name}}"></p>
+	<p><a href="/user_media/{{doc.image.name}}"><img src="/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a></p>
 
 	<div class="post-meta archive-pagination">
 		
@@ -29,8 +29,12 @@
 
 {% block sidebar %}
 <div>
-	URL for embedding:
-	http://www.muckrock.com/user_media/{{doc.image.name}}
+	Code for embedding:
+	<form>
+		<textarea style="width:240px; height:80px">
+<a href="{{doc.get_absolute_url}}"><img src="/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a>
+		</textarea>
+	</form>
 </div>
 
 {% endblock %}
