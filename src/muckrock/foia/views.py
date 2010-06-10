@@ -146,6 +146,14 @@ def document_detail(request, jurisdiction, user_name, slug, page):
     foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
+    max_width = 640
+    if doc.image.width > max_width:
+        width = max_width
+        height = int((float(max_width) /  doc.image.width) * doc.image.height)
+    else:
+        width = doc.image.width
+        height = doc.image.height
+
     return render_to_response('foia/foiarequest_doc_detail.html',
-                              {'doc': doc},
+                              {'doc': doc, 'width': width, 'height': height},
                               context_instance=RequestContext(request))
