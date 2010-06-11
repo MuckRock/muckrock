@@ -8,13 +8,11 @@ from django.contrib.auth.decorators import login_required
 
 from foia import views
 from foia.models import FOIARequest
-from foia.forms import FOIAWizard, FOIAWizardWhereForm
+from foia.forms import foia_wizard
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 
 foia_qs = {'queryset': FOIARequest.objects.all(),
            'paginate_by': 10}
-
-foia_wizard = FOIAWizard([FOIAWizardWhereForm])
 
 urlpatterns = patterns('',
     url(r'^$',                          list_detail.object_list, foia_qs, name='foia-index'),

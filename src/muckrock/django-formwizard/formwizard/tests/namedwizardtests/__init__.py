@@ -1,0 +1,1 @@
+from formwizard.tests.namedwizardtests.tests import *
