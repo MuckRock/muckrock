@@ -38,7 +38,7 @@ urlpatterns = patterns('',
 if muckrock.settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/static'}),
+            {'document_root': '/home/mitch/documents/work/muckrock/muckrock/src/muckrock/static'}),
         (r'^user_media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/user_media'}),
+            {'document_root': '/home/mitch/documents/work/muckrock/muckrock/src/muckrock/user_media'}),
     )
