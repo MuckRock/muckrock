@@ -1,0 +1,5 @@
+include LICENSE
+include AUTHORS
+recursive-include docs *.txt *.html
+recursive-exclude docs/build *.txt
+prune docs/build/html/_sources
