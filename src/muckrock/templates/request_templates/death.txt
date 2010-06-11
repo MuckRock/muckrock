@@ -2,7 +2,6 @@
 {% block title %}Death Certificate for {{full_name}}{% endblock %}
 {% block agency %}Health{% endblock %}
 
-{% block content %}The death certificate of {{full_name}}, born {{birth_date}} and deceased {{death_date}}.  {{interest}}
-{% endblock %}
+{% block content %}The death certificate of {{full_name}}, born {{birth_date}} and deceased {{death_date}}.  {{interest}}{% endblock %}
 
 
