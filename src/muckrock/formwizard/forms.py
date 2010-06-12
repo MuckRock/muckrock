@@ -78,6 +78,7 @@ class FormWizard(object):
         """
         self.reset_wizard()
 
+        print kwargs
         if 'extra_context' in kwargs:
             self.update_extra_context(kwargs['extra_context'])
 
@@ -421,8 +422,7 @@ class DynamicFormWizard(FormWizard):
 
         assert len(form_list) > 0, 'at least one form is needed'
 
-        self.storage = get_storage(self.storage_name, self.get_wizard_name(), self.request)
-        self.storage.set_form_list(form_list)
+        self.initial_form_list = form_list
 
         self.initial_list = initial_list
         self.instance_list = instance_list
@@ -441,7 +441,7 @@ class DynamicFormWizard(FormWizard):
         if 'extra_context' in kwargs:
             self.update_extra_context(kwargs['extra_context'])
 
-        if self.request.POST.has_key('form_prev_step') and
+        if self.request.POST.has_key('form_prev_step') and \
            self.request.POST['form_prev_step'] in self.storage.get_form_list():
             self.storage.set_current_step(self.request.POST['form_prev_step'])
             form = self.get_form(data=self.storage.get_step_data(self.determine_step()))
@@ -543,7 +543,7 @@ class DynamicFormWizard(FormWizard):
         form_list = self.storage.get_form_list()
         try:
             return form_list[form_list.index(step) + 1]
-        except ValueError, IndexError
+        except (ValueError, IndexError):
             return None
 
     def get_prev_step(self, step=None):
@@ -561,7 +561,7 @@ class DynamicFormWizard(FormWizard):
                 return None
             else:
                 return form_list[key]
-        except IndexError
+        except IndexError:
             return None
 
     def get_step_index(self, step=None):
@@ -572,8 +572,9 @@ class DynamicFormWizard(FormWizard):
         if step is None:
             step = self.determine_step()
         try:
+            form_list = self.storage.get_form_list()
             return form_list.index(step)
-        except IndexError
+        except IndexError:
             return None
 
     @property
@@ -583,7 +584,24 @@ class DynamicFormWizard(FormWizard):
         """
         return len(self.storage.get_form_list())
 
-class DynamicSessionFormWizard(FormWizard):
+    def reset_wizard(self):
+        """
+        Resets the user-state of the wizard.
+        """
+        self.storage.reset()
+        self.storage.set_form_list(self.initial_form_list)
+
+    def append_form_list(self, form_class, length=None):
+        """
+        Appends to the current form list - first truncates ot length
+        """
+        form_list = self.storage.get_form_list()
+        if length is not None:
+            form_list = form_list[:length]
+        form_list.append(form_class)
+        return self.storage.set_form_list(form_list)
+
+class DynamicSessionFormWizard(DynamicFormWizard):
     """
     A DynamicFormWizard with pre-configured SessionStorageBackend.
     """

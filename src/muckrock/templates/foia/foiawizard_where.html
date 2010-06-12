@@ -19,7 +19,7 @@
 			<table class="form">
 				<tr>
 					<td>
-						<input type="radio" name="0-level" value="national" id="national" disabled="disabled" />
+						<input type="radio" name="{{form_step}}-level" value="national" id="national" disabled="disabled" />
 						<label for="national">
 							National
 						</label>
@@ -28,7 +28,7 @@
 				</tr>
 				<tr>
 					<td>
-						<input type="radio" name="0-level" value="state" id="state" />
+						<input type="radio" name="{{form_step}}-level" value="state" id="state" />
 						<label for="state">
 							State
 						</label>
@@ -36,8 +36,8 @@
 				</tr>
 				<tr>
 					<td>
-						<select name="0-state">
-							{% for state in state_list %}
+						<select name="{{form_step}}-state">
+							{% for state in extra_context.state_list %}
 							<option value="{{state.0}}">{{state.1}}</option>
 							{% endfor %}
 						</select>
@@ -45,7 +45,7 @@
 				</tr>
 				<tr>
 					<td>
-						<input type="radio" name="0-level" value="local" id="local" />
+						<input type="radio" name="{{form_step}}-level" value="local" id="local" />
 						<label for="local">
 							Local
 						</label>
@@ -53,16 +53,14 @@
 				</tr>
 				<tr>
 					<td>
-						<select name="0-local">
-							{% for city in local_list %}
+						<select name="{{form_step}}-local">
+							{% for city in extra_context.local_list %}
 							<option value="{{city.0}}">{{city.1}}</option>
 							{% endfor %}
 						</select>
 					</td>
 				</tr>
 			</table>
-			<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
-			{{ previous_fields|safe }}
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>
