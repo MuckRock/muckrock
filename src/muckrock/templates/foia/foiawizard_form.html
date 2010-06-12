@@ -3,15 +3,13 @@
 
 {% block content %}
 <h1>New FOIA Request</h1>
-{% if heading %}
-<h2>{{heading}}</h2>
+{% if extra_context.heading %}
+<h2>{{extra_context.heading}}</h2>
 {% endif %}
 	<div class="form">
   <form action="" method="post">
 		<fieldset>
 			{% include "form.html" %}
-			<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
-			{{ previous_fields|safe }}
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>

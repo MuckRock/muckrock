@@ -6,7 +6,6 @@ from django import forms
 from django.template.defaultfilters import slugify
 from django.forms.util import ErrorList
 from django.http import HttpResponseRedirect
-from django.contrib.formtools.wizard import FormWizard
 from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -18,6 +17,7 @@ from collections import namedtuple
 from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
 from foia.utils import make_template_choices, get_jurisdiction_display
 from widgets import CalendarWidget
+from formwizard.forms import DynamicSessionFormWizard
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -55,6 +55,13 @@ class FOIARequestForm(forms.ModelForm):
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 'request': forms.Textarea(attrs={'style': 'width:450px; height: 200px;'}),
                 }
+
+
+class FOIADeleteForm(forms.Form):
+    """Form to confirm deleting a FOIA Request"""
+
+    confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
+                                 help_text='This cannot be undone!')
 
 
 class FOIAWizardParent(forms.Form):
@@ -211,15 +218,9 @@ class FOIAWhatStateForm(forms.Form):
     template = forms.ChoiceField(choices=STATE_TEMPLATE_CHOICES)
 
 
-class FOIAWizard(FormWizard):
+class FOIAWizard(DynamicSessionFormWizard):
     """Wizard to create FOIA requests"""
-
-    def __init__(self, *args, **kwargs):
-        FormWizard.__init__(self, *args, **kwargs)
-        self.extra_context = {
-                'state_list': STATE_JURISDICTIONS,
-                'local_list': LOCAL_JURISDICTIONS,
-                }
+    # pylint: disable-msg=R0904
 
     def done(self, request, form_list):
         """Wizard has been completed"""
@@ -259,42 +260,31 @@ class FOIAWizard(FormWizard):
                                             'user_name': request.user.username,
                                             'slug': slugify(title)}))
 
-    def process_step(self, request, form, step):
+    def process_step(self, form):
         """Process each step"""
 
         # add 'what' step
-        if self.determine_step(request) == 0 and step == 0:
+        if self.get_step_index() == 0:
             level = form.cleaned_data['level']
             if level == 'local':
-                new_form = FOIAWhatLocalForm
-                self.extra_context.update({'template_choices': LOCAL_TEMPLATE_CHOICES})
+                self.append_form_list('FOIAWhatLocalForm', 1)
+                self.update_extra_context({'template_choices': LOCAL_TEMPLATE_CHOICES})
             elif level == 'state':
-                new_form = FOIAWhatStateForm
-                self.extra_context.update({'template_choices': STATE_TEMPLATE_CHOICES})
+                self.append_form_list('FOIAWhatStateForm', 1)
+                self.update_extra_context({'template_choices': STATE_TEMPLATE_CHOICES})
 
-            if len(self.form_list) == 1:
-                self.form_list.append(new_form)
-            elif len(self.form_list) > 1:
-                # state may be saved if they start over without finishing
-                self.form_list[1] = new_form
-
-        # total number of steps - add on the last form
-        num_steps = 3
-        if self.determine_step(request) == num_steps - 2 and step == num_steps - 2:
+        # add final template specific step
+        if self.get_step_index() == 1:
             template = TEMPLATES[form.cleaned_data['template']]
-            self.extra_context.update({'heading': template.name})
-            if len(self.form_list) == num_steps - 1:
-                self.form_list.append(template.form)
-            elif len(self.form_list) == num_steps:
-                # state may be saved if they start over without finishing
-                self.form_list[num_steps - 1] = template.form
-            elif len(self.form_list) > num_steps:
-                # error, this should never happen
-                pass
+            self.update_extra_context({'heading': template.name})
+            self.append_form_list(template.form.__name__, 2)
 
-    def get_template(self, step):
+        return self.get_form_step_data(form)
+
+    def get_template(self):
         """Template name"""
 
+        step = self.get_step_index()
         if step == 0:
             return 'foia/foiawizard_where.html'
         elif step == 1:
@@ -302,9 +292,9 @@ class FOIAWizard(FormWizard):
         else:
             return 'foia/foiawizard_form.html'
 
-class FOIADeleteForm(forms.Form):
-    """Form to confirm deleting a FOIA Request"""
 
-    confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
-                                 help_text='This cannot be undone!')
-
+form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
+form_dict.update((form.__name__, form) for form in
+                 [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm])
+foia_wizard = FOIAWizard(['FOIAWizardWhereForm'], form_dict)
+wizard_extra_context = {'state_list': STATE_JURISDICTIONS, 'local_list': LOCAL_JURISDICTIONS}
