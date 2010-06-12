@@ -17,7 +17,7 @@ from collections import namedtuple
 from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
 from foia.utils import make_template_choices, get_jurisdiction_display
 from widgets import CalendarWidget
-from django-formwizard.formwizard.forms import DynamicSessionsFormWizard
+from formwizard.forms import DynamicSessionFormWizard
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -218,15 +218,9 @@ class FOIAWhatStateForm(forms.Form):
     template = forms.ChoiceField(choices=STATE_TEMPLATE_CHOICES)
 
 
-class FOIAWizard(DynamicSessionsFormWizard):
+class FOIAWizard(DynamicSessionFormWizard):
     """Wizard to create FOIA requests"""
-
-    def __init__(self, *args, **kwargs):
-        DynamicSessionsFormWizard.__init__(self, *args, **kwargs)
-        self.update_extra_context({
-                'state_list': STATE_JURISDICTIONS,
-                'local_list': LOCAL_JURISDICTIONS,
-                })
+    # pylint: disable-msg=R0904
 
     def done(self, request, form_list):
         """Wizard has been completed"""
@@ -270,7 +264,7 @@ class FOIAWizard(DynamicSessionsFormWizard):
         """Process each step"""
 
         # add 'what' step
-        if self.determine_step() == 0:
+        if self.get_step_index() == 0:
             level = form.cleaned_data['level']
             if level == 'local':
                 self.append_form_list('FOIAWhatLocalForm', 1)
@@ -280,7 +274,7 @@ class FOIAWizard(DynamicSessionsFormWizard):
                 self.update_extra_context({'template_choices': STATE_TEMPLATE_CHOICES})
 
         # add final template specific step
-        if self.determine_step() == 1:
+        if self.get_step_index() == 1:
             template = TEMPLATES[form.cleaned_data['template']]
             self.update_extra_context({'heading': template.name})
             self.append_form_list(template.form.__name__, 2)
@@ -290,9 +284,7 @@ class FOIAWizard(DynamicSessionsFormWizard):
     def get_template(self):
         """Template name"""
 
-        return 'foia/foiawizard_form.html'
-
-        step = self.determine_step()
+        step = self.get_step_index()
         if step == 0:
             return 'foia/foiawizard_where.html'
         elif step == 1:
@@ -300,8 +292,9 @@ class FOIAWizard(DynamicSessionsFormWizard):
         else:
             return 'foia/foiawizard_form.html'
 
+
 form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
 form_dict.update((form.__name__, form) for form in
                  [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm])
 foia_wizard = FOIAWizard(['FOIAWizardWhereForm'], form_dict)
-
+wizard_extra_context = {'state_list': STATE_JURISDICTIONS, 'local_list': LOCAL_JURISDICTIONS}

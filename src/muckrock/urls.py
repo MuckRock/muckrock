@@ -19,6 +19,8 @@ import muckrock.settings
 from muckrock.news.sitemap import ArticleSitemap
 from muckrock.foia.sitemap import FoiaSitemap
 
+import os
+
 admin.autodiscover()
 
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
@@ -36,7 +38,7 @@ urlpatterns = patterns('',
 if muckrock.settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/static'}),
+            {'document_root': os.path.join(muckrock.settings.SITE_ROOT, 'static')}),
         (r'^user_media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': '/home/mitch/documents/work/muckrock/src/muckrock/user_media'}),
+            {'document_root': os.path.join(muckrock.settings.SITE_ROOT, 'user_media')}),
     )

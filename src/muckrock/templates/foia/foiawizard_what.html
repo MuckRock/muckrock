@@ -17,12 +17,12 @@
 		<fieldset>
 			{% csrf_token %}
 			<table class="form">
-				{% for cat_tuple in template_choices %}
+				{% for cat_tuple in extra_context.template_choices %}
 					{% if cat_tuple.0 != "none" %}
 					<tr><td colspan="2"><h3>{{cat_tuple.0}}</h3></tr></td>
 						{% for template in cat_tuple.1 %}
 						<tr><td width="10px">&nbsp;</td><td>
-								<input type="radio" name="1-template" id="{{template.0}}" value="{{template.0}}" />
+								<input type="radio" name="{{form_step}}-template" id="{{template.0}}" value="{{template.0}}" />
 								<label for="{{template.0}}">
 									{{template.1}}
 								</label>
@@ -30,7 +30,7 @@
 						{% endfor %}
 					{% else %}
 						<tr><td colspan="2">
-								<input type="radio" name="1-template" id="{{cat_tuple.0}}" value="{{cat_tuple.0}}" />
+								<input type="radio" name="{{form_step}}-template" id="{{cat_tuple.0}}" value="{{cat_tuple.0}}" />
 								<label for="{{cat_tuple.0}}">
 									{{cat_tuple.1}}
 								</label>
@@ -38,8 +38,6 @@
 					{% endif %}
 				{% endfor %}
 			</table>
-			<input type="hidden" name="{{ step_field }}" value="{{ step0 }}" />
-			{{ previous_fields|safe }}
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>
