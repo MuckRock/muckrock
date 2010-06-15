@@ -431,174 +431,31 @@ class DynamicFormWizard(FormWizard):
         return 'step: %s, form_dict: %s, initial_list: %s' % (
             self.determine_step(), self.form_dict, self.initial_list)
 
-    def process_post_request(self, *args, **kwargs):
-        """
-        Generates a HttpResponse which contains either the current step (if
-        form validation wasn't successful), the next step (if the current step
-        was stored successful) or the done view (if no more steps are
-        available)
-        """
-        if 'extra_context' in kwargs:
-            self.update_extra_context(kwargs['extra_context'])
-
-        if self.request.POST.has_key('form_prev_step') and \
-           self.request.POST['form_prev_step'] in self.storage.get_form_list():
-            self.storage.set_current_step(self.request.POST['form_prev_step'])
-            form = self.get_form(data=self.storage.get_step_data(self.determine_step()))
-        else:
-            form = self.get_form(data=self.request.POST)
-
-            if form.is_valid():
-                self.storage.set_step_data(self.determine_step(), self.process_step(form))
-
-                if self.determine_step() == self.get_last_step():
-                    return self.render_done(form, *args, **kwargs)
-                else:
-                    return self.render_next_step(form, *args, **kwargs)
-        return self.render(form)
-
-    def render_done(self, form, *args, **kwargs):
-        """
-        Gets called when all forms passed. The method should also re-validate
-        all steps to prevent manipulation. If any form don't validate,
-        `render_revalidation_failure` should get called. If everything is fine
-        call `done`.
-        """
-        final_form_list = []
-        for form_key in self.storage.get_form_list():
-            form_obj = self.get_form(step=form_key, data=self.storage.get_step_data(form_key))
-            if not form_obj.is_valid():
-                return self.render_revalidation_failure(form_key, form_obj)
-            final_form_list.append(form_obj)
-        return self.done(self.request, final_form_list)
-
-    def get_form(self, step=None, data=None):
-        """
-        Constructs the form for a given `step`. If no `step` is defined, the
-        current step will be determined automatically.
-
-        The form will be initialized using the `data` argument to prefill the
-        new form.
-        """
-        if step is None:
-            step = self.determine_step()
-        form_class = self.form_dict[step]
-        kwargs = {
-            'data': data,
-            'prefix': self.get_form_prefix(step, form_class),
-            'initial': self.get_form_initial(step),
-        }
-        if issubclass(form_class, forms.ModelForm):
-            kwargs.update({'instance': self.get_form_instance(step)})
-        return form_class(**kwargs)
-
-    def get_all_cleaned_data(self):
-        """
-        Returns a merged dictionary of all step' cleaned_data dictionaries.
-        If a step contains a `FormSet`, the key will be prefixed with formset
-        and contain a list of the formset' cleaned_data dictionaries.
-        """
-        cleaned_dict = {}
-        for form_key in self.storage.get_form_list():
-            form_obj = self.get_form(step=form_key, data=self.storage.get_step_data(form_key))
-            if form_obj.is_valid():
-                if isinstance(form_obj.cleaned_data, list):
-                    cleaned_dict.update({'formset-%s' % form_key: form_obj.cleaned_data})
-                else:
-                    cleaned_dict.update(form_obj.cleaned_data)
-        return cleaned_dict
-
-    def get_cleaned_data_for_step(self, step):
-        """
-        Returns the cleaned data for a given `step`. Before returning the
-        cleaned data, the stored values are being revalidated through the
-        form. If the data doesn't validate, None will be returned.
-        """
-        if step in self.storage.get_form_list():
-            form_obj = self.get_form(step=step, data=self.storage.get_step_data(step))
-            if form_obj.is_valid():
-                return form_obj.cleaned_data
-        return None
-
-    def get_first_step(self):
-        """
-        Returns the name of the first step.
-        """
-        return self.storage.get_form_list()[0]
-
-    def get_last_step(self):
-        """
-        Returns the name of the last step.
-        """
-        return self.storage.get_form_list()[-1]
-
-    def get_next_step(self, step=None):
-        """
-        Returns the next step after the given `step`. If no more steps are
-        available, None will be returned. If the `step` argument is None, the
-        current step will be determined automatically.
-        """
-        if step is None:
-            step = self.determine_step()
-        form_list = self.storage.get_form_list()
-        try:
-            return form_list[form_list.index(step) + 1]
-        except (ValueError, IndexError):
-            return None
-
-    def get_prev_step(self, step=None):
-        """
-        Returns the previous step before the given `step`. If there are no
-        steps available, None will be returned. If the `step` argument is None, the
-        current step will be determined automatically.
-        """
-        if step is None:
-            step = self.determine_step()
-        form_list = self.storage.get_form_list()
-        try:
-            key = form_list.index(step) - 1
-            if key < 0:
-                return None
-            else:
-                return form_list[key]
-        except IndexError:
-            return None
-
-    def get_step_index(self, step=None):
-        """
-        Returns the index for the given `step` name. If no step is given,
-        the current step will be used to get the index.
-        """
-        if step is None:
-            step = self.determine_step()
-        try:
-            form_list = self.storage.get_form_list()
-            return form_list.index(step)
-        except IndexError:
-            return None
-
     @property
-    def num_steps(self):
+    def form_list(self):
         """
-        Returns the total number of steps/forms in this the wizard.
+        Create a SortedDict form list like you would get from a regular FormWizard
         """
-        return len(self.storage.get_form_list())
+        form_list = SortedDict()
+        for key in self.storage.get_form_list():
+            form_list[key] = self.form_dict[key]
+        return form_list
 
     def reset_wizard(self):
         """
         Resets the user-state of the wizard.
         """
-        self.storage.reset()
+        super(DynamicFormWizard, self).reset_wizard()
         self.storage.set_form_list(self.initial_form_list)
 
-    def append_form_list(self, form_class, length=None):
+    def append_form_list(self, form_name, length=None):
         """
-        Appends to the current form list - first truncates ot length
+        Appends to the current form list - first truncates to length
         """
         form_list = self.storage.get_form_list()
         if length is not None:
             form_list = form_list[:length]
-        form_list.append(form_class)
+        form_list.append(form_name)
         return self.storage.set_form_list(form_list)
 
 class DynamicSessionFormWizard(DynamicFormWizard):
