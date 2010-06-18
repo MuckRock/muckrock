@@ -3,58 +3,43 @@
 
 {% block content %}
 	<h1>FOIA Request</h1>
-	{% ifequal user object.user %}
-	  {% if object.is_editable %}
-		<p><a href="{% url foia-update jurisdiction=object.jurisdiction,user_name=object.user.username,slug=object.slug %}">Update</a></p>
-		{% endif %}
-	  {% if object.status == 'started' %}
-		<p><a href="{% url foia-delete jurisdiction=object.jurisdiction,user_name=object.user.username,slug=object.slug %}">Delete</a></p>
-		{% endif %}
-	{% endifequal %}
-	<table class="data-table">
-		<tr class="odd"> <th width="30%">Title</th><td>{{ object.title }}</td> </tr>
-		<tr class="even"> <th>User</th><td>{{ object.user }}</td> </tr>
-		<tr class="odd"> <th>Status</th><td>{{ object.get_status_display }}</td> </tr>
-		<tr class="even"> <th>Jurisdiction</th><td>{{ object.get_jurisdiction_display }}</td> </tr>
-		<tr class="odd"> <th>Agency</th><td>{{ object.agency }}</td> </tr>
-		<tr class="even"> <th>Date submitted</th><td>
-				{% if object.date_submitted %}
-					{{ object.date_submitted }}
-			  {% endif %}</td> </tr>
-		<tr class="odd"> <th>Request</th><td>{{ object.request|linebreaks }}</td> </tr>
+	<h2>{{object.title}}</h2>
+	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.get_full_name}}</a>
+	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}
+	for the {{object.agency}} of {{object.get_jurisdiction_display}}
+	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
+	</p>
+	<p>Status: {{object.get_status_display}}{% if object.date_due %},{%endif%}
+	{% if object.date_due and past_due %}
+		past due by {{ object.date_due|timesince }}
+	{% endif %}
+	{% if object.date_due and not past_due %}
+		due in {{ object.date_due|timeuntil }}
+	{% endif %}
 
-		{% if object.date_due and past_due %}
-		<tr class="even"><th>Past due</th><td class="error">
-				{{ object.date_due|timesince }}
-		</td></tr>
-		{% endif %}
-		{% if object.date_due and not past_due %}
-		<tr class="even"><th>Due in</th><td>
-				{{ object.date_due|timeuntil }}
-		</td></tr>
-		{% endif %}
-		{% if not object.date_due %}
-		<tr class="even"><th>Due in</th><td>
-		</td></tr>
-		{% endif %}
+	{% if object.doc_first_page %}
+	- <a href="{{object.doc_first_page.get_absolute_url}}">View Official Response</a>
+	{% endif %}
+	</p>
 
-		<tr class="odd"> <th>Date response received</th><td>
-				{% if object.date_done %}
-					{{ object.date_done }}
-				{% endif %}</td>
-		</tr>
-		<tr class="even"> <th>Response</th><td>
-				{% autoescape off %}
-				{{ object.response }}
-				{% endautoescape %}
-		</td> </tr>
-		<tr class="odd"> <th>Document</th>
-			<td>
-				{% if object.doc_first_page %}
-				<a href="{{object.doc_first_page.get_absolute_url}}">View document</a>
-				{% endif %}
-			</td>
-		</tr>
-	</table>
+	<div class="request"><strong>Request:</strong><br />{{object.request|linebreaks}}</div>
+	{% if object.response %}
+	<div class="response"><strong>Response:</strong><br />{{object.response}}</div>
+	{% endif %}
+
+
 {% endblock %}
 
+{% block sidebar %}
+{% if user == object.user and object.is_editable %}
+	<h2>Actions</h2>
+	<ul>
+		<li><a href="{% url foia-update jurisdiction=object.jurisdiction,user_name=object.user.username,slug=object.slug %}">Update</a></li>
+	{% if object.status == 'started' %}
+		<li><a href="{% url foia-delete jurisdiction=object.jurisdiction,user_name=object.user.username,slug=object.slug %}">Delete</a></li>
+	{% endif %}
+	</ul>
+	<div class="content-separator"></div>
+{% endif %}
+
+{% endblock %}

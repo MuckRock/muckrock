@@ -57,8 +57,12 @@ class FOIARequestManager(models.Manager):
         return self.filter(status__in=['submitted', 'processed', 'fix', 'rejected', 'done'])
 
     def get_done(self):
-        """Get all draft news articles"""
+        """Get all FOIA requests with responses"""
         return self.filter(status='done')
+
+    def get_editable(self):
+        """Get all editable FOIA requests"""
+        return self.filter(status__in=['started', 'fix'])
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
