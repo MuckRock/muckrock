@@ -8,14 +8,6 @@
 {% else %}
 <h1>{{user_obj.username|capfirst}}'s Account</h1>
 {% endifequal %}
-<ul>
-	{% ifequal user user_obj %}
-	<li><a href="{% url acct-update %}">Update your information</a>
-	<li><a href="{% url foia-list-user user_name=user_obj.username %}">My FOIA Requests</a>
-	{% else %}
-	<li><a href="{% url foia-list-user user_name=user_obj.username %}">{{user_obj.username|capfirst}}'s FOIA Requests</a>
-	{% endifequal %}
-</ul>
 <table class="data-table">
 	<tr class="odd">
 		<th width="30%">User Name</th>
@@ -63,3 +55,14 @@
 
 {% endblock %}
 
+{% block sidebar %}
+<h2>User Menu</h2>
+<ul>
+	{% ifequal user user_obj %}
+	<li><a href="{% url foia-list-user user_name=user_obj.username %}">My FOIA Requests</a>
+	{% else %}
+	<li><a href="{% url foia-list-user user_name=user_obj.username %}">{{user_obj.username|capfirst}}'s FOIA Requests</a>
+	{% endifequal %}
+</ul>
+<div class="content-separator"></div>
+{% endblock %}
