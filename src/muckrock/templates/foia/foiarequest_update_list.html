@@ -1,0 +1,95 @@
+
+{% extends "foia/base-submit.html" %}
+
+{% load tags %}
+
+{% block content %}
+	<h1>My Editable FOIA Requests</h1>
+
+	<div class="post-meta archive-pagination">
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
+	<table class="data-table">
+		<tr class="odd">
+			{% if sort_by == 'title' and sort_order == 'asc' %}
+				<th><a href="{% url foia-sorted-list sort_order='desc',field='title' %}">Title</a></th>
+			{% else %}
+				<th><a href="{% url foia-sorted-list sort_order='asc',field='title' %}">Title</a></th>
+			{% endif %}
+			{% if sort_by == 'user' and sort_order == 'asc' %}
+				<th><a href="{% url foia-sorted-list sort_order='desc',field='user' %}">User</a></th>
+			{% else %}
+				<th><a href="{% url foia-sorted-list sort_order='asc',field='user' %}">User</a></th>
+			{% endif %}
+			{% if sort_by == 'status' and sort_order == 'asc' %}
+				<th><a href="{% url foia-sorted-list sort_order='desc',field='status' %}">Status</a></th>
+			{% else %}
+				<th><a href="{% url foia-sorted-list sort_order='asc',field='status' %}">Status</a></th>
+			{% endif %}
+			{% if sort_by == 'jurisdiction' and sort_order == 'asc' %}
+				<th><a href="{% url foia-sorted-list sort_order='desc',field='jurisdiction' %}">Jurisdiction</a></th>
+			{% else %}
+				<th><a href="{% url foia-sorted-list sort_order='asc',field='jurisdiction' %}">Jurisdiction</a></th>
+			{% endif %}
+		</tr>
+		{% for foia in object_list %}
+		<tr class="{% cycle 'even' 'odd' %}">
+			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction,user_name=foia.user.username,slug=foia.slug %}">{{ foia.title }}</a></td>
+			<td><a href="{% url acct-profile foia.user.username %}">{{ foia.user }}</a></td>
+			<td>{{ foia.get_status_display }}</td>
+			<td>{{ foia.get_jurisdiction_display|capfirst }}</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+	<div class="post-meta archive-pagination">
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
+{% endblock %}
+

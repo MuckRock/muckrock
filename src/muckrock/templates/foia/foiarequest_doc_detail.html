@@ -4,9 +4,9 @@
 {% block content %}
 	<h1>{{doc.foia.title}} Document - Page {{doc.page}}/{{doc.total_pages}}</h1>
 
-	<p><a href="{{doc.foia.get_absolute_url}}">Back to FOIA Request</a></p>
 	<p><a href="/user_media/{{doc.image.name}}"><img src="/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a></p>
 
+	{% if doc.previous or doc.next %}
 	<div class="post-meta archive-pagination">
 		
 		{% if doc.previous %}
@@ -24,10 +24,14 @@
 		<div class="clearer">&nbsp;</div>
 		
 	</div>
+	{% endif %}
 
 {% endblock %}
 
 {% block sidebar %}
+	<h2>Actions</h2>
+	<ul><li><a href="{{doc.foia.get_absolute_url}}">Back to FOIA Request</a></li></ul>
+	<div class="content-separator"></div>
 <div>
 	Code for embedding:
 	<form>
@@ -36,5 +40,6 @@
 		</textarea>
 	</form>
 </div>
+<div class="content-separator"></div>
 
 {% endblock %}
