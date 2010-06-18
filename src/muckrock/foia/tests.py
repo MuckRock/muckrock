@@ -383,12 +383,13 @@ def test_auth_views():
     client.login(username='test1', password='abc')
 
     # get authenticated pages
-    get_allowed(client, reverse('foia-create'), ['foia/foiawizard_where.html', 'foia/base.html'])
+    get_allowed(client, reverse('foia-create'),
+                ['foia/foiawizard_where.html', 'foia/base-submit.html'])
 
     get_allowed(client, reverse('foia-update',
                                 kwargs={'jurisdiction': 'massachusetts',
                                         'user_name': 'test1', 'slug': 'test-a'}),
-                ['foia/foiarequest_form.html', 'foia/base.html'])
+                ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
     get_404(client, reverse('foia-update',
                             kwargs={'jurisdiction': 'massachusetts',
@@ -396,11 +397,11 @@ def test_auth_views():
 
     # post authenticated pages
     post_allowed_bad(client, reverse('foia-create'),
-                     ['foia/foiawizard_where.html', 'foia/base.html'])
+                     ['foia/foiawizard_where.html', 'foia/base-submit.html'])
     post_allowed_bad(client, reverse('foia-update',
                                      kwargs={'jurisdiction': 'massachusetts',
                                              'user_name': 'test1', 'slug': 'test-a'}),
-                     ['foia/foiarequest_form.html', 'foia/base.html'])
+                     ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
 @nose.tools.with_setup(setup)
 def test_post_views():

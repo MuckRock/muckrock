@@ -578,3 +578,22 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 
 /* Single line IE fix */
 * html #sub-nav, * html .section-title, * html .main {height: 0.01%; min-height: 0.01%;}
+
+/* custom */
+.request {
+	background-color: #fafbff;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #bbd;
+	padding: 5px;
+	margin-bottom: 7px;
+}
+
+.response {
+	background-color: #fbfaff;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #bbd;
+	padding: 5px;
+	margin-top: 7px;
+}

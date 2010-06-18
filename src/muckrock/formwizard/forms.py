@@ -78,7 +78,6 @@ class FormWizard(object):
         """
         self.reset_wizard()
 
-        print kwargs
         if 'extra_context' in kwargs:
             self.update_extra_context(kwargs['extra_context'])
 

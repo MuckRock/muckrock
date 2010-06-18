@@ -8,11 +8,10 @@
 
 {% block sub-nav %}
 <ul class="tabbed">
-	<li class="{% active request "^/foia/list/$" %}"><a href="{% url foia-list %}">Latest</a></li>
-	<li class="{% active request "^/foia/new/" %}"><a href="{% url foia-create %}">Submit a Request</a></li>
-	{#<li class="{% active request "^/foia/archives/" %}"><a href="{% url foia-archive %}">Archives</a></li>#}
+	<li class="{% active request "^/foia/list/$" %}"><a href="{% url foia-list %}">All Requests</a></li>
 	{% if user.is_authenticated %}
-	<li class="{% active request "^/foia/list/{{user}}/$" %}"><a href="{% url foia-list-user user_name=user.username%}">My Requests</a></li>
+	<li class="{% active request "^/foia/list/user/{{user}}/$" %}"><a href="{% url foia-list-user user_name=user.username%}">My Requests</a></li>
 	{% endif %}
 </ul>
 {% endblock %}
+

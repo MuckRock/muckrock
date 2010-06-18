@@ -104,6 +104,15 @@ def delete(request, jurisdiction, user_name, slug):
                               {'form': form, 'foia': foia},
                               context_instance=RequestContext(request))
 
+@login_required
+def update_list(request):
+    """List of all FOIA requests by a given user"""
+
+    return list_detail.object_list(request,
+                                   FOIARequest.objects.get_editable().filter(user=request.user),
+                                   paginate_by=10,
+                                   template_name='foia/foiarequest_update_list.html')
+
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
