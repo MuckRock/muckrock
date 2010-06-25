@@ -91,7 +91,7 @@ class FOIARequest(models.Model):
         """The url for this object"""
         # pylint: disable-msg=E1101
         return ('foia-detail', [], {'jurisdiction': self.jurisdiction,
-                                    'user_name': self.user.username, 'slug': self.slug})
+                                    'slug': self.slug, 'idx': self.id})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -106,7 +106,6 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
-        unique_together = (('jurisdiction', 'user', 'slug'),)
 
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
@@ -123,8 +122,8 @@ class FOIAImage(models.Model):
         """The url for this object"""
         return ('foia-doc-detail', [],
                 {'jurisdiction': self.foia.jurisdiction,
-                 'user_name': self.foia.user.username,
                  'slug': self.foia.slug,
+                 'idx': self.foia.id,
                  'page': self.page})
 
     def next(self):

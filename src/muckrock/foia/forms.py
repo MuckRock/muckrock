@@ -246,10 +246,10 @@ class FOIAWizard(DynamicSessionFormWizard):
         assert title
         if len(title) > 70:
             title = title[:70]
-        FOIARequest.objects.create(user=request.user, status='started',
-                                   jurisdiction=jurisdiction, title=title,
-                                   request=foia_request, slug=slugify(title),
-                                   agency=agency)
+        foia = FOIARequest.objects.create(user=request.user, status='started',
+                                          jurisdiction=jurisdiction, title=title,
+                                          request=foia_request, slug=slugify(title),
+                                          agency=agency)
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '
@@ -257,7 +257,7 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         return HttpResponseRedirect(reverse('foia-update',
                                     kwargs={'jurisdiction': jurisdiction,
-                                            'user_name': request.user.username,
+                                            'idx': foia.id,
                                             'slug': slugify(title)}))
 
     def process_step(self, form):

@@ -57,11 +57,10 @@ def _foia_form_handler(request, foia, action):
                               context_instance=RequestContext(request))
 
 @login_required
-def update(request, jurisdiction, user_name, slug):
+def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
 
     if not foia.is_editable():
         return render_to_response('error.html',
@@ -75,11 +74,10 @@ def update(request, jurisdiction, user_name, slug):
     return _foia_form_handler(request, foia, 'Update')
 
 @login_required
-def delete(request, jurisdiction, user_name, slug):
+def delete(request, jurisdiction, slug, idx):
     """Delete a non-submitted FOIA Request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, user=user, slug=slug, jurisdiction=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
 
     if not foia.status == 'started':
         return render_to_response('error.html',
@@ -133,11 +131,10 @@ def sorted_list(request, sort_order, field):
                                    paginate_by=10,
                                    extra_context={'sort_by': field, 'sort_order': sort_order})
 
-def detail(request, jurisdiction, user_name, slug):
+def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
     extra_context = {'object': foia}
     if foia.date_due:
         extra_context['past_due'] = foia.date_due < datetime.now().date()
@@ -148,11 +145,10 @@ def detail(request, jurisdiction, user_name, slug):
                               extra_context,
                               context_instance=RequestContext(request))
 
-def document_detail(request, jurisdiction, user_name, slug, page):
+def document_detail(request, jurisdiction, slug, idx, page):
     """Details of a single FOIA request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
     max_width = 640
