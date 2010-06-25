@@ -3,6 +3,7 @@ Sitemap for FOIA application
 """
 
 from django.contrib.sitemaps import Sitemap
+
 from foia.models import FOIARequest
 
 class FoiaSitemap(Sitemap):

@@ -2,11 +2,12 @@
 Models for the FOIA application
 """
 
-from django.db import models
-from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.db import models
+from django.db.models.signals import post_save
 from django.template.defaultfilters import slugify
+from django.template.loader import render_to_string
 
 from muckrock.utils import try_or_none
 
@@ -70,11 +71,9 @@ class FOIARequest(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
-    # tags = ManyToManyField(tags)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)
     agency = models.CharField(max_length=60, choices=AGENCIES)
-    # fees?
     request = models.TextField()
     response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
@@ -91,11 +90,15 @@ class FOIARequest(models.Model):
         """The url for this object"""
         # pylint: disable-msg=E1101
         return ('foia-detail', [], {'jurisdiction': self.jurisdiction,
-                                    'user_name': self.user.username, 'slug': self.slug})
+                                    'slug': self.slug, 'idx': self.id})
 
     def is_editable(self):
         """Can this request be updated?"""
         return self.status == 'started' or self.status == 'fix'
+
+    def is_deletable(self):
+        """Can this request be deleted?"""
+        return self.status == 'started'
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
@@ -106,7 +109,6 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
-        unique_together = (('jurisdiction', 'user', 'slug'),)
 
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
@@ -123,8 +125,8 @@ class FOIAImage(models.Model):
         """The url for this object"""
         return ('foia-doc-detail', [],
                 {'jurisdiction': self.foia.jurisdiction,
-                 'user_name': self.foia.user.username,
                  'slug': self.foia.slug,
+                 'idx': self.foia.id,
                  'page': self.page})
 
     def next(self):
@@ -145,31 +147,16 @@ class FOIAImage(models.Model):
         verbose_name = 'FOIA Document Image'
         unique_together = (('foia', 'page'),)
 
-mail_template = \
-"""
-Dear %(name)s,
-
-This mail is to let you know that your FOIA Request "%(title)s"
-has been updated.  Its current status is '%(status)s' and you may
-view the full details of the request here:
-http://www.muckrock.com%(link)s.
-
-Thanks for using MuckRock and please email us if you have any
-questions about our service!
-
-Sincerely,
-The MuckRock Team
-"""
-
 def foia_save_handler(sender, **kwargs):
     """Log changes to FOIA Requests"""
     # pylint: disable-msg=W0613
 
     request = kwargs['instance']
-    msg = mail_template % {'name': request.user.get_full_name(),
-                           'title': request.title,
-                           'status': request.get_status_display(),
-                           'link': request.get_absolute_url()}
+    msg = render_to_string('foia/mail.txt',
+        {'name': request.user.get_full_name(),
+         'title': request.title,
+         'status': request.get_status_display(),
+         'link': request.get_absolute_url()})
     send_mail('[MuckRock] FOIA request has been updated',
               msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
 

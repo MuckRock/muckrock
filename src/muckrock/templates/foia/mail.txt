@@ -1,0 +1,12 @@
+Dear {{name}},
+
+This mail is to let you know that your FOIA Request "{{title}}"
+has been updated.  Its current status is '{{status}}' and you may
+view the full details of the request here:
+http://www.muckrock.com{{link}}.
+
+Thanks for using MuckRock and please email us if you have any
+questions about our service!
+
+Sincerely,
+The MuckRock Team
