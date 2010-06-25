@@ -7,9 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import list_detail
 
 from foia import views
-from foia.models import FOIARequest
-from foia.forms import foia_wizard, wizard_extra_context
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
+from foia.forms import foia_wizard, wizard_extra_context
+from foia.models import FOIARequest
 
 foia_qs = {'queryset': FOIARequest.objects.all(),
            'paginate_by': 10}

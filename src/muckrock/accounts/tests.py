@@ -2,15 +2,17 @@
 Tests using nose for the accounts application
 """
 
-from django.forms import ValidationError
 from django.contrib.auth.models import User
-from django.test.client import Client
 from django.core.urlresolvers import reverse
-import nose.tools
+from django.forms import ValidationError
+from django.test.client import Client
 
+import nose.tools
 from datetime import datetime, timedelta
 
-from muckrock.accounts.models import Profile, RequestLimitError
+# this needs to be fully qualified for strange reasons
+from muckrock.accounts.models import RequestLimitError
+from accounts.models import Profile
 from accounts.forms import UserChangeForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from settings import MONTHLY_REQUESTS

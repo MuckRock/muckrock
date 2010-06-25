@@ -4,6 +4,7 @@ Feeds for the News application
 
 # pylint: disable-msg=E0611
 from django.contrib.syndication.views import Feed
+
 from news.models import Article
 
 class LatestEntries(Feed):

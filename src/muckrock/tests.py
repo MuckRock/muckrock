@@ -2,8 +2,8 @@
 Tests for site level functionality and helper functions for application tests
 """
 
-from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.test.client import Client
 
 import nose.tools
 

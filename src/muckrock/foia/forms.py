@@ -3,20 +3,20 @@ Forms for FOIA application
 """
 
 from django import forms
-from django.template.defaultfilters import slugify
-from django.http import HttpResponseRedirect
-from django.template.loader import render_to_string
-from django.template import RequestContext
-from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.template.defaultfilters import slugify
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
-from datetime import datetime
 from collections import namedtuple
+from datetime import datetime
 
 from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
 from foia.utils import make_template_choices, get_jurisdiction_display
-from widgets import CalendarWidget
 from formwizard.forms import DynamicSessionFormWizard
+from widgets import CalendarWidget
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
