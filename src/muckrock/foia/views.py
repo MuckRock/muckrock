@@ -4,12 +4,13 @@ Views for the FOIA application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, Http404
-from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
-from django.views.generic import list_detail
-from django.template.defaultfilters import slugify
+from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template.defaultfilters import slugify
+from django.template import RequestContext
+from django.views.generic import list_detail
 
 from datetime import datetime, timedelta
 
@@ -57,11 +58,10 @@ def _foia_form_handler(request, foia, action):
                               context_instance=RequestContext(request))
 
 @login_required
-def update(request, jurisdiction, user_name, slug):
+def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
 
     if not foia.is_editable():
         return render_to_response('error.html',
@@ -75,13 +75,12 @@ def update(request, jurisdiction, user_name, slug):
     return _foia_form_handler(request, foia, 'Update')
 
 @login_required
-def delete(request, jurisdiction, user_name, slug):
+def delete(request, jurisdiction, slug, idx):
     """Delete a non-submitted FOIA Request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, user=user, slug=slug, jurisdiction=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
 
-    if not foia.status == 'started':
+    if not foia.is_deletable():
         return render_to_response('error.html',
                  {'message': 'You may only delete non-submitted requests.'},
                  context_instance=RequestContext(request))
@@ -94,7 +93,7 @@ def delete(request, jurisdiction, user_name, slug):
         form = FOIADeleteForm(request.POST)
         if form.is_valid():
             foia.delete()
-            # message?
+            messages.info(request, 'Request succesfully deleted')
             return HttpResponseRedirect(reverse('foia-list-user',
                                                 kwargs={'user_name': request.user.username}))
     else:
@@ -136,11 +135,10 @@ def sorted_list(request, sort_order, field):
                                    extra_context={'sort_by': field, 'sort_order': sort_order})
 
 @login_required
-def detail(request, jurisdiction, user_name, slug):
+def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
     extra_context = {'object': foia}
     if foia.date_due:
         extra_context['past_due'] = foia.date_due < datetime.now().date()
@@ -152,11 +150,10 @@ def detail(request, jurisdiction, user_name, slug):
                               context_instance=RequestContext(request))
 
 @login_required
-def document_detail(request, jurisdiction, user_name, slug, page):
+def document_detail(request, jurisdiction, slug, idx, page):
     """Details of a single FOIA request"""
 
-    user = get_object_or_404(User, username=user_name)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, user=user, slug=slug)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
     max_width = 640

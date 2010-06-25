@@ -3,49 +3,23 @@ Forms for FOIA application
 """
 
 from django import forms
-from django.template.defaultfilters import slugify
-from django.forms.util import ErrorList
-from django.http import HttpResponseRedirect
-from django.template.loader import render_to_string
-from django.template import RequestContext
-from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.template.defaultfilters import slugify
+from django.template import RequestContext
+from django.template.loader import render_to_string
 
-from datetime import datetime
 from collections import namedtuple
+from datetime import datetime
 
 from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
 from foia.utils import make_template_choices, get_jurisdiction_display
-from widgets import CalendarWidget
 from formwizard.forms import DynamicSessionFormWizard
+from widgets import CalendarWidget
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
-
-    def clean(self):
-        """Check user and slug are unique together"""
-
-        forms.ModelForm.clean(self)
-
-        # if no title, just return, let field error be raised
-        if 'title' not in self.cleaned_data:
-            return self.cleaned_data
-
-        user = self.instance.user
-        slug = slugify(self.cleaned_data['title'])
-
-        other_foias = FOIARequest.objects.filter(user=user, slug=slug)
-
-        if len(other_foias) == 1 and other_foias[0] != self.instance:
-            self._errors['title'] = \
-                ErrorList(['You already have a FOIA request with a similar title'])
-
-        if len(other_foias) > 1: # pragma: no cover
-            # this should never happen
-            self._errors['title'] = \
-                ErrorList(['You already have a FOIA request with a similar title'])
-
-        return self.cleaned_data
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -246,10 +220,10 @@ class FOIAWizard(DynamicSessionFormWizard):
         assert title
         if len(title) > 70:
             title = title[:70]
-        FOIARequest.objects.create(user=request.user, status='started',
-                                   jurisdiction=jurisdiction, title=title,
-                                   request=foia_request, slug=slugify(title),
-                                   agency=agency)
+        foia = FOIARequest.objects.create(user=request.user, status='started',
+                                          jurisdiction=jurisdiction, title=title,
+                                          request=foia_request, slug=slugify(title),
+                                          agency=agency)
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '
@@ -257,7 +231,7 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         return HttpResponseRedirect(reverse('foia-update',
                                     kwargs={'jurisdiction': jurisdiction,
-                                            'user_name': request.user.username,
+                                            'idx': foia.id,
                                             'slug': slugify(title)}))
 
     def process_step(self, form):

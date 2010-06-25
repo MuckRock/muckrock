@@ -4,6 +4,7 @@ Feeds for the FOIA application
 
 # pylint: disable-msg=E0611
 from django.contrib.syndication.views import Feed
+
 from foia.models import FOIARequest
 
 class LatestSubmittedRequests(Feed):
