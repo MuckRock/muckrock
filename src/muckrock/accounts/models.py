@@ -2,9 +2,9 @@
 Models for the accounts application
 """
 
-from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
+from django.db import models
 
 from datetime import datetime
 
@@ -51,7 +51,7 @@ class Profile(models.Model):
         """Reduce one from the user's request amount"""
 
         if not self.can_request():
-            raise RequestLimitError()
+            raise RequestLimitError
 
         self.monthly_requests -= 1
         self.save()

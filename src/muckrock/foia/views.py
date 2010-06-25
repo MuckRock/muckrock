@@ -4,12 +4,13 @@ Views for the FOIA application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, Http404
-from django.template import RequestContext
-from django.shortcuts import render_to_response, get_object_or_404
-from django.views.generic import list_detail
-from django.template.defaultfilters import slugify
+from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template.defaultfilters import slugify
+from django.template import RequestContext
+from django.views.generic import list_detail
 
 from datetime import datetime, timedelta
 
@@ -79,7 +80,7 @@ def delete(request, jurisdiction, slug, idx):
 
     foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
 
-    if not foia.status == 'started':
+    if not foia.is_deletable():
         return render_to_response('error.html',
                  {'message': 'You may only delete non-submitted requests.'},
                  context_instance=RequestContext(request))
@@ -92,7 +93,7 @@ def delete(request, jurisdiction, slug, idx):
         form = FOIADeleteForm(request.POST)
         if form.is_valid():
             foia.delete()
-            # message?
+            messages.info(request, 'Request succesfully deleted')
             return HttpResponseRedirect(reverse('foia-list-user',
                                                 kwargs={'user_name': request.user.username}))
     else:

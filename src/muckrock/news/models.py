@@ -2,8 +2,9 @@
 Models for the News application
 """
 
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+
 from datetime import datetime
 
 from foia.models import FOIARequest
