@@ -13,7 +13,6 @@ from datetime import datetime
 from operator import attrgetter
 
 from foia.models import FOIARequest, FOIAImage
-from foia.forms import FOIARequestForm
 from accounts.models import Profile
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
@@ -25,36 +24,6 @@ def setup():
 
     # clean the test mail outbox
     mail.outbox = []
-
- # forms
-@nose.tools.with_setup(setup)
-def test_foia_request_form_clean():
-    """The form should prevent a user from having two requests with the same slug"""
-    user1 = User.objects.create(username='test1', email='test1@muckrock.com')
-    user2 = User.objects.create(username='test2', email='test2@muckrock.com')
-
-    FOIARequest.objects.create(user=user1, title='test', slug='test', status='started',
-                                       jurisdiction='massachusetts', agency='Clerk', request='test')
-    foia2 = FOIARequest(user=user1)
-    foia3 = FOIARequest(user=user2)
-
-    foia_dict1 = {'title': 'test', 'slug': 'test', 'status': 'submitted',
-                  'jurisdiction': 'massachusetts', 'agency': 'Clerk', 'request': 'abc'}
-    foia_dict2 = {'title': 'new test', 'slug': 'new-test', 'status': 'submitted',
-                  'jurisdiction': 'massachusetts', 'agency': 'Clerk', 'request': 'abc'}
-
-    form = FOIARequestForm(foia_dict1, instance=foia2)
-    nose.tools.assert_false(form.is_valid(),
-                            'Form is not valid since user and slug are not unique together')
-
-    form = FOIARequestForm(foia_dict2, instance=foia2)
-    nose.tools.ok_(form.is_valid(),
-                   'Form is valid since user and slug are unique together')
-
-    form = FOIARequestForm(foia_dict1, instance=foia3)
-    nose.tools.ok_(form.is_valid(),
-                   'Form is valid since user and slug are unique together')
-    #
 
  # models
 @nose.tools.with_setup(setup)
