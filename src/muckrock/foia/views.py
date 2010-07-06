@@ -35,7 +35,9 @@ def _foia_form_handler(request, foia, action):
             form = FOIARequestForm(request.POST, instance=foia)
 
             if form.is_valid():
-                request.user.get_profile().make_request()
+                if request.POST['submit'] == 'Submit':
+                    request.user.get_profile().make_request()
+
                 foia_request = form.save(commit=False)
                 foia_request.slug = slugify(foia_request.title)
                 foia_request.save()
