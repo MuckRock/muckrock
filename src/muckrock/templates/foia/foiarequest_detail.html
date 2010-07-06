@@ -9,13 +9,13 @@
 	for the {{object.agency}} of {{object.get_jurisdiction_display}}
 	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
 	</p>
-	<p>Status: {{object.get_status_display}}{% if object.date_due %},{%endif%}
-	{% if object.date_due and past_due %}
-		past due by {{ object.date_due|timesince }}
-	{% endif %}
-	{% if object.date_due and not past_due %}
-		due in {{ object.date_due|timeuntil }}
-	{% endif %}
+	<p>Status: {{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
+		{% if past_due %}
+			past due by {{ object.date_due|timesince }}
+		{% else %}
+			due in {{ object.date_due|timeuntil }}
+		{% endif %}
+	{%endif%}
 
 	{% if object.doc_first_page %}
 	- <a href="{{object.doc_first_page.get_absolute_url}}">View Official Response</a>
