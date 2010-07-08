@@ -152,14 +152,16 @@ def detail(request, jurisdiction, slug, idx):
     if not foia.is_viewable(request.user):
         raise Http404()
 
-    extra_context = {'object': foia}
+    context = {'object': foia}
     if foia.date_due:
-        extra_context['past_due'] = foia.date_due < datetime.now().date()
+        context['past_due'] = foia.date_due < datetime.now().date()
     else:
-        extra_context['past_due'] = False
+        context['past_due'] = False
+
+    context['embargo'] = foia.is_embargo(request.user)
 
     return render_to_response('foia/foiarequest_detail.html',
-                              extra_context,
+                              context,
                               context_instance=RequestContext(request))
 
 def document_detail(request, jurisdiction, slug, idx, page):
@@ -169,6 +171,9 @@ def document_detail(request, jurisdiction, slug, idx, page):
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
     if not foia.is_viewable(request.user):
+        raise Http404()
+
+    if foia.is_embargo() and request.user != foia.user:
         raise Http404()
 
     max_width = 640
