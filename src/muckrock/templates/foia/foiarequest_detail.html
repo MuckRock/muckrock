@@ -24,7 +24,7 @@
 
 	<div class="request"><strong>Request:</strong><br />{{object.request|linebreaks}}</div>
 	{% if object.response %}
-	<div class="response"><strong>Response:</strong><br />{{object.response}}</div>
+	<div class="response"><strong>Response:</strong><br />{% autoescape off %}{{object.response}}{% endautoescape %}</div>
 	{% endif %}
 
 
