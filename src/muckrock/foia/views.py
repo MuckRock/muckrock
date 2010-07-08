@@ -114,11 +114,21 @@ def update_list(request):
                                    paginate_by=10,
                                    template_name='foia/foiarequest_update_list.html')
 
+def list_(request):
+    """List all viewable FOIA requests"""
+
+    return list_detail.object_list(request,
+                                   FOIARequest.objects.get_viewable(request.user),
+                                   paginate_by=10)
+
+
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
     user = get_object_or_404(User, username=user_name)
-    return list_detail.object_list(request, FOIARequest.objects.filter(user=user), paginate_by=10)
+    return list_detail.object_list(request,
+                                   FOIARequest.objects.get_viewable(request.user).filter(user=user),
+                                   paginate_by=10)
 
 def sorted_list(request, sort_order, field):
     """Sorted list of FOIA requests"""
@@ -129,15 +139,20 @@ def sorted_list(request, sort_order, field):
         raise Http404()
 
     ob_field = '-' + field if sort_order == 'desc' else field
-    return list_detail.object_list(request,
-                                   FOIARequest.objects.all().order_by(ob_field),
-                                   paginate_by=10,
-                                   extra_context={'sort_by': field, 'sort_order': sort_order})
+    return list_detail.object_list(
+                request,
+                FOIARequest.objects.get_viewable(request.user).order_by(ob_field),
+                paginate_by=10,
+                extra_context={'sort_by': field, 'sort_order': sort_order})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
     foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
+
+    if not foia.is_viewable(request.user):
+        raise Http404()
+
     extra_context = {'object': foia}
     if foia.date_due:
         extra_context['past_due'] = foia.date_due < datetime.now().date()
@@ -153,6 +168,9 @@ def document_detail(request, jurisdiction, slug, idx, page):
 
     foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
+
+    if not foia.is_viewable(request.user):
+        raise Http404()
 
     max_width = 640
     if doc.image.width > max_width:
