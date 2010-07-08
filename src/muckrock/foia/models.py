@@ -5,6 +5,7 @@ Models for the FOIA application
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
@@ -65,6 +66,15 @@ class FOIARequestManager(models.Manager):
         """Get all editable FOIA requests"""
         return self.filter(status__in=['started', 'fix'])
 
+    def get_viewable(self, user):
+        """Get all viewable FOIA requests for given user"""
+        # Requests are visible after they have been submitted or if you own them
+        if user.is_authenticated():
+            return self.filter(~Q(status='started') | Q(user=user))
+        else:
+            # anonymous user, just filter out drafts
+            return self.exclude(status='started')
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
@@ -99,6 +109,10 @@ class FOIARequest(models.Model):
     def is_deletable(self):
         """Can this request be deleted?"""
         return self.status == 'started'
+
+    def is_viewable(self, user):
+        """Is this request viewable?"""
+        return self.status != 'started' or self.user == user
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
