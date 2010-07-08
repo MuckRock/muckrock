@@ -121,7 +121,7 @@ def test_foia_doc_total_pages():
 
 @nose.tools.with_setup(setup)
 def test_foia_email():
-    """Test FOIA sending an email to the user when a FOIA request is saved"""
+    """Test FOIA sending an email to the user when a FOIA request is updated"""
 
     nose.tools.eq_(len(mail.outbox), 0)
 
@@ -129,13 +129,33 @@ def test_foia_email():
     foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1', status='started',
                                       jurisdiction='massachusetts')
 
-    nose.tools.eq_(len(mail.outbox), 1)
-    nose.tools.eq_(mail.outbox[0].to, [user.email])
+    nose.tools.eq_(len(mail.outbox), 0)
 
     foia.status = 'submitted'
     foia.save()
 
+    nose.tools.eq_(len(mail.outbox), 0)
+
+    foia.status = 'processed'
+    foia.save()
+
+    nose.tools.eq_(len(mail.outbox), 1)
+    nose.tools.eq_(mail.outbox[0].to, [user.email])
+
+    foia.status = 'fix'
+    foia.save()
+
     nose.tools.eq_(len(mail.outbox), 2)
+
+    foia.status = 'rejected'
+    foia.save()
+
+    nose.tools.eq_(len(mail.outbox), 3)
+
+    foia.status = 'done'
+    foia.save()
+
+    nose.tools.eq_(len(mail.outbox), 4)
 
  # manager
 @nose.tools.with_setup(setup)

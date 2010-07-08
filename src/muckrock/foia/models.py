@@ -5,7 +5,7 @@ Models for the FOIA application
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
@@ -152,12 +152,20 @@ def foia_save_handler(sender, **kwargs):
     # pylint: disable-msg=W0613
 
     request = kwargs['instance']
-    msg = render_to_string('foia/mail.txt',
-        {'name': request.user.get_full_name(),
-         'title': request.title,
-         'status': request.get_status_display(),
-         'link': request.get_absolute_url()})
-    send_mail('[MuckRock] FOIA request has been updated',
-              msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+    try:
+        old_request = FOIARequest.objects.get(pk=request.pk)
+    except FOIARequest.DoesNotExist:
+        # if we are saving a new FOIA Request, do not email them
+        return
 
-post_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
+    if request.status != old_request.status and \
+            request.status in ['processed', 'fix', 'rejected', 'done']:
+        msg = render_to_string('foia/mail.txt',
+            {'name': request.user.get_full_name(),
+             'title': request.title,
+             'status': request.get_status_display(),
+             'link': request.get_absolute_url()})
+        send_mail('[MuckRock] FOIA request has been updated',
+                  msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+
+pre_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
