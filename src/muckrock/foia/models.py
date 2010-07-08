@@ -5,7 +5,8 @@ Models for the FOIA application
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models import Q
+from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
@@ -65,6 +66,15 @@ class FOIARequestManager(models.Manager):
         """Get all editable FOIA requests"""
         return self.filter(status__in=['started', 'fix'])
 
+    def get_viewable(self, user):
+        """Get all viewable FOIA requests for given user"""
+        # Requests are visible after they have been submitted or if you own them
+        if user.is_authenticated():
+            return self.filter(~Q(status='started') | Q(user=user))
+        else:
+            # anonymous user, just filter out drafts
+            return self.exclude(status='started')
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
@@ -99,6 +109,10 @@ class FOIARequest(models.Model):
     def is_deletable(self):
         """Can this request be deleted?"""
         return self.status == 'started'
+
+    def is_viewable(self, user):
+        """Is this request viewable?"""
+        return self.status != 'started' or self.user == user
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
@@ -152,12 +166,20 @@ def foia_save_handler(sender, **kwargs):
     # pylint: disable-msg=W0613
 
     request = kwargs['instance']
-    msg = render_to_string('foia/mail.txt',
-        {'name': request.user.get_full_name(),
-         'title': request.title,
-         'status': request.get_status_display(),
-         'link': request.get_absolute_url()})
-    send_mail('[MuckRock] FOIA request has been updated',
-              msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+    try:
+        old_request = FOIARequest.objects.get(pk=request.pk)
+    except FOIARequest.DoesNotExist:
+        # if we are saving a new FOIA Request, do not email them
+        return
 
-post_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
+    if request.status != old_request.status and \
+            request.status in ['processed', 'fix', 'rejected', 'done']:
+        msg = render_to_string('foia/mail.txt',
+            {'name': request.user.get_full_name(),
+             'title': request.title,
+             'status': request.get_status_display(),
+             'link': request.get_absolute_url()})
+        send_mail('[MuckRock] FOIA request has been updated',
+                  msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+
+pre_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
