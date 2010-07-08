@@ -10,6 +10,8 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
+from datetime import date, timedelta
+
 from muckrock.utils import try_or_none
 
 slug_tuple = lambda s: (slugify(s), s)
@@ -89,6 +91,7 @@ class FOIARequest(models.Model):
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
+    embargo = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -113,6 +116,21 @@ class FOIARequest(models.Model):
     def is_viewable(self, user):
         """Is this request viewable?"""
         return self.status != 'started' or self.user == user
+
+    def is_embargo(self, user=None):
+        """Is this request currently on an embargo?"""
+        if user and user == self.user:
+            # Don't embargo from yourself
+            return False
+        else:
+            return self.embargo and self.date_done and \
+                    (date.today() - self.date_done) < timedelta(30)
+
+    def end_embargo(self):
+        """When will the embargo end?"""
+        # should only be called if date_done is not null
+        if self.date_done:
+            return self.date_done + timedelta(30)
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
