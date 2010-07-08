@@ -121,7 +121,6 @@ def list_(request):
                                    FOIARequest.objects.get_viewable(request.user),
                                    paginate_by=10)
 
-
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
