@@ -22,7 +22,7 @@ class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
     embargo = forms.BooleanField(label='Embargo', required=False,
-                                 help_text='Putting an embargo on a request will hide the response '
+                                 help_text='Putting an embargo on a request will hide it '
                                            'from others for 30 days after the response is received')
 
     class Meta:

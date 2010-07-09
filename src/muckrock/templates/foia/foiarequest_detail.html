@@ -17,10 +17,10 @@
 		{% endif %}
 	{%endif%}
 
-	{% if object.doc_first_page and not embargo %}
+	{% if object.doc_first_page %}
 	- <a href="{{object.doc_first_page.get_absolute_url}}">View Official Response</a>
 	{% endif %}
-	{% if object.files.all and not embargo %}
+	{% if object.files.all %}
 	<h4>Attached Files:</h4>
 	<ul>
 		{% for file in object.files.all %}
@@ -33,11 +33,7 @@
 	<div class="request"><strong>Request:</strong><br />{{object.request|linebreaks}}</div>
 	{% if object.response %}
 	<div class="response"><strong>Response:</strong><br />
-		{% if embargo %}
-		<strong>This response is currently on embargo.  It will be publically viewable as of {{object.end_embargo}}.</strong>
-		{% else %}
 		{% autoescape off %}{{object.response}}{% endautoescape %}
-		{% endif %}
 	</div>
 	{% endif %}
 
