@@ -11,6 +11,7 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
 from datetime import date, timedelta
+import os
 
 from muckrock.utils import try_or_none
 
@@ -77,6 +78,7 @@ class FOIARequestManager(models.Manager):
             # anonymous user, just filter out drafts
             return self.exclude(status='started')
 
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
@@ -142,6 +144,7 @@ class FOIARequest(models.Model):
         ordering = ['title']
         verbose_name = 'FOIA Request'
 
+
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
     # pylint: disable-msg=E1101
@@ -178,6 +181,25 @@ class FOIAImage(models.Model):
         ordering = ['page']
         verbose_name = 'FOIA Document Image'
         unique_together = (('foia', 'page'),)
+
+
+class FOIAFile(models.Model):
+    """An arbitrary file attached to a FOIA request"""
+    # pylint: disable-msg=E1101
+    foia = models.ForeignKey(FOIARequest, related_name='files')
+    ffile = models.FileField(upload_to='foia_files')
+
+    def __unicode__(self):
+        return 'File: %s' % self.ffile.name
+
+    def name(self):
+        """Return the basename of the file"""
+        return os.path.basename(self.ffile.name)
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        verbose_name = 'FOIA Document File'
+
 
 def foia_save_handler(sender, **kwargs):
     """Log changes to FOIA Requests"""
