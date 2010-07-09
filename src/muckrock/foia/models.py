@@ -86,8 +86,7 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
     status = models.CharField(max_length=10, choices=STATUS)
-    jurisdiction = models.CharField(max_length=30, choices=JURISDICTIONS)
-    agency = models.CharField(max_length=60, choices=AGENCIES)
+    agency = models.ForeignKey('Agency')
     request = models.TextField()
     response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
@@ -199,6 +198,33 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name = 'FOIA Document File'
+
+
+class Jurisdiction(models.Model):
+    """A jursidiction that you may file FOIA requests in"""
+
+    levels = ( ('n', 'National'), ('s', 'State'), ('l', 'Local') )
+
+    name = models.CharField(max_length=50)
+    abbrev = models.CharField(max_length=5, blank=True)
+    level = models.CharField(max_length=1, choices=levels)
+    parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
+
+
+class AgencyType(models.Model):
+    """Marks an agency as fufilling requests of this type for its jurisdiction"""
+
+    name = models.CharField(max_length=60)
+
+
+class Agency(models.Model):
+    """An agency for a particular jurisdiction that has at least one agency type"""
+
+    jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
+    types = models.ManyToManyField(AgencyType)
+    address = models.TextField()
+    email = models.EmailField(blank=True)
+
 
 
 def foia_save_handler(sender, **kwargs):
