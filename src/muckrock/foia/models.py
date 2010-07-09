@@ -10,7 +10,7 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 import os
 
 from muckrock.utils import try_or_none
@@ -71,12 +71,15 @@ class FOIARequestManager(models.Manager):
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
-        # Requests are visible after they have been submitted or if you own them
+        # Requests are visible if you own them, or if they are not drafts and not embargoed
         if user.is_authenticated():
-            return self.filter(~Q(status='started') | Q(user=user))
+            return self.filter(Q(user=user) |
+                               (~Q(status='started') &
+                                ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30))))
         else:
-            # anonymous user, just filter out drafts
-            return self.exclude(status='started')
+            # anonymous user, filter out drafts and embargoes
+            return self.exclude(status='started')\
+                       .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30))
 
 
 class FOIARequest(models.Model):
@@ -116,7 +119,7 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.status != 'started' or self.user == user
+        return self.user == user or (self.status != 'started' and not self.is_embargo())
 
     def is_embargo(self, user=None):
         """Is this request currently on an embargo?"""
@@ -126,12 +129,6 @@ class FOIARequest(models.Model):
         else:
             return self.embargo and self.date_done and \
                     (date.today() - self.date_done) < timedelta(30)
-
-    def end_embargo(self):
-        """When will the embargo end?"""
-        # should only be called if date_done is not null
-        if self.date_done:
-            return self.date_done + timedelta(30)
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
