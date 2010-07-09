@@ -2,14 +2,14 @@
 Tests using nose for the FOIA application
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.test.client import Client
 from django.template.defaultfilters import slugify
 from django.core.urlresolvers import reverse
 from django.core import mail
 import nose.tools
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from operator import attrgetter
 
 from foia.models import FOIARequest, FOIAImage
@@ -156,6 +156,62 @@ def test_foia_email():
     foia.save()
 
     nose.tools.eq_(len(mail.outbox), 4)
+
+@nose.tools.with_setup(setup)
+def test_foia_viewable():
+    """Test all the viewable and embargo functions"""
+
+    user1 = User.objects.create(username='Test_User1', email='user1@test.com')
+    user2 = User.objects.create(username='Test_User2', email='user2@test.com')
+
+    foia_a = FOIARequest.objects.create(user=user1, title='Test A', slug='test-a', status='started',
+                                        jurisdiction='massachusetts', embargo=False)
+
+    foia_b = FOIARequest.objects.create(user=user1, title='Test B', slug='test-b', status='done',
+                                        jurisdiction='massachusetts', embargo=False,
+                                        date_done=date.today() - timedelta(10))
+
+    foia_c = FOIARequest.objects.create(user=user1, title='Test c', slug='test-c', status='done',
+                                        jurisdiction='massachusetts', embargo=True,
+                                        date_done=date.today() - timedelta(10))
+
+    foia_d = FOIARequest.objects.create(user=user1, title='Test d', slug='test-d', status='done',
+                                        jurisdiction='massachusetts', embargo=True,
+                                        date_done=date.today() - timedelta(30))
+
+    foia_e = FOIARequest.objects.create(user=user1, title='Test e', slug='test-e', status='done',
+                                        jurisdiction='massachusetts', embargo=True,
+                                        date_done=date.today() - timedelta(90))
+
+    foias = FOIARequest.objects.get_viewable(user1)
+    nose.tools.eq_(len(foias), 5, 'All FOIAs are viewable by the owner')
+
+    foias = FOIARequest.objects.get_viewable(user2)
+    nose.tools.eq_(len(foias), 3,
+            'Drafts and emabrgos < 30 days not viewable by others: %s' % foias)
+
+    foias = FOIARequest.objects.get_viewable(AnonymousUser())
+    nose.tools.eq_(len(foias), 3, 'Drafts and emabrgos < 30 days not viewable by anonymous users')
+
+    nose.tools.assert_true(foia_a.is_viewable(user1))
+    nose.tools.assert_true(foia_b.is_viewable(user1))
+    nose.tools.assert_true(foia_c.is_viewable(user1))
+    nose.tools.assert_true(foia_d.is_viewable(user1))
+    nose.tools.assert_true(foia_e.is_viewable(user1))
+
+    nose.tools.assert_false(foia_a.is_viewable(user2))
+    nose.tools.assert_true (foia_b.is_viewable(user2))
+    nose.tools.assert_false(foia_c.is_viewable(user2))
+    nose.tools.assert_true (foia_d.is_viewable(user2))
+    nose.tools.assert_true (foia_e.is_viewable(user2))
+
+    nose.tools.assert_false(foia_a.is_viewable(AnonymousUser()))
+    nose.tools.assert_true (foia_b.is_viewable(AnonymousUser()))
+    nose.tools.assert_false(foia_c.is_viewable(AnonymousUser()))
+    nose.tools.assert_true (foia_d.is_viewable(AnonymousUser()))
+    nose.tools.assert_true (foia_e.is_viewable(AnonymousUser()))
+
+
 
  # manager
 @nose.tools.with_setup(setup)
