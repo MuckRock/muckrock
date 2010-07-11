@@ -117,6 +117,10 @@ INSTALLED_APPS = (
     'muckrock.templatetags',
 )
 
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+}
+
 if EMAIL_DEBUG:
     EMAIL_PORT = 1025
 else:

@@ -1,0 +1,101 @@
+[
+    {
+        "pk": 3, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Boston", 
+            "parent": 1, 
+            "slug": "boston-ma"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Brookline", 
+            "parent": 1, 
+            "slug": "brookline-ma"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Cambridge", 
+            "parent": 1, 
+            "slug": "cambridge-ma"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Groton", 
+            "parent": 1, 
+            "slug": "groton-ma"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Milford", 
+            "parent": 1, 
+            "slug": "milford-ma"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Somerville", 
+            "parent": 1, 
+            "slug": "somerville-ma"
+        }
+    }, 
+    {
+        "pk": 9, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Worcester", 
+            "parent": 1, 
+            "slug": "worcester-ma"
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "MA", 
+            "level": "s", 
+            "name": "Massachusetts", 
+            "parent": null, 
+            "slug": "massachusetts"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "", 
+            "level": "l", 
+            "name": "Amherst", 
+            "parent": 1, 
+            "slug": "amherst-ma"
+        }
+    }
+]
