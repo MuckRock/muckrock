@@ -21,10 +21,14 @@ from widgets import CalendarWidget
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
+    embargo = forms.BooleanField(label='Embargo', required=False,
+                                 help_text='Putting an embargo on a request will hide it '
+                                           'from others for 30 days after the response is received')
+
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'jurisdiction', 'agency', 'request']
+        fields = ['title', 'jurisdiction', 'agency', 'embargo', 'request']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 'request': forms.Textarea(attrs={'style': 'width:450px; height: 200px;'}),
