@@ -10,6 +10,9 @@ from django.db.models.signals import pre_save
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
+from datetime import datetime, date, timedelta
+import os
+
 from muckrock.utils import try_or_none
 
 slug_tuple = lambda s: (slugify(s), s)
@@ -68,12 +71,16 @@ class FOIARequestManager(models.Manager):
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
-        # Requests are visible after they have been submitted or if you own them
+        # Requests are visible if you own them, or if they are not drafts and not embargoed
         if user.is_authenticated():
-            return self.filter(~Q(status='started') | Q(user=user))
+            return self.filter(Q(user=user) |
+                               (~Q(status='started') &
+                                ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30))))
         else:
-            # anonymous user, just filter out drafts
-            return self.exclude(status='started')
+            # anonymous user, filter out drafts and embargoes
+            return self.exclude(status='started')\
+                       .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30))
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -89,6 +96,7 @@ class FOIARequest(models.Model):
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
+    embargo = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -112,7 +120,16 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.status != 'started' or self.user == user
+        return self.user == user or (self.status != 'started' and not self.is_embargo())
+
+    def is_embargo(self, user=None):
+        """Is this request currently on an embargo?"""
+        if user and user == self.user:
+            # Don't embargo from yourself
+            return False
+        else:
+            return self.embargo and self.date_done and \
+                    (date.today() - self.date_done) < timedelta(30)
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""
@@ -123,6 +140,7 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
+
 
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
@@ -160,6 +178,25 @@ class FOIAImage(models.Model):
         ordering = ['page']
         verbose_name = 'FOIA Document Image'
         unique_together = (('foia', 'page'),)
+
+
+class FOIAFile(models.Model):
+    """An arbitrary file attached to a FOIA request"""
+    # pylint: disable-msg=E1101
+    foia = models.ForeignKey(FOIARequest, related_name='files')
+    ffile = models.FileField(upload_to='foia_files')
+
+    def __unicode__(self):
+        return 'File: %s' % self.ffile.name
+
+    def name(self):
+        """Return the basename of the file"""
+        return os.path.basename(self.ffile.name)
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        verbose_name = 'FOIA Document File'
+
 
 def foia_save_handler(sender, **kwargs):
     """Log changes to FOIA Requests"""

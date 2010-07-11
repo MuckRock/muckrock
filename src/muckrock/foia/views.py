@@ -156,14 +156,14 @@ def detail(request, jurisdiction, slug, idx):
     if not foia.is_viewable(request.user):
         raise Http404()
 
-    extra_context = {'object': foia}
+    context = {'object': foia}
     if foia.date_due:
-        extra_context['past_due'] = foia.date_due < datetime.now().date()
+        context['past_due'] = foia.date_due < datetime.now().date()
     else:
-        extra_context['past_due'] = False
+        context['past_due'] = False
 
     return render_to_response('foia/foiarequest_detail.html',
-                              extra_context,
+                              context,
                               context_instance=RequestContext(request))
 
 @login_required
