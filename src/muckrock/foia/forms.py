@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -13,22 +14,23 @@ from django.template.loader import render_to_string
 from collections import namedtuple
 from datetime import datetime
 
-from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
-from foia.utils import make_template_choices, get_jurisdiction_display
+from foia.models import FOIARequest, Jurisdiction, AgencyType
+from foia.utils import make_template_choices
 from formwizard.forms import DynamicSessionFormWizard
 from widgets import CalendarWidget
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
-    embargo = forms.BooleanField(label='Embargo', required=False,
+    embargo = forms.BooleanField(required=False,
                                  help_text='Putting an embargo on a request will hide it '
                                            'from others for 30 days after the response is received')
+    agency_type = forms.ModelChoiceField(label='Agency', queryset=AgencyType.objects.all())
 
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'jurisdiction', 'agency', 'embargo', 'request']
+        fields = ['title', 'jurisdiction', 'agency_type', 'embargo', 'request']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 'request': forms.Textarea(attrs={'style': 'width:450px; height: 200px;'}),
@@ -163,8 +165,8 @@ class FOIAWizardWhereForm(forms.Form):
     level = forms.ChoiceField(choices=(('national', 'National'),
                                        ('state', 'State'),
                                        ('local', 'Local')))
-    state = forms.ChoiceField(choices=STATE_JURISDICTIONS, required=False)
-    local = forms.ChoiceField(choices=LOCAL_JURISDICTIONS, required=False)
+    state = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='s'), required=False)
+    local = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='l'), required=False)
 
     def clean(self):
         """Make sure state or local is required based off of choice of level"""
@@ -212,29 +214,30 @@ class FOIAWizard(DynamicSessionFormWizard):
             jurisdiction = form_list[0].cleaned_data['local']
         else:
             # shouldn't happen
-            jurisdiction = ''
+            return render_to_response('error.html',
+                     {'message': 'There was an error furing form processing'},
+                     context_instance=RequestContext(request))
 
         template_file = 'request_templates/%s.txt' % template
         data = form_list[2].cleaned_data
-        data.update({'jurisdiction': get_jurisdiction_display(jurisdiction)})
+        data['jurisdiction'] = jurisdiction.name
 
-        title, agency, foia_request = \
+        title, agency_type, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,
                                                  RequestContext(request)).split('\n', 2))
-        assert title
         if len(title) > 70:
             title = title[:70]
         foia = FOIARequest.objects.create(user=request.user, status='started',
                                           jurisdiction=jurisdiction, title=title,
                                           request=foia_request, slug=slugify(title),
-                                          agency=agency)
+                                          agency_type=AgencyType.objects.get(name=agency_type))
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '
                                   'submit it when you are ready.')
 
         return HttpResponseRedirect(reverse('foia-update',
-                                    kwargs={'jurisdiction': jurisdiction,
+                                    kwargs={'jurisdiction': jurisdiction.slug,
                                             'idx': foia.id,
                                             'slug': slugify(title)}))
 
@@ -271,8 +274,3 @@ class FOIAWizard(DynamicSessionFormWizard):
             return 'foia/foiawizard_form.html'
 
 
-form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
-form_dict.update((form.__name__, form) for form in
-                 [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm])
-foia_wizard = FOIAWizard(['FOIAWizardWhereForm'], form_dict)
-wizard_extra_context = {'state_list': STATE_JURISDICTIONS, 'local_list': LOCAL_JURISDICTIONS}

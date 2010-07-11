@@ -7,51 +7,12 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save
-from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 
 from datetime import datetime, date, timedelta
 import os
 
 from muckrock.utils import try_or_none
-
-slug_tuple = lambda s: (slugify(s), s)
-dup_tuple = lambda s: (s, s)
-
-STATE_JURISDICTIONS = (
-    slug_tuple('Massachusetts'),
-)
-LOCAL_JURISDICTIONS = (
-    slug_tuple('Amherst, MA'),
-    slug_tuple('Boston, MA'),
-    slug_tuple('Brookline, MA'),
-    slug_tuple('Cambridge, MA'),
-    slug_tuple('Groton, MA'),
-    slug_tuple('Milford, MA'),
-    slug_tuple('Somerville, MA'),
-    slug_tuple('Worcester, MA'),
-)
-JURISDICTIONS = STATE_JURISDICTIONS + LOCAL_JURISDICTIONS
-
-STATUS = (
-    ('started', 'Started'),
-    ('submitted', 'Submitted'),
-    ('processed', 'Processed'),
-    ('fix', 'Fix required'),
-    ('rejected', 'Rejected'),
-    ('done', 'Response received'),
-)
-
-AGENCIES = (
-    dup_tuple('Clerk'),
-    dup_tuple('Finance'),
-    dup_tuple('Fire Department'),
-    dup_tuple('Health'),
-    dup_tuple('Information Technology'),
-    dup_tuple('Planning and Inspections'),
-    dup_tuple('Police'),
-    dup_tuple('Public Works'),
-)
 
 class FOIARequestManager(models.Manager):
     """Object manager for FOIA requests"""
@@ -85,11 +46,21 @@ class FOIARequestManager(models.Manager):
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
+    status = (
+        ('started', 'Started'),
+        ('submitted', 'Submitted'),
+        ('processed', 'Processed'),
+        ('fix', 'Fix required'),
+        ('rejected', 'Rejected'),
+        ('done', 'Response received'),
+    )
+
     user = models.ForeignKey(User)
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
-    status = models.CharField(max_length=10, choices=STATUS)
-    agency = models.ForeignKey('Agency')
+    status = models.CharField(max_length=10, choices=status)
+    jurisdiction = models.ForeignKey('Jurisdiction', null=True)
+    agency_type = models.ForeignKey('AgencyType', null=True)
     request = models.TextField()
     response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
@@ -106,7 +77,7 @@ class FOIARequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable-msg=E1101
-        return ('foia-detail', [], {'jurisdiction': self.jurisdiction,
+        return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
                                     'slug': self.slug, 'idx': self.id})
 
     def is_editable(self):
@@ -155,7 +126,7 @@ class FOIAImage(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('foia-doc-detail', [],
-                {'jurisdiction': self.foia.jurisdiction,
+                {'jurisdiction': self.foia.jurisdiction.slug,
                  'slug': self.foia.slug,
                  'idx': self.foia.id,
                  'page': self.page})
@@ -203,9 +174,22 @@ class Jurisdiction(models.Model):
     levels = ( ('n', 'National'), ('s', 'State'), ('l', 'Local') )
 
     name = models.CharField(max_length=50)
+    # slug should be slugify(unicode(self))
+    slug = models.SlugField(max_length=55)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
+
+    def __unicode__(self):
+        # pylint: disable-msg=E1101
+        if self.level == 'l':
+            return '%s, %s' % (self.name, self.parent.abbrev)
+        else:
+            return self.name
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['name']
 
 
 class AgencyType(models.Model):
@@ -213,15 +197,29 @@ class AgencyType(models.Model):
 
     name = models.CharField(max_length=60)
 
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['name']
+
 
 class Agency(models.Model):
     """An agency for a particular jurisdiction that has at least one agency type"""
 
+    name = models.CharField(max_length=60)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType)
     address = models.TextField()
     email = models.EmailField(blank=True)
 
+    def __unicode__(self):
+        return self.name
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        verbose_name_plural = 'agencies'
 
 
 def foia_save_handler(sender, **kwargs):

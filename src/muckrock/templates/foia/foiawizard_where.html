@@ -36,11 +36,7 @@
 				</tr>
 				<tr>
 					<td>
-						<select name="{{form_step}}-state">
-							{% for state in extra_context.state_list %}
-							<option value="{{state.0}}">{{state.1}}</option>
-							{% endfor %}
-						</select>
+						{{form.state}}
 					</td>
 				</tr>
 				<tr>
@@ -53,11 +49,7 @@
 				</tr>
 				<tr>
 					<td>
-						<select name="{{form_step}}-local">
-							{% for city in extra_context.local_list %}
-							<option value="{{city.0}}">{{city.1}}</option>
-							{% endfor %}
-						</select>
+						{{form.local}}
 					</td>
 				</tr>
 			</table>

@@ -1,0 +1,58 @@
+[
+    {
+        "pk": 1, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Clerk"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Finance"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Fire Department"
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Health"
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Information Technology"
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Planning and Inspections"
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Police"
+        }
+    }, 
+    {
+        "pk": 8, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "Public Works"
+        }
+    }
+]
