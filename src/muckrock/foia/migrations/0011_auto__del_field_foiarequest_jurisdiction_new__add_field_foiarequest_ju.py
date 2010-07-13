@@ -8,84 +8,13 @@ class Migration(SchemaMigration):
     
     def forwards(self, orm):
         
-        # Adding model 'Jurisdiction'
-        db.create_table('foia_jurisdiction', (
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('parent', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='children', null=True, to=orm['foia.Jurisdiction'])),
-            ('level', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('abbrev', self.gf('django.db.models.fields.CharField')(max_length=5, blank=True)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=55, db_index=True)),
-        ))
-        db.send_create_signal('foia', ['Jurisdiction'])
+        db.rename_column('foia_foiarequest', 'jurisdiction_new_id', 'jurisdiction_id')
 
-        # Adding model 'AgencyType'
-        db.create_table('foia_agencytype', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=60)),
-        ))
-        db.send_create_signal('foia', ['AgencyType'])
-
-        # Adding model 'Agency'
-        db.create_table('foia_agency', (
-            ('email', self.gf('django.db.models.fields.EmailField')(max_length=75, blank=True)),
-            ('jurisdiction', self.gf('django.db.models.fields.related.ForeignKey')(related_name='agencies', to=orm['foia.Jurisdiction'])),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('address', self.gf('django.db.models.fields.TextField')()),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=60)),
-        ))
-        db.send_create_signal('foia', ['Agency'])
-
-        # Adding M2M table for field types on 'Agency'
-        db.create_table('foia_agency_types', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('agency', models.ForeignKey(orm['foia.agency'], null=False)),
-            ('agencytype', models.ForeignKey(orm['foia.agencytype'], null=False))
-        ))
-        db.create_unique('foia_agency_types', ['agency_id', 'agencytype_id'])
-
-        # Deleting field 'FOIARequest.agency'
-        db.delete_column('foia_foiarequest', 'agency')
-
-        # Adding field 'FOIARequest.agency_type'
-        db.add_column('foia_foiarequest', 'agency_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.AgencyType'], null=True), keep_default=False)
-
-        # Deleting field 'FOIARequest.jurisdiction'
-        db.delete_column('foia_foiarequest', 'jurisdiction')
-
-        # Adding field 'FOIARequest.jurisdiction'
-        db.add_column('foia_foiarequest', 'jurisdiction', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.Jurisdiction'], null=True), keep_default=False)
-
-    
     
     def backwards(self, orm):
+
+        db.rename_column('foia_foiarequest', 'jurisdiction_id', 'jurisdiction_new_id')
         
-        # Deleting model 'Jurisdiction'
-        db.delete_table('foia_jurisdiction')
-
-        # Deleting model 'AgencyType'
-        db.delete_table('foia_agencytype')
-
-        # Deleting model 'Agency'
-        db.delete_table('foia_agency')
-
-        # Removing M2M table for field types on 'Agency'
-        db.delete_table('foia_agency_types')
-
-        # Adding field 'FOIARequest.agency'
-        db.add_column('foia_foiarequest', 'agency', self.gf('django.db.models.fields.CharField')(default='massachusetts', max_length=60), keep_default=False)
-
-        # Deleting field 'FOIARequest.agency_type'
-        db.delete_column('foia_foiarequest', 'agency_type_id')
-
-        # Renaming column for 'FOIARequest.jurisdiction' to match new field type.
-        db.rename_column('foia_foiarequest', 'jurisdiction_id', 'jurisdiction')
-        # Changing field 'FOIARequest.jurisdiction'
-        db.alter_column('foia_foiarequest', 'jurisdiction', self.gf('django.db.models.fields.CharField')(max_length=30))
-
-        # Removing index on 'FOIARequest', fields ['jurisdiction']
-        db.delete_index('foia_foiarequest', ['jurisdiction_id'])
-    
     
     models = {
         'auth.group': {
@@ -153,13 +82,13 @@ class Migration(SchemaMigration):
         },
         'foia.foiarequest': {
             'Meta': {'object_name': 'FOIARequest'},
-            'agency_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.AgencyType']", 'null': 'True'}),
+            'agency_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.AgencyType']"}),
             'date_done': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'date_due': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'date_submitted': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'embargo': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.Jurisdiction']", 'null': 'True'}),
+            'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.Jurisdiction']"}),
             'request': ('django.db.models.fields.TextField', [], {}),
             'response': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '70', 'db_index': 'True'}),
