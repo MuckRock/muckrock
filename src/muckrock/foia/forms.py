@@ -16,6 +16,7 @@ from datetime import datetime
 
 from foia.models import FOIARequest, Jurisdiction, AgencyType
 from foia.utils import make_template_choices
+from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
 from widgets import CalendarWidget
 
@@ -60,6 +61,8 @@ class FOIAMugShotForm(FOIAWizardParent):
     date_begin = forms.DateField(help_text='Range of dates in which the mug shots were taken',
                                  widget=CalendarWidget(attrs={'class': 'datepicker'}))
     date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+    clean = validate_date_order('date_begin', 'date_end')
 
 
 class FOIACriminalForm(FOIAWizardParent):
@@ -115,6 +118,8 @@ class FOIABirthForm(FOIAWizardParent):
             help_text='A brief sentence about your geneological interest in this individual',
             widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
 
+    clean = validate_date_order('birth_date', 'death_date')
+
 
 class FOIADeathForm(FOIAWizardParent):
     """A form to fill in a death certificate template"""
@@ -131,6 +136,8 @@ class FOIADeathForm(FOIAWizardParent):
             required=False,
             help_text='A brief sentence about your geneological interest in this individual',
             widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
+
+    clean = validate_date_order('birth_date', 'death_date')
 
 
 class FOIABlankForm(FOIAWizardParent):
