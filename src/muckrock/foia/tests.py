@@ -37,6 +37,7 @@ def test_foia_model_unicode():
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user,
                                       jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'),
                                       title='Test 1', slug='test-1')
     nose.tools.eq_(unicode(foia), u'Test 1')
 
@@ -46,7 +47,8 @@ def test_foia_model_url():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
     nose.tools.eq_(foia.get_absolute_url(),
         reverse('foia-detail', kwargs={'idx': foia.id, 'slug': 'Test-1',
                                        'jurisdiction': 'massachusetts'}))
@@ -61,6 +63,7 @@ def test_foia_model_editable():
         """Test the given status"""
         foia = FOIARequest.objects.create(user=user, title=title,
                 jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                agency_type=AgencyType.objects.get(name='Clerk'),
                 slug=slugify(title), status=status)
         nose.tools.eq_(foia.is_editable(), value)
 
@@ -76,7 +79,8 @@ def test_foia_doc_model_unicode():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
     doc = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(unicode(doc), u'Test 1 Document Page 1')
 
@@ -86,7 +90,8 @@ def test_foia_doc_model_url():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
     doc = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(doc.get_absolute_url(),
         reverse('foia-doc-detail', kwargs={'idx': foia.id, 'slug': 'Test-1', 'page': 1,
@@ -98,7 +103,8 @@ def test_foia_doc_next_prev():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
     doc1 = FOIAImage.objects.create(foia=foia, page=1)
     doc2 = FOIAImage.objects.create(foia=foia, page=2)
     doc3 = FOIAImage.objects.create(foia=foia, page=3)
@@ -115,7 +121,8 @@ def test_foia_doc_total_pages():
 
     user = User.objects.create(username='Test_User')
     foia = FOIARequest.objects.create(user=user, slug='Test-1',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
     doc1 = FOIAImage.objects.create(foia=foia, page=1)
     nose.tools.eq_(doc1.total_pages(), 1)
 
@@ -136,7 +143,8 @@ def test_foia_email():
 
     user = User.objects.create(username='Test_User', email='user@test.com')
     foia = FOIARequest.objects.create(user=user, title='Test 1', slug='test-1', status='started',
-                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'))
+                                      jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                      agency_type=AgencyType.objects.get(name='Clerk'))
 
     nose.tools.eq_(len(mail.outbox), 0)
 
@@ -175,22 +183,27 @@ def test_foia_viewable():
 
     foia_a = FOIARequest.objects.create(user=user1, title='Test A', slug='test-a', status='started',
                                         jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                        agency_type=AgencyType.objects.get(name='Clerk'),
                                         embargo=False)
 
     foia_b = FOIARequest.objects.create(user=user1, title='Test B', slug='test-b', status='done',
                                         jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                        agency_type=AgencyType.objects.get(name='Clerk'),
                                         embargo=False, date_done=date.today() - timedelta(10))
 
     foia_c = FOIARequest.objects.create(user=user1, title='Test c', slug='test-c', status='done',
                                         jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                        agency_type=AgencyType.objects.get(name='Clerk'),
                                         embargo=True, date_done=date.today() - timedelta(10))
 
     foia_d = FOIARequest.objects.create(user=user1, title='Test d', slug='test-d', status='done',
                                         jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                        agency_type=AgencyType.objects.get(name='Clerk'),
                                         embargo=True, date_done=date.today() - timedelta(30))
 
     foia_e = FOIARequest.objects.create(user=user1, title='Test e', slug='test-e', status='done',
                                         jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+                                        agency_type=AgencyType.objects.get(name='Clerk'),
                                         embargo=True, date_done=date.today() - timedelta(90))
 
     foias = FOIARequest.objects.get_viewable(user1)
@@ -231,17 +244,23 @@ def test_manager_get_submitted():
 
     foias = []
     foias.append(FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
-        status='started', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='started', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 2', slug='test-2',
-        status='submitted', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='submitted', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 3', slug='test-3',
-        status='processed', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='processed', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 4', slug='test-4',
-        status='fix', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='fix', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 5', slug='test-5',
-        status='rejected', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='rejected', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 6', slug='test-6',
-        status='done', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='done', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
 
     nose.tools.eq_(set(FOIARequest.objects.get_submitted()), set(foias[1:]))
 
@@ -252,17 +271,23 @@ def test_manager_get_done():
 
     foias = []
     foias.append(FOIARequest.objects.create(user=user, title='Test 1', slug='test-1',
-        status='started', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='started', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 2', slug='test-2',
-        status='submitted', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='submitted', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 3', slug='test-3',
-        status='processed', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='processed', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 4', slug='test-4',
-        status='fix', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='fix', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 5', slug='test-5',
-        status='rejected', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='rejected', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
     foias.append(FOIARequest.objects.create(user=user, title='Test 6', slug='test-6',
-        status='done', jurisdiction=Jurisdiction.objects.get(slug='massachusetts')))
+        status='done', jurisdiction=Jurisdiction.objects.get(slug='massachusetts'),
+        agency_type=AgencyType.objects.get(name='Clerk')))
 
     nose.tools.eq_(set(FOIARequest.objects.get_done()), set(foias[5:]))
 
