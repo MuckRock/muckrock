@@ -1,0 +1,6 @@
+{% extends "request_templates/base.txt" %}
+{% block title %}Week of email for {{full_name}}{% endblock %}
+{% block agency %}Clerk{% endblock %}
+
+{% block content %}All incoming and outgoing e-mails for the 7-day period following {{start_date}} for {{full_name}}, a government employee in the {{department}}.{% endblock %}
+

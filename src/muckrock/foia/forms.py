@@ -140,6 +140,73 @@ class FOIADeathForm(FOIAWizardParent):
     clean = validate_date_order('birth_date', 'death_date')
 
 
+class FOIAEmailForm(FOIAWizardParent):
+    """A form to fill in an email request template"""
+
+    full_name = forms.CharField(help_text='Government employee you would like the emails of')
+    department = forms.CharField(help_text='Department or office he or she is in')
+    start_date = forms.DateField(help_text='Start of seven day period of emails',
+                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+
+class FOIAExpenseForm(FOIAWizardParent):
+    """A form to fill in an expense report request template"""
+
+    full_name = forms.CharField(help_text='Government employee you would like the emails of')
+    department = forms.CharField(help_text='Department or office he or she is in')
+    months_back = forms.IntegerField(help_text='How many months back')
+
+
+class FOIAMinutesForm(FOIAWizardParent):
+    """A form to fill in a meeting minutes request template"""
+
+    group = forms.CharField(help_text='Government group, board, or panel you would like the minutes of')
+    meetings_back = forms.IntegerField(help_text='How many meetings back')
+
+
+class FOIATravelForm(FOIAWizardParent):
+    """A form to fill in a travel expense request template"""
+
+    full_name = forms.CharField(help_text='Government employee you wouldlike travel recipets from')
+    department = forms.CharField(help_text='Department or office he or she is in')
+
+
+class FOIAAthleticForm(FOIAWizardParent):
+    """A form to fill in an athletic personal salary request template"""
+
+    school = forms.CharField(help_text='School you would like the athletic personnel salaries for')
+
+
+class FOIAPetForm(FOIAWizardParent):
+    """A form to fill in a pet license request template"""
+    pass
+
+
+class FOIAParkingForm(FOIAWizardParent):
+    """A form to fill in a waived parking ticket template"""
+
+    start_date = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+    end_date = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+
+class FOIRestaurantForm(FOIAWizardParent):
+    """A form to fill in a restaurant health inspeaction template"""
+
+    restaurant = forms.CharField()
+	address = forms.CharField(help_text='Full address of the restaurant',
+                              widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
+    past_records = forms.BooleanField(required=False, help_text='Check to obtain past records')
+    year = forms.IntegerField(required=False, help_text='Year you want past records back to')
+
+    # XXX year required if past is checked
+
+
+class FOIASexOffenderForm(FOIAWizardParent):
+    """A form to fill in a sex offender template"""
+    # how should blank ones work???
+    pass
+
+
 class FOIABlankForm(FOIAWizardParent):
     """A form with no specific template"""
 
@@ -152,18 +219,28 @@ class FOIABlankForm(FOIAWizardParent):
 
 Template = namedtuple('Template', 'id, name, category, level, form')
 TEMPLATES = {
-    'mug_shot': Template('mug_shot', 'Mug Shots',       'Crime',     'both',  FOIAMugShotForm),
-    'crime':    Template('crime',    'Criminal Record', 'Crime',     'state', FOIACriminalForm),
-    'assessor': Template('assessor', "Assessor's Data", 'Finances',  'local', FOIAAssessorForm),
-    'salary':   Template('salary',   'Salary Data',     'Finances',  'local', FOIASalaryForm),
-    'contract': Template('contract', 'Contracts',       'Finances',  'both',  FOIAContractForm),
-    'birth':    Template('birth',    'Birth Record',    'Genealogy', 'local', FOIABirthForm),
-    'death':    Template('death',    'Death Record',    'Genealogy', 'local', FOIADeathForm),
-    'none':     Template('none',     'None',            None,        'both',  FOIABlankForm),
+    'mug_shot': Template('mug_shot', 'Mug Shots',       'Crime',       'ls',  FOIAMugShotForm),
+    'crime':    Template('crime',    'Criminal Record', 'Crime',       's',   FOIACriminalForm),
+    'parking':  Template('parking'   'Parking Ticket Waivers','Crime', 'l',   FOIAParkingForm),
+    'sex':      Template('sex'       'Sex Offender Registry','Crime',  'l',   FOIASexOffenderForm),
+    'assessor': Template('assessor', "Assessor's Data", 'Finance',     'l',   FOIAAssessorForm),
+    'salary':   Template('salary',   'Salary Data',     'Finance',     'l',   FOIASalaryForm),
+    'contract': Template('contract', 'Contracts',       'Finance',     'ls',  FOIAContractForm),
+    'expense':  Template('expense',  'Expense Reports', 'Finance',     'lsf', FOIAExpenseForm),
+    'athletic': Template('athletic', 'Athletic Personel Salaris', 'Finance', 'ls', FOIAAthleticForm),
+    'travel':   Template('travel',   'Travel Expense Reports', 'Finance', 'lsf', FOIATravelForm),
+    'birth':    Template('birth',    'Birth Record',    'Genealogy',   'l',   FOIABirthForm),
+    'death':    Template('death',    'Death Record',    'Genealogy',   'l',   FOIADeathForm),
+    'emails':   Template('emails',   'Week of Email',   'Bureaucracy', 'lsf', FOIAEmailForm),
+    'minutes':  Template('minutes',  'Meeting Minutes', 'Bureaucracy', 'lsf', FOIAEmailForm),
+    'pets':     Template('pets',     'Pet Licensing Data', 'Health',   'l',   FOIAPetForm),
+    'restaurant': Template('restaurant', 'Restaurant Health Inspections', 'Health', 'l', FOIAPetForm),
+    'none':     Template('none',     'None',            None,          'lsf',  FOIABlankForm),
     }
 
-LOCAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'local')
-STATE_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'state')
+LOCAL_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 'l')
+STATE_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 's')
+FEDERAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'f')
 
 
 class FOIAWizardWhereForm(forms.Form):
@@ -203,6 +280,12 @@ class FOIAWhatStateForm(forms.Form):
     """A form to select what template to use for a state request"""
 
     template = forms.ChoiceField(choices=STATE_TEMPLATE_CHOICES)
+
+
+class FOIAWhatFederalForm(forms.Form):
+    """A form to select what template to use for a federal request"""
+
+    template = forms.ChoiceField(choices=FEDERAL_TEMPLATE_CHOICES)
 
 
 class FOIAWizard(DynamicSessionFormWizard):

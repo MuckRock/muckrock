@@ -2,7 +2,7 @@
 
 def make_template_choices(template_dict, level):
     """Make the data structure for the select form from the more generic data strcuture"""
-    templates = [t for t in template_dict.values() if t.level == level or t.level == 'both']
+    templates = [t for t in template_dict.values() if level in t.level]
     categories = set(t.category for t in templates)
 
     choices = []
