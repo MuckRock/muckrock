@@ -44,7 +44,7 @@ def update(request):
         """Get or create the user's profile"""
         try:
             return request.user.get_profile()
-        except Profile.DoesNotExist:
+        except Profile.DoesNotExist: # pragma: no cover
             # shouldn't happen
             return Profile(user=request.user, monthly_requests=MONTHLY_REQUESTS,
                            date_update=datetime.now())
