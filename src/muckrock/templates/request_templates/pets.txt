@@ -1,0 +1,6 @@
+{% extends "request_templates/base.txt" %}
+{% block title %}Pet licensing data for {{jurisdiction}}{% endblock %}
+{% block agency %}Health{% endblock %}
+
+{% block content %}All the pet licensing fata, including breed, owner address, and animal names for {{jurisdiction}}.{% endblock %}
+
