@@ -37,7 +37,7 @@ def page_links(page_obj):
     if pages[-1] != page_obj.paginator.num_pages:
         links += '&nbsp;&hellip;'
 
-    return '%s' % links
+    return links
 
 @register.filter
 @stringfilter
