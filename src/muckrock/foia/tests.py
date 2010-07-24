@@ -234,8 +234,6 @@ def test_foia_viewable():
     nose.tools.assert_true (foia_d.is_viewable(AnonymousUser()))
     nose.tools.assert_true (foia_e.is_viewable(AnonymousUser()))
 
-
-
  # manager
 @nose.tools.with_setup(setup)
 def test_manager_get_submitted():

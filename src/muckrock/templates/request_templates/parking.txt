@@ -1,6 +1,5 @@
 {% extends "request_templates/base.txt" %}
 {% block title %}Waived Parking Tickets between {{start_date}} and {{end_date}} in {{jursidction}}{% endblock %}
-{% block agency %}Police{% endblock %}
 
 {% block content %}A list of waived parking tickets processed between {{start_date}} and {{end_date}}, including the license plate on the citation, the name of the individual cited, and the name of the official who waived the ticket, and any documentation as to why these tickets were waived.{% endblock %}
 
