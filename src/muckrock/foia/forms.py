@@ -244,7 +244,7 @@ TEMPLATES = {
     'birth':    Template('birth',    'Birth Record',    'Genealogy',   'l',   FOIABirthForm),
     'death':    Template('death',    'Death Record',    'Genealogy',   'l',   FOIADeathForm),
     'emails':   Template('emails',   'Week of Email',   'Bureaucracy', 'lsf', FOIAEmailForm),
-    'minutes':  Template('minutes',  'Meeting Minutes', 'Bureaucracy', 'lsf', FOIAEmailForm),
+    'minutes':  Template('minutes',  'Meeting Minutes', 'Bureaucracy', 'lsf', FOIAMinutesForm),
     'pets':     Template('pets',     'Pet Licensing Data', 'Health',   'l',   FOIAPetForm),
     'restaurant': Template('restaurant', 'Restaurant Health Inspections','Health','l',FOIAPetForm),
     'none':     Template('none',     'None',            None,          'lsf',  FOIABlankForm),
