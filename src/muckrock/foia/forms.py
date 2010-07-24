@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -13,22 +14,24 @@ from django.template.loader import render_to_string
 from collections import namedtuple
 from datetime import datetime
 
-from foia.models import FOIARequest, STATE_JURISDICTIONS, LOCAL_JURISDICTIONS
-from foia.utils import make_template_choices, get_jurisdiction_display
+from foia.models import FOIARequest, Jurisdiction, AgencyType
+from foia.utils import make_template_choices
+from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
 from widgets import CalendarWidget
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
-    embargo = forms.BooleanField(label='Embargo', required=False,
+    embargo = forms.BooleanField(required=False,
                                  help_text='Putting an embargo on a request will hide it '
                                            'from others for 30 days after the response is received')
+    agency_type = forms.ModelChoiceField(label='Agency', queryset=AgencyType.objects.all())
 
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'jurisdiction', 'agency', 'embargo', 'request']
+        fields = ['title', 'jurisdiction', 'agency_type', 'embargo', 'request']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 'request': forms.Textarea(attrs={'style': 'width:450px; height: 200px;'}),
@@ -58,6 +61,8 @@ class FOIAMugShotForm(FOIAWizardParent):
     date_begin = forms.DateField(help_text='Range of dates in which the mug shots were taken',
                                  widget=CalendarWidget(attrs={'class': 'datepicker'}))
     date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+    clean = validate_date_order('date_begin', 'date_end')
 
 
 class FOIACriminalForm(FOIAWizardParent):
@@ -113,6 +118,8 @@ class FOIABirthForm(FOIAWizardParent):
             help_text='A brief sentence about your geneological interest in this individual',
             widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
 
+    clean = validate_date_order('birth_date', 'death_date')
+
 
 class FOIADeathForm(FOIAWizardParent):
     """A form to fill in a death certificate template"""
@@ -130,6 +137,87 @@ class FOIADeathForm(FOIAWizardParent):
             help_text='A brief sentence about your geneological interest in this individual',
             widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
 
+    clean = validate_date_order('birth_date', 'death_date')
+
+
+class FOIAEmailForm(FOIAWizardParent):
+    """A form to fill in an email request template"""
+
+    full_name = forms.CharField(help_text='Government employee you would like the emails of')
+    department = forms.CharField(help_text='Department or office he or she is in')
+    date_begin = forms.DateField(help_text='Start of seven day period of emails',
+                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+
+class FOIAExpenseForm(FOIAWizardParent):
+    """A form to fill in an expense report request template"""
+
+    full_name = forms.CharField(help_text='Government employee you would like the emails of')
+    department = forms.CharField(help_text='Department or office he or she is in')
+    months_back = forms.IntegerField(help_text='How many months back')
+
+
+class FOIAMinutesForm(FOIAWizardParent):
+    """A form to fill in a meeting minutes request template"""
+
+    group = forms.CharField(help_text='Government group, board, or panel you want the minutes from')
+    meetings_back = forms.IntegerField(help_text='How many meetings back')
+
+
+class FOIATravelForm(FOIAWizardParent):
+    """A form to fill in a travel expense request template"""
+
+    full_name = forms.CharField(help_text='Government employee you wouldlike travel recipets from')
+    department = forms.CharField(help_text='Department or office he or she is in')
+
+
+class FOIAAthleticForm(FOIAWizardParent):
+    """A form to fill in an athletic personal salary request template"""
+
+    school = forms.CharField(help_text='School you would like the athletic personnel salaries for')
+
+
+class FOIAPetForm(FOIAWizardParent):
+    """A form to fill in a pet license request template"""
+    pass
+
+
+class FOIAParkingForm(FOIAWizardParent):
+    """A form to fill in a waived parking ticket template"""
+
+    date_begin = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+    date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+    clean = validate_date_order('date_begin', 'date_end')
+
+
+class FOIRestaurantForm(FOIAWizardParent):
+    """A form to fill in a restaurant health inspeaction template"""
+
+    restaurant = forms.CharField()
+    address = forms.CharField(help_text='Full address of the restaurant',
+                              widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
+    past_records = forms.BooleanField(required=False, help_text='Check to obtain past records')
+    year = forms.IntegerField(required=False, help_text='Year you want past records back to')
+
+    def clean(self):
+        """Year is required only is past_records is checked"""
+
+        past_records = self.cleaned_data.get('past_records')
+        year = self.cleaned_data.get('year')
+
+        if past_records and year is None:
+            self._errors['year'] = self.error_class(
+                    ['Year is required if you would like to obtain past records'])
+
+        return self.cleaned_data
+
+
+class FOIASexOffenderForm(FOIAWizardParent):
+    """A form to fill in a sex offender template"""
+    # how should blank ones work???
+    pass
+
 
 class FOIABlankForm(FOIAWizardParent):
     """A form with no specific template"""
@@ -143,28 +231,38 @@ class FOIABlankForm(FOIAWizardParent):
 
 Template = namedtuple('Template', 'id, name, category, level, form')
 TEMPLATES = {
-    'mug_shot': Template('mug_shot', 'Mug Shots',       'Crime',     'both',  FOIAMugShotForm),
-    'crime':    Template('crime',    'Criminal Record', 'Crime',     'state', FOIACriminalForm),
-    'assessor': Template('assessor', "Assessor's Data", 'Finances',  'local', FOIAAssessorForm),
-    'salary':   Template('salary',   'Salary Data',     'Finances',  'local', FOIASalaryForm),
-    'contract': Template('contract', 'Contracts',       'Finances',  'both',  FOIAContractForm),
-    'birth':    Template('birth',    'Birth Record',    'Genealogy', 'local', FOIABirthForm),
-    'death':    Template('death',    'Death Record',    'Genealogy', 'local', FOIADeathForm),
-    'none':     Template('none',     'None',            None,        'both',  FOIABlankForm),
+    'mug_shot': Template('mug_shot', 'Mug Shots',       'Crime',       'ls',  FOIAMugShotForm),
+    'crime':    Template('crime',    'Criminal Record', 'Crime',       's',   FOIACriminalForm),
+    'parking':  Template('parking',  'Parking Ticket Waivers','Crime', 'l',   FOIAParkingForm),
+    'sex':      Template('sex',      'Sex Offender Registry','Crime',  'l',   FOIASexOffenderForm),
+    'assessor': Template('assessor', "Assessor's Data", 'Finance',     'l',   FOIAAssessorForm),
+    'salary':   Template('salary',   'Salary Data',     'Finance',     'l',   FOIASalaryForm),
+    'contract': Template('contract', 'Contracts',       'Finance',     'ls',  FOIAContractForm),
+    'expense':  Template('expense',  'Expense Reports', 'Finance',     'lsf', FOIAExpenseForm),
+    'athletic': Template('athletic', 'Athletic Personel Salaries','Finance','ls',FOIAAthleticForm),
+    'travel':   Template('travel',   'Travel Expense Reports', 'Finance', 'lsf', FOIATravelForm),
+    'birth':    Template('birth',    'Birth Record',    'Genealogy',   'l',   FOIABirthForm),
+    'death':    Template('death',    'Death Record',    'Genealogy',   'l',   FOIADeathForm),
+    'emails':   Template('emails',   'Week of Email',   'Bureaucracy', 'lsf', FOIAEmailForm),
+    'minutes':  Template('minutes',  'Meeting Minutes', 'Bureaucracy', 'lsf', FOIAEmailForm),
+    'pets':     Template('pets',     'Pet Licensing Data', 'Health',   'l',   FOIAPetForm),
+    'restaurant': Template('restaurant', 'Restaurant Health Inspections','Health','l',FOIAPetForm),
+    'none':     Template('none',     'None',            None,          'lsf',  FOIABlankForm),
     }
 
-LOCAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'local')
-STATE_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'state')
+LOCAL_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 'l')
+STATE_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 's')
+FEDERAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'f')
 
 
 class FOIAWizardWhereForm(forms.Form):
     """A form to select the jurisdiction to file the request in"""
 
-    level = forms.ChoiceField(choices=(('national', 'National'),
+    level = forms.ChoiceField(choices=(('federal', 'Federal'),
                                        ('state', 'State'),
                                        ('local', 'Local')))
-    state = forms.ChoiceField(choices=STATE_JURISDICTIONS, required=False)
-    local = forms.ChoiceField(choices=LOCAL_JURISDICTIONS, required=False)
+    state = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='s'), required=False)
+    local = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='l'), required=False)
 
     def clean(self):
         """Make sure state or local is required based off of choice of level"""
@@ -196,6 +294,12 @@ class FOIAWhatStateForm(forms.Form):
     template = forms.ChoiceField(choices=STATE_TEMPLATE_CHOICES)
 
 
+class FOIAWhatFederalForm(forms.Form):
+    """A form to select what template to use for a federal request"""
+
+    template = forms.ChoiceField(choices=FEDERAL_TEMPLATE_CHOICES)
+
+
 class FOIAWizard(DynamicSessionFormWizard):
     """Wizard to create FOIA requests"""
     # pylint: disable-msg=R0904
@@ -206,35 +310,38 @@ class FOIAWizard(DynamicSessionFormWizard):
         template = form_list[1].cleaned_data['template']
 
         level = form_list[0].cleaned_data['level']
-        if level == 'state':
-            jurisdiction = form_list[0].cleaned_data['state']
-        elif level == 'local':
+        if level == 'local':
             jurisdiction = form_list[0].cleaned_data['local']
+        elif level == 'state':
+            jurisdiction = form_list[0].cleaned_data['state']
+        elif level == 'federal':
+            jurisdiction = Jurisdiction.objects.get(level='f')
         else:
             # shouldn't happen
-            jurisdiction = ''
+            return render_to_response('error.html',
+                     {'message': 'There was an error furing form processing'},
+                     context_instance=RequestContext(request))
 
         template_file = 'request_templates/%s.txt' % template
         data = form_list[2].cleaned_data
-        data.update({'jurisdiction': get_jurisdiction_display(jurisdiction)})
+        data['jurisdiction'] = jurisdiction.name
 
-        title, agency, foia_request = \
+        title, agency_type, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,
                                                  RequestContext(request)).split('\n', 2))
-        assert title
         if len(title) > 70:
             title = title[:70]
         foia = FOIARequest.objects.create(user=request.user, status='started',
                                           jurisdiction=jurisdiction, title=title,
                                           request=foia_request, slug=slugify(title),
-                                          agency=agency)
+                                          agency_type=AgencyType.objects.get(name=agency_type))
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '
                                   'submit it when you are ready.')
 
         return HttpResponseRedirect(reverse('foia-update',
-                                    kwargs={'jurisdiction': jurisdiction,
+                                    kwargs={'jurisdiction': jurisdiction.slug,
                                             'idx': foia.id,
                                             'slug': slugify(title)}))
 
@@ -250,6 +357,9 @@ class FOIAWizard(DynamicSessionFormWizard):
             elif level == 'state':
                 self.append_form_list('FOIAWhatStateForm', 1)
                 self.update_extra_context({'template_choices': STATE_TEMPLATE_CHOICES})
+            elif level == 'federal':
+                self.append_form_list('FOIAWhatFederalForm', 1)
+                self.update_extra_context({'template_choices': FEDERAL_TEMPLATE_CHOICES})
 
         # add final template specific step
         if self.get_step_index() == 1:
@@ -271,8 +381,3 @@ class FOIAWizard(DynamicSessionFormWizard):
             return 'foia/foiawizard_form.html'
 
 
-form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
-form_dict.update((form.__name__, form) for form in
-                 [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm])
-foia_wizard = FOIAWizard(['FOIAWizardWhereForm'], form_dict)
-wizard_extra_context = {'state_list': STATE_JURISDICTIONS, 'local_list': LOCAL_JURISDICTIONS}

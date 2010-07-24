@@ -1,0 +1,6 @@
+{% extends "request_templates/base.txt" %}
+{% block title %}Most Recent Minutes for {{group}}.{% endblock %}
+{% block agency %}Clerk{% endblock %}
+
+{% block content %}The most recent minutes of the last {{meetings_back}} meetings for {{group}}.{% endblock %}
+
