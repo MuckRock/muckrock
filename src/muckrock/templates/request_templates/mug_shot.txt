@@ -1,5 +1,4 @@
 {% extends "request_templates/base.txt" %}
 {% block title %}Mugshots of {{full_name}} between {{date_begin}} and {{date_end}}{% endblock %}
-{% block agency %}Police{% endblock %}
 
 {% block content %}Any and all mug shots taken of {{full_name}} taken between the days of {{date_begin}} and {{date_end}}.{% endblock %}

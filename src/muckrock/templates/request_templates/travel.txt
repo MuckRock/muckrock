@@ -1,6 +1,5 @@
 {% extends "request_templates/base.txt" %}
 {% block title %}Travel Expense Reports for {{full_name}}{% endblock %}
-{% block agency %}Finance{% endblock %}
 
 {% block content %}All travel expense records for {{full_name}}, of the {{department}}.  This includes any copies of receipts r public credit card statements filed as part of the report, with sensitive date removed.{% endblock %}
 
