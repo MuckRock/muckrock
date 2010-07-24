@@ -65,7 +65,7 @@ def create(request):
     """Create a new foia request using the wizard"""
 
     # collect all the forms so that the wizard can access them
-    form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
+    form_dict = dict((t.__name__, t) for t in TEMPLATES.values())
     form_dict.update((form.__name__, form) for form in
                      [FOIAWizardWhereForm, FOIAWhatLocalForm,
                       FOIAWhatStateForm, FOIAWhatFederalForm])

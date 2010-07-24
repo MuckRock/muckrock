@@ -1,5 +1,4 @@
 {% autoescape off%}{% block title %}{% endblock %}
-{% block agency %}{% endblock %}
 
 To Whom It May Concern:
 {% if jurisdiction == 'United States of America' %}This is a request under the Freedom of Information Act.{% else %}Pursuant to the state Freedom of Information Act, G.L.M. c.4, €7, clause 26th, I hereby request the following records:{%endif %}
