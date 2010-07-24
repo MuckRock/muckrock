@@ -1,6 +1,5 @@
 {% extends "request_templates/base.txt" %}
 {% block title %}Birth Certificate for {{full_name}}{% endblock %}
-{% block agency %}Health{% endblock %}
 
 {% block content %}The birth certificate of {{full_name}}, born {{birth_date}} and deceased {{death_date}}.  {{interest}}{% endblock %}
 

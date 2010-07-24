@@ -1,0 +1,5 @@
+{% extends "request_templates/base.txt" %}
+{% block title %}Sex Offender Registry for {{jurisdiction}}{% endblock %}
+
+{% block content %}The state sex offender registry, in Excel format.{% endblock %}
+

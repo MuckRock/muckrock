@@ -171,7 +171,7 @@ class FOIAFile(models.Model):
 class Jurisdiction(models.Model):
     """A jursidiction that you may file FOIA requests in"""
 
-    levels = ( ('n', 'National'), ('s', 'State'), ('l', 'Local') )
+    levels = ( ('f', 'Federal'), ('s', 'State'), ('l', 'Local') )
 
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
