@@ -15,7 +15,7 @@ from django.views.generic import list_detail
 from datetime import datetime, timedelta
 
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
-                       FOIAWhatStateForm, FOIAWizard, TEMPLATES
+                       FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIAImage, Jurisdiction
 from accounts.models import RequestLimitError
 from muckrock.utils import process_get
@@ -67,7 +67,8 @@ def create(request):
     # collect all the forms so that the wizard can access them
     form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
     form_dict.update((form.__name__, form) for form in
-                     [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm])
+                     [FOIAWizardWhereForm, FOIAWhatLocalForm,
+                      FOIAWhatStateForm, FOIAWhatFederalForm])
     return FOIAWizard(['FOIAWizardWhereForm'], form_dict)(request)
 
 @login_required

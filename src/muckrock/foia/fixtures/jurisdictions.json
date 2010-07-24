@@ -83,7 +83,7 @@
             "abbrev": "MA", 
             "level": "s", 
             "name": "Massachusetts", 
-            "parent": null, 
+            "parent": 10, 
             "slug": "massachusetts"
         }
     }, 
@@ -96,6 +96,17 @@
             "name": "Amherst", 
             "parent": 1, 
             "slug": "amherst-ma"
+        }
+    },
+    {
+        "pk": 10, 
+        "model": "foia.jurisdiction", 
+        "fields": {
+            "abbrev": "USA", 
+            "level": "f", 
+            "name": "United States of America", 
+            "parent": null, 
+            "slug": "united-states-of-america"
         }
     }
 ]

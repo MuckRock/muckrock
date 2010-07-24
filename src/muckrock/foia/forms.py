@@ -145,7 +145,7 @@ class FOIAEmailForm(FOIAWizardParent):
 
     full_name = forms.CharField(help_text='Government employee you would like the emails of')
     department = forms.CharField(help_text='Department or office he or she is in')
-    start_date = forms.DateField(help_text='Start of seven day period of emails',
+    date_begin = forms.DateField(help_text='Start of seven day period of emails',
                                  widget=CalendarWidget(attrs={'class': 'datepicker'}))
 
 
@@ -160,7 +160,7 @@ class FOIAExpenseForm(FOIAWizardParent):
 class FOIAMinutesForm(FOIAWizardParent):
     """A form to fill in a meeting minutes request template"""
 
-    group = forms.CharField(help_text='Government group, board, or panel you would like the minutes of')
+    group = forms.CharField(help_text='Government group, board, or panel you want the minutes from')
     meetings_back = forms.IntegerField(help_text='How many meetings back')
 
 
@@ -185,20 +185,32 @@ class FOIAPetForm(FOIAWizardParent):
 class FOIAParkingForm(FOIAWizardParent):
     """A form to fill in a waived parking ticket template"""
 
-    start_date = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
-    end_date = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+    date_begin = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+    date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+
+    clean = validate_date_order('date_begin', 'date_end')
 
 
 class FOIRestaurantForm(FOIAWizardParent):
     """A form to fill in a restaurant health inspeaction template"""
 
     restaurant = forms.CharField()
-	address = forms.CharField(help_text='Full address of the restaurant',
+    address = forms.CharField(help_text='Full address of the restaurant',
                               widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
     past_records = forms.BooleanField(required=False, help_text='Check to obtain past records')
     year = forms.IntegerField(required=False, help_text='Year you want past records back to')
 
-    # XXX year required if past is checked
+    def clean(self):
+        """Year is required only is past_records is checked"""
+
+        past_records = self.cleaned_data.get('past_records')
+        year = self.cleaned_data.get('year')
+
+        if past_records and year is None:
+            self._errors['year'] = self.error_class(
+                    ['Year is required if you would like to obtain past records'])
+
+        return self.cleaned_data
 
 
 class FOIASexOffenderForm(FOIAWizardParent):
@@ -221,20 +233,20 @@ Template = namedtuple('Template', 'id, name, category, level, form')
 TEMPLATES = {
     'mug_shot': Template('mug_shot', 'Mug Shots',       'Crime',       'ls',  FOIAMugShotForm),
     'crime':    Template('crime',    'Criminal Record', 'Crime',       's',   FOIACriminalForm),
-    'parking':  Template('parking'   'Parking Ticket Waivers','Crime', 'l',   FOIAParkingForm),
-    'sex':      Template('sex'       'Sex Offender Registry','Crime',  'l',   FOIASexOffenderForm),
+    'parking':  Template('parking',  'Parking Ticket Waivers','Crime', 'l',   FOIAParkingForm),
+    'sex':      Template('sex',      'Sex Offender Registry','Crime',  'l',   FOIASexOffenderForm),
     'assessor': Template('assessor', "Assessor's Data", 'Finance',     'l',   FOIAAssessorForm),
     'salary':   Template('salary',   'Salary Data',     'Finance',     'l',   FOIASalaryForm),
     'contract': Template('contract', 'Contracts',       'Finance',     'ls',  FOIAContractForm),
     'expense':  Template('expense',  'Expense Reports', 'Finance',     'lsf', FOIAExpenseForm),
-    'athletic': Template('athletic', 'Athletic Personel Salaris', 'Finance', 'ls', FOIAAthleticForm),
+    'athletic': Template('athletic', 'Athletic Personel Salaries','Finance','ls',FOIAAthleticForm),
     'travel':   Template('travel',   'Travel Expense Reports', 'Finance', 'lsf', FOIATravelForm),
     'birth':    Template('birth',    'Birth Record',    'Genealogy',   'l',   FOIABirthForm),
     'death':    Template('death',    'Death Record',    'Genealogy',   'l',   FOIADeathForm),
     'emails':   Template('emails',   'Week of Email',   'Bureaucracy', 'lsf', FOIAEmailForm),
     'minutes':  Template('minutes',  'Meeting Minutes', 'Bureaucracy', 'lsf', FOIAEmailForm),
     'pets':     Template('pets',     'Pet Licensing Data', 'Health',   'l',   FOIAPetForm),
-    'restaurant': Template('restaurant', 'Restaurant Health Inspections', 'Health', 'l', FOIAPetForm),
+    'restaurant': Template('restaurant', 'Restaurant Health Inspections','Health','l',FOIAPetForm),
     'none':     Template('none',     'None',            None,          'lsf',  FOIABlankForm),
     }
 
@@ -246,7 +258,7 @@ FEDERAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'f')
 class FOIAWizardWhereForm(forms.Form):
     """A form to select the jurisdiction to file the request in"""
 
-    level = forms.ChoiceField(choices=(('national', 'National'),
+    level = forms.ChoiceField(choices=(('federal', 'Federal'),
                                        ('state', 'State'),
                                        ('local', 'Local')))
     state = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='s'), required=False)
@@ -298,10 +310,12 @@ class FOIAWizard(DynamicSessionFormWizard):
         template = form_list[1].cleaned_data['template']
 
         level = form_list[0].cleaned_data['level']
-        if level == 'state':
-            jurisdiction = form_list[0].cleaned_data['state']
-        elif level == 'local':
+        if level == 'local':
             jurisdiction = form_list[0].cleaned_data['local']
+        elif level == 'state':
+            jurisdiction = form_list[0].cleaned_data['state']
+        elif level == 'federal':
+            jurisdiction = Jurisdiction.objects.get(level='f')
         else:
             # shouldn't happen
             return render_to_response('error.html',
@@ -343,6 +357,9 @@ class FOIAWizard(DynamicSessionFormWizard):
             elif level == 'state':
                 self.append_form_list('FOIAWhatStateForm', 1)
                 self.update_extra_context({'template_choices': STATE_TEMPLATE_CHOICES})
+            elif level == 'federal':
+                self.append_form_list('FOIAWhatFederalForm', 1)
+                self.update_extra_context({'template_choices': FEDERAL_TEMPLATE_CHOICES})
 
         # add final template specific step
         if self.get_step_index() == 1:
