@@ -14,8 +14,9 @@ from django.views.generic import list_detail
 
 from datetime import datetime, timedelta
 
-from foia.forms import FOIARequestForm, FOIADeleteForm
-from foia.models import FOIARequest, FOIAImage
+from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
+                       FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+from foia.models import FOIARequest, FOIAImage, Jurisdiction
 from accounts.models import RequestLimitError
 from muckrock.utils import process_get
 
@@ -60,10 +61,22 @@ def _foia_form_handler(request, foia, action):
                               context_instance=RequestContext(request))
 
 @login_required
+def create(request):
+    """Create a new foia request using the wizard"""
+
+    # collect all the forms so that the wizard can access them
+    form_dict = dict((t.form.__name__, t.form) for t in TEMPLATES.values())
+    form_dict.update((form.__name__, form) for form in
+                     [FOIAWizardWhereForm, FOIAWhatLocalForm,
+                      FOIAWhatStateForm, FOIAWhatFederalForm])
+    return FOIAWizard(['FOIAWizardWhereForm'], form_dict)(request)
+
+@login_required
 def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_editable():
         return render_to_response('error.html',
@@ -80,7 +93,8 @@ def update(request, jurisdiction, slug, idx):
 def delete(request, jurisdiction, slug, idx):
     """Delete a non-submitted FOIA Request"""
 
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_deletable():
         return render_to_response('error.html',
@@ -140,7 +154,10 @@ def sorted_list(request, sort_order, field):
     if field not in ['title', 'status', 'user', 'jurisdiction']:
         raise Http404()
 
+    if field == 'jurisdiction':
+        field += '__name'
     ob_field = '-' + field if sort_order == 'desc' else field
+
     return list_detail.object_list(
                 request,
                 FOIARequest.objects.get_viewable(request.user).order_by(ob_field),
@@ -151,7 +168,8 @@ def sorted_list(request, sort_order, field):
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_viewable(request.user):
         raise Http404()
@@ -170,7 +188,8 @@ def detail(request, jurisdiction, slug, idx):
 def document_detail(request, jurisdiction, slug, idx, page):
     """Details of a single FOIA request"""
 
-    foia = get_object_or_404(FOIARequest, jurisdiction=jurisdiction, slug=slug, id=idx)
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     doc = get_object_or_404(FOIAImage, foia=foia, page=page)
 
     if not foia.is_viewable(request.user):

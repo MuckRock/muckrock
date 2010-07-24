@@ -6,7 +6,7 @@
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.get_full_name}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}
-	for the {{object.agency}} of {{object.get_jurisdiction_display}}
+	for the {{object.agency}} of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
 	</p>
 	<p>Status: {{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
@@ -44,9 +44,9 @@
 {% if user == object.user and object.is_editable %}
 	<h2>Actions</h2>
 	<ul>
-		<li><a href="{% url foia-update jurisdiction=object.jurisdiction,idx=object.id,slug=object.slug %}">Update</a></li>
+		<li><a href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></li>
 	{% if object.is_deletable %}
-		<li><a href="{% url foia-delete jurisdiction=object.jurisdiction,idx=object.id,slug=object.slug %}">Delete</a></li>
+		<li><a href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></li>
 	{% endif %}
 	</ul>
 	<div class="content-separator"></div>
