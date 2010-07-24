@@ -167,7 +167,7 @@ class FOIAMinutesForm(FOIAWizardParent):
 class FOIATravelForm(FOIAWizardParent):
     """A form to fill in a travel expense request template"""
 
-    full_name = forms.CharField(help_text='Government employee you wouldlike travel recipets from')
+    full_name = forms.CharField(help_text='Government employee you would like travel recipets from')
     department = forms.CharField(help_text='Department or office he or she is in')
 
 
