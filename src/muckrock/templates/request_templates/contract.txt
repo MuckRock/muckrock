@@ -1,6 +1,5 @@
 {% extends "request_templates/base.txt" %}{% load tags%}
 {% block title %}Contracts between {{jurisdiction}}'s {{department}} and {{companies|company_title}}{% endblock %}
-{% block agency %}Clerk{% endblock %}
 
 {% block content %}A full copy of all contracts and written agreements between {{jurisdiction}}'s {{department}} and the following companies:
 
