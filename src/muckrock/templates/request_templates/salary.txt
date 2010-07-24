@@ -1,6 +1,5 @@
 {% extends "request_templates/base.txt" %}
 {% block title %}Salaray Data for {{jurisdiction}}'s {{department}} in {{year}}{% endblock %}
-{% block agency %}Finance{% endblock %}
 
 {% block content %}A copy of the {{jurisdiction}}'s {{department}} annual salaries, including benefits, by position, for the year {{year}}.  We do not require names attached to the salary information, but just the titles.{% endblock %}
 
