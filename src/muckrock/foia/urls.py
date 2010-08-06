@@ -3,6 +3,7 @@ URL mappings for the FOIA application
 """
 
 from django.conf.urls.defaults import patterns, url
+from django.contrib.auth.decorators import login_required
 
 from foia import views
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
