@@ -306,7 +306,7 @@ class FOIABlankForm(FOIAWizardParent):
             widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
 
     slug = 'none'
-    name = 'None'
+    name = 'Write My Own Request'
     category = None
     level = 'lsf'
     agency = 'Clerk'
