@@ -29,6 +29,16 @@
 	</ul>
 	{% endif %}
 	</p>
+	{% if object.is_embargo and not object.date_done %}
+	<p>
+	This request is embargoed and will not be visible to others until 30 days after a response is received.
+	</p>
+	{% endif %}
+	{% if object.is_embargo and object.date_done %}
+	<p>
+	This request is embargoed and will not be visible until {{ object.embargo_date }}.
+	</p>
+	{% endif %}
 
 	<div class="request"><strong>Request:</strong><br />{{object.request|linebreaks}}</div>
 	{% if object.response %}
