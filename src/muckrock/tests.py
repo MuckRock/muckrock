@@ -3,9 +3,15 @@ Tests for site level functionality and helper functions for application tests
 """
 
 from django.core.urlresolvers import reverse
-from django.test.client import Client
+from django.test import TestCase
 
 import nose.tools
+
+from utils import try_or_none
+
+# allow methods that could be functions and too many public methods in tests
+# pylint: disable-msg=R0201
+# pylint: disable-msg=R0904
 
  # helper functions for view testing
 def get_allowed(client, url, templates=None, context=None):
@@ -52,11 +58,20 @@ def get_404(client, url):
 
     return response
 
- # tests for base level pages
-def test_views():
-    """Test views"""
 
-    client = Client()
-    get_allowed(client, reverse('index'))
-    get_allowed(client, reverse('sitemap'))
-    get_allowed(client, '/search/')
+class TestAccountFunctional(TestCase):
+    """Functional tests for account"""
+
+    # test utils
+    def test_try_or_none(self):
+        """Test the try_or_none util function"""
+        nose.tools.eq_(try_or_none(ZeroDivisionError, lambda x: 10 / x, 5), 2)
+        nose.tools.eq_(try_or_none(ZeroDivisionError, lambda x: 10 / x, 0), None)
+
+    # tests for base level views
+    def test_views(self):
+        """Test views"""
+
+        get_allowed(self.client, reverse('index'))
+        get_allowed(self.client, reverse('sitemap'))
+        get_allowed(self.client, '/search/')

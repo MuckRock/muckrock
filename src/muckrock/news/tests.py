@@ -2,141 +2,113 @@
 Tests using nose for the news application
 """
 
-from datetime import datetime, timedelta
-
-from django.contrib.auth.models import User
-from django.test.client import Client
 from django.core.urlresolvers import reverse
+from django.test import TestCase
+
 import nose.tools
+from datetime import datetime
 
 from news.models import Article
 from muckrock.tests import get_allowed, get_404
 
-def setup():
-    """Clean the database before each test"""
-    User.objects.all().delete()
-    Article.objects.all().delete()
+# allow methods that could be functions and too many public methods in tests
+# pylint: disable-msg=R0201
+# pylint: disable-msg=R0904
 
- # models
-@nose.tools.with_setup(setup)
-def test_article_model_unicode():
-    """Test the Article model's __unicode__ method"""
-    user = User.objects.create(username='Test_User')
-    article = Article.objects.create(title='Test Article', author=user)
-    nose.tools.eq_(unicode(article), u'Test Article')
+class TestNewsUnit(TestCase):
+    """Unit tests for news"""
+    fixtures = ['test_users.json', 'test_news.json']
 
-@nose.tools.with_setup(setup)
-def test_article_model_url():
-    """Test the Article model's get_absolute_url method"""
-    user = User.objects.create(username='Test_User')
-    article = Article.objects.create(title='Test Article', author=user,
-                                     pub_date=datetime(1984, 12, 29), slug='test-article')
-    nose.tools.eq_(article.get_absolute_url(), reverse('news-detail',
-        kwargs={'year': 1984, 'month': 'dec', 'day': 29, 'slug': 'test-article'}))
-    #
+    def setUp(self):
+        """Set up tests"""
+        # pylint: disable-msg=C0103
+        self.article = Article.objects.get(pk=1)
 
- # manager
-@nose.tools.with_setup(setup)
-def test_manager_get_published():
-    """Test the Article Manager's get_punlished method"""
-    tomorrow = datetime.now() + timedelta(1)
-    user = User.objects.create(username='Test_User')
+    # models
+    def test_article_model_unicode(self):
+        """Test the Article model's __unicode__ method"""
+        nose.tools.eq_(unicode(self.article), 'Test Article 1')
 
-    article1 = Article.objects.create(title='Test Article 1', pub_date=datetime(1984, 12, 29),
-                                     author=user, slug='test-article-1', publish=True)
-    Article.objects.create(title='Test Article 2', pub_date=datetime(1989, 12, 29),
-                          author=user, slug='test-article-2', publish=False)
-    Article.objects.create(title='Test Article 3', pub_date=tomorrow,
-                          author=user, slug='test-article-3', publish=True)
-    Article.objects.create(title='Test Article 4', pub_date=tomorrow,
-                          author=user, slug='test-article-4', publish=False)
-    article5 = Article.objects.create(title='Test Article 5', pub_date=datetime(1999, 1, 1),
-                                     author=user, slug='test-article-5', publish=True)
+    def test_article_model_url(self):
+        """Test the Article model's get_absolute_url method"""
+        nose.tools.eq_(self.article.get_absolute_url(), reverse('news-detail',
+            kwargs={'year': 1984, 'month': 'dec', 'day': 29, 'slug': 'test-article-1'}))
 
-    nose.tools.eq_(set(Article.objects.get_published()), set([article1, article5]))
+    # manager
+    def test_manager_get_published(self):
+        """Test the Article Manager's get_punlished method"""
+        nose.tools.ok_(all(a.publish and a.pub_date <= datetime.now()
+                           for a in Article.objects.get_published()))
+        nose.tools.eq_(len(Article.objects.get_published()), 5)
 
-@nose.tools.with_setup(setup)
-def test_manager_get_drafts():
-    """Test the Article Manager's get_drafts method"""
-    tomorrow = datetime.now() + timedelta(1)
-    user = User.objects.create(username='Test_User')
+    def test_manager_get_drafts(self):
+        """Test the Article Manager's get_drafts method"""
+        nose.tools.ok_(all(not a.publish for a in Article.objects.get_drafts()))
+        nose.tools.eq_(len(Article.objects.get_drafts()), 2)
 
-    Article.objects.create(title='Test Article 1', pub_date=datetime(1984, 12, 29),
-                          author=user, slug='test-article-1', publish=True)
-    article2 = Article.objects.create(title='Test Article 2', pub_date=datetime(1989, 12, 29),
-                                     author=user, slug='test-article-2', publish=False)
-    Article.objects.create(title='Test Article 3', pub_date=tomorrow,
-                          author=user, slug='test-article-3', publish=True)
-    article4 = Article.objects.create(title='Test Article 4', pub_date=tomorrow,
-                                     author=user, slug='test-article-4', publish=False)
-    Article.objects.create(title='Test Article 5', pub_date=datetime(1999, 1, 1),
-                          author=user, slug='test-article-5', publish=True)
 
-    nose.tools.eq_(set(Article.objects.get_drafts()), set([article2, article4]))
+class TestNewsFunctional(TestCase):
+    """Functional tests for news"""
+    fixtures = ['test_users.json', 'test_news.json']
 
- # views
-@nose.tools.with_setup(setup)
-def test_views():
-    """Test views"""
+    # views
+    def test_news_index(self):
+        """Should return the 5 lates articles"""
+        response = get_allowed(self.client, reverse('news-index'),
+                               ['news/article_archive.html', 'news/base.html'])
+        nose.tools.eq_(len(response.context['latest']), 5)
 
-    client = Client()
-    tomorrow = datetime.now() + timedelta(1)
-    user = User.objects.create(username='Test_User')
+    def test_news_archive_year(self):
+        """Should return all articles in the given year"""
+        response = get_allowed(self.client, reverse('news-archive-year', kwargs={'year': 1999}),
+                               ['news/article_archive_year.html', 'news/base.html'])
+        nose.tools.eq_(len(response.context['object_list']), 4)
+        nose.tools.ok_(all(article.pub_date.year == 1999
+                           for article in response.context['object_list']))
 
-    Article.objects.create(title='Test Article 1', pub_date=datetime(1984, 12, 29),
-                          author=user, slug='test-article-1', publish=True)
-    Article.objects.create(title='Test Article 2', pub_date=datetime(1989, 12, 29),
-                          author=user, slug='test-article-2', publish=False)
-    Article.objects.create(title='Test Article 3', pub_date=tomorrow,
-                          author=user, slug='test-article-3', publish=True)
-    Article.objects.create(title='Test Article 4', pub_date=tomorrow,
-                          author=user, slug='test-article-4', publish=False)
-    article5 = Article.objects.create(title='Test Article 5', pub_date=datetime(1999, 1, 1),
-                                      author=user, slug='test-article-5', publish=True)
-    Article.objects.create(title='Test Article 6', pub_date=datetime(1999, 1, 1),
-                          author=user, slug='test-article-6', publish=True)
-    Article.objects.create(title='Test Article 7', pub_date=datetime(1999, 1, 2),
-                          author=user, slug='test-article-7', publish=True)
-    Article.objects.create(title='Test Article 8', pub_date=datetime(1999, 2, 2),
-                          author=user, slug='test-article-8', publish=True)
+    def test_news_archive_month(self):
+        """Should return all articel from the given month"""
+        response = get_allowed(self.client,
+                               reverse('news-archive-month', kwargs={'year': 1999, 'month': 'jan'}),
+                               ['news/article_archive_month.html', 'news/base.html'])
+        nose.tools.eq_(len(response.context['object_list']), 3)
+        nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1
+                           for article in response.context['object_list']))
 
-    response = get_allowed(client, reverse('news-index'),
-                           ['news/article_archive.html', 'news/base.html'])
-    nose.tools.eq_(len(response.context['latest']), 5)
+    def test_news_archive_day(self):
+        """Should return all article for the given day"""
+        response = get_allowed(self.client,
+                               reverse('news-archive-day',
+                                       kwargs={'year': 1999, 'month': 'jan', 'day': 1}),
+                               ['news/article_archive_day.html', 'news/base.html'])
+        nose.tools.eq_(len(response.context['object_list']), 2)
+        nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1 and
+                           article.pub_date.day == 1
+                           for article in response.context['object_list']))
 
-    response = get_allowed(client, reverse('news-archive-year', kwargs={'year': 1999}),
-                           ['news/article_archive_year.html', 'news/base.html'])
-    nose.tools.eq_(len(response.context['object_list']), 4)
-    nose.tools.ok_(all(article.pub_date.year == 1999
-                       for article in response.context['object_list']))
+    def test_news_archive_day_empty(self):
+        """Should return nothing for a day with no articles"""
+        response = get_allowed(self.client,
+                               reverse('news-archive-day',
+                                       kwargs={'year': 1999, 'month': 'mar', 'day': 1}),
+                               ['news/article_archive_day.html', 'news/base.html'])
+        nose.tools.eq_(len(response.context['object_list']), 0)
 
-    response = get_allowed(client, reverse('news-archive-month',
-                                           kwargs={'year': 1999, 'month': 'jan'}),
-                           ['news/article_archive_month.html', 'news/base.html'])
-    nose.tools.eq_(len(response.context['object_list']), 3)
-    nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1
-                       for article in response.context['object_list']))
+    def test_news_detail(self):
+        """News detail should display the given article"""
+        response = get_allowed(self.client,
+                               reverse('news-detail',
+                                       kwargs={'year': 1999, 'month': 'jan', 'day': 1,
+                                               'slug': 'test-article-5'}),
+                               ['news/article_detail.html', 'news/base.html'])
+        nose.tools.eq_(response.context['object'], Article.objects.get(slug='test-article-5'))
 
-    response = get_allowed(client, reverse('news-archive-day',
-                                           kwargs={'year': 1999, 'month': 'jan', 'day': 1}),
-                           ['news/article_archive_day.html', 'news/base.html'])
-    nose.tools.eq_(len(response.context['object_list']), 2)
-    nose.tools.ok_(all(article.pub_date.year == 1999 and article.pub_date.month == 1 and
-                       article.pub_date.day == 1
-                       for article in response.context['object_list']))
+    def test_news_detail_404(self):
+        """Should give a 404 error for a article that doesn't exist"""
+        get_404(self.client, reverse('news-detail', kwargs={'year': 1999, 'month': 'mar',
+                                                            'day': 1, 'slug': 'test-article-1'}))
 
-    response = get_allowed(client, reverse('news-detail',
-                                           kwargs={'year': 1999, 'month': 'jan', 'day': 1,
-                                                   'slug': 'test-article-5'}),
-                           ['news/article_detail.html', 'news/base.html'])
-    nose.tools.eq_(response.context['object'], article5)
+    def test_feed(self):
+        """Should have a feed"""
+        get_allowed(self.client, reverse('news-feed'))
 
-    response = get_allowed(client, reverse('news-archive-day',
-                                           kwargs={'year': 1999, 'month': 'mar', 'day': 1}),
-                           ['news/article_archive_day.html', 'news/base.html'])
-    nose.tools.eq_(len(response.context['object_list']), 0)
-
-    response = get_allowed(client, reverse('news-feed'))
-
-    get_404(client, reverse('news-detail', kwargs={'year': 1999, 'month': 'mar',
-                                                   'day': 1, 'slug': 'test-article-1'}))
