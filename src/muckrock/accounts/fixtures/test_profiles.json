@@ -1,0 +1,47 @@
+[
+    {
+        "pk": 1, 
+        "model": "accounts.profile", 
+        "fields": {
+            "city": "Cambridge", 
+            "address1": "123 Main St", 
+            "address2": "Apt 4", 
+            "date_update": "2009-12-29", 
+            "phone": "617-555-1234", 
+            "state": "MA", 
+            "user": 1, 
+            "monthly_requests": 25, 
+            "zip_code": "02140"
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "accounts.profile", 
+        "fields": {
+            "city": "Boston", 
+            "address1": "456 Main St", 
+            "address2": "", 
+            "date_update": "2009-12-29", 
+            "phone": "617-555-5678", 
+            "state": "MA", 
+            "user": 2, 
+            "monthly_requests": 10, 
+            "zip_code": "02140"
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "accounts.profile", 
+        "fields": {
+            "city": "Allston", 
+            "address1": "9 Main St", 
+            "address2": "Apt 2", 
+            "date_update": "2009-12-29", 
+            "phone": "617-555-0000", 
+            "state": "MA", 
+            "user": 3, 
+            "monthly_requests": 0, 
+            "zip_code": "02140"
+        }
+    }
+]

@@ -36,11 +36,13 @@ class FOIARequestManager(models.Manager):
         if user.is_authenticated():
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
-                                ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30))))
+                                ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30)) &
+                                ~Q(embargo=True, date_done=None)))
         else:
             # anonymous user, filter out drafts and embargoes
-            return self.exclude(status='started')\
-                       .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30))
+            return self.exclude(status='started') \
+                       .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30)) \
+                       .exclude(embargo=True, date_done=None)
 
 
 class FOIARequest(models.Model):
@@ -92,14 +94,19 @@ class FOIARequest(models.Model):
         """Is this request viewable?"""
         return self.user == user or (self.status != 'started' and not self.is_embargo())
 
-    def is_embargo(self, user=None):
+    def is_embargo(self):
         """Is this request currently on an embargo?"""
-        if user and user == self.user:
-            # Don't embargo from yourself
+        if not self.embargo:
             return False
+        elif not self.date_done:
+            return True
         else:
-            return self.embargo and self.date_done and \
-                    (date.today() - self.date_done) < timedelta(30)
+            return date.today() < self.embargo_date()
+
+    def embargo_date(self):
+        """The date this request comes off of embargo"""
+        if self.embargo and self.date_done:
+            return self.date_done + timedelta(30)
 
     def doc_first_page(self):
         """Get the first page of this requests corresponding document"""

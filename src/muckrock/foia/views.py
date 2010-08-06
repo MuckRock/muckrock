@@ -18,7 +18,6 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOI
                        FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIAImage, Jurisdiction
 from accounts.models import RequestLimitError
-from muckrock.utils import process_get
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to create and update a FOIA request"""
@@ -54,7 +53,7 @@ def _foia_form_handler(request, foia, action):
                                       context_instance=RequestContext(request))
 
     else:
-        form = FOIARequestForm(initial=process_get(request.GET), instance=foia)
+        form = FOIARequestForm(initial=dict(request.GET.items()), instance=foia)
 
     return render_to_response('foia/foiarequest_form.html',
                               {'form': form, 'action': action},
