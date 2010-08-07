@@ -19,9 +19,10 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # pylint: disable-msg=R0201
 # pylint: disable-msg=R0904
 
-class TestFOIAUnit(TestCase):
-    """Unit tests for FOIA"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_foia.json']
+class TestFOIARequestUnit(TestCase):
+    """Unit tests for FOIARequests"""
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_foiarequests.json']
 
     def setUp(self):
         """Set up tests"""
@@ -128,49 +129,6 @@ class TestFOIAUnit(TestCase):
         nose.tools.assert_true (foias[3].is_viewable(AnonymousUser()))
         nose.tools.assert_true (foias[4].is_viewable(AnonymousUser()))
 
-    # Todo: Fix tests from here down
-    def test_foia_doc_model_unicode(self):
-        """Test FOIA Image model's __unicode__ method"""
-
-        doc = FOIAImage.objects.create(foia=self.foia, page=1)
-        nose.tools.eq_(unicode(doc), 'Test 1 Document Page 1')
-
-    def test_foia_doc_model_url(self):
-        """Test FOIA Images model's get_absolute_url method"""
-
-        doc = FOIAImage.objects.create(foia=self.foia, page=1)
-        nose.tools.eq_(doc.get_absolute_url(),
-            reverse('foia-doc-detail', kwargs={'idx': self.foia.id, 'slug': 'test-1', 'page': 1,
-                                               'jurisdiction': 'massachusetts'}))
-
-    def test_foia_doc_next_prev(self):
-        """Test FOIA Images model's next and previous methods"""
-
-        doc1 = FOIAImage.objects.create(foia=self.foia, page=1)
-        doc2 = FOIAImage.objects.create(foia=self.foia, page=2)
-        doc3 = FOIAImage.objects.create(foia=self.foia, page=3)
-        nose.tools.eq_(doc1.previous(), None)
-        nose.tools.eq_(doc1.next(), doc2)
-        nose.tools.eq_(doc2.previous(), doc1)
-        nose.tools.eq_(doc2.next(), doc3)
-        nose.tools.eq_(doc3.previous(), doc2)
-        nose.tools.eq_(doc3.next(), None)
-
-    def test_foia_doc_total_pages(self):
-        """Test FOIA Images model's total pages method"""
-
-        doc1 = FOIAImage.objects.create(foia=self.foia, page=1)
-        nose.tools.eq_(doc1.total_pages(), 1)
-
-        doc2 = FOIAImage.objects.create(foia=self.foia, page=2)
-        nose.tools.eq_(doc1.total_pages(), 2)
-        nose.tools.eq_(doc2.total_pages(), 2)
-
-        doc3 = FOIAImage.objects.create(foia=self.foia, page=3)
-        nose.tools.eq_(doc1.total_pages(), 3)
-        nose.tools.eq_(doc2.total_pages(), 3)
-        nose.tools.eq_(doc3.total_pages(), 3)
-
      # manager
     def test_manager_get_submitted(self):
         """Test the FOIA Manager's get_submitted method"""
@@ -194,9 +152,59 @@ class TestFOIAUnit(TestCase):
                         foia.status in ['started', 'submitted', 'processed', 'fix', 'rejected'])
 
 
+class TestFOIAImageUnit(TestCase):
+    """Unit tests for FOIARequests"""
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_foiarequests.json', 'test_foiaimages.json']
+
+    def setUp(self):
+        """Set up tests"""
+        # pylint: disable-msg=C0103
+        self.foia = FOIARequest.objects.get(pk=1)
+        self.doc = FOIAImage.objects.get(pk=1)
+
+    # models
+    def test_foia_doc_model_unicode(self):
+        """Test FOIA Image model's __unicode__ method"""
+        nose.tools.eq_(unicode(self.doc), 'Test 5 Document Page 1')
+
+    def test_foia_doc_model_url(self):
+        """Test FOIA Images model's get_absolute_url method"""
+        nose.tools.eq_(self.doc.get_absolute_url(),
+            reverse('foia-doc-detail', kwargs={'idx': self.doc.foia.id, 'slug': self.doc.foia.slug,
+                                               'jurisdiction': self.doc.foia.jurisdiction.slug,
+                                               'page': self.doc.page}))
+
+    def test_foia_doc_next_prev(self):
+        """Test FOIA Images model's next and previous methods"""
+
+        foia = FOIARequest.objects.get(pk=10)
+        doc1 = FOIAImage.objects.get(foia=foia, page=1)
+        doc2 = FOIAImage.objects.get(foia=foia, page=2)
+        doc3 = FOIAImage.objects.get(foia=foia, page=3)
+        nose.tools.eq_(doc1.previous(), None)
+        nose.tools.eq_(doc1.next(), doc2)
+        nose.tools.eq_(doc2.previous(), doc1)
+        nose.tools.eq_(doc2.next(), doc3)
+        nose.tools.eq_(doc3.previous(), doc2)
+        nose.tools.eq_(doc3.next(), None)
+
+    def test_foia_doc_total_pages(self):
+        """Test FOIA Images model's total pages method"""
+        foia = FOIARequest.objects.get(pk=10)
+        doc1 = FOIAImage.objects.get(foia=foia, page=1)
+        doc2 = FOIAImage.objects.get(foia=foia, page=2)
+        doc3 = FOIAImage.objects.get(foia=foia, page=3)
+
+        nose.tools.eq_(self.doc.total_pages(), 1)
+        nose.tools.eq_(doc1.total_pages(), 3)
+        nose.tools.eq_(doc2.total_pages(), 3)
+        nose.tools.eq_(doc3.total_pages(), 3)
+
+
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
-    fixtures = ['jurisdictions.json', 'agency_types.json']
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json']
 
     # views
     def test_anon_views(self):
