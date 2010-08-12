@@ -27,7 +27,7 @@ sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
 urlpatterns = patterns('',
     url(r'^$', direct_to_template, {'template': 'beta_home.html'}, name='index'),
     url(r'^accounts/', include(accounts.urls)),
-    url(r'^foia/', include(foia.urls)),
+    url(r'^foi/', include(foia.urls)),
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/$', include(haystack.urls)),
