@@ -3,7 +3,6 @@ URL mappings for the FOIA application
 """
 
 from django.conf.urls.defaults import patterns, url
-from django.contrib.auth.decorators import login_required
 
 from foia import views
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
@@ -22,8 +21,8 @@ urlpatterns = patterns('',
     url(r'^view/%s/doc/(?P<page>\d+)/$' % foia_url,
                                         views.document_detail, name='foia-doc-detail'),
     url(r'^update/$',                   views.update_list, name='foia-update-list'),
-    url(r'^feeds/submitted/$',          login_required(LatestSubmittedRequests()), name='foia-submitted-feed'),
-    url(r'^feeds/completed/$',          login_required(LatestDoneRequests()), name='foia-done-feed'),
     url(r'^update/%s/$' % foia_url,     views.update, name='foia-update'),
     url(r'^delete/%s/$' % foia_url,     views.delete, name='foia-delete'),
+    url(r'^feeds/submitted/$',          LatestSubmittedRequests(), name='foia-submitted-feed'),
+    url(r'^feeds/completed/$',          LatestDoneRequests(), name='foia-done-feed'),
 )

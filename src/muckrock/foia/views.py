@@ -127,7 +127,6 @@ def update_list(request):
                                    paginate_by=10,
                                    template_name='foia/foiarequest_update_list.html')
 
-@login_required
 def list_(request):
     """List all viewable FOIA requests"""
 
@@ -135,7 +134,6 @@ def list_(request):
                                    FOIARequest.objects.get_viewable(request.user),
                                    paginate_by=10)
 
-@login_required
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
@@ -144,7 +142,6 @@ def list_by_user(request, user_name):
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user),
                                    paginate_by=10)
 
-@login_required
 def sorted_list(request, sort_order, field):
     """Sorted list of FOIA requests"""
 
@@ -163,7 +160,6 @@ def sorted_list(request, sort_order, field):
                 paginate_by=10,
                 extra_context={'sort_by': field, 'sort_order': sort_order})
 
-@login_required
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
@@ -183,7 +179,6 @@ def detail(request, jurisdiction, slug, idx):
                               context,
                               context_instance=RequestContext(request))
 
-@login_required
 def document_detail(request, jurisdiction, slug, idx, page):
     """Details of a single FOIA request"""
 

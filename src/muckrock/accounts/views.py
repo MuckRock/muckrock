@@ -68,7 +68,6 @@ def update(request):
     return render_to_response('registration/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
-@login_required
 def profile(request, user_name=None):
     """View a user's profile"""
 
