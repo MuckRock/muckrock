@@ -8,12 +8,10 @@ from django.conf.urls.defaults import handler404, handler500
 # pylint: enable-msg=W0611
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
-from django.contrib.auth.decorators import login_required
 from django.views.generic.simple import direct_to_template
 from django.contrib.sitemaps.views import sitemap
-from django.views.generic.date_based import archive_index
 
-from haystack.views import basic_search
+import haystack.urls
 
 import accounts.urls, foia.urls, news.urls
 import settings
@@ -32,7 +30,7 @@ urlpatterns = patterns('',
     url(r'^foia/', include(foia.urls)),
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/$', login_required(basic_search)),
+    url(r'^search/$', include(haystack.urls)),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap')
 )
 
