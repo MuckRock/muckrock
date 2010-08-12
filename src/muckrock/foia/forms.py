@@ -47,11 +47,7 @@ class FOIADeleteForm(forms.Form):
 
 class FOIAWizardParent(forms.Form):
     """A form with generic options for every template"""
-
-    max_pay = forms.IntegerField(label='What will you pay for the request?',
-                                 help_text="We'll cover the first $5",
-                                 min_value=5, initial=5,
-                                 widget=forms.TextInput(attrs={'size': 2}))
+    # there used to be something here - I'm leaving it for now just in case
 
 class FOIAMugShotForm(FOIAWizardParent):
     """A form to fill in a mug shot template"""
@@ -90,8 +86,8 @@ class FOIAAssessorForm(FOIAWizardParent):
     year = forms.IntegerField(min_value=1900, max_value=last_year, initial=last_year,
                               help_text='The year for which you want the data')
 
-    slug = 'assesor'
-    name = "Assesor's Data"
+    slug = 'assessor'
+    name = "Assessor's Data"
     category = 'Finance'
     level = 'l'
     agency = 'Clerk'
@@ -106,7 +102,7 @@ class FOIASalaryForm(FOIAWizardParent):
                               help_text='The year for which you want the data')
 
     slug = 'salary'
-    name = 'Salaray Data'
+    name = 'Salary Data'
     category = 'Finance'
     level = 'l'
     agency = 'Finance'
@@ -226,12 +222,12 @@ class FOIATravelForm(FOIAWizardParent):
     agency = 'Finance'
 
 class FOIAAthleticForm(FOIAWizardParent):
-    """A form to fill in an athletic personal salary request template"""
+    """A form to fill in an athletic personnel salary request template"""
 
     school = forms.CharField(help_text='School you would like the athletic personnel salaries for')
 
     slug = 'athletic'
-    name = 'Athletic Personel Salaries'
+    name = 'Athletic Personnel Salaries'
     category = 'Finance'
     level = 'ls'
     agency = 'Finance'

@@ -334,7 +334,7 @@ class TestFOIAFunctional(TestCase):
         # test for submitting a foia request for enough credits
         # tests for the wizard
 
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit',
+        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
                      'jurisdiction': Jurisdiction.objects.get(slug='boston-ma').pk,
                      'agency_type': AgencyType.objects.get(name='Clerk').pk}
                      

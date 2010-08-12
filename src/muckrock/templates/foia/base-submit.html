@@ -3,13 +3,13 @@
 
 {% load tags %}
 
-{% block title %}FOIA Requests{% endblock %}
-{% block headline %}FOIA{% endblock %}
+{% block title %}FOI Requests{% endblock %}
+{% block headline %}FOI{% endblock %}
 
 {% block sub-nav %}
 <ul class="tabbed">
 	<li class="{% active request "^/foia/new/" %}"><a href="{% url foia-create %}">Submit a Request</a></li>
-	<li class="{% active request "^/foia/update/" %}"><a href="{% url foia-update-list %}">Edit My Requests</a></li>
+	<li class="{% active request "^/foia/update/" %}"><a href="{% url foia-update-list %}">Edit My Drafts</a></li>
 </ul>
 {% endblock %}
 
