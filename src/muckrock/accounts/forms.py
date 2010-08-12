@@ -3,6 +3,7 @@ Forms for accounts application
 """
 
 from django import forms
+from django.contrib.auth.forms import UserCreationForm as UCF
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
@@ -40,3 +41,14 @@ class UserChangeForm(ProfileForm):
             raise forms.ValidationError('A user with that e-mail address already exists.')
 
         return email
+
+
+class UserCreationForm(UCF):
+    """Custimized UserCreationForm"""
+
+    def clean_username(self):
+        """Do a case insensitive uniqueness check"""
+        username = self.cleaned_data['username']
+        if User.objects.filter(username__iexact=username):
+            raise forms.ValidationError("User with this Username already exists.")
+        return username
