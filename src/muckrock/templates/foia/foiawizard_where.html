@@ -7,9 +7,8 @@
 {% endblock %}
 
 {% block content %}
-<h1>Write and File a New Information Request</h1>
-<h2>Which level of government do you want to file to?</h2>
-<h3><em>Different levels of government have different information, but we suggest starting as local as makes sense and working your way up.</em></h3>
+<h1>Which level of government do you want to file to?</h1>
+<em class="large">Different levels of government have different information, but we suggest starting as local as makes sense and working your way up.</em>
 {% if form.errors %}
 <div class="error">{{ form.errors }}</div>
 {% endif %}
