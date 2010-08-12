@@ -3,7 +3,6 @@ Views for the accounts application
 """
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -14,7 +13,7 @@ from django.template import RequestContext
 from datetime import datetime
 
 from settings import MONTHLY_REQUESTS
-from accounts.forms import UserChangeForm
+from accounts.forms import UserChangeForm, UserCreationForm
 from accounts.models import Profile
 
 def register(request):
