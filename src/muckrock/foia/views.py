@@ -23,10 +23,10 @@ def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to create and update a FOIA request"""
 
     if request.method == 'POST':
-        status_dict = {'Submit': 'submitted', 'Save': 'started'}
+        status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
 
         try:
-            if request.POST['submit'] == 'Submit':
+            if request.POST['submit'] == 'Submit Request':
                 foia.date_submitted = datetime.now()
                 foia.date_due = datetime.now() + timedelta(15)
 
@@ -35,7 +35,7 @@ def _foia_form_handler(request, foia, action):
             form = FOIARequestForm(request.POST, instance=foia)
 
             if form.is_valid():
-                if request.POST['submit'] == 'Submit':
+                if request.POST['submit'] == 'Submit Request':
                     request.user.get_profile().make_request()
 
                 foia_request = form.save(commit=False)

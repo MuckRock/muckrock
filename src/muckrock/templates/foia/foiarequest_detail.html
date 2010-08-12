@@ -2,7 +2,7 @@
 {% extends "foia/base.html" %}
 
 {% block content %}
-	<h1>FOIA Request</h1>
+	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.get_full_name}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}

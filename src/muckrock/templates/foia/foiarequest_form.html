@@ -2,13 +2,13 @@
 {% extends "foia/base-submit.html" %}
 
 {% block content %}
-	<h1>{{action}} FOIA Request</h1>
+	<h1>{{action}} FOI Request</h1>
 	<div class="form">
   <form action="" method="post">
 		<fieldset>
 			{% include "form.html" %}
-			<input type="submit" name="submit" value="Save" class="button" />
-			<input type="submit" name="submit" value="Submit" class="button" />
+			<input type="submit" name="submit" value="Submit Request" class="button" />
+			<input type="submit" name="submit" value="Save as Draft" class="button" />
 		</fieldset>
   </form>
 	</div>
@@ -18,17 +18,17 @@
 
 <div class="post">
 	<h2>Help</a></h2>
-	<h3>Save</h3>
-	<ul>
-		<li>Updates your request</li>
-		<li>May save as much as you like</li>
-		<li>Keeps it private</li>
-	</ul>
-	<h4>Submit</h4>
+	<h3>Submit Request</h3>
 	<ul>
 		<li>Files the request</li>
 		<li>May not make further changes</li>
 		<li>Makes it publicly viewable</li>
+	</ul>
+	<h3>Save as Draft</h3>
+	<ul>
+		<li>Updates your request</li>
+		<li>May save as much as you like</li>
+		<li>Keeps it private</li>
 	</ul>
 	
 </div>
