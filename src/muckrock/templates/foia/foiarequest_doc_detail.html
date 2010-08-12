@@ -30,13 +30,13 @@
 
 {% block sidebar %}
 	<h2>Actions</h2>
-	<ul><li><a href="{{doc.foia.get_absolute_url}}">Back to FOIA Request</a></li></ul>
+	<ul><li><a href="{{doc.foia.get_absolute_url}}">Back to FOI Request</a></li></ul>
 	<div class="content-separator"></div>
 <div>
 	Code for embedding:
 	<form>
 		<textarea style="width:240px; height:80px">
-<a href="{{doc.get_absolute_url}}"><img src="/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a>
+<a href="http://www.muckrock.com{{doc.get_absolute_url}}"><img src="http://www.muckrock.com/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a>
 		</textarea>
 	</form>
 </div>

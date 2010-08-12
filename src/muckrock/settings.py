@@ -132,6 +132,8 @@ else:
     EMAIL_USE_TLS = True
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
+AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
+
 TEST_RUNNER = 'django_nose.run_tests'
 
 HAYSTACK_SITECONF = 'muckrock.search_sites'
