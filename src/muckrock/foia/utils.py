@@ -8,11 +8,7 @@ def make_template_choices(template_dict, level):
     choices = []
 
     for category in categories:
-        if category is not None:
-            cat_templates = [t for t in templates if t.category == category]
-            choices.append((category, [(t.slug, t.name) for t in cat_templates]))
-
-    for template in [t for t in templates if t.category is None]:
-        choices.append((template.slug, template.name))
+        cat_templates = [t for t in templates if t.category == category]
+        choices.append((category, [(t.slug, t) for t in cat_templates]))
 
     return choices

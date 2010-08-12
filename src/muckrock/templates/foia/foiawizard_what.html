@@ -2,14 +2,31 @@
 {% extends "foia/base-submit.html" %}
 
 {% block media %}
+<link rel="stylesheet" media="all" type="text/css" href="/static/css/jquery-ui-1.8.1.custom.css" />
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/static/js/wizard_where.js"></script>
+<script type="text/javascript">
+	$(function() {
+		$("#tabs").tabs();
+	});
+</script>
 {% endblock %}
 
 {% block content %}
-<h1>Write and File a New Information Request</h1>
-<h2>Which documents do you want to request?</h2>
-<h3><em>Use one of our templates below, <a href="#">write your own request from scratch</a>, or request a new template (please!) by emailing Michael@MuckRock.com.</em></h3>
+<h1>Which documents do you want to request?</h1>
+<!--<em class="large">Use one of our templates below, <a href="#">write your own request from scratch</a>, or request a new template (please!) by emailing <a href="Michael@MuckRock.com">Michael@MuckRock.com</a>.</em>-->
+
+<em class="large">Use one of our templates below, </em>
+
+<form action="" method="post" style="display: inline;">
+	<button type="submit" name="{{form_step}}-template" value="none" class="link large" />
+		<em>write your own request from scratch,</em>
+	</button>
+</form>
+
+<em class="large">or request a new template (please!) by emailing <a href="Michael@MuckRock.com">Michael@MuckRock.com</a>.</em>
+
 {% if form.errors %}
 <div class="error">{{ form.errors }}</div>
 {% endif %}
@@ -17,28 +34,33 @@
   <form action="" method="post">
 		<fieldset>
 			{% csrf_token %}
-			<table class="form">
+			<div id="tabs">
+				<ul>
 				{% for cat_tuple in extra_context.template_choices %}
-					{% if cat_tuple.0 != "none" %}
-					<tr><td colspan="2"><h3>{{cat_tuple.0}}</h3></tr></td>
-						{% for template in cat_tuple.1 %}
-						<tr><td width="10px">&nbsp;</td><td>
-								<input type="radio" name="{{form_step}}-template" id="{{template.0}}" value="{{template.0}}" />
-								<label for="{{template.0}}">
-									{{template.1}}
-								</label>
-						</tr></td>
-						{% endfor %}
-					{% else %}
-						<tr><td colspan="2">
-								<input type="radio" name="{{form_step}}-template" id="{{cat_tuple.0}}" value="{{cat_tuple.0}}" />
-								<label for="{{cat_tuple.0}}">
-									{{cat_tuple.1}}
-								</label>
-						</tr></td>
+					{% if cat_tuple.0 != 'None' %}
+						<li><a href="#tabs-{{cat_tuple.0}}">{{cat_tuple.0}}</a></li>
 					{% endif %}
 				{% endfor %}
-			</table>
+				</ul>
+
+				{% for cat_tuple in extra_context.template_choices %}
+					{% if cat_tuple.0 != 'None' %}
+						<div id="tabs-{{cat_tuple.0}}">
+							<dl>
+							{% for template in cat_tuple.1 %}
+								<dt>
+									<input type="radio" name="{{form_step}}-template" id="{{template.0}}" value="{{template.0}}" />
+									<label for="{{template.0}}">
+										{{template.1.name}}
+									</label>
+								</dt>
+								<dd>{{template.1.short_desc}}</dd>
+							{% endfor %}
+							</dl>
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>

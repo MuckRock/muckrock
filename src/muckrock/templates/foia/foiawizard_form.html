@@ -2,7 +2,7 @@
 {% extends "foia/base-submit.html" %}
 
 {% block content %}
-<h1>Write and File a New Information Request</h1>
+<h1>What are the details of your request?</h1>
 {% if extra_context.heading %}
 <h2>{{extra_context.heading}}</h2>
 {% endif %}
@@ -14,4 +14,13 @@
 		</fieldset>
   </form>
 	</div>
+{% endblock %}
+
+{% block sidebar %}
+{% if form.long_desc %}
+<h2>About this Template:</h2>
+<p>
+{{form.long_desc}}
+</p>
+{% endif %}
 {% endblock %}

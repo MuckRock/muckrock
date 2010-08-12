@@ -246,6 +246,21 @@ input.button:active {border-style: inset;}
 table.form tr td {vertical-align: top;}
 span.required:after { content: "*"; }
 
+button.link {
+	background: none;
+	color: #357;
+	text-decoration: underline;
+	margin: 0;
+	padding: 0;
+	border: none;
+	cursor: pointer;
+	-moz-user-select: text;
+}
+
+button.link em {
+	text-decoration: underline;
+}
+
 
 /* 
    Alignment 
