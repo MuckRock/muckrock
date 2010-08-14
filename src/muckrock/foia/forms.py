@@ -417,6 +417,7 @@ class FOIAWizard(DynamicSessionFormWizard):
         template_file = 'request_templates/%s.txt' % template
         data = form_list[2].cleaned_data if len(form_list) > 2 else {}
         data['jurisdiction'] = jurisdiction.name
+        data['legal'] = jurisdiction.legal()
 
         title, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,
