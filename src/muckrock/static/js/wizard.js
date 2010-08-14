@@ -1,6 +1,7 @@
 
  $(document).ready(function(){
-		 $("select").attr("disabled", "disabled");
+		 $("select[name='FOIAWizardWhereForm-local']").attr("disabled", "disabled");
+		 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
 		 $("input[name='FOIAWizardWhereForm-level']").change(function(){
 				 if ($("input[name='FOIAWizardWhereForm-level']:checked").val() == 'local') {
 					 $("select[name='FOIAWizardWhereForm-local']").removeAttr("disabled");
