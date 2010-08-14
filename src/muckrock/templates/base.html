@@ -1,4 +1,5 @@
 {% load tags %}
+{% load assets %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
 
@@ -7,7 +8,15 @@
 	<meta name="description" content=""/>
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
-	<link rel="stylesheet" type="text/css" href="/static/css/style.css" media="screen" />
+
+	{% assets filter="jsmin", output="js/main.js", "js/jquery-1.4.2.js", "js/jquery-ui-1.8.4.custom.js", "js/datepicker.js", "js/wizard.js" %}
+	<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+	{% endassets %}
+
+	{% assets filter="cssutils", output="css/main.css", "css/jquery-ui-1.8.4.custom.css", "css/style.css" %}
+	<link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" media="screen" />
+	{% endassets %}
+
 	{{ form.media }}
 	{% block media %}{% endblock %}
 	<title>MuckRock | {% block title %}News{% endblock %}</title>

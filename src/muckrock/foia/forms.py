@@ -19,7 +19,6 @@ from foia.models import FOIARequest, Jurisdiction, AgencyType
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
-from widgets import CalendarWidget
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -54,8 +53,8 @@ class FOIAMugShotForm(FOIAWizardParent):
 
     full_name = forms.CharField(help_text='Full name of person whose mug shots you want')
     date_begin = forms.DateField(help_text='Range of dates in which the mug shots were taken',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
-    date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    date_end = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}))
 
     clean = validate_date_order('date_begin', 'date_end')
 
@@ -72,7 +71,7 @@ class FOIACriminalForm(FOIAWizardParent):
     full_name = forms.CharField(help_text='Full name of person whose criminal record you want')
     birth_date = forms.DateField(required=False, label='Date of birth',
                                  help_text='If known',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
 
     slug = 'crime'
     name = 'Criminal Record'
@@ -132,12 +131,12 @@ class FOIABirthForm(FOIAWizardParent):
 
     full_name = forms.CharField(help_text='Full name of person whose birth record you want')
     birth_date = forms.DateField(label='Date of birth',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
     death_date = forms.DateField(label='Date of death',
                                  help_text='In many states, only individuals deceased for over 75 '
                                            'years have their records available for geneological '
                                            'inspection',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
     interest = forms.CharField(
             required=False,
             help_text='A brief sentence about your geneological interest in this individual',
@@ -157,12 +156,12 @@ class FOIADeathForm(FOIAWizardParent):
 
     full_name = forms.CharField(help_text='Full name of person whose death record you want')
     birth_date = forms.DateField(label='Date of birth',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
     death_date = forms.DateField(label='Date of death',
                                  help_text='In many states, only individuals deceased for over 75 '
                                            'years have their records available for geneological '
                                            'inspection',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
     interest = forms.CharField(
             required=False,
             help_text='A brief sentence about your geneological interest in this individual',
@@ -183,7 +182,7 @@ class FOIAEmailForm(FOIAWizardParent):
     full_name = forms.CharField(help_text='Government employee you would like the emails of')
     department = forms.CharField(help_text='Department or office he or she is in')
     date_begin = forms.DateField(help_text='Start of seven day period of emails',
-                                 widget=CalendarWidget(attrs={'class': 'datepicker'}))
+                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
 
     slug = 'emails'
     name = 'Week of Email'
@@ -275,8 +274,8 @@ class FOIAPetForm(FOIAWizardParent):
 class FOIAParkingForm(FOIAWizardParent):
     """A form to fill in a waived parking ticket template"""
 
-    date_begin = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
-    date_end = forms.DateField(widget=CalendarWidget(attrs={'class': 'datepicker'}))
+    date_begin = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}))
+    date_end = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}))
 
     clean = validate_date_order('date_begin', 'date_end')
 

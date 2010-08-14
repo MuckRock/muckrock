@@ -19,8 +19,6 @@ from foia.sitemap import FoiaSitemap
 from news.models import Article
 from news.sitemap import ArticleSitemap
 
-import os
-
 admin.autodiscover()
 
 article_args = {'queryset': Article.objects.get_published(), 'date_field': 'pub_date',
@@ -40,7 +38,5 @@ urlpatterns = patterns('',
 if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(settings.SITE_ROOT, 'static')}),
-        (r'^user_media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(settings.SITE_ROOT, 'user_media')}),
+            {'document_root': settings.MEDIA_ROOT}),
     )

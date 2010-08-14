@@ -24,7 +24,7 @@
 	<h4>Attached Files:</h4>
 	<ul>
 		{% for file in object.files.all %}
-		<li><a href="/user_media/{{file.ffile.name}}">{{file.name}}</a></li>
+		<li><a href="/static/{{file.ffile.name}}">{{file.name}}</a></li>
 		{% endfor %}
 	</ul>
 	{% endif %}
