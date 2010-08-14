@@ -11,3 +11,5 @@ django-haystack==1.0.1-final
 whoosh==0.3.18
 django-debug-toolbar==0.8.3
 mock==0.7.0b2
+django-assets==0.2
+cssutils==0.9.7b3

@@ -4,7 +4,7 @@
 {% block content %}
 	<h1>{{doc.foia.title}} Document - Page {{doc.page}}/{{doc.total_pages}}</h1>
 
-	<p><a href="/user_media/{{doc.image.name}}"><img src="/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a></p>
+	<p><a href="/static/{{doc.image.name}}"><img src="/static/{{doc.image.name}}" width={{width}} height={{height}} /></a></p>
 
 	{% if doc.previous or doc.next %}
 	<div class="post-meta archive-pagination">
@@ -36,7 +36,7 @@
 	Code for embedding:
 	<form>
 		<textarea style="width:240px; height:80px">
-<a href="http://www.muckrock.com{{doc.get_absolute_url}}"><img src="http://www.muckrock.com/user_media/{{doc.image.name}}" width={{width}} height={{height}} /></a>
+<a href="http://www.muckrock.com{{doc.get_absolute_url}}"><img src="http://www.muckrock.com/static/{{doc.image.name}}" width={{width}} height={{height}} /></a>
 		</textarea>
 	</form>
 </div>
