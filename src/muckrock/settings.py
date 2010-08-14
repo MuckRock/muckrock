@@ -16,7 +16,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASE_ENGINE = 'postgresql_psycopg2'  
+DATABASE_ENGINE = 'postgresql_psycopg2'
 DATABASE_NAME = 'muckrock'             # Or path to database file if using sqlite3.
 DATABASE_USER = 'muckrock'             # Not used with sqlite3.
 DATABASE_PASSWORD = ''         # Not used with sqlite3.
@@ -42,12 +42,12 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(SITE_ROOT, 'user_media')
+MEDIA_ROOT = os.path.join(SITE_ROOT, 'static')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     'django_nose',
     'debug_toolbar',
     'haystack',
+    'django_assets',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -139,5 +140,8 @@ TEST_RUNNER = 'django_nose.run_tests'
 HAYSTACK_SITECONF = 'muckrock.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'whoosh'
 HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
+
+ASSETS_DEBUG = False
+ASSETS_EXPIRE = 'querystring'
 
 MONTHLY_REQUESTS = 25
