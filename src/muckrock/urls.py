@@ -18,8 +18,6 @@ import settings
 from foia.sitemap import FoiaSitemap
 from news.sitemap import ArticleSitemap
 
-import os
-
 admin.autodiscover()
 
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
@@ -37,7 +35,5 @@ urlpatterns = patterns('',
 if settings.DEBUG:
     urlpatterns += patterns('',
         (r'^static/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(settings.SITE_ROOT, 'static')}),
-        (r'^user_media/(?P<path>.*)$', 'django.views.static.serve',
-            {'document_root': os.path.join(settings.SITE_ROOT, 'user_media')}),
+            {'document_root': settings.MEDIA_ROOT}),
     )
