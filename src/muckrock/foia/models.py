@@ -194,6 +194,14 @@ class Jurisdiction(models.Model):
         else:
             return self.name
 
+    def legal(self):
+        """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
+        # pylint: disable-msg=E1101
+        if self.level == 'l':
+            return self.parent.abbrev
+        else:
+            return self.abbrev
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['name']
