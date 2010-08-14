@@ -61,6 +61,8 @@ def get_404(client, url):
 
 class TestAccountFunctional(TestCase):
     """Functional tests for account"""
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_foiarequests.json', 'test_news.json']
 
     # test utils
     def test_try_or_none(self):
