@@ -9,12 +9,15 @@
 	for the {{object.agency}} of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
 	</p>
-	<p>Status: {{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
+	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
+	<p>Status: <span class="request-{{object.color_code}}">
+		{{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
 		{% if past_due %}
 			past due by {{ object.date_due|timesince }}
 		{% else %}
 			due in {{ object.date_due|timeuntil }}
 		{% endif %}
+		</span>
 	{%endif%}
 
 	{% if object.doc_first_page %}
