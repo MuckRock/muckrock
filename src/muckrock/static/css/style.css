@@ -234,12 +234,14 @@ input, textarea, select {
 }
 input:focus, textarea:focus, select:focus {background: #FFFFF5;}
 
+/*
 input.button {
 	background: #DDD;
 	border: 1px outset #AAA;
 	padding: 4px 5px;
 }
 input.button:active {border-style: inset;}
+*/
 
 .form-error {border-color: #F00;}
 
@@ -612,3 +614,7 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	padding: 5px;
 	margin-top: 7px;
 }
+
+.request-go   { color: #077507; }
+.request-stop { color: #CC2727; }
+.request-wait { color: #A3A30B; }
