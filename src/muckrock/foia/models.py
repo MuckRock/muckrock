@@ -113,6 +113,19 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         return self.images.get(page=1)
 
+    def percent_complete(self):
+        """Get percent complete for the progress bar"""
+        percents = {'started': 25, 'submitted': 50, 'processed': 75,
+                    'fix':     75, 'rejected': 100, 'done':      100, }
+        return percents[self.status]
+
+    def color_code(self):
+        """Get the color code for the current status"""
+        processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
+        colors = {'started': 'wait', 'submitted': 'go',   'processed': processed,
+                  'fix':     'wait', 'rejected':  'stop', 'done':      'go', }
+        return colors[self.status]
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']

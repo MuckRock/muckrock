@@ -17,7 +17,7 @@
         "pk": 3, 
         "model": "foia.agencytype", 
         "fields": {
-            "name": "Fire Department"
+            "name": "Fire"
         }
     }, 
     {
