@@ -46,6 +46,9 @@
 
 			<ul class="tabbed" id="network-tabs">
 				{% if user.is_authenticated %}
+					{% if user.is_staff %}
+					<li><a href="/admin/">Admin</a></li>
+					{% endif %}
 				<li><a href="{% url acct-my-profile %}">My Account</a></li>
 				<li><a href="{% url acct-logout %}">Log Out</a></li>
 				{% else %}
