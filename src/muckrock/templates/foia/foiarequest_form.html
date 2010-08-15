@@ -3,6 +3,13 @@
 
 {% block content %}
 	<h1>{{action}} FOI Request</h1>
+	{% if messages %}
+		{% for message in messages %}
+			{% if message.tags == "success" %}
+			<div id="progressbar" title="100% Complete"></div><br />
+			{% endif %}
+		{% endfor %}
+	{% endif %}
 	<div class="form">
   <form action="" method="post">
 		<fieldset>
