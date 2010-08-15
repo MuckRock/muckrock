@@ -6,7 +6,7 @@
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.get_full_name}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}
-	for the {{object.agency}} of {{object.jurisdiction}}
+	for the {{object.agency_type}} Department of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
 	</p>
 	<p>Status: {{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
