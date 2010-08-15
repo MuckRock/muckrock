@@ -59,7 +59,7 @@
 		<tr class="{% cycle 'even' 'odd' %}">
 			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a></td>
 			<td><a href="{% url acct-profile foia.user.username %}">{{ foia.user }}</a></td>
-			<td>{{ foia.get_status_display }}</td>
+			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
 			<td>{{ foia.jurisdiction }}</td>
 		</tr>
 		{% endfor %}
