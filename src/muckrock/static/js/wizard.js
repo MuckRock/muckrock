@@ -20,4 +20,6 @@
 
 	$(function() {
 		$("#tabs").tabs();
+		$("input:submit").button();
+		$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
 	});
