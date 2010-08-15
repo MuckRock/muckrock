@@ -234,12 +234,14 @@ input, textarea, select {
 }
 input:focus, textarea:focus, select:focus {background: #FFFFF5;}
 
+/*
 input.button {
 	background: #DDD;
 	border: 1px outset #AAA;
 	padding: 4px 5px;
 }
 input.button:active {border-style: inset;}
+*/
 
 .form-error {border-color: #F00;}
 

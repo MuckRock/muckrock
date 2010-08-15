@@ -20,4 +20,5 @@
 
 	$(function() {
 		$("#tabs").tabs();
+		$("input:submit").button();
 	});
