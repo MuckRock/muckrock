@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
                        FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
-from foia.models import FOIARequest, FOIAImage, Jurisdiction
+from foia.models import FOIARequest, FOIADocument, FOIAImage, Jurisdiction
 from accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
@@ -180,7 +180,7 @@ def detail(request, jurisdiction, slug, idx):
                               context_instance=RequestContext(request))
 
 def document_detail(request, jurisdiction, slug, idx, page):
-    """Details of a single FOIA request"""
+    """Details of a single FOIA request image"""
 
     jmodel = Jurisdiction.objects.get(slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
@@ -199,4 +199,15 @@ def document_detail(request, jurisdiction, slug, idx, page):
 
     return render_to_response('foia/foiarequest_doc_detail.html',
                               {'doc': doc, 'width': width, 'height': height},
+                              context_instance=RequestContext(request))
+
+def doc_cloud_detail(request, doc_id):
+    """Details of a DocumentCloud document"""
+
+    doc = get_object_or_404(FOIADocument, doc_id=doc_id)
+
+    if not doc.access == 'public':
+        raise Http404()
+
+    return render_to_response('document_cloud.html', {'doc_id': doc_id},
                               context_instance=RequestContext(request))

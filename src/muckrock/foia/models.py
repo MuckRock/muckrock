@@ -132,6 +132,33 @@ class FOIARequest(models.Model):
         verbose_name = 'FOIA Request'
 
 
+class FOIADocument(models.Model):
+    """A DocumentCloud document attached to a FOIA request"""
+
+    access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
+
+    # pylint: disable-msg=E1101
+    foia = models.ForeignKey(FOIARequest, related_name='documents')
+    document = models.FileField(upload_to='foia_documents')
+    title = models.CharField(max_length=70)
+    source = models.CharField(max_length=70)
+    description = models.TextField()
+    access = models.CharField(max_length=12, choices=access)
+    doc_id = models.SlugField(max_length=80, editable=False)
+
+    def __unicode__(self):
+        return self.title
+
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('foia-doc-cloud-detail', [], {'doc_id': self.doc_id})
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        verbose_name = 'FOIA DocumentCloud Document'
+
+
 class FOIAImage(models.Model):
     """An image attached to a FOIA request"""
     # pylint: disable-msg=E1101
