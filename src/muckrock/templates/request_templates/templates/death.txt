@@ -1,4 +1,4 @@
-{% extends "request_templates/base.txt" %}
+{% extends jurisdiction_template %}
 {% block title %}Death Certificate for {{full_name}}{% endblock %}
 
 {% block content %}The death certificate of {{full_name}}, born {{birth_date}} and deceased {{death_date}}.  {{interest}}{% endblock %}
