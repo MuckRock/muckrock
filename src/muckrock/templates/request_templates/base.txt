@@ -1,7 +1,6 @@
 {% autoescape off%}{% block title %}{% endblock %}
 
 To Whom It May Concern:
-
 {% block body %}{% endblock %}
 In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.
 
