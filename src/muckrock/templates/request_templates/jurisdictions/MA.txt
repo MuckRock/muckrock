@@ -1,5 +1,8 @@
+{% extends "request_templates/base.txt" %}
+{% block body %}
 Pursuant to the state Freedom of Information Act, G.L.M. c.4, €7, clause 26th, I hereby request the following records:
 
 {% block content %}{% endblock %}
 
 I also request that, if appropriate, fees be waived as we believe this request is in the public interest, as suggested but not stipulated by the recommendations of the Massachusetts Supervisor of Public Records. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.
+{% endblock %}

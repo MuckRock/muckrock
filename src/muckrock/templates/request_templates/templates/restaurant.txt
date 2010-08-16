@@ -1,4 +1,4 @@
-{% extends "request_templates/base.txt" %}
+{% extends jurisdiction_template %}
 {% block title %}Resaurant Health Inspection for {{restaurant}}{% endblock %}
 
 {% block content %}The most recent state health inspection records for the restaurant {{restaurant}}.{% if past_records %}
