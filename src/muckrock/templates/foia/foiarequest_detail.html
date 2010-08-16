@@ -43,7 +43,7 @@
 	</p>
 	{% endif %}
 
-	<div class="request"><strong>Request:</strong><br />{{object.request|linebreaks|urlize}}</div>
+	<div class="request"><strong>Request:</strong><br />{{object.request|urlize|linebreaks}}</div>
 	{% if object.response %}
 	<div class="response"><strong>Response:</strong><br />
 		{% autoescape off %}{{object.response}}{% endautoescape %}
