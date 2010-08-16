@@ -28,12 +28,12 @@ class TestAccountUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable-msg=C0103
         self.profile = Profile.objects.get(pk=1)
 
     # forms
     def test_user_change_form_email_normal(self):
         """Changing email normally should succeed"""
+        # pylint: disable-msg=W0201
         form = UserChangeForm(instance=self.profile)
         form.cleaned_data = {}
         form.cleaned_data['email'] = 'new@example.com'
