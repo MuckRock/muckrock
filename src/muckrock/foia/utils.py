@@ -23,14 +23,15 @@ def make_template_choices(template_dict, level):
 def upload_document_cloud(file_name, title, source, description, access):
     """Upload a document to Document Cloud"""
 
+    # these need to be coerced from unicode to regular strings in order to avoid encoding errors
     file_name = str(file_name)
     title = str(title)
     source = str(source)
     description = str(description)
     access = str(access)
 
-    username = str(DOCUMNETCLOUD_USERNAME)
-    password = str(DOCUMENTCLOUD_PASSWORD)
+    username = DOCUMNETCLOUD_USERNAME
+    password = DOCUMENTCLOUD_PASSWORD
 
     params = {
         'file': open(file_name, 'rb'),
