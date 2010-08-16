@@ -23,6 +23,16 @@
 	{% if object.doc_first_page %}
 	- <a href="{{object.doc_first_page.get_absolute_url}}">View Official Response</a>
 	{% endif %}
+	{% if object.documents.all %}
+	<h4>Documents:</h4>
+	<ul>
+		{% for document in object.documents.all %}
+			{% if document.status == "public" %}
+				<li><a href="{{document.get_absolute_url}}">{{document.title}}</a></li>
+			{% endif %}
+		{% endfor %}
+	</ul>
+	{% endif %}
 	{% if object.files.all %}
 	<h4>Attached Files:</h4>
 	<ul>

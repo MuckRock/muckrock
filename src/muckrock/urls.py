@@ -32,7 +32,7 @@ urlpatterns = patterns('',
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
-    url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap')
+    url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 )
 
 if settings.DEBUG:
