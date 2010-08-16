@@ -1,4 +1,4 @@
-{% extends "request_templates/base.txt" %}
+{% extends jurisdiction_template %}
 {% block title %}Most Recent Minutes for {{group}}.{% endblock %}
 
 {% block content %}The most recent minutes of the last {{meetings_back}} meetings for {{group}}.{% endblock %}
