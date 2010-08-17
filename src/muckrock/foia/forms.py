@@ -259,7 +259,7 @@ class FOIAAthleticForm(FOIAWizardParent):
 
 class FOIAPetForm(FOIAWizardParent):
     """A form to fill in a pet license request template"""
-    
+
     slug = 'pets'
     name = 'Pet Licensing Data'
     category = 'Health'
@@ -269,7 +269,7 @@ class FOIAPetForm(FOIAWizardParent):
                  'in your city, and more.'
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.' 
+                'the School of Journalism at the University of Arizona.'
 
 class FOIAParkingForm(FOIAWizardParent):
     """A form to fill in a waived parking ticket template"""
@@ -330,6 +330,51 @@ class FOIASexOffenderForm(FOIAWizardParent):
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
                 'the School of Journalism at the University of Arizona.'
+
+class FOIAFTCComplaintForm(FOIAWizardParent):
+    """A form to fill in an FTC Complaint template"""
+
+    companies = forms.CharField(
+            label='Which company/companies',
+            help_text='One per line',
+            widget=forms.Textarea(attrs={'style': 'width:450px; height:80px'}))
+
+    slug = 'ftc'
+    name = 'FTC Complaint'
+    category = 'Business'
+    level = 'f'
+    agency = 'FTC'
+    short_desc = 'See all the complaints about a company or companies that '\
+                 'have been filed with the Federal Trade Commission'
+
+class FOIAMilitaryForm(FOIAWizardParent):
+    """A form to fill in a Military Service Record template"""
+
+    full_name = forms.CharField(help_text="The veteran's complete name while in service")
+    service_number = forms.CharField(required=False)
+    branch = forms.CharField(required=False, label='Branch of Service')
+    date_begin = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}),
+                                 required=False, label='Date began service')
+    date_end = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}),
+                               required=False, label='Date ended service')
+    birth_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker'}),
+                                 required=False)
+    birth_place = forms.CharField(required=False)
+    entry = forms.CharField(required=False, label='Place of entry into the service')
+    discharge = forms.CharField(required=False, label='Place of discharge')
+    last_unit = forms.CharField(required=False, label='Last unit of assignment')
+    reason = forms.CharField(required=False,
+            help_text='The reason for your request, such as applying for veterans benefits, '
+                      'preparing to retire, or researching your personal military history',
+            widget=forms.Textarea(attrs={'style': 'width:450px; height:32px'}))
+
+    slug = 'military'
+    name = 'Military Service Record'
+    category = 'Genealogy'
+    level = 'f'
+    agency = 'Clerk'
+    short_desc = "Verify and individual's military service recors"
+    long_desc = 'Please be advised that military service verification can be a very slow process'
 
 class FOIABlankForm(FOIAWizardParent):
     """A form with no specific template"""
@@ -416,7 +461,8 @@ class FOIAWizard(DynamicSessionFormWizard):
         template_file = 'request_templates/templates/%s.txt' % template
         data = form_list[2].cleaned_data if len(form_list) > 2 else {}
         data['jurisdiction'] = jurisdiction.name
-        data['jurisdiction_template'] = 'request_templates/jurisdictions/%s.txt' % jurisdiction.legal()
+        data['jurisdiction_template'] = \
+                'request_templates/jurisdictions/%s.txt' % jurisdiction.legal()
 
         title, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,
