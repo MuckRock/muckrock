@@ -47,3 +47,8 @@ def company_title(companies):
         return companies.split('\n')[0] + ', et al'
     else:
         return companies
+
+@register.filter
+def foia_is_viewable(foia, user):
+    """Make sure the FOIA is viewable before showing it to the user"""
+    return foia.is_viewable(user)
