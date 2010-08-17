@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load tags %}
 
 {% block title %}Search{% endblock %}
 {% block headline %}Search{% endblock %}
@@ -25,10 +26,16 @@
 
             {% for result in page.object_list %}
                 <p>
+								{% if result.model_name == "foiarequest" %}
+									{% if result.object|foia_is_viewable:user %}
                     <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+									{% endif %}
+								{% else %}
+									<a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+								{% endif %}
                 </p>
             {% empty %}
-                <p>No results found.</p>
+						{# <p>No results found.</p> this leaks information if left in #}
             {% endfor %}
         {% else %}
             {# Show some example queries to run, maybe query syntax, something else? #}
