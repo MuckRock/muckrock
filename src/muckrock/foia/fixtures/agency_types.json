@@ -54,5 +54,12 @@
         "fields": {
             "name": "Public Works"
         }
+    },
+    {
+        "pk": 9, 
+        "model": "foia.agencytype", 
+        "fields": {
+            "name": "FTC"
+        }
     }
 ]
