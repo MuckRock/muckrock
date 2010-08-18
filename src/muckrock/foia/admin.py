@@ -6,7 +6,7 @@ from django.contrib import admin, messages
 
 from foia.models import FOIARequest, FOIADocument, FOIAImage, FOIAFile, \
                         Jurisdiction, Agency, AgencyType
-from foia.utils import upload_document_cloud
+from foia.tasks import upload_document_cloud
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
@@ -15,20 +15,15 @@ class FOIADocumentAdmin(admin.ModelAdmin):
     """FOIA Image Inline admin options"""
     model = FOIADocument
     extra = 1
+    readonly_fields = ['doc_id']
 
     def save_model(self, request, obj, form, change):
         """Attach user to article on save"""
 
         obj.save()
         if not change:
-            try:
-                info = upload_document_cloud(obj.document.path, obj.title, obj.source,
-                                             obj.description, obj.access)
-                obj.doc_id = info['id']
-                obj.save()
-            except IOError:
-                messages.error(request, 'There was an error during document cloud processing, '
-                                        'please delete this instance and recreate it')
+            # pylint: disable-msg=E1101
+            upload_document_cloud.delay(obj.pk)
         else:
             messages.info(request, 'Updates made here cannot be propagated to DocumentCloud')
 
