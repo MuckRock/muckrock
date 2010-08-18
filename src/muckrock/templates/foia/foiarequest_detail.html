@@ -27,7 +27,7 @@
 	<h4>Documents:</h4>
 	<ul>
 		{% for document in object.documents.all %}
-			{% if document.status == "public" %}
+			{% if document.access == "public" %}
 				<li><a href="{{document.get_absolute_url}}">{{document.title}}</a></li>
 			{% endif %}
 		{% endfor %}

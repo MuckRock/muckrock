@@ -115,6 +115,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'haystack',
     'django_assets',
+    'djcelery',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -124,6 +125,17 @@ INSTALLED_APPS = (
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
+
+import djcelery
+djcelery.setup_loader()
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "muckrock"
+BROKER_PASSWORD = "muckrock"
+BROKER_VHOST = "muckrock_vhost"
+CELERY_RESULT_BACKEND = "amqp"
+CELERY_IMPORTS = ("foia.tasks", )
+CELERY_DISABLE_RATE_LIMITS = True
 
 if EMAIL_DEBUG:
     EMAIL_PORT = 1025
