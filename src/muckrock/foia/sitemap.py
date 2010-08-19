@@ -36,4 +36,5 @@ class FoiaSitemap(Sitemap):
             'fix': 0.6,
             'rejected': 0.1,
             'done': 0.8,
+            'partial': 0.7,
         }[obj.status]
