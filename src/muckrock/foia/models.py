@@ -12,8 +12,6 @@ from django.template.loader import render_to_string
 from datetime import datetime, date, timedelta
 import os
 
-from muckrock.utils import try_or_none
-
 class FOIARequestManager(models.Manager):
     """Object manager for FOIA requests"""
     # pylint: disable-msg=R0904
@@ -108,11 +106,6 @@ class FOIARequest(models.Model):
         if self.embargo and self.date_done:
             return self.date_done + timedelta(30)
 
-    def doc_first_page(self):
-        """Get the first page of this requests corresponding document"""
-        # pylint: disable-msg=E1101
-        return self.images.get(page=1)
-
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         # pylint: disable-msg=E1101
@@ -162,44 +155,6 @@ class FOIADocument(models.Model):
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name = 'FOIA DocumentCloud Document'
-
-
-class FOIAImage(models.Model):
-    """An image attached to a FOIA request"""
-    # pylint: disable-msg=E1101
-    foia = models.ForeignKey(FOIARequest, related_name='images')
-    image = models.ImageField(upload_to='foia_images')
-    page = models.SmallIntegerField()
-
-    def __unicode__(self):
-        return '%s Document Page %d' % (self.foia.title, self.page)
-
-    @models.permalink
-    def get_absolute_url(self):
-        """The url for this object"""
-        return ('foia-doc-detail', [],
-                {'jurisdiction': self.foia.jurisdiction.slug,
-                 'slug': self.foia.slug,
-                 'idx': self.foia.id,
-                 'page': self.page})
-
-    def next(self):
-        """Get next document page"""
-        return try_or_none(self.DoesNotExist, self.foia.images.get, page=self.page + 1)
-
-    def previous(self):
-        """Get previous document page"""
-        return try_or_none(self.DoesNotExist, self.foia.images.get, page=self.page - 1)
-
-    def total_pages(self):
-        """Get total page count"""
-        return self.foia.images.count()
-
-    class Meta:
-        # pylint: disable-msg=R0903
-        ordering = ['page']
-        verbose_name = 'FOIA Document Image'
-        unique_together = (('foia', 'page'),)
 
 
 class FOIAFile(models.Model):
