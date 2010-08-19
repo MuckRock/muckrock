@@ -7,8 +7,6 @@ from django.test import TestCase
 
 import nose.tools
 
-from utils import try_or_none
-
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable-msg=R0201
 # pylint: disable-msg=R0904
@@ -63,12 +61,6 @@ class TestAccountFunctional(TestCase):
     """Functional tests for account"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_foiarequests.json', 'test_news.json']
-
-    # test utils
-    def test_try_or_none(self):
-        """Test the try_or_none util function"""
-        nose.tools.eq_(try_or_none(ZeroDivisionError, lambda x: 10 / x, 5), 2)
-        nose.tools.eq_(try_or_none(ZeroDivisionError, lambda x: 10 / x, 0), None)
 
     # tests for base level views
     def test_views(self):

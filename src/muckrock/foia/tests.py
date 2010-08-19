@@ -11,7 +11,7 @@ import nose.tools
 from datetime import date, timedelta
 from operator import attrgetter
 
-from foia.models import FOIARequest, FOIAImage, Jurisdiction, AgencyType
+from foia.models import FOIARequest, Jurisdiction, AgencyType
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -151,56 +151,6 @@ class TestFOIARequestUnit(TestCase):
                         foia.status in ['started', 'submitted', 'processed', 'fix', 'rejected'])
 
 
-class TestFOIAImageUnit(TestCase):
-    """Unit tests for FOIARequests"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_foiarequests.json', 'test_foiaimages.json']
-
-    def setUp(self):
-        """Set up tests"""
-        # pylint: disable-msg=C0103
-        self.foia = FOIARequest.objects.get(pk=1)
-        self.doc = FOIAImage.objects.get(pk=1)
-
-    # models
-    def test_foia_doc_model_unicode(self):
-        """Test FOIA Image model's __unicode__ method"""
-        nose.tools.eq_(unicode(self.doc), 'Test 5 Document Page 1')
-
-    def test_foia_doc_model_url(self):
-        """Test FOIA Images model's get_absolute_url method"""
-        nose.tools.eq_(self.doc.get_absolute_url(),
-            reverse('foia-doc-detail', kwargs={'idx': self.doc.foia.id, 'slug': self.doc.foia.slug,
-                                               'jurisdiction': self.doc.foia.jurisdiction.slug,
-                                               'page': self.doc.page}))
-
-    def test_foia_doc_next_prev(self):
-        """Test FOIA Images model's next and previous methods"""
-
-        foia = FOIARequest.objects.get(pk=10)
-        doc1 = FOIAImage.objects.get(foia=foia, page=1)
-        doc2 = FOIAImage.objects.get(foia=foia, page=2)
-        doc3 = FOIAImage.objects.get(foia=foia, page=3)
-        nose.tools.eq_(doc1.previous(), None)
-        nose.tools.eq_(doc1.next(), doc2)
-        nose.tools.eq_(doc2.previous(), doc1)
-        nose.tools.eq_(doc2.next(), doc3)
-        nose.tools.eq_(doc3.previous(), doc2)
-        nose.tools.eq_(doc3.next(), None)
-
-    def test_foia_doc_total_pages(self):
-        """Test FOIA Images model's total pages method"""
-        foia = FOIARequest.objects.get(pk=10)
-        doc1 = FOIAImage.objects.get(foia=foia, page=1)
-        doc2 = FOIAImage.objects.get(foia=foia, page=2)
-        doc3 = FOIAImage.objects.get(foia=foia, page=3)
-
-        nose.tools.eq_(self.doc.total_pages(), 1)
-        nose.tools.eq_(doc1.total_pages(), 3)
-        nose.tools.eq_(doc2.total_pages(), 3)
-        nose.tools.eq_(doc3.total_pages(), 3)
-
-
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_profiles.json',
@@ -252,17 +202,6 @@ class TestFOIAFunctional(TestCase):
                     ['foia/foiarequest_detail.html', 'foia/base.html'],
                     context = {'object': foia})
 
-    def test_foia_doc_detail(self):
-        """Test the foia-doc-detail view"""
-
-        # Need a way to put an actual image in here for this to work
-        #get_allowed(self.client,
-        #            reverse('foia-doc-detail',
-        #                kwargs={'user_name': 'test1', 'slug': 'test-a', 'page': 1,
-        #                        'jurisdiction': 'massachusetts'}),
-        #            ['foia/foiarequest_doc_detail.html', 'foia/base.html'],
-        #            context = {'doc': doc1})
-
     def test_feeds(self):
         """Test the RSS feed views"""
 
@@ -279,15 +218,6 @@ class TestFOIAFunctional(TestCase):
                                                        'jurisdiction': 'massachusetts'}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 2, 'slug': 'test-c',
                                                        'jurisdiction': 'massachusetts'}))
-        get_404(self.client, reverse('foia-doc-detail',
-                                kwargs={'idx': 3, 'slug': 'test-c', 'page': 3,
-                                        'jurisdiction': 'massachusetts'}))
-        get_404(self.client, reverse('foia-doc-detail',
-                                kwargs={'idx': 4, 'slug': 'test-c', 'page': 1,
-                                        'jurisdiction': 'massachusetts'}))
-        get_404(self.client, reverse('foia-doc-detail',
-                                kwargs={'idx': 5, 'slug': 'test-c', 'page': 1,
-                                        'jurisdiction': 'massachusetts'}))
 
     def test_unallowed_views(self):
         """Test private views while not logged in"""
