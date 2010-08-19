@@ -23,6 +23,9 @@ DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
+DOCUMNETCLOUD_USERNAME = 'mitch@mitchellkotler.net'
+DOCUMENTCLOUD_PASSWORD = 'b4c0n7'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -112,6 +115,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'haystack',
     'django_assets',
+    'djcelery',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -121,6 +125,17 @@ INSTALLED_APPS = (
 DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
+
+import djcelery
+djcelery.setup_loader()
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "muckrock"
+BROKER_PASSWORD = "muckrock"
+BROKER_VHOST = "muckrock_vhost"
+CELERY_RESULT_BACKEND = "amqp"
+CELERY_IMPORTS = ("foia.tasks", )
+CELERY_DISABLE_RATE_LIMITS = True
 
 if EMAIL_DEBUG:
     EMAIL_PORT = 1025
