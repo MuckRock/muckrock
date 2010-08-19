@@ -135,7 +135,7 @@ class TestFOIARequestUnit(TestCase):
         submitted_foias = FOIARequest.objects.get_submitted()
         for foia in FOIARequest.objects.all():
             if foia in submitted_foias:
-                nose.tools.ok_(foia.status in ['submitted', 'processed', 'fix', 'rejected', 'done'])
+                nose.tools.ok_(foia.status != 'started')
             else:
                 nose.tools.ok_(foia.status == 'started')
 
