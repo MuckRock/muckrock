@@ -2,7 +2,7 @@
 Admin registration for FOIA models
 """
 
-from django.contrib import admin, messages
+from django.contrib import admin
 
 from foia.models import FOIARequest, FOIADocument, FOIAImage, FOIAFile, \
                         Jurisdiction, Agency, AgencyType
@@ -16,16 +16,14 @@ class FOIADocumentAdmin(admin.ModelAdmin):
     model = FOIADocument
     extra = 1
     readonly_fields = ['doc_id']
+    list_display = ('title', 'foia', 'doc_id', 'description')
 
     def save_model(self, request, obj, form, change):
         """Attach user to article on save"""
-
+        # pylint: disable-msg=E1101
         obj.save()
-        if not change:
-            # pylint: disable-msg=E1101
-            upload_document_cloud.delay(obj.pk)
-        else:
-            messages.info(request, 'Updates made here cannot be propagated to DocumentCloud')
+        # wait 3 seconds to give database a chance to sync
+        upload_document_cloud.apply_async(args=[obj.pk, change], countdown=3)
 
 
 class FOIAImageInline(admin.TabularInline):

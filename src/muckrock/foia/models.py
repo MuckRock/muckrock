@@ -113,6 +113,11 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         return self.images.get(page=1)
 
+    def public_documents(self):
+        """Get a list of public documents attached to this request"""
+        # pylint: disable-msg=E1101
+        return self.documents.filter(access='public').exclude(doc_id='')
+
     def percent_complete(self):
         """Get percent complete for the progress bar"""
         percents = {'started': 25, 'submitted': 50, 'processed': 75,
