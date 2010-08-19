@@ -18,7 +18,7 @@ class FOIARequestManager(models.Manager):
 
     def get_submitted(self):
         """Get all submitted FOIA requests"""
-        return self.filter(status__in=['submitted', 'processed', 'fix', 'rejected', 'done'])
+        return self.exclude(status='started')
 
     def get_done(self):
         """Get all FOIA requests with responses"""
@@ -47,12 +47,13 @@ class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
 
     status = (
-        ('started', 'Started'),
-        ('submitted', 'Submitted'),
-        ('processed', 'Processed'),
-        ('fix', 'Fix required'),
+        ('started', 'Draft'),
+        ('submitted', 'Processing'),
+        ('processed', 'Awaiting Response'),
+        ('fix', 'Fix Required'),
         ('rejected', 'Rejected'),
-        ('done', 'Response received'),
+        ('done', 'Completed'),
+        ('partial', 'Partially Completed'),
     )
 
     user = models.ForeignKey(User)
@@ -114,14 +115,16 @@ class FOIARequest(models.Model):
     def percent_complete(self):
         """Get percent complete for the progress bar"""
         percents = {'started': 25, 'submitted': 50, 'processed': 75,
-                    'fix':     75, 'rejected': 100, 'done':      100, }
+                    'fix':     75, 'rejected': 100, 'done':      100,
+                    'partial': 90}
         return percents[self.status]
 
     def color_code(self):
         """Get the color code for the current status"""
         processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
         colors = {'started': 'wait', 'submitted': 'go',   'processed': processed,
-                  'fix':     'wait', 'rejected':  'stop', 'done':      'go', }
+                  'fix':     'wait', 'rejected':  'stop', 'done':      'go',
+                  'partial': 'go'}
         return colors[self.status]
 
     class Meta:
@@ -249,7 +252,7 @@ def foia_save_handler(sender, **kwargs):
         return
 
     if request.status != old_request.status and \
-            request.status in ['processed', 'fix', 'rejected', 'done']:
+            request.status in ['processed', 'fix', 'rejected', 'done', 'partial']:
         msg = render_to_string('foia/mail.txt',
             {'name': request.user.get_full_name(),
              'title': request.title,
