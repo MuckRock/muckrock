@@ -187,5 +187,5 @@ def doc_cloud_detail(request, doc_id):
     if not doc.access == 'public' or not doc.doc_id:
         raise Http404()
 
-    return render_to_response('document_cloud.html', {'doc_id': doc_id},
+    return render_to_response('document_cloud.html', {'doc': doc},
                               context_instance=RequestContext(request))

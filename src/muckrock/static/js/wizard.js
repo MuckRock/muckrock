@@ -18,8 +18,21 @@
 			 });
  });
 
-	$(function() {
-		$("#tabs").tabs();
-		$("input:submit").button();
-		$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
+$(function() {
+	$("#tabs").tabs();
+	$("input:submit").button();
+	$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
+});
+
+$(function() {
+	$('#dialog').dialog({
+		autoOpen: false,
+		width: 320,
+		zIndex: 100000
 	});
+	
+	$('#opener').click(function() {
+		$('#dialog').dialog('open');
+		return false;
+	});
+});
