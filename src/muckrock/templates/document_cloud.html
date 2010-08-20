@@ -64,13 +64,16 @@
 			<div id="site-title">
 
 				<h1><a href="{%url index%}">MuckRock</a> <span> / {% block headline %}Document Viewer{% endblock %}</span></h1>
+				{% if doc.get_thumbnail %}
+				<span id="embed-link"><a href="#" id="opener">Get Embed Code</a></span>
+				{% endif %}
 
 			</div>
 
 			<div id="document-viewer"></div>
-			<script src="http://s3.documentcloud.org/viewer/loader.js"></script>
-			<script>
-				DV.load('http://www.documentcloud.org/documents/{{ doc_id }}.js', {
+			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+			<script type="text/javascript">
+				DV.load('http://www.documentcloud.org/documents/{{ doc.doc_id }}.js', {
 					container : '#document-viewer'
 				});
 			</script>
@@ -78,6 +81,13 @@
 		</div>
 	</div>
 </div>
+
+{% if doc.get_thumbnail %}
+<div id="dialog" title="Embed Code">
+	<p>Copy and paste the following code into your site to create a thumbnail link to this document:</p>
+	<textarea style="width:250px; height: 120px;">&lt;a href="http://www.muckrock.com{% url foia-doc-cloud-detail doc.doc_id %}"&gt; &lt;img src="{{doc.get_thumbnail}}" alt="{{ doc.title }}" /&gt; &lt;/a&gt;</textarea>
+</div>
+{% endif %}
 
 <script type="text/javascript">
 
