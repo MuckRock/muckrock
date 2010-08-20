@@ -618,3 +618,13 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 .request-go   { color: #077507; }
 .request-stop { color: #CC2727; }
 .request-wait { color: #A3A30B; }
+
+#embed-link {
+	float: right;
+	margin-right: 20px;
+}
+
+#embed-link a {
+	color: #335577;
+	text-decoration: underline;
+}
