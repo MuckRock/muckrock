@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 
 from datetime import datetime, date, timedelta
 import os
+import re
 
 class FOIARequestManager(models.Manager):
     """Object manager for FOIA requests"""
@@ -154,6 +155,15 @@ class FOIADocument(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('foia-doc-cloud-detail', [], {'doc_id': self.doc_id})
+
+    def get_thumbnail(self):
+        """Get the url to the thumbnail image"""
+        match = re.match('^(\d+)-(.*)$', self.doc_id)
+        if not match:
+            return None
+        else:
+            return 'http://s3.documentcloud.org/documents/'\
+                   '%s/pages/%s-p1-thumbnail.gif' % match.groups()
 
     class Meta:
         # pylint: disable-msg=R0903
