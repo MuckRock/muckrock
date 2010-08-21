@@ -15,7 +15,7 @@ import inspect
 import sys
 from datetime import datetime
 
-from foia.models import FOIARequest, Jurisdiction, AgencyType
+from foia.models import FOIARequest, FOIACommunication, Jurisdiction, AgencyType
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
@@ -27,14 +27,14 @@ class FOIARequestForm(forms.ModelForm):
                                  help_text='Putting an embargo on a request will hide it '
                                            'from others for 30 days after the response is received')
     agency_type = forms.ModelChoiceField(label='Agency', queryset=AgencyType.objects.all())
+    request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'jurisdiction', 'agency_type', 'embargo', 'request']
+        fields = ['title', 'jurisdiction', 'agency_type', 'embargo']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
-                'request': forms.Textarea(attrs={'style': 'width:450px; height: 200px;'}),
                 }
 
 class FOIADeleteForm(forms.Form):
@@ -471,10 +471,12 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         if len(title) > 70:
             title = title[:70]
-        foia = FOIARequest.objects.create(user=request.user, status='started',
-                                          jurisdiction=jurisdiction, title=title,
-                                          request=foia_request, slug=slugify(title),
+        foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
+                                          jurisdiction=jurisdiction, slug=slugify(title),
                                           agency_type=AgencyType.objects.get(name=agency_type))
+        FOIACommunication.objects.create(
+                foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
+                response=False, full_html=False, communication=foia_request)
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '

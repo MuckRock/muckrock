@@ -603,6 +603,7 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	border-width: 1px;
 	border-color: #bbd;
 	padding: 5px;
+	margin-top: 7px;
 	margin-bottom: 7px;
 }
 
@@ -613,6 +614,7 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	border-color: #bbd;
 	padding: 5px;
 	margin-top: 7px;
+	margin-bottom: 7px;
 }
 
 .request-go   { color: #077507; }
