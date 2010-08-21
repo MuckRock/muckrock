@@ -10,7 +10,7 @@ from foia.models import FOIARequest
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""
     title = 'Latest Submitted Requests'
-    link = '/foia/'
+    link = '/foi/'
     description = 'Updates on changes and additions to submitted FOIA Requests on MuckRock.com'
 
     def items(self):
@@ -25,7 +25,7 @@ class LatestSubmittedRequests(Feed):
 class LatestDoneRequests(Feed):
     """An RSS Feed for completed FOIA requests"""
     title = 'Latest Completed Requests'
-    link = '/foia/'
+    link = '/foi/'
     description = 'Updates on changes and additions to completed FOIA Requests on MuckRock.com'
 
     def items(self):
