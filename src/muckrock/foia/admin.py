@@ -4,7 +4,7 @@ Admin registration for FOIA models
 
 from django.contrib import admin
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, \
+from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, \
                         Jurisdiction, Agency, AgencyType
 from foia.tasks import upload_document_cloud
 
@@ -32,13 +32,19 @@ class FOIAFileInline(admin.TabularInline):
     extra = 1
 
 
+class FOIACommunicationInline(admin.TabularInline):
+    """FOIA File Inline admin options"""
+    model = FOIACommunication
+    extra = 1
+
+
 class FOIARequestAdmin(admin.ModelAdmin):
     """FOIA Request admin options"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
     search_fields = ['title', 'request', 'response']
-    inlines = [FOIAFileInline]
+    inlines = [FOIACommunicationInline, FOIAFileInline]
 
 
 class JurisdictionAdmin(admin.ModelAdmin):

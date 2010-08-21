@@ -51,13 +51,16 @@
 	</p>
 	{% endif %}
 
-	<div class="request"><strong>Request:</strong><br />{{object.request|urlize|linebreaks}}</div>
-	{% if object.response %}
-	<div class="response"><strong>Response:</strong><br />
-		{% autoescape off %}{{object.response}}{% endautoescape %}
+	{% for comm in object.communications.all %}
+	<div class="{% if comm.response %}response{% else %}request{% endif %}">
+		<strong>From {{comm.from_who}} on {{comm.date}}:</strong><br />
+		{% if comm.full_html %}
+			{% autoescape off %}{{comm.communication}}{% endautoescape %}
+		{% else %}
+			{{comm.communication|urlize|linebreaks}}
+		{% endif %}
 	</div>
-	{% endif %}
-
+	{% endfor %}
 
 {% endblock %}
 

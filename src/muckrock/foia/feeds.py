@@ -20,8 +20,7 @@ class LatestSubmittedRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        # pylint: disable-msg=R0201
-        return item.request
+        return item.first_request()
 
 class LatestDoneRequests(Feed):
     """An RSS Feed for completed FOIA requests"""
@@ -36,5 +35,4 @@ class LatestDoneRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        # pylint: disable-msg=R0201
-        return item.request
+        return item.first_request()

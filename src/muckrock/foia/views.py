@@ -20,7 +20,7 @@ from foia.models import FOIARequest, FOIADocument, Jurisdiction
 from accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
-    """Handle a form for a FOIA request - user to create and update a FOIA request"""
+    """Handle a form for a FOIA request - user to update a FOIA request"""
 
     if request.method == 'POST':
         status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
@@ -38,11 +38,15 @@ def _foia_form_handler(request, foia, action):
                 if request.POST['submit'] == 'Submit Request':
                     request.user.get_profile().make_request()
 
-                foia_request = form.save(commit=False)
-                foia_request.slug = slugify(foia_request.title)
-                foia_request.save()
+                foia = form.save(commit=False)
+                foia.slug = slugify(foia.title)
+                foia.save()
+                foia_comm = foia.communications.all()[0]
+                foia_comm.date = datetime.now()
+                foia_comm.communication = form.cleaned_data['request']
+                foia_comm.save()
 
-                return HttpResponseRedirect(foia_request.get_absolute_url())
+                return HttpResponseRedirect(foia.get_absolute_url())
 
         except KeyError:
             # bad post, not possible from web form
@@ -53,7 +57,7 @@ def _foia_form_handler(request, foia, action):
                                       context_instance=RequestContext(request))
 
     else:
-        form = FOIARequestForm(initial=dict(request.GET.items()), instance=foia)
+        form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
 
     return render_to_response('foia/foiarequest_form.html',
                               {'form': form, 'action': action},
