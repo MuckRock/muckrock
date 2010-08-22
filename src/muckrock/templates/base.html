@@ -155,9 +155,9 @@
 				
 					<div class="column-title">Follow Us</div>
 					<ul class="plain-list">
-						<li><a href="/news/feeds/" class="feed">Latest News</a></li>
-						<li><a href="/foia/feeds/submitted/" class="feed">Recently Submitted Requests</a></li>
-						<li><a href="/foia/feeds/completed/" class="feed">Recently Completed Requests</a></li>
+						<li><a href="{% url news-feed %}" class="feed">Latest News</a></li>
+						<li><a href="{% url foia-submitted-feed %}" class="feed">Recently Submitted Requests</a></li>
+						<li><a href="{% url foia-done-feed %}" class="feed">Recently Completed Requests</a></li>
 						<li><a href="http://www.twitter.com/muckrocknews" class="twitter">@MuckRockNews</a></li>
 					</ul>
 
@@ -204,6 +204,28 @@
 
 	</div>
 </div>
+
+<script type="text/javascript">
+  var uservoiceOptions = {
+    key: 'muckrock',
+    host: 'muckrock.uservoice.com', 
+    forum: '72499',
+    alignment: 'left',
+    background_color:'#ddedf7', 
+    text_color: 'black',
+    hover_color: '#bbcbd5',
+    lang: 'en',
+    showTab: true
+  };
+  function _loadUserVoice() {
+    var s = document.createElement('script');
+    s.src = ("https:" == document.location.protocol ? "https://" : "http://") + "uservoice.com/javascripts/widgets/tab.js";
+    document.getElementsByTagName('head')[0].appendChild(s);
+  }
+  _loadSuper = window.onload;
+  window.onload = (typeof window.onload != 'function') ? _loadUserVoice : function() { _loadSuper(); _loadUserVoice(); };
+</script>
+
 
 <script type="text/javascript">
 

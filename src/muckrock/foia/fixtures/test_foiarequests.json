@@ -10,11 +10,10 @@
             "title": "Test 1",
             "date_submitted": null,
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 1,
-            "slug": "test-1"
+            "slug": "test-1",
+			"price": "0.00"
         }
     },
 	{
@@ -28,11 +27,10 @@
             "title": "Test 2",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": "2001-01-10", 
             "user": 1,
-            "slug": "test-2"
+            "slug": "test-2",
+			"price": "0.00"
         }
     },
 	{
@@ -46,11 +44,10 @@
             "title": "Test 3",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 1,
-            "slug": "test-3"
+            "slug": "test-3",
+			"price": "0.00"
         }
     },
 	{
@@ -64,11 +61,10 @@
             "title": "Test 4",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 1,
-            "slug": "test-4"
+            "slug": "test-4",
+			"price": "0.00"
         }
     },
 	{
@@ -82,11 +78,10 @@
             "title": "Test 5",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "test response",
             "date_due": null,
             "user": 1,
-            "slug": "test-5"
+            "slug": "test-5",
+			"price": "0.00"
         }
     },
 	{
@@ -100,11 +95,10 @@
             "title": "Test 6",
             "date_submitted": null,
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 2,
-            "slug": "test-6"
+            "slug": "test-6",
+			"price": "0.00"
         }
     },
 	{
@@ -118,11 +112,10 @@
             "title": "Test 7",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_submitted": "2001-01-12", 
             "user": 2,
-            "slug": "test-7"
+            "slug": "test-7",
+			"price": "0.00"
         }
     },
 	{
@@ -136,11 +129,10 @@
             "title": "Test 8",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 2,
-            "slug": "test-8"
+            "slug": "test-8",
+			"price": "0.00"
         }
     },
 	{
@@ -154,11 +146,10 @@
             "title": "Test 9",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 2,
-            "slug": "test-9"
+            "slug": "test-9",
+			"price": "0.00"
         }
     },
 	{
@@ -172,11 +163,10 @@
             "title": "Test 10",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "test response",
             "date_due": null,
             "user": 2,
-            "slug": "test-10"
+            "slug": "test-10",
+			"price": "0.00"
         }
     },
 	{
@@ -190,11 +180,10 @@
             "title": "Test 11",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 1,
-            "slug": "test-11"
+            "slug": "test-11",
+			"price": "0.00"
         }
     },
 	{
@@ -208,11 +197,10 @@
             "title": "Test 12",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": null,
             "user": 1,
-            "slug": "test-12"
+            "slug": "test-12",
+			"price": "0.00"
         }
     },
 	{
@@ -226,11 +214,10 @@
             "title": "Test 13",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "test response",
             "date_due": null,
             "user": 1,
-            "slug": "test-13"
+            "slug": "test-13",
+			"price": "0.00"
         }
     },
 	{
@@ -244,11 +231,10 @@
             "title": "Test 14",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "test response",
             "date_due": null,
             "user": 1,
-            "slug": "test-14"
+            "slug": "test-14",
+			"price": "0.00"
         }
 	},
 	{
@@ -262,11 +248,10 @@
             "title": "Test 15",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_due": "2001-01-10", 
             "user": 1,
-            "slug": "test-15"
+            "slug": "test-15",
+			"price": "0.00"
         }
     },
 	{
@@ -280,11 +265,10 @@
             "title": "Test 16",
             "date_submitted": "2000-12-29", 
             "agency_type": 1,
-            "request": "test request",
-            "response": "",
             "date_submitted": "2001-01-12", 
             "user": 2,
-            "slug": "test-16"
+            "slug": "test-16",
+			"price": "0.00"
         }
     }
 ]

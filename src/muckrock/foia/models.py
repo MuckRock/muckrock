@@ -63,12 +63,11 @@ class FOIARequest(models.Model):
     status = models.CharField(max_length=10, choices=status)
     jurisdiction = models.ForeignKey('Jurisdiction')
     agency_type = models.ForeignKey('AgencyType')
-    request = models.TextField()
-    response = models.TextField(blank=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
+    price = models.DecimalField(max_digits=8, decimal_places=2, null=True)
 
     objects = FOIARequestManager()
 
@@ -128,10 +127,31 @@ class FOIARequest(models.Model):
                   'partial': 'go'}
         return colors[self.status]
 
+    def first_request(self):
+        """Return the first request text"""
+        # pylint: disable-msg=E1101
+        return self.communications.all()[0].communication
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
+
+
+class FOIACommunication(models.Model):
+    """A single communication of a FOIA request"""
+
+    foia = models.ForeignKey(FOIARequest, related_name='communications')
+    from_who = models.CharField(max_length=70)
+    date = models.DateField()
+    response = models.BooleanField(help_text='Is this a response (or a request)?')
+    full_html = models.BooleanField()
+    communication = models.TextField()
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['foia', 'date']
+        verbose_name = 'FOIA Communication'
 
 
 class FOIADocument(models.Model):
