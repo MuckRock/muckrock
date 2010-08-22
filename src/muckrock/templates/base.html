@@ -155,9 +155,9 @@
 				
 					<div class="column-title">Follow Us</div>
 					<ul class="plain-list">
-						<li><a href="/news/feeds/" class="feed">Latest News</a></li>
-						<li><a href="/foia/feeds/submitted/" class="feed">Recently Submitted Requests</a></li>
-						<li><a href="/foia/feeds/completed/" class="feed">Recently Completed Requests</a></li>
+						<li><a href="{% url news-feed %}" class="feed">Latest News</a></li>
+						<li><a href="{% url foia-submitted-feed %}" class="feed">Recently Submitted Requests</a></li>
+						<li><a href="{% url foia-done-feed %}" class="feed">Recently Completed Requests</a></li>
 						<li><a href="http://www.twitter.com/muckrocknews" class="twitter">@MuckRockNews</a></li>
 					</ul>
 

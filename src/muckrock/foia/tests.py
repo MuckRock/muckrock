@@ -21,7 +21,7 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_foiarequests.json']
+                'test_foiarequests.json', 'test_foiacommunications.json']
 
     def setUp(self):
         """Set up tests"""
@@ -154,7 +154,7 @@ class TestFOIARequestUnit(TestCase):
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_profiles.json',
-                'test_foiarequests.json', 'test_foiaimages.json']
+                'test_foiarequests.json', 'test_foiacommunications.json']
 
     # views
     def test_foia_list(self):
@@ -276,5 +276,5 @@ class TestFOIAFunctional(TestCase):
                      reverse('foia-detail', kwargs={'jurisdiction': 'boston-ma',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
-        nose.tools.eq_(foia.request, 'updated request')
+        nose.tools.eq_(foia.first_request(), 'updated request')
         nose.tools.eq_(foia.status, 'submitted')
