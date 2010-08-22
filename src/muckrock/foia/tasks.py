@@ -1,14 +1,17 @@
 """Celery Tasks for the FOIA application"""
 
+from celery.decorators import periodic_task, task
+from celery.task.schedules import crontab
+from django.core import management
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD
-
-from foia.models import FOIADocument
 
 import base64
 import json
 import urllib2
 from vendor import MultipartPostHandler
-from celery.decorators import task
+
+from foia.models import FOIADocument
+
 
 @task(ignore_result=True)
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -55,3 +58,9 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     except urllib2.URLError, exc:
         # pylint: disable-msg=E1101
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
+
+
+@periodic_task(run_every=crontab(hour='1', minute='0', day_of_week='*'))
+def update_index():
+    """Update the search index every day at 1AM"""
+    management.call_command('update_index')
