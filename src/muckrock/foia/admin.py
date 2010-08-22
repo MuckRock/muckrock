@@ -13,8 +13,6 @@ from foia.tasks import upload_document_cloud
 
 class FOIADocumentAdmin(admin.ModelAdmin):
     """FOIA Image Inline admin options"""
-    model = FOIADocument
-    extra = 1
     readonly_fields = ['doc_id']
     list_display = ('title', 'foia', 'doc_id', 'description')
 
