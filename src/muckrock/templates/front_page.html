@@ -1,0 +1,142 @@
+{% extends "base_base.html" %}
+{% load tags %}
+{% load assets %}
+
+{% block main %}
+		<div class="main" id="main-three-columns">
+
+			<div class="left" id="main-left">
+
+				<div class="post">
+					{% if article.kicker %}<div class="post-kicker"><h4>{{ article.kicker }}</h4></div>{% endif %}
+					<div class="post-title"><h1><a href="{% article.get_absolute_url %}">{{ article.title }}</a></h1></div>
+
+					<div class="post-date">by {{ article.author.get_full_name }} on {{ article.pub_date }}</div>
+
+					<div class="post-body">
+
+						<p><a href=" {{article.get_absolute_url }}"><img src="{% thumbnail article.photo 510x233 %}" alt="" class="bordered" /></a></p>
+
+						<p class="large">{% autoescape off %}{{ article.summary }}{% endautoescape %}</p>
+
+						<a href="{{ article.get_absolute_url }}" class="more">Read more &#187;</a>
+
+					</div>
+				
+				</div>
+
+				<div class="content-separator"></div>
+				<h1>Featured Documents &amp; Requests</h1>
+
+				{% for doc in featured_docs %}
+				<div class="col3 {% cycle 'left' 'col3-mid left' 'right' %}">
+					<div class="column-content">
+						<div class="post">
+							<p align="center"><a href="{{ doc.get_absolute_url }}"><img src="{{ doc.get_thumbnail }}" alt="" class="bordered" height="128" /></a></p>
+							<h4><a href="{{ doc.get_absolute_url }}">doc.title</a></h4>
+							{{ doc.description }}
+						</div>
+
+					</div>
+				</div>
+				{% endfor %}
+
+				<div class="clearer">&nbsp;</div>
+				
+			</div>
+
+			<div class="left sidebar" id="sidebar-1">
+
+				<div class="post">
+					<p><a href="#"><img src="news-image-small-1.jpg" alt="" class="bordered" /></a></p>
+					<p>MuckRock is the easiest way for journalists, bloggers, interest groups and everyday citizens to file, track and share documents through freedom of information laws. You have a right to know what you're government is up to; We make sure you can.</p>
+					<a href="#" class="more">File a Request Now &#187;</a>
+				</div>
+
+
+				<div class="content-separator"></div>
+
+				<div class="post">
+					<h3>Get in touch</h3>
+					<p>Are you interested in joining the MuckRock closed beta? Just want to learn more? Have feedback, questions or suggestions? E-mail us! We'd love to hear your thoughts.</p>
+					<a href="mailto:info@muckrock.com" class="more">Email MuckRock &#187;</a>
+				</div>				
+
+
+				<div class="content-separator"></div>
+
+				<div class="post">
+					<h3>Stats &amp; Figures</h3>
+					<p><ul>
+						<li>{{ num_requests }} requests filed</li>
+						<li>{{ num_completed_requests }} requests succesfully completed</li>
+						<li>{{ num_denied_requests }}  requests denied</li>
+						<li>{{ num_pages }} pages of government documents released</li>
+					</ul></p>
+				</div>		
+			</div>
+
+			<div class="right sidebar" id="sidebar-2">
+
+				<div class="section">
+					<div class="section-title">Most Viewed Documents</div>
+					<div class="section-content">
+						<ul class="nice-list">
+							{% for doc in most_viewed_documents %}
+							<li><span class="quiet">{{forloop.counter}}.</span>
+							<a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a></li>
+							{% endfor %}
+							<li><a href="{% url foia-list %}" class="more">Browse all documents &#187;</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="section network-section">
+					<div class="section-title">News &amp; Opinion</div>
+					<div class="section-content">
+
+						<ul class="nice-list">
+							{% for article in recent_articles %}
+							<li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>
+							{% endfor %}
+							<li><a href="{% url news-index %}" class="more">View all news &#187;</a></li>
+						</ul>
+						
+					</div>
+
+				</div>
+				<div class="section">
+
+					<div class="section-title">
+
+						<div class="left">Overdue Requests</div>
+						<div class="right"><img src="img/icon-time.gif" width="14" height="14" alt="" /></div>
+
+						<div class="clearer">&nbsp;</div>
+
+					</div>
+
+					<div class="section-content">
+
+						<ul class="nice-list">
+							{% for request in overdue_requests %}
+							<li>
+								<div class="left">
+									<a href="{{ request.get_absolute_url }}"><strong>{{ request.title }}</strong></a>
+								</div>
+								<div class="left quiet">{{ request.date_due|timesince }} overdue</div>
+								<div class="clearer">&nbsp;</div>
+							</li>
+							{% empty %}
+							<li>There are no overdue requests at this time.</li>
+							{% endfor %}
+							<li><a href="#" class="more">Browse all &#187;</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+{% endblock %}
