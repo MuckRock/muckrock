@@ -1,7 +1,10 @@
 
 {% extends "foia/base.html" %}
 
+{% load trackback_tags %}
+
 {% block content %}
+{% get_trackback_rdf_for object %}
 	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
