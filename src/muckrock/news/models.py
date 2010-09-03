@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from datetime import datetime
+from easy_thumbnails.fields import ThumbnailerImageField
 
 from foia.models import FOIARequest
 
@@ -27,13 +28,16 @@ class Article(models.Model):
 
     pub_date = models.DateTimeField('Publish date', default=datetime.now)
     title = models.CharField(max_length=200)
+    kicker = models.CharField(max_length=200, blank=True)
     slug = models.SlugField(help_text='A "Slug" is a unique URL-friendly title for an object.')
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
     body = models.TextField('Body text')
-    author = models.ForeignKey(User, editable=False)
+    author = models.ForeignKey(User, limit_choices_to = {'is_staff': True})
     publish = models.BooleanField('Publish on site', default=True,
             help_text='Articles will not appear on the site until their "publish date".')
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
+    image = ThumbnailerImageField(upload_to='news_images', blank=True, null=True,
+                                  resize_source={'size': (510, 233), 'crop': 'smart'})
 
     objects = ArticleManager()
 
