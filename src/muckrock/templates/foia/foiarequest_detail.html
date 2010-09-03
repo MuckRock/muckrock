@@ -4,7 +4,7 @@
 {% block content %}
 	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
-	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.get_full_name}}</a>
+	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}
 	for the {{object.agency_type}} Department of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
