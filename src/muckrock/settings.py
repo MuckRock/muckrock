@@ -23,9 +23,6 @@ DATABASE_PASSWORD = ''         # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
-DOCUMNETCLOUD_USERNAME = 'mitch@mitchellkotler.net'
-DOCUMENTCLOUD_PASSWORD = 'b4c0n7'
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -58,7 +55,7 @@ MEDIA_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'vf6&qbnho24fuojvpep3@id#k=1bs$%^mgxs%t5nswznr2&-5c'
+SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -116,6 +113,7 @@ INSTALLED_APPS = (
     'haystack',
     'django_assets',
     'djcelery',
+    'easy_thumbnails',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -143,7 +141,7 @@ else:
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = 25
     EMAIL_HOST_USER = 'notice@muckrock.com'
-    EMAIL_HOST_PASSWORD = 'XFh3NTxdi9Hk'
+    EMAIL_HOST_PASSWORD = ''
     EMAIL_SUBJECT_PREFIX = '[Muckrock] '
     EMAIL_USE_TLS = True
 
@@ -159,4 +157,8 @@ HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
-MONTHLY_REQUESTS = 25
+MONTHLY_REQUESTS = 5
+
+# pylint: disable-msg=W0401
+# pylint: disable-msg=W0614
+from local_settings import *

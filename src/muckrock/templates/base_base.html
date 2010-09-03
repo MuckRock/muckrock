@@ -75,9 +75,9 @@
 
 					<ul class="tabbed">
 						{% block main-nav %}
-						<li class="{% active request "(^/$)|(^/news/)" %}"><a href="{%url index%}">News</a></li>
-						<li class="{% active request "^/foia/((new)|(update)|(delete))/" %}"><a href="{%url foia-create%}">Submit Request</a></li>
-						<li class="{% active request "^/foia/((list)|(view))/" %}"><a href="{%url foia-list%}">FOI Requests</a></li>
+						<li class="{% active request "^/news/" %}"><a href="{%url news-index%}">News</a></li>
+						<li class="{% active request "^/foi/((new)|(update)|(delete))/" %}"><a href="{%url foia-create%}">Submit Request</a></li>
+						<li class="{% active request "^/foi/((list)|(view))/" %}"><a href="{%url foia-list%}">FOI Requests</a></li>
 						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-my-profile%}">Account Information</a></li>
 						<li><a href="/blog/">Blog</a></li>
 						{% endblock %}
@@ -90,6 +90,7 @@
 				<div id="sub-nav">
 
 					{% block sub-nav %}
+						&nbsp;
 					{% endblock %}
 
 					<div class="clearer">&nbsp;</div>
