@@ -111,7 +111,7 @@ def set_top_viewed_docs():
                 break
             try:
                 top_docs.append(FOIADocument.objects.get(
-                    doc_id=path_re.match(doc).group('doc_id')))
+                    doc_id=path_re.match(doc_path).group('doc_id')))
             except FOIADocument.DoesNotExist:
                 pass
     except AttributeError:
