@@ -107,12 +107,12 @@ def set_top_viewed_docs():
     try:
         top_docs = [FOIADocument.objects.get(doc_id=path_re.match(doc).group('doc_id'))
                     for doc in top_docs]
-    except AttributeError, FOIADocument.DoesNotExist:
+    except (AttributeError, FOIADocument.DoesNotExist):
         print >> sys.stderr, 'Error in set_top_viewed_docs'
         print >> sys.stderr, top_docs
 
     for i, doc in enumerate(top_docs):
-        tv_doc = FOIADocTopViewed.objects.get_or_create(rank=i+1)
+        tv_doc = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'doc': doc})
         tv_doc.doc = doc
         tv_doc.save()
 
