@@ -104,7 +104,7 @@ def set_top_viewed_docs():
     top_doc_paths = [entry.title.text for entry in data.entry
                 if entry.title.text.startswith('ga:pagePath=/foi/doc_cloud/')]
     path_re = re.compile('ga:pagePath=/foi/doc_cloud/(?P<doc_id>[a-z0-9-]+)/')
-    top_docs =[]
+    top_docs = []
     try:
         for doc_path in top_doc_paths:
             if len(top_docs) >= 5:
@@ -120,7 +120,7 @@ def set_top_viewed_docs():
         return
 
     for i, doc in enumerate(top_docs):
-        tv_doc = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'doc': doc})
+        tv_doc, _ = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'doc': doc})
         tv_doc.doc = doc
         tv_doc.save()
 
