@@ -101,15 +101,23 @@ def set_top_viewed_docs():
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    top_docs = [entry.title.text for entry in data.entry
-                if entry.title.text.startswith('ga:pagePath=/foi/doc_cloud/')][:5]
+    top_doc_paths = [entry.title.text for entry in data.entry
+                if entry.title.text.startswith('ga:pagePath=/foi/doc_cloud/')]
     path_re = re.compile('ga:pagePath=/foi/doc_cloud/(?P<doc_id>[a-z0-9-]+)/')
+    top_docs =[]
     try:
-        top_docs = [FOIADocument.objects.get(doc_id=path_re.match(doc).group('doc_id'))
-                    for doc in top_docs]
-    except (AttributeError, FOIADocument.DoesNotExist):
+        for doc_path in top_doc_paths:
+            if len(top_docs) >= 5:
+                break
+            try:
+                top_docs.append(FOIADocument.objects.get(
+                    doc_id=path_re.match(doc).group('doc_id')))
+            except FOIADocument.DoesNotExist:
+                pass
+    except AttributeError:
         print >> sys.stderr, 'Error in set_top_viewed_docs'
         print >> sys.stderr, top_docs
+        return
 
     for i, doc in enumerate(top_docs):
         tv_doc = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'doc': doc})
