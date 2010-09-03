@@ -16,12 +16,5 @@ class ArticleAdmin(admin.ModelAdmin):
     date_hierarchy = 'pub_date'
     search_fields = ['title', 'body']
 
-    def save_model(self, request, obj, form, change):
-        """Attach user to article on save"""
-
-        obj.author = request.user
-        obj.save()
-
-
 admin.site.register(Article, ArticleAdmin)
 
