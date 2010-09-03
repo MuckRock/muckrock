@@ -17,3 +17,4 @@ celery==2.0.2
 django-celery==2.0.2
 gdata==2.0.11
 easy-thumbnails==1.0-alpha-8
+django-trackback==0.1.0
