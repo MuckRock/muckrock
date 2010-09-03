@@ -1,6 +1,10 @@
 {% extends "base_base.html" %}
 {% load tags %}
 {% load assets %}
+{% load thumbnail %}
+
+{% block title %}Home{% endblock %}
+{% block headline %}Home{% endblock %}
 
 {% block main %}
 		<div class="main" id="main-three-columns">
@@ -8,18 +12,24 @@
 			<div class="left" id="main-left">
 
 				<div class="post">
-					{% if article.kicker %}<div class="post-kicker"><h4>{{ article.kicker }}</h4></div>{% endif %}
-					<div class="post-title"><h1><a href="{% article.get_absolute_url %}">{{ article.title }}</a></h1></div>
-
-					<div class="post-date">by {{ article.author.get_full_name }} on {{ article.pub_date }}</div>
+					<div class="post-title"><h1>
+						<a href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a>
+					</h1></div>
+					{% if featured_article.kicker %}<div class="post-kicker">
+						<h4>{{ featured_article.kicker }}</h4>
+					</div>{% endif %}
 
 					<div class="post-body">
 
-						<p><a href=" {{article.get_absolute_url }}"><img src="{% thumbnail article.photo 510x233 %}" alt="" class="bordered" /></a></p>
+						{% if featured_article.image %}
+						<p><a href=" {{featured_article.get_absolute_url }}"><img src="{% thumbnail featured_article.image 510x233 %}" alt="" class="bordered" /></a></p>
+						{% endif %}
 
-						<p class="large">{% autoescape off %}{{ article.summary }}{% endautoescape %}</p>
+					<div class="post-date">by {{ featured_article.author.get_full_name }} on {{ featured_article.pub_date|date:"DATETIME_FORMAT" }}</div>
 
-						<a href="{{ article.get_absolute_url }}" class="more">Read more &#187;</a>
+						<p class="large">{% autoescape off %}{{ featured_article.summary }}{% endautoescape %}</p>
+
+						<a href="{{ featured_article.get_absolute_url }}" class="more">Read more &#187;</a>
 
 					</div>
 				
@@ -28,13 +38,19 @@
 				<div class="content-separator"></div>
 				<h1>Featured Documents &amp; Requests</h1>
 
-				{% for doc in featured_docs %}
+				{% for req in featured_reqs %}
 				<div class="col3 {% cycle 'left' 'col3-mid left' 'right' %}">
 					<div class="column-content">
 						<div class="post">
-							<p align="center"><a href="{{ doc.get_absolute_url }}"><img src="{{ doc.get_thumbnail }}" alt="" class="bordered" height="128" /></a></p>
-							<h4><a href="{{ doc.get_absolute_url }}">doc.title</a></h4>
-							{{ doc.description }}
+							<p align="center"><a href="{{ req.get_absolute_url }}">
+								{% if req.documents.all %}
+									<img src="{{ req.documents.all.0.get_thumbnail }}" alt="" class="bordered" width="102" height="128" />
+								{% else %}
+									<img src="/static/img/report.png" alt="" class="bordered" height="128" />
+								{% endif %}
+							</a></p>
+							<h4><a href="{{ req.get_absolute_url }}">{{ req.title }}</a></h4>
+							{{ req.description }}
 						</div>
 
 					</div>
@@ -48,9 +64,10 @@
 			<div class="left sidebar" id="sidebar-1">
 
 				<div class="post">
-					<p><a href="#"><img src="news-image-small-1.jpg" alt="" class="bordered" /></a></p>
+					<!-- TODO this should go to about page -->
+					<p><a href="#"><img src="/static/img/news-image-small-1.jpg" alt="" class="bordered" /></a></p>
 					<p>MuckRock is the easiest way for journalists, bloggers, interest groups and everyday citizens to file, track and share documents through freedom of information laws. You have a right to know what you're government is up to; We make sure you can.</p>
-					<a href="#" class="more">File a Request Now &#187;</a>
+					<a href="{% url foia-create %}" class="more">File a Request Now &#187;</a>
 				</div>
 
 
@@ -82,7 +99,7 @@
 					<div class="section-title">Most Viewed Documents</div>
 					<div class="section-content">
 						<ul class="nice-list">
-							{% for doc in most_viewed_documents %}
+							{% for doc in most_viewed_docs %}
 							<li><span class="quiet">{{forloop.counter}}.</span>
 							<a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a></li>
 							{% endfor %}
@@ -110,7 +127,7 @@
 					<div class="section-title">
 
 						<div class="left">Overdue Requests</div>
-						<div class="right"><img src="img/icon-time.gif" width="14" height="14" alt="" /></div>
+						<div class="right"><img src="/static/img/icon-time.gif" width="14" height="14" alt="" /></div>
 
 						<div class="clearer">&nbsp;</div>
 
@@ -130,7 +147,7 @@
 							{% empty %}
 							<li>There are no overdue requests at this time.</li>
 							{% endfor %}
-							<li><a href="#" class="more">Browse all &#187;</a></li>
+							<li><a href="{% url foia-list %}" class="more">Browse all &#187;</a></li>
 						</ul>
 					</div>
 				</div>

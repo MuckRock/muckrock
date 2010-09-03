@@ -5,7 +5,7 @@ Admin registration for FOIA models
 from django.contrib import admin
 
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, \
-                        Jurisdiction, Agency, AgencyType
+                        Jurisdiction, Agency, AgencyType, FOIADocTopViewed
 from foia.tasks import upload_document_cloud
 
 # These inhereit more than the allowed number of public methods
@@ -13,7 +13,7 @@ from foia.tasks import upload_document_cloud
 
 class FOIADocumentAdmin(admin.ModelAdmin):
     """FOIA Image Inline admin options"""
-    readonly_fields = ['doc_id']
+    readonly_fields = ['doc_id', 'pages']
     list_display = ('title', 'foia', 'doc_id', 'description')
 
     def save_model(self, request, obj, form, change):
@@ -69,4 +69,4 @@ admin.site.register(FOIADocument, FOIADocumentAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
 admin.site.register(AgencyType,   AgencyTypeAdmin)
 admin.site.register(Agency,       AgencyAdmin)
-
+admin.site.register(FOIADocTopViewed)
