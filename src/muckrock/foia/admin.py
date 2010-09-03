@@ -41,7 +41,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
-    search_fields = ['title', 'request', 'response']
+    search_fields = ['title', 'description']
     inlines = [FOIACommunicationInline, FOIAFileInline]
 
 
