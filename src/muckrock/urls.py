@@ -8,13 +8,13 @@ from django.conf.urls.defaults import handler404, handler500
 # pylint: enable-msg=W0611
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
-from django.views.generic.simple import direct_to_template
 from django.contrib.sitemaps.views import sitemap
 
 import haystack.urls
 
 import accounts.urls, foia.urls, news.urls
 import settings
+import views
 from foia.sitemap import FoiaSitemap
 from news.sitemap import ArticleSitemap
 
@@ -23,7 +23,7 @@ admin.autodiscover()
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
 
 urlpatterns = patterns('',
-    url(r'^$', direct_to_template, {'template': 'beta_home.html'}, name='index'),
+    url(r'^$', views.front_page, name='index'),
     url(r'^accounts/', include(accounts.urls)),
     url(r'^foi/', include(foia.urls)),
     url(r'^news/', include(news.urls)),

@@ -2,8 +2,12 @@
 *.swp
 *.swo
 *.pyc
+local_settings.py
+fabfile.py
 pylint.sh
+coverage.sh
 whoosh
 .coverage
 htmlcov
 src/muckrock/static/foia_*
+src/muckrock/static/news_*

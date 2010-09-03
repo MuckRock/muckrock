@@ -43,6 +43,10 @@ class FOIARequestManager(models.Manager):
                        .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30)) \
                        .exclude(embargo=True, date_done=None)
 
+    def get_overdue(self):
+        """Get all overdue FOIA requests"""
+        return self.filter(status='processed', date_due__lt=date.today())
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -68,6 +72,8 @@ class FOIARequest(models.Model):
     date_due = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True)
+    description = models.TextField(blank=True)
+    featured = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -167,6 +173,7 @@ class FOIADocument(models.Model):
     description = models.TextField()
     access = models.CharField(max_length=12, choices=access)
     doc_id = models.SlugField(max_length=80, editable=False)
+    pages = models.PositiveIntegerField(default=0, editable=False)
 
     def __unicode__(self):
         return self.title
@@ -188,6 +195,18 @@ class FOIADocument(models.Model):
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name = 'FOIA DocumentCloud Document'
+
+
+class FOIADocTopViewed(models.Model):
+    """Keep track of the top 5 most viewed documents for the front page"""
+
+    doc = models.ForeignKey(FOIADocument)
+    rank = models.PositiveSmallIntegerField(unique=True)
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['rank']
+        verbose_name = 'FOIA Top Viewed Document'
 
 
 class FOIAFile(models.Model):
