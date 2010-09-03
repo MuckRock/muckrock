@@ -81,6 +81,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'trackback.middleware.PingbackUrlInjectionMiddleware',
 )
 
 if DEBUG:
@@ -114,6 +115,7 @@ INSTALLED_APPS = (
     'django_assets',
     'djcelery',
     'easy_thumbnails',
+    'trackback',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
