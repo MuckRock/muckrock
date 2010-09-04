@@ -2,7 +2,7 @@
 Models for the FOIA application
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
@@ -13,7 +13,9 @@ from datetime import datetime, date, timedelta
 import os
 import re
 
-class FOIARequestManager(models.Manager):
+from muckrock.models import ChainableManager
+
+class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
     # pylint: disable-msg=R0904
 
@@ -42,6 +44,10 @@ class FOIARequestManager(models.Manager):
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30)) \
                        .exclude(embargo=True, date_done=None)
+
+    def get_public(self):
+        """Get all publically viewable FOIA requests"""
+        return self.get_viewable(AnonymousUser())
 
     def get_overdue(self):
         """Get all overdue FOIA requests"""
@@ -191,6 +197,14 @@ class FOIADocument(models.Model):
         else:
             return 'http://s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p1-thumbnail.gif' % match.groups()
+
+    def is_viewable(self, user):
+        """Is this document viewable to user"""
+        return self.access == 'public' and self.foia.is_viewable(user)
+
+    def is_public(self):
+        """Is this document viewable to everyone"""
+        return self.is_viewable(AnonymousUser())
 
     class Meta:
         # pylint: disable-msg=R0903

@@ -110,8 +110,9 @@ def set_top_viewed_docs():
             if len(top_docs) >= 5:
                 break
             try:
-                top_docs.append(FOIADocument.objects.get(
-                    doc_id=path_re.match(doc_path).group('doc_id')))
+                doc = FOIADocument.objects.get(doc_id=path_re.match(doc_path).group('doc_id'))
+                if doc.is_public():
+                    top_docs.append(doc)
             except FOIADocument.DoesNotExist:
                 pass
     except AttributeError:
