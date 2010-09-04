@@ -11,7 +11,6 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 
 import haystack.urls
-import trackback.urls
 
 import accounts.urls, foia.urls, news.urls
 import settings
@@ -31,7 +30,6 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
-    url(r'^ping/', include(trackback.urls))
 )
 
 if settings.DEBUG:
