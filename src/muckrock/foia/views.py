@@ -194,7 +194,7 @@ def doc_cloud_detail(request, doc_id):
 
     doc = get_object_or_404(FOIADocument, doc_id=doc_id)
 
-    if not doc.access == 'public' or not doc.doc_id:
+    if not doc.is_viewable(request.user) or not doc.doc_id:
         raise Http404()
 
     return render_to_response('document_cloud.html', {'doc': doc},
