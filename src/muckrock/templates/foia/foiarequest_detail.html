@@ -1,13 +1,14 @@
 
 {% extends "foia/base.html" %}
+{% load pingback_tags %}
 
 {% block content %}
 	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
-	{% if object.date_submitted %} on {{object.date_submitted}}{%endif%}
+	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
 	for the {{object.agency_type}} Department of {{object.jurisdiction}}
-	{% if object.date_done %} and fufilled on {{object.date_done}}{%endif%}
+	{% if object.date_done %} and fufilled on {{object.date_done|date}}{%endif%}
 	</p>
 	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
 	<p>Status: <span class="request-{{object.color_code}}">
@@ -53,7 +54,7 @@
 
 	{% for comm in object.communications.all %}
 	<div class="{% if comm.response %}response{% else %}request{% endif %}">
-		<strong>From {{comm.from_who}} on {{comm.date}}:</strong><br />
+		<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
 		{% if comm.full_html %}
 			{% autoescape off %}{{comm.communication}}{% endautoescape %}
 		{% else %}
@@ -65,15 +66,29 @@
 {% endblock %}
 
 {% block sidebar %}
-{% if user == object.user and object.is_editable %}
-	<h2>Actions</h2>
-	<ul>
-		<li><a href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></li>
-	{% if object.is_deletable %}
-		<li><a href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></li>
+	{% if user == object.user and object.is_editable %}
+		<h2>Actions</h2>
+		<ul>
+			<li><a href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></li>
+		{% if object.is_deletable %}
+			<li><a href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></li>
+		{% endif %}
+		</ul>
+		<div class="content-separator"></div>
 	{% endif %}
-	</ul>
-	<div class="content-separator"></div>
-{% endif %}
+
+	{% get_pingback_list for object as pingbacks %}
+	{% if pingbacks %}
+	    <h2>Pingbacks:</h2>
+	    {% for pingback in pingbacks %}
+	        <div class="b-pingback">
+						<strong>{{ pingback.url|urlizetrunc:40 }}</strong><br />
+						<em>{{ pingback.date|date }}</em><br />
+	
+						<p>{{ pingback.content }}</p>
+	        </div>
+	    {% endfor %}
+		<div class="content-separator"></div>
+	{% endif %}
 
 {% endblock %}
