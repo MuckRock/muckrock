@@ -4,10 +4,15 @@ URL mappings for the FOIA application
 
 from django.conf.urls.defaults import patterns, url
 
+from pingback import register_pingback
+
 from foia import views
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
+from foia.pingbacks import pingback_foia_handler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
+
+register_pingback(views.detail, pingback_foia_handler)
 
 urlpatterns = patterns('',
     url(r'^list/$',                   views.list_, name='foia-list'),
