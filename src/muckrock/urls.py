@@ -9,9 +9,10 @@ from django.conf.urls.defaults import handler404, handler500
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
+from django.views.decorators.csrf import csrf_exempt
 
 import haystack.urls
-import trackback.urls
+from django_xmlrpc.views import handle_xmlrpc
 
 import accounts.urls, foia.urls, news.urls
 import settings
@@ -30,8 +31,8 @@ urlpatterns = patterns('',
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
+    url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
-    url(r'^ping/', include(trackback.urls))
 )
 
 if settings.DEBUG:
