@@ -1,0 +1,6 @@
+
+{% extends "admin/change_form.html" %}
+
+{% block form_top %}
+  <p><a href="{% url admin:foia_foiadocument_add%}?foia={{object_id}}" onclick="return showAddAnotherPopup(this);">Add a Document Cloud Document to this Request</a></p>
+{% endblock %}
