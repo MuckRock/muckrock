@@ -34,6 +34,7 @@ class FoiaSitemap(Sitemap):
             'submitted': 0.5,
             'processed': 0.6,
             'fix': 0.6,
+            'payment': 0.6,
             'rejected': 0.1,
             'done': 0.8,
             'partial': 0.7,
