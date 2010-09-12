@@ -82,6 +82,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pingback.middleware.PingbackMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
 if DEBUG:
@@ -108,6 +109,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.sitemaps',
     'django.contrib.messages',
+    'django.contrib.flatpages',
     'south',
     'django_nose',
     'debug_toolbar',
