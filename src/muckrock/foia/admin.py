@@ -2,7 +2,9 @@
 Admin registration for FOIA models
 """
 
+from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
+from django.views.generic import list_detail
 
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, \
                         Jurisdiction, Agency, AgencyType, FOIADocTopViewed
@@ -43,6 +45,20 @@ class FOIARequestAdmin(admin.ModelAdmin):
     list_filter = ['status']
     search_fields = ['title', 'description']
     inlines = [FOIACommunicationInline, FOIAFileInline]
+
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super(FOIARequestAdmin, self).get_urls()
+        my_urls = patterns('', url(r'^process/$', self.admin_site.admin_view(self.process),
+                                   name='foia-admin-process'))
+        return my_urls + urls
+
+    def process(self, request):
+        """List all the requests that need to be processed"""
+        # pylint: disable-msg=R0201
+        return list_detail.object_list(request,
+                   FOIARequest.objects.filter(status='submitted'),
+                   template_name='foia/admin_process.html')
 
 
 class JurisdictionAdmin(admin.ModelAdmin):

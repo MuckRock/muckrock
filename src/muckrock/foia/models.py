@@ -144,6 +144,11 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         return self.communications.all()[0].communication
 
+    def get_agencies(self):
+        """Get any agencies that correspond to this request"""
+        # Ideally there would be one
+        return Agency.objects.filter(jurisdiction=self.jurisdiction, types=self.agency_type)
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']
