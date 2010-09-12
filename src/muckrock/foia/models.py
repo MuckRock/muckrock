@@ -62,6 +62,7 @@ class FOIARequest(models.Model):
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
         ('fix', 'Fix Required'),
+        ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
         ('done', 'Completed'),
         ('partial', 'Partially Completed'),
@@ -127,16 +128,16 @@ class FOIARequest(models.Model):
     def percent_complete(self):
         """Get percent complete for the progress bar"""
         percents = {'started': 25, 'submitted': 50, 'processed': 75,
-                    'fix':     75, 'rejected': 100, 'done':      100,
-                    'partial': 90}
+                    'fix':     75, 'payment':   75, 'rejected': 100,
+                    'done':   100, 'partial':   90}
         return percents[self.status]
 
     def color_code(self):
         """Get the color code for the current status"""
         processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
         colors = {'started': 'wait', 'submitted': 'go',   'processed': processed,
-                  'fix':     'wait', 'rejected':  'stop', 'done':      'go',
-                  'partial': 'go'}
+                  'fix':     'wait', 'payment':   'wait', 'rejected':  'stop',
+                  'done':      'go', 'partial': 'go'}
         return colors[self.status]
 
     def first_request(self):
@@ -320,7 +321,7 @@ def foia_save_handler(sender, **kwargs):
         return
 
     if request.status != old_request.status and \
-            request.status in ['processed', 'fix', 'rejected', 'done', 'partial']:
+            request.status in ['processed', 'fix', 'payment', 'rejected', 'done', 'partial']:
         msg = render_to_string('foia/mail.txt',
             {'name': request.user.get_full_name(),
              'title': request.title,
