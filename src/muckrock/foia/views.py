@@ -12,7 +12,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic import list_detail
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
                        FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
@@ -26,10 +26,6 @@ def _foia_form_handler(request, foia, action):
         status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
 
         try:
-            if request.POST['submit'] == 'Submit Request':
-                foia.date_submitted = datetime.now()
-                foia.date_due = datetime.now() + timedelta(15)
-
             foia.status = status_dict[request.POST['submit']]
 
             form = FOIARequestForm(request.POST, instance=foia)
