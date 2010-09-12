@@ -13,7 +13,6 @@ class ChainableManager(models.Manager):
 
     def get_query_set(self):
         """Dynamically adds custom methods to returned QuerySet"""
-        print 'In outer gqs'
         qset = super(ChainableManager, self).get_query_set()
 
         class _QuerySet(qset.__class__):
@@ -26,5 +25,4 @@ class ChainableManager(models.Manager):
                                                      not hasattr(_QuerySet, attr)]:
             setattr(_QuerySet, method, MethodType(getattr(self, method).im_func, None, _QuerySet))
         qset.__class__ = _QuerySet
-        print 'gqs\t', id(qset), qset.__class__
         return qset
