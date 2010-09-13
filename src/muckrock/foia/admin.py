@@ -14,12 +14,12 @@ from foia.tasks import upload_document_cloud
 # pylint: disable-msg=R0904
 
 class FOIADocumentAdmin(admin.ModelAdmin):
-    """FOIA Image Inline admin options"""
+    """FOIA Document admin options"""
     readonly_fields = ['doc_id', 'pages']
     list_display = ('title', 'foia', 'doc_id', 'description')
 
     def save_model(self, request, obj, form, change):
-        """Attach user to article on save"""
+        """Upload document to Document Cloud on save"""
         # pylint: disable-msg=E1101
         obj.save()
         # wait 3 seconds to give database a chance to sync
