@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.defaultfilters import slugify
@@ -16,11 +17,20 @@ from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
                        FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, Jurisdiction
+from foia.models import FOIARequest, FOIADocument, Jurisdiction, Agency
 from accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
+
+    def default_form():
+        """Make a default form to update a FOIA request"""
+        form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
+        agency_pk = foia.agency and foia.agency.pk
+        form.fields['agency'].queryset = \
+            Agency.objects.filter(Q(jurisdiction=foia.jurisdiction, approved=True) |
+                                  Q(pk=agency_pk))
+        return form
 
     if request.method == 'POST':
         status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
@@ -35,6 +45,12 @@ def _foia_form_handler(request, foia, action):
                     request.user.get_profile().make_request()
 
                 foia = form.save(commit=False)
+                agency_name = request.POST.get('agency-name')
+                if agency_name and agency_name != foia.agency.name:
+                    # Use the combobox to create a new agency
+                    foia.agency = Agency.objects.create(name=agency_name,
+                                                        jurisdiction=foia.jurisdiction,
+                                                        approved=False)
                 foia.slug = slugify(foia.title)
                 foia.save()
                 foia_comm = foia.communications.all()[0]
@@ -44,16 +60,15 @@ def _foia_form_handler(request, foia, action):
 
                 return HttpResponseRedirect(foia.get_absolute_url())
 
-        except KeyError:
-            # bad post, not possible from web form
-            form = FOIARequestForm(instance=foia)
         except RequestLimitError:
             # no requests left
             return render_to_response('foia/foiarequest_error.html',
                                       context_instance=RequestContext(request))
-
+        except KeyError:
+            # bad post, not possible from web form
+            form = default_form()
     else:
-        form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
+        form = default_form()
 
     return render_to_response('foia/foiarequest_form.html',
                               {'form': form, 'action': action},

@@ -11,7 +11,7 @@ import nose.tools
 from datetime import date, timedelta
 from operator import attrgetter
 
-from foia.models import FOIARequest, Jurisdiction, AgencyType
+from foia.models import FOIARequest
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -264,16 +264,13 @@ class TestFOIAFunctional(TestCase):
         # test for submitting a foia request for enough credits
         # tests for the wizard
 
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
-                     'jurisdiction': Jurisdiction.objects.get(slug='boston-ma').pk,
-                     'agency_type': AgencyType.objects.get(name='Clerk').pk}
-                     
+        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request'}
 
         post_allowed(self.client, reverse('foia-update',
                                      kwargs={'jurisdiction': foia.jurisdiction.slug,
                                              'idx': foia.pk, 'slug': foia.slug}),
                      foia_data, 'http://testserver' +
-                     reverse('foia-detail', kwargs={'jurisdiction': 'boston-ma',
+                     reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
         nose.tools.eq_(foia.first_request(), 'updated request')

@@ -77,7 +77,7 @@ class AgencyTypeAdmin(admin.ModelAdmin):
 class AgencyAdmin(admin.ModelAdmin):
     """Agency admin options"""
     list_display = ('name', 'jurisdiction')
-    list_filter = ['jurisdiction', 'types']
+    list_filter = ['approved', 'jurisdiction', 'types']
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
