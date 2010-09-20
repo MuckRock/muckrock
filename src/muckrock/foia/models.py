@@ -73,7 +73,8 @@ class FOIARequest(models.Model):
     slug = models.SlugField(max_length=70)
     status = models.CharField(max_length=10, choices=status)
     jurisdiction = models.ForeignKey('Jurisdiction')
-    agency_type = models.ForeignKey('AgencyType')
+    #agency_type = models.ForeignKey('AgencyType')
+    agency = models.ForeignKey('Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
@@ -144,11 +145,6 @@ class FOIARequest(models.Model):
         """Return the first request text"""
         # pylint: disable-msg=E1101
         return self.communications.all()[0].communication
-
-    def get_agencies(self):
-        """Get any agencies that correspond to this request"""
-        # Ideally there would be one
-        return Agency.objects.filter(jurisdiction=self.jurisdiction, types=self.agency_type)
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -298,8 +294,9 @@ class Agency(models.Model):
     name = models.CharField(max_length=60)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType)
-    address = models.TextField()
+    address = models.TextField(blank=True)
     email = models.EmailField(blank=True)
+    approved = models.BooleanField()
 
     def __unicode__(self):
         return self.name
