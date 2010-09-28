@@ -1,6 +1,14 @@
 
 {% extends "foia/base-submit.html" %}
 
+{% block media %}
+	<style>
+		.ui-button { margin-left: -1px; }
+		.ui-button-icon-only .ui-button-text { padding: 0.35em; } 
+		.ui-autocomplete-input { margin: 0; padding: 0.48em 0 0.47em 0.45em; }
+	</style>
+{% endblock %}
+
 {% block content %}
 	<h1>{{action}} FOI Request</h1>
 	{% if messages %}
@@ -13,7 +21,27 @@
 	<div class="form">
   <form action="" method="post">
 		<fieldset>
-			{% include "form.html" %}
+			{% csrf_token %}
+			<table class="form">
+			{% for field in form %}
+			<tr{% if field.errors %} class="error"{% endif %}>
+					<td style="width:40%;">
+						<label for="{{ field.auto_id }}">
+							{% if field.field.required %}<span class="required">{{ field.label}}:</span>
+							{% else %}{{ field.label}}:{% endif %}
+						</label>
+					</td>
+					<td>{{ field }}
+						{% if field.help_text %}<br \><em class="quiet">{{field.help_text}}</em>{% endif %}
+						{{field.errors}}
+					</td>
+				</tr>
+				{# put the jurisdiction after title #}
+				{% if field.label == "Title" %}
+					<tr><td><label>Jurisdiction:</label></td><td>{{form.instance.jurisdiction}}</td></tr>
+				{% endif %}
+			{% endfor %}
+			</table>
 			<input type="submit" name="submit" value="Submit Request" class="button" />
 			<input type="submit" name="submit" value="Save as Draft" class="button" />
 		</fieldset>

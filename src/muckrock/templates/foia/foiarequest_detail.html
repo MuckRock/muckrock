@@ -7,7 +7,7 @@
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
-	for the {{object.agency_type}} Department of {{object.jurisdiction}}
+	for the {{object.agency}} of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done|date}}{%endif%}
 	</p>
 	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
@@ -18,20 +18,9 @@
 		{% else %}
 			due in {{ object.date_due|timeuntil }}
 		{% endif %}
-		</span>
-	{%endif%}
+		{%endif%}
+	</span></p>
 
-	{% if object.doc_first_page %}
-	- <a href="{{object.doc_first_page.get_absolute_url}}">View Official Response</a>
-	{% endif %}
-	{% if object.public_documents %}
-	<h4>Documents:</h4>
-	<ul>
-		{% for document in object.public_documents %}
-			<li><a href="{{document.get_absolute_url}}">{{document.title}}</a></li>
-		{% endfor %}
-	</ul>
-	{% endif %}
 	{% if object.files.all %}
 	<h4>Attached Files:</h4>
 	<ul>
@@ -40,28 +29,69 @@
 		{% endfor %}
 	</ul>
 	{% endif %}
-	</p>
-	{% if object.is_embargo and not object.date_done %}
-	<p>
-	This request is embargoed and will not be visible to others until 30 days after a response is received.
-	</p>
-	{% endif %}
-	{% if object.is_embargo and object.date_done %}
-	<p>
-	This request is embargoed and will not be visible until {{ object.embargo_date }}.
-	</p>
-	{% endif %}
 
-	{% for comm in object.communications.all %}
-	<div class="{% if comm.response %}response{% else %}request{% endif %}">
-		<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
-		{% if comm.full_html %}
-			{% autoescape off %}{{comm.communication}}{% endautoescape %}
-		{% else %}
-			{{comm.communication|urlize|linebreaks}}
+	{% if object.public_documents %}
+	<div id="tabs">
+		<ul>
+			<li><a href="#tabs-documents">Documents</a></li>
+			<li><a href="#tabs-request">Request</a></li>
+		</ul>
+		<div id="tabs-documents">
+			<div id="viewer"></div>
+			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+			<script type="text/javascript">
+				$(function() {
+					var doc_id = window.location.hash.substring(1);
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+					if (!doc_id || ($.inArray(doc_id, documents) == -1)) doc_id = default_doc_id;
+
+					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
+						width: 627,
+						height: 600,
+						sidebar: false,
+						container: "#viewer"
+					});
+				});
+			</script>
+			<div class="dc-thumbnails">
+
+				<ul class="dc-thumbnails">
+				{% if object.public_documents|length > 1 %}
+					{% for document in object.public_documents %}
+						<li><a href="#{{document.doc_id}}" onclick="DV.load('http://www.documentcloud.org/documents/{{document.doc_id}}.js', {width: 627, height: 600, sidebar: false, container: '#viewer'}); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
+					{% endfor %}
+				{% endif %}
+				</ul>
+			</div>
+		</div>
 		{% endif %}
+		<div id="tabs-request">
+			{% if object.is_embargo and not object.date_done %}
+			<p>
+			This request is embargoed and will not be visible to others until 30 days after a response is received.
+			</p>
+			{% endif %}
+			{% if object.is_embargo and object.date_done %}
+			<p>
+			This request is embargoed and will not be visible until {{ object.embargo_date }}.
+			</p>
+			{% endif %}
+
+			{% for comm in object.communications.all %}
+			<div class="{% if comm.response %}response{% else %}request{% endif %}">
+				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
+				{% if comm.full_html %}
+					{% autoescape off %}{{comm.communication}}{% endautoescape %}
+				{% else %}
+					{{comm.communication|urlize|linebreaks}}
+				{% endif %}
+			</div>
+			{% endfor %}
+		</div>
+	{% if object.public_documents %}
 	</div>
-	{% endfor %}
+	{% endif %}
 
 {% endblock %}
 
