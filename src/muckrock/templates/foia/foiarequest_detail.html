@@ -57,9 +57,11 @@
 			<div class="dc-thumbnails">
 
 				<ul class="dc-thumbnails">
-				{% for document in object.public_documents %}
-					<li><a href="#{{document.doc_id}}" onclick="DV.load('http://www.documentcloud.org/documents/{{document.doc_id}}.js', {width: 627, height: 600, sidebar: false, container: '#viewer'}); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
-				{% endfor %}
+				{% if object.public_documents|length > 1 %}
+					{% for document in object.public_documents %}
+						<li><a href="#{{document.doc_id}}" onclick="DV.load('http://www.documentcloud.org/documents/{{document.doc_id}}.js', {width: 627, height: 600, sidebar: false, container: '#viewer'}); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
+					{% endfor %}
+				{% endif %}
 				</ul>
 			</div>
 		</div>

@@ -186,10 +186,9 @@ class FOIADocument(models.Model):
     def __unicode__(self):
         return self.title
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-doc-cloud-detail', [], {'doc_id': self.doc_id})
+        return '%s#%s' % (self.foia.get_absolute_url(), self.doc_id)
 
     def get_thumbnail(self):
         """Get the url to the thumbnail image"""

@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic import list_detail
@@ -208,5 +208,4 @@ def doc_cloud_detail(request, doc_id):
     if not doc.is_viewable(request.user) or not doc.doc_id:
         raise Http404()
 
-    return render_to_response('document_cloud.html', {'doc': doc},
-                              context_instance=RequestContext(request))
+    return redirect(doc, permanant=True)
