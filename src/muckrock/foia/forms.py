@@ -15,7 +15,7 @@ import inspect
 import sys
 from datetime import datetime
 
-from foia.models import FOIARequest, FOIACommunication, Jurisdiction, AgencyType
+from foia.models import FOIARequest, FOIACommunication, Jurisdiction, Agency, AgencyType
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
@@ -26,13 +26,16 @@ class FOIARequestForm(forms.ModelForm):
     embargo = forms.BooleanField(required=False,
                                  help_text='Putting an embargo on a request will hide it '
                                            'from others for 30 days after the response is received')
-    agency_type = forms.ModelChoiceField(label='Agency', queryset=AgencyType.objects.all())
+    agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
+                                    widget=forms.Select(attrs={'class': 'agency-combo'}),
+                                    help_text='Select one of the agencies for the jurisdiction you '
+                                          'have chosen, or write in the correct agency if known')
     request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'jurisdiction', 'agency_type', 'embargo']
+        fields = ['title', 'agency', 'embargo']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 }
@@ -46,7 +49,27 @@ class FOIADeleteForm(forms.Form):
 
 class FOIAWizardParent(forms.Form):
     """A form with generic options for every template"""
-    # there used to be something here - I'm leaving it for now just in case
+    agency = None
+    agency_type = None
+
+    @classmethod
+    def get_agency(cls, jurisdiction):
+        """Get the agency for this template given a jurisdiction"""
+
+        def get_first(list_):
+            """Get first element of a list or none if it is empty"""
+            if list_:
+                return list_[0]
+
+        agency = None
+        if cls.agency:
+            agency = get_first(Agency.objects.filter(name=cls.agency, jurisdiction=jurisdiction))
+        if not agency and cls.agency_type:
+            agency = get_first(Agency.objects.filter(
+                types=get_first(AgencyType.objects.filter(name=cls.agency_type)),
+                jurisdiction=jurisdiction))
+
+        return agency
 
 class FOIAMugShotForm(FOIAWizardParent):
     """A form to fill in a mug shot template"""
@@ -62,7 +85,7 @@ class FOIAMugShotForm(FOIAWizardParent):
     name = 'Mug Shots'
     category = 'Crime'
     level = 'ls'
-    agency = 'Police'
+    agency_type = 'Police'
     short_desc = "Get somebody's mug shots."
 
 class FOIACriminalForm(FOIAWizardParent):
@@ -77,7 +100,7 @@ class FOIACriminalForm(FOIAWizardParent):
     name = 'Criminal Record'
     category = 'Crime'
     level = 's'
-    agency = 'Police'
+    agency_type = 'Police'
     short_desc = 'Get the criminal record for an individual.'
 
 class FOIAAssessorForm(FOIAWizardParent):
@@ -91,7 +114,7 @@ class FOIAAssessorForm(FOIAWizardParent):
     name = "Assessor's Data"
     category = 'Finance'
     level = 'l'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
     short_desc = 'Get the property values for your town.'
 
 class FOIASalaryForm(FOIAWizardParent):
@@ -107,7 +130,7 @@ class FOIASalaryForm(FOIAWizardParent):
     name = 'Salary Data'
     category = 'Finance'
     level = 'l'
-    agency = 'Finance'
+    agency_type = 'Finance'
     short_desc = 'Find out the salaries for positions in a government department.'
 
 class FOIAContractForm(FOIAWizardParent):
@@ -123,7 +146,7 @@ class FOIAContractForm(FOIAWizardParent):
     name = 'Contracts'
     category = 'Finance'
     level = 'ls'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
     short_desc = 'Find out what contracts companies are making with your government.'
 
 class FOIABirthForm(FOIAWizardParent):
@@ -148,7 +171,7 @@ class FOIABirthForm(FOIAWizardParent):
     name = 'Birth Record'
     category = 'Genealogy'
     level = 'l'
-    agency = 'Health'
+    agency_type = 'Health'
     short_desc = 'Get the birth certificate of a friend or family member.'
 
 class FOIADeathForm(FOIAWizardParent):
@@ -173,7 +196,7 @@ class FOIADeathForm(FOIAWizardParent):
     name = 'Death Record'
     category = 'Genealogy'
     level = 'l'
-    agency = 'Health'
+    agency_type = 'Health'
     short_desc = 'Get the death certificate of a deceased friend or family member.'
 
 class FOIAEmailForm(FOIAWizardParent):
@@ -188,11 +211,11 @@ class FOIAEmailForm(FOIAWizardParent):
     name = 'Week of Email'
     category = 'Bureaucracy'
     level = 'lsf'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
     short_desc = 'Read what your officials are discussing via email.'
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.' 
+                'the School of Journalism at the University of Arizona.'
 
 class FOIAExpenseForm(FOIAWizardParent):
     """A form to fill in an expense report request template"""
@@ -205,11 +228,11 @@ class FOIAExpenseForm(FOIAWizardParent):
     name = 'Expense Reports'
     category = 'Finance'
     level = 'lsf'
-    agency = 'Finance'
+    agency_type = 'Finance'
     short_desc = 'Find out what the petty fund at your government is being spent on.'
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.' 
+                'the School of Journalism at the University of Arizona.'
 
 class FOIAMinutesForm(FOIAWizardParent):
     """A form to fill in a meeting minutes request template"""
@@ -221,7 +244,7 @@ class FOIAMinutesForm(FOIAWizardParent):
     name = 'Meeting Minutes'
     category = 'Bureaucracy'
     level = 'lsf'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
     short_desc = 'Request the most recent minutes of a state agency, board or committee.'
     long_desc = 'This template was suggested by Barbara Croll Fought, associate professor at the '\
                 'Newhouse School of Public Communications, Syracuse University.'
@@ -236,11 +259,11 @@ class FOIATravelForm(FOIAWizardParent):
     name = 'Travel Expense Reports'
     category = 'Finance'
     level = 'lsf'
-    agency = 'Finance'
+    agency_type = 'Finance'
     short_desc = 'Discover how comfy your state employees are while roughing it on the road.'
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.' 
+                'the School of Journalism at the University of Arizona.'
 
 class FOIAAthleticForm(FOIAWizardParent):
     """A form to fill in an athletic personnel salary request template"""
@@ -251,7 +274,7 @@ class FOIAAthleticForm(FOIAWizardParent):
     name = 'Athletic Personnel Salaries'
     category = 'Finance'
     level = 'ls'
-    agency = 'Finance'
+    agency_type = 'Finance'
     short_desc = 'Unveil the salary information for school sports teams coaches, trainers and '\
                  'other support personnel.'
     long_desc = 'This template was suggested by Barbara Croll Fought, associate professor at the '\
@@ -264,7 +287,7 @@ class FOIAPetForm(FOIAWizardParent):
     name = 'Pet Licensing Data'
     category = 'Health'
     level = 'l'
-    agency = 'Health'
+    agency_type = 'Health'
     short_desc = 'Discover which breeds are most popular, where dogs are most likely to be found '\
                  'in your city, and more.'
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
@@ -283,11 +306,11 @@ class FOIAParkingForm(FOIAWizardParent):
     name = 'Parking Ticket Waivers'
     category = 'Crime'
     level = 'l'
-    agency = 'Police'
+    agency_type = 'Police'
     short_desc = "Discover who isn't paying their parking tickets, and who doesn't have to."
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.' 
+                'the School of Journalism at the University of Arizona.'
 
 class FOIRestaurantForm(FOIAWizardParent):
     """A form to fill in a restaurant health inspeaction template"""
@@ -302,7 +325,7 @@ class FOIRestaurantForm(FOIAWizardParent):
     name = 'Restaurant Health Inspection'
     category = 'Health'
     level = 'l'
-    agency = 'Health'
+    agency_type = 'Health'
     short_desc = 'Uncover how clean, or not, your favorite dining spots really are.'
     long_desc = 'This template was suggested by Will Sommer.'
 
@@ -325,7 +348,7 @@ class FOIASexOffenderForm(FOIAWizardParent):
     name = 'Sex Offender Registry'
     category = 'Crime'
     level = 'l'
-    agency = 'Police'
+    agency_type = 'Police'
     short_desc = "Receive your state's list of sex offenders."
     long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
                 'Chairman for the Society of Professional Journalists and Assistant Professor at '\
@@ -372,7 +395,7 @@ class FOIAMilitaryForm(FOIAWizardParent):
     name = 'Military Service Record'
     category = 'Genealogy'
     level = 'f'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
     short_desc = "Verify and individual's military service recors"
     long_desc = 'Please be advised that military service verification can be a very slow process'
 
@@ -389,7 +412,7 @@ class FOIABlankForm(FOIAWizardParent):
     name = 'Write My Own Request'
     category = 'None'
     level = 'lsf'
-    agency = 'Clerk'
+    agency_type = 'Clerk'
 
 TEMPLATES = dict((form.slug, form) for form_name, form in inspect.getmembers(sys.modules[__name__],
                  lambda member: inspect.isclass(member) and issubclass(member, FOIAWizardParent))
@@ -467,13 +490,14 @@ class FOIAWizard(DynamicSessionFormWizard):
         title, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,
                                                  RequestContext(request)).split('\n', 1))
-        agency_type = TEMPLATES[template].agency
+
+        agency = TEMPLATES[template].get_agency(jurisdiction)
 
         if len(title) > 70:
             title = title[:70]
         foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
                                           jurisdiction=jurisdiction, slug=slugify(title),
-                                          agency_type=AgencyType.objects.get(name=agency_type))
+                                          agency=agency)
         FOIACommunication.objects.create(
                 foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
                 response=False, full_html=False, communication=foia_request)
