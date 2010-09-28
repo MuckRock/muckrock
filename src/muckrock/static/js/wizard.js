@@ -1,4 +1,5 @@
 
+ // Wizard location page to enable/disable selects
  $(document).ready(function(){
 		 $("select[name='FOIAWizardWhereForm-local']").attr("disabled", "disabled");
 		 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
@@ -18,26 +19,14 @@
 			 });
  });
 
+// Set up tabs and progress bars
 $(function() {
 	$("#tabs").tabs();
 	$("input:submit").button();
 	$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
 });
 
-$(function() {
-	$('#dialog').dialog({
-		autoOpen: false,
-		width: 320,
-		zIndex: 100000
-	});
-	
-	$('#opener').click(function() {
-		$('#dialog').dialog('open');
-		return false;
-	});
-});
-
-
+// Set up the combobox for agency selection
 (function( $ ) {
 	$.widget( "ui.combobox", {
 		_create: function() {
@@ -130,6 +119,7 @@ $(function() {
 	});
 })( jQuery );
 
+// Also for agency combo box
 $(function() {
 	$( ".agency-combo" ).combobox();
 });
