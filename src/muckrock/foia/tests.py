@@ -163,7 +163,7 @@ class TestFOIAFunctional(TestCase):
         response = get_allowed(self.client, reverse('foia-list'),
                 ['foia/foiarequest_list.html', 'foia/base.html'])
         nose.tools.eq_(set(response.context['object_list']),
-                set(FOIARequest.objects.get_viewable(AnonymousUser())[:10]))
+            set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:10]))
 
     def test_foia_list_user(self):
         """Test the foia-list-user view"""
