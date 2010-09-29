@@ -24,8 +24,9 @@ class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
     embargo = forms.BooleanField(required=False,
-                                 help_text='Putting an embargo on a request will hide it '
-                                           'from others for 30 days after the response is received')
+                                 help_text='Embargoing a request keeps it completely private from '
+                                           'other users until 30 days after you receive the final '
+                                           'response to your request.')
     agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
                                     widget=forms.Select(attrs={'class': 'agency-combo'}),
                                     help_text='Select one of the agencies for the jurisdiction you '
