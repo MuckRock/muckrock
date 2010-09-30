@@ -141,8 +141,7 @@ def update_list(request):
                                    FOIARequest.objects.get_editable().filter(user=request.user),
                                    paginate_by=10,
                                    extra_context={'title': 'My Editable FOI Requests',
-                                                  'base': 'foia/base-submit.html',
-                                                  'single': True})
+                                                  'base': 'foia/base-submit-single.html'})
 
 def list_(request):
     """List all viewable FOIA requests"""
@@ -157,8 +156,7 @@ def list_by_user(request, user_name):
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user),
                                    paginate_by=10,
                                    extra_context={'title': 'FOI Requests',
-                                                  'base': 'foia/base.html',
-                                                  'single': True})
+                                                  'base': 'foia/base-single.html'})
 
 def sorted_list(request, sort_order, field):
     """Sorted list of FOIA requests"""
@@ -177,8 +175,7 @@ def sorted_list(request, sort_order, field):
                 FOIARequest.objects.get_viewable(request.user).order_by(ob_field),
                 paginate_by=10,
                 extra_context={'sort_by': field, 'sort_order': sort_order,
-                               'title': 'FOI Requests', 'base': 'foia/base.html',
-                               'single': True})
+                               'title': 'FOI Requests', 'base': 'foia/base-single.html'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""

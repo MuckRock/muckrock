@@ -1,0 +1,17 @@
+
+{% extends "base-single.html" %}
+
+{% load tags %}
+
+{% block title %}FOI Requests{% endblock %}
+{% block headline %}FOI{% endblock %}
+
+{% block sub-nav %}
+<ul class="tabbed">
+	<li class="{% active request "^/foi/list/$" %}"><a href="{% url foia-list %}">All Requests</a></li>
+	{% if user.is_authenticated %}
+	<li class="{% active request "^/foi/list/user/{{user}}/$" %}"><a href="{% url foia-list-user user_name=user.username%}">My Requests</a></li>
+	{% endif %}
+</ul>
+{% endblock %}
+
