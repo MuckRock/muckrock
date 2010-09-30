@@ -29,21 +29,24 @@ class FOIARequestManager(ChainableManager):
 
     def get_editable(self):
         """Get all editable FOIA requests"""
-        return self.filter(status__in=['started', 'fix'])
+        return self.filter(Q(status__in=['started', 'fix']) | Q(tracker=True))
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
         # Requests are visible if you own them, or if they are not drafts and not embargoed
+        # and not tracker only
         if user.is_authenticated():
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30)) &
-                                ~Q(embargo=True, date_done=None)))
+                                ~Q(embargo=True, date_done=None) &
+                                ~Q(tracker=True)))
         else:
-            # anonymous user, filter out drafts and embargoes
+            # anonymous user, filter out drafts and embargoes and tracker only
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30)) \
-                       .exclude(embargo=True, date_done=None)
+                       .exclude(embargo=True, date_done=None) \
+                       .exclude(tracker=True)
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -73,7 +76,6 @@ class FOIARequest(models.Model):
     slug = models.SlugField(max_length=70)
     status = models.CharField(max_length=10, choices=status)
     jurisdiction = models.ForeignKey('Jurisdiction')
-    #agency_type = models.ForeignKey('AgencyType')
     agency = models.ForeignKey('Agency', blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
@@ -82,6 +84,7 @@ class FOIARequest(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=2, null=True)
     description = models.TextField(blank=True)
     featured = models.BooleanField()
+    tracker = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -97,15 +100,16 @@ class FOIARequest(models.Model):
 
     def is_editable(self):
         """Can this request be updated?"""
-        return self.status == 'started' or self.status == 'fix'
+        return self.status == 'started' or self.status == 'fix' or self.tracker
 
     def is_deletable(self):
         """Can this request be deleted?"""
-        return self.status == 'started'
+        return self.status == 'started' or self.tracker
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.user == user or (self.status != 'started' and not self.is_embargo())
+        return self.user == user or (self.status != 'started' and not self.is_embargo()
+                                     and not self.tracker)
 
     def is_embargo(self):
         """Is this request currently on an embargo?"""
