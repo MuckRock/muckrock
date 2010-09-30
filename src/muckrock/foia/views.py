@@ -2,11 +2,13 @@
 Views for the FOIA application
 """
 
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Q
+from django.forms.models import inlineformset_factory
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -15,17 +17,21 @@ from django.views.generic import list_detail
 
 from datetime import datetime
 
-from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
-                       FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, Jurisdiction, Agency
+from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, \
+                       FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
+                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 from accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
 
-    def default_form():
+    def default_form(data=None):
         """Make a default form to update a FOIA request"""
-        form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
+        if data:
+            form = FOIARequestForm(data, instance=foia)
+        else:
+            form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
         agency_pk = foia.agency and foia.agency.pk
         form.fields['agency'].queryset = \
             Agency.objects.filter(Q(jurisdiction=foia.jurisdiction, approved=True) |
@@ -38,7 +44,7 @@ def _foia_form_handler(request, foia, action):
         try:
             foia.status = status_dict[request.POST['submit']]
 
-            form = FOIARequestForm(request.POST, instance=foia)
+            form = default_form(request.POST)
 
             if form.is_valid():
                 if request.POST['submit'] == 'Submit Request':
@@ -86,6 +92,54 @@ def create(request):
     return FOIAWizard(['FOIAWizardWhereForm'], form_dict)(request)
 
 @login_required
+def tracker(request, foia=None):
+    """Create or update a foia request just for tracking"""
+
+    def default_form(data=None):
+        """Make a default form for a tracker FOI request"""
+
+        # pylint: disable-msg=C0103
+        CommInlineFormset = inlineformset_factory(FOIARequest, FOIACommunication,
+                extra=1, can_delete=False, fields=('from_who', 'date', 'communication'))
+        if data:
+            form = FOIARequestTrackerForm(data, instance=foia)
+            formset = CommInlineFormset(data, instance=foia)
+        else:
+            form = FOIARequestTrackerForm(instance=foia)
+            formset = CommInlineFormset(instance=foia)
+
+        agency_pk = foia and foia.agency and foia.agency.pk
+        form.fields['agency'].queryset = Agency.objects.filter(Q(approved=True) | Q(pk=agency_pk))
+        for formset_form in formset.forms:
+            formset_form.fields['date'].widget = forms.TextInput(attrs={'class': 'datepicker'})
+
+        return form, formset
+
+    if request.method == 'POST':
+        form, formset = default_form(request.POST)
+        if form.is_valid() and formset.is_valid():
+            foia = form.save(commit=False)
+
+            agency_name = request.POST.get('agency-name')
+            if agency_name and (not foia.agency or agency_name != foia.agency.name):
+                # Use the combobox to create a new agency
+                foia.agency = Agency.objects.create(name=agency_name,
+                                                    jurisdiction=foia.jurisdiction,
+                                                    approved=False)
+            foia.user = request.user
+            foia.slug = slugify(foia.title)
+            foia.tracker = True
+            foia.save()
+            formset.save()
+            return HttpResponseRedirect(foia.get_absolute_url())
+    else:
+        form, formset = default_form()
+
+    return render_to_response('foia/foiarequest_tracker_form.html',
+                              {'form': form, 'formset': formset},
+                              context_instance=RequestContext(request))
+
+@login_required
 def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
@@ -100,6 +154,9 @@ def update(request, jurisdiction, slug, idx):
         return render_to_response('error.html',
                  {'message': 'You may only edit your own requests'},
                  context_instance=RequestContext(request))
+
+    if foia.tracker:
+        return tracker(request, foia)
 
     return _foia_form_handler(request, foia, 'Update')
 
@@ -135,7 +192,7 @@ def delete(request, jurisdiction, slug, idx):
 
 @login_required
 def update_list(request):
-    """List of all FOIA requests by a given user"""
+    """List of all editable FOIA requests by a given user"""
 
     return list_detail.object_list(request,
                                    FOIARequest.objects.get_editable().filter(user=request.user),
