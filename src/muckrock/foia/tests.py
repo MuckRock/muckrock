@@ -161,7 +161,7 @@ class TestFOIAFunctional(TestCase):
         """Test the foia-list view"""
 
         response = get_allowed(self.client, reverse('foia-list'),
-                ['foia/foiarequest_list.html', 'foia/base.html'])
+                ['foia/foiarequest_list.html', 'foia/base-single.html'], base='base-single.html')
         nose.tools.eq_(set(response.context['object_list']),
             set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:10]))
 
@@ -171,7 +171,8 @@ class TestFOIAFunctional(TestCase):
         for username in ['adam', 'bob']:
             response = get_allowed(self.client,
                                    reverse('foia-list-user', kwargs={'user_name': username}),
-                                   ['foia/foiarequest_list.html', 'foia/base.html'])
+                                   ['foia/foiarequest_list.html', 'foia/base-single.html'],
+                                   base='base-single.html')
             user = User.objects.get(username=username)
             nose.tools.eq_(set(response.context['object_list']),
                            set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
@@ -186,7 +187,8 @@ class TestFOIAFunctional(TestCase):
 
                 response = get_allowed(self.client, reverse('foia-sorted-list',
                                        kwargs={'sort_order': order, 'field': field}),
-                                       ['foia/foiarequest_list.html', 'foia/base.html'])
+                                       ['foia/foiarequest_list.html', 'foia/base-single.html'],
+                                       base='base-single.html')
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(attr),
