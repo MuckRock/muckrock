@@ -1,13 +1,17 @@
-<div class="main">
+{% extends "base_base.html" %}
 
-		{% if messages %}
-			{% for message in messages %}
-			<div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-			{% endfor %}
-		{% endif %}
+{% block main %}
+	<div class="main">
 
-		{% block content %} {% endblock %}
+			{% if messages %}
+				{% for message in messages %}
+				<div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+				{% endfor %}
+			{% endif %}
 
-	<div class="clearer">&nbsp;</div>
+			{% block content %} {% endblock %}
 
-</div>
+		<div class="clearer">&nbsp;</div>
+
+	</div>
+{% endblock %}
