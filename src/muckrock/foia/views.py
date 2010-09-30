@@ -46,7 +46,7 @@ def _foia_form_handler(request, foia, action):
 
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('agency-name')
-                if agency_name and agency_name != foia.agency.name:
+                if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
                     foia.agency = Agency.objects.create(name=agency_name,
                                                         jurisdiction=foia.jurisdiction,
