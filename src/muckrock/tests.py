@@ -12,13 +12,13 @@ import nose.tools
 # pylint: disable-msg=R0904
 
  # helper functions for view testing
-def get_allowed(client, url, templates=None, context=None):
+def get_allowed(client, url, templates=None, base='base.html', context=None):
     """Test a get on a url that is allowed with the users current credntials"""
     response = client.get(url)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
     if templates:
-        nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
+        nose.tools.eq_([t.name for t in response.template][:3], templates + [base])
 
     if context:
         for key, value in context.iteritems():
