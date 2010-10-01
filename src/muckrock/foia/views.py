@@ -130,7 +130,10 @@ def tracker(request, foia=None):
             foia.slug = slugify(foia.title)
             foia.tracker = True
             foia.save()
-            formset.save()
+            comms = formset.save(commit=False)
+            for comm in comms:
+                comm.foia = foia
+                comm.save()
             return HttpResponseRedirect(foia.get_absolute_url())
     else:
         form, formset = default_form()
