@@ -23,6 +23,7 @@
 $(function() {
 	$("#tabs").tabs();
 	$("input:submit").button();
+	$(".jqbutton").button();
 	$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
 });
 
