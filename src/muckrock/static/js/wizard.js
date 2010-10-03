@@ -73,12 +73,6 @@ $(function() {
 									return false;
 								}
 							});
-							if ( !valid ) {
-								// remove invalid value, as it didn't match anything
-								$( this ).val( "" );
-								select.val( "" );
-								return false;
-							}
 						}
 					}
 				})
