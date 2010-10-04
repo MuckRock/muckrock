@@ -23,6 +23,7 @@
 $(function() {
 	$("#tabs").tabs();
 	$("input:submit").button();
+	$(".jqbutton").button();
 	$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
 });
 
@@ -73,12 +74,6 @@ $(function() {
 									return false;
 								}
 							});
-							if ( !valid ) {
-								// remove invalid value, as it didn't match anything
-								$( this ).val( "" );
-								select.val( "" );
-								return false;
-							}
 						}
 					}
 				})
