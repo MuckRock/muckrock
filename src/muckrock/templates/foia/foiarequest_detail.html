@@ -98,12 +98,12 @@
 {% block sidebar %}
 	{% if user == object.user and object.is_editable %}
 		<h2>Actions</h2>
-		<ul>
-			<li><a href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></li>
+			<a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a>
 		{% if object.is_deletable %}
-			<li><a href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></li>
+			<br />
+			<br />
+			<a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a>
 		{% endif %}
-		</ul>
 		<div class="content-separator"></div>
 	{% endif %}
 
