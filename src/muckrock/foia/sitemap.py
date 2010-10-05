@@ -10,8 +10,8 @@ class FoiaSitemap(Sitemap):
     """Sitemap for FOIA Requests"""
 
     def items(self):
-        """Return all FOIA requests"""
-        return FOIARequest.objects.all()
+        """Return all public FOIA requests"""
+        return FOIARequest.objects.get_public()
 
     #def lastmod(self, obj):
     # Is it worth storing a last_mod field on foia requests just for this?
