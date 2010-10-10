@@ -296,7 +296,7 @@ class Agency(models.Model):
 
     name = models.CharField(max_length=60)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
-    types = models.ManyToManyField(AgencyType)
+    types = models.ManyToManyField(AgencyType, blank=True)
     address = models.TextField(blank=True)
     email = models.EmailField(blank=True)
     approved = models.BooleanField()
