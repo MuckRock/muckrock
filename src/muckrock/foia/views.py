@@ -21,7 +21,7 @@ from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, 
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
-from accounts.models import RequestLimitError
+from muckrock.accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
