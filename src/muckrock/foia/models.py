@@ -329,5 +329,9 @@ def foia_save_handler(sender, **kwargs):
              'link': request.get_absolute_url()})
         send_mail('[MuckRock] FOIA request has been updated',
                   msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
+    if request.status == 'submitted':
+        send_mail('[MuckRock] FOIA request has been submitted',
+                  'http://www.muckrock.com' + request.get_absolute_url(),
+                  'info@muckrock.com', ['morisy@gmail.com'], fail_silently=False)
 
 pre_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
