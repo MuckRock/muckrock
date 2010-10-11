@@ -1,5 +1,0 @@
-{% extends jurisdiction_template %}
-{% block title %}Week of email for {{full_name}}{% endblock %}
-
-{% block content %}All incoming and outgoing e-mails for the 7-day period following {{date_begin}} for {{full_name}}, a government employee in the {{department}}.{% endblock %}
-
