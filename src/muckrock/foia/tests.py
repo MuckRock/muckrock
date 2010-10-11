@@ -57,24 +57,25 @@ class TestFOIARequestUnit(TestCase):
 
         self.foia.status = 'submitted'
         self.foia.save()
-        nose.tools.eq_(len(mail.outbox), 0)
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(mail.outbox[0].to, ['morisy@gmail.com'])
 
         self.foia.status = 'processed'
         self.foia.save()
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].to, [self.foia.user.email])
+        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.eq_(mail.outbox[1].to, [self.foia.user.email])
 
         self.foia.status = 'fix'
         self.foia.save()
-        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.eq_(len(mail.outbox), 3)
 
         self.foia.status = 'rejected'
         self.foia.save()
-        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.eq_(len(mail.outbox), 4)
 
         self.foia.status = 'done'
         self.foia.save()
-        nose.tools.eq_(len(mail.outbox), 4)
+        nose.tools.eq_(len(mail.outbox), 5)
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
