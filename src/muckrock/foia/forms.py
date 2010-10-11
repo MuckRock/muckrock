@@ -218,24 +218,6 @@ class FOIADeathForm(FOIAWizardParent):
     agency_type = 'Health'
     short_desc = 'Get the death certificate of a deceased friend or family member.'
 
-class FOIAEmailForm(FOIAWizardParent):
-    """A form to fill in an email request template"""
-
-    full_name = forms.CharField(help_text='Government employee you would like the emails of')
-    department = forms.CharField(help_text='Department or office he or she is in')
-    date_begin = forms.DateField(help_text='Start of seven day period of emails',
-                                 widget=forms.TextInput(attrs={'class': 'datepicker'}))
-
-    slug = 'emails'
-    name = 'Week of Email'
-    category = 'Bureaucracy'
-    level = 'lsf'
-    agency_type = 'Clerk'
-    short_desc = 'Read what your officials are discussing via email.'
-    long_desc = 'This template was suggested by David Cuillier, Freedom of Information Committee '\
-                'Chairman for the Society of Professional Journalists and Assistant Professor at '\
-                'the School of Journalism at the University of Arizona.'
-
 class FOIAExpenseForm(FOIAWizardParent):
     """A form to fill in an expense report request template"""
 
