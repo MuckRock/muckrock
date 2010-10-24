@@ -193,49 +193,50 @@ def delete(request, jurisdiction, slug, idx):
                               {'form': form, 'foia': foia},
                               context_instance=RequestContext(request))
 
+def _sort_requests(get, foia_requests):
+    """Sort's the FOIA requests"""
+    order = get.get('order', 'desc')
+    field = get.get('field', 'date_submitted')
+    if order not in ['asc', 'desc']:
+        order = 'desc'
+    if field not in ['title', 'status', 'user', 'jurisdiction', 'date_submitted']:
+        field = 'date_submitted'
+    if field == 'jurisdiction':
+        field += '__name'
+    ob_field = '-' + field if order == 'desc' else field
+
+    return foia_requests.order_by(ob_field)
+
 @login_required
 def update_list(request):
     """List of all editable FOIA requests by a given user"""
 
-    return list_detail.object_list(request,
-                                   FOIARequest.objects.get_editable().filter(user=request.user),
-                                   paginate_by=10,
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_editable().filter(user=request.user))
+
+    return list_detail.object_list(request, foia_requests, paginate_by=10,
                                    extra_context={'title': 'My Editable FOI Requests',
                                                   'base': 'foia/base-submit-single.html'})
 
 def list_(request):
     """List all viewable FOIA requests"""
 
-    return sorted_list(request, 'desc', 'date_submitted')
+    foia_requests = _sort_requests(request.GET, FOIARequest.objects.get_viewable(request.user))
+
+    return list_detail.object_list(
+                request, foia_requests, paginate_by=10,
+                extra_context={'title': 'FOI Requests', 'base': 'foia/base-single.html'})
 
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
     user = get_object_or_404(User, username=user_name)
-    return list_detail.object_list(request,
-                                   FOIARequest.objects.get_viewable(request.user).filter(user=user),
-                                   paginate_by=10,
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user).filter(user=user))
+
+    return list_detail.object_list(request, foia_requests, paginate_by=10,
                                    extra_context={'title': 'FOI Requests',
                                                   'base': 'foia/base-single.html'})
-
-def sorted_list(request, sort_order, field):
-    """Sorted list of FOIA requests"""
-
-    if sort_order not in ['asc', 'desc']:
-        raise Http404()
-    if field not in ['title', 'status', 'user', 'jurisdiction', 'date_submitted']:
-        raise Http404()
-
-    if field == 'jurisdiction':
-        field += '__name'
-    ob_field = '-' + field if sort_order == 'desc' else field
-
-    return list_detail.object_list(
-                request,
-                FOIARequest.objects.get_viewable(request.user).order_by(ob_field),
-                paginate_by=10,
-                extra_context={'sort_by': field, 'sort_order': sort_order,
-                               'title': 'FOI Requests', 'base': 'foia/base-single.html'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
