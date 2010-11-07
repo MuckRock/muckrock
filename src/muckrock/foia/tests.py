@@ -180,14 +180,14 @@ class TestFOIAFunctional(TestCase):
             nose.tools.ok_(all(foia.user == user for foia in response.context['object_list']))
 
     def test_foia_sorted_list(self):
-        """Test the foia-sorted-list view"""
+        """Test sorting on foia-list view"""
 
         for field, attr in [('title', 'title'), ('user', 'user.username'),
                             ('status', 'status'), ('jurisdiction', 'jurisdiction.name')]:
             for order in ['asc', 'desc']:
 
-                response = get_allowed(self.client, reverse('foia-sorted-list',
-                                       kwargs={'sort_order': order, 'field': field}),
+                response = get_allowed(self.client, reverse('foia-list') +
+                                       '?field=%s&order=%s' % (field, order),
                                        ['foia/foiarequest_list.html', 'foia/base-single.html'],
                                        base='base-single.html')
                 nose.tools.eq_([f.title for f in response.context['object_list']],
@@ -215,8 +215,6 @@ class TestFOIAFunctional(TestCase):
         """Test views that should give a 404 error"""
 
         get_404(self.client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
-        get_404(self.client, reverse('foia-sorted-list',
-                kwargs={'sort_order': 'asc', 'field': 'bad_field'}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 1, 'slug': 'test-c',
                                                        'jurisdiction': 'massachusetts'}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 2, 'slug': 'test-c',
