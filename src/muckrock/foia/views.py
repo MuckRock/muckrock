@@ -21,7 +21,6 @@ from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, 
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
-from muckrock.accounts.models import RequestLimitError
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
@@ -48,7 +47,11 @@ def _foia_form_handler(request, foia, action):
 
             if form.is_valid():
                 if request.POST['submit'] == 'Submit Request':
-                    request.user.get_profile().make_request()
+                    if not request.user.get_profile().make_request():
+                        foia.status = 'started'
+                        messages.error(request, "You are out of requests for this month.  "
+                            "You're request has been saved as a draft, please submit it when you "
+                            "get more requests")
 
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('agency-name')
@@ -66,10 +69,6 @@ def _foia_form_handler(request, foia, action):
 
                 return HttpResponseRedirect(foia.get_absolute_url())
 
-        except RequestLimitError:
-            # no requests left
-            return render_to_response('foia/foiarequest_error.html',
-                                      context_instance=RequestContext(request))
         except KeyError:
             # bad post, not possible from web form
             form = default_form()
