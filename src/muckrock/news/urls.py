@@ -27,7 +27,7 @@ urlpatterns = patterns('',
         url(r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/$',
             date_based.archive_month, article_date_list_args, name='news-archive-month'),
         url(r'^archives/(?P<year>\d{4})/$',
-            date_based.archive_year, dict(article_date_list_args, make_object_list=True),
+            views.news_year, dict(article_date_list_args, make_object_list=True),
             name='news-archive-year'),
         url(r'^feeds/$', LatestEntries(), name='news-feed'),
 )
