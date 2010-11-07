@@ -56,7 +56,7 @@ def _foia_form_handler(request, foia, action):
                     # Use the combobox to create a new agency
                     foia.agency = Agency.objects.create(name=agency_name,
                                                         jurisdiction=foia.jurisdiction,
-                                                        approved=False)
+                                                        user=request.user, approved=False)
                 foia.slug = slugify(foia.title)
                 foia.save()
                 foia_comm = foia.communications.all()[0]
