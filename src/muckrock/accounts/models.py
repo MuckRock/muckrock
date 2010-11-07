@@ -10,9 +10,6 @@ from datetime import datetime
 
 from settings import MONTHLY_REQUESTS
 
-class RequestLimitError(Exception):
-    """A user has tried to submit a request when they do not have any left"""
-
 class Profile(models.Model):
     """User profile information for muckrock"""
 
@@ -51,10 +48,11 @@ class Profile(models.Model):
         """Reduce one from the user's request amount"""
 
         if not self.can_request():
-            raise RequestLimitError
+            return False
 
         self.monthly_requests -= 1
         self.save()
+        return True
 
 
 
