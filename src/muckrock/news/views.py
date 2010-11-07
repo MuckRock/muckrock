@@ -18,3 +18,13 @@ def news_detail(request, year, month, day, slug):
 
     return date_based.object_detail(request, year, month, day, queryset, 'pub_date',
                                     slug=slug, allow_future=allow_future)
+
+def news_year(request, **kwargs):
+    """View for year archive"""
+    year = int(kwargs['year'])
+    extra_context = {}
+    if year > 1000:
+        extra_context['prev_year'] = year - 1
+    if year < 9999:
+        extra_context['next_year'] = year + 1
+    return date_based.archive_year(request, extra_context=extra_context, **kwargs)

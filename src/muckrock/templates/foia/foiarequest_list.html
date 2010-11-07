@@ -34,30 +34,30 @@
 
 	<table class="data-table">
 		<tr class="odd">
-			{% if sort_by == 'title' and sort_order == 'asc' %}
-				<th width="40%"><a href="{% url foia-sorted-list sort_order='desc',field='title' %}">Title</a></th>
+			{% if request.GET.field == 'title' and request.GET.order == 'asc' %}
+				<th width="40%"><a href="?order=desc&field=title">Title</a></th>
 			{% else %}
-				<th width="40%"><a href="{% url foia-sorted-list sort_order='asc',field='title' %}">Title</a></th>
+				<th width="40%"><a href="?order=asc&field=title">Title</a></th>
 			{% endif %}
-			{% if sort_by == 'user' and sort_order == 'asc' %}
-				<th width="10%"><a href="{% url foia-sorted-list sort_order='desc',field='user' %}">User</a></th>
+			{% if request.GET.field == 'user' and request.GET.order == 'asc' %}
+				<th width="10%"><a href="?order=desc&field=user">User</a></th>
 			{% else %}
-				<th width="10%"><a href="{% url foia-sorted-list sort_order='asc',field='user' %}">User</a></th>
+				<th width="10%"><a href="?order=asc&field=user">User</a></th>
 			{% endif %}
-			{% if sort_by == 'status' and sort_order == 'asc' %}
-				<th width="15%"><a href="{% url foia-sorted-list sort_order='desc',field='status' %}">Status</a></th>
+			{% if request.GET.field == 'status' and request.GET.order == 'asc' %}
+				<th width="15%"><a href="?order=desc&field=status">Status</a></th>
 			{% else %}
-				<th width="15%"><a href="{% url foia-sorted-list sort_order='asc',field='status' %}">Status</a></th>
+				<th width="15%"><a href="?order=asc&field=status">Status</a></th>
 			{% endif %}
-			{% if sort_by == 'jurisdiction' and sort_order == 'asc' %}
-				<th width="20%"><a href="{% url foia-sorted-list sort_order='desc',field='jurisdiction' %}">Jurisdiction</a></th>
+			{% if request.GET.field == 'jurisdiction' and request.GET.order == 'asc' %}
+				<th width="20%"><a href="?order=desc&field=jurisdiction">Jurisdiction</a></th>
 			{% else %}
-				<th width="20%"><a href="{% url foia-sorted-list sort_order='asc',field='jurisdiction' %}">Jurisdiction</a></th>
+				<th width="20%"><a href="?order=asc&field=jurisdiction">Jurisdiction</a></th>
 			{% endif %}
-			{% if sort_by == 'date_submitted' and sort_order == 'asc' %}
-				<th width="15%"><a href="{% url foia-sorted-list sort_order='desc',field='date_submitted' %}">Date</a></th>
+			{% if request.GET.field == 'date_submitted' and request.GET.order == 'asc' %}
+				<th width="15%"><a href="?order=desc&field=date">Date</a></th>
 			{% else %}
-				<th width="15%"><a href="{% url foia-sorted-list sort_order='asc',field='date_submitted' %}">Date</a></th>
+				<th width="15%"><a href="?order=asc&field=date">Date</a></th>
 			{% endif %}
 		</tr>
 		{% for foia in object_list %}
