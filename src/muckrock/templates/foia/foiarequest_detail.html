@@ -40,26 +40,35 @@
 			<div id="viewer"></div>
 			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 			<script type="text/javascript">
-				$(function() {
-					var doc_id = window.location.hash.substring(1);
-					var default_doc_id = "{{object.public_documents.0.doc_id}}"
-					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
-					if (!doc_id || ($.inArray(doc_id, documents) == -1)) doc_id = default_doc_id;
-
+				function display_doc(doc_id)
+				{
 					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
 						width: 627,
 						height: 600,
 						sidebar: false,
 						container: "#viewer"
 					});
+
+					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\ncontainer : "#viewer-' + doc_id + '"});\n<\/script>';
+					$('textarea#embed').val(embed_code);
+				}
+
+				$(function() {
+					var doc_id = window.location.hash.substring(1);
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+					if (!doc_id || ($.inArray(doc_id, documents) == -1)) doc_id = default_doc_id;
+
+					display_doc(doc_id);
 				});
+
 			</script>
 			<div class="dc-thumbnails">
 
 				<ul class="dc-thumbnails">
 				{% if object.public_documents|length > 1 %}
 					{% for document in object.public_documents %}
-						<li><a href="#{{document.doc_id}}" onclick="DV.load('http://www.documentcloud.org/documents/{{document.doc_id}}.js', {width: 627, height: 600, sidebar: false, container: '#viewer'}); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
+						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
 					{% endfor %}
 				{% endif %}
 				</ul>
@@ -104,6 +113,14 @@
 			<br />
 			<a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a>
 		{% endif %}
+		<div class="content-separator"></div>
+	{% endif %}
+
+	{% if object.public_documents %}
+		<h2>Embed Code</h2>
+		<p>Copy and paste this code into your site to embed this document<p>
+		<textarea id="embed" style="width: 240px; height: 170px">
+		</textarea>
 		<div class="content-separator"></div>
 	{% endif %}
 

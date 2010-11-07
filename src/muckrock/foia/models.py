@@ -14,6 +14,7 @@ import os
 import re
 
 from muckrock.models import ChainableManager
+import fields
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
@@ -297,9 +298,21 @@ class Agency(models.Model):
     name = models.CharField(max_length=60)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
+    approved = models.BooleanField()
+    user = models.ForeignKey(User, null=True, blank=True)
+
     address = models.TextField(blank=True)
     email = models.EmailField(blank=True)
-    approved = models.BooleanField()
+    other_emails = fields.EmailsListField(blank=True, max_length=255)
+    contact_salutation = models.CharField(blank=True, max_length=30)
+    contact_first_name = models.CharField(blank=True, max_length=100)
+    contact_last_name = models.CharField(blank=True, max_length=100)
+    contact_title = models.CharField(blank=True, max_length=255)
+    url = models.URLField(blank=True)
+    expires = models.DateField(blank=True, null=True)
+    phone = models.CharField(blank=True, max_length=20)
+    fax = models.CharField(blank=True, max_length=20)
+    notes = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.name

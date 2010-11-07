@@ -10,8 +10,6 @@ from django.test import TestCase
 import nose.tools
 from datetime import datetime, timedelta
 
-# this needs to be fully qualified for strange reasons
-from muckrock.accounts.models import RequestLimitError
 from accounts.models import Profile
 from accounts.forms import UserChangeForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
@@ -95,10 +93,10 @@ class TestAccountUnit(TestCase):
         nose.tools.eq_(self.profile.monthly_requests, 24)
 
     def test_profile_make_request_fail(self):
-        """If out of requests, make request raises an error"""
+        """If out of requests, make request returns false"""
         profile = Profile.objects.get(pk=3)
         profile.date_update = datetime.now()
-        nose.tools.assert_raises(RequestLimitError, profile.make_request)
+        nose.tools.assert_false(profile.make_request())
 
 
 class TestAccountFunctional(TestCase):
