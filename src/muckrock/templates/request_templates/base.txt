@@ -10,8 +10,9 @@ Sincerely,
 
 {{user.get_full_name}}
 Filed via MuckRock.com
+E-mail (Preferred): requests@muckrock.com
+Daytime: (617) 299-1832
+For mailed responses, please address:
+MuckRock
 185 Beacon St. #3
-Somerville, MA 02143
-
-Daytime: (857) 488- 3081
-E-mail: requests@muckrock.com{% endautoescape %}
+Somerville, MA 02143{% endautoescape %}
