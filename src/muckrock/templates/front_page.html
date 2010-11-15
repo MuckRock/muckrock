@@ -99,9 +99,9 @@
 					<div class="section-title">Most Viewed Documents</div>
 					<div class="section-content">
 						<ul class="nice-list">
-							{% for doc in most_viewed_docs %}
+							{% for req in most_viewed_docs %}
 							<li><span class="quiet">{{forloop.counter}}.</span>
-							<a href="{{ doc.get_absolute_url }}">{{ doc.title }}</a></li>
+							<a href="{{ req.get_absolute_url }}">{{ req.title }}</a></li>
 							{% endfor %}
 							<li><a href="{% url foia-list %}" class="more">Browse all documents &#187;</a></li>
 						</ul>
