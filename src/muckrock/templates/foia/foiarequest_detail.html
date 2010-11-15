@@ -126,10 +126,10 @@
 
 	{% get_pingback_list for object as pingbacks %}
 	{% if pingbacks %}
-	    <h2>Pingbacks:</h2>
+	    <h2>News & Opinions:</h2>
 	    {% for pingback in pingbacks %}
 	        <div class="b-pingback">
-						<strong>{{ pingback.url|urlizetrunc:40 }}</strong><br />
+						<strong><a href="{{pingback.url}}">{{ pingback.title}}</a></strong><br />
 						<em>{{ pingback.date|date }}</em><br />
 	
 						<p>{{ pingback.content }}</p>

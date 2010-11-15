@@ -15,7 +15,8 @@ import urllib2
 from datetime import date, timedelta
 from vendor import MultipartPostHandler
 
-from foia.models import FOIADocument, FOIADocTopViewed
+from foia.models import FOIADocument, FOIADocTopViewed, FOIARequest
+from foia.urls import foia_url
 
 
 @task(ignore_result=True)
@@ -93,37 +94,37 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 
 
 @periodic_task(run_every=crontab(hour=1, minute=10))
-def set_top_viewed_docs():
-    """Get the top 5 most viewed documents from Google Analytics and save them locally"""
+def set_top_viewed_reqs():
+    """Get the top 5 most viewed requests from Google Analytics and save them locally"""
 
     client = gdata.analytics.service.AnalyticsDataService()
     client.ClientLogin(GA_USERNAME, GA_PASSWORD)
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    top_doc_paths = [entry.title.text for entry in data.entry
-                if entry.title.text.startswith('ga:pagePath=/foi/doc_cloud/')]
-    path_re = re.compile('ga:pagePath=/foi/doc_cloud/(?P<doc_id>[a-z0-9-]+)/')
-    top_docs = []
+    top_req_paths = [entry.title.text for entry in data.entry
+                if entry.title.text.startswith('ga:pagePath=/foi/view/')]
+    path_re = re.compile(foia_url)
+    top_reqs = []
     try:
-        for doc_path in top_doc_paths:
-            if len(top_docs) >= 5:
+        for req_path in top_req_paths:
+            if len(top_reqs) >= 5:
                 break
             try:
-                doc = FOIADocument.objects.get(doc_id=path_re.match(doc_path).group('doc_id'))
-                if doc.is_public():
-                    top_docs.append(doc)
-            except FOIADocument.DoesNotExist:
+                req = FOIARequest.objects.get(pk=path_re.match(req_path).group('idx'))
+                if req.is_public():
+                    top_reqs.append(req)
+            except FOIARequest.DoesNotExist:
                 pass
     except AttributeError:
-        print >> sys.stderr, 'Error in set_top_viewed_docs'
-        print >> sys.stderr, top_docs
+        print >> sys.stderr, 'Error in set_top_viewed_reqs'
+        print >> sys.stderr, top_reqs
         return
 
-    for i, doc in enumerate(top_docs):
-        tv_doc, _ = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'doc': doc})
-        tv_doc.doc = doc
-        tv_doc.save()
+    for i, req in enumerate(top_reqs):
+        tv_req, _ = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'req': req})
+        tv_req.req = req
+        tv_req.save()
 
 
 @periodic_task(run_every=crontab(hour=1, minute=0))

@@ -23,7 +23,7 @@ def front_page(request):
     num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
     num_pages = FOIADocument.objects.aggregate(Sum('pages'))['pages__sum']
 
-    most_viewed_docs = [tv.doc for tv in FOIADocTopViewed.objects.select_related(depth=1).all()[:5]]
+    most_viewed_reqs = [tv.req for tv in FOIADocTopViewed.objects.select_related(depth=1).all()[:5]]
     recent_articles = Article.objects.get_published()[:5]
     overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
 
