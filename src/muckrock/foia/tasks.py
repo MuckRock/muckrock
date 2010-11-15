@@ -104,7 +104,7 @@ def set_top_viewed_reqs():
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
     top_req_paths = [entry.title.text for entry in data.entry
                 if entry.title.text.startswith('ga:pagePath=/foi/view/')]
-    path_re = re.compile(foia_url)
+    path_re = re.compile('ga:pagePath=/foi/view/' + foia_url)
     top_reqs = []
     try:
         for req_path in top_req_paths:
