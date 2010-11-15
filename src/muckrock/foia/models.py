@@ -112,6 +112,10 @@ class FOIARequest(models.Model):
         return self.user == user or (self.status != 'started' and not self.is_embargo()
                                      and not self.tracker)
 
+    def is_public(self):
+        """Is this document viewable to everyone"""
+        return self.is_viewable(AnonymousUser())
+
     def is_embargo(self):
         """Is this request currently on an embargo?"""
         if not self.embargo:
@@ -218,15 +222,15 @@ class FOIADocument(models.Model):
 
 
 class FOIADocTopViewed(models.Model):
-    """Keep track of the top 5 most viewed documents for the front page"""
+    """Keep track of the top 5 most viewed requests for the front page"""
 
-    doc = models.ForeignKey(FOIADocument)
+    req = models.ForeignKey(FOIARequest, null=True)
     rank = models.PositiveSmallIntegerField(unique=True)
 
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['rank']
-        verbose_name = 'FOIA Top Viewed Document'
+        verbose_name = 'FOIA Top Viewed Request'
 
 
 class FOIAFile(models.Model):
