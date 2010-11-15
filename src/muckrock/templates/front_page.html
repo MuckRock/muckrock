@@ -99,7 +99,7 @@
 					<div class="section-title">Most Viewed Documents</div>
 					<div class="section-content">
 						<ul class="nice-list">
-							{% for req in most_viewed_docs %}
+							{% for req in most_viewed_reqs %}
 							<li><span class="quiet">{{forloop.counter}}.</span>
 							<a href="{{ req.get_absolute_url }}">{{ req.title }}</a></li>
 							{% endfor %}
