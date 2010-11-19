@@ -30,7 +30,7 @@ class FOIARequestManager(ChainableManager):
 
     def get_editable(self):
         """Get all editable FOIA requests"""
-        return self.filter(Q(status__in=['started', 'fix']) | Q(tracker=True))
+        return self.filter(Q(status='started') | Q(tracker=True))
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
@@ -101,7 +101,11 @@ class FOIARequest(models.Model):
 
     def is_editable(self):
         """Can this request be updated?"""
-        return self.status == 'started' or self.status == 'fix' or self.tracker
+        return self.status == 'started' or self.tracker
+
+    def is_fixable(self):
+        """Can this request be ammended by the user?"""
+        return self.status == 'fix'
 
     def is_deletable(self):
         """Can this request be deleted?"""
@@ -166,7 +170,7 @@ class FOIACommunication(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=70)
-    date = models.DateField()
+    date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField()
