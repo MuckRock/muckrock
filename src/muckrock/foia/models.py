@@ -170,7 +170,7 @@ class FOIACommunication(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=70)
-    date = models.DateField()
+    date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField()
