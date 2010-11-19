@@ -18,7 +18,7 @@ from django.views.generic import list_detail
 from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, FOIAFixForm, \
-                       FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
+                       FOIANoteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 
@@ -192,6 +192,32 @@ def fix(request, jurisdiction, slug, idx):
         form = FOIAFixForm()
 
     return render_to_response('foia/foiarequest_fix.html', {'form': form, 'foia': foia},
+                              context_instance=RequestContext(request))
+
+@login_required
+def note(request, jurisdiction, slug, idx):
+    """Add a note to a request"""
+
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+
+    if foia.user != request.user:
+        return render_to_response('error.html',
+                 {'message': 'You may only add notes to your own requests'},
+                 context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = FOIANoteForm(request.POST)
+        if form.is_valid():
+            foia_note = form.save(commit=False)
+            foia_note.foia = foia
+            foia_note.date = datetime.now()
+            foia_note.save()
+            return HttpResponseRedirect(foia.get_absolute_url() + '#tabs-notes')
+    else:
+        form = FOIANoteForm()
+
+    return render_to_response('foia/foiarequest_note.html', {'form': form, 'foia': foia},
                               context_instance=RequestContext(request))
 
 @login_required

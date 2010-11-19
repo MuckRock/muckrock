@@ -181,6 +181,19 @@ class FOIACommunication(models.Model):
         verbose_name = 'FOIA Communication'
 
 
+class FOIANote(models.Model):
+    """A private note on a FOIA request"""
+
+    foia = models.ForeignKey(FOIARequest, related_name='notes')
+    date = models.DateTimeField()
+    note = models.TextField()
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['foia', 'date']
+        verbose_name = 'FOIA Note'
+
+
 class FOIADocument(models.Model):
     """A DocumentCloud document attached to a FOIA request"""
 
