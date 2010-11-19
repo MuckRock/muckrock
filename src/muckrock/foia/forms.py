@@ -15,7 +15,7 @@ import inspect
 import sys
 from datetime import datetime
 
-from foia.models import FOIARequest, FOIACommunication, Jurisdiction, Agency, AgencyType
+from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, Agency, AgencyType
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
@@ -68,6 +68,15 @@ class FOIADeleteForm(forms.Form):
 class FOIAFixForm(forms.Form):
     """Form to ammend a request with extra information"""
     fix = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+
+class FOIANoteForm(forms.ModelForm):
+    """A form for a FOIA Note"""
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIANote
+        fields = ['note']
+        widgets = {'note': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
 
 
 class FOIAWizardParent(forms.Form):

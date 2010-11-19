@@ -617,6 +617,16 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	margin-bottom: 7px;
 }
 
+.note {
+	background-color: #ffffff;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #bbb;
+	padding: 5px;
+	margin-top: 7px;
+	margin-bottom: 7px;
+}
+
 .request-go   { color: #077507; }
 .request-stop { color: #CC2727; }
 .request-wait { color: #A3A30B; }
