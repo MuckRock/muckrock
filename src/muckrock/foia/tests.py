@@ -45,7 +45,7 @@ class TestFOIARequestUnit(TestCase):
 
         foias = FOIARequest.objects.all().order_by('id')[:5]
         for foia in foias[:5]:
-            if foia.status in ['started', 'fix']:
+            if foia.status in ['started']:
                 nose.tools.assert_true(foia.is_editable())
             else:
                 nose.tools.assert_false(foia.is_editable())
