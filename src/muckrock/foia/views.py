@@ -17,7 +17,7 @@ from django.views.generic import list_detail
 
 from datetime import datetime
 
-from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, \
+from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, FOIAFixForm, \
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
@@ -150,7 +150,7 @@ def update(request, jurisdiction, slug, idx):
 
     if not foia.is_editable():
         return render_to_response('error.html',
-                 {'message': 'You may only edit non-submitted requests unless a fix is requested'},
+                 {'message': 'You may only edit non-submitted requests'},
                  context_instance=RequestContext(request))
     if foia.user != request.user:
         return render_to_response('error.html',
@@ -161,6 +161,38 @@ def update(request, jurisdiction, slug, idx):
         return tracker(request, foia)
 
     return _foia_form_handler(request, foia, 'Update')
+
+@login_required
+def fix(request, jurisdiction, slug, idx):
+    """Ammend a 'fix required' FOIA Request"""
+
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+
+    if not foia.is_fixable():
+        return render_to_response('error.html',
+                 {'message': 'This request has not had a fix request'},
+                 context_instance=RequestContext(request))
+    if foia.user != request.user:
+        return render_to_response('error.html',
+                 {'message': 'You may only fix your own requests'},
+                 context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = FOIAFixForm(request.POST)
+        if form.is_valid():
+            FOIACommunication.objects.create(
+                    foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
+                    response=False, full_html=False, communication=form.cleaned_data['fix'])
+            foia.status = 'submitted'
+            foia.save()
+            return HttpResponseRedirect(foia.get_absolute_url())
+
+    else:
+        form = FOIAFixForm()
+
+    return render_to_response('foia/foiarequest_fix.html', {'form': form, 'foia': foia},
+                              context_instance=RequestContext(request))
 
 @login_required
 def delete(request, jurisdiction, slug, idx):
