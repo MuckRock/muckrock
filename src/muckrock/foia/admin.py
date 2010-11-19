@@ -6,7 +6,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.views.generic import list_detail
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, \
+from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
                         Jurisdiction, Agency, AgencyType, FOIADocTopViewed
 from foia.tasks import upload_document_cloud
 
@@ -33,8 +33,14 @@ class FOIAFileInline(admin.TabularInline):
 
 
 class FOIACommunicationInline(admin.TabularInline):
-    """FOIA File Inline admin options"""
+    """FOIA Communication Inline admin options"""
     model = FOIACommunication
+    extra = 1
+
+
+class FOIANoteInline(admin.TabularInline):
+    """FOIA Notes Inline admin options"""
+    model = FOIANote
     extra = 1
 
 
@@ -44,7 +50,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
     search_fields = ['title', 'description']
-    inlines = [FOIACommunicationInline, FOIAFileInline]
+    inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
 
     def get_urls(self):
         """Add custom URLs here"""
