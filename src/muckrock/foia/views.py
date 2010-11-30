@@ -162,6 +162,37 @@ def update(request, jurisdiction, slug, idx):
 
     return _foia_form_handler(request, foia, 'Update')
 
+def _foia_action(request, jurisdiction, slug, idx, action_msg, other_tests,
+                 form_class, form_actions, return_url, heading, action_value):
+    """Generic helper for FOIA actions"""
+
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
+
+    if foia.user != request.user:
+        return render_to_response('error.html',
+                 {'message': 'You may only %s your own requests' % action_msg},
+                 context_instance=RequestContext(request))
+
+    for test, msg in other_tests:
+        if not test(foia):
+            return render_to_response('error.html', {'message': msg},
+                     context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = form_class(request.POST)
+        if form.is_valid():
+            form_actions(request, foia, form)
+            return HttpResponseRedirect(return_url(request, foia))
+
+    else:
+        form = form_class()
+
+    return render_to_response('foia/foiarequest_action.html',
+                              {'form': form, 'foia': foia,
+                               'heading': heading, 'action': action_value},
+                              context_instance=RequestContext(request))
+
 @login_required
 def fix(request, jurisdiction, slug, idx):
     """Ammend a 'fix required' FOIA Request"""
@@ -193,6 +224,25 @@ def fix(request, jurisdiction, slug, idx):
 
     return render_to_response('foia/foiarequest_fix.html', {'form': form, 'foia': foia},
                               context_instance=RequestContext(request))
+
+@login_required
+def fix_(request, jurisdiction, slug, idx):
+
+    def form_actions(request, foia, form):
+        FOIACommunication.objects.create(
+                foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
+                response=False, full_html=False, communication=form.cleaned_data['fix'])
+        foia.status = 'submitted'
+        foia.save()
+
+    action_msg = 'fix'
+    other_tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')]
+    form_class = FOIAFixForm
+    return_url = lambda r, f: f.get_absolute_url()
+    heading = 'Fix FOIA Request'
+    action_value = 'Fix'
+    return _foia_action(request, jurisdiction, slug, idx, action_msg, other_tests,
+                        form_class, form_actions, return_url, heading, action_value)
 
 @login_required
 def note(request, jurisdiction, slug, idx):
