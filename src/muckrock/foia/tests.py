@@ -104,7 +104,7 @@ class TestFOIARequestUnit(TestCase):
             else:
                 nose.tools.assert_false(foia.is_viewable(user2))
 
-        viewable_foias = FOIARequest.objects.get_viewable(AnonymousUser())
+        viewable_foias = FOIARequest.objects.get_public()
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
                 nose.tools.assert_true(foia.is_viewable(AnonymousUser()))
