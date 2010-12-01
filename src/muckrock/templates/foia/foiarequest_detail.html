@@ -127,23 +127,19 @@
 
 {% block sidebar %}
 	{% if user == object.user  %}
-		{% if object.is_editable or object.is_fixable %}
-			<h2>Actions</h2>
-		{% endif %}
+		<h2>Actions</h2>
 		{% if object.is_editable %}
-				<a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a>
-			{% if object.is_deletable %}
-				<br />
-				<br />
-				<a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a>
-			{% endif %}
+			<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
+		{% else %}
+			<p><a class="jqbutton" href="{% url foia-embargo jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update Embargo</a></p>
+		{% endif %}
+		{% if object.is_deletable %}
+			<p><a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></p>
 		{% endif %}
 		{% if object.is_fixable %}
-				<a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a>
+			<p><a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a></p>
 		{% endif %}
-		{% if object.is_editable or object.is_fixable %}
 		<div class="content-separator"></div>
-		{% endif %}
 	{% endif %}
 
 	{% if object.public_documents %}

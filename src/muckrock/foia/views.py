@@ -15,11 +15,12 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic import list_detail
 
+from collections import namedtuple
 from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, FOIAFixForm, \
-                       FOIANoteForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+                       FOIANoteForm, FOIAEmbargoForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
+                       FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 
 def _foia_form_handler(request, foia, action):
@@ -162,93 +163,123 @@ def update(request, jurisdiction, slug, idx):
 
     return _foia_form_handler(request, foia, 'Update')
 
+def _foia_action(request, jurisdiction, slug, idx, action):
+    """Generic helper for FOIA actions"""
+
+    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
+
+    if foia.user != request.user:
+        return render_to_response('error.html',
+                 {'message': 'You may only %s your own requests' % action.msg},
+                 context_instance=RequestContext(request))
+
+    for test, msg in action.tests:
+        if not test(foia):
+            return render_to_response('error.html', {'message': msg},
+                     context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = action.form_class(request.POST)
+        if form.is_valid():
+            action.form_actions(request, foia, form)
+            return HttpResponseRedirect(action.return_url(request, foia))
+
+    else:
+        if issubclass(action.form_class, forms.ModelForm):
+            form = action.form_class(instance=foia)
+        else:
+            form = action.form_class()
+
+    return render_to_response('foia/foiarequest_action.html',
+                              {'form': form, 'foia': foia,
+                               'heading': action.heading,
+                               'action': action.value},
+                              context_instance=RequestContext(request))
+
+Action = namedtuple('Action', 'form_actions msg tests form_class return_url heading value')
+
 @login_required
 def fix(request, jurisdiction, slug, idx):
     """Ammend a 'fix required' FOIA Request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    def form_actions(request, foia, form):
+        """Save the FOI Communication"""
+        FOIACommunication.objects.create(
+                foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
+                response=False, full_html=False, communication=form.cleaned_data['fix'])
+        foia.status = 'submitted'
+        foia.save()
 
-    if not foia.is_fixable():
-        return render_to_response('error.html',
-                 {'message': 'This request has not had a fix request'},
-                 context_instance=RequestContext(request))
-    if foia.user != request.user:
-        return render_to_response('error.html',
-                 {'message': 'You may only fix your own requests'},
-                 context_instance=RequestContext(request))
-
-    if request.method == 'POST':
-        form = FOIAFixForm(request.POST)
-        if form.is_valid():
-            FOIACommunication.objects.create(
-                    foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
-                    response=False, full_html=False, communication=form.cleaned_data['fix'])
-            foia.status = 'submitted'
-            foia.save()
-            return HttpResponseRedirect(foia.get_absolute_url())
-
-    else:
-        form = FOIAFixForm()
-
-    return render_to_response('foia/foiarequest_fix.html', {'form': form, 'foia': foia},
-                              context_instance=RequestContext(request))
+    action = Action(
+        form_actions = form_actions,
+        msg = 'fix',
+        tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')],
+        form_class = FOIAFixForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Fix FOIA Request',
+        value = 'Fix')
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
 def note(request, jurisdiction, slug, idx):
     """Add a note to a request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    def form_actions(_, foia, form):
+        """Save the FOI note"""
+        foia_note = form.save(commit=False)
+        foia_note.foia = foia
+        foia_note.date = datetime.now()
+        foia_note.save()
 
-    if foia.user != request.user:
-        return render_to_response('error.html',
-                 {'message': 'You may only add notes to your own requests'},
-                 context_instance=RequestContext(request))
-
-    if request.method == 'POST':
-        form = FOIANoteForm(request.POST)
-        if form.is_valid():
-            foia_note = form.save(commit=False)
-            foia_note.foia = foia
-            foia_note.date = datetime.now()
-            foia_note.save()
-            return HttpResponseRedirect(foia.get_absolute_url() + '#tabs-notes')
-    else:
-        form = FOIANoteForm()
-
-    return render_to_response('foia/foiarequest_note.html', {'form': form, 'foia': foia},
-                              context_instance=RequestContext(request))
+    action = Action(
+        form_actions = form_actions,
+        msg = 'add notes',
+        tests = [],
+        form_class = FOIANoteForm,
+        return_url = lambda r, f: f.get_absolute_url() + '#tabs-notes',
+        heading = 'Add Note',
+        value = 'Add')
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
 def delete(request, jurisdiction, slug, idx):
     """Delete a non-submitted FOIA Request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    def form_actions(request, foia, _):
+        """Delete the FOI request"""
+        foia.delete()
+        messages.info(request, 'Request succesfully deleted')
 
-    if not foia.is_deletable():
-        return render_to_response('error.html',
-                 {'message': 'You may only delete non-submitted requests.'},
-                 context_instance=RequestContext(request))
-    if foia.user != request.user:
-        return render_to_response('error.html',
-                 {'message': 'You may only delete your own requests'},
-                 context_instance=RequestContext(request))
+    action = Action(
+        form_actions = form_actions,
+        msg = 'delete',
+        tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
+        form_class = FOIADeleteForm,
+        return_url = lambda r, f: reverse('foia-list-user', kwargs={'user_name': r.user.username}),
+        heading = 'Delete FOI Request',
+        value = 'Delete')
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
-    if request.method == 'POST':
-        form = FOIADeleteForm(request.POST)
-        if form.is_valid():
-            foia.delete()
-            messages.info(request, 'Request succesfully deleted')
-            return HttpResponseRedirect(reverse('foia-list-user',
-                                                kwargs={'user_name': request.user.username}))
-    else:
-        form = FOIADeleteForm()
+@login_required
+def embargo(request, jurisdiction, slug, idx):
+    """Change the embargo on a request"""
 
-    return render_to_response('foia/foiarequest_delete.html',
-                              {'form': form, 'foia': foia},
-                              context_instance=RequestContext(request))
+    def form_actions(_, foia, form):
+        """Update the embargo date"""
+        foia.embargo = form.cleaned_data.get('embargo')
+        foia.date_embargo = form.cleaned_data.get('date_embargo')
+        foia.save()
+
+    action = Action(
+        form_actions = form_actions,
+        msg = 'embargo',
+        tests = [],
+        form_class = FOIAEmbargoForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Update the Embargo Date',
+        value = 'Update')
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
 def _sort_requests(get, foia_requests):
     """Sort's the FOIA requests"""
