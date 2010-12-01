@@ -5,6 +5,7 @@
         "fields": {
             "status": "started",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 1",
@@ -21,6 +22,7 @@
         "fields": {
             "status": "submitted",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 2",
@@ -37,6 +39,7 @@
         "fields": {
             "status": "fix",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 3",
@@ -53,6 +56,7 @@
         "fields": {
             "status": "rejected",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 4",
@@ -69,6 +73,7 @@
         "fields": {
             "status": "done",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": "2001-01-05", 
             "title": "Test 5",
@@ -85,6 +90,7 @@
         "fields": {
             "status": "started",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 6",
@@ -101,6 +107,7 @@
         "fields": {
             "status": "submitted",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 7",
@@ -117,6 +124,7 @@
         "fields": {
             "status": "fix",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 8",
@@ -133,6 +141,7 @@
         "fields": {
             "status": "rejected",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 9",
@@ -149,6 +158,7 @@
         "fields": {
             "status": "done",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": "2001-01-10", 
             "title": "Test 10",
@@ -165,6 +175,7 @@
         "fields": {
             "status": "done",
             "embargo": true,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": "2001-01-11", 
             "title": "Test 11",
@@ -181,6 +192,7 @@
         "fields": {
             "status": "done",
             "embargo": true,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": "2001-01-12", 
             "title": "Test 12",
@@ -197,6 +209,7 @@
         "fields": {
             "status": "done",
             "embargo": true,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": "2001-01-13", 
             "title": "Test 13",
@@ -213,6 +226,7 @@
         "fields": {
             "status": "submitted",
             "embargo": true,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 14",
@@ -229,6 +243,7 @@
         "fields": {
             "status": "processed",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 15",
@@ -245,6 +260,7 @@
         "fields": {
             "status": "processed",
             "embargo": false,
+            "date_embargo": null,
             "jurisdiction": 1,
             "date_done": null,
             "title": "Test 16",
