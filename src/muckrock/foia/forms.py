@@ -62,8 +62,14 @@ class FOIARequestForm(forms.ModelForm):
 class FOIAEmbargoForm(FOIARequestForm):
     """A form to update the embargo status of a FOIA Request"""
 
+    def __init__(self, *args, **kwargs):
+        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
+        del self.fields['agency']
+        del self.fields['request']
+
     class Meta:
         # pylint: disable-msg=R0903
+        model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
 class FOIARequestTrackerForm(forms.ModelForm):

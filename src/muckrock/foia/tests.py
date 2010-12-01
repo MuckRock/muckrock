@@ -84,10 +84,10 @@ class TestFOIARequestUnit(TestCase):
         user2 = User.objects.get(pk=2)
 
         foias = list(FOIARequest.objects.filter(id__in=[1, 5, 11, 12, 13, 14]).order_by('id'))
-        foias[1].date_done = date.today() - timedelta(10)
-        foias[2].date_done = date.today() - timedelta(10)
-        foias[3].date_done = date.today() - timedelta(30)
-        foias[4].date_done = date.today() - timedelta(90)
+        foias[1].date_embargo = date.today() + timedelta(10)
+        foias[2].date_embargo = date.today() + timedelta(10)
+        foias[3].date_embargo = date.today()
+        foias[4].date_embargo = date.today() - timedelta(10)
 
         # check manager get_viewable against models is_viewable
         viewable_foias = FOIARequest.objects.get_viewable(user1)
