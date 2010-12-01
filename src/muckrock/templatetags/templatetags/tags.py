@@ -18,13 +18,18 @@ def active(request, pattern):
     return ''
 
 @register.simple_tag
-def page_links(page_obj):
+def page_links(page_obj, order, field):
     """Return page links for surrounding pages"""
 
     def make_link(num, skip):
         """Make a link to page num"""
+        options = ''
+        if order:
+            options += '&order=%s' % order
+        if field:
+            options += '&field=%s' % field
         if num != skip:
-            return '<a href="?page=%d">%d</a>' % (num, num)
+            return '<a href="?page=%d%s">%d</a>' % (num, options, num)
         else:
             return str(num)
 
