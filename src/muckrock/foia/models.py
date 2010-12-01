@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.template.loader import render_to_string
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 import os
 import re
 
@@ -114,6 +114,10 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
+        print self
+        print self.status != 'started'
+        print not self.is_embargo()
+        print not self.tracker
         return self.user == user or (self.status != 'started' and not self.is_embargo()
                                      and not self.tracker)
 
