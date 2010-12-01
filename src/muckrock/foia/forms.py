@@ -13,7 +13,7 @@ from django.template.loader import render_to_string
 
 import inspect
 import sys
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, Agency, AgencyType
 from foia.utils import make_template_choices
@@ -23,23 +23,54 @@ from formwizard.forms import DynamicSessionFormWizard
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
-    embargo = forms.BooleanField(required=False,
-                                 help_text='Embargoing a request keeps it completely private from '
-                                           'other users until 30 days after you receive the final '
-                                           'response to your request.')
     agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
                                     widget=forms.Select(attrs={'class': 'agency-combo'}),
                                     help_text='Select one of the agencies for the jurisdiction you '
                                           'have chosen, or write in the correct agency if known')
+    embargo = forms.BooleanField(required=False,
+                                 help_text='Embargoing a request keeps it completely private from '
+                                           'other users until the embargo date you set.  '
+                                           'You may change this whenever you want.')
+    date_embargo = forms.DateField(label='Embargo date', required=False,
+                                   widget=forms.TextInput(attrs={'class': 'datepicker'}))
     request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+
+    def clean(self):
+        """date_embargo is required if embargo is checked and must be within 30 days"""
+
+        embargo = self.cleaned_data.get('embargo')
+        date_embargo = self.cleaned_data.get('date_embargo')
+
+        if embargo:
+            if not date_embargo:
+                self._errors['date_embargo'] = self.error_class(
+                        ['Embargo date is required if embargo is selected'])
+            elif date_embargo > date.today() + timedelta(30):
+                self._errors['date_embargo'] = self.error_class(
+                        ['Embargo date must be within 30 days of today'])
+
+        return self.cleaned_data
 
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
-        fields = ['title', 'agency', 'embargo']
+        fields = ['title', 'agency', 'embargo', 'date_embargo']
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 }
+
+class FOIAEmbargoForm(FOIARequestForm):
+    """A form to update the embargo status of a FOIA Request"""
+
+    def __init__(self, *args, **kwargs):
+        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
+        del self.fields['agency']
+        del self.fields['request']
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIARequest
+        fields = ['embargo', 'date_embargo']
 
 class FOIARequestTrackerForm(forms.ModelForm):
     """A form for a FOIA Request that is only tracked"""

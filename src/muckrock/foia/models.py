@@ -9,7 +9,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.template.loader import render_to_string
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 import os
 import re
 
@@ -39,14 +39,14 @@ class FOIARequestManager(ChainableManager):
         if user.is_authenticated():
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
-                                ~Q(embargo=True, date_done__gt=datetime.today() - timedelta(30)) &
-                                ~Q(embargo=True, date_done=None) &
+                                ~Q(embargo=True, date_embargo=None) &
+                                ~Q(embargo=True, date_embargo__gt=datetime.today()) &
                                 ~Q(tracker=True)))
         else:
             # anonymous user, filter out drafts and embargoes and tracker only
             return self.exclude(status='started') \
-                       .exclude(embargo=True, date_done__gt=datetime.today() - timedelta(30)) \
-                       .exclude(embargo=True, date_done=None) \
+                       .exclude(embargo=True, date_embargo=None) \
+                       .exclude(embargo=True, date_embargo__gt=datetime.today()) \
                        .exclude(tracker=True)
 
     def get_public(self):
@@ -82,6 +82,7 @@ class FOIARequest(models.Model):
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
+    date_embargo = models.DateField(blank=True, null=True)
     price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     description = models.TextField(blank=True)
     featured = models.BooleanField()
@@ -113,6 +114,10 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
+        print self
+        print self.status != 'started'
+        print not self.is_embargo()
+        print not self.tracker
         return self.user == user or (self.status != 'started' and not self.is_embargo()
                                      and not self.tracker)
 
@@ -122,17 +127,15 @@ class FOIARequest(models.Model):
 
     def is_embargo(self):
         """Is this request currently on an embargo?"""
-        if not self.embargo:
-            return False
-        elif not self.date_done:
+        if self.embargo and not self.embargo_date():
             return True
         else:
-            return date.today() < self.embargo_date()
+            return self.embargo and date.today() < self.embargo_date()
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
-        if self.embargo and self.date_done:
-            return self.date_done + timedelta(30)
+        if self.embargo:
+            return self.date_embargo
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
