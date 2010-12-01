@@ -20,7 +20,7 @@
 			{% endif %}
 		</div>
 		<div class="nav-center">
-			{% page_links page_obj %}
+			{% page_links page_obj ord field %}
 		</div>
 		{% if page_obj.has_next %}
 		<div class="nav-right">
@@ -89,7 +89,7 @@
 			{% endif %}
 		</div>
 		<div class="nav-center">
-			{% page_links page_obj %}
+			{% page_links page_obj ord field %}
 		</div>
 		{% if page_obj.has_next %}
 		<div class="nav-right">
