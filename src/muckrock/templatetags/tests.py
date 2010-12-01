@@ -37,7 +37,7 @@ class TestTemplatetagsFunctional(TestCase):
                 ''.join('&nbsp;&nbsp;<a href="?page=%d">%d</a>' % (i, i) for i in range(6,9)) + \
                 '&nbsp;&hellip;'
 
-        nose.tools.eq_(tags.page_links(mock_page_obj), links)
+        nose.tools.eq_(tags.page_links(mock_page_obj, None, None), links)
 
     def test_company_title(self):
         """Test the company_title template tag"""
