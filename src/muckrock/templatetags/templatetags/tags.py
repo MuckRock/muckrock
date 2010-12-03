@@ -18,7 +18,7 @@ def active(request, pattern):
     return ''
 
 @register.simple_tag
-def page_links(page_obj, order, field):
+def page_links(page_obj, order=None, field=None):
     """Return page links for surrounding pages"""
 
     def make_link(num, skip):
