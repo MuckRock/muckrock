@@ -1,6 +1,6 @@
-Dear {{name}},
+Dear {{name|safe}},
 
-This mail is to let you know that your FOI Request "{{title}}"
+This mail is to let you know that your FOI Request "{{title|safe}}"
 has been updated.  Its current status is '{{status}}' and you may
 view the full details of the request here:
 http://www.muckrock.com{{link}}.
