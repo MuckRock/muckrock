@@ -4,7 +4,16 @@
 {% load tags %}
 
 {% block content %}
-	<h1>{{ title }}</h1>
+	<h1 class="left">{{ title }}</h1>
+
+	<span class="right">
+		<form action="/search/" method="get">
+			{% csrf_token %}
+			<input type="text" name="q" id="id_q" />
+			<input type="submit" name="submit" value="Search" class="button" />
+		</form>
+	</span>
+	<div class="clear">&nbsp;</div>
 
 	<div class="post-meta archive-pagination">
 	{% with request.GET.order as ord %}
