@@ -25,9 +25,9 @@ def page_links(page_obj, order=None, field=None):
         """Make a link to page num"""
         options = ''
         if order:
-            options += '&order=%s' % order
+            options += '&amp;order=%s' % order
         if field:
-            options += '&field=%s' % field
+            options += '&amp;field=%s' % field
         if num != skip:
             return '<a href="?page=%d%s">%d</a>' % (num, options, num)
         else:
