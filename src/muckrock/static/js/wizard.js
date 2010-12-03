@@ -19,12 +19,13 @@
 			 });
  });
 
-// Set up tabs and progress bars
+// Set up tabs and progress bars and tool tips
 $(function() {
 	$("#tabs").tabs();
 	$("input:submit").button();
 	$(".jqbutton").button();
 	$("#progressbar").progressbar({ value: parseInt($("#progressbar").attr("title")) });
+	$(".tipTip").tipTip({defaultPosition: "top", delay: 0});
 });
 
 // Set up the combobox for agency selection
