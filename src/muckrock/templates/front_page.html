@@ -2,6 +2,7 @@
 {% load tags %}
 {% load assets %}
 {% load thumbnail %}
+{% load humanize %}
 
 {% block title %}Home{% endblock %}
 {% block headline %}Home{% endblock %}
@@ -85,10 +86,10 @@
 				<div class="post">
 					<h3>Stats &amp; Figures</h3>
 					<p><ul>
-						<li>{{ num_requests }} request{{ num_requests|pluralize }} filed</li>
-						<li>{{ num_completed_requests }} request{{ num_completed_requests|pluralize }} succesfully completed</li>
-						<li>{{ num_denied_requests }} request{{ num_denied_requests|pluralize }} denied</li>
-						<li>{{ num_pages }} pages of government document{{ num_pages|pluralize }} released</li>
+						<li>{{ num_requests|intcomma }} request{{ num_requests|pluralize }} filed</li>
+						<li>{{ num_completed_requests|intcomma }} request{{ num_completed_requests|pluralize }} succesfully completed</li>
+						<li>{{ num_denied_requests|intcomma }} request{{ num_denied_requests|pluralize }} denied</li>
+						<li>{{ num_pages|intcomma }} pages of government document{{ num_pages|pluralize }} released</li>
 					</ul></p>
 				</div>		
 			</div>
