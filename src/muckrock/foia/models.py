@@ -108,6 +108,10 @@ class FOIARequest(models.Model):
         """Can this request be ammended by the user?"""
         return self.status == 'fix'
 
+    def is_appealable(self):
+        """Can this request be appealed by the user?"""
+        return self.status == 'rejected'
+
     def is_deletable(self):
         """Can this request be deleted?"""
         return self.status == 'started' or self.tracker
