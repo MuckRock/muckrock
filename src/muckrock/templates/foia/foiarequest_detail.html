@@ -86,7 +86,7 @@
 				<ul class="dc-thumbnails">
 				{% if object.public_documents|length > 1 %}
 					{% for document in object.public_documents %}
-						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" /></a></li>
+						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" title="{{document.title}}" class="tipTip" /></a></li>
 					{% endfor %}
 				{% endif %}
 				</ul>
@@ -157,10 +157,10 @@
 	    <h2>News & Opinions:</h2>
 	    {% for pingback in pingbacks %}
 	        <div class="b-pingback">
-						<strong><a href="{{pingback.url}}">{{ pingback.title}}</a></strong><br />
+						<strong><a href="{{pingback.url}}">{{ pingback.title|striptags|safe }}</a></strong><br />
 						<em>{{ pingback.date|date }}</em><br />
 	
-						<p>{{ pingback.content }}</p>
+						<p>{{ pingback.content|striptags|safe }}</p>
 	        </div>
 	    {% endfor %}
 		<div class="content-separator"></div>
