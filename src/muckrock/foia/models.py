@@ -114,10 +114,6 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        print self
-        print self.status != 'started'
-        print not self.is_embargo()
-        print not self.tracker
         return self.user == user or (self.status != 'started' and not self.is_embargo()
                                      and not self.tracker)
 

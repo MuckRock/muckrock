@@ -19,8 +19,9 @@ from collections import namedtuple
 from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, FOIAFixForm, \
-                       FOIANoteForm, FOIAEmbargoForm, FOIAWizardWhereForm, FOIAWhatLocalForm, \
-                       FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+                       FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
+                       FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, \
+                       TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 
 def _foia_form_handler(request, foia, action):
@@ -168,6 +169,7 @@ def _foia_action(request, jurisdiction, slug, idx, action):
 
     jmodel = Jurisdiction.objects.get(slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
+    form_class = action.form_class(foia)
 
     if foia.user != request.user:
         return render_to_response('error.html',
@@ -180,16 +182,16 @@ def _foia_action(request, jurisdiction, slug, idx, action):
                      context_instance=RequestContext(request))
 
     if request.method == 'POST':
-        form = action.form_class(request.POST)
+        form = form_class(request.POST)
         if form.is_valid():
             action.form_actions(request, foia, form)
             return HttpResponseRedirect(action.return_url(request, foia))
 
     else:
-        if issubclass(action.form_class, forms.ModelForm):
-            form = action.form_class(instance=foia)
+        if issubclass(form_class, forms.ModelForm):
+            form = form_class(instance=foia)
         else:
-            form = action.form_class()
+            form = form_class()
 
     return render_to_response('foia/foiarequest_action.html',
                               {'form': form, 'foia': foia,
@@ -215,7 +217,7 @@ def fix(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'fix',
         tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')],
-        form_class = FOIAFixForm,
+        form_class = lambda _: FOIAFixForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Fix FOIA Request',
         value = 'Fix')
@@ -236,7 +238,7 @@ def note(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'add notes',
         tests = [],
-        form_class = FOIANoteForm,
+        form_class = lambda _: FOIANoteForm,
         return_url = lambda r, f: f.get_absolute_url() + '#tabs-notes',
         heading = 'Add Note',
         value = 'Add')
@@ -255,7 +257,7 @@ def delete(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'delete',
         tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
-        form_class = FOIADeleteForm,
+        form_class = lambda _: FOIADeleteForm,
         return_url = lambda r, f: reverse('foia-list-user', kwargs={'user_name': r.user.username}),
         heading = 'Delete FOI Request',
         value = 'Delete')
@@ -275,7 +277,8 @@ def embargo(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'embargo',
         tests = [],
-        form_class = FOIAEmbargoForm,
+        form_class = lambda f: FOIAEmbargoDateForm if f.status in ['done', 'partial'] \
+                               else FOIAEmbargoForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Update the Embargo Date',
         value = 'Update')
