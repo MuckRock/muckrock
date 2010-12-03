@@ -31,9 +31,34 @@ class FOIARequestForm(forms.ModelForm):
                                  help_text='Embargoing a request keeps it completely private from '
                                            'other users until the embargo date you set.  '
                                            'You may change this whenever you want.')
+    request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIARequest
+        fields = ['title', 'agency', 'embargo']
+        widgets = {
+                'title': forms.TextInput(attrs={'style': 'width:450px;'}),
+                }
+
+class FOIAEmbargoForm(FOIARequestForm):
+    """A form to update the embargo status of a FOIA Request"""
+
+    def __init__(self, *args, **kwargs):
+        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
+        del self.fields['agency']
+        del self.fields['request']
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIARequest
+        fields = ['embargo']
+
+class FOIAEmbargoDateForm(FOIAEmbargoForm):
+    """A form to update the embargo status of a FOIA Request"""
+
     date_embargo = forms.DateField(label='Embargo date', required=False,
                                    widget=forms.TextInput(attrs={'class': 'datepicker'}))
-    request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
     def clean(self):
         """date_embargo is required if embargo is checked and must be within 30 days"""
@@ -50,22 +75,6 @@ class FOIARequestForm(forms.ModelForm):
                         ['Embargo date must be within 30 days of today'])
 
         return self.cleaned_data
-
-    class Meta:
-        # pylint: disable-msg=R0903
-        model = FOIARequest
-        fields = ['title', 'agency', 'embargo', 'date_embargo']
-        widgets = {
-                'title': forms.TextInput(attrs={'style': 'width:450px;'}),
-                }
-
-class FOIAEmbargoForm(FOIARequestForm):
-    """A form to update the embargo status of a FOIA Request"""
-
-    def __init__(self, *args, **kwargs):
-        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
-        del self.fields['agency']
-        del self.fields['request']
 
     class Meta:
         # pylint: disable-msg=R0903
