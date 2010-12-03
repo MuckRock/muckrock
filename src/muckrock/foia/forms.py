@@ -105,9 +105,17 @@ class FOIADeleteForm(forms.Form):
     confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
                                  help_text='This cannot be undone!')
 
-class FOIAFixForm(forms.Form):
-    """Form to ammend a request with extra information"""
-    fix = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+def foia_comm_form_factory(label):
+    """Create a Communication Form with the given label"""
+
+    class FOIACommForm(forms.Form):
+        """Form to ammend a request with extra information"""
+        comm = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}),
+                               label=label)
+    return FOIACommForm
+
+FOIAFixForm = foia_comm_form_factory('Fix')
+FOIAAppealForm = foia_comm_form_factory('Appeal')
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
