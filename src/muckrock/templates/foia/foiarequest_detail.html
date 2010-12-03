@@ -10,6 +10,16 @@
 	for the {{object.agency}} of {{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done|date}}{%endif%}
 	</p>
+	{% if object.is_embargo and not object.embargo_date %}
+	<p class="notice">
+	This request is embargoed and will not be visible to others until 30 days after a response is received.
+	</p>
+	{% endif %}
+	{% if object.is_embargo and object.embargo_date %}
+	<p class="notice">
+	This request is embargoed and will not be visible until {{ object.embargo_date|date }}.
+	</p>
+	{% endif %}
 	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
 	<p>Status: <span class="request-{{object.color_code}}">
 		{{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
@@ -84,17 +94,6 @@
 		</div>
 		{% endif %}
 		<div id="tabs-request">
-			{% if object.is_embargo and not object.date_done %}
-			<p>
-			This request is embargoed and will not be visible to others until 30 days after a response is received.
-			</p>
-			{% endif %}
-			{% if object.is_embargo and object.date_done %}
-			<p>
-			This request is embargoed and will not be visible until {{ object.embargo_date }}.
-			</p>
-			{% endif %}
-
 			{% for comm in object.communications.all %}
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
