@@ -19,9 +19,9 @@ from collections import namedtuple
 from datetime import datetime
 
 from foia.forms import FOIARequestForm, FOIARequestTrackerForm, FOIADeleteForm, FOIAFixForm, \
-                       FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
-                       FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, FOIAWizard, \
-                       TEMPLATES
+                       FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAAppealForm, \
+                       FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
+                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 
 def _foia_form_handler(request, foia, action):
@@ -201,26 +201,40 @@ def _foia_action(request, jurisdiction, slug, idx, action):
 
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url heading value')
 
+def _save_foia_comm(request, foia, form):
+    """Save the FOI Communication"""
+    FOIACommunication.objects.create(
+            foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
+            response=False, full_html=False, communication=form.cleaned_data['comm'])
+    foia.status = 'submitted'
+    foia.save()
+
 @login_required
 def fix(request, jurisdiction, slug, idx):
     """Ammend a 'fix required' FOIA Request"""
 
-    def form_actions(request, foia, form):
-        """Save the FOI Communication"""
-        FOIACommunication.objects.create(
-                foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
-                response=False, full_html=False, communication=form.cleaned_data['fix'])
-        foia.status = 'submitted'
-        foia.save()
-
     action = Action(
-        form_actions = form_actions,
+        form_actions = _save_foia_comm,
         msg = 'fix',
         tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')],
         form_class = lambda _: FOIAFixForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Fix FOIA Request',
         value = 'Fix')
+    return _foia_action(request, jurisdiction, slug, idx, action)
+
+@login_required
+def appeal(request, jurisdiction, slug, idx):
+    """Appeal a rejected FOIA Request"""
+
+    action = Action(
+        form_actions = _save_foia_comm,
+        msg = 'appeal',
+        tests = [(lambda f: f.is_appealable(), 'This request has not been rejected')],
+        form_class = lambda _: FOIAAppealForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Appeal FOIA Request',
+        value = 'Appeal')
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required

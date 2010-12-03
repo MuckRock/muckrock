@@ -138,6 +138,9 @@
 		{% if object.is_fixable %}
 			<p><a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a></p>
 		{% endif %}
+		{% if object.is_appealable %}
+			<p><a class="jqbutton" href="{% url foia-appeal jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Appeal</a></p>
+		{% endif %}
 		<div class="content-separator"></div>
 	{% endif %}
 
