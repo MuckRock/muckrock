@@ -6,6 +6,8 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
 from django.views.generic import list_detail
 
+from datetime import date, timedelta
+
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
                         Jurisdiction, Agency, AgencyType, FOIADocTopViewed
 from foia.tasks import upload_document_cloud
@@ -51,6 +53,12 @@ class FOIARequestAdmin(admin.ModelAdmin):
     list_filter = ['status']
     search_fields = ['title', 'description']
     inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
+
+    def save_model(self, request, obj, form, change):
+        """If changing to completed and embargoed, set embargo date to 30 days out"""
+        if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
+            obj.date_embargo = date.today() + timedelta(30)
+            obj.save()
 
     def get_urls(self):
         """Add custom URLs here"""
