@@ -110,6 +110,7 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
     'django.contrib.messages',
     'django.contrib.flatpages',
+    'django.contrib.humanize',
     'south',
     'django_nose',
     'debug_toolbar',
