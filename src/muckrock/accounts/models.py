@@ -55,4 +55,20 @@ class Profile(models.Model):
         return True
 
 
+class Statistics(models.Model):
+    """Nightly statistics"""
 
+    date = models.DateField()
+
+    total_requests = models.IntegerField()
+    total_requests_success = models.IntegerField()
+    total_requests_denied = models.IntegerField()
+    total_pages = models.IntegerField()
+    total_users = models.IntegerField()
+    users_today = models.ManyToManyField(User)
+    total_agencies = models.IntegerField()
+    total_fees = models.IntegerField()
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['-date']
