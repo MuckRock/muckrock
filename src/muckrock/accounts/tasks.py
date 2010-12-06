@@ -19,7 +19,7 @@ def store_statstics():
 
     yesterday = date.today() - timedelta(1)
 
-    stats = Statistics(
+    stats = Statistics.objects.create(
         date=yesterday,
         total_requests=FOIARequest.objects.count(),
         total_requests_success=FOIARequest.objects.filter(status='done').count(),
@@ -29,6 +29,7 @@ def store_statstics():
         total_agencies=Agency.objects.count(),
         total_fees=FOIARequest.objects.aggregate(Sum('price'))['price__sum'],
         )
+    # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
                                             last_login__month=yesterday.month,
                                             last_login__day=yesterday.day)
