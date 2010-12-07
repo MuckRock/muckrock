@@ -16,7 +16,8 @@ class LatestSubmittedRequests(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable-msg=R0201
-        return FOIARequest.objects.get_submitted().order_by('-date_submitted')[:5]
+        # pylint: disable-msg=E1103
+        return FOIARequest.objects.get_submitted().get_public().order_by('-date_submitted')[:5]
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -31,7 +32,8 @@ class LatestDoneRequests(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable-msg=R0201
-        return FOIARequest.objects.get_done().order_by('-date_done')[:5]
+        # pylint: disable-msg=E1103
+        return FOIARequest.objects.get_done().get_public().order_by('-date_done')[:5]
 
     def item_description(self, item):
         """The description of each rss item"""
