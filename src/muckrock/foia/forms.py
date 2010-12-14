@@ -81,24 +81,6 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
-class FOIARequestTrackerForm(forms.ModelForm):
-    """A form for a FOIA Request that is only tracked"""
-
-    agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
-                                    widget=forms.Select(attrs={'class': 'agency-combo'}))
-
-    class Meta:
-        # pylint: disable-msg=R0903
-        model = FOIARequest
-        fields = ['title', 'status', 'jurisdiction', 'agency', 'date_submitted', 'date_due',
-                  'date_done']
-        widgets = {
-                'title': forms.TextInput(attrs={'style': 'width:400px;'}),
-                'date_submitted': forms.TextInput(attrs={'class': 'datepicker'}),
-                'date_due': forms.TextInput(attrs={'class': 'datepicker'}),
-                'date_done': forms.TextInput(attrs={'class': 'datepicker'}),
-                }
-
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
 

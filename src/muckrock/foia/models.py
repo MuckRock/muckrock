@@ -30,24 +30,21 @@ class FOIARequestManager(ChainableManager):
 
     def get_editable(self):
         """Get all editable FOIA requests"""
-        return self.filter(Q(status='started') | Q(tracker=True))
+        return self.filter(status='started')
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
         # Requests are visible if you own them, or if they are not drafts and not embargoed
-        # and not tracker only
         if user.is_authenticated():
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gt=datetime.today()) &
-                                ~Q(tracker=True)))
+                                ~Q(embargo=True, date_embargo__gt=datetime.today())))
         else:
-            # anonymous user, filter out drafts and embargoes and tracker only
+            # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gt=datetime.today()) \
-                       .exclude(tracker=True)
+                       .exclude(embargo=True, date_embargo__gt=datetime.today())
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -103,7 +100,7 @@ class FOIARequest(models.Model):
 
     def is_editable(self):
         """Can this request be updated?"""
-        return self.status == 'started' or self.tracker
+        return self.status == 'started'
 
     def is_fixable(self):
         """Can this request be ammended by the user?"""
@@ -115,12 +112,11 @@ class FOIARequest(models.Model):
 
     def is_deletable(self):
         """Can this request be deleted?"""
-        return self.status == 'started' or self.tracker
+        return self.status == 'started'
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.user == user or (self.status != 'started' and not self.is_embargo()
-                                     and not self.tracker)
+        return self.user == user or (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
         """Is this document viewable to everyone"""
