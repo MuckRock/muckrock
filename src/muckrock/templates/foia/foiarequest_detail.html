@@ -67,7 +67,7 @@
 						container: "#viewer"
 					});
 
-					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\ncontainer : "#viewer-' + doc_id + '"});\n<\/script>';
+					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\nwidth: 627,\nheight: 600,\nsidebar: false,\ncontainer : "#viewer-' + doc_id + '"});\n<\/script>';
 					$('textarea#embed').val(embed_code);
 				}
 
