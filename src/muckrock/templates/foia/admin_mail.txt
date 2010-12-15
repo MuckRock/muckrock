@@ -1,0 +1,8 @@
+Submitter: http://www.muckrock.com/accounts/profile/{{request.user}}/
+Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
+{% if request.agency %}Agency Admin: http://www.muckrock.com/admin/foia/agency/{{request.agency.pk}}/
+{% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
+{% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
+{% endif %}
+{% now "F j, Y" %}
+{{ request.first_request }}
