@@ -42,7 +42,7 @@
 									{% if result.object|foia_is_viewable:user %}
 										<tr class="{% cycle 'even' 'odd' %}">
 											<td><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></td>
-											<td><a href="{{ result.object.user.get_absolute_url }}">{{ result.object.user.get_full_name }}</a></td>
+											<td><a href="{% url acct-profile result.object.user.username %}">{{result.object.user.username}}</a></td>
 											<td>{% if result.object.date_submitted %}
 														{{ result.object.date_submitted|date }}
 													{% else %}
@@ -55,7 +55,7 @@
 								{% if result.model_name == "article" %}
 									<tr class="{% cycle 'even' 'odd' %}">
 										<td><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></td>
-										<td><a href="{{ result.object.author.get_absolute_url }}">{{ result.object.author.get_full_name }}</a></td>
+										<td><a href="{% url acct-profile result.object.author.username %}">{{result.object.author.username}}</a></td>
 										<td>{{ result.object.pub_date|date }}</td>
 									</tr>
 								{% endif %}
