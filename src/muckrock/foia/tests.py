@@ -58,7 +58,7 @@ class TestFOIARequestUnit(TestCase):
         self.foia.status = 'submitted'
         self.foia.save()
         nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].to, ['morisy@gmail.com'])
+        nose.tools.eq_(mail.outbox[0].to, ['requests@muckrock.com'])
 
         self.foia.status = 'processed'
         self.foia.save()
@@ -274,5 +274,5 @@ class TestFOIAFunctional(TestCase):
                      reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
-        nose.tools.eq_(foia.first_request(), 'updated request')
+        nose.tools.assert_true(foia.first_request().startswith('updated request'))
         nose.tools.eq_(foia.status, 'submitted')
