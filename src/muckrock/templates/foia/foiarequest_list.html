@@ -79,7 +79,12 @@
 			<td><a href="{% url acct-profile foia.user.username %}">{{ foia.user }}</a></td>
 			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
 			<td>{{ foia.jurisdiction }}</td>
-			<td>{{ foia.date_submitted|date }}</td>
+			<td>{% if foia.date_submitted %}
+						{{ foia.date_submitted|date }}
+					{% else %}
+						{{ foia.communications.all.0.date|date }}
+					{% endif %}
+			</td>
 		</tr>
 		{% endfor %}
 	</table>
