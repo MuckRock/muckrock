@@ -654,3 +654,7 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 .dc-thumbnails {
 	text-align: center;
 }
+
+.doc-thumb {
+	margin: 4px 10px 4px 4px;
+}

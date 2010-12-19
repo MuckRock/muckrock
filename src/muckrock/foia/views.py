@@ -361,7 +361,7 @@ def detail(request, jurisdiction, slug, idx):
     if not foia.is_viewable(request.user):
         raise Http404()
 
-    context = {'object': foia}
+    context = {'object': foia, 'communications': foia.get_communications(request.user)}
     if foia.date_due:
         context['past_due'] = foia.date_due < datetime.now().date()
     else:
