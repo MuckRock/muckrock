@@ -163,6 +163,17 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         return self.communications.all()[0].communication
 
+    def get_communications(self, user):
+        """Get communications and documents to display on details page"""
+        # pylint: disable-msg=E1101
+        comms = self.communications.all()
+        docs = self.documents.exclude(doc_id='').exclude(date=None)
+        if self.user != user:
+            docs = docs.filter(access='public')
+        comms_and_docs = list(comms) +list(docs)
+        comms_and_docs.sort(key=lambda x: x.date)
+        return comms_and_docs
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']
@@ -212,6 +223,7 @@ class FOIADocument(models.Model):
     access = models.CharField(max_length=12, choices=access)
     doc_id = models.SlugField(max_length=80, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
+    date = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return self.title
@@ -220,14 +232,20 @@ class FOIADocument(models.Model):
         """The url for this object"""
         return '%s#%s' % (self.foia.get_absolute_url(), self.doc_id)
 
-    def get_thumbnail(self):
+    def get_thumbnail(self, size='thumbnail'):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
         if not match:
             return None
-        else:
+        elif self.access == 'public':
             return 'http://s3.documentcloud.org/documents/'\
-                   '%s/pages/%s-p1-thumbnail.gif' % match.groups()
+                   '%s/pages/%s-p1-%s.gif' % (match.groups() + (size,))
+        else:
+            return '/static/img/report.png'
+
+    def get_medium_thumbnail(self):
+        """Convenient function for template"""
+        return self.get_thumbnail('small')
 
     def is_viewable(self, user):
         """Is this document viewable to user"""
@@ -236,6 +254,18 @@ class FOIADocument(models.Model):
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
+
+    # following methods are to make this quack like a communication for display on the details page
+    response = True
+    full_html = False
+
+    def from_who(self):
+        """To quack like a communication"""
+        return self.source
+
+    def communication(self):
+        """To quack like a communication"""
+        return self.description
 
     class Meta:
         # pylint: disable-msg=R0903
