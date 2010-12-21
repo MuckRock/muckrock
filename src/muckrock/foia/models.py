@@ -3,11 +3,8 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save
-from django.template.loader import render_to_string
 
 from datetime import datetime, date
 import os
@@ -60,6 +57,7 @@ class FOIARequestManager(ChainableManager):
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
+    # pylint: disable-msg=R0904
 
     status = (
         ('started', 'Draft'),
@@ -128,10 +126,15 @@ class FOIARequest(models.Model):
 
     def is_embargo(self):
         """Is this request currently on an embargo?"""
-        if self.embargo and not self.embargo_date():
+        if not self.embargo:
+            return False
+
+        if not self.embargo_date() or date.today() < self.embargo_date():
             return True
         else:
-            return self.embargo and date.today() < self.embargo_date()
+            self.embargo = False
+            self.save()
+            return False
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
@@ -376,30 +379,3 @@ class Agency(models.Model):
         # pylint: disable-msg=R0903
         verbose_name_plural = 'agencies'
 
-
-def foia_save_handler(sender, **kwargs):
-    """Log changes to FOIA Requests"""
-    # pylint: disable-msg=W0613
-
-    request = kwargs['instance']
-    try:
-        old_request = FOIARequest.objects.get(pk=request.pk)
-    except FOIARequest.DoesNotExist:
-        # if we are saving a new FOIA Request, do not email them
-        return
-
-    if request.status != old_request.status and \
-            request.status not in ['started', 'submitted']:
-        msg = render_to_string('foia/mail.txt',
-            {'name': request.user.get_full_name(),
-             'title': request.title,
-             'status': request.get_status_display(),
-             'link': request.get_absolute_url()})
-        send_mail('[MuckRock] FOIA request has been updated',
-                  msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
-    if request.status == 'submitted':
-        send_mail('[NEW] Freedom of Information Request: %s' % request.title,
-                  render_to_string('foia/admin_mail.txt', {'request': request}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-
-pre_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
