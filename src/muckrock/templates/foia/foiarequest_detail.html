@@ -60,6 +60,7 @@
 			<script type="text/javascript">
 				function display_doc(doc_id)
 				{
+					$("#tabs").tabs("select", "tabs-documents");
 					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
 						width: 627,
 						height: 600,
@@ -67,7 +68,7 @@
 						container: "#viewer"
 					});
 
-					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\nwidth: 627,\nheight: 600,\nsidebar: false,\ncontainer : "#viewer-' + doc_id + '"});\n<\/script>';
+					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
 					$('textarea#embed').val(embed_code);
 				}
 
@@ -94,14 +95,29 @@
 		</div>
 		{% endif %}
 		<div id="tabs-request">
-			{% for comm in object.communications.all %}
+			{% for comm in communications %}
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
+				{% if comm.get_thumbnail %}
+					{% if comm.access == "public" %}
+						<div class="left text-center">
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
+							<a href="/static/{{comm.document}}">Download</a>
+						</div>
+					{% else %}
+						<div class="left text-center">
+							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
+							<a href="/static/{{comm.document}}">Download</a>
+						</div>
+					{% endif %}
+				{% endif %}
 				{% if comm.full_html %}
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
 				{% else %}
 					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
+				<div class="clearer">&nbsp;</div>
 			</div>
 			{% endfor %}
 		</div>
@@ -125,32 +141,35 @@
 {% endblock %}
 
 {% block sidebar %}
-	{% if user == object.user  %}
+	{% if user == object.user or object.public_documents %}
 		<h2>Actions</h2>
-		{% if object.is_editable %}
-			<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
-		{% else %}
-			<p><a class="jqbutton" href="{% url foia-embargo jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update Embargo</a></p>
+		{% if user == object.user %}
+			{% if object.is_editable %}
+				<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
+			{% else %}
+				<p><a class="jqbutton" href="{% url foia-embargo jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update Embargo</a></p>
+			{% endif %}
+			{% if object.is_deletable %}
+				<p><a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></p>
+			{% endif %}
+			{% if object.is_fixable %}
+				<p><a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a></p>
+			{% endif %}
+			{% if object.is_appealable %}
+				<p><a class="jqbutton" href="{% url foia-appeal jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Appeal</a></p>
+			{% endif %}
 		{% endif %}
-		{% if object.is_deletable %}
-			<p><a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></p>
-		{% endif %}
-		{% if object.is_fixable %}
-			<p><a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a></p>
-		{% endif %}
-		{% if object.is_appealable %}
-			<p><a class="jqbutton" href="{% url foia-appeal jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Appeal</a></p>
+		{% if object.public_documents %}
+			<p><a href="#" id="opener" class="jqbutton">Embed this Document</a></p>
+			<div id="dialog" title="Embed Code">
+				<p>Copy and paste this code into your site to embed this document<p>
+				<textarea id="embed" style="width: 520px; height: 160px">
+				</textarea>
+			</div>
 		{% endif %}
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% if object.public_documents %}
-		<h2>Embed Code</h2>
-		<p>Copy and paste this code into your site to embed this document<p>
-		<textarea id="embed" style="width: 240px; height: 170px">
-		</textarea>
-		<div class="content-separator"></div>
-	{% endif %}
 
 	{% get_pingback_list for object as pingbacks %}
 	{% if pingbacks %}

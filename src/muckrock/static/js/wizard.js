@@ -119,3 +119,17 @@ $(function() {
 $(function() {
 	$( ".agency-combo" ).combobox();
 });
+
+$(function() {
+	$('#dialog').dialog({
+		autoOpen: false,
+		width: 560,
+		height: 280,
+		modal: true,
+		zIndex: 100000
+	});
+	$('#opener').click(function() {
+		$('#dialog').dialog('open');
+		return false;
+	});
+});
