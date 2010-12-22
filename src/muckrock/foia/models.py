@@ -114,7 +114,8 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.user == user or (self.status != 'started' and not self.is_embargo())
+        return user.is_staff or self.user == user or \
+            (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
         """Is this document viewable to everyone"""
