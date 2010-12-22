@@ -3,11 +3,8 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
-from django.db.models.signals import pre_save
-from django.template.loader import render_to_string
 
 from datetime import datetime, date
 import os
@@ -30,24 +27,21 @@ class FOIARequestManager(ChainableManager):
 
     def get_editable(self):
         """Get all editable FOIA requests"""
-        return self.filter(Q(status='started') | Q(tracker=True))
+        return self.filter(status='started')
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
         # Requests are visible if you own them, or if they are not drafts and not embargoed
-        # and not tracker only
         if user.is_authenticated():
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gt=datetime.today()) &
-                                ~Q(tracker=True)))
+                                ~Q(embargo=True, date_embargo__gt=datetime.today())))
         else:
-            # anonymous user, filter out drafts and embargoes and tracker only
+            # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gt=datetime.today()) \
-                       .exclude(tracker=True)
+                       .exclude(embargo=True, date_embargo__gt=datetime.today())
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -60,6 +54,7 @@ class FOIARequestManager(ChainableManager):
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
+    # pylint: disable-msg=R0904
 
     status = (
         ('started', 'Draft'),
@@ -103,7 +98,7 @@ class FOIARequest(models.Model):
 
     def is_editable(self):
         """Can this request be updated?"""
-        return self.status == 'started' or self.tracker
+        return self.status == 'started'
 
     def is_fixable(self):
         """Can this request be ammended by the user?"""
@@ -115,12 +110,11 @@ class FOIARequest(models.Model):
 
     def is_deletable(self):
         """Can this request be deleted?"""
-        return self.status == 'started' or self.tracker
+        return self.status == 'started'
 
     def is_viewable(self, user):
         """Is this request viewable?"""
-        return self.user == user or (self.status != 'started' and not self.is_embargo()
-                                     and not self.tracker)
+        return self.user == user or (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
         """Is this document viewable to everyone"""
@@ -128,10 +122,15 @@ class FOIARequest(models.Model):
 
     def is_embargo(self):
         """Is this request currently on an embargo?"""
-        if self.embargo and not self.embargo_date():
+        if not self.embargo:
+            return False
+
+        if not self.embargo_date() or date.today() < self.embargo_date():
             return True
         else:
-            return self.embargo and date.today() < self.embargo_date()
+            self.embargo = False
+            self.save()
+            return False
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
@@ -162,6 +161,17 @@ class FOIARequest(models.Model):
         """Return the first request text"""
         # pylint: disable-msg=E1101
         return self.communications.all()[0].communication
+
+    def get_communications(self, user):
+        """Get communications and documents to display on details page"""
+        # pylint: disable-msg=E1101
+        comms = self.communications.all()
+        docs = self.documents.exclude(doc_id='').exclude(date=None)
+        if self.user != user:
+            docs = docs.filter(access='public')
+        comms_and_docs = list(comms) +list(docs)
+        comms_and_docs.sort(key=lambda x: x.date)
+        return comms_and_docs
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -212,6 +222,7 @@ class FOIADocument(models.Model):
     access = models.CharField(max_length=12, choices=access)
     doc_id = models.SlugField(max_length=80, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
+    date = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return self.title
@@ -220,14 +231,20 @@ class FOIADocument(models.Model):
         """The url for this object"""
         return '%s#%s' % (self.foia.get_absolute_url(), self.doc_id)
 
-    def get_thumbnail(self):
+    def get_thumbnail(self, size='thumbnail'):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
         if not match:
             return None
-        else:
+        elif self.access == 'public':
             return 'http://s3.documentcloud.org/documents/'\
-                   '%s/pages/%s-p1-thumbnail.gif' % match.groups()
+                   '%s/pages/%s-p1-%s.gif' % (match.groups() + (size,))
+        else:
+            return '/static/img/report.png'
+
+    def get_medium_thumbnail(self):
+        """Convenient function for template"""
+        return self.get_thumbnail('small')
 
     def is_viewable(self, user):
         """Is this document viewable to user"""
@@ -236,6 +253,18 @@ class FOIADocument(models.Model):
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
+
+    # following methods are to make this quack like a communication for display on the details page
+    response = True
+    full_html = False
+
+    def from_who(self):
+        """To quack like a communication"""
+        return self.source
+
+    def communication(self):
+        """To quack like a communication"""
+        return self.description
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -346,30 +375,3 @@ class Agency(models.Model):
         # pylint: disable-msg=R0903
         verbose_name_plural = 'agencies'
 
-
-def foia_save_handler(sender, **kwargs):
-    """Log changes to FOIA Requests"""
-    # pylint: disable-msg=W0613
-
-    request = kwargs['instance']
-    try:
-        old_request = FOIARequest.objects.get(pk=request.pk)
-    except FOIARequest.DoesNotExist:
-        # if we are saving a new FOIA Request, do not email them
-        return
-
-    if request.status != old_request.status and \
-            request.status not in ['started', 'submitted']:
-        msg = render_to_string('foia/mail.txt',
-            {'name': request.user.get_full_name(),
-             'title': request.title,
-             'status': request.get_status_display(),
-             'link': request.get_absolute_url()})
-        send_mail('[MuckRock] FOIA request has been updated',
-                  msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
-    if request.status == 'submitted':
-        send_mail('[NEW] Freedom of Information Request: %s' % request.title,
-                  render_to_string('foia/admin_mail.txt', {'request': request}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-
-pre_save.connect(foia_save_handler, sender=FOIARequest, dispatch_uid='muckrock.foia.models')
