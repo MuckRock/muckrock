@@ -60,6 +60,7 @@
 			<script type="text/javascript">
 				function display_doc(doc_id)
 				{
+					$("#tabs").tabs("select", "tabs-documents");
 					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
 						width: 627,
 						height: 600,
@@ -94,14 +95,29 @@
 		</div>
 		{% endif %}
 		<div id="tabs-request">
-			{% for comm in object.communications.all %}
+			{% for comm in communications %}
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
+				{% if comm.get_thumbnail %}
+					{% if comm.access == "public" %}
+						<div class="left text-center">
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
+							<a href="/static/{{comm.document}}">Download</a>
+						</div>
+					{% else %}
+						<div class="left text-center">
+							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
+							<a href="/static/{{comm.document}}">Download</a>
+						</div>
+					{% endif %}
+				{% endif %}
 				{% if comm.full_html %}
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
 				{% else %}
 					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
+				<div class="clearer">&nbsp;</div>
 			</div>
 			{% endfor %}
 		</div>

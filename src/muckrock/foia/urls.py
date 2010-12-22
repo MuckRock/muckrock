@@ -6,6 +6,9 @@ from django.conf.urls.defaults import patterns, url
 
 from pingback import register_pingback
 
+# pylint: disable-msg=W0611
+import foia.signals
+# pylint: enable-msg=W0611
 from foia import views
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from foia.pingbacks import pingback_foia_handler
