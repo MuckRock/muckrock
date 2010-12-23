@@ -168,7 +168,7 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         comms = self.communications.all()
         docs = self.documents.exclude(doc_id='').exclude(date=None)
-        if self.user != user:
+        if self.user != user and not user.is_staff:
             docs = docs.filter(access='public')
         comms_and_docs = list(comms) +list(docs)
         comms_and_docs.sort(key=lambda x: x.date)
