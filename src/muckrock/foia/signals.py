@@ -44,14 +44,16 @@ def foia_update_embargo(sender, **kwargs):
         # if we are saving a new FOIA Request, there are no docs to update
         return
 
-    if request.is_embargo() != old_request.is_embargo():
-        access = 'private' if request.is_embargo() else 'public'
+    if request.is_embargo(save=False) != old_request.is_embargo(save=False):
+        access = 'private' if request.is_embargo(save=False) else 'public'
         for doc in request.documents.all():
             if doc.access != access:
                 doc.access = access
                 doc.save()
                 upload_document_cloud.apply_async(args=[doc.pk, True], countdown=3)
 
-pre_save.connect(foia_email_notifier, sender=FOIARequest, dispatch_uid='muckrock.foia.signals')
-pre_save.connect(foia_update_embargo, sender=FOIARequest, dispatch_uid='muckrock.foia.signals')
+pre_save.connect(foia_email_notifier, sender=FOIARequest,
+                 dispatch_uid='muckrock.foia.signals.email')
+pre_save.connect(foia_update_embargo, sender=FOIARequest,
+                 dispatch_uid='muckrock.foia.signals.embargo')
 
