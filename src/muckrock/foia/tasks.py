@@ -16,7 +16,8 @@ from datetime import date, timedelta
 from vendor import MultipartPostHandler
 
 from foia.models import FOIADocument, FOIADocTopViewed, FOIARequest
-from foia.urls import foia_url
+
+foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 
 @task(ignore_result=True)
