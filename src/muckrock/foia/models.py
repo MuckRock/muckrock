@@ -83,6 +83,7 @@ class FOIARequest(models.Model):
     description = models.TextField(blank=True)
     featured = models.BooleanField()
     tracker = models.BooleanField()
+    sidebar_html = models.TextField(blank=True)
 
     objects = FOIARequestManager()
 
