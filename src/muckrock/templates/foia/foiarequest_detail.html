@@ -2,6 +2,8 @@
 {% extends "foia/base.html" %}
 {% load pingback_tags %}
 
+{% block title %} {{object.title}} {% endblock %}
+
 {% block content %}
 	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
