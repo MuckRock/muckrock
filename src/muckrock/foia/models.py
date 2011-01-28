@@ -121,17 +121,19 @@ class FOIARequest(models.Model):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
 
-    def is_embargo(self):
+    def is_embargo(self, save=True):
         """Is this request currently on an embargo?"""
         if not self.embargo:
             return False
 
         if not self.embargo_date() or date.today() < self.embargo_date():
             return True
-        else:
+
+        if save:
             self.embargo = False
             self.save()
-            return False
+
+        return False
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
