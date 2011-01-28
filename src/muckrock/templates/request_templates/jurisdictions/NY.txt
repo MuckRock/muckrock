@@ -1,0 +1,10 @@
+{% extends "request_templates/base.txt" %}
+{% block body %}
+Pursuant to the New York State Freedom of Information Law (1977 N.Y. Laws ch. 933), I hereby request the following records:
+
+{% block content %}{% endblock %}
+
+I also request that, if appropriate, fees be waived as we believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.
+{% endblock %}
+
+{% block days %}5{% endblock %}

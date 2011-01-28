@@ -4,7 +4,7 @@ Admin registration for FOIA models
 
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin
-from django.views.generic import list_detail
+from django.views.generic import simple
 
 from datetime import date, timedelta
 
@@ -70,9 +70,11 @@ class FOIARequestAdmin(admin.ModelAdmin):
     def process(self, request):
         """List all the requests that need to be processed"""
         # pylint: disable-msg=R0201
-        return list_detail.object_list(request,
-                   FOIARequest.objects.filter(status='submitted'),
-                   template_name='foia/admin_process.html')
+        foias = list(FOIARequest.objects.filter(status='submitted'))
+        foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
+                                        y.communications.latest('date').date))
+        return simple.direct_to_template(request, template='foia/admin_process.html',
+                                         extra_context={'object_list': foias})
 
 
 class JurisdictionAdmin(admin.ModelAdmin):
