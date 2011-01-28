@@ -2,6 +2,8 @@
 {% extends "foia/base.html" %}
 {% load pingback_tags %}
 
+{% block title %} {{object.title}} {% endblock %}
+
 {% block content %}
 	<h1>FOI Request</h1>
 	<h2>{{object.title}}</h2>
@@ -141,6 +143,10 @@
 {% endblock %}
 
 {% block sidebar %}
+	{% if object.sidebar_html %}
+		{{ object.sidebar_html|safe }}
+		<div class="content-separator"></div>
+	{% endif %}
 	{% if user == object.user or object.public_documents %}
 		<h2>Actions</h2>
 		{% if user == object.user %}
