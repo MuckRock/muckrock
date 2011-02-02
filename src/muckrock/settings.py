@@ -121,6 +121,7 @@ INSTALLED_APPS = (
     'pingback',
     'muckrock.accounts',
     'muckrock.foia',
+    'muckrock.rodeo',
     'muckrock.news',
     'muckrock.templatetags',
 )
