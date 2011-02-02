@@ -1,0 +1,26 @@
+
+{% extends "foia/base.html" %}
+
+{% block content %}
+	<h1>Welcome to the Rodeo!</h1>
+	<h2>{{rodeo.document.title}}</h2>
+	<p>Page {{page}}</p>
+	<img src="{{img}}" />
+{% endblock %}
+
+{% block sidebar %}
+  <form action="" method="post">
+		{% csrf_token %}
+		{% for field in form.hidden_fields %}
+			{{ field }}
+		{% endfor %}
+		{% for field in form.visible_fields %}
+			<div{% if field.errors %} class="error"{% endif %}>
+				{{ field }}
+				{{ field.errors }}
+			</div>
+		{% endfor %}
+		<input type="submit" name="submit" value="Vote" class="button" />
+  </form>
+	<div class="content-separator"></div>
+{% endblock %}

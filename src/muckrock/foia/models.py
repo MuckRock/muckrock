@@ -235,14 +235,14 @@ class FOIADocument(models.Model):
         """The url for this object"""
         return '%s#%s' % (self.foia.get_absolute_url(), self.doc_id)
 
-    def get_thumbnail(self, size='thumbnail'):
+    def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
         if not match:
             return None
         elif self.access == 'public':
             return 'http://s3.documentcloud.org/documents/'\
-                   '%s/pages/%s-p1-%s.gif' % (match.groups() + (size,))
+                   '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
             return '/static/img/report.png'
 
