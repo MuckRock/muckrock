@@ -75,12 +75,12 @@
 				}
 
 				$(function() {
-					var doc_id = window.location.hash.substring(1);
+					var hash = window.location.hash.substring(1);
 					var default_doc_id = "{{object.public_documents.0.doc_id}}"
 					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
-					if (!doc_id || ($.inArray(doc_id, documents) == -1)) doc_id = default_doc_id;
 
-					display_doc(doc_id);
+					if (!hash || ($.inArray(hash, documents) == -1)) doc_id = default_doc_id;
+					if (hash.substring(0,4) != "tabs") display_doc(doc_id);
 				});
 
 			</script>
