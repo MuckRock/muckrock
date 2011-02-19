@@ -1,5 +1,6 @@
 
 {% extends "news/base.html" %}
+{% load thumbnail %}
 
 {% block title %} {{object.title}} {% endblock %}
 
@@ -9,8 +10,13 @@
 				<div class="post-title">
 					<h2><a href="{{object.get_absolute_url}}">{{object.title}}</a></h2>
 				</div>
-				<div class="post-date">{{object.pub_date|date:"g:i A, l, F j, Y"}} by
-					{{object.author.first_name}} {{object.author.last_name}}</div>
+				{% if object.kicker %}<div class="post-kicker">
+					<h4>{{ object.kicker }}</h4>
+				</div>{% endif %}
+				{% if object.image %}
+				<p><a href=" {{object.get_absolute_url }}"><img src="{% thumbnail object.image 510x233 %}" alt="" class="bordered" /></a></p>
+				{% endif %}
+				<div class="post-date">by {{object.author.first_name}} {{object.author.last_name}} on {{object.pub_date|date:"DATETIME_FORMAT"}}</div>
 				{% if object.foia %}
 				<div>
 					<p>FOI Request: <a href="{{object.foia.get_absolute_url}}">{{object.foia.title}}</a></p>
