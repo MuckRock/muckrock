@@ -658,3 +658,20 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 .doc-thumb {
 	margin: 4px 10px 4px 4px;
 }
+
+/* for tweets */
+
+.comment {
+	border-top: 1px solid #CCB;
+	margin: 5px 0px 5px 0px;
+	padding-top: 5px;
+}
+
+.comment_avatar {
+	float: left;
+	margin-right: 5px;
+}
+
+.comment_author {
+	font-weight: bold;
+}
