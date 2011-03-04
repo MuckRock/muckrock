@@ -81,8 +81,55 @@
 
 					if (!hash || ($.inArray(hash, documents) == -1)) doc_id = default_doc_id;
 					if (hash.substring(0,4) != "tabs") display_doc(doc_id);
-				});
 
+					// Enable tweetbacks
+					var MAX_TWEETS = 5;
+					var BASE = 'http://otter.topsy.com/trackbacks.js?callback=?&perpage=' + MAX_TWEETS;
+					var ALL = BASE + '&url=';
+					var INFL = BASE + '&infonly=1&url=';
+					var URL_RE = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+					var TWEET_RE = /@([A-Za-z0-9_]+)/g;
+
+					function urlify(text) {
+						return text.replace(URL_RE,"<a href='$1'>$1</a>").
+								    replace(TWEET_RE, "<a href='http://twitter.com/$1'>@$1</a>");
+					}
+
+					function processTweetList(list) {
+						$('#tweet-container').show();
+						$.each(list, function(index, tweet) {
+							$('<div class="comment">' + 
+							'<div class="comment_avatar">' +
+							'<img src="' + tweet.author.photo_url + '" class="avatar avatar-36 photo" height="36" width="36"/>' +
+							'</div>' +
+							'<div class="comment_body">' +
+							'<span class="comment_author">' + 
+							'<a href="' + tweet.permalink_url + '">' +
+							tweet.author.name + '</a></span>' +
+							'<span class="comment_main"><p>' + urlify(tweet.content) + '</p></span>' +
+							'<div class="comment_date">' + tweet.date_alpha + '</div>'+
+							'</div>' +
+							'</div>').appendTo('#tweets');
+						});
+					}
+
+					function getTweets(url) {
+						$.getJSON(ALL + url, function(data) {
+							var response = data.response;
+							if (response.total > MAX_TWEETS) {
+								$.getJSON(INFL + url, function(infl) {
+									processTweetList(infl.response.list);
+									var count = (infl.response.total > MAX_TWEETS ? MAX_TWEETS : infl.response.total);
+								});        
+							} else if (response.total > 0) {
+								processTweetList(response.list);
+							}
+						});
+					}
+					var url = "http://www.muckrock.com{{request.path}}";
+					getTweets(url);
+
+				});
 			</script>
 			<div class="dc-thumbnails">
 
@@ -190,5 +237,17 @@
 	    {% endfor %}
 		<div class="content-separator"></div>
 	{% endif %}
+
+	<div id="tweet-container" style="display: none;" >
+		<h2>Tweets</h2>
+		<div class="comments" id="tweets">
+			<!-- Tweets go here -->
+		</div>
+		<div class="content-separator"></div>
+	</div>
+
+	<h2>Facebook</h2>
+	<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
+	<div class="content-separator"></div>
 
 {% endblock %}
