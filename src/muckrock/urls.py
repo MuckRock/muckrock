@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 import haystack.urls
 from django_xmlrpc.views import handle_xmlrpc
 
-import accounts.urls, foia.urls, news.urls
+import accounts.urls, foia.urls, news.urls, rodeo.urls
 import settings
 import views
 from foia.sitemap import FoiaSitemap
@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
     url(r'^accounts/', include(accounts.urls)),
     url(r'^foi/', include(foia.urls)),
+    url(r'^foi/', include(rodeo.urls)),
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),

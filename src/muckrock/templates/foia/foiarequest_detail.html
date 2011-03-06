@@ -72,6 +72,8 @@
 
 					var embed_code = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
 					$('textarea#embed').val(embed_code);
+					$('div[id^="rodeo-"]').hide();
+					$('#rodeo-' + doc_id).show();
 				}
 
 				$(function() {
@@ -79,7 +81,11 @@
 					var default_doc_id = "{{object.public_documents.0.doc_id}}"
 					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
 
-					if (!hash || ($.inArray(hash, documents) == -1)) doc_id = default_doc_id;
+					if (!hash || ($.inArray(hash, documents) == -1)) {
+						doc_id = default_doc_id;
+					} else {
+						doc_id = hash;
+					}
 					if (hash.substring(0,4) != "tabs") display_doc(doc_id);
 
 					// Enable tweetbacks
@@ -223,6 +229,18 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
+	{% for doc in object.public_documents.all %}
+		{% if doc.rodeo_set.all %}
+			<div id="rodeo-{{doc.doc_id}}" style="display: none;">
+				<h2>Help to Analyze</h2>
+				<ul>
+					{% for rodeo in doc.rodeo_set.all %}
+						<li><a href="{{rodeo.get_absolute_url}}">{{rodeo.title}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		{% endif %}
+	{% endfor %}
 
 	{% get_pingback_list for object as pingbacks %}
 	{% if pingbacks %}
@@ -239,14 +257,12 @@
 	{% endif %}
 
 	<div id="tweet-container" style="display: none;" >
-		<h2>Tweets</h2>
 		<div class="comments" id="tweets">
 			<!-- Tweets go here -->
 		</div>
 		<div class="content-separator"></div>
 	</div>
 
-	<h2>Facebook</h2>
 	<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
 	<div class="content-separator"></div>
 
