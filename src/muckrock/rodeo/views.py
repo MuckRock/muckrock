@@ -2,7 +2,6 @@
 Views for the Rodeo application
 """
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -12,7 +11,6 @@ from foia.models import FOIADocument
 from rodeo.models import Rodeo
 from rodeo.forms import RodeoVoteForm
 
-@login_required
 def main(request, doc_id, rodeo_pk):
     """The main rodeo request page"""
 
@@ -27,7 +25,8 @@ def main(request, doc_id, rodeo_pk):
         form = RodeoVoteForm(request.POST, rodeo=rodeo)
         if form.is_valid():
             vote = form.save(commit=False)
-            vote.user = request.user
+            if request.user.is_authenticated():
+                vote.user = request.user
             vote.save()
             messages.info(request, 'Your vote has been recorded')
             return HttpResponseRedirect(rodeo.get_absolute_url())
