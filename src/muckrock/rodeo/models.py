@@ -14,6 +14,7 @@ class Rodeo(models.Model):
 
     title = models.CharField(max_length=70)
     document = models.ForeignKey(FOIADocument)
+    question = models.TextField(blank=True)
 
     def __unicode__(self):
         # pylint: disable-msg=E1101
