@@ -33,11 +33,16 @@ class Rodeo(models.Model):
         # ensure pages is set
         return randint(1, self.document.pages)
 
+    def get_votes(self):
+        """Get all votes associated with this rodeo"""
+        # pylint: disable-msg=E1101
+        return [vote for option in self.options.all() for vote in option.votes.all()]
+
 class RodeoOption(models.Model):
     """Options available for someone to choose on a rodeo"""
 
     title = models.CharField(max_length=70)
-    rodeo = models.ForeignKey(Rodeo)
+    rodeo = models.ForeignKey(Rodeo, related_name='options')
 
     def __unicode__(self):
         return self.title
@@ -49,4 +54,4 @@ class RodeoVote(models.Model):
 
     user = models.ForeignKey(User)
     page = models.IntegerField()
-    option = models.ForeignKey(RodeoOption)
+    option = models.ForeignKey(RodeoOption, related_name='votes')
