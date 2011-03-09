@@ -1,0 +1,6 @@
+
+{% extends "admin/change_form.html" %}
+
+{% block form_top %}
+  <p><a href="{% url admin:votes-csv rodeo_pk=object_id %}">CSV of Votes for this Rodeo</a></p>
+{% endblock %}
