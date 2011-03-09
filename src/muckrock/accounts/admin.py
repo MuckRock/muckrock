@@ -21,7 +21,7 @@ class StatisticsAdmin(admin.ModelAdmin):
     def get_urls(self):
         """Add custom URLs here"""
         urls = super(StatisticsAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^stats.csv$', self.admin_site.admin_view(self.csv),
+        my_urls = patterns('', url(r'^stats\.csv$', self.admin_site.admin_view(self.csv),
                                    name='stats-csv'))
         return my_urls + urls
 

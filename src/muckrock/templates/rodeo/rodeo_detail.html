@@ -3,12 +3,13 @@
 
 {% block content %}
 	<h1>Crowdsourcing</h1>
-	<h2>{{rodeo.document.title}}</h2>
+	<h2>{{rodeo.document.title}} - {{rodeo.title}}</h2>
 	<p>Page {{page}}</p>
 	<img src="{{img}}" />
 {% endblock %}
 
 {% block sidebar %}
+  <p>{{rodeo.question}}</p>
   <form action="" method="post">
 		{% csrf_token %}
 		{% for field in form.hidden_fields %}
