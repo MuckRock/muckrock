@@ -52,6 +52,6 @@ class RodeoVote(models.Model):
 
     # need some way of not allowing a user to vote on the same page multiple times
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, null=True)
     page = models.IntegerField()
     option = models.ForeignKey(RodeoOption, related_name='votes')

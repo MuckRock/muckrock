@@ -44,7 +44,8 @@ class RodeoAdmin(admin.ModelAdmin):
         writer = csv.writer(response)
         writer.writerow(['User', 'Page', 'Vote'])
         for vote in rodeo.get_votes():
-            writer.writerow([vote.user.username, vote.page, vote.option.title])
+            name = vote.user.username if vote.user is not None else 'Anonymous Coward'
+            writer.writerow([name, vote.page, vote.option.title])
 
         return response
 
