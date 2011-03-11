@@ -36,5 +36,6 @@ def main(request, doc_id, rodeo_pk):
 
     return render_to_response('rodeo/rodeo_detail.html',
                               {'form': form, 'page': page, 'rodeo': rodeo,
-                               'img': rodeo.document.get_thumbnail('normal', page)},
+                               'img': rodeo.document.get_thumbnail('normal', page),
+                               'percent_complete': len(rodeo.get_votes()) / 5.0},
                               context_instance=RequestContext(request))
