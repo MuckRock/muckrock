@@ -2,8 +2,10 @@
 {% extends "foia/base.html" %}
 
 {% block content %}
-	<h1>Crowdsourcing</h1>
+	<h1>Help us analyze this document</h1>
 	<h2>{{rodeo.document.title}} - {{rodeo.title}}</h2>
+	<p><em>Click one of the options on the right to help us better understand this release.</em></p>
+	<div id="progressbar" title="{{percent_complete}}% Complete"></div>
 	<p>Page {{page}}</p>
 	<img src="{{img}}" />
 {% endblock %}
