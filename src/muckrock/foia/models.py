@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.db import models
 from django.db.models import Q
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import os
 import re
 
@@ -50,6 +50,13 @@ class FOIARequestManager(ChainableManager):
     def get_overdue(self):
         """Get all overdue FOIA requests"""
         return self.filter(status='processed', date_due__lt=date.today())
+
+    def get_followup(self):
+        """Get requests which require us to follow up on with the agency"""
+        return [f for f in self.filter(status='processed')
+                    if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now() and
+                       f.date_due < date.today()]
+
 
 
 class FOIARequest(models.Model):
