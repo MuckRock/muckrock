@@ -91,6 +91,7 @@ class FOIARequest(models.Model):
     featured = models.BooleanField()
     tracker = models.BooleanField()
     sidebar_html = models.TextField(blank=True)
+    tracking_id = models.CharField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
 
