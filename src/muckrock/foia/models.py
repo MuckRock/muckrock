@@ -55,7 +55,7 @@ class FOIARequestManager(ChainableManager):
         """Get requests which require us to follow up on with the agency"""
         return [f for f in self.filter(status='processed')
                     if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now() and
-                       f.date_due < date.today()]
+                       f.date_due and f.date_due < date.today()]
 
 
 
