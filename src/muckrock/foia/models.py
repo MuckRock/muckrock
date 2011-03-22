@@ -375,6 +375,16 @@ class Agency(models.Model):
     def __unicode__(self):
         return self.name
 
+    def normalize_fax(self):
+        """Return a fax number suitable for use in a faxaway email address"""
+
+        fax = ''.join(c for c in self.fax if c.isdigit())
+        if len(fax) == 10:
+            return '1' + fax
+        if len(fax) == 11 and fax[0] == 1:
+            return fax
+        return None
+
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name_plural = 'agencies'
