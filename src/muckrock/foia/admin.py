@@ -51,7 +51,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
-    search_fields = ['title', 'description']
+    search_fields = ['title', 'description', 'tracking_id']
     inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
 
     def save_model(self, request, obj, form, change):
