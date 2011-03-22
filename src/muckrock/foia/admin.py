@@ -64,17 +64,29 @@ class FOIARequestAdmin(admin.ModelAdmin):
         """Add custom URLs here"""
         urls = super(FOIARequestAdmin, self).get_urls()
         my_urls = patterns('', url(r'^process/$', self.admin_site.admin_view(self.process),
-                                   name='foia-admin-process'))
+                                   name='foia-admin-process'),
+                               url(r'^followup/$', self.admin_site.admin_view(self.followup),
+                                   name='foia-admin-followup'))
         return my_urls + urls
 
+    def _list_helper(self, request, foias, action):
+        """List all the requests that need to be processed"""
+        # pylint: disable-msg=R0201
+        foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
+                                        y.communications.latest('date').date))
+        return simple.direct_to_template(request, template='foia/admin_process.html',
+                                         extra_context={'object_list': foias, 'action': action})
     def process(self, request):
         """List all the requests that need to be processed"""
         # pylint: disable-msg=R0201
         foias = list(FOIARequest.objects.filter(status='submitted'))
-        foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
-                                        y.communications.latest('date').date))
-        return simple.direct_to_template(request, template='foia/admin_process.html',
-                                         extra_context={'object_list': foias})
+        return self._list_helper(request, foias, 'Process')
+
+    def followup(self, request):
+        """List all the requests that need to be followed up"""
+        # pylint: disable-msg=R0201
+        foias = list(FOIARequest.objects.get_followup())
+        return self._list_helper(request, foias, 'Follow Up')
 
 
 class JurisdictionAdmin(admin.ModelAdmin):
