@@ -5,4 +5,8 @@ Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
 {% now "F j, Y" %}
-{{ request.first_request }}
+{% for comm in request.communications.all %}
+{{ comm.communication }}
+{% if not forloop.last %}
+---{% endif %}
+{% endfor %}

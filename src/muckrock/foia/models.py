@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.db import models
 from django.db.models import Q
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import os
 import re
 
@@ -51,6 +51,13 @@ class FOIARequestManager(ChainableManager):
         """Get all overdue FOIA requests"""
         return self.filter(status='processed', date_due__lt=date.today())
 
+    def get_followup(self):
+        """Get requests which require us to follow up on with the agency"""
+        return [f for f in self.filter(status='processed')
+                    if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now() and
+                       f.date_due < date.today()]
+
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -84,6 +91,7 @@ class FOIARequest(models.Model):
     featured = models.BooleanField()
     tracker = models.BooleanField()
     sidebar_html = models.TextField(blank=True)
+    tracking_id = models.CharField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
 
@@ -374,6 +382,16 @@ class Agency(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def normalize_fax(self):
+        """Return a fax number suitable for use in a faxaway email address"""
+
+        fax = ''.join(c for c in self.fax if c.isdigit())
+        if len(fax) == 10:
+            return '1' + fax
+        if len(fax) == 11 and fax[0] == 1:
+            return fax
+        return None
 
     class Meta:
         # pylint: disable-msg=R0903

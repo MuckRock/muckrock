@@ -18,8 +18,8 @@ def foia_email_notifier(sender, **kwargs):
         # if we are saving a new FOIA Request, do not email them
         return
 
-    if request.status != old_request.status and \
-            request.status not in ['started', 'submitted']:
+    if (request.status != old_request.status and request.status not in ['started', 'submitted']) \
+            or request.communications.count() != old_request.communications.count():
         msg = render_to_string('foia/mail.txt',
             {'name': request.user.get_full_name(),
              'title': request.title,
@@ -28,7 +28,8 @@ def foia_email_notifier(sender, **kwargs):
         send_mail('[MuckRock] FOIA request has been updated',
                   msg, 'info@muckrock.com', [request.user.email], fail_silently=False)
     if request.status == 'submitted':
-        send_mail('[NEW] Freedom of Information Request: %s' % request.title,
+        notice = 'NEW' if old_request.status == 'started' else 'UPDATED'
+        send_mail('[%s] Freedom of Information Request: %s' % (notice, request.title),
                   render_to_string('foia/admin_mail.txt', {'request': request}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
