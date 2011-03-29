@@ -65,15 +65,6 @@ def _foia_form_handler(request, foia, action):
                 foia_comm = foia.communications.all()[0]
                 foia_comm.date = datetime.now()
                 foia_comm.communication = form.cleaned_data['request']
-                if request.POST['submit'] == 'Submit Request':
-                    foia_comm.communication += \
-                        '\nFiled via MuckRock.com\n' \
-                        'E-mail (Preferred): requests@muckrock.com\n' \
-                        'Daytime: (617) 299-1832\n' \
-                        'For mailed responses, please address:\n' \
-                        'MuckRock\n' \
-                        '185 Beacon St. #3\n' \
-                        'Somerville, MA 02143'
                 foia_comm.save()
                 foia.save()
 
