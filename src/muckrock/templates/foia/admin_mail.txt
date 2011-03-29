@@ -7,6 +7,14 @@ Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% now "F j, Y" %}
 {% for comm in request.communications.all %}
 {{ comm.communication }}
+{% if forloop.first %}
+Filed via MuckRock.com
+E-mail (Preferred): requests@muckrock.com
+
+For mailed responses, please address:
+MuckRock
+185 Beacon St. #3
+Somerville, MA 02143{% endif %}
 {% if not forloop.last %}
 ---{% endif %}
 {% endfor %}
