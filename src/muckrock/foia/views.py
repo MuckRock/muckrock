@@ -68,6 +68,9 @@ def _foia_form_handler(request, foia, action):
                 foia_comm.save()
                 foia.save()
 
+                if request.POST['submit'] == 'Submit Request':
+                    foia.submitted()
+
                 return HttpResponseRedirect(foia.get_absolute_url())
 
         except KeyError:
@@ -153,6 +156,7 @@ def _save_foia_comm(request, foia, form):
             response=False, full_html=False, communication=form.cleaned_data['comm'])
     foia.status = 'submitted'
     foia.save()
+    foia.submitted()
 
 @login_required
 def fix(request, jurisdiction, slug, idx):

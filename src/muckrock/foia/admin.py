@@ -51,13 +51,23 @@ class FOIARequestAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
-    search_fields = ['title', 'description', 'tracking_id']
+    search_fields = ['title', 'description', 'tracking_id', 'mail_id']
+    readonly_fields = ['mail_id']
     inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
 
     def save_model(self, request, obj, form, change):
-        """If changing to completed and embargoed, set embargo date to 30 days out"""
+        """Actions to take when a request is saved from the admin"""
+
+        #If changing to completed and embargoed, set embargo date to 30 days out
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
+
+        # if we change the status or add a communication, send the user an update notification
+        old_request = obj.get_saved()
+        if old_request and (obj.status != old_request.status or
+                            obj.communications.count() != old_request.communications.count()):
+            obj.updated()
+
         obj.save()
 
     def get_urls(self):
@@ -76,6 +86,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
                                         y.communications.latest('date').date))
         return simple.direct_to_template(request, template='foia/admin_process.html',
                                          extra_context={'object_list': foias, 'action': action})
+
     def process(self, request):
         """List all the requests that need to be processed"""
         # pylint: disable-msg=R0201
