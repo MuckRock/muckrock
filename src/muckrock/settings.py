@@ -3,6 +3,8 @@ Django settings for muckrock project
 """
 
 import os
+from lamson.server import Relay
+from automailer.config.settings import relay_config
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -164,6 +166,8 @@ ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
 MONTHLY_REQUESTS = 5
+
+relay = Relay(host=relay_config['host'], port=relay_config['port'], debug=1)
 
 # pylint: disable-msg=W0401
 # pylint: disable-msg=W0614

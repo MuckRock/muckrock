@@ -4,17 +4,16 @@ Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
+{% if agency_email %}
+A copy of this has already been e-mailed to {{ agency_email }}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{% endif %}
+
 {% now "F j, Y" %}
 {% for comm in request.communications.all %}
 {{ comm.communication }}
 {% if forloop.first %}
-Filed via MuckRock.com
-E-mail (Preferred): requests@muckrock.com
-
-For mailed responses, please address:
-MuckRock
-185 Beacon St. #3
-Somerville, MA 02143{% endif %}
+{% include "foia/address.txt" %}{% endif %}
 {% if not forloop.last %}
 ---{% endif %}
 {% endfor %}
