@@ -471,8 +471,10 @@ class FOIAWizardWhereForm(forms.Form):
     level = forms.ChoiceField(choices=(('federal', 'Federal'),
                                        ('state', 'State'),
                                        ('local', 'Local')))
-    state = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='s'), required=False)
-    local = forms.ModelChoiceField(queryset=Jurisdiction.objects.filter(level='l'), required=False)
+    state = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(level='s').exclude(hidden=True), required=False)
+    local = forms.ModelChoiceField(
+        queryset=Jurisdiction.objects.filter(level='l').exclude(hidden=True), required=False)
 
     def clean(self):
         """Make sure state or local is required based off of choice of level"""

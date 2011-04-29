@@ -396,6 +396,7 @@ class Jurisdiction(models.Model):
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
+    hidden = models.BooleanField(default=False)
 
     def __unicode__(self):
         # pylint: disable-msg=E1101
