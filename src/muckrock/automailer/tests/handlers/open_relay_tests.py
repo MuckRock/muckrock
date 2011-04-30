@@ -1,4 +1,4 @@
-from nose.tools import *
+#from nose.tools import *
 from lamson.testing import *
 import os
 from lamson import server

@@ -12,7 +12,7 @@ logging.config.fileConfig("config/test_logging.conf")
 
 # the relay host to actually send the final message to (set debug=1 to see what
 # the relay is saying to the log server).
-settings.relay = Relay(host=settings.relay_config['host'], 
+settings.relay = Relay(host=settings.relay_config['host'],
                        port=settings.relay_config['port'], debug=0)
 
 
@@ -24,7 +24,7 @@ Router.RELOAD = True
 Router.LOG_EXCEPTIONS = False
 
 view.LOADER = jinja2.Environment(
-    loader=jinja2.PackageLoader(settings.template_config['dir'], 
+    loader=jinja2.PackageLoader(settings.template_config['dir'],
                                 settings.template_config['module']))
 
 # if you have pyenchant and enchant installed then the template tests will do

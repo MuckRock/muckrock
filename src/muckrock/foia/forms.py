@@ -529,7 +529,7 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         template_file = 'request_templates/templates/%s.txt' % template
         data = form_list[2].cleaned_data if len(form_list) > 2 else {}
-        data['jurisdiction'] = jurisdiction.name
+        data['jurisdiction'] = jurisdiction
         data['jurisdiction_template'] = \
                 'request_templates/jurisdictions/%s.txt' % jurisdiction.legal()
 

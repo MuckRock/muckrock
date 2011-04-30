@@ -10,12 +10,14 @@ from datetime import datetime
 from tempfile import NamedTemporaryFile
 
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
+from foia.tasks import upload_document_cloud
 
 DOC_CLOUD_TYPES = ['application/pdf']
 IGNORE_TYPES = []
 TEXT_TYPES = ['text/plain']
 
 #XXX spam? bounce messages?
+# pylint: disable-msg=C0103
 
 @route('(address)@(host)')
 @stateless
@@ -40,7 +42,7 @@ def REQUEST(message, address=None, host=None):
                 if file_name and content_type in DOC_CLOUD_TYPES:
                     _upload_doc_cloud(foia, file_name, part, message['from'])
                 elif file_name:
-                    _upload_file(foia, file_name, part, message['from'])
+                    _upload_file(foia, file_name, part)
                 # XXX do something for no filename here?
 
         FOIACommunication.objects.create(
@@ -55,7 +57,7 @@ def REQUEST(message, address=None, host=None):
         # TODO Use NLTK to try and automatically set updated status
 
     except FOIARequest.DoesNotExist:
-        logging.warning('Invalid request: %s' % address)
+        logging.warning('Invalid request: %s', address)
 
 
 # factor commonalities out of these two?
