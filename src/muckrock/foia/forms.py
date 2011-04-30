@@ -19,6 +19,7 @@ from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, 
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
+from muckrock.forms import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -472,9 +473,10 @@ class FOIAWizardWhereForm(forms.Form):
                                        ('state', 'State'),
                                        ('local', 'Local')))
     state = forms.ModelChoiceField(
-        queryset=Jurisdiction.objects.filter(level='s').exclude(hidden=True), required=False)
-    local = forms.ModelChoiceField(
-        queryset=Jurisdiction.objects.filter(level='l').exclude(hidden=True), required=False)
+        queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
+    local = GroupedModelChoiceField(
+        queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
+        group_by_field='parent', required=False)
 
     def clean(self):
         """Make sure state or local is required based off of choice of level"""
