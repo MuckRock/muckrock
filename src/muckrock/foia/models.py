@@ -14,6 +14,7 @@ import os
 import re
 
 from automailer.config.settings import router_defaults
+from business_days.business_days import calenders
 from muckrock.models import ChainableManager
 from settings import relay
 import fields
@@ -254,7 +255,10 @@ class FOIARequest(models.Model):
                        Body=render_to_string('foia/request.txt', {'request': self}))
             self.status = 'processed'
             self.date_submitted = date.today()
-            # XXX request.date_due = date.today()
+            days = self.jurisdiction.get_days()
+            if days:
+                cal = calenders[self.jurisdiction.legal()]
+                self.date_due = cal.busines_days_from(date.today(), days)
             self.save()
 
     class Meta:
@@ -397,6 +401,7 @@ class Jurisdiction(models.Model):
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
+    days = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __unicode__(self):
         # pylint: disable-msg=E1101
@@ -412,6 +417,14 @@ class Jurisdiction(models.Model):
             return self.parent.abbrev
         else:
             return self.abbrev
+
+    def get_days(self):
+        """How many days does an agency have to reply?"""
+        # pylint: disable-msg=E1101
+        if self.level == 'l':
+            return self.parent.days
+        else:
+            return self.days
 
     class Meta:
         # pylint: disable-msg=R0903
