@@ -1,3 +1,10 @@
+"""
+Initialization for testing environment
+"""
+
+import sys
+sys.path.insert(0, './')
+
 from config import settings
 from lamson import view
 from lamson.routing import Router
@@ -6,18 +13,18 @@ import jinja2
 import logging
 import logging.config
 import os
-import sys
 
 logging.config.fileConfig("config/test_logging.conf")
 
 # the relay host to actually send the final message to (set debug=1 to see what
 # the relay is saying to the log server).
 settings.relay = Relay(host=settings.relay_config['host'],
-                       port=settings.relay_config['port'], debug=0)
+                       port=8825, debug=0)
 
 
 settings.receiver = None
 
+# pylint: disable-msg=W0142
 Router.defaults(**settings.router_defaults)
 Router.load(settings.handlers)
 Router.RELOAD = True
@@ -34,5 +41,3 @@ view.LOADER = jinja2.Environment(
 
 # these are for django compatibility
 os.environ['DJANGO_SETTINGS_MODULE'] = 'muckrock.settings'
-sys.path.insert(1, '../../')
-sys.path.insert(1, '../')

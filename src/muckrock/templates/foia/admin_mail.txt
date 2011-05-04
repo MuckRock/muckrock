@@ -4,15 +4,10 @@ Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
-{% if agency_email %}
-A copy of this has already been e-mailed to {{ agency_email }}
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-{% endif %}
-
 {% now "F j, Y" %}
-{% for comm in request.communications.all %}
+{% for comm in request.communications.reverse %}
 {{ comm.communication }}
-{% if forloop.first %}
+{% if forloop.last %}
 {% include "foia/address.txt" %}{% endif %}
 {% if not forloop.last %}
 ---{% endif %}

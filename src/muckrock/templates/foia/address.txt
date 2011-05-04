@@ -1,8 +1,8 @@
 Filed via MuckRock.com
-E-mail (Preferred): {{ request.mail_id }}@requests.muckrock.com
+E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
 
 For mailed responses, please address:
 MuckRock
-Ref: {{ request.mail_id }}
+Ref: {{ request.get_mail_id }}
 185 Beacon St. #3
 Somerville, MA 02143

@@ -19,3 +19,4 @@ gdata==2.0.11
 easy-thumbnails==1.0-alpha-8
 django-pingback==0.3
 BeautifulSoup==3.1.0.1
+lamson==1.1
