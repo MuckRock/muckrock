@@ -1,3 +1,11 @@
 {% now "F j, Y" %}
-{{ request.communications.reverse.0.communication }}
-{% include "foia/address.txt" %}
+{% if request.communications.count > 1 %}{% if request.tracking_id %}
+This is a follow up to request number {{request.tracking_id}}:{% else %}
+This is a follow up to a previous request:{% endif %}{% endif %}
+{% for comm in request.communications.reverse %}
+{{ comm.communication }}
+{% if forloop.last %}
+{% include "foia/address.txt" %}{% endif %}
+{% if not forloop.last %}
+---{% endif %}
+{% endfor %}

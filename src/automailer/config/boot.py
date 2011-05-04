@@ -1,3 +1,6 @@
+"""
+Initilization for production environment
+"""
 from config import settings
 from lamson.routing import Router
 from lamson.server import Relay, SMTPReceiver
@@ -16,6 +19,7 @@ settings.relay = Relay(host=settings.relay_config['host'],
 settings.receiver = SMTPReceiver(settings.receiver_config['host'],
                                  settings.receiver_config['port'])
 
+# pylint: disable-msg=W0142
 Router.defaults(**settings.router_defaults)
 Router.load(settings.handlers)
 Router.RELOAD = True
