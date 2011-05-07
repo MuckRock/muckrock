@@ -9,7 +9,7 @@
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
-	for the {{object.agency}} of {{object.jurisdiction}}
+	for {% if object.agency %}the {{object.agency}} of {% endif %}{{object.jurisdiction}}
 	{% if object.date_done %} and fufilled on {{object.date_done|date}}{%endif%}
 	</p>
 	{% if object.is_embargo and not object.embargo_date %}
