@@ -185,7 +185,7 @@ class FOIARequest(models.Model):
         """Get communications and documents to display on details page"""
         # pylint: disable-msg=E1101
         comms = self.communications.all()
-        docs = self.documents.exclude(doc_id='').exclude(date=None)
+        docs = self.documents.exclude(date=None)
         if self.user != user and not user.is_staff:
             docs = docs.filter(access='public')
         comms_and_docs = list(comms) +list(docs)
@@ -291,6 +291,8 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
+    class_name = 'FOIACommunication'
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['foia', 'date']
@@ -336,9 +338,8 @@ class FOIADocument(models.Model):
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
-        if not match:
-            return None
-        elif self.access == 'public':
+
+        if match and self.access == 'public':
             return 'http://s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
@@ -359,6 +360,7 @@ class FOIADocument(models.Model):
     # following methods are to make this quack like a communication for display on the details page
     response = True
     full_html = False
+    class_name = 'FOIADocument'
 
     def from_who(self):
         """To quack like a communication"""
