@@ -17,7 +17,7 @@ import re
 
 from business_days.business_days import calenders
 from muckrock.models import ChainableManager
-from settings import relay, LAMSON_ROUTER_HOST
+from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 import fields
 
 class FOIARequestManager(ChainableManager):
@@ -240,7 +240,7 @@ class FOIARequest(models.Model):
 
         agency_email = self.get_agency_email()
 
-        if agency_email:
+        if agency_email and LAMSON_ACTIVATE:
             msg = MailResponse(From='%s@%s' % (self.get_mail_id(), LAMSON_ROUTER_HOST),
                                To=agency_email,
                                Subject='Freedom of Information Request: %s' % self.title,
