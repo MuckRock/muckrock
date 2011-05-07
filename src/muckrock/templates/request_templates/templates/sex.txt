@@ -1,5 +1,5 @@
 {% extends jurisdiction_template %}
-{% block title %}Sex Offender Registry for {{jurisdiction}}{% endblock %}
+{% block title %}Sex Offender Registry for {{jurisdiction.name}}{% endblock %}
 
 {% block content %}The state sex offender registry, in Excel format.{% endblock %}
 
