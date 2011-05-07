@@ -57,24 +57,29 @@ class TestFOIARequestUnit(TestCase):
 
         self.foia.status = 'submitted'
         self.foia.save()
+        self.foia.submitted()
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.eq_(mail.outbox[0].to, ['requests@muckrock.com'])
 
         self.foia.status = 'processed'
         self.foia.save()
+        self.foia.updated()
         nose.tools.eq_(len(mail.outbox), 2)
         nose.tools.eq_(mail.outbox[1].to, [self.foia.user.email])
 
         self.foia.status = 'fix'
         self.foia.save()
+        self.foia.updated()
         nose.tools.eq_(len(mail.outbox), 3)
 
         self.foia.status = 'rejected'
         self.foia.save()
+        self.foia.updated()
         nose.tools.eq_(len(mail.outbox), 4)
 
         self.foia.status = 'done'
         self.foia.save()
+        self.foia.updated()
         nose.tools.eq_(len(mail.outbox), 5)
 
     def test_foia_viewable(self):
