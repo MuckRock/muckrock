@@ -1,7 +1,7 @@
 {% extends jurisdiction_template %}{% load tags%}
-{% block title %}Contracts between {{jurisdiction}}'s {{department}} and {{companies|company_title}}{% endblock %}
+{% block title %}Contracts between {{jurisdiction.name}}'s {{department}} and {{companies|company_title}}{% endblock %}
 
-{% block content %}A full copy of all contracts and written agreements between {{jurisdiction}}'s {{department}} and the following companies:
+{% block content %}A full copy of all contracts and written agreements between {{jurisdiction.name}}'s {{department}} and the following companies:
 
 {{companies}}{% endblock %}
 

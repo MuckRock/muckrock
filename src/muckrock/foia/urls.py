@@ -20,7 +20,7 @@ register_pingback(views.detail, pingback_foia_handler)
 
 urlpatterns = patterns('',
     url(r'^list/$',                   views.list_, name='foia-list'),
-    url(r'^list/user/(?P<user_name>[\w\d_]+)/$',
+    url(r'^list/user/(?P<user_name>[\w\d_.@]+)/$',
                                       views.list_by_user, name='foia-list-user'),
     url(r'^new/$',                    views.create, name='foia-create'),
     url(r'^view/%s/$' % foia_url,     views.detail, name='foia-detail'),
