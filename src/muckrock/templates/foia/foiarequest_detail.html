@@ -153,8 +153,10 @@
 			{% for comm in communications %}
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
-				{% if comm.get_thumbnail %}
-					{% if comm.access == "public" %}
+
+				{# document #}
+				{% if comm.class_name == "FOIADocument" %}
+					{% if comm.access == "public" and comm.doc_id %}
 						<div class="left text-center">
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
@@ -166,12 +168,18 @@
 							<a href="/static/{{comm.document}}">Download</a>
 						</div>
 					{% endif %}
+					{% if not comm.doc_id %}
+						<p>Your document is processing.  It will be viewable in the embedded viewer soon.</p>
+					{% endif %}
 				{% endif %}
+				{# html communication #}
 				{% if comm.full_html %}
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
+				{# text communication #}
 				{% else %}
 					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
+
 				<div class="clearer">&nbsp;</div>
 			</div>
 			{% endfor %}
