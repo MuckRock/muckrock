@@ -3,6 +3,7 @@ Django settings for muckrock project
 """
 
 import os
+from lamson.server import Relay
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -164,6 +165,14 @@ ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
 MONTHLY_REQUESTS = 5
+
+LAMSON_ACTIVATE = True
+LAMSON_RELAY_HOST = 'localhost'
+LAMSON_RELAY_PORT = 1025
+relay = Relay(host=LAMSON_RELAY_HOST, port=LAMSON_RELAY_PORT, debug=1)
+LAMSON_RECEIVER_HOST = 'localhost'
+LAMSON_RECEIVER_PORT = 8823
+LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
 # pylint: disable-msg=W0401
 # pylint: disable-msg=W0614

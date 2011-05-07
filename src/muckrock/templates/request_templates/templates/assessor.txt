@@ -1,6 +1,6 @@
 {% extends jurisdiction_template %}
-{% block title %}Assessor Data for {{jurisdiction}} in {{year}}{% endblock %}
+{% block title %}Assessor Data for {{jurisdiction.name}} in {{year}}{% endblock %}
 
-{% block content %}A copy of the {{jurisdiction}} assessor’s data, including parcel numbers, owner names, addresses, land values, and house values for the year {{year}}.{% endblock %}
+{% block content %}A copy of the {{jurisdiction.name}} assessor’s data, including parcel numbers, owner names, addresses, land values, and house values for the year {{year}}.{% endblock %}
 
 
