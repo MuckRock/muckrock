@@ -1,0 +1,11 @@
+Response received from: {{ message.from }} for request {{ request.title }} - {{ request.mail_id }}
+
+{% now "F j, Y" %}
+{{ request.communications.reverse.0.communication }}
+
+{% for str in attachments %}
+{{ str }}
+{% endfor %}
+
+Please set the status
+Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/

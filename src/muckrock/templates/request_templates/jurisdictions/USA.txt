@@ -6,5 +6,3 @@ This is a request under the Freedom of Information Act.  I hereby request the fo
 
 I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of  charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.
 {% endblock %}
-
-{% block days %}20{% endblock %}

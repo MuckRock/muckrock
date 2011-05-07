@@ -3,14 +3,21 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
+from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
+from django.template.loader import render_to_string
+
+from lamson.mail import MailResponse
 
 from datetime import datetime, date, timedelta
+from hashlib import md5
 import os
 import re
 
+from business_days.business_days import calenders
 from muckrock.models import ChainableManager
+from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 import fields
 
 class FOIARequestManager(ChainableManager):
@@ -58,7 +65,6 @@ class FOIARequestManager(ChainableManager):
                        f.date_due and f.date_due < date.today()]
 
 
-
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable-msg=R0904
@@ -92,6 +98,7 @@ class FOIARequest(models.Model):
     tracker = models.BooleanField()
     sidebar_html = models.TextField(blank=True)
     tracking_id = models.CharField(blank=True, max_length=255)
+    mail_id = models.CharField(blank=True, max_length=255, editable=False)
 
     objects = FOIARequestManager()
 
@@ -185,6 +192,78 @@ class FOIARequest(models.Model):
         comms_and_docs.sort(key=lambda x: x.date)
         return comms_and_docs
 
+    def set_mail_id(self):
+        """Set the mail id, which is the unique identifier for the auto mailer system"""
+        if not self.mail_id:
+            uid = int(md5(self.title + datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
+            self.mail_id = '%s-%08d' % (self.pk, uid)
+            self.save()
+
+    def get_mail_id(self):
+        """Get the mail id - generate it if it doesn't exist"""
+        if not self.mail_id:
+            self.set_mail_id()
+        return self.mail_id
+
+    def get_agency_email(self):
+        """Get the email address for this request's agency"""
+        # pylint: disable-msg=E1101
+
+        if self.agency:
+            return self.agency.get_email()
+        else:
+            return None
+
+    def get_saved(self):
+        """Get the old model that is saved in the db"""
+
+        try:
+            return FOIARequest.objects.get(pk=self.pk)
+        except FOIARequest.DoesNotExist:
+            return None
+
+    def updated(self):
+        """The request has been updated.  Send the user an email"""
+        # pylint: disable-msg=E1101
+
+        msg = render_to_string('foia/mail.txt',
+            {'name': self.user.get_full_name(),
+             'title': self.title,
+             'status': self.get_status_display(),
+             'link': self.get_absolute_url()})
+        send_mail('[MuckRock] FOIA request has been updated',
+                  msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+    def submitted(self):
+        """The request has been submitted.  Notify admin and try to auto submit"""
+        # pylint: disable-msg=E1101
+
+        agency_email = self.get_agency_email()
+
+        if agency_email and LAMSON_ACTIVATE:
+            msg = MailResponse(From='%s@%s' % (self.get_mail_id(), LAMSON_ROUTER_HOST),
+                               To=agency_email,
+                               Subject='Freedom of Information Request: %s' % self.title,
+                               Body=render_to_string('foia/request.txt', {'request': self}))
+            agency_cc = self.agency.get_other_emails()
+            if agency_cc:
+                msg['cc'] = ','.join(agency_cc)
+            relay.deliver(msg, To=[agency_email, 'requests@muckrock.com'] + agency_cc)
+
+            self.status = 'processed'
+            self.date_submitted = date.today()
+            days = self.jurisdiction.get_days()
+            if days:
+                cal = calenders[self.jurisdiction.legal()]
+                self.date_due = cal.busines_days_from(date.today(), days)
+            self.save()
+        else:
+            notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
+            send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
+                      render_to_string('foia/admin_mail.txt', {'request': self}),
+                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['title']
@@ -194,12 +273,23 @@ class FOIARequest(models.Model):
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
+    status = (
+        ('fix', 'Fix Required'),
+        ('payment', 'Payment Required'),
+        ('rejected', 'Rejected'),
+        ('no_docs', 'No Responsive Documents'),
+        ('done', 'Completed'),
+        ('partial', 'Partially Completed'),
+    )
+
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=70)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField()
+    # what status this communication should set the request to - used for machine learning
+    status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -230,7 +320,7 @@ class FOIADocument(models.Model):
     document = models.FileField(upload_to='foia_documents')
     title = models.CharField(max_length=70)
     source = models.CharField(max_length=70)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     access = models.CharField(max_length=12, choices=access)
     doc_id = models.SlugField(max_length=80, editable=False)
     pages = models.PositiveIntegerField(default=0, editable=False)
@@ -325,6 +415,7 @@ class Jurisdiction(models.Model):
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
+    days = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __unicode__(self):
         # pylint: disable-msg=E1101
@@ -340,6 +431,14 @@ class Jurisdiction(models.Model):
             return self.parent.abbrev
         else:
             return self.abbrev
+
+    def get_days(self):
+        """How many days does an agency have to reply?"""
+        # pylint: disable-msg=E1101
+        if self.level == 'l':
+            return self.parent.days
+        else:
+            return self.days
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -393,6 +492,20 @@ class Agency(models.Model):
         if len(fax) == 11 and fax[0] == 1:
             return fax
         return None
+
+    def get_email(self):
+        """Returns an email address to send to"""
+
+        if self.email:
+            return self.email
+        elif self.fax:
+            return '%s@fax2.faxaway.com' % self.normalize_fax()
+        else:
+            return None
+
+    def get_other_emails(self):
+        """Returns other emails as a list"""
+        return fields.email_separator_re.split(self.other_emails)
 
     class Meta:
         # pylint: disable-msg=R0903
