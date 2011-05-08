@@ -101,7 +101,10 @@ class FOIARequestAdmin(admin.ModelAdmin):
         my_urls = patterns('', url(r'^process/$', self.admin_site.admin_view(self.process),
                                    name='foia-admin-process'),
                                url(r'^followup/$', self.admin_site.admin_view(self.followup),
-                                   name='foia-admin-followup'))
+                                   name='foia-admin-followup'),
+                               url(r'^send_update/(?P<idx>\d+)/$',
+                                   self.admin_site.admin_view(self.send_update),
+                                   name='foia-admin-send-update'))
         return my_urls + urls
 
     def _list_helper(self, request, foias, action):
@@ -123,6 +126,15 @@ class FOIARequestAdmin(admin.ModelAdmin):
         # pylint: disable-msg=R0201
         foias = list(FOIARequest.objects.get_followup())
         return self._list_helper(request, foias, 'Follow Up')
+
+    def send_update(self, request, idx):
+        """Manually send the user an update notification"""
+        # pylint: disable-msg=R0201
+
+        foia = get_object_or_404(FOIARequest, pk=idx)
+        foia.updated()
+        messages.info(request, 'An update notification has been set to the user, %s' % foia.user)
+        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
 
 class JurisdictionAdmin(admin.ModelAdmin):
