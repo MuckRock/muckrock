@@ -3,14 +3,17 @@ Admin registration for FOIA models
 """
 
 from django.conf.urls.defaults import patterns, url
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.views.generic import simple
 
 from datetime import date, timedelta
 
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
                         Jurisdiction, Agency, AgencyType, FOIADocTopViewed
-from foia.tasks import upload_document_cloud
+from foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
@@ -26,6 +29,28 @@ class FOIADocumentAdmin(admin.ModelAdmin):
         obj.save()
         # wait 3 seconds to give database a chance to sync
         upload_document_cloud.apply_async(args=[obj.pk, change], countdown=3)
+
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super(FOIADocumentAdmin, self).get_urls()
+        my_urls = patterns('', url(r'^retry_pages/(?P<idx>\d+)/$',
+                                   self.admin_site.admin_view(self.retry_pages),
+                                   name='doc-admin-retry-pages'))
+        return my_urls + urls
+
+    def retry_pages(self, request, idx):
+        """Retry getting the page count"""
+        # pylint: disable-msg=E1101
+        # pylint: disable-msg=R0201
+
+        doc = get_object_or_404(FOIADocument, pk=idx)
+        if doc.pages:
+            messages.info(request, 'This document already has its page count set')
+        else:
+            set_document_cloud_pages.apply_async(args=[doc.pk])
+            messages.info(request, 'Attempting to set the page count... Please wait while the '
+                                   'Document Cloud servers are being accessed')
+        return HttpResponseRedirect(reverse('admin:foia_foiadocument_change', args=[doc.pk]))
 
 
 class FOIAFileInline(admin.TabularInline):
