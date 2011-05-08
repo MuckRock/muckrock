@@ -20,6 +20,8 @@ from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 import fields
 
+FOLLOWUP_DAYS = 15
+
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
     # pylint: disable-msg=R0904
@@ -60,8 +62,7 @@ class FOIARequestManager(ChainableManager):
 
     def get_followup(self):
         """Get requests which require us to follow up on with the agency"""
-        return [f for f in self.get_overdue()
-                  if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()]
+        return self.filter(status='processed', date_followup__lte=date.today())
 
 
 class FOIARequest(models.Model):
@@ -89,6 +90,8 @@ class FOIARequest(models.Model):
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
+    days_until_due = models.PositiveSmallIntegerField(blank=True, null=True)
+    date_followup = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
     date_embargo = models.DateField(blank=True, null=True)
     price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
@@ -221,10 +224,16 @@ class FOIARequest(models.Model):
         except FOIARequest.DoesNotExist:
             return None
 
+    def last_comm(self):
+        """Return the last communication"""
+        # pylint: disable-msg=E1101
+        return self.communications.reverse()[0]
+
     def updated(self):
-        """The request has been updated.  Send the user an email"""
+        """Various actions whenever the request has been updated"""
         # pylint: disable-msg=E1101
 
+        # notify the user
         msg = render_to_string('foia/mail.txt',
             {'name': self.user.get_full_name(),
              'title': self.title,
@@ -232,6 +241,32 @@ class FOIARequest(models.Model):
              'link': self.get_absolute_url()})
         send_mail('[MuckRock] FOIA request has been updated',
                   msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+        # update due date
+        save = False
+        cal = calenders[self.jurisdiction.legal()]
+
+        if self.status == 'processed':
+            self.date_followup = max(self.date_due,
+                                     self.last_comm().date + timedelta(FOLLOWUP_DAYS))
+            if self.days_until_due is not None:
+                # unpause the count down
+                self.date_due = cal.busines_days_from(date.today(), self.days_until_due)
+                self.days_until_due = None
+            save = True
+
+        if self.status != 'processed' and self.date_followup:
+            self.date_followup = None
+            save = True
+
+        if self.status in ['fix', 'payment'] and self.date_due:
+            # pause the count down
+            self.days_until_due = cal.business_days_between(date.today(), self.date_due)
+            self.date_due = None
+            save = True
+
+        if save:
+            self.save()
 
     def submitted(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
@@ -261,6 +296,34 @@ class FOIARequest(models.Model):
             send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
+    def followup(self):
+        """Send a follow up email for this request"""
+        # pylint: disable-msg=E1101
+
+        FOIACommunication.objects.create(
+                foia=self, from_who=self.user.get_full_name(),
+                date=datetime.now(), response=False, full_html=False,
+                communication=render_to_string('foia/followup.txt', {'request': self}))
+
+        agency_email = self.get_agency_email()
+
+        if agency_email and LAMSON_ACTIVATE:
+            msg = MailResponse(From='%s@%s' % (self.get_mail_id(), LAMSON_ROUTER_HOST),
+                               To=agency_email,
+                               Subject='Freedom of Information Request: %s' % self.title,
+                               Body=render_to_string('foia/requests.txt', {'request': self}))
+            agency_cc = self.agency.get_other_emails()
+            if agency_cc:
+                msg['cc'] = ','.join(agency_cc)
+            relay.deliver(msg, To=[agency_email, 'requests@muckrock.com'] + agency_cc)
+
+        else:
+            send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
+                      render_to_string('foia/admin_mail.txt', {'request': self}),
+                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
+        self.updated()
 
 
     class Meta:

@@ -132,3 +132,10 @@ def set_top_viewed_reqs():
 def update_index():
     """Update the search index every day at 1AM"""
     management.call_command('update_index')
+
+
+@periodic_task(run_every=crontab(hour=5, minute=0))
+def followup_requests():
+    """Follow up on any requests that need following up on"""
+    for foia in FOIARequest.objects.get_followup():
+        foia.followup()
