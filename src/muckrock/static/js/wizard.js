@@ -120,11 +120,12 @@ $(function() {
 	$( ".agency-combo" ).combobox();
 });
 
+// embed dialog pop up
 $(function() {
 	$('#dialog').dialog({
 		autoOpen: false,
 		width: 560,
-		height: 280,
+		height: 480,
 		modal: true,
 		zIndex: 100000
 	});
