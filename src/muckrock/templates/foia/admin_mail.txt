@@ -1,3 +1,4 @@
+{% autoescape off %}
 Submitter: http://www.muckrock.com/accounts/profile/{{request.user}}/
 Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% if request.agency %}Agency Admin: http://www.muckrock.com/admin/foia/agency/{{request.agency.pk}}/
@@ -12,3 +13,4 @@ Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
 {% if not forloop.last %}
 ---{% endif %}
 {% endfor %}
+{% endautoescape %}

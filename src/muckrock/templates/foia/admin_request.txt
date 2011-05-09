@@ -1,3 +1,4 @@
+{% autoescape off %}
 Response received from: {{ message.from }} for request {{ request.title }} - {{ request.mail_id }}
 
 {% now "F j, Y" %}
@@ -9,3 +10,4 @@ Response received from: {{ message.from }} for request {{ request.title }} - {{ 
 
 Please set the status
 Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
+{% endautoescape %}
