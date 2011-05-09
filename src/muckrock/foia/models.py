@@ -186,11 +186,12 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
         comms = self.communications.all()
         docs = self.documents.exclude(date=None)
+        files = self.files.exclude(date=None)
         if self.user != user and not user.is_staff:
             docs = docs.filter(access='public')
-        comms_and_docs = list(comms) +list(docs)
-        comms_and_docs.sort(key=lambda x: x.date)
-        return comms_and_docs
+        display_comms = list(comms) +list(docs) + list(files)
+        display_comms.sort(key=lambda x: x.date)
+        return display_comms
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
@@ -392,6 +393,9 @@ class FOIAFile(models.Model):
     # pylint: disable-msg=E1101
     foia = models.ForeignKey(FOIARequest, related_name='files')
     ffile = models.FileField(upload_to='foia_files')
+    date = models.DateTimeField(null=True)
+    source = models.CharField(max_length=70, blank=True)
+    description = models.TextField(blank=True)
 
     def __unicode__(self):
         return 'File: %s' % self.ffile.name
@@ -399,6 +403,19 @@ class FOIAFile(models.Model):
     def name(self):
         """Return the basename of the file"""
         return os.path.basename(self.ffile.name)
+
+    # following methods are to make this quack like a communication for display on the details page
+    response = True
+    full_html = False
+    class_name = 'FOIAFile'
+
+    def from_who(self):
+        """To quack like a communication"""
+        return self.source
+
+    def communication(self):
+        """To quack like a communication"""
+        return self.description
 
     class Meta:
         # pylint: disable-msg=R0903
