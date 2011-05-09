@@ -33,16 +33,7 @@
 		{%endif%}
 	</span></p>
 
-	{% if object.files.all %}
-	<h4>Attached Files:</h4>
-	<ul>
-		{% for file in object.files.all %}
-		<li><a href="/static/{{file.ffile.name}}">{{file.name}}</a></li>
-		{% endfor %}
-	</ul>
-	{% endif %}
-
-	{% if object.public_documents or object.user == user%}
+	{% if object.public_documents or object.user == user %}
 	<div id="tabs">
 		<ul>
 			{% if object.public_documents %}
@@ -134,6 +125,13 @@
 					{% if not comm.doc_id %}
 						<p>Your document is processing.  It will be viewable in the embedded viewer soon.</p>
 					{% endif %}
+				{% endif %}
+				{# file #}
+				{% if comm.class_name == "FOIAFile" %}
+					<div class="left text-center">
+						<a href="/static/{{comm.ffile}}"><img src="/static/img/report.png" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
+						<a href="/static/{{comm.ffile}}">Download</a>
+					</div>
 				{% endif %}
 				{# html communication #}
 				{% if comm.full_html %}
