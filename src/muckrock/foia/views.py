@@ -295,7 +295,7 @@ def list_by_user(request, user_name):
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_viewable(request.user):

@@ -69,7 +69,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
 
-@task(ignore_result=True)
+@task(ignore_result=True, max_retries=10)
 def set_document_cloud_pages(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
 
@@ -91,7 +91,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         doc.save()
     except urllib2.URLError, exc:
         # pylint: disable-msg=E1101
-        set_document_cloud_pages.retry(args=[doc.pk], countdown=300, kwargs=kwargs, exc=exc)
+        set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
 
 
 @periodic_task(run_every=crontab(hour=1, minute=10))
