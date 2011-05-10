@@ -242,7 +242,8 @@ class FOIARequest(models.Model):
         agency_email = self.get_agency_email()
 
         if agency_email and LAMSON_ACTIVATE:
-            msg = MailResponse(From='%s@%s' % (self.get_mail_id(), LAMSON_ROUTER_HOST),
+            from_addr = 'fax' if agency_email.endswith('faxaway.com') else self.get_mail_id()
+            msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
                                To=agency_email,
                                Subject='Freedom of Information Request: %s' % self.title,
                                Body=render_to_string('foia/request.txt', {'request': self}))
@@ -508,7 +509,7 @@ class Agency(models.Model):
         fax = ''.join(c for c in self.fax if c.isdigit())
         if len(fax) == 10:
             return '1' + fax
-        if len(fax) == 11 and fax[0] == 1:
+        if len(fax) == 11 and fax[0] == '1':
             return fax
         return None
 
@@ -517,7 +518,7 @@ class Agency(models.Model):
 
         if self.email:
             return self.email
-        elif self.fax:
+        elif self.normalize_fax():
             return '%s@fax2.faxaway.com' % self.normalize_fax()
         else:
             return None
