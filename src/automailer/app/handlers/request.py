@@ -12,7 +12,6 @@ from config.settings import relay
 from lamson.routing import route, stateless
 
 import os
-import re
 from datetime import datetime
 from email.utils import parseaddr
 from tempfile import NamedTemporaryFile
@@ -23,7 +22,6 @@ from foia.tasks import upload_document_cloud
 DOC_CLOUD_TYPES = ['application/pdf']
 IGNORE_TYPES = []
 TEXT_TYPES = ['text/plain']
-ALLOWED_EMAILS = [re.compile('[.]gov$')]
 
 # pylint: disable-msg=C0103
 
@@ -33,7 +31,7 @@ def REQUEST(message, address=None, host=None):
     """Request auto handler"""
     # pylint: disable-msg=E1101
 
-    if not any(pat.search(parseaddr(message['from'])[1]) for pat in ALLOWED_EMAILS):
+    if not _allowed_email(parseaddr(message['from'])[1]):
         logging.warning('Bad sender: %s', message['from'])
         message['subject'] = 'Bad Sender: %s' % message['subject']
         relay.deliver(message, To='requests@muckrock.com')
@@ -114,3 +112,12 @@ def _upload_doc_cloud(foia, file_name, part, sender):
         foia_doc.document.save(file_name, File(temp_file))
         foia_doc.save()
         upload_document_cloud.apply_async(args=[foia_doc.pk, False], countdown=3)
+
+def _allowed_email(email):
+    """Is this an allowed email?"""
+
+    allowed_email_tlds = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
+    if any(email.endswith(tld) for tld in allowed_email_tlds):
+        return True
+    # check agency database here
+    return False
