@@ -22,6 +22,7 @@ from foia.tasks import upload_document_cloud
 DOC_CLOUD_TYPES = ['application/pdf']
 IGNORE_TYPES = []
 TEXT_TYPES = ['text/plain']
+ALLOWED_TLDS = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
 
 # pylint: disable-msg=C0103
 
@@ -31,14 +32,15 @@ def REQUEST(message, address=None, host=None):
     """Request auto handler"""
     # pylint: disable-msg=E1101
 
-    if not _allowed_email(parseaddr(message['from'])[1]):
-        logging.warning('Bad sender: %s', message['from'])
-        message['subject'] = 'Bad Sender: %s' % message['subject']
-        relay.deliver(message, To='requests@muckrock.com')
-        return
-
     try:
         foia = FOIARequest.objects.get(mail_id=address)
+
+        if not _allowed_email(parseaddr(message['from'])[1], foia):
+            logging.warning('Bad sender: %s', message['from'])
+            message['subject'] = 'Bad Sender: %s' % message['subject']
+            relay.deliver(message, To='requests@muckrock.com')
+            return
+
         communication = ''
         attachments = []
         for part in message.to_message().walk():
@@ -113,11 +115,10 @@ def _upload_doc_cloud(foia, file_name, part, sender):
         foia_doc.save()
         upload_document_cloud.apply_async(args=[foia_doc.pk, False], countdown=3)
 
-def _allowed_email(email):
+def _allowed_email(email, foia):
     """Is this an allowed email?"""
 
-    allowed_email_tlds = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
-    if any(email.endswith(tld) for tld in allowed_email_tlds):
+    foia_email = foia.get_agency_email()
+    if foia_email and '@' in foia_email and email.endwith(foia_email.split('@')[1]):
         return True
-    # check agency database here
-    return False
+    return any(email.endswith(tld) for tld in ALLOWED_TLDS)
