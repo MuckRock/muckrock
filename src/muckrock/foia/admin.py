@@ -27,6 +27,8 @@ class FOIADocumentAdmin(admin.ModelAdmin):
         """Upload document to Document Cloud on save"""
         # pylint: disable-msg=E1101
         obj.save()
+        if not change:
+            obj.foia.update(obj.anchor())
         # wait 3 seconds to give database a chance to sync
         upload_document_cloud.apply_async(args=[obj.pk, change], countdown=3)
 
@@ -87,13 +89,21 @@ class FOIARequestAdmin(admin.ModelAdmin):
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
-        # if we change the status or add a communication, send the user an update notification
-        old_request = obj.get_saved()
-        if old_request and (obj.status != old_request.status or
-                            obj.communications.count() != old_request.communications.count()):
-            obj.update()
-
         obj.save()
+
+    def save_formset(self, request, form, formset, change):
+        """Actions to take while saving inline instances"""
+
+        instances = formset.save(commit=False)
+        for instance in instances:
+            # only way to tell if its new or not is to check the db
+            try:
+                instance.__class__.objects.get(pk=instance.pk)
+            except instance.__class__.DoesNotExist:
+                # it is new, update on it, save first to get an id
+                instance.save()
+                instance.foia.update(instance.anchor())
+        formset.save()
 
     def get_urls(self):
         """Add custom URLs here"""
