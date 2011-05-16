@@ -91,7 +91,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
         old_request = obj.get_saved()
         if old_request and (obj.status != old_request.status or
                             obj.communications.count() != old_request.communications.count()):
-            obj.updated()
+            obj.update()
 
         obj.save()
 
@@ -132,7 +132,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
         # pylint: disable-msg=R0201
 
         foia = get_object_or_404(FOIARequest, pk=idx)
-        foia.updated()
+        foia.update()
         messages.info(request, 'An update notification has been set to the user, %s' % foia.user)
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 

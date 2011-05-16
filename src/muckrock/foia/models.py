@@ -103,6 +103,7 @@ class FOIARequest(models.Model):
     sidebar_html = models.TextField(blank=True)
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
+    updated = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -227,9 +228,12 @@ class FOIARequest(models.Model):
         except FOIARequest.DoesNotExist:
             return None
 
-    def updated(self):
+    def update(self):
         """The request has been updated.  Send the user an email"""
         # pylint: disable-msg=E1101
+
+        self.updated = True
+        self.save()
 
         msg = render_to_string('foia/mail.txt',
             {'name': self.user.get_full_name(),
@@ -239,7 +243,7 @@ class FOIARequest(models.Model):
         send_mail('[MuckRock] FOIA request has been updated',
                   msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
 
-    def submitted(self):
+    def submit(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable-msg=E1101
 
