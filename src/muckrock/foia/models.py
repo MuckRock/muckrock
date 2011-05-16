@@ -228,20 +228,25 @@ class FOIARequest(models.Model):
         except FOIARequest.DoesNotExist:
             return None
 
-    def update(self):
+    def update(self, anchor=None):
         """The request has been updated.  Send the user an email"""
         # pylint: disable-msg=E1101
 
-        self.updated = True
-        self.save()
+        if not self.updated:
+            self.updated = True
+            self.save()
 
-        msg = render_to_string('foia/mail.txt',
-            {'name': self.user.get_full_name(),
-             'title': self.title,
-             'status': self.get_status_display(),
-             'link': self.get_absolute_url()})
-        send_mail('[MuckRock] FOIA request has been updated',
-                  msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+            link = self.get_absolute_url()
+            if anchor:
+                link += '#' + anchor
+
+            msg = render_to_string('foia/mail.txt',
+                {'name': self.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': link})
+            send_mail('[MuckRock] FOIA request has been updated',
+                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
 
     def submit(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
@@ -302,6 +307,10 @@ class FOIACommunication(models.Model):
     status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
     class_name = 'FOIACommunication'
+
+    def anchor(self):
+        """Anchor name"""
+        return 'comm-%d' % self.pk
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -380,6 +389,10 @@ class FOIADocument(models.Model):
         """To quack like a communication"""
         return self.description
 
+    def anchor(self):
+        """Anchor name"""
+        return 'doc-%d' % self.pk
+
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name = 'FOIA DocumentCloud Document'
@@ -425,6 +438,10 @@ class FOIAFile(models.Model):
     def communication(self):
         """To quack like a communication"""
         return self.description
+
+    def anchor(self):
+        """Anchor name"""
+        return 'file-%d' % self.pk
 
     class Meta:
         # pylint: disable-msg=R0903

@@ -67,20 +67,19 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.eq_(len(mail.outbox), 2)
         nose.tools.eq_(mail.outbox[1].to, [self.foia.user.email])
 
+        # already updated, no additional email
         self.foia.status = 'fix'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.eq_(len(mail.outbox), 2)
 
+        # if the user views it and clears the updated flag, we do get another email
+        self.foia.updated = False
+        self.foia.save()
         self.foia.status = 'rejected'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 4)
-
-        self.foia.status = 'done'
-        self.foia.save()
-        self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 5)
+        nose.tools.eq_(len(mail.outbox), 3)
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
