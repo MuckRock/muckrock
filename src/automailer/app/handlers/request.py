@@ -78,7 +78,7 @@ def REQUEST(message, address=None, host=None):
                                          {'request': foia, 'attachments': attachments,
                                           'message': message}))
 
-        foia.updated()
+        foia.update()
 
         # Use NLTK to try and automatically set updated status
 

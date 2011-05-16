@@ -1,0 +1,120 @@
+
+{% extends "foia/base.html" %}
+
+{% load tags %}
+
+{% block content %}
+	<h1 class="left">My FOI Requests</h1>
+	<div class="clear">&nbsp;</div>
+
+	<div class="post-meta archive-pagination">
+	{% with request.GET.order as ord %}
+	{% with request.GET.field as field %}
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj ord field %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	{% endwith %}
+	{% endwith %}
+	</div>
+
+	<table class="data-table">
+		<tr class="odd">
+			<th width="5%"></th>
+			{% if request.GET.field == 'title' and request.GET.order == 'asc' %}
+				<th width="40%"><a href="?order=desc&amp;field=title">Title</a></th>
+			{% else %}
+				<th width="40%"><a href="?order=asc&amp;field=title">Title</a></th>
+			{% endif %}
+			{% if request.GET.field == 'status' and request.GET.order == 'asc' %}
+				<th width="20%"><a href="?order=desc&amp;field=status">Status</a></th>
+			{% else %}
+				<th width="20%"><a href="?order=asc&amp;field=status">Status</a></th>
+			{% endif %}
+			{% if request.GET.field == 'jurisdiction' and request.GET.order == 'asc' %}
+				<th width="20%"><a href="?order=desc&amp;field=jurisdiction">Jurisdiction</a></th>
+			{% else %}
+				<th width="20%"><a href="?order=asc&amp;field=jurisdiction">Jurisdiction</a></th>
+			{% endif %}
+			{% if request.GET.field == 'date_submitted' and request.GET.order == 'asc' %}
+				<th width="15%"><a href="?order=desc&amp;field=date">Date</a></th>
+			{% else %}
+				<th width="15%"><a href="?order=asc&amp;field=date">Date</a></th>
+			{% endif %}
+		</tr>
+		{% for foia in object_list %}
+		<tr class="{% if foia.updated %}updated{% else %}{% cycle 'even' 'odd' %}{% endif %}">
+			<td><input type="checkbox" name="foia" value="{{foia.id}}" /></td>
+			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a></td>
+			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
+			<td>{{ foia.jurisdiction }}</td>
+			<td>{% if foia.date_submitted %}
+						{{ foia.date_submitted|date:"SHORT_DATE_FORMAT" }}
+					{% else %}
+						{{ foia.communications.all.0.date|date:"SHORT_DATE_FORMAT" }}
+					{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+	<div class="post-meta archive-pagination">
+	{% with request.GET.order as ord %}
+	{% with request.GET.field as field %}
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj ord field %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	{% endwith %}
+	{% endwith %}
+	</div>
+
+{% endblock %}
+
+{% block sidebar %}
+	<ul>
+		<li class="{% active request "^/foi/mylist/all/" %}"><a href="{% url foia-mylist view="all" %}">All</a></li>
+		<li class="{% active request "^/foi/mylist/drafts/" %}"><a href="{% url foia-mylist view="drafts" %}">Drafts</a></li>
+		<li class="{% active request "^/foi/mylist/action/" %}"><a href="{% url foia-mylist view="action" %}">Action Required</a></li>
+		<li class="{% active request "^/foi/mylist/waiting/" %}"><a href="{% url foia-mylist view="waiting" %}">Waiting</a></li>
+		<li class="{% active request "^/foi/mylist/completed/" %}"><a href="{% url foia-mylist view="completed" %}">Completed</a></li>
+	</ul>
+{% endblock %}
