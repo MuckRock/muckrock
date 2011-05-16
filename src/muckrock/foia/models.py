@@ -15,7 +15,7 @@ from hashlib import md5
 import os
 import re
 
-from business_days.business_days import calenders
+from business_days.business_days import calendars
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 import fields
@@ -38,6 +38,10 @@ class FOIARequestManager(ChainableManager):
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
+
+        if user.is_staff:
+            return self.all()
+
         # Requests are visible if you own them, or if they are not drafts and not embargoed
         if user.is_authenticated():
             return self.filter(Q(user=user) |
@@ -256,7 +260,7 @@ class FOIARequest(models.Model):
             self.date_submitted = date.today()
             days = self.jurisdiction.get_days()
             if days:
-                cal = calenders[self.jurisdiction.legal()]
+                cal = calendars[self.jurisdiction.legal()]
                 self.date_due = cal.busines_days_from(date.today(), days)
             self.save()
         else:
