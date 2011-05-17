@@ -107,7 +107,7 @@
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
-				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
+				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# document #}
 				{% if comm.class_name == "FOIADocument" %}
