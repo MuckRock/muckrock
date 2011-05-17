@@ -1,0 +1,17 @@
+{% autoescape off %}
+{% for comm in request.communications.reverse %}
+{% if not forloop.first %}On {{ comm.date|date }}:
+{% endif %}
+{{ comm.communication }}
+{% if forloop.last %}
+Filed via MuckRock.com
+E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
+
+For mailed responses, please address:
+MuckRock
+Ref: {{ request.get_mail_id }}
+185 Beacon St. #3
+Somerville, MA 02143{% endif %}
+{% if not forloop.last %}---{% endif %}
+{% endfor %}
+{% endautoescape %}

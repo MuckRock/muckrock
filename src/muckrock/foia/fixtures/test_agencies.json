@@ -1,0 +1,53 @@
+[
+    {
+        "pk": 1, 
+        "model": "foia.agency", 
+        "fields": {
+            "fax": "", 
+            "contact_salutation": "", 
+            "name": "Test Agency", 
+            "contact_last_name": "", 
+            "url": "", 
+            "other_emails": "other_a@agency1.gov, other_b@agency1.gov", 
+            "jurisdiction": 5, 
+            "expires": null, 
+            "approved": true, 
+            "phone": "", 
+            "user": null, 
+            "address": "123 Nowhere", 
+            "notes": "", 
+            "contact_title": "", 
+            "email": "test@agency1.gov", 
+            "types": [
+                1, 
+                8
+            ], 
+            "contact_first_name": ""
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "foia.agency", 
+        "fields": {
+            "fax": "", 
+            "contact_salutation": "", 
+            "name": "MA Clerk", 
+            "contact_last_name": "", 
+            "url": "", 
+            "other_emails": "", 
+            "jurisdiction": 1, 
+            "expires": null, 
+            "approved": true, 
+            "phone": "", 
+            "user": null, 
+            "address": "456 Nowhere\r\nBoston, MA 02140", 
+            "notes": "", 
+            "contact_title": "", 
+            "email": "clerk@mass.gov", 
+            "types": [
+                1
+            ], 
+            "contact_first_name": ""
+        }
+    }
+]
