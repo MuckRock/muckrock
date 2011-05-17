@@ -20,7 +20,7 @@ from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
 from foia.tasks import upload_document_cloud
 
 DOC_CLOUD_TYPES = ['application/pdf', 'application/msword']
-IGNORE_TYPES = []
+IGNORE_TYPES = ['application/x-pkcs7-signature']
 TEXT_TYPES = ['text/plain']
 ALLOWED_TLDS = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
 
