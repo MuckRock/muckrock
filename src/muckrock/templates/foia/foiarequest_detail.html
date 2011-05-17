@@ -105,7 +105,7 @@
 		{% endif %}
 		<div id="tabs-request">
 			{% for comm in communications %}
-			<a name="{{comm.anchor}}">
+			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
 
