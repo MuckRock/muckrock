@@ -19,7 +19,7 @@ from tempfile import NamedTemporaryFile
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
 from foia.tasks import upload_document_cloud
 
-DOC_CLOUD_TYPES = ['application/pdf']
+DOC_CLOUD_TYPES = ['application/pdf', 'application/msword']
 IGNORE_TYPES = []
 TEXT_TYPES = ['text/plain']
 ALLOWED_TLDS = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
@@ -54,7 +54,7 @@ def REQUEST(message, address=None, host=None):
                 attachments.append('Add to body text - type: %s name: %s' %
                                    (content_type, file_name))
 
-            if content_type not in IGNORE_TYPES:
+            elif content_type not in IGNORE_TYPES:
                 if file_name and content_type in DOC_CLOUD_TYPES:
                     _upload_doc_cloud(foia, file_name, part, message['from'])
                     attachments.append('Add as a doc cloud - type: %s name: %s' %
