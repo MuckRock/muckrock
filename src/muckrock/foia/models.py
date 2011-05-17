@@ -307,6 +307,7 @@ class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
     status = (
+        ('processed', 'Awaiting Response'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
