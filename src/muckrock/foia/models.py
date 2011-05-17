@@ -72,6 +72,7 @@ class FOIARequestManager(ChainableManager):
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable-msg=R0904
+    # pylint: disable-msg=R0902
 
     status = (
         ('started', 'Draft'),
@@ -104,6 +105,8 @@ class FOIARequest(models.Model):
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
     updated = models.BooleanField()
+    email = models.EmailField(blank=True)
+    other_emails = fields.EmailsListField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
 
@@ -211,14 +214,22 @@ class FOIARequest(models.Model):
             self.set_mail_id()
         return self.mail_id
 
-    def get_agency_email(self):
-        """Get the email address for this request's agency"""
+    def get_other_emails(self):
+        """Get the other emails for this request as a list"""
+        return fields.email_separator_re.split(self.other_emails)
+
+    def get_to_who(self):
+        """Who communications are to"""
         # pylint: disable-msg=E1101
 
-        if self.agency:
-            return self.agency.get_email()
+        if self.agency and self.email:
+            return '%s <%s>' % (self.agency.name, self.email)
+        elif self.agency and self.agency.email:
+            return '%s <%s>' % (self.agency.name, self.agency.email)
+        elif self.agency:
+            return self.agency.name
         else:
-            return None
+            return ''
 
     def get_saved(self):
         """Get the old model that is saved in the db"""
@@ -252,25 +263,36 @@ class FOIARequest(models.Model):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable-msg=E1101
 
-        agency_email = self.get_agency_email()
+        if not self.email and self.agency:
+            self.email = self.agency.get_email()
+            self.other_emails = self.agency.other_emails
+            self.save()
 
-        if agency_email and LAMSON_ACTIVATE:
-            from_addr = 'fax' if agency_email.endswith('faxaway.com') else self.get_mail_id()
+        if self.email and LAMSON_ACTIVATE:
+            from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
+            if self.tracking_id:
+                subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
+            elif self.communications.count() > 1:
+                subject = 'Follow up to Freedom of Information Request: %s' % self.title
+            else:
+                subject = 'Freedom of Information Request: %s' % self.title
             msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
-                               To=agency_email,
-                               Subject='Freedom of Information Request: %s' % self.title,
+                               To=self.email,
+                               Subject=subject,
                                Body=render_to_string('foia/request.txt', {'request': self}))
-            agency_cc = self.agency.get_other_emails()
-            if agency_cc:
-                msg['cc'] = ','.join(agency_cc)
-            relay.deliver(msg, To=[agency_email, 'requests@muckrock.com'] + agency_cc)
+            cc_addrs = self.get_other_emails()
+            if cc_addrs:
+                msg['cc'] = ','.join(cc_addrs)
+            relay.deliver(msg, To=[self.email, 'requests@muckrock.com'] + cc_addrs)
 
             self.status = 'processed'
-            self.date_submitted = date.today()
-            days = self.jurisdiction.get_days()
-            if days:
-                cal = calendars[self.jurisdiction.legal()]
-                self.date_due = cal.busines_days_from(date.today(), days)
+
+            if not self.date_submitted:
+                self.date_submitted = date.today()
+                days = self.jurisdiction.get_days()
+                if days:
+                    cal = calendars[self.jurisdiction.legal()]
+                    self.date_due = cal.business_days_from(date.today(), days)
             self.save()
         else:
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
@@ -289,6 +311,7 @@ class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
     status = (
+        ('processed', 'Awaiting Response'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
@@ -299,6 +322,7 @@ class FOIACommunication(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=70)
+    to_who = models.CharField(max_length=70, blank=True)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
