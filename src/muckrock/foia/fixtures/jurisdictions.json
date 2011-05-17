@@ -84,7 +84,8 @@
             "level": "s", 
             "name": "Massachusetts", 
             "parent": 10, 
-            "slug": "massachusetts"
+            "slug": "massachusetts",
+			"days": 10
         }
     }, 
     {

@@ -13,7 +13,7 @@ from lamson.routing import route, stateless
 
 import os
 from datetime import datetime
-from email.utils import parseaddr
+from email.utils import parseaddr, getaddresses
 from tempfile import NamedTemporaryFile
 
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
@@ -34,8 +34,11 @@ def REQUEST(message, address=None, host=None):
 
     try:
         foia = FOIARequest.objects.get(mail_id=address)
+        from_email = parseaddr(message['from'])[1]
+        # this is a python email message object
+        msg = message.to_message()
 
-        if not _allowed_email(parseaddr(message['from'])[1], foia):
+        if not _allowed_email(from_email, foia):
             logging.warning('Bad sender: %s', message['from'])
             message['subject'] = 'Bad Sender: %s' % message['subject']
             relay.deliver(message, To='requests@muckrock.com')
@@ -43,7 +46,7 @@ def REQUEST(message, address=None, host=None):
 
         communication = ''
         attachments = []
-        for part in message.to_message().walk():
+        for part in msg.walk():
             if part.get_content_maintype() == 'multipart':
                 # just a container for other parts
                 continue
@@ -78,6 +81,11 @@ def REQUEST(message, address=None, host=None):
                                          {'request': foia, 'attachments': attachments,
                                           'message': message}))
 
+        foia.email = from_email
+        foia.other_emails = ','.join(email for name, email
+                             in getaddresses(msg.get_all('to', []) + msg.get_all('cc', []))
+                             if not email.endswith('muckrock.com'))
+        foia.save()
         foia.update(comm.anchor())
 
         # Use NLTK to try and automatically set updated status
@@ -120,5 +128,7 @@ def _allowed_email(email, foia):
 
     foia_email = foia.get_agency_email()
     if foia_email and '@' in foia_email and email.endwith(foia_email.split('@')[1]):
+        return True
+    if foia.agency and email in foia.agency.get_other_emails():
         return True
     return any(email.endswith(tld) for tld in ALLOWED_TLDS)
