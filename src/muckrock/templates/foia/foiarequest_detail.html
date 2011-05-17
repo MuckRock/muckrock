@@ -200,6 +200,13 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
+	{% if object.tracking_id %}
+		<div>
+		<p>Agency Tracking ID: {{object.tracking_id}}</p>
+		</div>
+		<div class="content-separator"></div>
+	{% endif %}
+
 	{% for doc in object.public_documents.all %}
 		{% if doc.rodeo_set.all %}
 			<div id="rodeo-{{doc.doc_id}}" style="display: none;">
@@ -210,6 +217,7 @@
 					{% endfor %}
 				</ul>
 			</div>
+			<div class="content-separator"></div>
 		{% endif %}
 	{% endfor %}
 
