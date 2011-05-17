@@ -78,7 +78,7 @@ def test_normal():
 
     foia = FOIARequest.objects.get(title='test foia')
     client.begin()
-    client.say('%s@%s' % (foia.mail_id, LAMSON_ROUTER_HOST), 'Test normal.')
+    client.say('%s@%s,other@agency.gov' % (foia.mail_id, LAMSON_ROUTER_HOST), 'Test normal.')
 
     foia = FOIARequest.objects.get(pk=foia.pk)
     nose.tools.eq_(foia.first_request(), 'Test normal.')
@@ -89,6 +89,9 @@ def test_normal():
 
     nose.tools.eq_(len(mail.outbox), 1)
     nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
+
+    nose.tools.eq_(foia.email, 'mitch@localhost.gov')
+    nose.tools.eq_(foia.other_emails, 'other@agency.gov')
 
 
 # test different attachment types
