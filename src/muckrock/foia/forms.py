@@ -88,6 +88,15 @@ class FOIADeleteForm(forms.Form):
     confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
                                  help_text='This cannot be undone!')
 
+class FOIAFlagForm(forms.Form):
+    """Form to flag a FOIA Request"""
+    reason = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}),
+                             label='Reason')
+
+    help_text = 'Flag a request in order to let us know that something is wrong with the ' \
+                'request, such as it having the wrong status or responses being out of order.  ' \
+                'Please describe the problem as specifically as possibly here:'
+
 def foia_comm_form_factory(label):
     """Create a Communication Form with the given label"""
 
