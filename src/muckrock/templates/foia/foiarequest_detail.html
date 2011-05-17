@@ -107,7 +107,7 @@
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
-				<strong>From {{comm.from_who}} on {{comm.date|date}}:</strong><br />
+				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# document #}
 				{% if comm.class_name == "FOIADocument" %}
@@ -172,6 +172,9 @@
 	{% endif %}
 	{% if user == object.user or object.public_documents %}
 		<h2>Actions</h2>
+		{% if user.is_staff %}
+			<p><a class="jqbutton" href="{% url admin:foia_foiarequest_change object.id %}">Admin</a></p>
+		{% endif %}
 		{% if user == object.user %}
 			{% if object.is_editable %}
 				<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
@@ -196,6 +199,9 @@
 				<p>Copy and paste this code into your site to create a thumbnail link to this document:<p>
 				<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
 			</div>
+		{% endif %}
+		{% if user.is_authenticated %}
+			<p><a class="jqbutton" href="{% url foia-flag jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Flag</a></p>
 		{% endif %}
 		<div class="content-separator"></div>
 	{% endif %}
