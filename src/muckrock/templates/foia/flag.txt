@@ -1,7 +1,8 @@
-
+{% autoescape off %}
 Submitter: http://www.muckrock.com{% url admin:auth_user_change user.pk %}
 Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
 
 The user {{user}} has flagged the request {{request.title}} for the following reason:
 
 {{reason}}
+{% endautoescape %}

@@ -1,3 +1,4 @@
+{% autoescape off %}
 {% for comm in request.communications.reverse %}
 {% if not forloop.first %}On {{ comm.date|date }}:
 {% endif %}
@@ -13,3 +14,4 @@ Ref: {{ request.get_mail_id }}
 Somerville, MA 02143{% endif %}
 {% if not forloop.last %}---{% endif %}
 {% endfor %}
+{% endautoescape %}
