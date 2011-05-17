@@ -218,6 +218,19 @@ class FOIARequest(models.Model):
         """Get the other emails for this request as a list"""
         return fields.email_separator_re.split(self.other_emails)
 
+    def get_to_who(self):
+        """Who communications are to"""
+        # pylint: disable-msg=E1101
+
+        if self.agency and self.email:
+            return '%s <%s>' % (self.agency.name, self.email)
+        elif self.agency and self.agency.email:
+            return '%s <%s>' % (self.agency.name, self.agency.email)
+        elif self.agency:
+            return self.agency.name
+        else:
+            return ''
+
     def get_saved(self):
         """Get the old model that is saved in the db"""
 
@@ -309,6 +322,7 @@ class FOIACommunication(models.Model):
 
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=70)
+    to_who = models.CharField(max_length=70, blank=True)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()

@@ -556,8 +556,8 @@ class FOIAWizard(DynamicSessionFormWizard):
                                           jurisdiction=jurisdiction, slug=slugify(title),
                                           agency=agency)
         FOIACommunication.objects.create(
-                foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
-                response=False, full_html=False, communication=foia_request)
+                foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
+                date=datetime.now(), response=False, full_html=False, communication=foia_request)
 
         messages.success(request, 'Request succesfully created.  Please review it and make any '
                                   'changes that you need.  You may save it for future review or '

@@ -156,8 +156,9 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url head
 def _save_foia_comm(request, foia, form):
     """Save the FOI Communication"""
     FOIACommunication.objects.create(
-            foia=foia, from_who=request.user.get_full_name(), date=datetime.now(),
-            response=False, full_html=False, communication=form.cleaned_data['comm'])
+            foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
+            date=datetime.now(), response=False, full_html=False,
+            communication=form.cleaned_data['comm'])
     foia.status = 'submitted'
     foia.save()
     foia.submit()
