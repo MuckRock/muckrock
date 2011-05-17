@@ -69,7 +69,7 @@ def _foia_form_handler(request, foia, action):
                 foia.save()
 
                 if request.POST['submit'] == 'Submit Request':
-                    foia.submitted()
+                    foia.submit()
 
                 return HttpResponseRedirect(foia.get_absolute_url())
 
@@ -156,7 +156,7 @@ def _save_foia_comm(request, foia, form):
             response=False, full_html=False, communication=form.cleaned_data['comm'])
     foia.status = 'submitted'
     foia.save()
-    foia.submitted()
+    foia.submit()
 
 @login_required
 def fix(request, jurisdiction, slug, idx):
@@ -251,35 +251,37 @@ def _sort_requests(get, foia_requests):
     """Sort's the FOIA requests"""
     order = get.get('order', 'desc')
     field = get.get('field', 'date_submitted')
+
     if order not in ['asc', 'desc']:
         order = 'desc'
-    if field not in ['title', 'status', 'user', 'jurisdiction', 'date_submitted']:
+    if field not in ['title', 'status', 'user', 'jurisdiction', 'date']:
+        field = 'date_submitted'
+
+    if field == 'date':
         field = 'date_submitted'
     if field == 'jurisdiction':
         field += '__name'
+
     ob_field = '-' + field if order == 'desc' else field
 
-    return foia_requests.order_by(ob_field)
+    return foia_requests.order_by('-updated', ob_field)
 
-@login_required
-def update_list(request):
-    """List of all editable FOIA requests by a given user"""
+def _list(request, requests, kwargs=None):
+    """Helper function for creating list views"""
+    # pylint: disable-msg=W0142
 
-    foia_requests = _sort_requests(request.GET,
-                                   FOIARequest.objects.get_editable().filter(user=request.user))
+    if not kwargs:
+        kwargs = {}
 
-    return list_detail.object_list(request, foia_requests, paginate_by=10,
-                                   extra_context={'title': 'My Editable FOI Requests',
-                                                  'base': 'foia/base-submit-single.html'})
+    per_page = min(int(request.GET.get('per_page', 10)), 100)
+    return list_detail.object_list(request, requests, paginate_by=per_page,
+                                   extra_context={'title': 'FOI Requests'}, **kwargs)
 
 def list_(request):
     """List all viewable FOIA requests"""
 
     foia_requests = _sort_requests(request.GET, FOIARequest.objects.get_viewable(request.user))
-
-    return list_detail.object_list(
-                request, foia_requests, paginate_by=10,
-                extra_context={'title': 'FOI Requests', 'base': 'foia/base-single.html'})
+    return _list(request, foia_requests)
 
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
@@ -288,9 +290,26 @@ def list_by_user(request, user_name):
     foia_requests = _sort_requests(request.GET,
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user))
 
-    return list_detail.object_list(request, foia_requests, paginate_by=10,
-                                   extra_context={'title': 'FOI Requests',
-                                                  'base': 'foia/base-single.html'})
+    return _list(request, foia_requests)
+
+@login_required
+def my_list(request, view):
+    """Views owned by current user"""
+    # pylint: disable-msg=E1103
+
+    unsorted = FOIARequest.objects.filter(user=request.user)
+    if view == 'drafts':
+        unsorted = unsorted.get_editable()
+    elif view == 'action':
+        unsorted = unsorted.filter(status__in=['fix', 'payment'])
+    elif view == 'waiting':
+        unsorted = unsorted.filter(status='processed')
+    elif view == 'completed':
+        unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
+
+    foia_requests = _sort_requests(request.GET, unsorted)
+
+    return _list(request, foia_requests, kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
@@ -300,6 +319,10 @@ def detail(request, jurisdiction, slug, idx):
 
     if not foia.is_viewable(request.user):
         raise Http404()
+
+    if foia.updated and foia.user == request.user:
+        foia.updated = False
+        foia.save()
 
     context = {'object': foia, 'communications': foia.get_communications(request.user)}
     if foia.date_due:
