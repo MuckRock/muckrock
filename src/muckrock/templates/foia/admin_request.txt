@@ -9,5 +9,5 @@ Response received from: {{ message.from }} for request {{ request.title }} - {{ 
 {% endfor %}
 
 Please set the status
-Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
+Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
 {% endautoescape %}
