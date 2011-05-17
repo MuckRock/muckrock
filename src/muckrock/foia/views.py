@@ -251,24 +251,37 @@ def _sort_requests(get, foia_requests):
     """Sort's the FOIA requests"""
     order = get.get('order', 'desc')
     field = get.get('field', 'date_submitted')
+
     if order not in ['asc', 'desc']:
         order = 'desc'
-    if field not in ['title', 'status', 'user', 'jurisdiction', 'date_submitted']:
+    if field not in ['title', 'status', 'user', 'jurisdiction', 'date']:
+        field = 'date_submitted'
+
+    if field == 'date':
         field = 'date_submitted'
     if field == 'jurisdiction':
         field += '__name'
+
     ob_field = '-' + field if order == 'desc' else field
 
     return foia_requests.order_by('-updated', ob_field)
+
+def _list(request, requests, kwargs=None):
+    """Helper function for creating list views"""
+    # pylint: disable-msg=W0142
+
+    if not kwargs:
+        kwargs = {}
+
+    per_page = min(int(request.GET.get('per_page', 10)), 100)
+    return list_detail.object_list(request, requests, paginate_by=per_page,
+                                   extra_context={'title': 'FOI Requests'}, **kwargs)
 
 def list_(request):
     """List all viewable FOIA requests"""
 
     foia_requests = _sort_requests(request.GET, FOIARequest.objects.get_viewable(request.user))
-
-    return list_detail.object_list(
-                request, foia_requests, paginate_by=10,
-                extra_context={'title': 'FOI Requests', 'base': 'foia/base-single.html'})
+    return _list(request, foia_requests)
 
 def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
@@ -277,9 +290,7 @@ def list_by_user(request, user_name):
     foia_requests = _sort_requests(request.GET,
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user))
 
-    return list_detail.object_list(request, foia_requests, paginate_by=10,
-                                   extra_context={'title': 'FOI Requests',
-                                                  'base': 'foia/base-single.html'})
+    return _list(request, foia_requests)
 
 @login_required
 def my_list(request, view):
@@ -298,9 +309,7 @@ def my_list(request, view):
 
     foia_requests = _sort_requests(request.GET, unsorted)
 
-    return list_detail.object_list(request, foia_requests, paginate_by=10,
-                                   template_name = 'foia/foiarequest_mylist.html',
-                                   extra_context={'title': 'FOI Requests'})
+    return _list(request, foia_requests, kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
