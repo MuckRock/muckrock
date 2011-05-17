@@ -8,7 +8,7 @@
             "last_name": "Smith", 
             "is_active": true, 
             "is_superuser": false, 
-            "is_staff": false, 
+            "is_staff": true, 
             "last_login": "2010-07-11 13:28:22", 
             "groups": [], 
             "user_permissions": [], 

@@ -15,7 +15,7 @@ from hashlib import md5
 import os
 import re
 
-from business_days.business_days import calenders
+from business_days.business_days import calendars
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 import fields
@@ -38,6 +38,10 @@ class FOIARequestManager(ChainableManager):
 
     def get_viewable(self, user):
         """Get all viewable FOIA requests for given user"""
+
+        if user.is_staff:
+            return self.all()
+
         # Requests are visible if you own them, or if they are not drafts and not embargoed
         if user.is_authenticated():
             return self.filter(Q(user=user) |
@@ -99,6 +103,7 @@ class FOIARequest(models.Model):
     sidebar_html = models.TextField(blank=True)
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
+    updated = models.BooleanField()
 
     objects = FOIARequestManager()
 
@@ -223,19 +228,27 @@ class FOIARequest(models.Model):
         except FOIARequest.DoesNotExist:
             return None
 
-    def updated(self):
+    def update(self, anchor=None):
         """The request has been updated.  Send the user an email"""
         # pylint: disable-msg=E1101
 
-        msg = render_to_string('foia/mail.txt',
-            {'name': self.user.get_full_name(),
-             'title': self.title,
-             'status': self.get_status_display(),
-             'link': self.get_absolute_url()})
-        send_mail('[MuckRock] FOIA request has been updated',
-                  msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+        if not self.updated:
+            self.updated = True
+            self.save()
 
-    def submitted(self):
+            link = self.get_absolute_url()
+            if anchor:
+                link += '#' + anchor
+
+            msg = render_to_string('foia/mail.txt',
+                {'name': self.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': link})
+            send_mail('[MuckRock] FOIA request has been updated',
+                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+    def submit(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable-msg=E1101
 
@@ -256,7 +269,7 @@ class FOIARequest(models.Model):
             self.date_submitted = date.today()
             days = self.jurisdiction.get_days()
             if days:
-                cal = calenders[self.jurisdiction.legal()]
+                cal = calendars[self.jurisdiction.legal()]
                 self.date_due = cal.busines_days_from(date.today(), days)
             self.save()
         else:
@@ -294,6 +307,10 @@ class FOIACommunication(models.Model):
     status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
     class_name = 'FOIACommunication'
+
+    def anchor(self):
+        """Anchor name"""
+        return 'comm-%d' % self.pk
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -372,6 +389,10 @@ class FOIADocument(models.Model):
         """To quack like a communication"""
         return self.description
 
+    def anchor(self):
+        """Anchor name"""
+        return 'doc-%d' % self.pk
+
     class Meta:
         # pylint: disable-msg=R0903
         verbose_name = 'FOIA DocumentCloud Document'
@@ -417,6 +438,10 @@ class FOIAFile(models.Model):
     def communication(self):
         """To quack like a communication"""
         return self.description
+
+    def anchor(self):
+        """Anchor name"""
+        return 'file-%d' % self.pk
 
     class Meta:
         # pylint: disable-msg=R0903

@@ -1,0 +1,21 @@
+
+	<div>
+	{% with request.GET.order as ord %}
+	{% with request.GET.field as field %}
+	{% with request.GET.per_page as pp %}
+		<span class="small">
+			({{page_obj.start_index}} - {{page_obj.end_index}})/{{page_obj.paginator.count}} | Per page:
+			{% if pp == "10" or not pp %}10,{% else %}
+			<a href="?page=1&amp;per_page=10{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">10</a>,
+			{% endif %}
+			{% if pp == "25" %}25,{% else %}
+			<a href="?page=1&amp;per_page=25{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">25</a>,
+			{% endif %}
+			{% if pp == "50" %}50{% else %}
+			<a href="?page=1&amp;per_page=50{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">50</a>
+			{% endif %}
+		</span>
+	{% endwith %}
+	{% endwith %}
+	{% endwith %}
+	</div>
