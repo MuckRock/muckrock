@@ -49,12 +49,6 @@ def _foia_form_handler(request, foia, action):
             form = default_form(request.POST)
 
             if form.is_valid():
-                if request.POST['submit'] == 'Submit Request':
-                    if not request.user.get_profile().make_request():
-                        foia.status = 'started'
-                        messages.error(request, "You are out of requests for this month.  "
-                            "You're request has been saved as a draft, please submit it when you "
-                            "get more requests")
 
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('agency-name')
@@ -68,11 +62,18 @@ def _foia_form_handler(request, foia, action):
                 foia_comm.date = datetime.now()
                 foia_comm.communication = form.cleaned_data['request']
                 foia_comm.save()
-                foia.save()
-                messages.success(request, 'Request succesfully submitted.')
 
                 if request.POST['submit'] == 'Submit Request':
-                    foia.submit()
+                    if request.user.get_profile().make_request():
+                        foia.save()
+                        foia.submit()
+                        messages.success(request, 'Request succesfully submitted.')
+                    else:
+                        foia.status = 'started'
+                        foia.save()
+                        messages.error(request, "You are out of requests for this month.  "
+                            "You're request has been saved as a draft, please submit it when you "
+                            "get more requests")
 
                 return HttpResponseRedirect(foia.get_absolute_url())
 
