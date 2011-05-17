@@ -72,6 +72,7 @@ class FOIARequestManager(ChainableManager):
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable-msg=R0904
+    # pylint: disable-msg=R0902
 
     status = (
         ('started', 'Draft'),
@@ -104,6 +105,8 @@ class FOIARequest(models.Model):
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
     updated = models.BooleanField()
+    email = models.EmailField(blank=True)
+    other_emails = fields.EmailsListField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
 
@@ -220,6 +223,10 @@ class FOIARequest(models.Model):
         else:
             return None
 
+    def get_other_emails(self):
+        """Get the other emails for this request as a list"""
+        return fields.email_separator_re.split(self.other_emails)
+
     def get_saved(self):
         """Get the old model that is saved in the db"""
 
@@ -252,10 +259,13 @@ class FOIARequest(models.Model):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable-msg=E1101
 
-        agency_email = self.get_agency_email()
+        if not self.email and self.agency:
+            self.email = self.get_agency_email()
+            self.other_emails = self.agency.other_emails
+            self.save()
 
-        if agency_email and LAMSON_ACTIVATE:
-            from_addr = 'fax' if agency_email.endswith('faxaway.com') else self.get_mail_id()
+        if self.email and LAMSON_ACTIVATE:
+            from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
             if self.tracking_id:
                 subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
             elif self.communications.count() > 1:
@@ -263,20 +273,22 @@ class FOIARequest(models.Model):
             else:
                 subject = 'Freedom of Information Request: %s' % self.title
             msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
-                               To=agency_email,
+                               To=self.email,
                                Subject=subject,
                                Body=render_to_string('foia/request.txt', {'request': self}))
-            agency_cc = self.agency.get_other_emails()
-            if agency_cc:
-                msg['cc'] = ','.join(agency_cc)
-            relay.deliver(msg, To=[agency_email, 'requests@muckrock.com'] + agency_cc)
+            cc_addrs = self.get_other_emails()
+            if cc_addrs:
+                msg['cc'] = ','.join(cc_addrs)
+            relay.deliver(msg, To=[self.email, 'requests@muckrock.com'] + cc_addrs)
 
             self.status = 'processed'
-            self.date_submitted = date.today()
-            days = self.jurisdiction.get_days()
-            if days:
-                cal = calendars[self.jurisdiction.legal()]
-                self.date_due = cal.busines_days_from(date.today(), days)
+
+            if not self.date_submitted:
+                self.date_submitted = date.today()
+                days = self.jurisdiction.get_days()
+                if days:
+                    cal = calendars[self.jurisdiction.legal()]
+                    self.date_due = cal.business_days_from(date.today(), days)
             self.save()
         else:
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
