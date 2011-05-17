@@ -214,15 +214,6 @@ class FOIARequest(models.Model):
             self.set_mail_id()
         return self.mail_id
 
-    def get_agency_email(self):
-        """Get the email address for this request's agency"""
-        # pylint: disable-msg=E1101
-
-        if self.agency:
-            return self.agency.get_email()
-        else:
-            return None
-
     def get_other_emails(self):
         """Get the other emails for this request as a list"""
         return fields.email_separator_re.split(self.other_emails)
@@ -260,7 +251,7 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
 
         if not self.email and self.agency:
-            self.email = self.get_agency_email()
+            self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
             self.save()
 

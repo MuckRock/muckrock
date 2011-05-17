@@ -126,8 +126,7 @@ def _upload_doc_cloud(foia, file_name, part, sender):
 def _allowed_email(email, foia):
     """Is this an allowed email?"""
 
-    foia_email = foia.get_agency_email()
-    if foia_email and '@' in foia_email and email.endwith(foia_email.split('@')[1]):
+    if foia.email and '@' in foia.email and email.endwith(foia.email.split('@')[1]):
         return True
     if foia.agency and email in foia.agency.get_other_emails():
         return True
