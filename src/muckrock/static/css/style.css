@@ -160,6 +160,10 @@ th,td,caption {padding: 4px 10px 4px 5px;}
 tr.even td {background: #F2F6FA;}
 tfoot {font-style: italic;}
 caption {background: #EEE;}
+table.data-table tr.updated td {
+	background: #FFFFF7;
+	font-weight: bold;
+}
 
 table.data-table {
 	border: 1px solid #CCB;
@@ -478,6 +482,8 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	padding: 10px;
 }
 #sub-nav li.current-tab a, #sub-nav a:hover {color: #223;}
+
+#sidebar li.current-tab a {color: #223; font-weight: bold;}
 
 
 /* Main */

@@ -77,7 +77,7 @@
 						{% block main-nav %}
 						<li class="{% active request "^/news/" %}"><a href="{%url news-index%}">News</a></li>
 						<li class="{% active request "^/foi/((new)|(update)|(delete))/" %}"><a href="{%url foia-create%}">Submit Request</a></li>
-						<li class="{% active request "^/foi/((list)|(view))/" %}"><a href="{%url foia-list%}">FOI Requests</a></li>
+						<li class="{% active request "^/foi/((list)|(view)|(mylist))/" %}"><a href="{%url foia-list%}">FOI Requests</a></li>
 						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-my-profile%}">Account Information</a></li>
 						<li><a href="/blog/">Blog</a></li>
 						{% endblock %}
