@@ -1,15 +1,11 @@
 
 {% extends "base.html" %}
 
-{% load tags %}
-
 {% block title %}FOI Requests{% endblock %}
 {% block headline %}FOI{% endblock %}
 
 {% block sub-nav %}
-<ul class="tabbed">
-	<li class="{% active request "^/foi/new/" %}"><a href="{% url foia-create %}">Submit a Request</a></li>
-	<li class="{% active request "^/foi/update/" %}"><a href="{% url foia-update-list %}">Edit My Drafts</a></li>
-</ul>
+	{% include "foia/submit-include.html" %}
 {% endblock %}
+
 

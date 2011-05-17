@@ -67,7 +67,7 @@ def REQUEST(message, address=None, host=None):
                     attachments.append('Skipped due to no name - type: %s name: %s' %
                                        (content_type, file_name))
 
-        FOIACommunication.objects.create(
+        comm = FOIACommunication.objects.create(
                 foia=foia, from_who=message['from'], date=datetime.now(), response=True,
                 full_html=False, communication=communication)
 
@@ -78,7 +78,7 @@ def REQUEST(message, address=None, host=None):
                                          {'request': foia, 'attachments': attachments,
                                           'message': message}))
 
-        foia.updated()
+        foia.update(comm.anchor())
 
         # Use NLTK to try and automatically set updated status
 

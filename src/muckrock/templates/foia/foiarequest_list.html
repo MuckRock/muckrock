@@ -1,5 +1,5 @@
 
-{% extends base %}
+{% extends "foia/base-single.html" %}
 
 {% load tags %}
 
@@ -15,63 +15,11 @@
 	</span>
 	<div class="clear">&nbsp;</div>
 
-	<div class="post-meta archive-pagination">
-	{% with request.GET.order as ord %}
-	{% with request.GET.field as field %}
-		
-		<div class="nav-left">
-			{% if page_obj.has_previous %}
-			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; First page</a>
-			&nbsp; &nbsp;
-			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; Previous page</a>
-			{% else %}
-			&nbsp;
-			{% endif %}
-		</div>
-		<div class="nav-center">
-			{% page_links page_obj ord field %}
-		</div>
-		{% if page_obj.has_next %}
-		<div class="nav-right">
-			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Next page &#187;</a>
-			&nbsp; &nbsp;
-			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Last page &#187;</a>
-		</div>
-		{% endif %}
-
-		<div class="clearer">&nbsp;</div>
-		
-	{% endwith %}
-	{% endwith %}
-	</div>
+	{% include "foia/pagination.html" %}
 
 	<table class="data-table">
 		<tr class="odd">
-			{% if request.GET.field == 'title' and request.GET.order == 'asc' %}
-				<th width="40%"><a href="?order=desc&amp;field=title">Title</a></th>
-			{% else %}
-				<th width="40%"><a href="?order=asc&amp;field=title">Title</a></th>
-			{% endif %}
-			{% if request.GET.field == 'user' and request.GET.order == 'asc' %}
-				<th width="10%"><a href="?order=desc&amp;field=user">User</a></th>
-			{% else %}
-				<th width="10%"><a href="?order=asc&amp;field=user">User</a></th>
-			{% endif %}
-			{% if request.GET.field == 'status' and request.GET.order == 'asc' %}
-				<th width="15%"><a href="?order=desc&amp;field=status">Status</a></th>
-			{% else %}
-				<th width="15%"><a href="?order=asc&amp;field=status">Status</a></th>
-			{% endif %}
-			{% if request.GET.field == 'jurisdiction' and request.GET.order == 'asc' %}
-				<th width="20%"><a href="?order=desc&amp;field=jurisdiction">Jurisdiction</a></th>
-			{% else %}
-				<th width="20%"><a href="?order=asc&amp;field=jurisdiction">Jurisdiction</a></th>
-			{% endif %}
-			{% if request.GET.field == 'date_submitted' and request.GET.order == 'asc' %}
-				<th width="15%"><a href="?order=desc&amp;field=date">Date</a></th>
-			{% else %}
-				<th width="15%"><a href="?order=asc&amp;field=date">Date</a></th>
-			{% endif %}
+			{% table_header request.GET 40 "title" 10 "user" 15 "status" 20 "jurisdiction" 15 "date" %}
 		</tr>
 		{% for foia in object_list %}
 		<tr class="{% cycle 'even' 'odd' %}">
@@ -89,35 +37,8 @@
 		{% endfor %}
 	</table>
 
-	<div class="post-meta archive-pagination">
-	{% with request.GET.order as ord %}
-	{% with request.GET.field as field %}
-		
-		<div class="nav-left">
-			{% if page_obj.has_previous %}
-			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; First page</a>
-			&nbsp; &nbsp;
-			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">&#171; Previous page</a>
-			{% else %}
-			&nbsp;
-			{% endif %}
-		</div>
-		<div class="nav-center">
-			{% page_links page_obj ord field %}
-		</div>
-		{% if page_obj.has_next %}
-		<div class="nav-right">
-			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Next page &#187;</a>
-			&nbsp; &nbsp;
-			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}">Last page &#187;</a>
-		</div>
-		{% endif %}
-
-		<div class="clearer">&nbsp;</div>
-		
-	{% endwith %}
-	{% endwith %}
-	</div>
+	{% include "foia/per_page.html" %}
+	{% include "foia/pagination.html" %}
 
 {% endblock %}
 

@@ -59,8 +59,7 @@
 <h2>User Menu</h2>
 <ul>
 	{% ifequal user user_obj %}
-	<li><a href="{% url foia-list-user user_name=user_obj.username %}">My FOI Requests</a>
-	<li><a href="{% url foia-update-list %}">Edit my Drafts</a>
+	<li><a href="{% url foia-mylist view="all" %}">My FOI Requests</a>
 	{% else %}
 	<li><a href="{% url foia-list-user user_name=user_obj.username %}">{{user_obj.username|capfirst}}'s FOI Requests</a>
 	{% endifequal %}
