@@ -172,6 +172,9 @@
 	{% endif %}
 	{% if user == object.user or object.public_documents %}
 		<h2>Actions</h2>
+		{% if user.is_staff %}
+			<p><a class="jqbutton" href="{% url admin:foia_foiarequest_change object.id %}">Admin</a></p>
+		{% endif %}
 		{% if user == object.user %}
 			{% if object.is_editable %}
 				<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
