@@ -69,6 +69,7 @@ def _foia_form_handler(request, foia, action):
                 foia_comm.communication = form.cleaned_data['request']
                 foia_comm.save()
                 foia.save()
+                messages.success(request, 'Request succesfully submitted.')
 
                 if request.POST['submit'] == 'Submit Request':
                     foia.submit()
