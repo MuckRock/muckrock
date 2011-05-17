@@ -6,11 +6,5 @@ Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change reque
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
 {% now "F j, Y" %}
-{% for comm in request.communications.reverse %}
-{{ comm.communication }}
-{% if forloop.last %}
-{% include "foia/address.txt" %}{% endif %}
-{% if not forloop.last %}
----{% endif %}
-{% endfor %}
+{% include "foia/comms.txt" %}
 {% endautoescape %}

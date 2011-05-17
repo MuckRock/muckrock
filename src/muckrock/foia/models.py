@@ -256,9 +256,15 @@ class FOIARequest(models.Model):
 
         if agency_email and LAMSON_ACTIVATE:
             from_addr = 'fax' if agency_email.endswith('faxaway.com') else self.get_mail_id()
+            if self.tracking_id:
+                subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
+            elif self.communications.count() > 1:
+                subject = 'Follow up to Freedom of Information Request: %s' % self.title
+            else:
+                subject = 'Freedom of Information Request: %s' % self.title
             msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
                                To=agency_email,
-                               Subject='Freedom of Information Request: %s' % self.title,
+                               Subject=subject,
                                Body=render_to_string('foia/request.txt', {'request': self}))
             agency_cc = self.agency.get_other_emails()
             if agency_cc:
