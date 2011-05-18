@@ -1,9 +1,17 @@
 {% autoescape off %}
 Submitter: http://www.muckrock.com{% url admin:auth_user_change request.user.pk %}
 Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
-{% if request.agency %}Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.agency.pk %}
-{% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
-{% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
+{% if not appeal %}
+	{% if request.agency %}Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.agency.pk %}
+	{% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
+	{% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
+	{% endif %}
+{% else %}
+	{% if request.appeal_agency %}Appeal Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.appeal_agency.pk %}
+	{% endif %}{% if request.agency.email %}Appeal Agency Email: {{request.appeal_agency.email}}
+	{% endif %}{% if request.agency.fax %}Appeal Agency Fax: {{request.appeal_agency.fax}}@fax2.faxaway.com
+	Appeal Agency - Allow emails for appeals: {{request.appeal_agency.can_email_appeals}}
+	{% endif %}
 {% endif %}
 Due Date, Follow Up Date, and Days Until Due will be automatically set when you update the request
 
