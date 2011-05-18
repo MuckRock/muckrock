@@ -302,6 +302,11 @@ class FOIARequest(models.Model):
                 date=datetime.now(), response=False, full_html=False,
                 communication=render_to_string('foia/followup.txt', {'request': self}))
 
+        if not self.email and self.agency:
+            self.email = self.agency.get_email()
+            self.other_emails = self.agency.other_emails
+            self.save()
+
         if self.email and LAMSON_ACTIVATE:
             self._send_email()
         else:
