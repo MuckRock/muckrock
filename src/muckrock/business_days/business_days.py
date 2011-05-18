@@ -35,7 +35,7 @@ class HolidayDate(object):
         """Is the given date an instance of this Holiday?"""
 
         # if the holiday falls on a Sun, observe on Mon
-        # if it falls on Sat, move to Fri is observe_sat is False
+        # if it falls on Sat, move to Fri is observe_sat if False
         weekday = date_.weekday()
         if weekday == SUN or (weekday == SAT and not self.observe_sat):
             return False
@@ -122,7 +122,7 @@ class ElectionDay(HolidayOrdWeekday):
             return date_
 
 
-class HolidayCalender(object):
+class HolidayCalendar(object):
     """A set of holidays"""
 
     def __init__(self, holidays, observe_sat):
@@ -149,7 +149,7 @@ class HolidayCalender(object):
 
         return not self.is_holiday(date_)
 
-    def busines_days_from(self, date_, num):
+    def business_days_from(self, date_, num):
         """Returns the date n business days from the given date"""
 
         # could be further optimized
@@ -186,15 +186,15 @@ us_holidays = [
     HolidayDate('Christmas', DEC, 25),
     ]
 
-calenders = {
-    'USA': HolidayCalender(us_holidays, False),
-    'FL': HolidayCalender(us_holidays + [
+calendars = {
+    'USA': HolidayCalendar(us_holidays, False),
+    'FL': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday('Day after Thanksgiving', NOV, FRI, 4)], False),
-    'MA': HolidayCalender(us_holidays + [
+    'MA': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday("Patriots' Day", APR, MON, 3)], True),
-    'ME': HolidayCalender(us_holidays + [
+    'ME': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday("Patriot's Day", APR, MON, 3)], False),
-    'NY': HolidayCalender(us_holidays + [
+    'NY': HolidayCalendar(us_holidays + [
             HolidayDate("Lincoln's Birthday", FEB, 12),
             ElectionDay()], True),
 }

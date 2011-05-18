@@ -35,6 +35,13 @@ def setup():
     management._commands['syncdb'] = 'django.core'
     connection.creation.create_test_db()
 
+    # populate the db
+    user = User.objects.create_user('mitch', 'mitch@test.com')
+    jurisdiction = Jurisdiction.objects.create(name='test jurisdiction', slug='test-jurisdiction')
+    foia = FOIARequest.objects.create(user=user, jurisdiction=jurisdiction,
+                                      title='test foia', slug='test-foia')
+    foia.set_mail_id()
+
 def teardown():
     """Tear down the test environment"""
 
@@ -53,8 +60,10 @@ def test_drops_open_relay_messages():
 
 def test_bad_sender():
     """Test a bad sender"""
+
+    foia = FOIARequest.objects.get(title='test foia')
     client.begin()
-    client.deliver('123-12345678@%s' % LAMSON_ROUTER_HOST, 'mitch@localhost.com',
+    client.deliver('%s@%s' % (foia.mail_id, LAMSON_ROUTER_HOST), 'mitch@localhost.com',
                    'Subject', 'Test a bad sender.')
     nose.tools.ok_(queue().pop()[1]['subject'].startswith('Bad Sender'))
 
@@ -66,31 +75,23 @@ def test_bad_addr():
 
 def test_normal():
     """Test a normal succesful response"""
-    user = User.objects.create_user('test', 'test@test.com')
-    user = User.objects.create_user('mitch', 'mitch@test.com')
-    jurisdiction = Jurisdiction.objects.create(name='test jurisdiction', slug='test-jurisdiction')
-    foia = FOIARequest.objects.create(user=user, jurisdiction=jurisdiction,
-                                      title='title', slug='title')
 
-    try:
-        foia.set_mail_id()
+    foia = FOIARequest.objects.get(title='test foia')
+    client.begin()
+    client.say('%s@%s,other@agency.gov' % (foia.mail_id, LAMSON_ROUTER_HOST), 'Test normal.')
 
-        client.begin()
-        client.say('%s@%s' % (foia.mail_id, LAMSON_ROUTER_HOST), 'Test normal.')
+    foia = FOIARequest.objects.get(pk=foia.pk)
+    nose.tools.eq_(foia.first_request(), 'Test normal.')
 
-        foia = FOIARequest.objects.get(pk=foia.pk)
-        nose.tools.eq_(foia.first_request(), 'Test normal.')
+    mail_ls = sorted([queue().pop(), queue().pop()])
+    nose.tools.ok_(mail_ls.pop()[1]['subject'].startswith('[RESPONSE]'))
+    nose.tools.eq_(mail_ls.pop()[1].body(), 'Test normal.')
 
-        mail_ls = sorted([queue().pop(), queue().pop()])
-        nose.tools.ok_(mail_ls.pop()[1]['subject'].startswith('[RESPONSE]'))
-        nose.tools.eq_(mail_ls.pop()[1].body(), 'Test normal.')
+    nose.tools.eq_(len(mail.outbox), 1)
+    nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
 
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
+    nose.tools.eq_(foia.email, 'mitch@localhost.gov')
+    nose.tools.eq_(foia.other_emails, 'other@agency.gov')
 
-    finally:
-        user.delete()
-        jurisdiction.delete()
-        foia.delete()
 
 # test different attachment types

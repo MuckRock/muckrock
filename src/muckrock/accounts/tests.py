@@ -11,7 +11,7 @@ import nose.tools
 from datetime import datetime, timedelta
 
 from accounts.models import Profile
-from accounts.forms import UserChangeForm
+from accounts.forms import UserChangeForm, UserCreationForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from settings import MONTHLY_REQUESTS
 
@@ -50,6 +50,13 @@ class TestAccountUnit(TestCase):
         form.cleaned_data = {}
         form.cleaned_data['email'] = 'bob@example.com'
         nose.tools.assert_raises(ValidationError, form.clean_email) # conflicting email
+
+    def test_user_creation_form(self):
+        """Create a new user - name should be case insensitive"""
+        form = UserCreationForm()
+        form.cleaned_data = {}
+        form.cleaned_data['username'] = 'ADAM'
+        nose.tools.assert_raises(ValidationError, form.clean_username) # conflicting name
 
     # models
     def test_profile_model_unicode(self):
@@ -101,7 +108,7 @@ class TestAccountUnit(TestCase):
 
 class TestAccountFunctional(TestCase):
     """Functional tests for account"""
-    fixtures = ['test_users.json', 'test_profiles.json']
+    fixtures = ['test_users.json', 'test_profiles.json', 'test_statistics.json']
 
     # views
     def test_anon_views(self):
@@ -214,4 +221,11 @@ class TestAccountFunctional(TestCase):
         get_allowed(self.client, reverse('acct-logout'),
                     ['registration/logged_out.html', 'registration/base.html'])
         get_post_unallowed(self.client, reverse('acct-my-profile'))
+
+    def test_admin_views(self):
+        """Test additional admin views"""
+
+        self.client.login(username='adam', password='abc')
+        response = get_allowed(self.client, reverse('admin:stats-csv'))
+        nose.tools.eq_(response['content-type'], 'text/csv')
 

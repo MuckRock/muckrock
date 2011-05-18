@@ -1,0 +1,8 @@
+
+{% extends "admin/change_form.html" %}
+
+{% block form_top %}
+	{% if object_id and not original.pages %}
+		<p><a href="{% url admin:doc-admin-retry-pages idx=object_id %}">Retry setting the page count on this document</a></p>
+		{% endif %}
+{% endblock %}
