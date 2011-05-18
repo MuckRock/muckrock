@@ -137,5 +137,7 @@ def update_index():
 @periodic_task(run_every=crontab(hour=5, minute=0))
 def followup_requests():
     """Follow up on any requests that need following up on"""
-    for foia in FOIARequest.objects.get_followup():
+    # change to this after all follows up have been resolved
+    #for foia in FOIARequest.objects.get_followup(): 
+    for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
         foia.followup()

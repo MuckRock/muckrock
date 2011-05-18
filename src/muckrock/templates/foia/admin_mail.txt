@@ -5,6 +5,8 @@ Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change reque
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
+Due Date, Follow Up Date, and Days Until Due will be automatically set when you update the request
+
 {% now "F j, Y" %}
 {% include "foia/comms.txt" %}
 {% endautoescape %}
