@@ -12,18 +12,17 @@ from config.settings import relay
 from lamson.routing import route, stateless
 
 import os
-import re
 from datetime import datetime
-from email.utils import parseaddr
+from email.utils import parseaddr, getaddresses
 from tempfile import NamedTemporaryFile
 
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
 from foia.tasks import upload_document_cloud
 
-DOC_CLOUD_TYPES = ['application/pdf']
-IGNORE_TYPES = []
+DOC_CLOUD_TYPES = ['application/pdf', 'application/msword']
+IGNORE_TYPES = ['application/x-pkcs7-signature']
 TEXT_TYPES = ['text/plain']
-ALLOWED_EMAILS = [re.compile('[.]gov$')]
+ALLOWED_TLDS = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
 
 # pylint: disable-msg=C0103
 
@@ -33,17 +32,21 @@ def REQUEST(message, address=None, host=None):
     """Request auto handler"""
     # pylint: disable-msg=E1101
 
-    if not any(pat.search(parseaddr(message['from'])[1]) for pat in ALLOWED_EMAILS):
-        logging.warning('Bad sender: %s', message['from'])
-        message['subject'] = 'Bad Sender: %s' % message['subject']
-        relay.deliver(message, To='requests@muckrock.com')
-        return
-
     try:
         foia = FOIARequest.objects.get(mail_id=address)
+        from_email = parseaddr(message['from'])[1]
+        # this is a python email message object
+        msg = message.to_message()
+
+        if not _allowed_email(from_email, foia):
+            logging.warning('Bad sender: %s', message['from'])
+            message['subject'] = 'Bad Sender: %s' % message['subject']
+            relay.deliver(message, To='requests@muckrock.com')
+            return
+
         communication = ''
         attachments = []
-        for part in message.to_message().walk():
+        for part in msg.walk():
             if part.get_content_maintype() == 'multipart':
                 # just a container for other parts
                 continue
@@ -54,7 +57,7 @@ def REQUEST(message, address=None, host=None):
                 attachments.append('Add to body text - type: %s name: %s' %
                                    (content_type, file_name))
 
-            if content_type not in IGNORE_TYPES:
+            elif content_type not in IGNORE_TYPES:
                 if file_name and content_type in DOC_CLOUD_TYPES:
                     _upload_doc_cloud(foia, file_name, part, message['from'])
                     attachments.append('Add as a doc cloud - type: %s name: %s' %
@@ -67,9 +70,9 @@ def REQUEST(message, address=None, host=None):
                     attachments.append('Skipped due to no name - type: %s name: %s' %
                                        (content_type, file_name))
 
-        FOIACommunication.objects.create(
-                foia=foia, from_who=message['from'], date=datetime.now(), response=True,
-                full_html=False, communication=communication)
+        comm = FOIACommunication.objects.create(
+                foia=foia, from_who=message['from'], to_who=foia.user.get_full_name(),
+                date=datetime.now(), response=True, full_html=False, communication=communication)
 
         relay.deliver(message, To='requests@muckrock.com')
         relay.send(From='%s@%s' % (address, host), To='requests@muckrock.com',
@@ -78,7 +81,12 @@ def REQUEST(message, address=None, host=None):
                                          {'request': foia, 'attachments': attachments,
                                           'message': message}))
 
-        foia.updated()
+        foia.email = from_email
+        foia.other_emails = ','.join(email for name, email
+                             in getaddresses(msg.get_all('to', []) + msg.get_all('cc', []))
+                             if not email.endswith('muckrock.com'))
+        foia.save()
+        foia.update(comm.anchor())
 
         # Use NLTK to try and automatically set updated status
 
@@ -114,3 +122,12 @@ def _upload_doc_cloud(foia, file_name, part, sender):
         foia_doc.document.save(file_name, File(temp_file))
         foia_doc.save()
         upload_document_cloud.apply_async(args=[foia_doc.pk, False], countdown=3)
+
+def _allowed_email(email, foia):
+    """Is this an allowed email?"""
+
+    if foia.email and '@' in foia.email and email.endwith(foia.email.split('@')[1]):
+        return True
+    if foia.agency and email in foia.agency.get_other_emails():
+        return True
+    return any(email.endswith(tld) for tld in ALLOWED_TLDS)

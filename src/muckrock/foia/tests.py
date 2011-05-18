@@ -20,13 +20,24 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_agencies.json',
                 'test_foiarequests.json', 'test_foiacommunications.json']
 
     def setUp(self):
         """Set up tests"""
         # pylint: disable-msg=C0103
         self.foia = FOIARequest.objects.get(pk=1)
+
+        # set relay in foia.models to a mock that adds emails to the test mail queue
+        class MockRelay(object):
+            # pylint: disable-msg=C0111
+            # pylint: disable-msg=W0613
+            # pylint: disable-msg=R0903
+            def deliver(self, message, To=None, From=None):
+                mail.outbox.append(message)
+        import foia.models
+        foia.models.relay = MockRelay()
+
 
     # models
     def test_foia_model_unicode(self):
@@ -57,30 +68,43 @@ class TestFOIARequestUnit(TestCase):
 
         self.foia.status = 'submitted'
         self.foia.save()
-        self.foia.submitted()
+        self.foia.submit()
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.eq_(mail.outbox[0].to, ['requests@muckrock.com'])
 
         self.foia.status = 'processed'
         self.foia.save()
-        self.foia.updated()
+        self.foia.update()
         nose.tools.eq_(len(mail.outbox), 2)
         nose.tools.eq_(mail.outbox[1].to, [self.foia.user.email])
 
+        # already updated, no additional email
         self.foia.status = 'fix'
         self.foia.save()
-        self.foia.updated()
-        nose.tools.eq_(len(mail.outbox), 3)
+        self.foia.update()
+        nose.tools.eq_(len(mail.outbox), 2)
 
+        # if the user views it and clears the updated flag, we do get another email
+        self.foia.updated = False
+        self.foia.save()
         self.foia.status = 'rejected'
         self.foia.save()
-        self.foia.updated()
-        nose.tools.eq_(len(mail.outbox), 4)
+        self.foia.update()
+        nose.tools.eq_(len(mail.outbox), 3)
 
-        self.foia.status = 'done'
-        self.foia.save()
-        self.foia.updated()
-        nose.tools.eq_(len(mail.outbox), 5)
+        foia = FOIARequest.objects.get(pk=6)
+        foia.status = 'submitted'
+        foia.save()
+        foia.submit()
+        # this is a lamson mail message, not a django mail message
+        nose.tools.eq_(mail.outbox[-1]['from'], '%s@requests.muckrock.com' % foia.get_mail_id())
+        nose.tools.eq_(mail.outbox[-1]['to'], 'test@agency1.gov')
+        nose.tools.eq_(mail.outbox[-1]['cc'], 'other_a@agency1.gov,other_b@agency1.gov')
+        nose.tools.eq_(mail.outbox[-1]['subject'],
+                       'Freedom of Information Request: %s' % foia.title)
+        nose.tools.eq_(foia.status, 'processed')
+        nose.tools.eq_(foia.date_submitted, date.today())
+        nose.tools.ok_(foia.date_due > date.today())
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""

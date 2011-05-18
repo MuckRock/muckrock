@@ -4,6 +4,7 @@
 {% block content %}
 	<h1>{{heading}}</h1>
 	<h2>{{foia.title}}</h2>
+	{% if form.help_text %}<p class="large">{{form.help_text}}</p>{% endif %}
 	<div class="form">
   <form action="" method="post">
 		<fieldset>

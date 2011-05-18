@@ -1,4 +1,8 @@
+{% autoescape off %}
 Response received from: {{ message.from }} for request {{ request.title }} - {{ request.mail_id }}
+
+Please set the status!
+Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
 
 {% now "F j, Y" %}
 {{ request.communications.reverse.0.communication }}
@@ -7,5 +11,4 @@ Response received from: {{ message.from }} for request {{ request.title }} - {{ 
 {{ str }}
 {% endfor %}
 
-Please set the status
-Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
+{% endautoescape %}
