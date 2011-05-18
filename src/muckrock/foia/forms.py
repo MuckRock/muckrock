@@ -93,9 +93,9 @@ class FOIAFlagForm(forms.Form):
     reason = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}),
                              label='Reason')
 
-    help_text = 'Flag a request in order to let us know that something is wrong with the ' \
-                'request, such as it having the wrong status or responses being out of order.  ' \
-                'Please describe the problem as specifically as possibly here:'
+    help_text = 'Submit a correction for a request in order to let us know that something is ' \
+                'wrong with the request, such as it having the wrong status or responses being ' \
+                'out of order.  Please describe the problem as specifically as possibly here:'
 
 def foia_comm_form_factory(label):
     """Create a Communication Form with the given label"""
