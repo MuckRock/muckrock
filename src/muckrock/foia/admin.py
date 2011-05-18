@@ -89,6 +89,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
+        obj.update_dates()
         obj.save()
 
     def save_formset(self, request, form, formset, change):

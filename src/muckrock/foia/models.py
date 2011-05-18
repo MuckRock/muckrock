@@ -66,7 +66,11 @@ class FOIARequestManager(ChainableManager):
 
     def get_followup(self):
         """Get requests which require us to follow up on with the agency"""
-        return self.filter(status='processed', date_followup__lte=date.today())
+
+        return [f for f in self.get_overdue()
+                  if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()]
+        # Change to this after all follow ups have been resolved
+        #return self.filter(status='processed', date_followup__lte=date.today())
 
 
 class FOIARequest(models.Model):
@@ -267,31 +271,7 @@ class FOIARequest(models.Model):
             send_mail('[MuckRock] FOIA request has been updated',
                       msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
 
-        # update due date
-        save = False
-        cal = calendars[self.jurisdiction.legal()]
-
-        if self.status == 'processed':
-            self.date_followup = max(self.date_due,
-                                     self.last_comm().date + timedelta(FOLLOWUP_DAYS))
-            if self.days_until_due is not None:
-                # unpause the count down
-                self.date_due = cal.busines_days_from(date.today(), self.days_until_due)
-                self.days_until_due = None
-            save = True
-
-        if self.status != 'processed' and self.date_followup:
-            self.date_followup = None
-            save = True
-
-        if self.status in ['fix', 'payment'] and self.date_due:
-            # pause the count down
-            self.days_until_due = cal.business_days_between(date.today(), self.date_due)
-            self.date_due = None
-            save = True
-
-        if save:
-            self.save()
+        self.update_dates()
 
     def submit(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
@@ -303,30 +283,9 @@ class FOIARequest(models.Model):
             self.save()
 
         if self.email and LAMSON_ACTIVATE:
-            from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
-            if self.tracking_id:
-                subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
-            elif self.communications.count() > 1:
-                subject = 'Follow up to Freedom of Information Request: %s' % self.title
-            else:
-                subject = 'Freedom of Information Request: %s' % self.title
-            msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
-                               To=self.email,
-                               Subject=subject,
-                               Body=render_to_string('foia/request.txt', {'request': self}))
-            cc_addrs = self.get_other_emails()
-            if cc_addrs:
-                msg['cc'] = ','.join(cc_addrs)
-            relay.deliver(msg, To=[self.email, 'requests@muckrock.com'] + cc_addrs)
-
             self.status = 'processed'
-
-            if not self.date_submitted:
-                self.date_submitted = date.today()
-                days = self.jurisdiction.get_days()
-                if days:
-                    cal = calendars[self.jurisdiction.legal()]
-                    self.date_due = cal.business_days_from(date.today(), days)
+            self._send_email()
+            self.update_dates()
             self.save()
         else:
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
@@ -338,30 +297,83 @@ class FOIARequest(models.Model):
         """Send a follow up email for this request"""
         # pylint: disable-msg=E1101
 
-        FOIACommunication.objects.create(
-                foia=self, from_who=self.user.get_full_name(),
+        comm = FOIACommunication.objects.create(
+                foia=self, from_who=self.user.get_full_name(), to_who=self.get_to_who(),
                 date=datetime.now(), response=False, full_html=False,
                 communication=render_to_string('foia/followup.txt', {'request': self}))
 
-        agency_email = self.get_agency_email()
-
-        if agency_email and LAMSON_ACTIVATE:
-            msg = MailResponse(From='%s@%s' % (self.get_mail_id(), LAMSON_ROUTER_HOST),
-                               To=agency_email,
-                               Subject='Freedom of Information Request: %s' % self.title,
-                               Body=render_to_string('foia/requests.txt', {'request': self}))
-            agency_cc = self.agency.get_other_emails()
-            if agency_cc:
-                msg['cc'] = ','.join(agency_cc)
-            relay.deliver(msg, To=[agency_email, 'requests@muckrock.com'] + agency_cc)
-
+        if self.email and LAMSON_ACTIVATE:
+            self._send_email()
         else:
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-        self.update()
+        self.update(comm.anchor())
 
+    def _send_email(self):
+        """Send an email of the request to it's email address"""
+        # pylint: disable-msg=E1101
+        # self.email should be set before calling this method
+
+        from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
+        if self.tracking_id:
+            subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
+        elif self.communications.count() > 1:
+            subject = 'Follow up to Freedom of Information Request: %s' % self.title
+        else:
+            subject = 'Freedom of Information Request: %s' % self.title
+        msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
+                           To=self.email,
+                           Subject=subject,
+                           Body=render_to_string('foia/request.txt', {'request': self}))
+        cc_addrs = self.get_other_emails()
+        if cc_addrs:
+            msg['cc'] = ','.join(cc_addrs)
+        relay.deliver(msg, To=[self.email, 'requests@muckrock.com'] + cc_addrs)
+
+    def update_dates(self):
+        """Set the due date, follow up date and days until due attributes"""
+        # pylint: disable-msg=E1101
+
+        cal = calendars.get(self.jurisdiction.legal())
+        if not cal:
+            send_mail('%s needs a calendar' % self.jurisdiction, '', 'info@muckrock.com',
+                      ['requests@muckrock.com'], fail_silently=False)
+            cal = calendars['USA']
+
+        # first submit
+        if not self.date_submitted:
+            self.date_submitted = date.today()
+            days = self.jurisdiction.get_days()
+            if days:
+                self.date_due = cal.business_days_from(date.today(), days)
+
+        # updated from lamson without setting status or submitted
+        if self.status == 'processed':
+
+            # unpause the count down
+            if self.days_until_due is not None:
+                self.date_due = cal.business_days_from(date.today(), self.days_until_due)
+                self.days_until_due = None
+
+            # update follow up date
+            if self.date_due:
+                self.date_followup = max(self.date_due,
+                                         self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS))
+            else:
+                self.date_followup = self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS)
+
+        # if we are no longer waiting on the agency, do not follow up
+        if self.status != 'processed' and self.date_followup:
+            self.date_followup = None
+
+        # if we need to respond, pause the count down until we do
+        if self.status in ['fix', 'payment'] and self.date_due:
+            self.days_until_due = cal.business_days_between(date.today(), self.date_due)
+            self.date_due = None
+
+        self.save()
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -632,7 +644,7 @@ class Agency(models.Model):
         elif self.normalize_fax():
             return '%s@fax2.faxaway.com' % self.normalize_fax()
         else:
-            return None
+            return ''
 
     def get_other_emails(self):
         """Returns other emails as a list"""
