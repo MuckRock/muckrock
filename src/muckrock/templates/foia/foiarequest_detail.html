@@ -170,7 +170,7 @@
 		{{ object.sidebar_html|safe }}
 		<div class="content-separator"></div>
 	{% endif %}
-	{% if user == object.user or object.public_documents %}
+	{% if user == object.user or object.public_documents or user.is_authenticated %}
 		<h2>Actions</h2>
 		{% if user.is_staff %}
 			<p><a class="jqbutton" href="{% url admin:foia_foiarequest_change object.id %}">Admin</a></p>
@@ -201,7 +201,7 @@
 			</div>
 		{% endif %}
 		{% if user.is_authenticated %}
-			<p><a class="jqbutton" href="{% url foia-flag jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Flag</a></p>
+			<p><a class="jqbutton" href="{% url foia-flag jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Submit Correction</a></p>
 		{% endif %}
 		<div class="content-separator"></div>
 	{% endif %}
