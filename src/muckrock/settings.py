@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     'djcelery',
     'easy_thumbnails',
     'pingback',
+    'taggit',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
