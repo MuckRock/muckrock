@@ -37,6 +37,7 @@ def _foia_form_handler(request, foia, action):
         agency_pk = foia.agency and foia.agency.pk
         form.fields['agency'].queryset = \
             Agency.objects.filter(Q(jurisdiction=foia.jurisdiction, approved=True) |
+                                  Q(jurisdiction=foia.jurisdiction, user=request.user) |
                                   Q(pk=agency_pk))
         return form
 
