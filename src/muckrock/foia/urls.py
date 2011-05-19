@@ -34,6 +34,8 @@ urlpatterns = patterns('',
     url(r'^add_note/%s/$' % foia_url, views.note, name='foia-note'),
     url(r'^delete/%s/$' % foia_url,   views.delete, name='foia-delete'),
     url(r'^embargo/%s/$' % foia_url,  views.embargo, name='foia-embargo'),
+    url(r'^update-agency/(?P<idx>\d+)/$',
+                                      views.update_agency, name='foia-update-agency'),
     url(r'^feeds/submitted/$',        LatestSubmittedRequests(), name='foia-submitted-feed'),
     url(r'^feeds/completed/$',        LatestDoneRequests(), name='foia-done-feed'),
 )

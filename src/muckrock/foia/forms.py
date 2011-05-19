@@ -4,6 +4,7 @@ Forms for FOIA application
 
 from django import forms
 from django.contrib import messages
+from django.contrib.localflavor.us.forms import USPhoneNumberField
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -117,6 +118,19 @@ class FOIANoteForm(forms.ModelForm):
         model = FOIANote
         fields = ['note']
         widgets = {'note': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
+
+class AgencyForm(forms.ModelForm):
+    """A form for an Agency"""
+
+    phone = USPhoneNumberField(required=False)
+    fax = USPhoneNumberField(required=False)
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = Agency
+        fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
+        widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
+                   'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
 
 class FOIAWizardParent(forms.Form):
