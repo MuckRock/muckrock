@@ -22,11 +22,12 @@ from datetime import datetime
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagForm, \
                        FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAAppealForm, \
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+                       FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
+    # pylint: disable-msg=R0912
 
     def default_form(data=None):
         """Make a default form to update a FOIA request"""
@@ -53,11 +54,13 @@ def _foia_form_handler(request, foia, action):
 
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('agency-name')
+                new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
                     foia.agency = Agency.objects.create(name=agency_name,
                                                         jurisdiction=foia.jurisdiction,
                                                         user=request.user, approved=False)
+                    new_agency = True
                 foia.slug = slugify(foia.title)
                 foia_comm = foia.communications.all()[0]
                 foia_comm.date = datetime.now()
@@ -76,7 +79,12 @@ def _foia_form_handler(request, foia, action):
                             "You're request has been saved as a draft, please submit it when you "
                             "get more requests")
 
-                return HttpResponseRedirect(foia.get_absolute_url())
+                if new_agency:
+                    return HttpResponseRedirect(reverse('foia-update-agency',
+                                                        kwargs={'idx': foia.agency.pk})
+                                                + '?foia=%d' % foia.pk)
+                else:
+                    return HttpResponseRedirect(foia.get_absolute_url())
 
         except KeyError:
             # bad post, not possible from web form
@@ -379,3 +387,34 @@ def doc_cloud_detail(request, doc_id):
         raise Http404()
 
     return redirect(doc, permanant=True)
+
+@login_required
+def update_agency(request, idx):
+    """Allow the user to fill in some information about new agencies they create"""
+
+    agency = get_object_or_404(Agency, pk=idx)
+
+    if agency.user != request.user or agency.approved:
+        return render_to_response('error.html',
+                 {'message': 'You may only edit your own agencies which have not been '
+                             'approved yet'},
+                 context_instance=RequestContext(request))
+
+    if request.method == 'POST':
+        form = AgencyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            foia_pk = request.GET.get('foia')
+            foia = FOIARequest.objects.filter(pk=foia_pk)
+            if foia:
+                return HttpResponseRedirect(reverse('foia-detail',
+                    kwargs={'jurisdiction': foia[0].jurisdiction.slug,
+                            'slug': foia[0].slug,
+                            'idx': foia[0].pk}))
+            else:
+                return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+    else:
+        form = AgencyForm(instance=agency)
+
+    return render_to_response('foia/agency_form.html', {'form': form},
+                              context_instance=RequestContext(request))

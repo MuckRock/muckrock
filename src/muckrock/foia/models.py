@@ -543,7 +543,7 @@ class Agency(models.Model):
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
-    url = models.URLField(blank=True)
+    url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
     expires = models.DateField(blank=True, null=True)
     phone = models.CharField(blank=True, max_length=20)
     fax = models.CharField(blank=True, max_length=20)
