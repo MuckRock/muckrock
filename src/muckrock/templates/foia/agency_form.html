@@ -1,0 +1,16 @@
+
+{% extends "foia/base-submit.html" %}
+
+{% block content %}
+	<h1>Agency Information</h1>
+	<h2>{{agency.name}}</h2>
+	<p class="large">You have filed a request with an agency we do not have in our database yet.  If you have any additional information about this agency we would appreciate if you could fill it in here.  It will help us to file your request sooner and allow all of our users to start filing requests to this agency.  If you do not know any of the information, don't worry - your request will still be processed.</p>
+	<div class="form">
+  <form action="" method="post">
+		<fieldset>
+			{% include "form.html" %}
+			<input type="submit" name="submit" value="Submit" class="button" />
+		</fieldset>
+  </form>
+	</div>
+{% endblock %}
