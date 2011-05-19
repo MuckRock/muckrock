@@ -1,16 +1,10 @@
 {% autoescape off %}
-Submitter: http://www.muckrock.com/accounts/profile/{{request.user}}/
-Request Admin: http://www.muckrock.com/admin/foia/foiarequest/{{request.id}}/
-{% if request.agency %}Agency Admin: http://www.muckrock.com/admin/foia/agency/{{request.agency.pk}}/
+Submitter: http://www.muckrock.com{% url admin:auth_user_change request.user.pk %}
+Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
+{% if request.agency %}Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.agency.pk %}
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}
 {% now "F j, Y" %}
-{% for comm in request.communications.reverse %}
-{{ comm.communication }}
-{% if forloop.last %}
-{% include "foia/address.txt" %}{% endif %}
-{% if not forloop.last %}
----{% endif %}
-{% endfor %}
+{% include "foia/comms.txt" %}
 {% endautoescape %}

@@ -20,13 +20,24 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_agencies.json',
                 'test_foiarequests.json', 'test_foiacommunications.json']
 
     def setUp(self):
         """Set up tests"""
         # pylint: disable-msg=C0103
         self.foia = FOIARequest.objects.get(pk=1)
+
+        # set relay in foia.models to a mock that adds emails to the test mail queue
+        class MockRelay(object):
+            # pylint: disable-msg=C0111
+            # pylint: disable-msg=W0613
+            # pylint: disable-msg=R0903
+            def deliver(self, message, To=None, From=None):
+                mail.outbox.append(message)
+        import foia.models
+        foia.models.relay = MockRelay()
+
 
     # models
     def test_foia_model_unicode(self):
@@ -80,6 +91,20 @@ class TestFOIARequestUnit(TestCase):
         self.foia.save()
         self.foia.update()
         nose.tools.eq_(len(mail.outbox), 3)
+
+        foia = FOIARequest.objects.get(pk=6)
+        foia.status = 'submitted'
+        foia.save()
+        foia.submit()
+        # this is a lamson mail message, not a django mail message
+        nose.tools.eq_(mail.outbox[-1]['from'], '%s@requests.muckrock.com' % foia.get_mail_id())
+        nose.tools.eq_(mail.outbox[-1]['to'], 'test@agency1.gov')
+        nose.tools.eq_(mail.outbox[-1]['cc'], 'other_a@agency1.gov,other_b@agency1.gov')
+        nose.tools.eq_(mail.outbox[-1]['subject'],
+                       'Freedom of Information Request: %s' % foia.title)
+        nose.tools.eq_(foia.status, 'processed')
+        nose.tools.eq_(foia.date_submitted, date.today())
+        nose.tools.ok_(foia.date_due > date.today())
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
@@ -159,7 +184,7 @@ class TestFOIARequestUnit(TestCase):
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_profiles.json',
-                'test_foiarequests.json', 'test_foiacommunications.json']
+                'test_foiarequests.json', 'test_foiacommunications.json', 'test_agencies.json']
 
     # views
     def test_foia_list(self):
@@ -260,8 +285,8 @@ class TestFOIAFunctional(TestCase):
                                                  'idx': foia.pk, 'slug': foia.slug}),
                          ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
-    def test_post_views(self):
-        """Test posting data in views while logged in"""
+    def test_foia_submit_views(self):
+        """Test submitting a FOIA request"""
 
         foia = FOIARequest.objects.get(pk=1)
         self.client.login(username='adam', password='abc')
@@ -278,5 +303,26 @@ class TestFOIAFunctional(TestCase):
                      reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
-        nose.tools.assert_true(foia.first_request().startswith('updated request'))
+        nose.tools.ok_(foia.first_request().startswith('updated request'))
         nose.tools.eq_(foia.status, 'submitted')
+
+    def test_foia_save_views(self):
+        """Test saving a FOIA request"""
+
+        foia = FOIARequest.objects.get(pk=6)
+        self.client.login(username='bob', password='abc')
+
+        foia_data = {'title': 'Test 6', 'request': 'saved request',
+                     'submit': 'Save as Draft', 'agency': 2}
+
+        post_allowed(self.client, reverse('foia-update',
+                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                             'idx': foia.pk, 'slug': foia.slug}),
+                     foia_data, 'http://testserver' +
+                     reverse('foia-detail', kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                                    'idx': foia.pk, 'slug': foia.slug}))
+        foia = FOIARequest.objects.get(title='Test 6')
+        nose.tools.ok_(foia.first_request().startswith('saved request'))
+        nose.tools.eq_(foia.status, 'started')
+        nose.tools.eq_(foia.agency.pk, 2)
+
