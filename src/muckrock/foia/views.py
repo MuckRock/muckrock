@@ -60,6 +60,9 @@ def _foia_form_handler(request, foia, action):
                     foia.agency = Agency.objects.create(name=agency_name,
                                                         jurisdiction=foia.jurisdiction,
                                                         user=request.user, approved=False)
+                    send_mail('[AGENCY] %s' % foia.agency.name,
+                              render_to_string('foia/admin_agency.txt', {'agency': foia.agency}),
+                              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
                     new_agency = True
                 foia.slug = slugify(foia.title)
                 foia_comm = foia.communications.all()[0]
@@ -401,7 +404,7 @@ def update_agency(request, idx):
                  context_instance=RequestContext(request))
 
     if request.method == 'POST':
-        form = AgencyForm(request.POST)
+        form = AgencyForm(request.POST, instance=agency)
         if form.is_valid():
             form.save()
             foia_pk = request.GET.get('foia')
