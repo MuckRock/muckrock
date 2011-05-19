@@ -69,15 +69,15 @@ def _foia_form_handler(request, foia, action):
 
                 if request.POST['submit'] == 'Submit Request':
                     if request.user.get_profile().make_request():
-                        foia.save()
                         foia.submit()
                         messages.success(request, 'Request succesfully submitted.')
                     else:
                         foia.status = 'started'
-                        foia.save()
                         messages.error(request, "You are out of requests for this month.  "
                             "You're request has been saved as a draft, please submit it when you "
                             "get more requests")
+
+                foia.save()
 
                 if new_agency:
                     return HttpResponseRedirect(reverse('foia-update-agency',
