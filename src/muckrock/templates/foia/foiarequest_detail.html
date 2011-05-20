@@ -32,6 +32,32 @@
 		{% endif %}
 		{%endif%}
 	</span></p>
+	<div id='tag-links'>Tags:
+		{% for tag in object.tags.all %}
+			{{tag.name}}{% if not forloop.last %}, {%endif%}
+		{% empty %}
+			None
+		{% endfor %}
+		{% if object.user == request.user %}
+			&nbsp;&mdash;&nbsp;&nbsp;
+			<a href="#" onclick="$('#tag-links').hide('slow'); $('#tag-edit').show('slow');
+			                     $('#tags').superblyTagField({
+														allowNewTags: true,
+														showTagsNumber: 10,
+														preset: [ {% for tag in object.tags.all %}'{{tag.name}}',{% endfor %} ], 
+														tags: [ {% for tag in all_tags %}'{{tag.name}}',{% endfor %} ]});
+													 ">Edit</a>
+		{% endif %}
+	</div>
+	<div id='tag-edit' style="display:none;">
+		<form action="" method="post">
+			<input type='text' name="tags" value="{{object.tag_string}}" id="tags" />
+			<input type="submit" name="submit" value="Submit" class="button" style="margin-top:2px;"/>
+			<em class="quiet" style="float:left;">Enter tags seperated by Enter or a comma</em>
+			<div class="clearer">&nbsp;</div>
+		</form>
+	</div>
+	<br />
 
 	{% if object.public_documents or object.user == user %}
 	<div id="tabs">
@@ -309,6 +335,7 @@
 			}
 			var url = "http://www.muckrock.com{{request.path}}";
 			getTweets(url);
+
 		});
 	</script>
 

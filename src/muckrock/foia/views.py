@@ -24,6 +24,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagFor
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
+from tags.models import Tag
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
@@ -371,7 +372,12 @@ def detail(request, jurisdiction, slug, idx):
         foia.updated = False
         foia.save()
 
-    context = {'object': foia, 'communications': foia.get_communications(request.user)}
+    if request.method == 'POST' and foia.user == request.user:
+        foia.update_tags(request.POST['tags'])
+        return redirect(foia)
+
+    context = {'object': foia, 'all_tags': Tag.objects.all(),
+               'communications': foia.get_communications(request.user)}
     if foia.date_due:
         context['past_due'] = foia.date_due < datetime.now().date()
     else:

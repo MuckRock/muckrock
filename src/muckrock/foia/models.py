@@ -12,12 +12,14 @@ from lamson.mail import MailResponse
 
 from datetime import datetime, date, timedelta
 from hashlib import md5
+from taggit.managers import TaggableManager
 import os
 import re
 
 from business_days.business_days import calendars
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
+from tags.models import Tag, TaggedItemBase
 import fields
 
 class FOIARequestManager(ChainableManager):
@@ -109,6 +111,7 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -300,6 +303,20 @@ class FOIARequest(models.Model):
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
+    def update_tags(self, tags):
+        """Update the requests tags"""
+        # pylint: disable-msg=W0142
+
+        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
+
+        tag_set = set()
+        for tag in tags.split(','):
+            tag = tag.translate(html_remove)
+            if not tag:
+                continue
+            new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
+            tag_set.add(new_tag)
+        self.tags.set(*tag_set)
 
     class Meta:
         # pylint: disable-msg=R0903
