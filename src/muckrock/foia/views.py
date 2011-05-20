@@ -24,6 +24,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagFor
                        FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
+from tags.models import Tag
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
@@ -53,7 +54,7 @@ def _foia_form_handler(request, foia, action):
             if form.is_valid():
 
                 foia = form.save(commit=False)
-                agency_name = request.POST.get('agency-name')
+                agency_name = request.POST.get('combo-name')
                 new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
@@ -114,7 +115,7 @@ def create(request):
 def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_editable():
@@ -131,7 +132,7 @@ def update(request, jurisdiction, slug, idx):
 def _foia_action(request, jurisdiction, slug, idx, action):
     """Generic helper for FOIA actions"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
     form_class = action.form_class(foia)
 
@@ -294,7 +295,27 @@ def embargo(request, jurisdiction, slug, idx):
         must_own = True)
     return _foia_action(request, jurisdiction, slug, idx, action)
 
-def _sort_requests(get, foia_requests):
+@login_required
+def follow(request, jurisdiction, slug, idx):
+    """Follow or unfollow a request"""
+
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+
+    if foia.user == request.user:
+        messages.error(request, 'You may not follow your own request')
+    else:
+        if foia.followed_by.filter(user=request.user):
+            foia.followed_by.remove(request.user.get_profile())
+            messages.info(request, 'You are no longer following %s' % foia.title)
+        else:
+            foia.followed_by.add(request.user.get_profile())
+            messages.info(request, 'You are now following %s.  You will be notified whenever it '
+                                   'is updated.' % foia.title)
+
+    return redirect(foia)
+
+def _sort_requests(get, foia_requests, update_top=False):
     """Sort's the FOIA requests"""
     order = get.get('order', 'desc')
     field = get.get('field', 'date_submitted')
@@ -311,18 +332,24 @@ def _sort_requests(get, foia_requests):
 
     ob_field = '-' + field if order == 'desc' else field
 
-    return foia_requests.order_by('-updated', ob_field)
+    if update_top:
+        return foia_requests.order_by('-updated', ob_field)
+    else:
+        return foia_requests.order_by(ob_field)
 
-def _list(request, requests, kwargs=None):
+def _list(request, requests, extra_context=None, kwargs=None):
     """Helper function for creating list views"""
     # pylint: disable-msg=W0142
 
+    if not extra_context:
+        extra_context = {}
     if not kwargs:
         kwargs = {}
+    extra_context['title'] = 'FOI Requests'
 
     per_page = min(int(request.GET.get('per_page', 10)), 100)
     return list_detail.object_list(request, requests, paginate_by=per_page,
-                                   extra_context={'title': 'FOI Requests'}, **kwargs)
+                                   extra_context=extra_context, **kwargs)
 
 def list_(request):
     """List all viewable FOIA requests"""
@@ -337,12 +364,51 @@ def list_by_user(request, user_name):
     foia_requests = _sort_requests(request.GET,
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user))
 
-    return _list(request, foia_requests)
+    return _list(request, foia_requests, extra_context={'subtitle': 'by %s' % user_name})
+
+def list_by_tag(request, tag_slug):
+    """List of all FOIA requests by a given user"""
+
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user).filter(tags=tag))
+
+    return _list(request, foia_requests, extra_context={'subtitle': 'Tagged with "%s"' % tag.name})
 
 @login_required
 def my_list(request, view):
     """Views owned by current user"""
     # pylint: disable-msg=E1103
+    # pylint: disable-msg=R0912
+
+    def handle_post():
+        """Handle post data"""
+        try:
+            foia_pks = request.POST.getlist('foia')
+            if request.POST.get('submit') == 'Add Tag':
+                tag_pk = request.POST.get('tag')
+                tag_name = request.POST.get('combo-name')
+                if tag_pk:
+                    tag = Tag.objects.get(pk=tag_pk)
+                elif tag_name:
+                    tag = Tag.objects.create(name=tag_name, user=request.user)
+                if tag_pk or tag_name:
+                    for foia_pk in foia_pks:
+                        foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+                        foia.tags.add(tag)
+            elif request.POST.get('submit') == 'Mark as Read':
+                for foia_pk in foia_pks:
+                    foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+                    foia.updated = False
+                    foia.save()
+        except FOIARequest.DoesNotExist, Tag.DoesNotExist:
+            # bad foia or tag value passed in, just ignore
+            pass
+        finally:
+            return redirect('foia-mylist', view=view)
+
+    if request.method == 'POST':
+        return handle_post()
 
     unsorted = FOIARequest.objects.filter(user=request.user)
     if view == 'drafts':
@@ -354,9 +420,26 @@ def my_list(request, view):
     elif view == 'completed':
         unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
 
-    foia_requests = _sort_requests(request.GET, unsorted)
+    tag = request.GET.get('tag')
+    if tag:
+        unsorted = unsorted.filter(tags__slug=tag)
+    tags = Tag.objects.filter(foiarequest__user=request.user).distinct()
 
-    return _list(request, foia_requests, kwargs={'template_name': 'foia/foiarequest_mylist.html'})
+    foia_requests = _sort_requests(request.GET, unsorted, update_top=True)
+
+    return _list(request, foia_requests,
+                 extra_context={'tags': tags, 'all_tags': Tag.objects.all()},
+                 kwargs={'template_name': 'foia/foiarequest_mylist.html'})
+
+@login_required
+def list_following(request):
+    """List of all FOIA requests the user is following"""
+
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user)
+                                                      .filter(followed_by=request.user))
+
+    return _list(request, foia_requests, extra_context={'subtitle': 'Following'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
@@ -371,11 +454,15 @@ def detail(request, jurisdiction, slug, idx):
         foia.updated = False
         foia.save()
 
-    context = {'object': foia, 'communications': foia.get_communications(request.user)}
-    if foia.date_due:
-        context['past_due'] = foia.date_due < datetime.now().date()
-    else:
-        context['past_due'] = False
+    if request.method == 'POST' and foia.user == request.user:
+        foia.update_tags(request.POST['tags'])
+        return redirect(foia)
+
+    context = {'object': foia, 'all_tags': Tag.objects.all(),
+               'communications': foia.get_communications(request.user)}
+    if request.user.is_authenticated():
+        context['follow'] = 'Unfollow' if foia.followed_by.filter(user=request.user) else 'Follow'
+    context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
 
     return render_to_response('foia/foiarequest_detail.html',
                               context,

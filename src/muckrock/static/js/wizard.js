@@ -78,7 +78,7 @@ $(function() {
 						}
 					}
 				})
-				.attr("name", "agency-name")
+				.attr("name", "combo-name")
 				.addClass( "ui-widget ui-widget-content ui-corner-left" );
 
 			input.data( "autocomplete" )._renderItem = function( ul, item ) {
@@ -117,7 +117,7 @@ $(function() {
 
 // Also for agency combo box
 $(function() {
-	$( ".agency-combo" ).combobox();
+	$( ".combobox" ).combobox();
 });
 
 // embed dialog pop up
