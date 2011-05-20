@@ -114,7 +114,7 @@ def create(request):
 def update(request, jurisdiction, slug, idx):
     """Update a started FOIA Request"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_editable():
@@ -131,7 +131,7 @@ def update(request, jurisdiction, slug, idx):
 def _foia_action(request, jurisdiction, slug, idx, action):
     """Generic helper for FOIA actions"""
 
-    jmodel = Jurisdiction.objects.get(slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
     form_class = action.form_class(foia)
 
