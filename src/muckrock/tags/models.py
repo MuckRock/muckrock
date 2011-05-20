@@ -11,6 +11,10 @@ class Tag(TaggitTag):
     """Custom Tag Class"""
     user = models.ForeignKey(User, null=True, blank=True)
 
+    class Meta:
+        # pylint: disable-msg=R0903
+        ordering = ['name']
+
 class TaggedItemBase(GenericTaggedItemBase):
     """Custom Tagged Item Base Class"""
     tag = models.ForeignKey(Tag, related_name="%(app_label)s_%(class)s_items")
