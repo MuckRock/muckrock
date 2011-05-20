@@ -367,9 +367,15 @@ def my_list(request, view):
     elif view == 'completed':
         unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
 
+    tag = request.GET.get('tag')
+    if tag:
+        unsorted = unsorted.filter(tags__slug=tag)
+    tags = Tag.objects.filter(foiarequest__user=request.user).distinct()
+
     foia_requests = _sort_requests(request.GET, unsorted)
 
-    return _list(request, foia_requests, kwargs={'template_name': 'foia/foiarequest_mylist.html'})
+    return _list(request, foia_requests, extra_context={'tags': tags},
+                 kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""

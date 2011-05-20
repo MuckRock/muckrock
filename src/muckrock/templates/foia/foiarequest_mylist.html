@@ -48,4 +48,12 @@
 	{% endwith %}
 	{% endwith %}
 	{% endwith %}
+	{% if tags %}
+		<div class="content-separator"></div>
+		<ul>
+		{% for tag in tags %}
+			<li><a href="?tag={{tag.slug}}">{{tag.name}}</a></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
 {% endblock %}
