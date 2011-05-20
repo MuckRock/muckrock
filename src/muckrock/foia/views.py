@@ -294,7 +294,7 @@ def embargo(request, jurisdiction, slug, idx):
         must_own = True)
     return _foia_action(request, jurisdiction, slug, idx, action)
 
-def _sort_requests(get, foia_requests):
+def _sort_requests(get, foia_requests, update_top=False):
     """Sort's the FOIA requests"""
     order = get.get('order', 'desc')
     field = get.get('field', 'date_submitted')
@@ -311,7 +311,10 @@ def _sort_requests(get, foia_requests):
 
     ob_field = '-' + field if order == 'desc' else field
 
-    return foia_requests.order_by('-updated', ob_field)
+    if update_top:
+        return foia_requests.order_by('-updated', ob_field)
+    else:
+        return foia_requests.order_by(ob_field)
 
 def _list(request, requests, kwargs=None):
     """Helper function for creating list views"""
@@ -354,7 +357,7 @@ def my_list(request, view):
     elif view == 'completed':
         unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
 
-    foia_requests = _sort_requests(request.GET, unsorted)
+    foia_requests = _sort_requests(request.GET, unsorted, update_top=True)
 
     return _list(request, foia_requests, kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
