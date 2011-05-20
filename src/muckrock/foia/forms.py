@@ -26,7 +26,7 @@ class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
     agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
-                                    widget=forms.Select(attrs={'class': 'agency-combo'}),
+                                    widget=forms.Select(attrs={'class': 'combobox'}),
                                     help_text='Select one of the agencies for the jurisdiction you '
                                           'have chosen, or write in the correct agency if known')
     embargo = forms.BooleanField(required=False,

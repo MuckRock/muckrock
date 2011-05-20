@@ -8,6 +8,7 @@ from django.db import models
 
 from datetime import datetime
 
+from foia.models import FOIARequest
 from settings import MONTHLY_REQUESTS
 
 class Profile(models.Model):
@@ -20,6 +21,7 @@ class Profile(models.Model):
     state = USStateField(blank=True, default='MA')
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
+    follows = models.ManyToManyField(FOIARequest, related_name='followed_by')
 
     # for limiting # of requests / month
     monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS)

@@ -5,6 +5,7 @@
 	<li class="{% active request "^/foi/list/$" %}"><a href="{% url foia-list %}">All Requests</a></li>
 	{% if user.is_authenticated %}
 	<li class="{% active request "^/foi/mylist/" %}"><a href="{% url foia-mylist view="all" %}">My Requests</a></li>
+	<li class="{% active request "^/foi/list/following/$" %}"><a href="{% url foia-list-following %}">Following</a></li>
 	{% endif %}
 </ul>
 
