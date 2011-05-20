@@ -314,16 +314,19 @@ def _sort_requests(get, foia_requests):
 
     return foia_requests.order_by('-updated', ob_field)
 
-def _list(request, requests, kwargs=None):
+def _list(request, requests, extra_context=None, kwargs=None):
     """Helper function for creating list views"""
     # pylint: disable-msg=W0142
 
+    if not extra_context:
+        extra_context = {}
     if not kwargs:
         kwargs = {}
+    extra_context['title'] = 'FOI Requests'
 
     per_page = min(int(request.GET.get('per_page', 10)), 100)
     return list_detail.object_list(request, requests, paginate_by=per_page,
-                                   extra_context={'title': 'FOI Requests'}, **kwargs)
+                                   extra_context=extra_context, **kwargs)
 
 def list_(request):
     """List all viewable FOIA requests"""
@@ -338,7 +341,16 @@ def list_by_user(request, user_name):
     foia_requests = _sort_requests(request.GET,
                                    FOIARequest.objects.get_viewable(request.user).filter(user=user))
 
-    return _list(request, foia_requests)
+    return _list(request, foia_requests, extra_context={'subtitle': 'by %s' % user_name})
+
+def list_by_tag(request, tag_slug):
+    """List of all FOIA requests by a given user"""
+
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user).filter(tags=tag))
+
+    return _list(request, foia_requests, extra_context={'subtitle': 'Tagged with "%s"' % tag.name})
 
 @login_required
 def my_list(request, view):

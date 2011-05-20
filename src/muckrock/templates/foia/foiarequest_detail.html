@@ -34,7 +34,7 @@
 	</span></p>
 	<div id='tag-links'>Tags:
 		{% for tag in object.tags.all %}
-			{{tag.name}}{% if not forloop.last %}, {%endif%}
+			<a href="{% url foia-list-tag tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}, {%endif%}
 		{% empty %}
 			None
 		{% endfor %}
