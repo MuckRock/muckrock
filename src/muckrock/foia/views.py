@@ -54,7 +54,7 @@ def _foia_form_handler(request, foia, action):
             if form.is_valid():
 
                 foia = form.save(commit=False)
-                agency_name = request.POST.get('agency-name')
+                agency_name = request.POST.get('combo-name')
                 new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
@@ -356,6 +356,36 @@ def list_by_tag(request, tag_slug):
 def my_list(request, view):
     """Views owned by current user"""
     # pylint: disable-msg=E1103
+    # pylint: disable-msg=R0912
+
+    def handle_post():
+        """Handle post data"""
+        try:
+            foia_pks = request.POST.getlist('foia')
+            if request.POST.get('submit') == 'Add Tag':
+                tag_pk = request.POST.get('tag')
+                tag_name = request.POST.get('combo-name')
+                if tag_pk:
+                    tag = Tag.objects.get(pk=tag_pk)
+                elif tag_name:
+                    tag = Tag.objects.create(name=tag_name, user=request.user)
+                if tag_pk or tag_name:
+                    for foia_pk in foia_pks:
+                        foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+                        foia.tags.add(tag)
+            elif request.POST.get('submit') == 'Mark as Read':
+                for foia_pk in foia_pks:
+                    foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+                    foia.updated = False
+                    foia.save()
+        except FOIARequest.DoesNotExist, Tag.DoesNotExist:
+            # bad foia or tag value passed in, just ignore
+            pass
+        finally:
+            return redirect('foia-mylist', view=view)
+
+    if request.method == 'POST':
+        return handle_post()
 
     unsorted = FOIARequest.objects.filter(user=request.user)
     if view == 'drafts':
@@ -374,7 +404,8 @@ def my_list(request, view):
 
     foia_requests = _sort_requests(request.GET, unsorted)
 
-    return _list(request, foia_requests, extra_context={'tags': tags},
+    return _list(request, foia_requests,
+                 extra_context={'tags': tags, 'all_tags': Tag.objects.all()},
                  kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
 def detail(request, jurisdiction, slug, idx):
