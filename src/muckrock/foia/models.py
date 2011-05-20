@@ -3,7 +3,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.db import models
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -12,6 +12,7 @@ from lamson.mail import MailResponse
 
 from datetime import datetime, date, timedelta
 from hashlib import md5
+from itertools import chain
 from taggit.managers import TaggableManager
 import os
 import re
@@ -254,13 +255,18 @@ class FOIARequest(models.Model):
             if anchor:
                 link += '#' + anchor
 
-            msg = render_to_string('foia/mail.txt',
-                {'name': self.user.get_full_name(),
-                 'title': self.title,
-                 'status': self.get_status_display(),
-                 'link': link})
-            send_mail('[MuckRock] FOIA request has been updated',
-                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+            send_data = []
+            for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+                msg = render_to_string('foia/mail.txt',
+                    {'name': profile.user.get_full_name(),
+                     'title': self.title,
+                     'status': self.get_status_display(),
+                     'link': link,
+                     'follow': self.user != profile.user})
+                send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                                  msg, 'info@muckrock.com', [profile.user.email]))
+
+            send_mass_mail(send_data, fail_silently=False)
 
     def submit(self):
         """The request has been submitted.  Notify admin and try to auto submit"""
@@ -302,6 +308,12 @@ class FOIARequest(models.Model):
             send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
+        # whether it is automailed or not, notify the followers (but not the owner)
+        send_data = [('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                      msg, 'info@muckrock.com', [profile.user.email])
+                     for profile in self.followed_by.all()]
+        send_mass_mail(send_data, fail_silently=False)
 
     def update_tags(self, tags):
         """Update the requests tags"""
