@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'muckrock.rodeo',
     'muckrock.news',
     'muckrock.templatetags',
+    'muckrock.tags',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
