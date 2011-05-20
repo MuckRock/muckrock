@@ -295,6 +295,26 @@ def embargo(request, jurisdiction, slug, idx):
         must_own = True)
     return _foia_action(request, jurisdiction, slug, idx, action)
 
+@login_required
+def follow(request, jurisdiction, slug, idx):
+    """Follow or unfollow a request"""
+
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+
+    if foia.user == request.user:
+        messages.error(request, 'You may not follow your own request')
+    else:
+        if foia.followed_by.filter(user=request.user):
+            foia.followed_by.remove(request.user.get_profile())
+            messages.info(request, 'You are no longer following %s' % foia.title)
+        else:
+            foia.followed_by.add(request.user.get_profile())
+            messages.info(request, 'You are now following %s.  You will be notified whenever it '
+                                   'is updated.' % foia.title)
+
+    return redirect(foia)
+
 def _sort_requests(get, foia_requests):
     """Sort's the FOIA requests"""
     order = get.get('order', 'desc')
@@ -408,6 +428,16 @@ def my_list(request, view):
                  extra_context={'tags': tags, 'all_tags': Tag.objects.all()},
                  kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
+@login_required
+def list_following(request):
+    """List of all FOIA requests the user is following"""
+
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user)
+                                                      .filter(followed_by=request.user))
+
+    return _list(request, foia_requests, extra_context={'subtitle': 'Following'})
+
 def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
@@ -427,10 +457,9 @@ def detail(request, jurisdiction, slug, idx):
 
     context = {'object': foia, 'all_tags': Tag.objects.all(),
                'communications': foia.get_communications(request.user)}
-    if foia.date_due:
-        context['past_due'] = foia.date_due < datetime.now().date()
-    else:
-        context['past_due'] = False
+    if request.user.is_authenticated():
+        context['follow'] = 'Unfollow' if foia.followed_by.filter(user=request.user) else 'Follow'
+    context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
 
     return render_to_response('foia/foiarequest_detail.html',
                               context,

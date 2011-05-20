@@ -232,6 +232,9 @@
 				<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
 			</div>
 		{% endif %}
+		{% if user.is_authenticated and user != object.user %}
+			<p><a class="jqbutton" href="{% url foia-follow jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">{{follow}}</a></p>
+		{% endif %}
 		{% if user.is_authenticated %}
 			<p><a class="jqbutton" href="{% url foia-flag jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Submit Correction</a></p>
 		{% endif %}
