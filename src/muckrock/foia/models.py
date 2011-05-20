@@ -277,35 +277,33 @@ class FOIARequest(models.Model):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable-msg=E1101
 
-        if not self.email and self.agency:
+        # can email appeal if the agency has an appeal agency which has an email address
+        # and can accept emailed appeals
+        can_email_appeal = appeal and self.agency and self.agency.appeal_agency and \
+                           self.agency.appeal_agency.email and \
+                           self.agency.appeal_agency.can_email_appeals
+
+        # update email addresses for the request
+        if can_email_appeal:
+            self.email = self.agency.appeal_agency.get_email()
+            self.other_emails = self.agency.appeal_agency.other_emails
+        elif not self.email and self.agency:
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
-            self.save()
 
-        if self.email and LAMSON_ACTIVATE and not appeal:
+        # if the request can be emailed, email it, otherwise send a notice to the admin
+        if LAMSON_ACTIVATE and ((self.email and not appeal) or can_email_appeal):
             self.status = 'processed'
             self._send_email()
             self.update_dates()
-            self.save()
-        elif not appeal:
+        else:
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
+            notice = 'APPEAL' if appeal else notice
             send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
-                      render_to_string('foia/admin_mail.txt', {'request': self}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-        elif appeal and self.agency and self.agency.appeal_agency:
-            appeal_agency = self.agency.appeal_agency
-            if appeal_agency.email and appeal_agency.can_email_appeals:
-                self.status = 'processed'
-                self.email = appeal_agency.email
-                self.other_emails = appeal_agency.other_emails
-                self._send_email()
-                self.update_dates()
-                self.save()
-        elif appeal:
-            send_mail('[APPEAL] Freedom of Information Request: %s' % self.title,
                       render_to_string('foia/admin_mail.txt',
-                                       {'request': self, 'appeal': True}),
+                                       {'request': self, 'appeal': appeal}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+        self.save()
 
     def followup(self):
         """Send a follow up email for this request"""
