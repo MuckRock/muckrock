@@ -51,6 +51,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
     inlines = [FOIACommunicationInline, FOIADocumentInline, FOIAFileInline, FOIANoteInline]
+    save_on_top = True
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
