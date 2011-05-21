@@ -3,15 +3,16 @@ Tests using nose for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core import mail
+from django.test import TestCase
 import nose.tools
 
-from datetime import date, timedelta
+import datetime
 from operator import attrgetter
 
-from foia.models import FOIARequest
+from business_days.business_days import calendars
+from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction, FOLLOWUP_DAYS
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -26,6 +27,9 @@ class TestFOIARequestUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         # pylint: disable-msg=C0103
+
+        mail.outbox = []
+
         self.foia = FOIARequest.objects.get(pk=1)
 
         # set relay in foia.models to a mock that adds emails to the test mail queue
@@ -103,8 +107,8 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.eq_(mail.outbox[-1]['subject'],
                        'Freedom of Information Request: %s' % foia.title)
         nose.tools.eq_(foia.status, 'processed')
-        nose.tools.eq_(foia.date_submitted, date.today())
-        nose.tools.ok_(foia.date_due > date.today())
+        nose.tools.eq_(foia.date_submitted, datetime.date.today())
+        nose.tools.ok_(foia.date_due > datetime.date.today())
 
     def test_foia_viewable(self):
         """Test all the viewable and embargo functions"""
@@ -113,10 +117,10 @@ class TestFOIARequestUnit(TestCase):
         user2 = User.objects.get(pk=2)
 
         foias = list(FOIARequest.objects.filter(id__in=[1, 5, 11, 12, 13, 14]).order_by('id'))
-        foias[1].date_embargo = date.today() + timedelta(10)
-        foias[2].date_embargo = date.today() + timedelta(10)
-        foias[3].date_embargo = date.today()
-        foias[4].date_embargo = date.today() - timedelta(10)
+        foias[1].date_embargo = datetime.date.today() + datetime.timedelta(10)
+        foias[2].date_embargo = datetime.date.today() + datetime.timedelta(10)
+        foias[3].date_embargo = datetime.date.today()
+        foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
 
         # check manager get_viewable against models is_viewable
         viewable_foias = FOIARequest.objects.get_viewable(user1)
@@ -325,4 +329,186 @@ class TestFOIAFunctional(TestCase):
         nose.tools.ok_(foia.first_request().startswith('saved request'))
         nose.tools.eq_(foia.status, 'started')
         nose.tools.eq_(foia.agency.pk, 2)
+
+
+class TestFOIAIntegration(TestCase):
+    """Integration tests for FOIA"""
+
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_agencies.json',
+                'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json']
+
+    def setUp(self):
+        """Set up tests"""
+        # pylint: disable-msg=C0103
+        # pylint: disable-msg=E1003
+        # pylint: disable-msg=C0111
+
+        mail.outbox = []
+
+        # set relay in foia.models to a mock that adds emails to the test mail queue
+        class MockRelay(object):
+            # pylint: disable-msg=W0613
+            # pylint: disable-msg=R0903
+            def deliver(self, message, To=None, From=None):
+                mail.outbox.append(message)
+        import foia.models
+        foia.models.relay = MockRelay()
+
+        # Replace real date and time with mock ones so we can control today's/now's value
+        # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
+        class MockDate(datetime.date):
+            def __add__(self, other):
+                d = super(MockDate, self).__add__(other)
+                return MockDate(d.year, d.month, d.day)
+        class MockDateTime(datetime.datetime):
+            def date(self):
+                return MockDate(self.year, self.month, self.day)
+        self.orig_date = datetime.date
+        self.orig_datetime = datetime.datetime
+        datetime.date = MockDate
+        datetime.datetime = MockDateTime
+        foia.models.date = datetime.date
+        foia.models.datetime = datetime.datetime
+        def save(self, *args, **kwargs):
+            if self.date_followup:
+                self.date_followup = MockDateTime(self.date_followup.year,
+                                                  self.date_followup.month,
+                                                  self.date_followup.day)
+            super(FOIARequest, self).save(*args, **kwargs)
+        self.FOIARequest_save = foia.models.FOIARequest.save
+        foia.models.FOIARequest.save = save
+        self.set_today(datetime.date(2010, 1, 1))
+
+    def tearDown(self):
+        """Tear down tests"""
+        # pylint: disable-msg=C0103
+
+        import foia.models
+
+        # restore the original date and datetime for other tests
+        datetime.date = self.orig_date
+        datetime.datetime = self.orig_datetime
+        foia.models.date = datetime.date
+        foia.models.datetime = datetime.datetime
+        foia.models.FOIARequest.save = self.FOIARequest_save
+
+    def set_today(self, date):
+        """Set what datetime thinks today is"""
+        datetime.date.today = classmethod(lambda cls: cls(date.year, date.month, date.day))
+        datetime.datetime.now = classmethod(lambda cls: cls(date.year, date.month, date.day))
+
+    def test_request_lifecycle_no_email(self):
+        """Test a request going through the full cycle as if we had to physically mail it"""
+        # pylint: disable-msg=R0915
+
+        user = User.objects.get(username='adam')
+        agency = Agency.objects.get(pk=3)
+        jurisdiction = Jurisdiction.objects.get(pk=1)
+        cal = calendars.get(jurisdiction.legal())
+
+        self.set_today(datetime.date(2010, 2, 1))
+        nose.tools.eq_(len(mail.outbox), 0)
+
+        ## create and submit request
+        foia = FOIARequest.objects.create(
+            user=user, title='Test with no email', slug='test-with-no-email',
+            status='submitted', jurisdiction=jurisdiction, agency=agency)
+        comm = FOIACommunication.objects.create(
+            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
+            response=False, communication='Test communication')
+        foia.submit()
+
+        # check that a notification has been sent to requests
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.ok_(mail.outbox[-1].subject.startswith('[NEW]'))
+        nose.tools.eq_(mail.outbox[-1].to, ['requests@muckrock.com'])
+
+        ## two days pass, then the admin mails in the request
+        self.set_today(datetime.date.today() + datetime.timedelta(2))
+        foia.status = 'processed'
+        foia.update_dates()
+        foia.save()
+
+        # make sure dates were set correctly
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
+                                                             jurisdiction.get_days()))
+        nose.tools.eq_(foia.date_followup.date(),
+                       max(foia.date_due, foia.last_comm().date.date() +
+                                          datetime.timedelta(FOLLOWUP_DAYS)))
+        nose.tools.ok_(foia.days_until_due is None)
+        # no more mail should have been sent
+        nose.tools.eq_(len(mail.outbox), 1)
+
+        old_date_due = foia.date_due
+
+        ## after 5 days agency replies with a fix needed
+        self.set_today(datetime.date.today() + datetime.timedelta(5))
+        comm = FOIACommunication.objects.create(
+            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.datetime.now(),
+            response=True, communication='Test communication')
+        foia.status = 'fix'
+        foia.save()
+        foia.update(comm.anchor())
+
+        # check that a notification has been sent to the user
+        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.ok_(mail.outbox[-1].subject.startswith('[MuckRock]'))
+        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
+        # make sure dates were set correctly
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.ok_(foia.date_due is None)
+        nose.tools.ok_(foia.date_followup is None)
+        nose.tools.eq_(foia.days_until_due, cal.business_days_between(datetime.date(2010, 2, 8),
+                                                                      old_date_due))
+
+        old_days_until_due = foia.days_until_due
+
+        ## after 10 days the user submits the fix and the admin submits it right away
+        self.set_today(datetime.date.today() + datetime.timedelta(10))
+        comm = FOIACommunication.objects.create(
+            foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
+            response=False, communication='Test communication')
+        foia.status = 'submitted'
+        foia.save()
+        foia.submit()
+
+        # check that a notification has been sent to requests
+        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.ok_(mail.outbox[-1].subject.startswith('[UPDATED]'))
+        nose.tools.eq_(mail.outbox[-1].to, ['requests@muckrock.com'])
+
+        foia.status = 'processed'
+
+        foia.update_dates()
+        foia.save()
+
+        # make sure dates were set correctly
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_due, cal.business_days_from(datetime.date.today(),
+                                                             old_days_until_due))
+        nose.tools.eq_(foia.date_followup.date(),
+                       max(foia.date_due, foia.last_comm().date.date() +
+                                          datetime.timedelta(FOLLOWUP_DAYS)))
+        nose.tools.ok_(foia.days_until_due is None)
+
+        old_date_due = foia.date_due
+
+        ## after 4 days agency replies with the documents
+        self.set_today(datetime.date.today() + datetime.timedelta(4))
+        comm = FOIACommunication.objects.create(
+            foia=foia, from_who='Test Agency', to_who='Muckrock', date=datetime.date.today(),
+            response=True, communication='Test communication')
+        foia.status = 'done'
+        foia.save()
+        foia.update(comm.anchor())
+
+        # check that a notification has not been sent to the user since they habe not
+        # cleared the updated flag yet by viewing it
+        nose.tools.eq_(len(mail.outbox), 3)
+        # make sure dates were set correctly
+        nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
+        nose.tools.eq_(foia.date_due, old_date_due)
+        nose.tools.ok_(foia.date_followup is None)
+        nose.tools.ok_(foia.days_until_due is None)
 
