@@ -7,7 +7,19 @@
 	<h1 class="left">My FOI Requests</h1>
 	<div class="clear">&nbsp;</div>
 
+	<form action="" method="post">
+	<select name="tag" class="combobox">
+		<option value=""></option>
+		{% for tag in all_tags %}
+			<option value="{{tag.pk}}">{{tag.name}}</option>
+		{% endfor %}
+	</select>
+	<input type="submit" name="submit" value="Add Tag" class="button" />
+	<input type="submit" name="submit" value="Mark as Read" class="button" />
+
 	{% include "foia/pagination.html" %}
+
+	<form>
 
 	<table class="data-table">
 		<tr class="odd">
@@ -15,8 +27,8 @@
 		</tr>
 		{% for foia in object_list %}
 		<tr class="{% if foia.updated %}updated{% else %}{% cycle 'even' 'odd' %}{% endif %}">
-			<td><input type="checkbox" name="foia" value="{{foia.id}}" /></td>
-			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a></td>
+			<td><input type="checkbox" name="foia" value="{{foia.pk}}" /></td>
+			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
 			<td>{{ foia.jurisdiction }}</td>
 			<td>{% if foia.date_submitted %}
@@ -28,6 +40,8 @@
 		</tr>
 		{% endfor %}
 	</table>
+
+	</form>
 
 	{% include "foia/per_page.html" %}
 	{% include "foia/pagination.html" %}
@@ -48,4 +62,12 @@
 	{% endwith %}
 	{% endwith %}
 	{% endwith %}
+	{% if tags %}
+		<div class="content-separator"></div>
+		<ul>
+		{% for tag in tags %}
+			<li><a href="?tag={{tag.slug}}">{{tag.name}}</a></li>
+		{% endfor %}
+		</ul>
+	{% endif %}
 {% endblock %}

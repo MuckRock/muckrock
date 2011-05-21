@@ -3,7 +3,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from django.db import models
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -12,12 +12,15 @@ from lamson.mail import MailResponse
 
 from datetime import datetime, date, timedelta
 from hashlib import md5
+from itertools import chain
+from taggit.managers import TaggableManager
 import os
 import re
 
 from business_days.business_days import calendars
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
+from tags.models import Tag, TaggedItemBase
 import fields
 
 FOLLOWUP_DAYS = 15
@@ -115,6 +118,7 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
 
     objects = FOIARequestManager()
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
         return self.title
@@ -263,13 +267,18 @@ class FOIARequest(models.Model):
             if anchor:
                 link += '#' + anchor
 
-            msg = render_to_string('foia/mail.txt',
-                {'name': self.user.get_full_name(),
-                 'title': self.title,
-                 'status': self.get_status_display(),
-                 'link': link})
-            send_mail('[MuckRock] FOIA request has been updated',
-                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+            send_data = []
+            for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+                msg = render_to_string('foia/mail.txt',
+                    {'name': profile.user.get_full_name(),
+                     'title': self.title,
+                     'status': self.get_status_display(),
+                     'link': link,
+                     'follow': self.user != profile.user})
+                send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                                  msg, 'info@muckrock.com', [profile.user.email]))
+
+            send_mass_mail(send_data, fail_silently=False)
 
         self.update_dates()
 
@@ -296,6 +305,12 @@ class FOIARequest(models.Model):
             self.status = 'processed'
             self._send_email()
             self.update_dates()
+            if not self.date_submitted:
+                self.date_submitted = date.today()
+                days = self.jurisdiction.get_days()
+                if days:
+                    cal = calendars[self.jurisdiction.legal()]
+                    self.date_due = cal.business_days_from(date.today(), days)
         else:
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
@@ -304,6 +319,20 @@ class FOIARequest(models.Model):
                                        {'request': self, 'appeal': appeal}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
         self.save()
+
+        # whether it is automailed or not, notify the followers (but not the owner)
+        send_data = []
+        for profile in self.followed_by.all():
+            msg = render_to_string('foia/mail.txt',
+                {'name': profile.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': self.get_absolute_url(),
+                 'follow': self.user != profile.user})
+            send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                              msg, 'info@muckrock.com', [profile.user.email]))
+
+        send_mass_mail(send_data, fail_silently=False)
 
     def followup(self):
         """Send a follow up email for this request"""
@@ -391,6 +420,21 @@ class FOIARequest(models.Model):
             self.date_due = None
 
         self.save()
+
+    def update_tags(self, tags):
+        """Update the requests tags"""
+        # pylint: disable-msg=W0142
+
+        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
+
+        tag_set = set()
+        for tag in tags.split(','):
+            tag = tag.translate(html_remove)
+            if not tag:
+                continue
+            new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
+            tag_set.add(new_tag)
+        self.tags.set(*tag_set)
 
     class Meta:
         # pylint: disable-msg=R0903
@@ -636,7 +680,7 @@ class Agency(models.Model):
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
-    url = models.URLField(blank=True)
+    url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
     expires = models.DateField(blank=True, null=True)
     phone = models.CharField(blank=True, max_length=20)
     fax = models.CharField(blank=True, max_length=20)

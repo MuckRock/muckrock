@@ -120,11 +120,13 @@ INSTALLED_APPS = (
     'djcelery',
     'easy_thumbnails',
     'pingback',
+    'taggit',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
     'muckrock.news',
     'muckrock.templatetags',
+    'muckrock.tags',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
