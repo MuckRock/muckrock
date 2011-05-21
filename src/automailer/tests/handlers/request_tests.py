@@ -40,7 +40,9 @@ def setup():
     # populate the db
     user = User.objects.create_user('mitch', 'mitch@test.com')
     Profile.objects.create(user=user, date_update=date.today())
-    jurisdiction = Jurisdiction.objects.create(name='test jurisdiction', slug='test-jurisdiction')
+    jurisdiction = Jurisdiction.objects.create(name='United States of America',
+                                               slug='united-states-of-america',
+                                               abbrev='USA')
     foia = FOIARequest.objects.create(user=user, jurisdiction=jurisdiction,
                                       title='test foia', slug='test-foia')
     foia.set_mail_id()
