@@ -310,9 +310,17 @@ class FOIARequest(models.Model):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         # whether it is automailed or not, notify the followers (but not the owner)
-        send_data = [('[MuckRock] FOIA request "%s" has been updated' % self.title,
-                      msg, 'info@muckrock.com', [profile.user.email])
-                     for profile in self.followed_by.all()]
+        send_data = []
+        for profile in self.followed_by.all():
+            msg = render_to_string('foia/mail.txt',
+                {'name': profile.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': self.get_absolute_url(),
+                 'follow': self.user != profile.user})
+            send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                              msg, 'info@muckrock.com', [profile.user.email]))
+
         send_mass_mail(send_data, fail_silently=False)
 
     def update_tags(self, tags):
