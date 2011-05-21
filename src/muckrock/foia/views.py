@@ -119,13 +119,11 @@ def update(request, jurisdiction, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_editable():
-        return render_to_response('error.html',
-                 {'message': 'You may only edit non-submitted requests'},
-                 context_instance=RequestContext(request))
+        messages.error(request, 'You may only edit non-submitted requests')
+        return redirect(foia)
     if foia.user != request.user:
-        return render_to_response('error.html',
-                 {'message': 'You may only edit your own requests'},
-                 context_instance=RequestContext(request))
+        messages.error(request, 'You may only edit your own requests')
+        return redirect(foia)
 
     return _foia_form_handler(request, foia, 'Update')
 
@@ -137,14 +135,13 @@ def _foia_action(request, jurisdiction, slug, idx, action):
     form_class = action.form_class(foia)
 
     if action.must_own and foia.user != request.user:
-        return render_to_response('error.html',
-                 {'message': 'You may only %s your own requests' % action.msg},
-                 context_instance=RequestContext(request))
+        messages.error(request, 'You may only %s  your own requests' % action.msg)
+        return redirect(foia)
 
     for test, msg in action.tests:
         if not test(foia):
-            return render_to_response('error.html', {'message': msg},
-                     context_instance=RequestContext(request))
+            messages.error(request, msg)
+            return redirect(foia)
 
     if request.method == 'POST':
         form = form_class(request.POST)
@@ -485,24 +482,21 @@ def update_agency(request, idx):
     agency = get_object_or_404(Agency, pk=idx)
 
     if agency.user != request.user or agency.approved:
-        return render_to_response('error.html',
-                 {'message': 'You may only edit your own agencies which have not been '
-                             'approved yet'},
-                 context_instance=RequestContext(request))
+        messages.error(request, 'You may only edit your own agencies which have '
+                                'not been approved yet')
+        return redirect('foia-mylist', view='all')
 
     if request.method == 'POST':
         form = AgencyForm(request.POST, instance=agency)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Agency information saved.')
             foia_pk = request.GET.get('foia')
             foia = FOIARequest.objects.filter(pk=foia_pk)
             if foia:
-                return HttpResponseRedirect(reverse('foia-detail',
-                    kwargs={'jurisdiction': foia[0].jurisdiction.slug,
-                            'slug': foia[0].slug,
-                            'idx': foia[0].pk}))
+                return redirect(foia[0])
             else:
-                return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+                return redirect('foia-mylist', view='all')
     else:
         form = AgencyForm(instance=agency)
 
