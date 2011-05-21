@@ -163,7 +163,7 @@ def _foia_action(request, jurisdiction, slug, idx, action):
 
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url heading value must_own')
 
-def _save_foia_comm(request, foia, form):
+def _save_foia_comm(request, foia, form, action):
     """Save the FOI Communication"""
     FOIACommunication.objects.create(
             foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
@@ -171,14 +171,15 @@ def _save_foia_comm(request, foia, form):
             communication=form.cleaned_data['comm'])
     foia.status = 'submitted'
     foia.save()
-    foia.submit()
+    foia.submit(appeal=(action == 'Appeal'))
+    messages.success(request, '%s succesfully submitted.' % action)
 
 @login_required
 def fix(request, jurisdiction, slug, idx):
     """Ammend a 'fix required' FOIA Request"""
 
     action = Action(
-        form_actions = _save_foia_comm,
+        form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Fix'),
         msg = 'fix',
         tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')],
         form_class = lambda _: FOIAFixForm,
@@ -193,7 +194,7 @@ def appeal(request, jurisdiction, slug, idx):
     """Appeal a rejected FOIA Request"""
 
     action = Action(
-        form_actions = _save_foia_comm,
+        form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Appeal'),
         msg = 'appeal',
         tests = [(lambda f: f.is_appealable(), 'This request has not been rejected')],
         form_class = lambda _: FOIAAppealForm,

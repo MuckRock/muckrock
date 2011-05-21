@@ -49,5 +49,30 @@
             ], 
             "contact_first_name": ""
         }
+    },
+    {
+        "pk": 3, 
+        "model": "foia.agency", 
+        "fields": {
+            "fax": "", 
+            "contact_salutation": "", 
+            "name": "Test Agency 3", 
+            "contact_last_name": "", 
+            "url": "", 
+            "other_emails": "", 
+            "jurisdiction": 1, 
+            "expires": null, 
+            "approved": true, 
+            "phone": "", 
+            "user": null, 
+            "address": "457 Nowhere\r\nBoston, MA 02140", 
+            "notes": "", 
+            "contact_title": "", 
+            "email": "", 
+            "types": [
+                1
+            ], 
+            "contact_first_name": ""
+        }
     }
 ]
