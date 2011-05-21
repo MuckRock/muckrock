@@ -58,7 +58,7 @@ def update(request):
             request.user.save()
 
             user_profile = form.save()
-            
+
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         user_profile = get_profile()

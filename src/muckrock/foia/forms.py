@@ -4,6 +4,7 @@ Forms for FOIA application
 
 from django import forms
 from django.contrib import messages
+from django.contrib.localflavor.us.forms import USPhoneNumberField
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -25,7 +26,7 @@ class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
     agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
-                                    widget=forms.Select(attrs={'class': 'agency-combo'}),
+                                    widget=forms.Select(attrs={'class': 'combobox'}),
                                     help_text='Select one of the agencies for the jurisdiction you '
                                           'have chosen, or write in the correct agency if known')
     embargo = forms.BooleanField(required=False,
@@ -93,9 +94,9 @@ class FOIAFlagForm(forms.Form):
     reason = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}),
                              label='Reason')
 
-    help_text = 'Flag a request in order to let us know that something is wrong with the ' \
-                'request, such as it having the wrong status or responses being out of order.  ' \
-                'Please describe the problem as specifically as possibly here:'
+    help_text = 'Submit a correction for a request in order to let us know that something is ' \
+                'wrong with the request, such as it having the wrong status or responses being ' \
+                'out of order.  Please describe the problem as specifically as possibly here:'
 
 def foia_comm_form_factory(label):
     """Create a Communication Form with the given label"""
@@ -117,6 +118,19 @@ class FOIANoteForm(forms.ModelForm):
         model = FOIANote
         fields = ['note']
         widgets = {'note': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
+
+class AgencyForm(forms.ModelForm):
+    """A form for an Agency"""
+
+    phone = USPhoneNumberField(required=False)
+    fax = USPhoneNumberField(required=False)
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = Agency
+        fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
+        widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
+                   'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
 
 class FOIAWizardParent(forms.Form):

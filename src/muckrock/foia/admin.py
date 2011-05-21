@@ -18,41 +18,11 @@ from foia.tasks import upload_document_cloud, set_document_cloud_pages
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
 
-class FOIADocumentAdmin(admin.ModelAdmin):
-    """FOIA Document admin options"""
+class FOIADocumentInline(admin.TabularInline):
+    """FOIA Document Inline admin options"""
+    model = FOIADocument
     readonly_fields = ['doc_id', 'pages']
-    list_display = ('title', 'foia', 'doc_id', 'description')
-
-    def save_model(self, request, obj, form, change):
-        """Upload document to Document Cloud on save"""
-        # pylint: disable-msg=E1101
-        obj.save()
-        if not change:
-            obj.foia.update(obj.anchor())
-        # wait 3 seconds to give database a chance to sync
-        upload_document_cloud.apply_async(args=[obj.pk, change], countdown=3)
-
-    def get_urls(self):
-        """Add custom URLs here"""
-        urls = super(FOIADocumentAdmin, self).get_urls()
-        my_urls = patterns('', url(r'^retry_pages/(?P<idx>\d+)/$',
-                                   self.admin_site.admin_view(self.retry_pages),
-                                   name='doc-admin-retry-pages'))
-        return my_urls + urls
-
-    def retry_pages(self, request, idx):
-        """Retry getting the page count"""
-        # pylint: disable-msg=E1101
-        # pylint: disable-msg=R0201
-
-        doc = get_object_or_404(FOIADocument, pk=idx)
-        if doc.pages:
-            messages.info(request, 'This document already has its page count set')
-        else:
-            set_document_cloud_pages.apply_async(args=[doc.pk])
-            messages.info(request, 'Attempting to set the page count... Please wait while the '
-                                   'Document Cloud servers are being accessed')
-        return HttpResponseRedirect(reverse('admin:foia_foiadocument_change', args=[doc.pk]))
+    extra = 2
 
 
 class FOIAFileInline(admin.TabularInline):
@@ -80,7 +50,8 @@ class FOIARequestAdmin(admin.ModelAdmin):
     list_filter = ['status']
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
-    inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
+    inlines = [FOIACommunicationInline, FOIADocumentInline, FOIAFileInline, FOIANoteInline]
+    save_on_top = True
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
@@ -94,17 +65,30 @@ class FOIARequestAdmin(admin.ModelAdmin):
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
+        # pylint: disable-msg=E1101
 
+        if formset.model == FOIANote:
+            formset.save()
+            return
+
+        # check communications, files, and docs for new ones to notify the user of an update
         instances = formset.save(commit=False)
         for instance in instances:
             # only way to tell if its new or not is to check the db
+            change = True
             try:
-                instance.__class__.objects.get(pk=instance.pk)
-            except instance.__class__.DoesNotExist:
-                # it is new, update on it, save first to get an id
-                instance.save()
+                formset.model.objects.get(pk=instance.pk)
+            except formset.model.DoesNotExist:
+                change = False
+
+            instance.save()
+            if not change:
+                # its new, so notify the user about it
                 instance.foia.update(instance.anchor())
-        formset.save()
+            if formset.model == FOIADocument:
+                upload_document_cloud.apply_async(args=[instance.pk, change], countdown=3)
+
+        formset.save_m2m()
 
     def get_urls(self):
         """Add custom URLs here"""
@@ -115,7 +99,10 @@ class FOIARequestAdmin(admin.ModelAdmin):
                                    name='foia-admin-followup'),
                                url(r'^send_update/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.send_update),
-                                   name='foia-admin-send-update'))
+                                   name='foia-admin-send-update'),
+                               url(r'^retry_pages/(?P<idx>\d+)/$',
+                                   self.admin_site.admin_view(self.retry_pages),
+                                   name='foia-admin-retry-pages'))
         return my_urls + urls
 
     def _list_helper(self, request, foias, action):
@@ -147,6 +134,20 @@ class FOIARequestAdmin(admin.ModelAdmin):
         messages.info(request, 'An update notification has been set to the user, %s' % foia.user)
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
+    def retry_pages(self, request, idx):
+        """Retry getting the page count"""
+        # pylint: disable-msg=E1101
+        # pylint: disable-msg=R0201
+
+        docs = FOIADocument.objects.filter(foia=idx, pages=0)
+        for doc in docs:
+            set_document_cloud_pages.apply_async(args=[doc.pk])
+
+        messages.info(request, 'Attempting to set the page count for %d documents... Please '
+                               'wait while the Document Cloud servers are being accessed'
+                               % docs.count())
+        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[idx]))
+
 
 class JurisdictionAdmin(admin.ModelAdmin):
     """Jurisdiction admin options"""
@@ -165,10 +166,10 @@ class AgencyAdmin(admin.ModelAdmin):
     """Agency admin options"""
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
+    search_fields = ['name']
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
-admin.site.register(FOIADocument, FOIADocumentAdmin)
 admin.site.register(Jurisdiction, JurisdictionAdmin)
 admin.site.register(AgencyType,   AgencyTypeAdmin)
 admin.site.register(Agency,       AgencyAdmin)
