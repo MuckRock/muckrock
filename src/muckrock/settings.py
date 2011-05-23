@@ -176,6 +176,9 @@ LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
+# pylint: disable-msg=W0611
+import monkey
+
 # pylint: disable-msg=W0401
 # pylint: disable-msg=W0614
 from local_settings import *
