@@ -207,7 +207,7 @@ class FOIARequest(models.Model):
         files = self.files.exclude(date=None)
         if self.user != user and not user.is_staff:
             docs = docs.filter(access='public')
-        display_comms = list(comms) +list(docs) + list(files)
+        display_comms = list(comms) + list(docs) + list(files)
         display_comms.sort(key=lambda x: x.date)
         return display_comms
 
