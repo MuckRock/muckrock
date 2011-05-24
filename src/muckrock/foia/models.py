@@ -207,7 +207,7 @@ class FOIARequest(models.Model):
         files = self.files.exclude(date=None)
         if self.user != user and not user.is_staff:
             docs = docs.filter(access='public')
-        display_comms = list(comms) +list(docs) + list(files)
+        display_comms = list(comms) + list(docs) + list(files)
         display_comms.sort(key=lambda x: x.date)
         return display_comms
 
@@ -253,6 +253,22 @@ class FOIARequest(models.Model):
         """Return the last communication"""
         # pylint: disable-msg=E1101
         return self.communications.reverse()[0]
+
+    def last_comm_date(self):
+        """Return the date of the latest communication or doc or file"""
+        # pylint: disable-msg=E1101
+
+        qsets = [self.communications.all().order_by('-date'),
+                 self.documents.exclude(date=None).order_by('-date'),
+                 self.files.exclude(date=None).order_by('-date')]
+
+        dates = []
+        for qset in qsets:
+            if qset:
+                # convert datetimes to dates
+                dates.append(qset[0].date.date() if hasattr(qset[0].date, 'date') else qset[0].date)
+
+        return max(dates) if dates else None
 
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
@@ -416,7 +432,10 @@ class FOIARequest(models.Model):
 
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            self.days_until_due = cal.business_days_between(date.today(), self.date_due)
+            last_date = self.last_comm_date()
+            if not last_date:
+                last_date = date.today()
+            self.days_until_due = cal.business_days_between(last_date, self.date_due)
             self.date_due = None
 
         self.save()
