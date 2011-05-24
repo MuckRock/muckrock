@@ -303,7 +303,7 @@ def follow(request, jurisdiction, slug, idx):
     if foia.user == request.user:
         messages.error(request, 'You may not follow your own request')
     else:
-        if foia.followed_by.filter(user=request.user):
+        if foia.followed_by.filter(user=request.user.get_profile()):
             foia.followed_by.remove(request.user.get_profile())
             messages.info(request, 'You are no longer following %s' % foia.title)
         else:
@@ -434,8 +434,8 @@ def list_following(request):
     """List of all FOIA requests the user is following"""
 
     foia_requests = _sort_requests(request.GET,
-                                   FOIARequest.objects.get_viewable(request.user)
-                                                      .filter(followed_by=request.user))
+        FOIARequest.objects.get_viewable(request.user)
+                           .filter(followed_by=request.user.get_profile()))
 
     return _list(request, foia_requests, extra_context={'subtitle': 'Following'})
 
@@ -459,7 +459,8 @@ def detail(request, jurisdiction, slug, idx):
     context = {'object': foia, 'all_tags': Tag.objects.all(),
                'communications': foia.get_communications(request.user)}
     if request.user.is_authenticated():
-        context['follow'] = 'Unfollow' if foia.followed_by.filter(user=request.user) else 'Follow'
+        context['follow'] = \
+            'Unfollow' if foia.followed_by.filter(user=request.user.get_profile()) else 'Follow'
     context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
 
     return render_to_response('foia/foiarequest_detail.html',
