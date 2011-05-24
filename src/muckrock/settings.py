@@ -141,7 +141,7 @@ BROKER_USER = "muckrock"
 BROKER_PASSWORD = "muckrock"
 BROKER_VHOST = "muckrock_vhost"
 CELERY_RESULT_BACKEND = "amqp"
-CELERY_IMPORTS = ("foia.tasks", )
+#CELERY_IMPORTS = ("foia.tasks", ) # this causes them to be double submitted for some reason
 CELERY_DISABLE_RATE_LIMITS = True
 
 if EMAIL_DEBUG:
