@@ -30,7 +30,9 @@
 		{% else %}
 			due in {{ object.date_due|timeuntil }}
 		{% endif %}
-		{%endif%}
+		{% endif %}
+		{% if object.days_until_due and object.status == 'fix' or object.days_until_due and object.status == 'payment' %}, due {{ object.days_until_due }} day{{object.days_until_due|pluralize}} from when the {% if object.status == 'fix' %}fix{% else %}payment{% endif %} is received
+		{% endif %}
 	</span></p>
 	<div id='tag-links'>Tags:
 		{% for tag in object.tags.all %}
