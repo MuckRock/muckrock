@@ -17,7 +17,7 @@ from email.utils import parseaddr, getaddresses
 from tempfile import NamedTemporaryFile
 
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
-from foia.tasks import upload_document_cloud
+from muckrock.foia.tasks import upload_document_cloud
 
 DOC_CLOUD_TYPES = ['application/pdf', 'application/msword']
 IGNORE_TYPES = ['application/x-pkcs7-signature']
