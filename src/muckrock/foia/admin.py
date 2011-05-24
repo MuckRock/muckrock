@@ -13,7 +13,7 @@ from datetime import date, timedelta
 
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
                         Jurisdiction, Agency, AgencyType, FOIADocTopViewed
-from foia.tasks import upload_document_cloud, set_document_cloud_pages
+from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
