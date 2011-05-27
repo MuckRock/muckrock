@@ -4,7 +4,7 @@ Models for the FOIA application
 
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail, send_mass_mail
-from django.db import models
+from django.db import models, connection, transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
 
@@ -213,10 +213,17 @@ class FOIARequest(models.Model):
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
-        if not self.mail_id:
-            uid = int(md5(self.title + datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
-            self.mail_id = '%s-%08d' % (self.pk, uid)
-            self.save()
+
+        # use raw sql here in order to avoid race conditions
+        uid = int(md5(self.title + datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
+        mail_id = '%s-%08d' % (self.pk, uid)
+        cursor = connection.cursor()
+        cursor.execute("UPDATE foia_foiarequest "
+                       "SET mail_id = CASE WHEN mail_id='' THEN %s ELSE mail_id END "
+                       "WHERE id = %s", [mail_id, self.pk])
+        transaction.commit_unless_managed()
+        # set object's mail id to what is in the database
+        self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
     def get_mail_id(self):
         """Get the mail id - generate it if it doesn't exist"""
