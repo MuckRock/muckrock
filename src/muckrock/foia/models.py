@@ -240,13 +240,14 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
 
         if self.agency and self.email:
-            return '%s <%s>' % (self.agency.name, self.email)
+            to_who = '%s <%s>' % (self.agency.name, self.email)
         elif self.agency and self.agency.email:
-            return '%s <%s>' % (self.agency.name, self.agency.email)
+            to_who = '%s <%s>' % (self.agency.name, self.agency.email)
         elif self.agency:
-            return self.agency.name
+            to_who = self.agency.name
         else:
-            return ''
+            to_who = ''
+        return to_who[:255]
 
     def get_saved(self):
         """Get the old model that is saved in the db"""
@@ -482,8 +483,8 @@ class FOIACommunication(models.Model):
     )
 
     foia = models.ForeignKey(FOIARequest, related_name='communications')
-    from_who = models.CharField(max_length=70)
-    to_who = models.CharField(max_length=70, blank=True)
+    from_who = models.CharField(max_length=255)
+    to_who = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()

@@ -71,7 +71,7 @@ def REQUEST(message, address=None, host=None):
                                        (content_type, file_name))
 
         comm = FOIACommunication.objects.create(
-                foia=foia, from_who=message['from'], to_who=foia.user.get_full_name(),
+                foia=foia, from_who=message['from'][:255], to_who=foia.user.get_full_name(),
                 date=datetime.now(), response=True, full_html=False, communication=communication)
 
         relay.deliver(message, To='requests@muckrock.com')
