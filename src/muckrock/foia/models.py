@@ -102,7 +102,7 @@ class FOIARequest(models.Model):
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
-    days_until_due = models.PositiveSmallIntegerField(blank=True, null=True)
+    days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
     date_embargo = models.DateField(blank=True, null=True)
