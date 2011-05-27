@@ -1,6 +1,7 @@
 
 {% extends "foia/base.html" %}
 {% load pingback_tags %}
+{% load tags %}
 
 {% block title %} {{object.title}} {% endblock %}
 
@@ -31,7 +32,13 @@
 			due in {{ object.date_due|timeuntil }}
 		{% endif %}
 		{% endif %}
-		{% if object.days_until_due and object.status == 'fix' or object.days_until_due and object.status == 'payment' %}, due {{ object.days_until_due }} day{{object.days_until_due|pluralize}} from when the {% if object.status == 'fix' %}fix{% else %}payment{% endif %} is received
+		{% if object.days_until_due and object.status == 'fix' or object.days_until_due and object.status == 'payment' %},
+			{% if object.days_until_due >= 0 %}
+				due {{ object.days_until_due }} day{{object.days_until_due|pluralize}}
+			{% else %}
+				will be {{ object.days_until_due|abs }} day{{object.days_until_due|pluralize}} past due
+			{% endif %}
+			from when the {% if object.status == 'fix' %}fix{% else %}payment{% endif %} is received
 		{% endif %}
 	</span></p>
 	<div id='tag-links'>Tags:
