@@ -152,9 +152,12 @@ class HolidayCalendar(object):
     def business_days_from(self, date_, num):
         """Returns the date n business days from the given date"""
 
-        # could be further optimized
+        # could be optimized
+        delta = timedelta(1 if num >= 0 else -1)
+        num = abs(num)
+
         while num:
-            date_ += timedelta(1)
+            date_ += delta
             if self.is_business_day(date_):
                 num -= 1
         return date_
@@ -163,15 +166,17 @@ class HolidayCalendar(object):
         """How many business days are between the given dates?"""
 
         # could be optimized
+        sign = 1
         if date_a > date_b:
             date_a, date_b = date_b, date_a
+            sign = -1
 
         num = 0
         while date_a < date_b:
             date_a += timedelta(1)
             if self.is_business_day(date_a):
                 num += 1
-        return num
+        return num * sign
 
 us_holidays = [
     HolidayDate("New Year's Day", JAN, 1),

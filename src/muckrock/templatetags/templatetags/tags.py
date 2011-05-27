@@ -109,3 +109,7 @@ def table_header(parser, token):
     return TableHeaderNode(parser.compile_filter(get),
                            [(a, parser.compile_filter(b)) for a, b in bits])
 
+@register.filter(name='abs')
+def abs_filter(value):
+    """Absolute value of a number"""
+    return abs(value)
