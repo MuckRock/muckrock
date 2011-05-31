@@ -18,6 +18,7 @@ from django.views.generic import list_detail
 
 from collections import namedtuple
 from datetime import datetime
+import logging
 
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagForm, \
                        FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAAppealForm, \
@@ -25,6 +26,8 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagFor
                        FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 from tags.models import Tag
+
+logger = logging.getLogger('muckrock.foia.views')
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
@@ -280,6 +283,8 @@ def embargo(request, jurisdiction, slug, idx):
         foia.embargo = form.cleaned_data.get('embargo')
         foia.date_embargo = form.cleaned_data.get('date_embargo')
         foia.save()
+        logger.info('Embargo set by user for FOI Request %d %s to %s',
+                    foia.pk, foia.title, foia.embargo)
 
     action = Action(
         form_actions = form_actions,
