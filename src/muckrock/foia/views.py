@@ -27,7 +27,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagFor
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 from tags.models import Tag
 
-logger = logging.getLogger('muckrock.foia.views')
+logger = logging.getLogger(__name__)
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
