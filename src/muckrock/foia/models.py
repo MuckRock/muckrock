@@ -25,7 +25,7 @@ from tags.models import Tag, TaggedItemBase
 import fields
 
 FOLLOWUP_DAYS = 15
-logger = logging.getLogger('muckrock.foia.models')
+logger = logging.getLogger(__name__)
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
