@@ -3,8 +3,9 @@ Views for muckrock project
 """
 
 from django.db.models import Sum
+from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.template import RequestContext, Context, loader
 
 from foia.models import FOIARequest, FOIADocument, FOIADocTopViewed
 from news.models import Article
@@ -29,3 +30,14 @@ def front_page(request):
 
     return render_to_response('front_page.html', locals(),
                               context_instance=RequestContext(request))
+
+def handler500(request):
+    """
+    500 error handler which includes ``request`` in the context.
+
+    Templates: `500.html`
+    Context: None
+    """
+
+    template = loader.get_template('500.html')
+    return HttpResponseServerError(template.render(Context({'request': request})))
