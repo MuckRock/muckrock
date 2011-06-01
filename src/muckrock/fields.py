@@ -1,5 +1,8 @@
 """
 Custom fields
+
+EmailsListField - http://djangosnippets.org/snippets/1958/
+GroupedModelChoiceField - http://djangosnippets.org/snippets/1968/
 """
 
 import re
