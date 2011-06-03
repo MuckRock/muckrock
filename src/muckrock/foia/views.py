@@ -285,7 +285,7 @@ def embargo(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'embargo',
         tests = [],
-        form_class = lambda f: FOIAEmbargoDateForm if f.status in ['done', 'partial'] \
+        form_class = lambda f: FOIAEmbargoDateForm if f.date_embargo \
                                else FOIAEmbargoForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Update the Embargo Date',
