@@ -299,7 +299,7 @@ class FOIARequest(models.Model):
                      'status': self.get_status_display(),
                      'link': link,
                      'follow': self.user != profile.user})
-                send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                                   msg, 'info@muckrock.com', [profile.user.email]))
 
             send_mass_mail(send_data, fail_silently=False)
@@ -353,7 +353,7 @@ class FOIARequest(models.Model):
                  'status': self.get_status_display(),
                  'link': self.get_absolute_url(),
                  'follow': self.user != profile.user})
-            send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                               msg, 'info@muckrock.com', [profile.user.email]))
 
         send_mass_mail(send_data, fail_silently=False)
