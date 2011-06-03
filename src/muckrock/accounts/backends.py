@@ -1,5 +1,6 @@
 """
 Backend to support case insensitive login
+http://www.shopfiber.com/case-insensitive-username-login-in-django/
 """
 
 from django.contrib.auth.backends import ModelBackend
