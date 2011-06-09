@@ -11,6 +11,11 @@ class Tag(TaggitTag):
     """Custom Tag Class"""
     user = models.ForeignKey(User, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        """Normalize name before saving"""
+        self.name = self.name.strip().lower()
+        super(Tag, self).save(*args, **kwargs)
+
     class Meta:
         # pylint: disable-msg=R0903
         ordering = ['name']
