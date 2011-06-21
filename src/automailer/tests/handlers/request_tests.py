@@ -44,7 +44,8 @@ def setup():
                                                slug='united-states-of-america',
                                                abbrev='USA')
     foia = FOIARequest.objects.create(user=user, jurisdiction=jurisdiction,
-                                      title='test foia', slug='test-foia')
+                                      title='test foia', slug='test-foia',
+                                      email='test@foia.gov')
     foia.set_mail_id()
 
 def teardown():

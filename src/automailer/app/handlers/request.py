@@ -94,6 +94,12 @@ def REQUEST(message, address=None, host=None):
         logging.warning('Invalid address: %s', address)
         message['subject'] = 'Invalid address: %s' % address
         relay.deliver(message, To='requests@muckrock.com')
+    except Exception as exc:
+        # If anything I haven't accounted for happens, at the very least forward
+        # the email to requests so it isn't lost
+        message['subject'] = 'Uncaught Exception: %s' % message['subject']
+        relay.deliver(message, To='requests@muckrock.com')
+        raise exc
 
 
 # factor commonalities out of these two?
