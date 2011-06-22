@@ -169,8 +169,6 @@ def _save_foia_comm(request, foia, form, action):
             foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
-    foia.status = 'submitted'
-    foia.save()
     foia.submit(appeal=(action == 'Appeal'))
     messages.success(request, '%s succesfully submitted.' % action)
 
