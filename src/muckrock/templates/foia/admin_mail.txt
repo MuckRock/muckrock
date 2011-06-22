@@ -5,7 +5,10 @@ Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change reque
 {% if request.agency %}Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.agency.pk %}
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
+{% endif %}{% if request.agency.address %}Agency Address:
+{{request.agency.address}}
 {% endif %}
+
 {% else %}
 {% if request.agency.appeal_agency %}Appeal Agency Admin: http://www.muckrock.com{% url admin:foia_agency_change request.agency.appeal_agency.pk %}
 {% if request.agency.appeal_agency.address %}Address: {{request.agency.appeal_agency.address}}
