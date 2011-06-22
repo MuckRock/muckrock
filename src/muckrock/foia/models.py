@@ -336,6 +336,7 @@ class FOIARequest(models.Model):
                     cal = calendars[self.jurisdiction.legal()]
                     self.date_due = cal.business_days_from(date.today(), days)
         else:
+            self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
             send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
@@ -375,6 +376,8 @@ class FOIARequest(models.Model):
         if self.email and LAMSON_ACTIVATE:
             self._send_email()
         else:
+            self.status = 'submitted'
+            self.save()
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
