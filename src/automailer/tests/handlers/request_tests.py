@@ -9,6 +9,7 @@ from django.db import connection
 from django.test import utils
 
 from lamson.testing import queue, relay, RouterConversation
+from lamson import routing, mail as lmail
 
 import nose.tools
 from datetime import date
@@ -98,6 +99,31 @@ def test_normal():
 
     nose.tools.eq_(foia.email, 'mitch@localhost.gov')
     nose.tools.eq_(foia.other_emails, 'other@agency.gov')
+
+
+# test different attachment types
+
+def test_attachments():
+    """Test a message with an attachment"""
+
+    try:
+        foia = FOIARequest.objects.get(title='test foia')
+
+        sample = lmail.MailResponse(
+            From='mitch@localhost.gov',
+            To='%s@%s' % (foia.mail_id, LAMSON_ROUTER_HOST),
+            Subject='Test Attachment Subject',
+            Body='Test Attachment Body')
+        sample.attach(filename='data.xls', data='abc123')
+        msg = lmail.MailRequest('localhost', sample['From'], sample['To'], str(sample))
+        routing.Router.deliver(msg)
+
+        foia = FOIARequest.objects.get(pk=foia.pk)
+        nose.tools.eq_(foia.files.all()[0].ffile.name, 'foia_files/data.xls')
+
+    finally:
+        # delete the file from the file system
+        foia.files.all()[0].delete()
 
 
 # test different attachment types
