@@ -3,6 +3,8 @@
 from celery.decorators import periodic_task, task
 from celery.task.schedules import crontab
 from django.core import management
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
                      GA_USERNAME, GA_PASSWORD, GA_ID
 
@@ -141,3 +143,13 @@ def followup_requests():
     #for foia in FOIARequest.objects.get_followup(): 
     for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
         foia.followup()
+
+
+@periodic_task(run_every=crontab(hour=6, minute=0))
+def embargo_warn():
+    """Warn users their requests are about to come off of embargo"""
+    for foia in FOIARequest.objects.filter(embargo=True,
+                                           date_embargo=date.today()+timedelta(1)):
+        send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
+                  render_to_string('foia/embargo.txt', {'request': foia}),
+                  'info@muckrock.com', [foia.user.email])

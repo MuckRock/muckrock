@@ -20,7 +20,7 @@ from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, 
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
-from muckrock.forms import GroupedModelChoiceField
+from muckrock.fields import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""

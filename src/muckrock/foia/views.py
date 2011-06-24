@@ -172,8 +172,6 @@ def _save_foia_comm(request, foia, form, action):
             foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
-    foia.status = 'submitted'
-    foia.save()
     foia.submit(appeal=(action == 'Appeal'))
     messages.success(request, '%s succesfully submitted.' % action)
 
@@ -290,7 +288,7 @@ def embargo(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'embargo',
         tests = [],
-        form_class = lambda f: FOIAEmbargoDateForm if f.status in ['done', 'partial'] \
+        form_class = lambda f: FOIAEmbargoDateForm if f.date_embargo \
                                else FOIAEmbargoForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Update the Embargo Date',
@@ -308,7 +306,7 @@ def follow(request, jurisdiction, slug, idx):
     if foia.user == request.user:
         messages.error(request, 'You may not follow your own request')
     else:
-        if foia.followed_by.filter(user=request.user.get_profile()):
+        if foia.followed_by.filter(user=request.user):
             foia.followed_by.remove(request.user.get_profile())
             messages.info(request, 'You are no longer following %s' % foia.title)
         else:
@@ -465,7 +463,7 @@ def detail(request, jurisdiction, slug, idx):
                'communications': foia.get_communications(request.user)}
     if request.user.is_authenticated():
         context['follow'] = \
-            'Unfollow' if foia.followed_by.filter(user=request.user.get_profile()) else 'Follow'
+            'Unfollow' if foia.followed_by.filter(user=request.user) else 'Follow'
     context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
 
     return render_to_response('foia/foiarequest_detail.html',
