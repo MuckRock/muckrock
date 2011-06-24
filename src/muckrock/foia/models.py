@@ -23,8 +23,6 @@ from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
 import fields
 
-FOLLOWUP_DAYS = 15
-
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
     # pylint: disable-msg=R0904
@@ -431,11 +429,9 @@ class FOIARequest(models.Model):
                 self.days_until_due = None
 
             # update follow up date
-            if self.date_due:
-                self.date_followup = max(self.date_due,
-                                         self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS))
-            else:
-                self.date_followup = self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS)
+            self.date_followup = self.last_comm().date.date() + timedelta(self._followup_days())
+            if self.date_due and self.date_due > self.date_followup:
+                self.date_followup = self.date_due
 
         # if we are no longer waiting on the agency, do not follow up
         if self.status != 'processed' and self.date_followup:
@@ -450,6 +446,14 @@ class FOIARequest(models.Model):
             self.date_due = None
 
         self.save()
+
+    def _followup_days(self):
+        """How many days do we wait until we follow up?"""
+        # pylint: disable-msg=E1101
+        if self.jurisdiction and self.jurisdiction.level == 'f':
+            return 30
+        else:
+            return 15
 
     def update_tags(self, tags):
         """Update the requests tags"""
