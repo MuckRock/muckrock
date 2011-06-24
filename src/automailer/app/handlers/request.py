@@ -52,23 +52,23 @@ def REQUEST(message, address=None, host=None):
                 continue
             content_type = part.get_content_type()
             file_name = part.get_filename()
-            if content_type in TEXT_TYPES:
+            type_ = _file_type(content_type, file_name)
+            if type_ == 'text':
                 communication += part.get_payload()
                 attachments.append('Add to body text - type: %s name: %s' %
                                    (content_type, file_name))
 
-            elif content_type not in IGNORE_TYPES:
-                if file_name and content_type in DOC_CLOUD_TYPES:
-                    _upload_doc_cloud(foia, file_name, part, message['from'])
-                    attachments.append('Add as a doc cloud - type: %s name: %s' %
-                                       (content_type, file_name))
-                elif file_name:
-                    _upload_file(foia, file_name, part)
-                    attachments.append('Add as a file - type: %s name: %s' %
-                                       (content_type, file_name))
-                else:
-                    attachments.append('Skipped due to no name - type: %s name: %s' %
-                                       (content_type, file_name))
+            elif type_ == 'doc_cloud':
+                _upload_doc_cloud(foia, file_name, part, message['from'])
+                attachments.append('Add as a doc cloud - type: %s name: %s' %
+                                   (content_type, file_name))
+            elif type_ == 'file':
+                _upload_file(foia, file_name, part, message['from'])
+                attachments.append('Add as a file - type: %s name: %s' %
+                                   (content_type, file_name))
+            elif type_ in ['skip', 'ignore']:
+                attachments.append('Skipped - type: %s name: %s' %
+                                   (content_type, file_name))
 
         comm = FOIACommunication.objects.create(
                 foia=foia, from_who=message['from'][:255], to_who=foia.user.get_full_name(),
@@ -104,13 +104,13 @@ def REQUEST(message, address=None, host=None):
 
 # factor commonalities out of these two?
 
-def _upload_file(foia, file_name, part):
+def _upload_file(foia, file_name, part, sender):
     """Upload a file to attach to a FOIA request"""
     # pylint: disable-msg=E1101
 
     with NamedTemporaryFile() as temp_file:
         temp_file.write(part.get_payload(decode=True))
-        foia_file = FOIAFile(foia=foia)
+        foia_file = FOIAFile(foia=foia, date=datetime.now(), source=sender[:70])
         foia_file.ffile.save(file_name, File(temp_file))
         foia_file.save()
 
@@ -137,3 +137,24 @@ def _allowed_email(email, foia):
     if foia.agency and email in foia.agency.get_other_emails():
         return True
     return any(email.endswith(tld) for tld in ALLOWED_TLDS)
+
+def _file_type(content_type, file_name):
+    """Determine the attachment's file type"""
+
+    doc_cloud_types = [
+        ('application/pdf', 'pdf'),
+        ('application/msword', 'doc'),
+        ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx'),
+        ]
+    ignore_types = [('application/x-pkcs7-signature', 'p7s')]
+
+    if content_type == 'text/plain':
+        return 'text'
+    elif not file_name:
+        return 'skip'
+    elif any(content_type == itt or file_name.endswith(ite) for itt, ite in ignore_types):
+        return 'ignore'
+    elif any(content_type == dtt or file_name.endswith(dte) for dtt, dte in doc_cloud_types):
+        return 'doc_cloud'
+    else:
+        return 'file'
