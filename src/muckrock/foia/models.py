@@ -24,7 +24,6 @@ from settings import logger, relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
 import fields
 
-FOLLOWUP_DAYS = 15
 logger = logging.getLogger(__name__)
 
 class FOIARequestManager(ChainableManager):
@@ -303,7 +302,7 @@ class FOIARequest(models.Model):
                      'status': self.get_status_display(),
                      'link': link,
                      'follow': self.user != profile.user})
-                send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+                send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                                   msg, 'info@muckrock.com', [profile.user.email]))
 
             send_mass_mail(send_data, fail_silently=False)
@@ -340,6 +339,7 @@ class FOIARequest(models.Model):
                     cal = calendars[self.jurisdiction.legal()]
                     self.date_due = cal.business_days_from(date.today(), days)
         else:
+            self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
             send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
@@ -357,7 +357,7 @@ class FOIARequest(models.Model):
                  'status': self.get_status_display(),
                  'link': self.get_absolute_url(),
                  'follow': self.user != profile.user})
-            send_data.append(('[MuckRock] FOIA request "%s" has been updated' % self.title,
+            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                               msg, 'info@muckrock.com', [profile.user.email]))
 
         send_mass_mail(send_data, fail_silently=False)
@@ -379,6 +379,8 @@ class FOIARequest(models.Model):
         if self.email and LAMSON_ACTIVATE:
             self._send_email()
         else:
+            self.status = 'submitted'
+            self.save()
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
@@ -432,11 +434,9 @@ class FOIARequest(models.Model):
                 self.days_until_due = None
 
             # update follow up date
-            if self.date_due:
-                self.date_followup = max(self.date_due,
-                                         self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS))
-            else:
-                self.date_followup = self.last_comm().date.date() + timedelta(FOLLOWUP_DAYS)
+            self.date_followup = self.last_comm().date.date() + timedelta(self._followup_days())
+            if self.date_due and self.date_due > self.date_followup:
+                self.date_followup = self.date_due
 
         # if we are no longer waiting on the agency, do not follow up
         if self.status != 'processed' and self.date_followup:
@@ -451,6 +451,14 @@ class FOIARequest(models.Model):
             self.date_due = None
 
         self.save()
+
+    def _followup_days(self):
+        """How many days do we wait until we follow up?"""
+        # pylint: disable-msg=E1101
+        if self.jurisdiction and self.jurisdiction.level == 'f':
+            return 30
+        else:
+            return 15
 
     def update_tags(self, tags):
         """Update the requests tags"""

@@ -12,7 +12,7 @@ import datetime
 from operator import attrgetter
 
 from business_days.business_days import calendars
-from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction, FOLLOWUP_DAYS
+from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -400,6 +400,7 @@ class TestFOIAIntegration(TestCase):
     def test_request_lifecycle_no_email(self):
         """Test a request going through the full cycle as if we had to physically mail it"""
         # pylint: disable-msg=R0915
+        # pylint: disable-msg=W0212
 
         user = User.objects.get(username='adam')
         agency = Agency.objects.get(pk=3)
@@ -435,7 +436,7 @@ class TestFOIAIntegration(TestCase):
                                                              jurisdiction.get_days()))
         nose.tools.eq_(foia.date_followup.date(),
                        max(foia.date_due, foia.last_comm().date.date() +
-                                          datetime.timedelta(FOLLOWUP_DAYS)))
+                                          datetime.timedelta(foia._followup_days())))
         nose.tools.ok_(foia.days_until_due is None)
         # no more mail should have been sent
         nose.tools.eq_(len(mail.outbox), 1)
@@ -489,7 +490,7 @@ class TestFOIAIntegration(TestCase):
                                                              old_days_until_due))
         nose.tools.eq_(foia.date_followup.date(),
                        max(foia.date_due, foia.last_comm().date.date() +
-                                          datetime.timedelta(FOLLOWUP_DAYS)))
+                                          datetime.timedelta(foia._followup_days())))
         nose.tools.ok_(foia.days_until_due is None)
 
         old_date_due = foia.date_due
