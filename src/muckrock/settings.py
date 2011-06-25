@@ -5,8 +5,11 @@ Django settings for muckrock project
 import os
 from lamson.server import Relay
 
+import logging
+from sentry.client.handlers import SentryHandler
+
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 EMAIL_DEBUG = DEBUG
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -121,6 +124,8 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'pingback',
     'taggit',
+    'sentry',
+    'sentry.client',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
@@ -141,7 +146,7 @@ BROKER_USER = "muckrock"
 BROKER_PASSWORD = "muckrock"
 BROKER_VHOST = "muckrock_vhost"
 CELERY_RESULT_BACKEND = "amqp"
-#CELERY_IMPORTS = ("foia.tasks", ) # this causes them to be double submitted for some reason
+CELERY_IMPORTS = ("foia.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
 
 if EMAIL_DEBUG:
@@ -175,6 +180,17 @@ relay = Relay(host=LAMSON_RELAY_HOST, port=LAMSON_RELAY_PORT, debug=1)
 LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
+# ensure we havent already registered the handler
+if SentryHandler not in [x.__class__ for x in logger.handlers]:
+    logger.addHandler(SentryHandler())
+
+    # Add StreamHandler to sentry's default so you can catch missed exceptions
+    logger = logging.getLogger('sentry.errors')
+    logger.propagate = False
+    logger.addHandler(logging.StreamHandler())
 
 # pylint: disable-msg=W0611
 import monkey
