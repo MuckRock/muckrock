@@ -21,3 +21,4 @@ django-pingback==0.3
 BeautifulSoup==3.1.0.1
 lamson==1.1
 django-taggit==0.9.3
+django-sentry==1.8.5
