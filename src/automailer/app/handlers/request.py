@@ -19,11 +19,6 @@ from tempfile import NamedTemporaryFile
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
 from muckrock.foia.tasks import upload_document_cloud
 
-DOC_CLOUD_TYPES = ['application/pdf', 'application/msword']
-IGNORE_TYPES = ['application/x-pkcs7-signature']
-TEXT_TYPES = ['text/plain']
-ALLOWED_TLDS = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
-
 # pylint: disable-msg=C0103
 
 @route('(address)@(host)')
@@ -135,11 +130,12 @@ def _upload_doc_cloud(foia, file_name, part, sender):
 def _allowed_email(email, foia):
     """Is this an allowed email?"""
 
+    allowed_tlds = ['.gov', '.mil', '.state.ma.us', '.state.ny.us']
     if foia.email and '@' in foia.email and email.endswith(foia.email.split('@')[1]):
         return True
     if foia.agency and email in foia.agency.get_other_emails():
         return True
-    return any(email.endswith(tld) for tld in ALLOWED_TLDS)
+    return any(email.endswith(tld) for tld in allowed_tlds)
 
 def _file_type(content_type, file_name):
     """Determine the attachment's file type"""
