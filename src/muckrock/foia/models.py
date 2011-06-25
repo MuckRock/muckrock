@@ -14,6 +14,7 @@ from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
+import logging
 import os
 import re
 
@@ -22,6 +23,8 @@ from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
 import fields
+
+logger = logging.getLogger(__name__)
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
@@ -162,6 +165,8 @@ class FOIARequest(models.Model):
             return True
 
         if save:
+            logger.info('Embargo expired for FOI Request %d - %s on %s',
+                        self.pk, self.title, self.embargo_date())
             self.embargo = False
             self.save()
 
