@@ -13,8 +13,8 @@ django-debug-toolbar==0.8.3
 mock==0.7.0b2
 django-assets==0.2
 cssutils==0.9.7b3
-celery==2.0.2
-django-celery==2.0.2
+celery==2.2.7
+django-celery==2.2.4
 gdata==2.0.11
 easy-thumbnails==1.0-alpha-8
 django-pingback==0.3

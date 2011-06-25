@@ -1,16 +1,20 @@
 """Celery Tasks for the FOIA application"""
 
 from celery.decorators import periodic_task, task
-from celery.task.schedules import crontab
+from celery.signals import task_failure
+from celery.schedules import crontab
 from django.core import management
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from sentry.client.handlers import SentryHandler
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
                      GA_USERNAME, GA_PASSWORD, GA_ID
+
 
 import base64
 import gdata.analytics.service
 import json
+import logging
 import re
 import sys
 import urllib2
@@ -21,6 +25,10 @@ from foia.models import FOIADocument, FOIADocTopViewed, FOIARequest
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
+logger = logging.getLogger('task')
+logger.setLevel(logging.INFO)
+if SentryHandler not in [x.__class__ for x in logger.handlers]:
+    logger.addHandler(SentryHandler())
 
 @task(ignore_result=True)
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -153,3 +161,25 @@ def embargo_warn():
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
                   render_to_string('foia/embargo.txt', {'request': foia}),
                   'info@muckrock.com', [foia.user.email])
+
+
+def process_failure_signal(exception, traceback, sender, task_id,
+                           signal, args, kwargs, einfo, **kw):
+    """Log celery exceptions to sentry"""
+    # http://www.colinhowe.co.uk/2011/02/08/celery-and-sentry-recording-errors/
+    # pylint: disable-msg=R0913
+    # pylint: disable-msg=W0613
+    exc_info = (type(exception), exception, traceback)
+    logger.error(
+        'Celery job exception: %s(%s)' % (exception.__class__.__name__, exception),
+        exc_info=exc_info,
+        extra={
+            'data': {
+                'task_id': task_id,
+                'sender': sender,
+                'args': args,
+                'kwargs': kwargs,
+            }
+        }
+    )
+task_failure.connect(process_failure_signal, dispatch_uid='muckrock.foia.tasks.logging')

@@ -9,7 +9,7 @@ import logging
 from sentry.client.handlers import SentryHandler
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+TEMPLATE_DEBUG = True
 EMAIL_DEBUG = DEBUG
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -146,7 +146,7 @@ BROKER_USER = "muckrock"
 BROKER_PASSWORD = "muckrock"
 BROKER_VHOST = "muckrock_vhost"
 CELERY_RESULT_BACKEND = "amqp"
-#CELERY_IMPORTS = ("foia.tasks", ) # this causes them to be double submitted for some reason
+CELERY_IMPORTS = ("foia.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
 
 if EMAIL_DEBUG:
