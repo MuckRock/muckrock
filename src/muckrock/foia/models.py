@@ -20,7 +20,7 @@ import re
 
 from business_days.business_days import calendars
 from muckrock.models import ChainableManager
-from settings import logger, relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
+from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
 import fields
 
