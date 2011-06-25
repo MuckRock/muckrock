@@ -72,13 +72,13 @@ def test_bad_sender():
     client.begin()
     client.deliver('%s@%s' % (foia.mail_id, LAMSON_ROUTER_HOST), 'mitch@localhost.com',
                    'Subject', 'Test a bad sender.')
-    nose.tools.ok_(queue().pop()[1]['subject'].startswith('Bad Sender'))
+    _test_queue(queue(), [lambda m: m['subject'].startswith('Bad Sender')])
 
 def test_bad_addr():
     """Test sending to a FOIA mail id that does not exist"""
     client.begin()
     client.say('123-12345678@%s' % LAMSON_ROUTER_HOST, 'Test a bad address.')
-    nose.tools.ok_(queue().pop()[1]['subject'].startswith('Invalid address'))
+    _test_queue(queue(), [lambda m: m['subject'].startswith('Invalid address')])
 
 def test_normal():
     """Test a normal succesful response"""
@@ -90,9 +90,9 @@ def test_normal():
     foia = FOIARequest.objects.get(pk=foia.pk)
     nose.tools.eq_(foia.first_request(), 'Test normal.')
 
-    mail_ls = sorted([queue().pop(), queue().pop()])
-    nose.tools.ok_(mail_ls.pop()[1]['subject'].startswith('[RESPONSE]'))
-    nose.tools.eq_(mail_ls.pop()[1].body(), 'Test normal.')
+    _test_queue(queue(),
+         [lambda m: m['subject'].startswith('[RESPONSE]'),
+          lambda m: m.body() == 'Test normal.'])
 
     nose.tools.eq_(len(mail.outbox), 1)
     nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
@@ -127,3 +127,14 @@ def test_attachments():
 
 
 # test different attachment types
+
+def _test_queue(queue_, tests):
+    """Helper function to check mail queue since it is not kept in order"""
+    while queue_.count():
+        _, msg = queue_.pop()
+        for test in tests:
+            if test(msg):
+                tests.remove(test)
+                break
+    # tests should be empty - a message matched every test
+    nose.tools.assert_false(tests, tests)
