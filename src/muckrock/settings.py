@@ -89,9 +89,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
-if DEBUG:
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-
 INTERNAL_IPS = ('127.0.0.1',)
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
@@ -146,18 +143,8 @@ BROKER_USER = "muckrock"
 BROKER_PASSWORD = "muckrock"
 BROKER_VHOST = "muckrock_vhost"
 CELERY_RESULT_BACKEND = "amqp"
-CELERY_IMPORTS = ("foia.tasks", )
+#CELERY_IMPORTS = ("foia.tasks", )
 CELERY_DISABLE_RATE_LIMITS = True
-
-if EMAIL_DEBUG:
-    EMAIL_PORT = 1025
-else:
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 25
-    EMAIL_HOST_USER = 'notice@muckrock.com'
-    EMAIL_HOST_PASSWORD = ''
-    EMAIL_SUBJECT_PREFIX = '[Muckrock] '
-    EMAIL_USE_TLS = True
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
@@ -182,7 +169,7 @@ LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG if DEBUG else logging.INFO)
+logger.setLevel(logging.DEBUG)
 # ensure we havent already registered the handler
 if SentryHandler not in [x.__class__ for x in logger.handlers]:
     logger.addHandler(SentryHandler())
