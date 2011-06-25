@@ -1,0 +1,8 @@
+{% extends "request_templates/base.txt" %}
+{% block body %}
+Pursuant to the California's Sunshine Amendment (Cal. Const. Art. I, § 3(b)), I hereby request the following records:
+
+{% block content %}{% endblock %}
+
+I also request that, if possible, fees be waived as I believe this request is in the public interest and not made for commercial gain. The requested documents will be processed by a representative of the news media/press and made available to the public at MuckRock.com. Please fulfill the request electronically, by e-mail attachment if possible or CD-ROM if not, and let me know of any fees that will be assessed.
+{% endblock %}
