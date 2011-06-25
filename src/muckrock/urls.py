@@ -4,7 +4,8 @@ URL mappings for muckrock project
 
 # pylint: disable-msg=W0611
 # these are called dynmically
-from django.conf.urls.defaults import handler404, handler500
+from django.conf.urls.defaults import handler404
+from views import handler500
 # pylint: enable-msg=W0611
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
@@ -14,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 import haystack.urls
 from django_xmlrpc.views import handle_xmlrpc
 
-import accounts.urls, foia.urls, news.urls, rodeo.urls
+import accounts.urls, foia.urls, news.urls, rodeo.urls, sentry.web.urls
 import settings
 import views
 from foia.sitemap import FoiaSitemap
@@ -32,6 +33,7 @@ urlpatterns = patterns('',
     url(r'^news/', include(news.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
+    url(r'^sentry/', include(sentry.web.urls)),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 )

@@ -33,6 +33,9 @@ def REQUEST(message, address=None, host=None):
     # pylint: disable-msg=E1101
 
     try:
+        # backup all emails we receive here
+        relay.deliver(message, To='backup@muckrock.com')
+
         foia = FOIARequest.objects.get(mail_id=address)
         from_email = parseaddr(message['from'])[1]
         # this is a python email message object
