@@ -52,7 +52,7 @@ def REQUEST(message, address=None, host=None):
             file_name = part.get_filename()
             type_ = _file_type(content_type, file_name)
             if type_ == 'text':
-                communication += part.get_payload()
+                communication += part.get_payload(decode=True)
                 attachments.append('Add to body text - type: %s name: %s' %
                                    (content_type, file_name))
 
