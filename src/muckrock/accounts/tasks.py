@@ -20,9 +20,9 @@ logger.setLevel(logging.INFO)
 if SentryHandler not in [x.__class__ for x in logger.handlers]:
     logger.addHandler(SentryHandler())
 
-@periodic_task(run_every=crontab(hour=0, minute=10))
+@periodic_task(run_every=crontab(hour=0, minute=30))
 def store_statstics():
-    """Store the daily statistics at 12:10AM"""
+    """Store the daily statistics"""
 
     yesterday = date.today() - timedelta(1)
 
