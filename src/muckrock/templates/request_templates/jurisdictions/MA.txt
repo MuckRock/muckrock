@@ -1,6 +1,6 @@
 {% extends "request_templates/base.txt" %}
 {% block body %}
-Pursuant to the state Freedom of Information Act, G.L.M. c.66, €10, I hereby request the following records:
+Pursuant to the state Freedom of Information Act, G.L.M. c.66, §10, I hereby request the following records:
 
 {% block content %}{% endblock %}
 
