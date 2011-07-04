@@ -163,6 +163,14 @@ def embargo_warn():
                   'info@muckrock.com', [foia.user.email])
 
 
+@periodic_task(run_every=crontab(hour=0, minute=0))
+def set_all_document_cloud_pages():
+    """Try and set all document cloud documents that have no page count set"""
+    # pylint: disable-msg=E1101
+    for doc in FOIADocument.objects.filter(pages=0):
+        set_document_cloud_pages.apply_async(args=[doc.pk])
+
+
 def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
     """Log celery exceptions to sentry"""
