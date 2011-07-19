@@ -8,7 +8,9 @@ from django.core.files import File
 from django.template.loader import render_to_string
 
 import logging
+# pylint: disable-msg=F0401
 from config.settings import relay
+# pylint: enable-msg=F0401
 from lamson.routing import route, stateless
 
 import os
@@ -101,6 +103,13 @@ def REQUEST(message, address=None, host=None):
 
 
 # factor commonalities out of these two?
+
+@route('fax@(host)')
+@stateless
+def FAX(message, host=None):
+    """Forward fax confirmations to requests@muckrock.com"""
+    # pylint: disable-msg=W0613
+    relay.deliver(message, To='requests@muckrock.com')
 
 def _upload_file(foia, file_name, part, sender):
     """Upload a file to attach to a FOIA request"""
