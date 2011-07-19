@@ -128,6 +128,15 @@ def test_attachments():
 
 # test different attachment types
 
+def test_fax():
+    """Test a fax confirmation"""
+
+    client.begin()
+    client.say('fax@%s' % LAMSON_ROUTER_HOST, 'Test fax.')
+    _test_queue(queue(), [lambda m: m.body() == 'Test fax.'])
+
+# test different attachment types
+
 def _test_queue(queue_, tests):
     """Helper function to check mail queue since it is not kept in order"""
     while queue_.count():
