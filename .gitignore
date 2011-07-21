@@ -11,3 +11,4 @@ whoosh
 htmlcov
 src/muckrock/static/foia_*
 src/muckrock/static/news_*
+gitfix
