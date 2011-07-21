@@ -2,6 +2,7 @@
 Admin registration for FOIA models
 """
 
+from django import forms
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
@@ -18,9 +19,42 @@ from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
 
+class FOIADocumentAdminForm(forms.ModelForm):
+    """Form to validate document only has ASCII characters in it"""
+
+    def __init__(self, *args, **kwargs):
+        super(FOIADocumentAdminForm, self).__init__(*args, **kwargs)
+        self.clean_title = self._validate('title')
+        self.clean_source = self._validate('source')
+        self.clean_description = self._validate('description')
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIADocument
+
+    @staticmethod
+    def _only_ascii(text):
+        """Ensure's that text only contains ASCII characters"""
+        non_ascii = ''.join(c for c in text if ord(c) >= 128)
+        if non_ascii:
+            raise forms.ValidationError('Field contains non-ASCII characters: %s' % non_ascii)
+
+    def _validate(self, field):
+        """Make a validator for field"""
+
+        def inner():
+            """Ensure field only has ASCII characters"""
+            data = self.cleaned_data[field]
+            self._only_ascii(data)
+            return data
+
+        return inner
+
+
 class FOIADocumentInline(admin.TabularInline):
     """FOIA Document Inline admin options"""
     model = FOIADocument
+    form = FOIADocumentAdminForm
     readonly_fields = ['doc_id', 'pages']
     extra = 2
 

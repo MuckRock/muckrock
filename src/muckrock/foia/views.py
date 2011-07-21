@@ -61,7 +61,7 @@ def _foia_form_handler(request, foia, action):
                 new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
-                    foia.agency = Agency.objects.create(name=agency_name,
+                    foia.agency = Agency.objects.create(name=agency_name[:255],
                                                         jurisdiction=foia.jurisdiction,
                                                         user=request.user, approved=False)
                     send_mail('[AGENCY] %s' % foia.agency.name,
