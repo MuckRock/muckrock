@@ -704,7 +704,7 @@ class AgencyType(models.Model):
 class Agency(models.Model):
     """An agency for a particular jurisdiction that has at least one agency type"""
 
-    name = models.CharField(max_length=60)
+    name = models.CharField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
     approved = models.BooleanField()
