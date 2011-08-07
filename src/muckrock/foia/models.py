@@ -414,8 +414,7 @@ class FOIARequest(models.Model):
 
         cal = calendars.get(self.jurisdiction.legal())
         if not cal:
-            send_mail('%s needs a calendar' % self.jurisdiction, '', 'info@muckrock.com',
-                      ['requests@muckrock.com'], fail_silently=False)
+            logger.warn('%s needs a calendar', self.jurisdiction)
             cal = calendars['USA']
 
         # first submit
