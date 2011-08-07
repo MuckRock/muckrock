@@ -31,6 +31,32 @@
         {% if query %}
             <h3>Results</h3>
 
+			<div class="post-meta archive-pagination">
+			{% with request.GET.q as q %}
+				<div class="nav-left">
+					{% if page.has_previous %}
+					<a href="?page=1&q={{q}}">&#171; First page</a>
+					&nbsp; &nbsp;
+					<a href="?page={{page.previous_page_number}}&q={{q}}">&#171; Previous page</a>
+					{% else %}
+					&nbsp;
+					{% endif %}
+				</div>
+				<div class="nav-center">
+					{% page_links page %}
+				</div>
+				{% if page.has_next %}
+				<div class="nav-right">
+					<a href="?page={{page.next_page_number}}&q={{q}}">Next page &#187;</a>
+					&nbsp; &nbsp;
+					<a href="?page={{paginator.num_pages}}&q={{q}}">Last page &#187;</a>
+				</div>
+				{% endif %}
+
+				<div class="clearer">&nbsp;</div>
+				{% endwith %}
+			</div>
+
 						<table class="data-table">
 							<tr class="odd">
 								<th width="40%">Title</th>
