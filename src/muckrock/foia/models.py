@@ -86,12 +86,14 @@ class FOIARequest(models.Model):
         ('started', 'Draft'),
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
+        ('appealing', 'Awaiting Apeal'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
         ('no_docs', 'No Responsive Documents'),
         ('done', 'Completed'),
         ('partial', 'Partially Completed'),
+        ('abandoned', 'Abandoned'),
     )
 
     user = models.ForeignKey(User)
