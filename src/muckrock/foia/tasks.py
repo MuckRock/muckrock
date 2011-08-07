@@ -11,6 +11,7 @@ from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
                      GA_USERNAME, GA_PASSWORD, GA_ID
 
 
+import dbsettings
 import base64
 import gdata.analytics.service
 import json
@@ -29,6 +30,11 @@ logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)
 if SentryHandler not in [x.__class__ for x in logger.handlers]:
     logger.addHandler(SentryHandler())
+
+class FOIAOptions(dbsettings.Group):
+    """DB settings for the FOIA app"""
+    enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
+options = FOIAOptions()
 
 @task(ignore_result=True)
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -149,8 +155,9 @@ def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup(): 
-    for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
-        foia.followup()
+    if options.enable_followup:
+        for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
+            foia.followup()
 
 
 @periodic_task(run_every=crontab(hour=6, minute=0))
