@@ -388,11 +388,12 @@ def my_list(request, view):
             foia_pks = request.POST.getlist('foia')
             if request.POST.get('submit') == 'Add Tag':
                 tag_pk = request.POST.get('tag')
-                tag_name = request.POST.get('combo-name')
+                tag_name = Tag.normalize(request.POST.get('combo-name'))
                 if tag_pk:
                     tag = Tag.objects.get(pk=tag_pk)
                 elif tag_name:
-                    tag = Tag.objects.create(name=tag_name, user=request.user)
+                    tag, _ = Tag.objects.get_or_create(name=tag_name,
+                                                       defaults={'user': request.user})
                 if tag_pk or tag_name:
                     for foia_pk in foia_pks:
                         foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)

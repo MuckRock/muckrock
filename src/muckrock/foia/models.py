@@ -465,11 +465,9 @@ class FOIARequest(models.Model):
         """Update the requests tags"""
         # pylint: disable-msg=W0142
 
-        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
-
         tag_set = set()
         for tag in tags.split(','):
-            tag = tag.translate(html_remove)
+            tag = Tag.normalize(tag)
             if not tag:
                 continue
             new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
