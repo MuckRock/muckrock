@@ -7,7 +7,8 @@ from django.test import TestCase
 import nose.tools
 from datetime import date
 
-from business_days import leap_year, days_in_month, calendars, HolidayDate, HolidayOrdWeekday
+from business_days import leap_year, days_in_month, calendars, \
+                          HolidayDate, HolidayOrdWeekday, HolidayEaster
 
 JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = range(1, 13)
 MON, TUES, WEDS, THURS, FRI, SAT, SUN = range(0, 7)
@@ -24,6 +25,7 @@ class TestBusinessDayUnit(TestCase):
         """Set up tests"""
         self.new_years = HolidayDate("New Year's Day", JAN, 1)
         self.mlk_day = HolidayOrdWeekday('Martin Luther King, Jr. Day', JAN, MON, 3)
+        self.good_friday = HolidayEaster('Good Friday')
 
     def test_leap_year(self):
         """Test for leap years"""
@@ -61,6 +63,17 @@ class TestBusinessDayUnit(TestCase):
         """Test retrieving the date for a holiday that occurs on a nth weekday of the month"""
 
         nose.tools.eq_(self.mlk_day.for_year(2010), date(2010, 1, 18))
+
+    def test_holiday_easter_match(self):
+        """Test matching for a holiday that occurs based on Easter"""
+
+        nose.tools.assert_true(self.good_friday.match(date(2010, 4, 2)))
+        nose.tools.assert_false(self.good_friday.match(date(2010, 4, 18)))
+
+    def test_holiday_easter_for_year(self):
+        """Test retrieving the date for a holiday that occurs based on Easter"""
+
+        nose.tools.eq_(self.good_friday.for_year(2010), date(2010, 4, 2))
 
     def test_holiday_calendars_is_holiday(self):
         """Test is_holiday"""

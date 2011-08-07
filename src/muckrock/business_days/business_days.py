@@ -3,6 +3,8 @@ Calculate government business days and holidays
 """
 
 from datetime import date, timedelta
+from pascha import computus
+from pascha import traditions
 
 JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = range(1, 13)
 MON, TUES, WEDS, THURS, FRI, SAT, SUN = range(0, 7)
@@ -100,6 +102,23 @@ class HolidayOrdWeekday(object):
         return date(year, self.month, day)
 
 
+class HolidayEaster(object):
+    """A Holiday that occurs based on the date of Easter"""
+
+    def __init__(self, name):
+        self.name = name
+        if not self.name in traditions.Western.offset:
+            raise ValueError('Name must be a Easter based Holiday')
+
+    def match(self, date_):
+        """Is the given date an instance of this Holiday?"""
+        return date_ == self.for_year(date_.year)
+
+    def for_year(self, year):
+        """Return the holiday's date for the given year"""
+        return traditions.Western.offset[self.name] + computus.western(None, year=year).date()
+
+
 class ElectionDay(HolidayOrdWeekday):
     """Election day is the first Tuesday of November after Novermber 1"""
 
@@ -190,11 +209,20 @@ us_holidays = [
     HolidayOrdWeekday('Thanksgiving', NOV, THURS, 4),
     HolidayDate('Christmas', DEC, 25),
     ]
+us_holidays_no_columbus = us_holidays[:6] + us_holidays[7:]
+
 
 calendars = {
     'USA': HolidayCalendar(us_holidays, False),
-    'FL': HolidayCalendar(us_holidays + [
+    'CA': HolidayCalendar(us_holidays_no_columbus + [
+            HolidayDate('Cesar Chavez Day', MAR, 31),
+            HolidayEaster('Good Friday')], True),
+    'CT': HolidayCalendar(us_holidays + [
+            HolidayDate("Lincoln's Birthday", FEB, 12)], True),
+    # also remove presidents day
+    'FL': HolidayCalendar(us_holidays_no_columbus[:2] + us_holidays_no_columbus[3:] + [
             HolidayOrdWeekday('Day after Thanksgiving', NOV, FRI, 4)], False),
+    # Evacuation day is a holiday only in Suffolk County...
     'MA': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday("Patriots' Day", APR, MON, 3)], True),
     'ME': HolidayCalendar(us_holidays + [
@@ -202,4 +230,5 @@ calendars = {
     'NY': HolidayCalendar(us_holidays + [
             HolidayDate("Lincoln's Birthday", FEB, 12),
             ElectionDay()], True),
+    'WA': HolidayCalendar(us_holidays_no_columbus, False),
 }
