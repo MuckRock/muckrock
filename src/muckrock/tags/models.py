@@ -13,8 +13,14 @@ class Tag(TaggitTag):
 
     def save(self, *args, **kwargs):
         """Normalize name before saving"""
-        self.name = self.name.strip().lower()
+        self.name = Tag.normalize(self.name)
         super(Tag, self).save(*args, **kwargs)
+
+    @staticmethod
+    def normalize(name):
+        """Normalize tag name"""
+        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
+        return name.translate(html_remove).strip().lower()
 
     class Meta:
         # pylint: disable-msg=R0903
