@@ -348,7 +348,10 @@ def _list(request, requests, extra_context=None, kwargs=None):
         kwargs = {}
     extra_context['title'] = 'FOI Requests'
 
-    per_page = min(int(request.GET.get('per_page', 10)), 100)
+    try:
+        per_page = min(int(request.GET.get('per_page', 10)), 100)
+    except ValueError:
+        per_page = 10
     return list_detail.object_list(request, requests, paginate_by=per_page,
                                    extra_context=extra_context, **kwargs)
 
