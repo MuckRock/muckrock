@@ -86,12 +86,14 @@ class FOIARequest(models.Model):
         ('started', 'Draft'),
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
+        ('appealing', 'Awaiting Apeal'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
         ('no_docs', 'No Responsive Documents'),
         ('done', 'Completed'),
         ('partial', 'Partially Completed'),
+        ('abandoned', 'Abandoned'),
     )
 
     user = models.ForeignKey(User)
@@ -329,7 +331,7 @@ class FOIARequest(models.Model):
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if LAMSON_ACTIVATE and ((self.email and not appeal) or can_email_appeal):
-            self.status = 'processed'
+            self.status = 'processed' if not appeal else 'appealing'
             self._send_email()
             self.update_dates()
             if not self.date_submitted:
@@ -414,8 +416,7 @@ class FOIARequest(models.Model):
 
         cal = calendars.get(self.jurisdiction.legal())
         if not cal:
-            send_mail('%s needs a calendar' % self.jurisdiction, '', 'info@muckrock.com',
-                      ['requests@muckrock.com'], fail_silently=False)
+            logger.warn('%s needs a calendar', self.jurisdiction)
             cal = calendars['USA']
 
         # first submit
@@ -464,11 +465,9 @@ class FOIARequest(models.Model):
         """Update the requests tags"""
         # pylint: disable-msg=W0142
 
-        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
-
         tag_set = set()
         for tag in tags.split(','):
-            tag = tag.translate(html_remove)
+            tag = Tag.normalize(tag)
             if not tag:
                 continue
             new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
