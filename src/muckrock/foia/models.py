@@ -331,7 +331,7 @@ class FOIARequest(models.Model):
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if LAMSON_ACTIVATE and ((self.email and not appeal) or can_email_appeal):
-            self.status = 'processed'
+            self.status = 'processed' if not appeal else 'appealing'
             self._send_email()
             self.update_dates()
             if not self.date_submitted:
