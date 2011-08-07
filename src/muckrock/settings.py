@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     'taggit',
     'sentry',
     'sentry.client',
+    'dbsettings',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
