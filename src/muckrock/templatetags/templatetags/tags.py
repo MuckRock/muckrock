@@ -17,19 +17,12 @@ def active(request, pattern):
         return 'current-tab'
     return ''
 
-@register.simple_tag
-def page_links(page_obj, order=None, field=None, per_page=None):
+def page_links_common(page_obj, option_dict):
     """Return page links for surrounding pages"""
 
     def make_link(num, skip):
         """Make a link to page num"""
-        options = ''
-        if order:
-            options += '&amp;order=%s' % order
-        if field:
-            options += '&amp;field=%s' % field
-        if per_page:
-            options += '&amp;per_page=%s' % per_page
+        options = ''.join('&amp;%s=%s' % (k, v) for k, v in option_dict.iteritems() if v)
         if num != skip:
             return '<a href="?page=%d%s">%d</a>' % (num, options, num)
         else:
@@ -45,6 +38,16 @@ def page_links(page_obj, order=None, field=None, per_page=None):
         links += '&nbsp;&hellip;'
 
     return links
+
+@register.simple_tag
+def page_links(page_obj, order=None, field=None, per_page=None):
+    """Page links for list displays"""
+    return page_links_common(page_obj, {'order': order, 'field': field, 'per_page': per_page})
+
+@register.simple_tag
+def search_page_links(page_obj, query=None):
+    """Page links for list displays"""
+    return page_links_common(page_obj, {'q': query})
 
 @register.filter
 @stringfilter
