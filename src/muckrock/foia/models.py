@@ -186,18 +186,20 @@ class FOIARequest(models.Model):
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
-        percents = {'started': 25,  'submitted': 50, 'processed': 75,
-                    'fix':     75,  'payment':   75, 'rejected': 100,
-                    'no_docs': 100, 'done':     100, 'partial':   90}
-        return percents[self.status]
+        percents = {'started':   25,  'submitted': 50, 'processed': 75,
+                    'fix':       75,  'payment':   75, 'rejected': 100,
+                    'no_docs':   100, 'done':     100, 'partial':   90,
+                    'abandoned': 100, 'appealing': 75}
+        return percents.get(self.status, 0)
 
     def color_code(self):
         """Get the color code for the current status"""
         processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
-        colors = {'started': 'wait', 'submitted': 'go',   'processed': processed,
-                  'fix':     'wait', 'payment':   'wait', 'rejected':  'stop',
-                  'no_docs': 'stop', 'done':      'go',   'partial': 'go'}
-        return colors[self.status]
+        colors = {'started':   'wait', 'submitted': 'go',   'processed': processed,
+                  'fix':       'wait', 'payment':   'wait', 'rejected':  'stop',
+                  'no_docs':   'stop', 'done':      'go',   'partial': 'go',
+                  'abandoned': 'stop', 'appealing': processed}
+        return colors.get(self.status, 'go')
 
     def first_request(self):
         """Return the first request text"""
