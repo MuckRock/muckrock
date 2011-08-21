@@ -35,6 +35,19 @@ class FOIARequestForm(forms.ModelForm):
                                            'You may change this whenever you want.')
     request = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(FOIARequestForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        """agency is required, but must check combobox name field instead of drop down"""
+
+        agency_name = self.request.POST.get('combo-name')
+        if not agency_name:
+            self._errors['agency'] = self.error_class(['This field is required.'])
+
+        return self.cleaned_data
+
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
