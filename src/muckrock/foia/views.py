@@ -36,9 +36,10 @@ def _foia_form_handler(request, foia, action):
     def default_form(data=None):
         """Make a default form to update a FOIA request"""
         if data:
-            form = FOIARequestForm(data, instance=foia)
+            form = FOIARequestForm(data, instance=foia, request=request)
         else:
-            form = FOIARequestForm(initial={'request': foia.first_request()}, instance=foia)
+            form = FOIARequestForm(initial={'request': foia.first_request()},
+                                   instance=foia, request=request)
         agency_pk = foia.agency and foia.agency.pk
         form.fields['agency'].queryset = \
             Agency.objects.filter(Q(jurisdiction=foia.jurisdiction, approved=True) |
