@@ -293,12 +293,14 @@ class TestFOIAFunctional(TestCase):
         """Test submitting a FOIA request"""
 
         foia = FOIARequest.objects.get(pk=1)
+        agency = Agency.objects.get(pk=3)
         self.client.login(username='adam', password='abc')
 
         # test for submitting a foia request for enough credits
         # tests for the wizard
 
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request'}
+        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
+                     'agency': agency.pk, 'combo-name': agency.name}
 
         post_allowed(self.client, reverse('foia-update',
                                      kwargs={'jurisdiction': foia.jurisdiction.slug,
@@ -314,10 +316,11 @@ class TestFOIAFunctional(TestCase):
         """Test saving a FOIA request"""
 
         foia = FOIARequest.objects.get(pk=6)
+        agency = Agency.objects.get(pk=2)
         self.client.login(username='bob', password='abc')
 
-        foia_data = {'title': 'Test 6', 'request': 'saved request',
-                     'submit': 'Save as Draft', 'agency': 2}
+        foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save as Draft',
+                     'agency': agency.pk, 'combo-name': agency.name}
 
         post_allowed(self.client, reverse('foia-update',
                                      kwargs={'jurisdiction': foia.jurisdiction.slug,
