@@ -7,11 +7,13 @@
 Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
 
-For mailed responses, please address:
-MuckRock
-Ref: {{ request.get_mail_id }}
-185 Beacon St. #3
-Somerville, MA 02143{% endif %}
+For mailed responses, please address (see note):
+MuckRock News
+DEPT MR {{ request.get_mail_id }}
+PO Box 55819
+Boston, MA 02205-5819
+
+PLEASE NOTE the new address as well as the fact that improperly addressed (i.e., with the requester's name rather than MuckRock News) requests might be returned by the USPS as undeliverable.{% endif %}
 {% if not forloop.last %}---{% endif %}
 {% endfor %}
 {% endautoescape %}
