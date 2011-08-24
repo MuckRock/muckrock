@@ -466,10 +466,8 @@ def detail(request, jurisdiction, slug, idx):
 
     context = {'object': foia, 'all_tags': Tag.objects.all(),
                'communications': foia.get_communications(request.user)}
-    if request.user.is_authenticated():
-        context['follow'] = \
-            'Unfollow' if foia.followed_by.filter(user=request.user) else 'Follow'
     context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
+    context['actions'] = foia.actions(request.user)
 
     return render_to_response('foia/foiarequest_detail.html',
                               context,
