@@ -288,7 +288,8 @@ def embargo(request, jurisdiction, slug, idx):
     action = Action(
         form_actions = form_actions,
         msg = 'embargo',
-        tests = [],
+        tests = [(lambda f: f.user.get_profile().can_embargo(),
+                  'You may not embargo requests with your account type')],
         form_class = lambda f: FOIAEmbargoDateForm if f.date_embargo \
                                else FOIAEmbargoForm,
         return_url = lambda r, f: f.get_absolute_url(),

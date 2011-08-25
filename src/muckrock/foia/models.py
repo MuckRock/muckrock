@@ -488,7 +488,7 @@ class FOIARequest(models.Model):
                 reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
             (self.user == user and self.is_editable(),
                 reverse('foia-update', kwargs=kwargs), 'Update'),
-            (self.user == user and not self.is_editable(),
+            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
                 reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
             (self.user == user and self.is_deletable(),
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
