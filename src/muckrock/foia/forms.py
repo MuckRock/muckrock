@@ -64,6 +64,10 @@ class FOIAEmbargoForm(FOIARequestForm):
         del self.fields['agency']
         del self.fields['request']
 
+    def clean(self):
+        """Do not check agency since we deleted it in this sub form"""
+        return self.cleaned_data
+
     class Meta:
         # pylint: disable-msg=R0903
         model = FOIARequest
