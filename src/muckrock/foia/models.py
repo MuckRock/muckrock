@@ -4,6 +4,7 @@ Models for the FOIA application
 
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail, send_mass_mail
+from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q
 from django.template.loader import render_to_string
@@ -475,6 +476,39 @@ class FOIARequest(models.Model):
             new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
+
+    def actions(self, user):
+        """What actions may the given user take on this Request"""
+        # pylint: disable-msg=E1101
+
+        kwargs = {'jurisdiction': self.jurisdiction.slug, 'idx': self.pk, 'slug': self.slug}
+
+        actions = [
+            (user.is_staff,
+                reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
+            (self.user == user and self.is_editable(),
+                reverse('foia-update', kwargs=kwargs), 'Update'),
+            (self.user == user and not self.is_editable(),
+                reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
+            (self.user == user and self.is_deletable(),
+                reverse('foia-delete', kwargs=kwargs), 'Delete'),
+            (self.user == user and self.is_fixable(),
+                reverse('foia-fix', kwargs=kwargs), 'Fix'),
+            (self.user == user and self.is_appealable(),
+                reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
+            (self.public_documents(), '#', 'Embed this Document'),
+            (user.is_authenticated() and self.user != user,
+                reverse('foia-follow', kwargs=kwargs),
+                'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
+                           else 'Follow'),
+            (user.is_authenticated(),
+                reverse('foia-flag', kwargs=kwargs), 'Submit Correction'),
+            ]
+
+        return [{'link': link, 'label': label,
+                 'id': 'opener' if label == 'Embed this Document' else ''}
+                for pred, link, label in actions if pred]
+
 
     class Meta:
         # pylint: disable-msg=R0903
