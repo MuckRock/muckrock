@@ -26,7 +26,8 @@ def register(request):
             new_user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
-            Profile.objects.create(user=new_user, monthly_requests=MONTHLY_REQUESTS,
+            Profile.objects.create(user=new_user,
+                                   monthly_requests=MONTHLY_REQUESTS.get('community', 0),
                                    date_update=datetime.now())
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
