@@ -159,7 +159,11 @@ HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
-MONTHLY_REQUESTS = 5
+MONTHLY_REQUESTS = {
+    'beta': 5,
+    'community': 0,
+    'pro': 5,
+}
 
 LAMSON_ACTIVATE = True
 LAMSON_RELAY_HOST = 'localhost'
