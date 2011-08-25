@@ -211,44 +211,19 @@
 		{% include "foia/mailchimp.html" %}
 		<div class="content-separator"></div>
 	{% endif %}
-	{% if user == object.user or object.public_documents or user.is_authenticated %}
+
+	{% if actions %}
 		<h2>Actions</h2>
-		{% if user.is_staff %}
-			<p><a class="jqbutton" href="{% url admin:foia_foiarequest_change object.id %}">Admin</a></p>
-		{% endif %}
-		{% if user == object.user %}
-			{% if object.is_editable %}
-				<p><a class="jqbutton" href="{% url foia-update jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update</a></p>
-			{% else %}
-				<p><a class="jqbutton" href="{% url foia-embargo jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Update Embargo</a></p>
-			{% endif %}
-			{% if object.is_deletable %}
-				<p><a class="jqbutton" href="{% url foia-delete jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Delete</a></p>
-			{% endif %}
-			{% if object.is_fixable %}
-				<p><a class="jqbutton" href="{% url foia-fix jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Fix</a></p>
-			{% endif %}
-			{% if object.is_appealable %}
-				<p><a class="jqbutton" href="{% url foia-appeal jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Appeal</a></p>
-			{% endif %}
-		{% endif %}
-		{% if object.public_documents %}
-			<p><a href="#" id="opener" class="jqbutton">Embed this Document</a></p>
-			<div id="dialog" title="Embed Code">
-				<p>Copy and paste this code into your site to embed this document in the document viewer:<p>
-				<textarea id="embed0" style="width: 520px; height: 160px"></textarea>
-				<p>Copy and paste this code into your site to create a thumbnail link to this document:<p>
-				<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
-			</div>
-		{% endif %}
-		{% if user.is_authenticated and user != object.user %}
-			<p><a class="jqbutton" href="{% url foia-follow jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">{{follow}}</a></p>
-		{% endif %}
-		{% if user.is_authenticated %}
-			<p><a class="jqbutton" href="{% url foia-flag jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Submit Correction</a></p>
-		{% endif %}
-		<div class="content-separator"></div>
+		{% for action in actions %}
+			<p><a class="jqbutton" href="{{action.link}}"{% if action.id %} id="{{action.id}}"{% endif %}>{{action.label}}</a></p>
+		{% endfor %}
 	{% endif %}
+	<div id="dialog" title="Embed Code">
+		<p>Copy and paste this code into your site to embed this document in the document viewer:<p>
+		<textarea id="embed0" style="width: 520px; height: 160px"></textarea>
+		<p>Copy and paste this code into your site to create a thumbnail link to this document:<p>
+		<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
+	</div>
 
 	{% if object.tracking_id %}
 		<div>
