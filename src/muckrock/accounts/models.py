@@ -15,6 +15,7 @@ class Profile(models.Model):
     """User profile information for muckrock"""
 
     acct_types = (
+        ('admin', 'Admin'),
         ('beta', 'Beta'),
         ('community', 'Community'),
         ('pro', 'Professional'),
@@ -64,6 +65,11 @@ class Profile(models.Model):
             return True
         else:
             return False
+
+    def can_embargo(self):
+        """Is this user allowed to embargo?"""
+
+        return self.acct_type in ['admin', 'beta', 'pro']
 
 
 class Statistics(models.Model):

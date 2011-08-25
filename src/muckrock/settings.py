@@ -160,6 +160,7 @@ ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
 MONTHLY_REQUESTS = {
+    'admin': 100,
     'beta': 5,
     'community': 0,
     'pro': 5,
