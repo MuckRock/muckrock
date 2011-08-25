@@ -63,35 +63,24 @@ class TestAccountUnit(TestCase):
         """Test profile model's __unicode__ method"""
         nose.tools.eq_(unicode(self.profile), "Adam's Profile", 'Profile unicode method')
 
-    def test_profile_get_num_requests(self):
+    def test_profile_get_monthly_requests(self):
         """Normal get number reuqests just returns the current value"""
         profile = Profile.objects.get(pk=2)
         profile.date_update = datetime.now()
-        nose.tools.eq_(profile.get_num_requests(), 10, 'normal get num requests')
+        nose.tools.eq_(profile.get_monthly_requests(), 10, 'normal get num requests')
 
-    def test_profile_get_num_requests_refresh(self):
+    def test_profile_get_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
         profile = Profile.objects.get(pk=2)
         profile.date_update = datetime.now() - timedelta(32)
-        nose.tools.eq_(profile.get_num_requests(), MONTHLY_REQUESTS)
+        nose.tools.eq_(profile.get_monthly_requests(), MONTHLY_REQUESTS[profile.acct_type])
         nose.tools.ok_(datetime.now() - profile.date_update < timedelta(minutes=5))
 
-    def test_profile_can_request_normal(self):
-        """Can request if profile has more than 0 requests"""
-        self.profile.date_update = datetime.now()
-        nose.tools.ok_(self.profile.can_request())
-
-    def test_profile_can_request_refresh(self):
-        """Can request resets count if it has been more than a month"""
+    def test_profile_make_request_refresh(self):
+        """Make request resets count if it has been more than a month"""
         profile = Profile.objects.get(pk=3)
         profile.date_update = datetime.now() - timedelta(32)
-        nose.tools.assert_true(profile.can_request())
-
-    def test_profile_can_request_false(self):
-        """Can not request if out of requests for the month"""
-        profile = Profile.objects.get(pk=3)
-        profile.date_update = datetime.now()
-        nose.tools.assert_false(profile.can_request())
+        nose.tools.assert_true(profile.make_request())
 
     def test_profile_make_request_pass(self):
         """Normal make request call decrements number of requests"""

@@ -11,6 +11,7 @@
             "state": "MA", 
             "user": 1, 
             "monthly_requests": 25, 
+			"acct_type": "beta",
             "zip_code": "02140"
         }
     }, 
@@ -26,6 +27,7 @@
             "state": "MA", 
             "user": 2, 
             "monthly_requests": 10, 
+			"acct_type": "beta",
             "zip_code": "02140"
         }
     }, 
@@ -41,6 +43,7 @@
             "state": "MA", 
             "user": 3, 
             "monthly_requests": 0, 
+			"acct_type": "beta",
             "zip_code": "02140"
         }
     }
