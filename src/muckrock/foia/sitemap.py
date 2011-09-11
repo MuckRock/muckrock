@@ -39,4 +39,6 @@ class FoiaSitemap(Sitemap):
             'no_docs': 0.1,
             'done': 0.8,
             'partial': 0.7,
-        }[obj.status]
+            'abandoned': 0.5,
+            'appealing': 0.6,
+        }.get(obj.status, 0.5)
