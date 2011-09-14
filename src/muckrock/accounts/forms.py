@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
 from accounts.models import Profile
+from fields import CCExpField
 
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
@@ -45,6 +46,25 @@ class UserChangeForm(ProfileForm):
 
 class UserCreationForm(UCF):
     """Custimized UserCreationForm"""
+
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
+    password1 = forms.CharField(label='Password',
+                                widget=forms.PasswordInput(attrs={'class': 'required'}))
+    password2 = forms.CharField(label='Password Confirmation',
+                                widget=forms.PasswordInput(attrs={'class': 'required'}))
+    acct_type = forms.ChoiceField(label='Account Type',
+                                  choices=(('community', 'Community'), ('pro', 'Professional')),
+                                  widget=forms.RadioSelect(attrs={'class': 'required'}))
+    card_number = forms.CharField(max_length=20, required=False,
+                                  widget=forms.TextInput(
+                                      attrs={'autocomplete': 'off',
+                                             'class': 'card-number stripe-sensitive required'}))
+    cvc = forms.CharField(max_length=4, required=False, label='CVC',
+                          widget=forms.TextInput(
+                              attrs={'autocomplete': 'off',
+                                     'class': 'card-cvc stripe-sensitive required'}))
+    expiration = CCExpField(required=False)
+    token = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def clean_username(self):
         """Do a case insensitive uniqueness check"""
