@@ -10,9 +10,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from datetime import datetime
+from datetime import datetime, date
 
-from settings import MONTHLY_REQUESTS
+from settings import MONTHLY_REQUESTS, STRIPE_PUB_KEY
 from accounts.forms import UserChangeForm, UserCreationForm
 from accounts.models import Profile
 
@@ -31,9 +31,9 @@ def register(request):
                                    date_update=datetime.now())
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
-        form = UserCreationForm()
+        form = UserCreationForm(initial={'expiration': date.today()})
     return render_to_response('registration/register.html',
-                              {'form': form, 'user': request.user},
+                              {'form': form, 'user': request.user, 'pub_key': STRIPE_PUB_KEY},
                               context_instance=RequestContext(request))
 
 @login_required
