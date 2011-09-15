@@ -3,7 +3,7 @@ Views for the FOIA application
 """
 
 from django import forms
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -20,9 +20,9 @@ from collections import namedtuple
 from datetime import datetime
 import logging
 
-from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagForm, \
-                       FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAAppealForm, \
-                       FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
+from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
+                       FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
+                       FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 from tags.models import Tag
@@ -169,12 +169,30 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url head
 
 def _save_foia_comm(request, foia, form, action):
     """Save the FOI Communication"""
+    if action == 'Admin Fix':
+        foia.email = form.cleaned_data['email']
+        foia.other_emails = form.cleaned_data['other_emails']
     FOIACommunication.objects.create(
             foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
     foia.submit(appeal=(action == 'Appeal'))
     messages.success(request, '%s succesfully submitted.' % action)
+
+@user_passes_test(lambda u: u.is_staff)
+def admin_fix(request, jurisdiction, slug, idx):
+    """Send an email from the requests auto email address"""
+
+    action = Action(
+        form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Admin Fix'),
+        msg = 'admin fix',
+        tests = [],
+        form_class = lambda _: FOIAAdminFixForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Email from Request Address',
+        value = 'Submit',
+        must_own = False)
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
 def fix(request, jurisdiction, slug, idx):
