@@ -494,6 +494,8 @@ class FOIARequest(models.Model):
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
             (self.user == user and self.is_fixable(),
                 reverse('foia-fix', kwargs=kwargs), 'Fix'),
+            (user.is_staff,
+                reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
             (self.user == user and self.is_appealable(),
                 reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
             (self.public_documents(), '#', 'Embed this Document'),
