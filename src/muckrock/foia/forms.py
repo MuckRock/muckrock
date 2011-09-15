@@ -136,6 +136,17 @@ class FOIANoteForm(forms.ModelForm):
         fields = ['note']
         widgets = {'note': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
 
+class FOIAAdminFixForm(forms.ModelForm):
+    """Form to email from the request's address"""
+
+    comm = forms.CharField(label='Body',
+                           widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+
+    class Meta:
+        # pylint: disable-msg=R0903
+        model = FOIARequest
+        fields = ['email', 'other_emails']
+
 class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
