@@ -1,0 +1,7 @@
+{% extends "request_templates/base.txt" %}
+{% block body %}
+Pursuant to the state open records law, Ariz. Rev. Stat. Ann. Secs. 39-121 to 39-122 and 39-128, I hereby request the following records:
+
+{% block content %}{% endblock %}
+
+{% endblock %}
