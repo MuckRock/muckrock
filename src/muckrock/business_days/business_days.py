@@ -37,7 +37,7 @@ class HolidayDate(object):
         """Is the given date an instance of this Holiday?"""
 
         # if the holiday falls on a Sun, observe on Mon
-        # if it falls on Sat, move to Fri is observe_sat if False
+        # if it falls on Sat, move to Fri if observe_sat is False
         weekday = date_.weekday()
         if weekday == SUN or (weekday == SAT and not self.observe_sat):
             return False
@@ -214,6 +214,7 @@ us_holidays_no_columbus = us_holidays[:6] + us_holidays[7:]
 
 calendars = {
     'USA': HolidayCalendar(us_holidays, False),
+    'AZ': HolidayCalendar(us_holidays, False),
     'CA': HolidayCalendar(us_holidays_no_columbus + [
             HolidayDate('Cesar Chavez Day', MAR, 31),
             HolidayEaster('Good Friday')], True),
