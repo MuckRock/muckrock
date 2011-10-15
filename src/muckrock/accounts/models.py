@@ -71,6 +71,13 @@ class Profile(models.Model):
 
         return self.acct_type in ['admin', 'beta', 'pro']
 
+    def get_cc(self):
+        """Get the user's CC if they have one on file"""
+        try:
+            return StripeCC.objects.get(user=self.user)
+        except StripeCC.DoesNotExist:
+            return None
+
 
 class StripeCC(models.Model):
     """A CC on file from Stripe
@@ -78,11 +85,10 @@ class StripeCC(models.Model):
     We only store the stripe token, the last 4 digits, and the card type
     so we do not need to be PCI compliant"""
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, unique=True)
     token = models.CharField(max_length=255)
     last4 = models.CharField(max_length=4)
     card_type = models.CharField(max_length=255)
-    default = models.BooleanField()
 
     def __unicode__(self):
         return u"%s's %s ending in %s" % \

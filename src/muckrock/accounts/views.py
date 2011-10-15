@@ -15,6 +15,7 @@ from datetime import datetime, date
 from settings import MONTHLY_REQUESTS, STRIPE_PUB_KEY
 from accounts.forms import UserChangeForm, UserCreationForm
 from accounts.models import Profile, StripeCC
+from foia.models import FOIARequest
 
 def register(request):
     """Register a new user"""
@@ -27,10 +28,12 @@ def register(request):
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
             Profile.objects.create(user=new_user,
-                                   monthly_requests=MONTHLY_REQUESTS.get(new_user.acct_type, 0),
+                                   acct_type=form.cleaned_data['acct_type'],
+                                   monthly_requests=MONTHLY_REQUESTS.get(
+                                       form.cleaned_data['acct_type'], 0),
                                    date_update=datetime.now())
-            if new_user.acct_type == 'pro':
-                StripeCC.objects.create(user=new_user, default=True,
+            if new_user.get_profile().acct_type == 'pro':
+                StripeCC.objects.create(user=new_user,
                                         token=form.cleaned_data['token'],
                                         last4=form.cleaned_data['last4'],
                                         card_type=form.cleaned_data['card_type'])
@@ -73,6 +76,10 @@ def update(request):
     return render_to_response('registration/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
+@login_required
+def update_cc(request):
+    """Update a user's CC"""
+
 def profile(request, user_name=None):
     """View a user's profile"""
 
@@ -81,5 +88,10 @@ def profile(request, user_name=None):
     else:
         user_obj = request.user
 
-    return render_to_response('registration/profile.html', {'user_obj': user_obj},
+    foia_requests = FOIARequest.objects.get_viewable(request.user)\
+                                       .filter(user=user_obj)\
+                                       .order_by('-date_submitted')[:5]
+
+    return render_to_response('registration/profile.html',
+                              {'user_obj': user_obj, 'foia_requests': foia_requests},
                               context_instance=RequestContext(request))
