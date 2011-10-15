@@ -61,6 +61,7 @@ class CreditCardForm(forms.ModelForm):
     card_type = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Meta:
+        # pylint: disable-msg=R0903
         model = StripeCC
 
     def clean(self):
@@ -78,6 +79,7 @@ class CreditCardForm(forms.ModelForm):
 
 class UserCreationForm(UCF, CreditCardForm):
     """Custimized UserCreationForm"""
+    # pylint: disable-msg=R0901
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
@@ -91,6 +93,7 @@ class UserCreationForm(UCF, CreditCardForm):
                                   widget=forms.RadioSelect(attrs={'class': 'required'}))
 
     class Meta(UCF.Meta):
+        # pylint: disable-msg=R0903
         fields = ['username', 'email', 'password1', 'password2', 'acct_type',
                   'card_number', 'cvc', 'expiration', 'token', 'last4', 'card_type']
 
