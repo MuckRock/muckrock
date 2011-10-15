@@ -72,10 +72,9 @@
 												// we add these names back in so we can revalidate properly
 												addInputNames();
 										} else {
-												// token contains id, last4, and card type
 												var token = response['id'];
-												var last4 = response['last4'];
-												var card_type = response['type'];
+												var last4 = response['card']['last4'];
+												var card_type = response['card']['type'];
 
 												// insert the stripe token
 												$("#id_token").val(token);

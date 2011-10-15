@@ -7,7 +7,7 @@ from django.contrib.auth.forms import UserCreationForm as UCF
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
-from accounts.models import Profile
+from accounts.models import Profile, StripeCC
 from fields import CCExpField
 
 class ProfileForm(forms.ModelForm):
@@ -44,19 +44,9 @@ class UserChangeForm(ProfileForm):
         return email
 
 
-class UserCreationForm(UCF):
-    """Custimized UserCreationForm"""
+class CreditCardForm(forms.ModelForm):
+    """A form for the user's CC"""
 
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
-    password1 = forms.CharField(label='Password',
-                                widget=forms.PasswordInput(attrs={'class': 'required'}))
-    password2 = forms.CharField(label='Password Confirmation',
-                                widget=forms.PasswordInput(attrs={'class': 'required'}))
-    acct_type = forms.ChoiceField(label='Account Type',
-                                  choices=(('community', 'Community'), ('pro', 'Professional')),
-                                  initial='community',
-                                  widget=forms.RadioSelect(attrs={'class': 'required'}))
     card_number = forms.CharField(max_length=20, required=False,
                                   widget=forms.TextInput(
                                       attrs={'autocomplete': 'off',
@@ -70,29 +60,43 @@ class UserCreationForm(UCF):
     last4 = forms.CharField(required=False, widget=forms.HiddenInput())
     card_type = forms.CharField(required=False, widget=forms.HiddenInput())
 
+    class Meta:
+        model = StripeCC
+
+    def clean(self):
+        """CC info is only required if type is pro"""
+        acct_type = self.cleaned_data.get('acct_type')
+        token = self.cleaned_data.get('token')
+        last4 = self.cleaned_data.get('last4')
+        card_type = self.cleaned_data.get('card_type')
+
+        if acct_type == 'pro' and (not token or not last4 or not card_type):
+            raise forms.ValidationError('Please enter valid credit card information')
+
+        return self.cleaned_data
+
+
+class UserCreationForm(UCF, CreditCardForm):
+    """Custimized UserCreationForm"""
+
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
+    password1 = forms.CharField(label='Password',
+                                widget=forms.PasswordInput(attrs={'class': 'required'}))
+    password2 = forms.CharField(label='Password Confirmation',
+                                widget=forms.PasswordInput(attrs={'class': 'required'}))
+    acct_type = forms.ChoiceField(label='Account Type',
+                                  choices=(('community', 'Community'), ('pro', 'Professional')),
+                                  initial='community',
+                                  widget=forms.RadioSelect(attrs={'class': 'required'}))
+
+    class Meta(UCF.Meta):
+        fields = ['username', 'email', 'password1', 'password2', 'acct_type',
+                  'card_number', 'cvc', 'expiration', 'token', 'last4', 'card_type']
+
     def clean_username(self):
         """Do a case insensitive uniqueness check"""
         username = self.cleaned_data['username']
         if User.objects.filter(username__iexact=username):
             raise forms.ValidationError("User with this Username already exists.")
         return username
-
-    def clean(self):
-        """CC info is only required if type is pro"""
-        acct_type = self.cleaned_data.get('acct_type')
-        card_number = self.cleaned_data.get('card_number')
-        cvc = self.cleaned_data.get('cvc')
-        expiration = self.cleaned_data.get('expiration')
-
-        if acct_type == 'pro':
-            if not card_number:
-                self._errors['card_number'] = self.error_class(
-                        ['Card number is required for pro accounts'])
-            if not cvc:
-                self._errors['cvc'] = self.error_class(
-                        ['CVC is required for pro accounts'])
-            if not expiration:
-                self._errors['expiration'] = self.error_class(
-                        ['Expiration date is required for pro accounts'])
-
-        return self.cleaned_data

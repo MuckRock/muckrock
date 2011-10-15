@@ -1,30 +1,28 @@
 
 {% extends "registration/base.html" %}
 
+{% load tags %}
+
 {% block content %}
 
 {% ifequal user user_obj %}
-<h1>Your Account</h1>
+	<h1>Your Account</h1>
 {% else %}
-<h1>{{user_obj.username|capfirst}}'s Account</h1>
+	<h1>{{user_obj.username|capfirst}}'s Account</h1>
 {% endifequal %}
-<table class="data-table">
-	<tr class="odd">
-		<th width="30%">User Name</th>
-		<td>{{user_obj.username}}</td>
-	</tr>
-	{% ifequal user user_obj %}
-	<tr class="even">
-		<th>Name</th>
-		<td>{{user_obj.first_name}} {{user_obj.last_name}}</td>
-	</tr>
-	<tr class="odd">
-		<th>Email</th>
-		<td>{{user_obj.email}}</td>
-	</tr>
-	<tr class="even">
-		<th>Address</th>
-		<td>
+
+<h2>{{user_obj.username}}</h2>
+
+{% if user == user_obj %}
+	{% if user_obj.get_profile.get_cc %}
+		<div class="largest right">
+			<p>Credit Card on file:</p><p>{{user_obj.get_profile.get_cc.card_type}} ending with {{user_obj.get_profile.get_cc.last4}}</p>
+		</div>
+	{% endif %}
+	<div class="largest">{{user_obj.first_name}} {{user_obj.last_name}}</div>
+	<div class="largest">{{user_obj.email}}</div>
+	{% if user_obj.get_profile.address1 %}
+		<div class="largest">
 			{{user_obj.get_profile.address1}} <br \>
 			{% if user_obj.get_profile.address2 %}
 				{{user_obj.get_profile.address2}} <br \>
@@ -34,35 +32,56 @@
 				{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}
 				{{user_obj.get_profile.zip_code}}<br \>
 			{% endif %}
-		</td>
-	</tr>
-	<tr class="odd">
-		<th>Phone</th>
-		<td>
-			{% if user_obj.get_profile.phone %}
-				{{user_obj.get_profile.phone}}
-			{% endif %}
-		</td>
-	</tr>
-	<tr class="even">
-		<th>Monthly Requests Left</th>
-		<td>
-				{{user_obj.get_profile.get_num_requests}}
-		</td>
-	</tr>
-	{% endifequal %}
-</table>
+		</div>
+	{% endif %}
+	{% if user_obj.get_profile.phone %}
+		<div class="largest">{{user_obj.get_profile.phone}}</div>
+	{% endif %}
+	<br \>
+	<div class="largest"><strong>Monthly Requests:</strong> {{user_obj.get_profile.get_monthly_requests}}</div>
+	<div class="largest"><strong>Requests:</strong> {{user_obj.get_profile.num_requests}}</div>
+{% endif %}
+
+<br \><br \>
+<h3>Latest Requests</h3>
+	{% if foia_requests %}
+		<table class="data-table">
+			<tr class="odd">
+				<th width="40%">Title</th>
+				<th width="20%">Status</th>
+				<th width="25%">Jurisdiction</th>
+				<th width="15%">Date</th>
+			</tr>
+			{% for foia in foia_requests %}
+			<tr class="{% cycle 'even' 'odd' %}">
+				<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
+				<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
+				<td>{{ foia.jurisdiction }}</td>
+				<td>{% if foia.date_submitted %}
+							{{ foia.date_submitted|date:"SHORT_DATE_FORMAT" }}
+						{% else %}
+							{{ foia.communications.all.0.date|date:"SHORT_DATE_FORMAT" }}
+						{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<p class="largest">
+		{% if user == user_obj %}
+			<a href="{% url foia-mylist view="all" %}">View all...</a>
+		{% else %}
+			<a href="{% url foia-list-user user_name=user_obj.username %}">View all...</a>
+		{% endif %}
+		</p>
+	{% else %}
+		<em class="large">No requests yet!</em>
+	{% endif %}
 
 {% endblock %}
 
 {% block sidebar %}
-<h2>User Menu</h2>
-<ul>
-	{% ifequal user user_obj %}
-	<li><a href="{% url foia-mylist view="all" %}">My FOI Requests</a>
-	{% else %}
-	<li><a href="{% url foia-list-user user_name=user_obj.username %}">{{user_obj.username|capfirst}}'s FOI Requests</a>
-	{% endifequal %}
-</ul>
-<div class="content-separator"></div>
+	{% if user == user_obj %}
+		<p class="largest"><strong><a href="">Buy more requests!</a></strong></p>
+	{% endif %}
 {% endblock %}
