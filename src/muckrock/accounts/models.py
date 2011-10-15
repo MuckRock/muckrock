@@ -38,7 +38,7 @@ class Profile(models.Model):
     date_update = models.DateField()
 
     # for stripe
-    stripe_id = model.CharField(max_length=255, blank=True)
+    stripe_id = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
