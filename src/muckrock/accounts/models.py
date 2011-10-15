@@ -72,6 +72,23 @@ class Profile(models.Model):
         return self.acct_type in ['admin', 'beta', 'pro']
 
 
+class StripeCC(models.Model):
+    """A CC on file from Stripe
+
+    We only store the stripe token, the last 4 digits, and the card type
+    so we do not need to be PCI compliant"""
+
+    user = models.ForeignKey(User)
+    token = models.CharField(max_length=255)
+    last4 = models.CharField(max_length=4)
+    card_type = models.CharField(max_length=255)
+    default = models.BooleanField()
+
+    def __unicode__(self):
+        return u"%s's %s ending in %s" % \
+            (unicode(self.user).capitalize(), self.card_type, self.last4)
+
+
 class Statistics(models.Model):
     """Nightly statistics"""
 

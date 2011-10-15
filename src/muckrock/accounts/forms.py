@@ -48,12 +48,14 @@ class UserCreationForm(UCF):
     """Custimized UserCreationForm"""
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
     password1 = forms.CharField(label='Password',
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
     password2 = forms.CharField(label='Password Confirmation',
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
     acct_type = forms.ChoiceField(label='Account Type',
                                   choices=(('community', 'Community'), ('pro', 'Professional')),
+                                  initial='community',
                                   widget=forms.RadioSelect(attrs={'class': 'required'}))
     card_number = forms.CharField(max_length=20, required=False,
                                   widget=forms.TextInput(
@@ -65,6 +67,8 @@ class UserCreationForm(UCF):
                                      'class': 'card-cvc stripe-sensitive required'}))
     expiration = CCExpField(required=False)
     token = forms.CharField(required=False, widget=forms.HiddenInput())
+    last4 = forms.CharField(required=False, widget=forms.HiddenInput())
+    card_type = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def clean_username(self):
         """Do a case insensitive uniqueness check"""
@@ -72,3 +76,23 @@ class UserCreationForm(UCF):
         if User.objects.filter(username__iexact=username):
             raise forms.ValidationError("User with this Username already exists.")
         return username
+
+    def clean(self):
+        """CC info is only required if type is pro"""
+        acct_type = self.cleaned_data.get('acct_type')
+        card_number = self.cleaned_data.get('card_number')
+        cvc = self.cleaned_data.get('cvc')
+        expiration = self.cleaned_data.get('expiration')
+
+        if acct_type == 'pro':
+            if not card_number:
+                self._errors['card_number'] = self.error_class(
+                        ['Card number is required for pro accounts'])
+            if not cvc:
+                self._errors['cvc'] = self.error_class(
+                        ['CVC is required for pro accounts'])
+            if not expiration:
+                self._errors['expiration'] = self.error_class(
+                        ['Expiration date is required for pro accounts'])
+
+        return self.cleaned_data

@@ -23,6 +23,29 @@
 							$(".card-expiry-month").removeAttr("name");
 					}
 
+					function disableCC() {
+						$(".card-number").attr("disabled", "disabled");
+						$(".card-cvc").attr("disabled", "disabled");
+						$(".card-expiry-month").attr("disabled", "disabled");
+						$(".card-expiry-year").attr("disabled", "disabled");
+					}
+
+					function enableCC() {
+						$(".card-number").removeAttr("disabled");
+						$(".card-cvc").removeAttr("disabled");
+						$(".card-expiry-month").removeAttr("disabled");
+						$(".card-expiry-year").removeAttr("disabled");
+					}
+
+					$("input[name='acct_type']").change(function(){
+							if ($("input[name='acct_type']:checked").val() == 'community') {
+								disableCC();
+							}
+							else if ($("input[name='acct_type']:checked").val() == 'pro') {
+								enableCC();
+							}
+					});
+
 					function submit(form) {
 							// remove the input field names for security
 							// we do this *before* anything else which might throw an exception
@@ -31,38 +54,47 @@
 							// given a valid form, submit the payment details to stripe
 							$(form['submit-button']).attr("disabled", "disabled")
 
-							Stripe.createToken({
-									number: $('.card-number').val(),
-									cvc: $('.card-cvc').val(),
-									exp_month: $('.card-expiry-month').val(),
-									exp_year: $('.card-expiry-year').val()
-							}, function(status, response) {
-									if (response.error) {
-											// re-enable the submit button
-											$(form['submit-button']).removeAttr("disabled")
-	
-											// show the error
-											$(".payment-errors").html(response.error.message);
-											$(".payment-errors").addClass('error');
+							if ($("input[name='acct_type']:checked").val() == 'pro') {
+								Stripe.createToken({
+										number: $('.card-number').val(),
+										cvc: $('.card-cvc').val(),
+										exp_month: $('.card-expiry-month').val(),
+										exp_year: $('.card-expiry-year').val()
+								}, function(status, response) {
+										if (response.error) {
+												// re-enable the submit button
+												$(form['submit-button']).removeAttr("disabled")
+		
+												// show the error
+												$(".payment-errors").html(response.error.message);
+												$(".payment-errors").addClass('error');
 
-											// we add these names back in so we can revalidate properly
-											addInputNames();
-									} else {
-											// token contains id, last4, and card type
-											var token = response['id'];
+												// we add these names back in so we can revalidate properly
+												addInputNames();
+										} else {
+												// token contains id, last4, and card type
+												var token = response['id'];
+												var last4 = response['last4'];
+												var card_type = response['type'];
 
-											// insert the stripe token
-											$("#id_token").val(token);
+												// insert the stripe token
+												$("#id_token").val(token);
+												$("#id_last4").val(last4);
+												$("#id_card_type").val(card_type);
 
-											// and submit
-											form.submit();
-									}
-							});
-							
+												// and submit
+												form.submit();
+										}
+								});
 							return false;
+						} else {
+							form.submit();
+						}
 					}
 
 					removeInputNames();
+
+					disableCC();
 					
 					// add custom rules for credit card validating
 					jQuery.validator.addMethod("cardNumber", Stripe.validateCardNumber, "Please enter a valid card number");

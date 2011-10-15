@@ -14,7 +14,7 @@ from datetime import datetime, date
 
 from settings import MONTHLY_REQUESTS, STRIPE_PUB_KEY
 from accounts.forms import UserChangeForm, UserCreationForm
-from accounts.models import Profile
+from accounts.models import Profile, StripeCC
 
 def register(request):
     """Register a new user"""
@@ -27,8 +27,13 @@ def register(request):
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
             Profile.objects.create(user=new_user,
-                                   monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+                                   monthly_requests=MONTHLY_REQUESTS.get(new_user.acct_type, 0),
                                    date_update=datetime.now())
+            if new_user.acct_type == 'pro':
+                StripeCC.objects.create(user=new_user, default=True,
+                                        token=form.cleaned_data['token'],
+                                        last4=form.cleaned_data['last4'],
+                                        card_type=form.cleaned_data['card_type'])
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         form = UserCreationForm(initial={'expiration': date.today()})
