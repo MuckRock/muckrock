@@ -11,8 +11,9 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from datetime import datetime, date
+import stripe
 
-from settings import MONTHLY_REQUESTS, STRIPE_PUB_KEY
+from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from accounts.forms import UserChangeForm, UserCreationForm
 from accounts.models import Profile, StripeCC
 from foia.models import FOIARequest
@@ -27,16 +28,25 @@ def register(request):
             new_user = authenticate(username=form.cleaned_data['username'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
-            Profile.objects.create(user=new_user,
+            profile = Profile.objects.create(user=new_user,
                                    acct_type=form.cleaned_data['acct_type'],
                                    monthly_requests=MONTHLY_REQUESTS.get(
                                        form.cleaned_data['acct_type'], 0),
                                    date_update=datetime.now())
-            if new_user.get_profile().acct_type == 'pro':
+            if profile.acct_type == 'pro':
                 StripeCC.objects.create(user=new_user,
                                         token=form.cleaned_data['token'],
                                         last4=form.cleaned_data['last4'],
                                         card_type=form.cleaned_data['card_type'])
+                stripe.api_key = STRIPE_SECRET_KEY
+                customer = stripe.Customer.create(
+                    description=new_user.username,
+                    email=new_user.email,
+                    card=rofile.get_cc().token,
+                    plan='pro')
+                profile.stripe_id = customer.id
+                profile.save()
+
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         form = UserCreationForm(initial={'expiration': date.today()})

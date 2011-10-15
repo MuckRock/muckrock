@@ -37,6 +37,9 @@ class Profile(models.Model):
     monthly_requests = models.IntegerField(default=0)
     date_update = models.DateField()
 
+    # for stripe
+    stripe_id = model.CharField(max_length=255, blank=True)
+
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
 
