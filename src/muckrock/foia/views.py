@@ -285,7 +285,7 @@ def delete(request, jurisdiction, slug, idx):
         msg = 'delete',
         tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
         form_class = lambda _: FOIADeleteForm,
-        return_url = lambda r, f: reverse('foia-list-user', kwargs={'user_name': r.user.username}),
+        return_url = lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
         heading = 'Delete FOI Request',
         value = 'Delete',
         must_own = True)
@@ -443,6 +443,8 @@ def my_list(request, view):
         unsorted = unsorted.filter(status='processed')
     elif view == 'completed':
         unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
+    elif view != 'all':
+        raise Http404()
 
     tag = request.GET.get('tag')
     if tag:
