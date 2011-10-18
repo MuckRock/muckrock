@@ -404,6 +404,13 @@ def my_list(request, view):
     # pylint: disable-msg=E1103
     # pylint: disable-msg=R0912
 
+    def set_read_status(foia_pks, status):
+        """Mark requests as read or unread"""
+        for foia_pk in foia_pks:
+            foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+            foia.updated = status
+            foia.save()
+
     def handle_post():
         """Handle post data"""
         try:
@@ -421,15 +428,14 @@ def my_list(request, view):
                         foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
                         foia.tags.add(tag)
             elif request.POST.get('submit') == 'Mark as Read':
-                for foia_pk in foia_pks:
-                    foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
-                    foia.updated = False
-                    foia.save()
-        except FOIARequest.DoesNotExist, Tag.DoesNotExist:
+                set_read_status(foia_pks, False)
+            elif request.POST.get('submit') == 'Mark as Unread':
+                set_read_status(foia_pks, True)
+        except (FOIARequest.DoesNotExist, Tag.DoesNotExist):
             # bad foia or tag value passed in, just ignore
             pass
-        finally:
-            return redirect('foia-mylist', view=view)
+
+        return redirect('foia-mylist', view=view)
 
     if request.method == 'POST':
         return handle_post()
