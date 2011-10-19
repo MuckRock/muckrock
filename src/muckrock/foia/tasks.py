@@ -36,7 +36,7 @@ class FOIAOptions(dbsettings.Group):
     enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
 options = FOIAOptions()
 
-@task(ignore_result=True)
+@task(ignore_result=True, max_retries=10)
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
@@ -79,7 +79,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             info = json.loads(ret)
             doc.doc_id = info['id']
             doc.save()
-            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=300)
+            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except urllib2.URLError, exc:
         # pylint: disable-msg=E1101
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
