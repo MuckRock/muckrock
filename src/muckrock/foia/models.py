@@ -337,12 +337,6 @@ class FOIARequest(models.Model):
             self.status = 'processed' if not appeal else 'appealing'
             self._send_email()
             self.update_dates()
-            if not self.date_submitted:
-                self.date_submitted = date.today()
-                days = self.jurisdiction.get_days()
-                if days:
-                    cal = calendars[self.jurisdiction.legal()]
-                    self.date_due = cal.business_days_from(date.today(), days)
         else:
             self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
@@ -438,9 +432,12 @@ class FOIARequest(models.Model):
                 self.days_until_due = None
 
             # update follow up date
-            self.date_followup = self.last_comm().date.date() + timedelta(self._followup_days())
-            if self.date_due and self.date_due > self.date_followup:
-                self.date_followup = self.date_due
+            new_date = self.last_comm().date.date() + timedelta(self._followup_days())
+            if self.date_due and self.date_due > new_date:
+                new_date = self.date_due
+
+            if not self.date_followup or self.date_followup < new_date:
+                self.date_followup = new_date
 
         # if we are no longer waiting on the agency, do not follow up
         if self.status != 'processed' and self.date_followup:
