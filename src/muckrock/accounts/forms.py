@@ -3,7 +3,7 @@ Forms for accounts application
 """
 
 from django import forms
-from django.contrib.auth.forms import UserCreationForm as UCF
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
@@ -64,38 +64,66 @@ class CreditCardForm(forms.ModelForm):
         # pylint: disable-msg=R0903
         model = StripeCC
 
+
+class BuyRequestForm(CreditCardForm):
+    """A form for buying requests"""
+
+    use_on_file = forms.BooleanField(required=False, label='Use card on file')
+    save_cc = forms.BooleanField(required=False, label='Save for future use')
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(BuyRequestForm, self).__init__(*args, **kwargs)
+
+        card = self.request.user.get_profile().get_cc()
+        if not card:
+            del self.fields['use_on_file']
+            self.Meta.fields = ['card_number', 'cvc', 'expiration', 'save_cc',
+                                'token', 'last4', 'card_type']
+        else:
+            self.fields['use_on_file'].help_text = '%s ending in %s' % (card.card_type, card.last4)
+
     def clean(self):
-        """CC info is only required if type is pro"""
-        acct_type = self.cleaned_data.get('acct_type')
+        """Validate the form"""
+
+        use_on_file = self.cleaned_data.get('use_on_file')
+        save_cc = self.cleaned_data.get('save_cc')
         token = self.cleaned_data.get('token')
         last4 = self.cleaned_data.get('last4')
         card_type = self.cleaned_data.get('card_type')
 
-        if acct_type == 'pro' and (not token or not last4 or not card_type):
+        if not use_on_file and (not token or not last4 or not card_type):
             raise forms.ValidationError('Please enter valid credit card information')
+
+        if use_on_file and save_cc:
+            raise forms.ValidationError('You may not use the card on file and save a new one')
+
+        if use_on_file and not self.request.user.get_profile().get_cc():
+            raise forms.ValidationError('You do not have a credit card on file')
 
         return self.cleaned_data
 
+    class Meta(CreditCardForm.Meta):
+        # pylint: disable-msg=R0903
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration',
+                  'save_cc', 'token', 'last4', 'card_type']
 
-class UserCreationForm(UCF, CreditCardForm):
-    """Custimized UserCreationForm"""
-    # pylint: disable-msg=R0901
+
+class RegisterFree(UserCreationForm):
+    """Register for a community account"""
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
     password1 = forms.CharField(label='Password',
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
     password2 = forms.CharField(label='Password Confirmation',
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
-    acct_type = forms.ChoiceField(label='Account Type',
-                                  choices=(('community', 'Community'), ('pro', 'Professional')),
-                                  initial='community',
-                                  widget=forms.RadioSelect(attrs={'class': 'required'}))
 
-    class Meta(UCF.Meta):
+    class Meta(UserCreationForm.Meta):
         # pylint: disable-msg=R0903
-        fields = ['username', 'email', 'password1', 'password2', 'acct_type',
-                  'card_number', 'cvc', 'expiration', 'token', 'last4', 'card_type']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
 
     def clean_username(self):
         """Do a case insensitive uniqueness check"""
@@ -103,3 +131,25 @@ class UserCreationForm(UCF, CreditCardForm):
         if User.objects.filter(username__iexact=username):
             raise forms.ValidationError("User with this Username already exists.")
         return username
+
+
+class RegisterPro(RegisterFree, CreditCardForm):
+    """Register for a pro account"""
+    # pylint: disable-msg=R0901
+
+    def clean(self):
+        """CC info is required"""
+        token = self.cleaned_data.get('token')
+        last4 = self.cleaned_data.get('last4')
+        card_type = self.cleaned_data.get('card_type')
+
+        if not token or not last4 or not card_type:
+            raise forms.ValidationError('Please enter valid credit card information')
+
+        return self.cleaned_data
+
+    class Meta(RegisterFree.Meta):
+        # pylint: disable-msg=R0903
+        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2',
+                  'card_number', 'cvc', 'expiration', 'token', 'last4', 'card_type']
+
