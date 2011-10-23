@@ -82,6 +82,6 @@
 
 {% block sidebar %}
 	{% if user == user_obj %}
-		<p class="largest"><strong><a href="">Buy more requests!</a></strong></p>
+		<p class="largest"><strong><a href="{% url acct-buy-requests %}">Buy more requests!</a></strong></p>
 	{% endif %}
 {% endblock %}

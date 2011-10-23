@@ -7,9 +7,12 @@ from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 from django.db import models
 
 from datetime import datetime
+import stripe
 
 from foia.models import FOIARequest
-from settings import MONTHLY_REQUESTS
+from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
+
+stripe.api_key = STRIPE_SECRET_KEY
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -77,9 +80,65 @@ class Profile(models.Model):
     def get_cc(self):
         """Get the user's CC if they have one on file"""
         try:
-            return StripeCC.objects.get(user=self.user)
+            local_card = StripeCC.objects.get(user=self.user)
         except StripeCC.DoesNotExist:
-            return None
+            local_card = None
+
+        remote_card = getattr(self.get_customer(), 'active_card', None)
+
+        if not local_card and remote_card:
+            local_card = StripeCC.objects.create(user=self.user,
+                                                 last4=remote_card.last4,
+                                                 card_type=remote_card.type)
+        elif local_card and not remote_card:
+            local_card.delete()
+            local_card = None
+        elif local_card and remote_card and \
+            (local_card.last4 != remote_card.last4 or local_card.card_type != remote_card.type):
+            local_card.last4 = remote_card.last4
+            local_card.card_type = remote_card.type
+            local_card.save()
+
+        return local_card
+
+    def save_cc(self, form):
+        """Save a credit card"""
+        customer = self.get_customer()
+        customer.card = form.cleaned_data['token']
+        customer.save()
+
+        StripeCC.objects.create(user=self.user,
+                                last4=form.cleaned_data['last4'],
+                                card_type=form.cleaned_data['card_type'])
+
+    def get_customer(self):
+        """Get stripe customer"""
+        try:
+            customer = stripe.Customer.retrieve(self.stripe_id)
+        except stripe.InvalidRequestError:
+            customer = self.save_customer()
+
+        return customer
+
+    def save_customer(self, token=None):
+        """Get stripe customer"""
+        # pylint: disable-msg=E1101
+
+        if token:
+            customer = stripe.Customer.create(
+                description=self.user.username,
+                email=self.user.email,
+                card=token,
+                plan='pro')
+        else:
+            customer = stripe.Customer.create(
+                description=self.user.username,
+                email=self.user.email)
+
+        self.stripe_id = customer.id
+        self.save()
+
+        return customer
 
 
 class StripeCC(models.Model):
@@ -89,7 +148,6 @@ class StripeCC(models.Model):
     so we do not need to be PCI compliant"""
 
     user = models.ForeignKey(User, unique=True)
-    token = models.CharField(max_length=255)
     last4 = models.CharField(max_length=4)
     card_type = models.CharField(max_length=255)
 
