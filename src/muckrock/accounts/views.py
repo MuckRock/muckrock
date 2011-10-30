@@ -15,7 +15,8 @@ from datetime import datetime, date
 import stripe
 
 from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
-from accounts.forms import UserChangeForm, RegisterFree, RegisterPro, BuyRequestForm
+from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
+                           BuyRequestForm, UpgradeSubscForm, CancelSubscForm
 from accounts.models import Profile
 from foia.models import FOIARequest
 
@@ -32,7 +33,7 @@ def register_free(request):
     def create_customer(user, **kwargs):
         """Create a stripe customer for community account"""
         # pylint: disable-msg=W0613
-        user.get_profile.save_customer()
+        user.get_profile().save_customer()
 
     template = 'registration/register_free.html'
 
@@ -118,6 +119,85 @@ def update(request):
 def update_cc(request):
     """Update a user's CC"""
 
+    if request.method == 'POST':
+        form = CreditCardForm(request.POST)
+
+        if request.POST.get('submit') == 'Delete':
+            request.user.get_profile().delete_cc()
+            messages.info(request, 'Your credit card has been removed from your profile.')
+            return HttpResponseRedirect(reverse('acct-my-profile'))
+        elif form.is_valid():
+            request.user.get_profile().save_cc(form)
+            messages.success(request, 'Your credit card has been saved.')
+            return HttpResponseRedirect(reverse('acct-my-profile'))
+
+    else:
+        form = CreditCardForm()
+
+    card = request.user.get_profile().get_cc()
+    if card:
+        desc = 'Current card on file: %s ending in %s' % (card.card_type, card.last4)
+    else:
+        desc = 'No card currently on file'
+
+    return render_to_response('registration/cc.html',
+                              {'form': form, 'pub_key': STRIPE_PUB_KEY, 'desc': desc,
+                               'heading': 'Update Credit Card'},
+                              context_instance=RequestContext(request))
+
+@login_required
+def manage_subsc(request):
+    """Subscribe or unsubscribe from a pro account"""
+
+    user_profile = request.user.get_profile()
+
+    if user_profile.acct_type == 'admin':
+        heading = 'Admin Account'
+        desc = "You are an admin, you don't need a subscription"
+        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+                                  context_instance=RequestContext(request))
+    if user_profile.acct_type == 'beta':
+        heading = 'Beta Account'
+        desc = 'Thank you for being a beta tester.  You will continue to get 5 ' \
+               'free requests a month for helping out.'
+        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+                                  context_instance=RequestContext(request))
+
+    if user_profile.acct_type == 'community':
+        heading = 'Upgrade to a Pro Account'
+        desc = 'Upgrade to a professional account. $40 per month for 10 requests per month.'
+        form_class = UpgradeSubscForm
+        template = 'registration/cc.html'
+    elif user_profile.acct_type == 'pro':
+        heading = 'Cancel Your Subscription'
+        desc = 'You will go back to a free community account.'
+        form_class = CancelSubscForm
+        template = 'registration/subsc.html'
+
+    if request.method == 'POST':
+        form = form_class(request.POST, request=request)
+
+        if user_profile.acct_type == 'community' and form.is_valid():
+            if not form.cleaned_data['use_on_file']:
+                user_profile.save_cc(form)
+            customer = user_profile.get_customer()
+            customer.update_subscription(plan='pro')
+            return HttpResponseRedirect(reverse('acct-my-profile'))
+        elif user_profile.acct_type == 'pro' and form.is_valid():
+            user_profile.acct_type = 'community'
+            user_profile.save()
+            customer = user_profile.get_customer()
+            customer.cancel_subscription()
+            messages.info(request, 'Your professional account subscription has been cancelled')
+            return HttpResponseRedirect(reverse('acct-my-profile'))
+
+    else:
+        form = form_class(request=request)
+
+    return render_to_response(template,
+                              {'form': form, 'heading': heading, 'desc': desc},
+                              context_instance=RequestContext(request))
+
 @login_required
 def buy_requests(request):
     """Buy more requests"""
@@ -153,7 +233,9 @@ def buy_requests(request):
     else:
         form = BuyRequestForm(request=request)
 
-    return render_to_response('registration/cc.html', {'form': form, 'heading': 'Buy Requests'},
+    return render_to_response('registration/cc.html',
+                              {'form': form, 'heading': 'Buy Requests',
+                               'desc': 'Buy 5 requests for $20.  They may be used at any time.'},
                               context_instance=RequestContext(request))
 
 def profile(request, user_name=None):

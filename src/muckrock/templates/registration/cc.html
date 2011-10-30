@@ -46,7 +46,7 @@
 							enableCC();
 						}
 					});
-					if ($('#id_use_on_file').checked) {
+					if ($('#id_use_on_file').is(":checked")) {
 						disableCC();
 					}
 
@@ -134,7 +134,7 @@
 {% block content %}
   <h1>{{heading}}</h1>
 	{% if desc %}
-		<p>{{desc}}</p>
+		<p class="largest">{{desc}}</p>
 	{% endif %}
 	<div class="form">
 		<form action="" method="post" id="stripe-form" style="display: none;">
@@ -142,7 +142,7 @@
 				
 				{% include "form.html" %}
 
-				<button type="submit" name="submit-button">Submit</button>
+				<input type="submit" name="submit" value="Submit" class="button" />
 				<div class="payment-errors"></div>
 			</fieldset>
 		</form>
