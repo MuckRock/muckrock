@@ -7,11 +7,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
 
 from datetime import datetime, date
+import json
+import logging
 import stripe
 
 from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -20,6 +23,7 @@ from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, Registe
 from accounts.models import Profile
 from foia.models import FOIARequest
 
+logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def register(request):
@@ -253,3 +257,33 @@ def profile(request, user_name=None):
     return render_to_response('registration/profile.html',
                               {'user_obj': user_obj, 'foia_requests': foia_requests},
                               context_instance=RequestContext(request))
+
+@csrf_exempt
+def stripe_webhook(request):
+    """Handle webhooks from stripe"""
+    if 'json' not in request.POST:
+        raise Http404
+
+    message = json.loads(request.POST.get('json'))
+    event = message.get('event')
+    del message['event']
+
+    events = ['recurring_payment_failed', 'invoice_ready' 'recurring_payment_succeeded',
+              'subscription_trial_ending', 'subscription_final_payment_attempt_failed', 'ping']
+
+    if event not in events:
+        raise Http404
+
+    for key, value in message.iteritems():
+        if isinstance(value, dict) and 'object' in value:
+            message[key] = stripe.convert_to_stripe_object(value, STRIPE_SECRET_KEY)
+
+    # show user a message? email user?
+    if event == 'subscription_final_payment_attempt_failed':
+        user_profile = Profile.objects.get(stripe_id=message['customer'])
+        user_profile.acct_type = 'community'
+        user_profile.save()
+        logger.info('%s subscription has been cancelled due to failed payment' % \
+                    user_profile.user.username)
+
+    return HttpResponse()
