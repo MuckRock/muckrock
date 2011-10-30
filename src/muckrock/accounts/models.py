@@ -107,9 +107,15 @@ class Profile(models.Model):
         customer.card = form.cleaned_data['token']
         customer.save()
 
-        StripeCC.objects.create(user=self.user,
-                                last4=form.cleaned_data['last4'],
-                                card_type=form.cleaned_data['card_type'])
+        try:
+            card = StripeCC.objects.get(user=self.user)
+            card.last4 = form.cleaned_data['last4']
+            card.card_type = form.cleaned_data['card_type']
+            card.save()
+        except StripeCC.DoesNotExist:
+            StripeCC.objects.create(user=self.user,
+                                    last4=form.cleaned_data['last4'],
+                                    card_type=form.cleaned_data['card_type'])
 
     def get_customer(self):
         """Get stripe customer"""
@@ -121,7 +127,7 @@ class Profile(models.Model):
         return customer
 
     def save_customer(self, token=None):
-        """Get stripe customer"""
+        """Save stripe customer"""
         # pylint: disable-msg=E1101
 
         if token:

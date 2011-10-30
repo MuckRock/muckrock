@@ -14,6 +14,7 @@
 <h2>{{user_obj.username}}</h2>
 
 {% if user == user_obj %}
+	<h3>{{user.get_profile.get_acct_type_display}} Account</h3>
 	{% if user_obj.get_profile.get_cc %}
 		<div class="largest right">
 			<p>Credit Card on file:</p><p>{{user_obj.get_profile.get_cc.card_type}} ending with {{user_obj.get_profile.get_cc.last4}}</p>

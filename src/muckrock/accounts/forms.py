@@ -60,26 +60,35 @@ class CreditCardForm(forms.ModelForm):
     last4 = forms.CharField(required=False, widget=forms.HiddenInput())
     card_type = forms.CharField(required=False, widget=forms.HiddenInput())
 
+    def clean(self):
+        """CC info is required"""
+        token = self.cleaned_data.get('token')
+        last4 = self.cleaned_data.get('last4')
+        card_type = self.cleaned_data.get('card_type')
+
+        if not token or not last4 or not card_type:
+            raise forms.ValidationError('Please enter valid credit card information')
+
+        return self.cleaned_data
+
     class Meta:
         # pylint: disable-msg=R0903
         model = StripeCC
+        exclude = ['user']
 
 
-class BuyRequestForm(CreditCardForm):
-    """A form for buying requests"""
+class UpgradeSubscForm(CreditCardForm):
+    """A form for subscribing to pro accounts"""
 
-    use_on_file = forms.BooleanField(required=False, label='Use card on file')
-    save_cc = forms.BooleanField(required=False, label='Save for future use')
+    use_on_file = forms.BooleanField(required=False, label='Use card on file', initial=True)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super(BuyRequestForm, self).__init__(*args, **kwargs)
+        super(UpgradeSubscForm, self).__init__(*args, **kwargs)
 
         card = self.request.user.get_profile().get_cc()
         if not card:
             del self.fields['use_on_file']
-            self.Meta.fields = ['card_number', 'cvc', 'expiration', 'save_cc',
-                                'token', 'last4', 'card_type']
         else:
             self.fields['use_on_file'].help_text = '%s ending in %s' % (card.card_type, card.last4)
 
@@ -87,16 +96,12 @@ class BuyRequestForm(CreditCardForm):
         """Validate the form"""
 
         use_on_file = self.cleaned_data.get('use_on_file')
-        save_cc = self.cleaned_data.get('save_cc')
         token = self.cleaned_data.get('token')
         last4 = self.cleaned_data.get('last4')
         card_type = self.cleaned_data.get('card_type')
 
         if not use_on_file and (not token or not last4 or not card_type):
             raise forms.ValidationError('Please enter valid credit card information')
-
-        if use_on_file and save_cc:
-            raise forms.ValidationError('You may not use the card on file and save a new one')
 
         if use_on_file and not self.request.user.get_profile().get_cc():
             raise forms.ValidationError('You do not have a credit card on file')
@@ -106,7 +111,36 @@ class BuyRequestForm(CreditCardForm):
     class Meta(CreditCardForm.Meta):
         # pylint: disable-msg=R0903
         fields = ['use_on_file', 'card_number', 'cvc', 'expiration',
+                  'token', 'last4', 'card_type']
+
+
+class BuyRequestForm(UpgradeSubscForm):
+    """A form for buying requests"""
+
+    save_cc = forms.BooleanField(required=False, label='Save for future use')
+
+    def clean(self):
+        """Validate the form"""
+
+        super(BuyRequestForm, self).clean()
+
+        save_cc = self.cleaned_data.get('save_cc')
+        use_on_file = self.cleaned_data.get('use_on_file')
+
+        if use_on_file and save_cc:
+            raise forms.ValidationError('You may not use the card on file and save a new one')
+
+        return self.cleaned_data
+
+    class Meta(UpgradeSubscForm.Meta):
+        # pylint: disable-msg=R0903
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration',
                   'save_cc', 'token', 'last4', 'card_type']
+
+
+class CancelSubscForm(forms.Form):
+    """Cancel subscription form"""
+    confirm = forms.BooleanField(label='Are you sure you want to cancel your Pro Subscription?')
 
 
 class RegisterFree(UserCreationForm):
@@ -136,17 +170,6 @@ class RegisterFree(UserCreationForm):
 class RegisterPro(RegisterFree, CreditCardForm):
     """Register for a pro account"""
     # pylint: disable-msg=R0901
-
-    def clean(self):
-        """CC info is required"""
-        token = self.cleaned_data.get('token')
-        last4 = self.cleaned_data.get('last4')
-        card_type = self.cleaned_data.get('card_type')
-
-        if not token or not last4 or not card_type:
-            raise forms.ValidationError('Please enter valid credit card information')
-
-        return self.cleaned_data
 
     class Meta(RegisterFree.Meta):
         # pylint: disable-msg=R0903

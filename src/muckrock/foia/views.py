@@ -81,9 +81,10 @@ def _foia_form_handler(request, foia, action):
                         messages.success(request, 'Request succesfully submitted.')
                     else:
                         foia.status = 'started'
-                        messages.error(request, "You are out of requests for this month.  "
-                            "You're request has been saved as a draft, please submit it when you "
-                            "get more requests")
+                        messages.error(request, 'You are out of requests for this month.  '
+                            'Your request has been saved as a draft, please '
+                            '<a href="%s">buy more requests</a> to submit it.'
+                            % reverse('acct-buy-requests'))
 
                 foia.save()
 
