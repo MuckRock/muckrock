@@ -146,6 +146,10 @@ class FOIARequest(models.Model):
         """Can this request be appealed by the user?"""
         return self.status == 'rejected'
 
+    def is_payable(self):
+        """Can this request be payed for by the user?"""
+        return self.status == 'payment' and self.price > 0
+
     def is_deletable(self):
         """Can this request be deleted?"""
         return self.status == 'started'
@@ -496,6 +500,8 @@ class FOIARequest(models.Model):
                 reverse('foia-fix', kwargs=kwargs), 'Fix'),
             (self.user == user and self.is_appealable(),
                 reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
+            (self.user == user and self.is_payable(),
+                reverse('foia-pay', kwargs=kwargs), 'Pay'),
             (self.public_documents(), '#', 'Embed this Document'),
             (user.is_authenticated() and self.user != user,
                 reverse('foia-follow', kwargs=kwargs),

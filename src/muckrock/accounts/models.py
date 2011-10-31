@@ -2,6 +2,7 @@
 Models for the accounts application
 """
 
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 from django.db import models
@@ -146,6 +147,24 @@ class Profile(models.Model):
 
         return customer
 
+    def pay(self, request, form, amount, desc):
+        """Create a stripe charge for the user"""
+        customer = self.get_customer()
+
+        try:
+            if form.cleaned_data['save_cc']:
+                self.save_cc(form)
+            if form.cleaned_data['use_on_file'] or form.cleaned_data['save_cc']:
+                stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
+                                     description=desc)
+            else:
+                stripe.Charge.create(amount=amount, currency='usd',
+                                     card=form.cleaned_data['token'],
+                                     description=desc)
+            messages.success(request, 'Your payment was successful')
+        except stripe.CardError as exc:
+            messages.error(request, 'Payment error: %s' % exc.message)
+            raise exc
 
 class StripeCC(models.Model):
     """A CC on file from Stripe
