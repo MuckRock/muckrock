@@ -133,6 +133,9 @@
 
 {% block content %}
   <h1>{{heading}}</h1>
+	{% if foia %}
+		<h2>{{foia.title}}</h2>
+	{% endif %}
 	{% if desc %}
 		<p class="largest">{{desc}}</p>
 	{% endif %}

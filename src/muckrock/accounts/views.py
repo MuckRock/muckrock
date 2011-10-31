@@ -17,11 +17,11 @@ import json
 import logging
 import stripe
 
-from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
-                           BuyRequestForm, UpgradeSubscForm, CancelSubscForm
+                           PaymentForm, UpgradeSubscForm, CancelSubscForm
 from accounts.models import Profile
 from foia.models import FOIARequest
+from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -207,35 +207,21 @@ def buy_requests(request):
     """Buy more requests"""
 
     if request.method == 'POST':
-        form = BuyRequestForm(request.POST, request=request)
+        form = PaymentForm(request.POST, request=request)
 
         if form.is_valid():
-            user_profile = request.user.get_profile()
-            customer = user_profile.get_customer()
-
             try:
-                if form.cleaned_data['save_cc']:
-                    user_profile.save_cc(form)
-                if form.cleaned_data['use_on_file'] or form.cleaned_data['save_cc']:
-                    stripe.Charge.create(amount=2000, currency='usd', customer=customer.id,
-                                         description='Charge for 5 requests to MuckRock.com')
-                else:
-                    stripe.Charge.create(amount=2000, currency='usd',
-                                         card=form.cleaned_data['token'],
-                                         description='Charge for 5 requests to MuckRock.com')
-
+                user_profile = request.user.get_profile()
+                user_profile.pay(form, request, 2000, 'Charge for 5 requests')
                 user_profile.num_requests += 5
                 user_profile.save()
-                messages.success(request, 'Your purchase was succesful')
-
+                logger.info('%s has purchased requests' % (request.user.username))
                 return HttpResponseRedirect(reverse('acct-my-profile'))
-
-            except stripe.CardError as exc:
-                messages.error(request, 'Payment error: %s' % exc.message)
+            except stripe.CardError:
                 return HttpResponseRedirect(reverse('acct-buy-requests'))
 
     else:
-        form = BuyRequestForm(request=request)
+        form = PaymentForm(request=request)
 
     return render_to_response('registration/cc.html',
                               {'form': form, 'heading': 'Buy Requests',

@@ -114,7 +114,7 @@ class UpgradeSubscForm(CreditCardForm):
                   'token', 'last4', 'card_type']
 
 
-class BuyRequestForm(UpgradeSubscForm):
+class PaymentForm(UpgradeSubscForm):
     """A form for buying requests"""
 
     save_cc = forms.BooleanField(required=False, label='Save for future use')
@@ -122,7 +122,7 @@ class BuyRequestForm(UpgradeSubscForm):
     def clean(self):
         """Validate the form"""
 
-        super(BuyRequestForm, self).clean()
+        super(PaymentForm, self).clean()
 
         save_cc = self.cleaned_data.get('save_cc')
         use_on_file = self.cleaned_data.get('use_on_file')
