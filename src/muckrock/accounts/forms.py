@@ -103,9 +103,6 @@ class UpgradeSubscForm(CreditCardForm):
         if not use_on_file and (not token or not last4 or not card_type):
             raise forms.ValidationError('Please enter valid credit card information')
 
-        if use_on_file and not self.request.user.get_profile().get_cc():
-            raise forms.ValidationError('You do not have a credit card on file')
-
         return self.cleaned_data
 
     class Meta(CreditCardForm.Meta):
@@ -165,6 +162,13 @@ class RegisterFree(UserCreationForm):
         if User.objects.filter(username__iexact=username):
             raise forms.ValidationError("User with this Username already exists.")
         return username
+
+    def clean_email(self):
+        """Do a case insensitive uniqueness check"""
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email):
+            raise forms.ValidationError("User with this Email already exists.")
+        return email
 
 
 class RegisterPro(RegisterFree, CreditCardForm):
