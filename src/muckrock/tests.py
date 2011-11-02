@@ -34,9 +34,11 @@ def post_allowed(client, url, data, redirect):
 
     return response
 
-def post_allowed_bad(client, url, templates):
+def post_allowed_bad(client, url, templates, data=None):
     """Test an allowed post with bad data"""
-    response = client.post(url, {'bad': 'data'})
+    if data is None:
+        data = {'bad': 'data'}
+    response = client.post(url, data)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
     nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
@@ -57,8 +59,8 @@ def get_404(client, url):
     return response
 
 
-class TestAccountFunctional(TestCase):
-    """Functional tests for account"""
+class TestFunctional(TestCase):
+    """Functional tests for top level"""
     fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_foiarequests.json', 'test_news.json']
 

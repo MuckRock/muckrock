@@ -11,6 +11,7 @@
             "state": "MA", 
             "user": 1, 
             "monthly_requests": 25, 
+			"num_requests": 10,
 			"acct_type": "beta",
             "zip_code": "02140"
         }
@@ -26,7 +27,8 @@
             "phone": "617-555-5678", 
             "state": "MA", 
             "user": 2, 
-            "monthly_requests": 10, 
+            "monthly_requests": 0, 
+			"num_requests": 10,
 			"acct_type": "beta",
             "zip_code": "02140"
         }
@@ -43,6 +45,7 @@
             "state": "MA", 
             "user": 3, 
             "monthly_requests": 0, 
+			"num_requests": 0,
 			"acct_type": "beta",
             "zip_code": "02140"
         }

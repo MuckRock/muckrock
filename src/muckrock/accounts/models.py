@@ -8,12 +8,15 @@ from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 from django.db import models
 
 from datetime import datetime
+import logging
 import stripe
+import sys
 
 from foia.models import FOIARequest
 from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 
 stripe.api_key = STRIPE_SECRET_KEY
+logger = logging.getLogger(__name__)
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -150,21 +153,24 @@ class Profile(models.Model):
     def pay(self, request, form, amount, desc):
         """Create a stripe charge for the user"""
         customer = self.get_customer()
+        save_cc = form.cleaned_data.get('save_cc')
+        use_on_file = form.cleaned_data.get('use_on_file')
+        token = form.cleaned_data.get('token')
 
         try:
-            if form.cleaned_data['save_cc']:
+            if save_cc:
                 self.save_cc(form)
-            if form.cleaned_data['use_on_file'] or form.cleaned_data['save_cc']:
+            if use_on_file or save_cc:
                 stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
                                      description=desc)
             else:
-                stripe.Charge.create(amount=amount, currency='usd',
-                                     card=form.cleaned_data['token'],
+                stripe.Charge.create(amount=amount, currency='usd', card=token,
                                      description=desc)
             messages.success(request, 'Your payment was successful')
         except stripe.CardError as exc:
-            messages.error(request, 'Payment error: %s' % exc.message)
-            raise exc
+            messages.error(request, 'Payment error: %s' % exc)
+            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+
 
 class StripeCC(models.Model):
     """A CC on file from Stripe
