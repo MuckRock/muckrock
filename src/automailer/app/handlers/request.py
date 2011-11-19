@@ -143,7 +143,7 @@ def _allowed_email(email, foia):
     email = email.lower()
     state_tlds = ['state.%s.us' % a.lower() for (a, _) in STATE_CHOICES
                                             if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
-    allowed_tlds = ['.gov', '.mil'] + state_tlds
+    allowed_tlds = ['.gov', '.mil', '.muckrock.com'] + state_tlds
     if foia.email and '@' in foia.email and email.endswith(foia.email.split('@')[1].lower()):
         return True
     if foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:

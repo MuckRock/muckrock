@@ -1,0 +1,7 @@
+{% extends "request_templates/base.txt" %}
+{% block body %}
+Pursuant to the New Hampshire "Access to Government Records and Meetings" Statute (RSA Ch. 91-A), I hereby request the following records:
+
+{% block content %}{% endblock %}
+
+{% endblock %}
