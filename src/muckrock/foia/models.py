@@ -221,9 +221,11 @@ class FOIARequest(models.Model):
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
+        # pylint: disable-msg=E1101
 
         # use raw sql here in order to avoid race conditions
-        uid = int(md5(self.title + datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
+        uid = int(md5(self.title.encode('utf8') +
+                      datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
         mail_id = '%s-%08d' % (self.pk, uid)
         cursor = connection.cursor()
         cursor.execute("UPDATE foia_foiarequest "

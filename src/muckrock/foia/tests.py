@@ -9,6 +9,7 @@ from django.test import TestCase
 import nose.tools
 
 import datetime
+import re
 from operator import attrgetter
 
 from business_days.business_days import calendars
@@ -161,6 +162,17 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_false(foias[2].is_viewable(AnonymousUser()))
         nose.tools.assert_true (foias[3].is_viewable(AnonymousUser()))
         nose.tools.assert_true (foias[4].is_viewable(AnonymousUser()))
+
+    def test_foia_set_mail_id(self):
+        """Test the set_mail_id function"""
+        foia = FOIARequest.objects.get(pk=17)
+        foia.set_mail_id()
+        mail_id = foia.mail_id
+        nose.tools.ok_(re.match(r'\d{1,4}-\d{8}', mail_id))
+
+        foia.set_mail_id()
+        nose.tools.eq_(mail_id, foia.mail_id)
+
 
      # manager
     def test_manager_get_submitted(self):
