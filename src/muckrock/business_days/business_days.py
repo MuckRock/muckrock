@@ -228,8 +228,13 @@ calendars = {
             HolidayOrdWeekday("Patriots' Day", APR, MON, 3)], True),
     'ME': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday("Patriot's Day", APR, MON, 3)], False),
+    'NH': HolidayCalendar(us_holidays_no_columbus + [
+            HolidayOrdWeekday('Day after Thanksgiving', NOV, FRI, 4)], False),
     'NY': HolidayCalendar(us_holidays + [
             HolidayDate("Lincoln's Birthday", FEB, 12),
             ElectionDay()], True),
+    'VT': HolidayCalendar(us_holidays_no_columbus + [
+            HolidayOrdWeekday('Battle of Bennington', AUG, MON, 3),
+            HolidayOrdWeekday('Town Meeting Day', MAR, TUES, 1)], False),
     'WA': HolidayCalendar(us_holidays_no_columbus, False),
 }
