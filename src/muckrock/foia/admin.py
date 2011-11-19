@@ -90,12 +90,11 @@ class FOIARequestAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
 
-        #If changing to completed and embargoed, set embargo date to 30 days out
+        # If changing to completed and embargoed, set embargo date to 30 days out
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
-        obj.update_dates()
-        obj.save()
+        # NOT saving here - saving after formset so that we can check for updates there first
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
@@ -103,6 +102,14 @@ class FOIARequestAdmin(admin.ModelAdmin):
 
         if formset.model == FOIANote:
             formset.save()
+            # check for foia updates here so that communication updates take priority
+            # (Notes are last)
+            foia = form.instance
+            old_foia = FOIARequest.objects.get(pk=foia.pk)
+            if foia.status != old_foia.status:
+                foia.update()
+            foia.update_dates()
+            foia.save()
             return
 
         # check communications, files, and docs for new ones to notify the user of an update
@@ -123,6 +130,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
                 upload_document_cloud.apply_async(args=[instance.pk, change], countdown=3)
 
         formset.save_m2m()
+
 
     def get_urls(self):
         """Add custom URLs here"""
