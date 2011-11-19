@@ -322,6 +322,8 @@ class TestAccountFunctional(TestCase):
                 (reverse('acct-profile', args=['adam']), 'registration/profile.html'),
                 (reverse('acct-login'),                  'registration/login.html'),
                 (reverse('acct-register'),               'registration/register.html'),
+                (reverse('acct-register-free'),          'registration/register_free.html'),
+                (reverse('acct-register-pro'),           'registration/cc.html'),
                 (reverse('acct-reset-pw'),               'registration/password_reset_form.html'),
                 (reverse('acct-logout'),                 'registration/logged_out.html'),
                 ]
@@ -333,22 +335,37 @@ class TestAccountFunctional(TestCase):
         """Test private views while not logged in"""
 
         # get/post authenticated pages while unauthenticated
-        url_names = ['acct-my-profile', 'acct-update', 'acct-change-pw']
+        url_names = ['acct-my-profile', 'acct-update', 'acct-change-pw', 'acct-update-cc',
+                     'acct-manage-subsc', 'acct-buy-requests']
         for url_name in url_names:
             get_post_unallowed(self.client, reverse(url_name))
 
         # post unathenticated pages
-        post_allowed_bad(self.client, reverse('acct-register'),
-                         ['registration/register.html', 'registration/base.html'])
+        post_allowed_bad(self.client, reverse('acct-register-free'),
+                         ['registration/register_free.html', 'registration/base.html'])
 
-    def test_register_view(self):
-        """Test the register view"""
+    def test_register_free_view(self):
+        """Test the register-free view"""
 
         post_allowed_bad(self.client, reverse('acct-register-free'),
                          ['registration/register_free.html', 'registration/base.html'])
         post_allowed(self.client, reverse('acct-register-free'),
                      {'username': 'test1', 'password1': 'abc', 'password2': 'abc',
                       'email': 'test@example.com', 'first_name': 'first', 'last_name': 'last'},
+                     'http://testserver' + reverse('acct-my-profile'))
+
+        # get authenticated pages
+        get_allowed(self.client, reverse('acct-my-profile'),
+                    ['registration/profile.html', 'registration/base.html'])
+
+    def test_register_pro_view(self):
+        """Test the register-pro view"""
+        post_allowed_bad(self.client, reverse('acct-register-pro'),
+                         ['registration/cc.html', 'registration/base.html'])
+        post_allowed(self.client, reverse('acct-register-pro'),
+                     {'username': 'test1', 'password1': 'abc', 'password2': 'abc',
+                      'email': 'test@example.com', 'first_name': 'first', 'last_name': 'last',
+                      'token': 'token', 'last4': '1111', 'card_type': 'Visa'},
                      'http://testserver' + reverse('acct-my-profile'))
 
         # get authenticated pages
@@ -382,33 +399,37 @@ class TestAccountFunctional(TestCase):
 
         # get authenticated pages
         urls_and_templates = [
-                ('acct-my-profile', 'registration/profile.html'),
-                ('acct-update',     'registration/update.html'),
-                ('acct-change-pw',  'registration/password_change_form.html'),
+                ('acct-my-profile',   'registration/profile.html'),
+                ('acct-update',       'registration/update.html'),
+                ('acct-change-pw',    'registration/password_change_form.html'),
+                ('acct-update-cc',    'registration/cc.html'),
+                ('acct-buy-requests', 'registration/cc.html'),
                 ]
 
         for url_name, template in urls_and_templates:
             get_allowed(self.client, reverse(url_name), [template, 'registration/base.html'])
 
-        # post authenticated pages
-        post_allowed_bad(self.client, reverse('acct-update'),
-                         ['registration/update.html', 'registration/base.html'])
-        post_allowed_bad(self.client, reverse('acct-change-pw'),
-                         ['registration/password_change_form.html', 'registration/base.html'])
+    def _test_post_view_helper(self, url, template, data,
+                               redirect_url='acct-my-profile', username='adam', password='abc'):
+        """Helper for logging in, posting to a view, then checking the results"""
 
-    def test_post_views(self):
-        """Test posting data in views while logged in"""
+        self.client.login(username=username, password=password)
+        post_allowed_bad(self.client, reverse(url),
+                         ['registration/%s.html' % template, 'registration/base.html'])
+        post_allowed(self.client, reverse(url), data,
+                     'http://testserver' + reverse(redirect_url))
 
-        self.client.login(username='adam', password='abc')
+    def test_update_view(self):
+        """Test the account update view"""
+
         user = User.objects.get(username='adam')
-
         user_data = {'first_name': 'mitchell',        'last_name': 'kotler',
                      'email': 'mitch@muckrock.com',   'user': user,
                      'address1': '123 main st',       'address2': '',
                      'city': 'boston', 'state': 'MA', 'zip_code': '02140',
                      'phone': '555-123-4567'}
-        post_allowed(self.client, reverse('acct-update'), user_data,
-            'http://testserver' + reverse('acct-my-profile'))
+
+        self._test_post_view_helper('acct-update', 'update', user_data)
 
         user = User.objects.get(username='adam')
         profile = user.get_profile()
@@ -418,11 +439,55 @@ class TestAccountFunctional(TestCase):
             if key not in ['user', 'first_name', 'last_name', 'email']:
                 nose.tools.eq_(val, getattr(profile, key))
 
-        post_allowed(self.client, reverse('acct-change-pw'),
-                    {'old_password': 'abc',
-                     'new_password1': '123',
-                     'new_password2': '123'},
-                     'http://testserver' + reverse('acct-change-pw-done'))
+    def test_change_pw_view(self):
+        """Test the change pw view"""
+
+        self._test_post_view_helper('acct-change-pw', 'password_change_form',
+                                    {'old_password': 'abc',
+                                     'new_password1': '123',
+                                     'new_password2': '123'},
+                                    redirect_url='acct-change-pw-done')
+        self.client.logout()
+        nose.tools.assert_false(self.client.login(username='adam', password='abc'))
+        nose.tools.assert_true (self.client.login(username='adam', password='123'))
+
+    def test_update_cc_view(self):
+        """Test updating a credit card"""
+
+        self._test_post_view_helper('acct-update-cc', 'cc',
+                                    {'token': 'token-update-cc',
+                                     'last4': '2222',
+                                     'card_type': 'Visa'})
+        nose.tools.eq_(mock_customer.card, 'token-update-cc')
+        mock_customer.save.assert_called_once_with()
+        card = StripeCC.objects.get(user__username='adam')
+        nose.tools.eq_(card.last4, '2222')
+        nose.tools.eq_(card.card_type, 'Visa')
+
+    def test_manage_subsc_view(self):
+        """Test managing your subscription"""
+        # get as admin, beta, community, and pro
+
+        # post as community and pro
+
+    def test_buy_requests_view(self):
+        """Test buying requests"""
+
+        self._test_post_view_helper('acct-buy-requests', 'cc',
+                                    {'token': 'token',
+                                     'last4': '3333',
+                                     'card_type': 'Visa',
+                                     'save_cc': True})
+        profile = Profile.objects.get(user__username='adam')
+        nose.tools.eq_(profile.num_requests, 15)
+        nose.tools.eq_(stripe.Charge.create.call_args, ((),
+                       {'amount': 2000,
+                        'currency': 'usd',
+                        'customer': profile.get_customer().id,
+                        'description': 'Charge for 5 requests'}))
+
+    def test_stripe_webhooks(self):
+        """Test webhooks received from stripe"""
 
     def test_logout_view(self):
         """Test the logout view"""

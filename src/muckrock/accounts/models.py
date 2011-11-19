@@ -83,6 +83,7 @@ class Profile(models.Model):
 
     def get_cc(self):
         """Get the user's CC if they have one on file"""
+        # XXX there is no point in storing card info locally if i check against remote every time
         try:
             local_card = StripeCC.objects.get(user=self.user)
         except StripeCC.DoesNotExist:
@@ -107,6 +108,7 @@ class Profile(models.Model):
 
     def save_cc(self, form):
         """Save a credit card"""
+        # XXX is were not storing locally dont need last4 and card type here (or in form)
         customer = self.get_customer()
         customer.card = form.cleaned_data['token']
         customer.save()
