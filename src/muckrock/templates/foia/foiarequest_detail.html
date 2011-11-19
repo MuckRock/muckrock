@@ -157,9 +157,11 @@
 							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
 							<a href="/static/{{comm.document}}">Download</a>
 						</div>
-					{% endif %}
-					{% if not comm.doc_id %}
-						<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
+						{% if comm.doc_id %}
+							<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
+						{% else %}
+							<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
+						{% endif %}
 					{% endif %}
 				{% endif %}
 				{# file #}
