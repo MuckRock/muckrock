@@ -126,11 +126,7 @@ def update_cc(request):
     if request.method == 'POST':
         form = CreditCardForm(request.POST)
 
-        if request.POST.get('submit') == 'Delete':
-            request.user.get_profile().delete_cc()
-            messages.info(request, 'Your credit card has been removed from your profile.')
-            return HttpResponseRedirect(reverse('acct-my-profile'))
-        elif form.is_valid():
+        if form.is_valid():
             request.user.get_profile().save_cc(form)
             messages.success(request, 'Your credit card has been saved.')
             return HttpResponseRedirect(reverse('acct-my-profile'))
@@ -212,7 +208,7 @@ def buy_requests(request):
         if form.is_valid():
             try:
                 user_profile = request.user.get_profile()
-                user_profile.pay(form, request, 2000, 'Charge for 5 requests')
+                user_profile.pay(request, form, 2000, 'Charge for 5 requests')
                 user_profile.num_requests += 5
                 user_profile.save()
                 logger.info('%s has purchased requests' % (request.user.username))
