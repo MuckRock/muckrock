@@ -51,13 +51,13 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         # not change means we are uploading a new one - it should not have an id yet
         return
 
-    # coerced from unicode to regular strings in order to avoid encoding errors
+    # these need to be encoded -> unicode to regular byte strings
     params = {
-        'title': str(doc.title),
-        'source': str(doc.source),
-        'description': str(doc.description),
-        'access': str(doc.access),
-        'related_article': str('http://www.muckrock.com' + doc.foia.get_absolute_url()),
+        'title': doc.title.encode('utf8'),
+        'source': doc.source.encode('utf8'),
+        'description': doc.description.encode('utf8'),
+        'access': doc.access.encode('utf8'),
+        'related_article': ('http://www.muckrock.com' + doc.foia.get_absolute_url()).encode('utf8'),
         }
     if change:
         params['_method'] = str('put')
