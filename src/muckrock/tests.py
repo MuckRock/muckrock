@@ -30,7 +30,7 @@ def post_allowed(client, url, data, redirect):
     """Test an allowed post with the given data and redirect location"""
     response = client.post(url, data, follow=True)
     nose.tools.eq_(response.status_code, 200)
-    nose.tools.eq_(response.redirect_chain, [(redirect, 302)])
+    nose.tools.eq_(response.redirect_chain, [('http://testserver' + redirect, 302)])
 
     return response
 

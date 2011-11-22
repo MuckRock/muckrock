@@ -3,16 +3,18 @@ Tests using nose for the accounts application
 """
 
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase
 
+import json
 import nose.tools
 import stripe
 from datetime import datetime, timedelta
 from mock import Mock, patch
 
-from accounts.models import Profile, StripeCC
+from accounts.models import Profile
 from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
                            PaymentForm, UpgradeSubscForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
@@ -63,15 +65,13 @@ class TestAccountFormsUnit(TestCase):
 
     def test_credit_card_form(self):
         """Test validation on credit card form"""
-        data = {'token': 'token', 'last4': '1234', 'card_type': 'Visa'}
+        data = {'token': 'token'}
         form = CreditCardForm(data)
         nose.tools.ok_(form.is_valid())
 
-        for data in [{'last4': '1234', 'card_type': 'Visa'},
-                     {'token': 'token', 'card_type': 'Visa'},
-                     {'token': 'token', 'last4': '1234'}]:
-            form = CreditCardForm(data)
-            nose.tools.assert_false(form.is_valid())
+        data = {'foo': 'bar'}
+        form = CreditCardForm(data)
+        nose.tools.assert_false(form.is_valid())
 
     def test_upgrade_subsc_form_init(self):
         """Test UpgradeSubscForm's init"""
@@ -83,7 +83,7 @@ class TestAccountFormsUnit(TestCase):
         nose.tools.ok_('use_on_file' not in form.fields)
 
         mock_card = Mock()
-        mock_card.card_type = 'Visa'
+        mock_card.type = 'Visa'
         mock_card.last4 = '1234'
         mock_profile.get_cc.return_value = mock_card
         form = UpgradeSubscForm(request=mock_request)
@@ -92,18 +92,18 @@ class TestAccountFormsUnit(TestCase):
     def test_upgrade_subsc_form_clean(self):
         """Test UpgradeSubscForm's clean"""
         mock_card = Mock()
-        mock_card.card_type = 'Visa'
+        mock_card.type = 'Visa'
         mock_card.last4 = '1234'
         mock_profile = Mock()
         mock_profile.get_cc.return_value = mock_card
         mock_request = Mock()
         mock_request.user.get_profile.return_value = mock_profile
 
-        data = {'token': 'token', 'last4': '1234', 'card_type': 'Visa', 'use_on_file': False}
+        data = {'token': 'token', 'use_on_file': False}
         form = UpgradeSubscForm(data, request=mock_request)
         nose.tools.ok_(form.is_valid())
 
-        data = {'last4': '1234', 'card_type': 'Visa', 'use_on_file': False}
+        data = {'use_on_file': False}
         form = UpgradeSubscForm(data, request=mock_request)
         nose.tools.assert_false(form.is_valid())
 
@@ -118,8 +118,7 @@ class TestAccountFormsUnit(TestCase):
         form = PaymentForm(data, request=mock_request)
         nose.tools.assert_false(form.is_valid())
 
-        data = {'token': 'token', 'last4': '1234', 'card_type': 'Visa',
-                'use_on_file': False, 'save_cc': True}
+        data = {'token': 'token', 'use_on_file': False, 'save_cc': True}
         form = PaymentForm(data, request=mock_request)
         nose.tools.ok_(form.is_valid())
 
@@ -135,7 +134,6 @@ class TestAccountFormsUnit(TestCase):
                 'last_name': 'smith', 'password1': '123', 'password2': '123'}
         form = RegisterFree(data)
         nose.tools.assert_false(form.is_valid())
-
 
 
 @patch('stripe.Customer', MockCustomer)
@@ -191,45 +189,19 @@ class TestProfileUnit(TestCase):
     def test_get_cc(self):
         """Test get_cc"""
 
-        def helper(profile_id, expected_card):
-            """Helper to test get_cc"""
-            profile = Profile.objects.get(pk=profile_id)
-            card = profile.get_cc()
-            if expected_card:
-                nose.tools.eq_(card.last4, expected_card.last4)
-                nose.tools.eq_(card.card_type, expected_card.type)
-                nose.tools.eq_(card.user, profile.user)
-            else:
-                nose.tools.ok_(card is None)
-
-        # no local, remote
-        helper(1, mock_customer.active_card)
-        # local and remote different - remote wins
-        helper(2, mock_customer.active_card)
+        profile = Profile.objects.get(pk=1)
+        card = profile.get_cc()
+        nose.tools.eq_(card.last4, mock_customer.active_card.last4)
+        nose.tools.eq_(card.type,  mock_customer.active_card.type)
 
         with patch('stripe.Customer') as NewMockCustomer:
             new_mock_customer = Mock()
             new_mock_customer.active_card = None
             NewMockCustomer.retrieve.return_value = new_mock_customer
 
-            # no local and no remote
-            helper(1, None)
-            # local and no remote different - delete local
-            helper(2, None)
-
-    def test_save_cc(self):
-        """Test save_cc"""
-
-        for profile_id in xrange(1, 3):
-            # test once with and without a stripecc on file
-            profile = Profile.objects.get(pk=profile_id)
-            form = Mock()
-            form.cleaned_data = {'token': 'token', 'last4': '5678', 'card_type': 'MasterCard'}
-            profile.save_cc(form)
-            card = StripeCC.objects.get(user=profile.user)
-            nose.tools.eq_(card.last4, '5678')
-            nose.tools.eq_(card.card_type, 'MasterCard')
-            nose.tools.eq_(card.user, profile.user)
+            profile = Profile.objects.get(pk=1)
+            card = profile.get_cc()
+            nose.tools.ok_(card is None)
 
     def test_get_customer(self):
         """Test get_customer"""
@@ -267,45 +239,23 @@ class TestProfileUnit(TestCase):
         profile = Profile.objects.get(pk=1)
         form = Mock()
 
-
         # save cc = true
-        form.cleaned_data = {'save_cc': True, 'token': 'token',
-                             'last4': '5678', 'card_type': 'MasterCard'}
-        profile.pay(Mock(), form, 4200, 'description')
+        form.cleaned_data = {'save_cc': True, 'token': 'token'}
+        profile.pay(form, 4200, 'description')
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
                         'customer': profile.get_customer().id,
                         'description': 'description'}))
-        card = StripeCC.objects.get(user=profile.user)
-        nose.tools.eq_(card.last4, '5678')
 
         # save cc = false and use on file = false, has a token
         form.cleaned_data = {'use_on_file': False, 'save_cc': False, 'token': 'token'}
-        profile.pay(Mock(), form, 4200, 'description')
+        profile.pay(form, 4200, 'description')
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
                         'card': 'token',
                         'description': 'description'}))
-
-        # save cc = false and use on file = true, exception
-        with patch('stripe.Charge') as NewMockCharge:
-            NewMockCharge.create.side_effect = stripe.CardError('Message', 'Param', 'Code')
-            mock_request = Mock()
-
-            form.cleaned_data = {'use_on_file': True, 'save_cc': False}
-            profile.pay(mock_request, form, 4200, 'description')
-
-
-class TestStripeCCUnit(TestCase):
-    """Unit tests for strip cc model"""
-    fixtures = ['test_users.json', 'test_profiles.json', 'test_stripeccs.json']
-
-    def test_unicode(self):
-        """Test stripe cc model's __unicode__ method"""
-        stripecc = StripeCC.objects.get(pk=1)
-        nose.tools.eq_(unicode(stripecc), "Bob's Visa ending in 1357")
 
 
 @patch('stripe.Customer', MockCustomer)
@@ -313,6 +263,10 @@ class TestStripeCCUnit(TestCase):
 class TestAccountFunctional(TestCase):
     """Functional tests for account"""
     fixtures = ['test_users.json', 'test_profiles.json', 'test_statistics.json']
+
+    def setUp(self):
+        """Set up tests"""
+        mail.outbox = []
 
     # views
     def test_anon_views(self):
@@ -352,7 +306,7 @@ class TestAccountFunctional(TestCase):
         post_allowed(self.client, reverse('acct-register-free'),
                      {'username': 'test1', 'password1': 'abc', 'password2': 'abc',
                       'email': 'test@example.com', 'first_name': 'first', 'last_name': 'last'},
-                     'http://testserver' + reverse('acct-my-profile'))
+                     reverse('acct-my-profile'))
 
         # get authenticated pages
         get_allowed(self.client, reverse('acct-my-profile'),
@@ -365,8 +319,8 @@ class TestAccountFunctional(TestCase):
         post_allowed(self.client, reverse('acct-register-pro'),
                      {'username': 'test1', 'password1': 'abc', 'password2': 'abc',
                       'email': 'test@example.com', 'first_name': 'first', 'last_name': 'last',
-                      'token': 'token', 'last4': '1111', 'card_type': 'Visa'},
-                     'http://testserver' + reverse('acct-my-profile'))
+                      'token': 'token'},
+                     reverse('acct-my-profile'))
 
         # get authenticated pages
         get_allowed(self.client, reverse('acct-my-profile'),
@@ -386,7 +340,7 @@ class TestAccountFunctional(TestCase):
         # succesful login
         post_allowed(self.client, reverse('acct-login'),
                      {'username': 'adam', 'password': 'abc'},
-                     'http://testserver' + reverse('acct-my-profile'))
+                     reverse('acct-my-profile'))
 
         # get authenticated pages
         get_allowed(self.client, reverse('acct-my-profile'),
@@ -412,12 +366,13 @@ class TestAccountFunctional(TestCase):
     def _test_post_view_helper(self, url, template, data,
                                redirect_url='acct-my-profile', username='adam', password='abc'):
         """Helper for logging in, posting to a view, then checking the results"""
+        # pylint: disable-msg=R0913
 
         self.client.login(username=username, password=password)
         post_allowed_bad(self.client, reverse(url),
                          ['registration/%s.html' % template, 'registration/base.html'])
         post_allowed(self.client, reverse(url), data,
-                     'http://testserver' + reverse(redirect_url))
+                     reverse(redirect_url))
 
     def test_update_view(self):
         """Test the account update view"""
@@ -455,29 +410,74 @@ class TestAccountFunctional(TestCase):
         """Test updating a credit card"""
 
         self._test_post_view_helper('acct-update-cc', 'cc',
-                                    {'token': 'token-update-cc',
-                                     'last4': '2222',
-                                     'card_type': 'Visa'})
+                                    {'token': 'token-update-cc'})
         nose.tools.eq_(mock_customer.card, 'token-update-cc')
         mock_customer.save.assert_called_once_with()
-        card = StripeCC.objects.get(user__username='adam')
-        nose.tools.eq_(card.last4, '2222')
-        nose.tools.eq_(card.card_type, 'Visa')
+
+        with patch('stripe.Customer') as NewMockCustomer:
+            new_mock_customer = Mock()
+            new_mock_customer.active_card = None
+            NewMockCustomer.retrieve.return_value = new_mock_customer
+            self._test_post_view_helper('acct-update-cc', 'cc',
+                                        {'token': 'token-update-cc'})
+            nose.tools.eq_(mock_customer.card, 'token-update-cc')
+            mock_customer.save.assert_called_once_with()
 
     def test_manage_subsc_view(self):
         """Test managing your subscription"""
-        # get as admin, beta, community, and pro
 
-        # post as community and pro
+        # beta
+        self.client.login(username='adam', password='abc')
+        get_allowed(self.client, reverse('acct-manage-subsc'),
+                    ['registration/subsc.html', 'registration/base.html'],
+                    context={'heading': 'Beta Account'})
+
+        # admin
+        self.client.login(username='admin', password='abc')
+        get_allowed(self.client, reverse('acct-manage-subsc'),
+                    ['registration/subsc.html', 'registration/base.html'],
+                    context={'heading': 'Admin Account'})
+
+        # community with card on file
+        self.client.login(username='community', password='abc')
+        get_allowed(self.client, reverse('acct-manage-subsc'),
+                    ['registration/cc.html', 'registration/base.html'],
+                    context={'heading': 'Upgrade to a Pro Account'})
+        post_allowed_bad(self.client, reverse('acct-manage-subsc'),
+                         ['registration/cc.html', 'registration/base.html'])
+        post_allowed(self.client, reverse('acct-manage-subsc'),
+                     {'use_on_file': True},
+                     reverse('acct-my-profile'))
+        comm_user_profile = User.objects.get(username='community').get_profile()
+        nose.tools.eq_(comm_user_profile.acct_type, 'pro')
+        mock_customer.update_subscription.assert_called_once_with(plan='pro')
+
+        # community with new card
+        comm_user_profile.acct_type = 'community'
+        comm_user_profile.save()
+        post_allowed(self.client, reverse('acct-manage-subsc'),
+                     {'token': 'token'},
+                     reverse('acct-my-profile'))
+        comm_user_profile = User.objects.get(username='community').get_profile()
+        nose.tools.eq_(comm_user_profile.acct_type, 'pro')
+        mock_customer.save.assert_called_once_with()
+
+        # pro
+        self.client.login(username='pro', password='abc')
+        get_allowed(self.client, reverse('acct-manage-subsc'),
+                    ['registration/subsc.html', 'registration/base.html'],
+                    context={'heading': 'Cancel Your Subscription'})
+        post_allowed(self.client, reverse('acct-manage-subsc'),
+                     {'confirm': True},
+                     reverse('acct-my-profile'))
+        nose.tools.eq_(Profile.objects.get(user__username='pro').acct_type, 'community')
+        mock_customer.cancel_subscription.assert_called_once_with()
 
     def test_buy_requests_view(self):
         """Test buying requests"""
 
         self._test_post_view_helper('acct-buy-requests', 'cc',
-                                    {'token': 'token',
-                                     'last4': '3333',
-                                     'card_type': 'Visa',
-                                     'save_cc': True})
+                                    {'token': 'token', 'save_cc': True})
         profile = Profile.objects.get(user__username='adam')
         nose.tools.eq_(profile.num_requests, 15)
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
@@ -486,8 +486,40 @@ class TestAccountFunctional(TestCase):
                         'customer': profile.get_customer().id,
                         'description': 'Charge for 5 requests'}))
 
+        with patch('stripe.Charge') as NewMockCharge:
+            NewMockCharge.create.side_effect = stripe.CardError('Message', 'Param', 'Code')
+            post_allowed(self.client, reverse('acct-buy-requests'),
+                         {'token': 'token', 'save_cc': True},
+                         reverse('acct-buy-requests'))
+            profile = Profile.objects.get(user__username='adam')
+            nose.tools.eq_(profile.num_requests, 15)
+
     def test_stripe_webhooks(self):
         """Test webhooks received from stripe"""
+
+        response = self.client.post(reverse('acct-webhook'), {})
+        nose.tools.eq_(response.status_code, 404)
+
+        response = self.client.post(reverse('acct-webhook'),
+                                    {'json': json.dumps({'event': 'fake_event'})})
+        nose.tools.eq_(response.status_code, 404)
+
+        response = self.client.post(reverse('acct-webhook'),
+                                    {'json': json.dumps({'event': 'ping'})})
+        nose.tools.eq_(response.status_code, 200)
+
+        webhook_json = open('accounts/fixtures/webhook_recurring_payment_failed.json').read()
+        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json})
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
+
+        webhook_json = open('accounts/fixtures/'
+                            'webhook_subscription_final_payment_attempt_failed.json').read()
+        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json})
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
 
     def test_logout_view(self):
         """Test the logout view"""

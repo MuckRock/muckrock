@@ -17,7 +17,7 @@
 	<h3>{{user.get_profile.get_acct_type_display}} Account</h3>
 	{% if user_obj.get_profile.get_cc %}
 		<div class="largest right">
-			<p>Credit Card on file:</p><p>{{user_obj.get_profile.get_cc.card_type}} ending with {{user_obj.get_profile.get_cc.last4}}</p>
+			<p>Credit Card on file:</p><p>{{user_obj.get_profile.get_cc.type}} ending with {{user_obj.get_profile.get_cc.last4}}</p>
 		</div>
 	{% endif %}
 	<div class="largest">{{user_obj.first_name}} {{user_obj.last_name}}</div>

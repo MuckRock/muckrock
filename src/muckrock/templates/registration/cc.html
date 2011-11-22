@@ -76,14 +76,8 @@
 											addInputNames();
 									} else {
 											var token = response['id'];
-											var last4 = response['card']['last4'];
-											var card_type = response['card']['type'];
-
 											// insert the stripe token
 											$("#id_token").val(token);
-											$("#id_last4").val(last4);
-											$("#id_card_type").val(card_type);
-
 											// and submit
 											form.submit();
 									}
