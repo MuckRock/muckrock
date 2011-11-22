@@ -71,73 +71,16 @@
 	{% if object.public_documents or object.user == user %}
 	<div id="tabs">
 		<ul>
-			{% if object.public_documents %}
-			<li><a href="#tabs-documents">Documents</a></li>
-			{% endif %}
 			<li><a href="#tabs-request">Request</a></li>
+			{% if object.public_documents %}
+			<li><a href="#tabs-documents" onclick="doc_load(); return true">Documents</a></li>
+			{% endif %}
 			{% if object.user == user %}
 			<li><a href="#tabs-notes">Notes</a></li>
 			{% endif %}
 		</ul>
 	{% endif %}
 
-	{% if object.public_documents %}
-		<div id="tabs-documents">
-			<div id="viewer"></div>
-			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
-			<script type="text/javascript">
-				function display_doc(doc_id)
-				{
-					$("#tabs").tabs("select", "tabs-documents");
-					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
-						width: 627,
-						height: 600,
-						sidebar: false,
-						container: "#viewer"
-					});
-
-					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
-					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
-					$('textarea#embed0').val(embed_code0);
-					$('textarea#embed1').val(embed_code1);
-					$('div[id^="rodeo-"]').hide();
-					$('#rodeo-' + doc_id).show();
-				}
-
-				function get_thumbnail(doc_id)
-				{
-					var idx = doc_id.indexOf('-');
-					var num = doc_id.slice(0, idx);
-					var name = doc_id.slice(idx + 1);
-					return 'http://s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
-				}
-
-				$(function() {
-					var hash = window.location.hash.substring(1);
-					var default_doc_id = "{{object.public_documents.0.doc_id}}"
-					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
-
-					if (!hash || ($.inArray(hash, documents) == -1)) {
-						doc_id = default_doc_id;
-					} else {
-						doc_id = hash;
-					}
-					if (hash.substring(0,4) != "tabs") display_doc(doc_id);
-
-				});
-			</script>
-			<div class="dc-thumbnails">
-
-				<ul class="dc-thumbnails">
-				{% if object.public_documents|length > 1 %}
-					{% for document in object.public_documents %}
-						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" title="{{document.title}}" class="tipTip" /></a></li>
-					{% endfor %}
-				{% endif %}
-				</ul>
-			</div>
-		</div>
-		{% endif %}
 		<div id="tabs-request">
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
@@ -183,6 +126,79 @@
 			</div>
 			{% endfor %}
 		</div>
+
+	{% if object.public_documents %}
+		<div id="tabs-documents">
+			<div id="viewer"></div>
+			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+			<script type="text/javascript">
+				function display_doc(doc_id)
+				{
+					$("#tabs").tabs("select", "tabs-documents");
+					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
+						width: 627,
+						height: 600,
+						sidebar: false,
+						container: "#viewer"
+					});
+
+					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
+					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+					$('textarea#embed0').val(embed_code0);
+					$('textarea#embed1').val(embed_code1);
+					$('div[id^="rodeo-"]').hide();
+					$('#rodeo-' + doc_id).show();
+				}
+
+				function get_thumbnail(doc_id)
+				{
+					var idx = doc_id.indexOf('-');
+					var num = doc_id.slice(0, idx);
+					var name = doc_id.slice(idx + 1);
+					return 'http://s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+				}
+
+				function doc_load() {
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					if (!doc_load.loaded) {
+						doc_load.loaded = true;
+						display_doc(default_doc_id);
+					}
+				}
+
+
+				$(function() {
+					var hash = window.location.hash.substring(1);
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+
+					if (!hash || ($.inArray(hash, documents) == -1)) {
+						doc_id = default_doc_id;
+					} else {
+						doc_id = hash;
+					}
+					if (hash && hash.substring(0,4) != "tabs") {
+						$("#tabs").tabs("select", "#tabs-documents");
+						display_doc(doc_id);
+						doc_load.loaded = true;
+					}
+
+				});
+
+			</script>
+			<div class="dc-thumbnails">
+
+				<ul class="dc-thumbnails">
+				{% if object.public_documents|length > 1 %}
+					{% for document in object.public_documents %}
+						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" title="{{document.title}}" class="tipTip" /></a></li>
+					{% endfor %}
+				{% endif %}
+				</ul>
+			</div>
+		</div>
+		{% endif %}
+
 		{% if object.user == user %}
 		<div id="tabs-notes">
 			{% for note in object.notes.all %}
