@@ -8,7 +8,7 @@ from django.http import HttpResponse
 
 import csv
 
-from accounts.models import Profile, Statistics, StripeCC
+from accounts.models import Profile, Statistics
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable-msg=R0904
@@ -46,5 +46,4 @@ class StatisticsAdmin(admin.ModelAdmin):
 
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.register(Profile)
-admin.site.register(StripeCC)
 

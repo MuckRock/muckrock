@@ -20,6 +20,7 @@ from collections import namedtuple
 from datetime import datetime
 import logging
 import stripe
+import sys
 
 from accounts.forms import PaymentForm
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagForm, \
@@ -318,7 +319,7 @@ def pay_request(request, jurisdiction, slug, idx):
         """Pay for request"""
         try:
             amount = int(foia.price * 1.05 * 100)
-            request.user.get_profile().pay(request, form, amount,
+            request.user.get_profile().pay(form, amount,
                                            'Charge for request %s' % foia.title)
 
             send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
@@ -328,9 +329,15 @@ def pay_request(request, jurisdiction, slug, idx):
 
             logger.info('%s has paid %0.2f for request %s' %
                         (request.user.username, amount/100.0, foia.title))
+            messages.success(request, 'Your payment was successful')
             return HttpResponseRedirect(reverse('acct-my-profile'))
-        except stripe.CardError:
-            return HttpResponseRedirect(reverse('acct-buy-requests'))
+        except stripe.CardError as exc:
+            messages.error(request, 'Payment error: %s' % exc)
+            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            return HttpResponseRedirect(reverse('foia-pay',
+                kwargs={'jurisdiction': foia.jurisdiction.slug,
+                        'slug': foia.slug,
+                        'idx': foia.pk}))
 
     action = Action(
         form_actions = form_actions,

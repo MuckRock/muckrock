@@ -7,7 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
-from accounts.models import Profile, StripeCC
+from accounts.models import Profile
 from fields import CCExpField
 
 class ProfileForm(forms.ModelForm):
@@ -57,24 +57,21 @@ class CreditCardForm(forms.ModelForm):
                                      'class': 'card-cvc stripe-sensitive required'}))
     expiration = CCExpField(required=False)
     token = forms.CharField(required=False, widget=forms.HiddenInput())
-    last4 = forms.CharField(required=False, widget=forms.HiddenInput())
-    card_type = forms.CharField(required=False, widget=forms.HiddenInput())
 
     def clean(self):
         """CC info is required"""
         token = self.cleaned_data.get('token')
-        last4 = self.cleaned_data.get('last4')
-        card_type = self.cleaned_data.get('card_type')
 
-        if not token or not last4 or not card_type:
+        if not token:
             raise forms.ValidationError('Please enter valid credit card information')
 
         return self.cleaned_data
 
     class Meta:
         # pylint: disable-msg=R0903
-        model = StripeCC
-        exclude = ['user']
+        # This is a model form just for inheritance purposes
+        model = User
+        fields = ['card_number', 'cvc', 'expiration', 'token']
 
 
 class UpgradeSubscForm(CreditCardForm):
@@ -90,25 +87,22 @@ class UpgradeSubscForm(CreditCardForm):
         if not card:
             del self.fields['use_on_file']
         else:
-            self.fields['use_on_file'].help_text = '%s ending in %s' % (card.card_type, card.last4)
+            self.fields['use_on_file'].help_text = '%s ending in %s' % (card.type, card.last4)
 
     def clean(self):
         """Validate the form"""
 
         use_on_file = self.cleaned_data.get('use_on_file')
         token = self.cleaned_data.get('token')
-        last4 = self.cleaned_data.get('last4')
-        card_type = self.cleaned_data.get('card_type')
 
-        if not use_on_file and (not token or not last4 or not card_type):
+        if not use_on_file and not token:
             raise forms.ValidationError('Please enter valid credit card information')
 
         return self.cleaned_data
 
     class Meta(CreditCardForm.Meta):
         # pylint: disable-msg=R0903
-        fields = ['use_on_file', 'card_number', 'cvc', 'expiration',
-                  'token', 'last4', 'card_type']
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'token']
 
 
 class PaymentForm(UpgradeSubscForm):
@@ -131,13 +125,16 @@ class PaymentForm(UpgradeSubscForm):
 
     class Meta(UpgradeSubscForm.Meta):
         # pylint: disable-msg=R0903
-        fields = ['use_on_file', 'card_number', 'cvc', 'expiration',
-                  'save_cc', 'token', 'last4', 'card_type']
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
 
 
 class CancelSubscForm(forms.Form):
     """Cancel subscription form"""
     confirm = forms.BooleanField(label='Are you sure you want to cancel your Pro Subscription?')
+
+    def __init__(self, *args, **kwargs):
+        kwargs.pop('request', None)
+        super(CancelSubscForm, self).__init__(*args, **kwargs)
 
 
 class RegisterFree(UserCreationForm):
@@ -178,5 +175,5 @@ class RegisterPro(RegisterFree, CreditCardForm):
     class Meta(RegisterFree.Meta):
         # pylint: disable-msg=R0903
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2',
-                  'card_number', 'cvc', 'expiration', 'token', 'last4', 'card_type']
+                  'card_number', 'cvc', 'expiration', 'token']
 

@@ -2,21 +2,17 @@
 Models for the accounts application
 """
 
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 from django.db import models
 
 from datetime import datetime
-import logging
 import stripe
-import sys
 
 from foia.models import FOIARequest
 from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 
 stripe.api_key = STRIPE_SECRET_KEY
-logger = logging.getLogger(__name__)
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -83,45 +79,13 @@ class Profile(models.Model):
 
     def get_cc(self):
         """Get the user's CC if they have one on file"""
-        # XXX there is no point in storing card info locally if i check against remote every time
-        try:
-            local_card = StripeCC.objects.get(user=self.user)
-        except StripeCC.DoesNotExist:
-            local_card = None
+        return getattr(self.get_customer(), 'active_card', None)
 
-        remote_card = getattr(self.get_customer(), 'active_card', None)
-
-        if not local_card and remote_card:
-            local_card = StripeCC.objects.create(user=self.user,
-                                                 last4=remote_card.last4,
-                                                 card_type=remote_card.type)
-        elif local_card and not remote_card:
-            local_card.delete()
-            local_card = None
-        elif local_card and remote_card and \
-            (local_card.last4 != remote_card.last4 or local_card.card_type != remote_card.type):
-            local_card.last4 = remote_card.last4
-            local_card.card_type = remote_card.type
-            local_card.save()
-
-        return local_card
-
-    def save_cc(self, form):
+    def save_cc(self, token):
         """Save a credit card"""
-        # XXX is were not storing locally dont need last4 and card type here (or in form)
         customer = self.get_customer()
-        customer.card = form.cleaned_data['token']
+        customer.card = token
         customer.save()
-
-        try:
-            card = StripeCC.objects.get(user=self.user)
-            card.last4 = form.cleaned_data['last4']
-            card.card_type = form.cleaned_data['card_type']
-            card.save()
-        except StripeCC.DoesNotExist:
-            StripeCC.objects.create(user=self.user,
-                                    last4=form.cleaned_data['last4'],
-                                    card_type=form.cleaned_data['card_type'])
 
     def get_customer(self):
         """Get stripe customer"""
@@ -152,41 +116,21 @@ class Profile(models.Model):
 
         return customer
 
-    def pay(self, request, form, amount, desc):
+    def pay(self, form, amount, desc):
         """Create a stripe charge for the user"""
         customer = self.get_customer()
         save_cc = form.cleaned_data.get('save_cc')
         use_on_file = form.cleaned_data.get('use_on_file')
         token = form.cleaned_data.get('token')
 
-        try:
-            if save_cc:
-                self.save_cc(form)
-            if use_on_file or save_cc:
-                stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
-                                     description=desc)
-            else:
-                stripe.Charge.create(amount=amount, currency='usd', card=token,
-                                     description=desc)
-            messages.success(request, 'Your payment was successful')
-        except stripe.CardError as exc:
-            messages.error(request, 'Payment error: %s' % exc)
-            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-
-
-class StripeCC(models.Model):
-    """A CC on file from Stripe
-
-    We only store the stripe token, the last 4 digits, and the card type
-    so we do not need to be PCI compliant"""
-
-    user = models.ForeignKey(User, unique=True)
-    last4 = models.CharField(max_length=4)
-    card_type = models.CharField(max_length=255)
-
-    def __unicode__(self):
-        return u"%s's %s ending in %s" % \
-            (unicode(self.user).capitalize(), self.card_type, self.last4)
+        if save_cc:
+            self.save_cc(token)
+        if use_on_file or save_cc:
+            stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
+                                 description=desc)
+        else:
+            stripe.Charge.create(amount=amount, currency='usd', card=token,
+                                 description=desc)
 
 
 class Statistics(models.Model):

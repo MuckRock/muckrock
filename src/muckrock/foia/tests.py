@@ -302,10 +302,11 @@ class TestFOIAFunctional(TestCase):
         foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
                      'agency': agency.pk, 'combo-name': agency.name}
 
-        post_allowed(self.client, reverse('foia-update',
-                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                             'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data, 'http://testserver' +
+        post_allowed(self.client,
+                     reverse('foia-update',
+                             kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'idx': foia.pk, 'slug': foia.slug}),
+                     foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
@@ -322,10 +323,11 @@ class TestFOIAFunctional(TestCase):
         foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save as Draft',
                      'agency': agency.pk, 'combo-name': agency.name}
 
-        post_allowed(self.client, reverse('foia-update',
-                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                             'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data, 'http://testserver' +
+        post_allowed(self.client,
+                     reverse('foia-update',
+                             kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'idx': foia.pk, 'slug': foia.slug}),
+                     foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': foia.jurisdiction.slug,
                                                     'idx': foia.pk, 'slug': foia.slug}))
         foia = FOIARequest.objects.get(title='Test 6')
