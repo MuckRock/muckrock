@@ -19,7 +19,7 @@ def front_page(request):
     featured_reqs = FOIARequest.objects.get_public().filter(featured=True)\
                                        .order_by('-date_done')[:3]
 
-    num_requests = FOIARequest.objects.count()
+    num_requests = FOIARequest.objects.exclude(status='started').count()
     num_completed_requests = FOIARequest.objects.filter(status='done').count()
     num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
     num_pages = FOIADocument.objects.aggregate(Sum('pages'))['pages__sum']
