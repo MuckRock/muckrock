@@ -492,7 +492,7 @@ class FOIAMilitaryForm(FOIAWizardParent):
     category = 'Genealogy'
     level = 'f'
     agency_type = 'Clerk'
-    short_desc = "Verify and individual's military service recors"
+    short_desc = "Verify and individual's military service records"
     long_desc = 'Please be advised that military service verification can be a very slow process'
 
 class FOIABlankForm(FOIAWizardParent):
