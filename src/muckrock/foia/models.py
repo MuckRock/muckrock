@@ -368,7 +368,7 @@ class FOIARequest(models.Model):
         # pylint: disable-msg=E1101
 
         comm = FOIACommunication.objects.create(
-                foia=self, from_who=self.user.get_full_name(), to_who=self.get_to_who(),
+                foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
                 date=datetime.now(), response=False, full_html=False,
                 communication=render_to_string('foia/followup.txt', {'request': self}))
 
