@@ -8,8 +8,8 @@ from django.test import TestCase
 import nose.tools
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=R0201
+# pylint: disable=R0904
 
  # helper functions for view testing
 def get_allowed(client, url, templates=None, base='base.html', context=None):

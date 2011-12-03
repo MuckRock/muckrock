@@ -11,7 +11,7 @@ import csv
 from accounts.models import Profile, Statistics
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable-msg=R0904
+# pylint: disable=R0904
 
 class StatisticsAdmin(admin.ModelAdmin):
     """Statistics admin options"""
@@ -27,8 +27,8 @@ class StatisticsAdmin(admin.ModelAdmin):
 
     def csv(self, request):
         """Create a CSV file of all the statistics"""
-        # pylint: disable-msg=R0201
-        # pylint: disable-msg=W0613
+        # pylint: disable=R0201
+        # pylint: disable=W0613
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = 'attachment; filename=stats.csv'
 

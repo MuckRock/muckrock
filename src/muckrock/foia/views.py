@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
-    # pylint: disable-msg=R0912
+    # pylint: disable=R0912
 
     def default_form(data=None):
         """Make a default form to update a FOIA request"""
@@ -359,7 +359,7 @@ def _sort_requests(get, foia_requests, update_top=False):
 
 def _list(request, requests, extra_context=None, kwargs=None):
     """Helper function for creating list views"""
-    # pylint: disable-msg=W0142
+    # pylint: disable=W0142
 
     if not extra_context:
         extra_context = {}
@@ -401,8 +401,8 @@ def list_by_tag(request, tag_slug):
 @login_required
 def my_list(request, view):
     """Views owned by current user"""
-    # pylint: disable-msg=E1103
-    # pylint: disable-msg=R0912
+    # pylint: disable=E1103
+    # pylint: disable=R0912
 
     def set_read_status(foia_pks, status):
         """Mark requests as read or unread"""

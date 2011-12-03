@@ -2,9 +2,9 @@
 Monkey patch Django urlize bug
 """
 
-# pylint: disable-msg=C0301
-# pylint: disable-msg=R0914
-# pylint: disable-msg=C0322
+# pylint: disable=C0301
+# pylint: disable=R0914
+# pylint: disable=C0322
 
 import string
 import re

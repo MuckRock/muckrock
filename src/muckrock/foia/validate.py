@@ -9,7 +9,7 @@ def validate_date_order(begin_field, end_field):
         date_end = self.cleaned_data.get(end_field)
 
         if date_begin and date_end and date_begin >= date_end:
-            # pylint: disable-msg=W0212
+            # pylint: disable=W0212
             self._errors[end_field] = self.error_class(
                     ['%s must be later than %s' % (end_field, begin_field)])
 

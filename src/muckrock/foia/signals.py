@@ -7,8 +7,8 @@ from muckrock.foia.tasks import upload_document_cloud
 
 def foia_update_embargo(sender, **kwargs):
     """When embargo has possibly been switched, update the document cloud permissions"""
-    # pylint: disable-msg=E1101
-    # pylint: disable-msg=W0613
+    # pylint: disable=E1101
+    # pylint: disable=W0613
 
     request = kwargs['instance']
     old_request = request.get_saved()
