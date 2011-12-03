@@ -20,7 +20,6 @@ from collections import namedtuple
 from datetime import datetime
 import logging
 
-from agency.forms import AgencyForm
 from agency.models import Agency
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
@@ -91,7 +90,7 @@ def _foia_form_handler(request, foia, action):
                 foia.save()
 
                 if new_agency:
-                    return HttpResponseRedirect(reverse('foia-update-agency',
+                    return HttpResponseRedirect(reverse('agency-update',
                                                         kwargs={'idx': foia.agency.pk})
                                                 + '?foia=%d' % foia.pk)
                 else:
@@ -512,30 +511,3 @@ def doc_cloud_detail(request, doc_id):
 
     return redirect(doc, permanant=True)
 
-@login_required
-def update_agency(request, idx):
-    """Allow the user to fill in some information about new agencies they create"""
-
-    agency = get_object_or_404(Agency, pk=idx)
-
-    if agency.user != request.user or agency.approved:
-        messages.error(request, 'You may only edit your own agencies which have '
-                                'not been approved yet')
-        return redirect('foia-mylist', view='all')
-
-    if request.method == 'POST':
-        form = AgencyForm(request.POST, instance=agency)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Agency information saved.')
-            foia_pk = request.GET.get('foia')
-            foia = FOIARequest.objects.filter(pk=foia_pk)
-            if foia:
-                return redirect(foia[0])
-            else:
-                return redirect('foia-mylist', view='all')
-    else:
-        form = AgencyForm(instance=agency)
-
-    return render_to_response('foia/agency_form.html', {'form': form},
-                              context_instance=RequestContext(request))
