@@ -18,7 +18,7 @@ class FoiaSitemap(Sitemap):
 
     def changefreq(self, obj):
         """How often does this object change"""
-        # pylint: disable-msg=R0201
+        # pylint: disable=R0201
 
         if obj.status in ['rejected', 'done']:
             return 'never'
@@ -27,7 +27,7 @@ class FoiaSitemap(Sitemap):
 
     def priority(self, obj):
         """How important is this object"""
-        # pylint: disable-msg=R0201
+        # pylint: disable=R0201
 
         return {
             'started': 0.3,

@@ -49,7 +49,7 @@ class FOIARequestForm(forms.ModelForm):
         return self.cleaned_data
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = FOIARequest
         fields = ['title', 'agency', 'embargo']
         widgets = {
@@ -69,7 +69,7 @@ class FOIAEmbargoForm(FOIARequestForm):
         return self.cleaned_data
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = FOIARequest
         fields = ['embargo']
 
@@ -96,7 +96,7 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         return self.cleaned_data
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
@@ -131,7 +131,7 @@ class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = FOIANote
         fields = ['note']
         widgets = {'note': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
@@ -143,7 +143,7 @@ class FOIAAdminFixForm(forms.ModelForm):
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = FOIARequest
         fields = ['email', 'other_emails']
 
@@ -154,7 +154,7 @@ class AgencyForm(forms.ModelForm):
     fax = USPhoneNumberField(required=False)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = Agency
         fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
         widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
@@ -563,7 +563,7 @@ class FOIAWhatFederalForm(forms.Form):
 
 class FOIAWizard(DynamicSessionFormWizard):
     """Wizard to create FOIA requests"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     def done(self, request, form_list):
         """Wizard has been completed"""

@@ -2,7 +2,7 @@
 Feeds for the FOIA application
 """
 
-# pylint: disable-msg=E0611
+# pylint: disable=E0611
 from django.contrib.syndication.views import Feed
 
 from foia.models import FOIARequest
@@ -15,8 +15,8 @@ class LatestSubmittedRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable-msg=R0201
-        # pylint: disable-msg=E1103
+        # pylint: disable=R0201
+        # pylint: disable=E1103
         return FOIARequest.objects.get_submitted().get_public().order_by('-date_submitted')[:5]
 
     def item_description(self, item):
@@ -31,8 +31,8 @@ class LatestDoneRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable-msg=R0201
-        # pylint: disable-msg=E1103
+        # pylint: disable=R0201
+        # pylint: disable=E1103
         return FOIARequest.objects.get_done().get_public().order_by('-date_done')[:5]
 
     def item_description(self, item):

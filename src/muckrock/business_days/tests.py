@@ -14,9 +14,9 @@ JAN, FEB, MAR, APR, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC = range(1, 13)
 MON, TUES, WEDS, THURS, FRI, SAT, SUN = range(0, 7)
 
 # allow long names, methods that could be functions and too many public methods in tests
-# pylint: disable-msg=C0103
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=C0103
+# pylint: disable=R0201
+# pylint: disable=R0904
 
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""

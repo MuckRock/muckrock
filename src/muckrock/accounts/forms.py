@@ -14,7 +14,7 @@ class ProfileForm(forms.ModelForm):
     zip_code = USZipCodeField(required=False)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = Profile
 
 
@@ -26,7 +26,7 @@ class UserChangeForm(ProfileForm):
     email = forms.EmailField()
 
     class Meta(ProfileForm.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['first_name', 'last_name', 'email',
                   'address1', 'address2', 'city', 'state', 'zip_code', 'phone']
 

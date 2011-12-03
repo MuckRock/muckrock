@@ -72,5 +72,5 @@ class Statistics(models.Model):
     total_fees = models.IntegerField()
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['-date']
