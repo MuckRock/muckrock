@@ -2,11 +2,11 @@
 URL mappings for muckrock project
 """
 
-# pylint: disable-msg=W0611
+# pylint: disable=W0611
 # these are called dynmically
 from django.conf.urls.defaults import handler404
 from views import handler500
-# pylint: enable-msg=W0611
+# pylint: enable=W0611
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
