@@ -8,7 +8,7 @@ from news.models import Article
 
 class ArticleAdmin(admin.ModelAdmin):
     """Model Admin for a news article"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'author', 'pub_date', 'publish')

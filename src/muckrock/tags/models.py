@@ -23,7 +23,7 @@ class Tag(TaggitTag):
         return name.translate(html_remove).strip().lower()
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['name']
 
 class TaggedItemBase(GenericTaggedItemBase):

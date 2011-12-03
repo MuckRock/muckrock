@@ -12,8 +12,8 @@ from news.models import Article
 from muckrock.tests import get_allowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=R0201
+# pylint: disable=R0904
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""
@@ -21,7 +21,7 @@ class TestNewsUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable-msg=C0103
+        # pylint: disable=C0103
         self.article = Article.objects.get(pk=1)
 
     # models
