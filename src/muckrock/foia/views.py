@@ -20,11 +20,14 @@ from collections import namedtuple
 from datetime import datetime
 import logging
 
+from agency.forms import AgencyForm
+from agency.models import Agency
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
+                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+from foia.models import FOIARequest, FOIADocument, FOIACommunication
+from jurisdiction.models import Jurisdiction
 from tags.models import Tag
 
 logger = logging.getLogger(__name__)

@@ -13,7 +13,8 @@ import logging
 from datetime import date, timedelta
 
 from accounts.models import Statistics
-from foia.models import FOIARequest, FOIADocument, Agency
+from agency.models import Agency
+from foia.models import FOIARequest, FOIADocument
 
 logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)
