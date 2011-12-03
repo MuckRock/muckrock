@@ -10,7 +10,7 @@ from tags.models import Tag
 
 class TagAdmin(admin.ModelAdmin):
     """Model Admin for a tag"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'user')

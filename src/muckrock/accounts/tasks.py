@@ -3,7 +3,7 @@
 Tasks for the account application
 """
 
-from celery.decorators import periodic_task
+from celery.task import periodic_task
 from celery.schedules import crontab
 from django.contrib.auth.models import User
 from django.db.models import Sum

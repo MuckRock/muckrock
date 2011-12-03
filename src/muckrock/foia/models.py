@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     def get_submitted(self):
         """Get all submitted FOIA requests"""
@@ -80,8 +80,8 @@ class FOIARequestManager(ChainableManager):
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
-    # pylint: disable-msg=R0904
-    # pylint: disable-msg=R0902
+    # pylint: disable=R0904
+    # pylint: disable=R0902
 
     status = (
         ('started', 'Draft'),
@@ -130,7 +130,7 @@ class FOIARequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
                                     'slug': self.slug, 'idx': self.id})
 
@@ -182,7 +182,7 @@ class FOIARequest(models.Model):
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return self.documents.filter(access='public').exclude(doc_id='')
 
     def percent_complete(self):
@@ -204,12 +204,12 @@ class FOIARequest(models.Model):
 
     def first_request(self):
         """Return the first request text"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return self.communications.all()[0].communication
 
     def get_communications(self, user):
         """Get communications and documents to display on details page"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         comms = self.communications.all()
         docs = self.documents.exclude(date=None)
         files = self.files.exclude(date=None)
@@ -221,7 +221,7 @@ class FOIARequest(models.Model):
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         # use raw sql here in order to avoid race conditions
         uid = int(md5(self.title.encode('utf8') +
@@ -247,7 +247,7 @@ class FOIARequest(models.Model):
 
     def get_to_who(self):
         """Who communications are to"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         if self.agency and self.email:
             to_who = '%s <%s>' % (self.agency.name, self.email)
@@ -269,12 +269,12 @@ class FOIARequest(models.Model):
 
     def last_comm(self):
         """Return the last communication"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return self.communications.reverse()[0]
 
     def last_comm_date(self):
         """Return the date of the latest communication or doc or file"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         qsets = [self.communications.all().order_by('-date'),
                  self.documents.exclude(date=None).order_by('-date'),
@@ -290,7 +290,7 @@ class FOIARequest(models.Model):
 
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         # mark the request as updated and notify the user
         if not self.updated:
@@ -318,7 +318,7 @@ class FOIARequest(models.Model):
 
     def submit(self, appeal=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
@@ -365,7 +365,7 @@ class FOIARequest(models.Model):
 
     def followup(self):
         """Send a follow up email for this request"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         comm = FOIACommunication.objects.create(
                 foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
@@ -390,7 +390,7 @@ class FOIARequest(models.Model):
 
     def _send_email(self):
         """Send an email of the request to it's email address"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         # self.email should be set before calling this method
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
@@ -411,7 +411,7 @@ class FOIARequest(models.Model):
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         cal = calendars.get(self.jurisdiction.legal())
         if not cal:
@@ -457,7 +457,7 @@ class FOIARequest(models.Model):
 
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:
@@ -465,7 +465,7 @@ class FOIARequest(models.Model):
 
     def update_tags(self, tags):
         """Update the requests tags"""
-        # pylint: disable-msg=W0142
+        # pylint: disable=W0142
 
         tag_set = set()
         for tag in tags.split(','):
@@ -478,7 +478,7 @@ class FOIARequest(models.Model):
 
     def actions(self, user):
         """What actions may the given user take on this Request"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         kwargs = {'jurisdiction': self.jurisdiction.slug, 'idx': self.pk, 'slug': self.slug}
 
@@ -512,7 +512,7 @@ class FOIARequest(models.Model):
 
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
 
@@ -547,7 +547,7 @@ class FOIACommunication(models.Model):
         return 'comm-%d' % self.pk
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['foia', 'date']
         verbose_name = 'FOIA Communication'
 
@@ -560,7 +560,7 @@ class FOIANote(models.Model):
     note = models.TextField()
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['foia', 'date']
         verbose_name = 'FOIA Note'
 
@@ -570,7 +570,7 @@ class FOIADocument(models.Model):
 
     access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
 
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     foia = models.ForeignKey(FOIARequest, related_name='documents')
     document = models.FileField(upload_to='foia_documents')
     title = models.CharField(max_length=70)
@@ -628,7 +628,7 @@ class FOIADocument(models.Model):
         return 'doc-%d' % self.pk
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         verbose_name = 'FOIA DocumentCloud Document'
 
 
@@ -639,14 +639,14 @@ class FOIADocTopViewed(models.Model):
     rank = models.PositiveSmallIntegerField(unique=True)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['rank']
         verbose_name = 'FOIA Top Viewed Request'
 
 
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     foia = models.ForeignKey(FOIARequest, related_name='files')
     ffile = models.FileField(upload_to='foia_files')
     date = models.DateTimeField(null=True)
@@ -678,7 +678,7 @@ class FOIAFile(models.Model):
         return 'file-%d' % self.pk
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
 
 
@@ -697,7 +697,7 @@ class Jurisdiction(models.Model):
     days = models.PositiveSmallIntegerField(blank=True, null=True)
 
     def __unicode__(self):
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         if self.level == 'l':
             return '%s, %s' % (self.name, self.parent.abbrev)
         else:
@@ -705,7 +705,7 @@ class Jurisdiction(models.Model):
 
     def legal(self):
         """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         if self.level == 'l':
             return self.parent.abbrev
         else:
@@ -713,14 +713,14 @@ class Jurisdiction(models.Model):
 
     def get_days(self):
         """How many days does an agency have to reply?"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         if self.level == 'l':
             return self.parent.days
         else:
             return self.days
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['name']
 
 
@@ -733,7 +733,7 @@ class AgencyType(models.Model):
         return self.name
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['name']
 
 
@@ -789,6 +789,6 @@ class Agency(models.Model):
         return fields.email_separator_re.split(self.other_emails)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         verbose_name_plural = 'agencies'
 

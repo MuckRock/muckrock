@@ -12,8 +12,8 @@ from news.models import Article
 
 def front_page(request):
     """Get all the details needed for the front page"""
-    # pylint: disable-msg=W0612
-    # pylint: disable-msg=E1103
+    # pylint: disable=W0612
+    # pylint: disable=E1103
 
     featured_article = Article.objects.get_published()[0]
     featured_reqs = FOIARequest.objects.get_public().filter(featured=True)\
