@@ -130,6 +130,8 @@ INSTALLED_APPS = (
     'muckrock.news',
     'muckrock.templatetags',
     'muckrock.tags',
+    'muckrock.agency',
+    'muckrock.jurisdiction',
 )
 
 DEBUG_TOOLBAR_CONFIG = {

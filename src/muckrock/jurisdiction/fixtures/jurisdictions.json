@@ -1,7 +1,7 @@
 [
     {
         "pk": 3, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -12,7 +12,7 @@
     }, 
     {
         "pk": 4, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -23,7 +23,7 @@
     }, 
     {
         "pk": 5, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -34,7 +34,7 @@
     }, 
     {
         "pk": 6, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -45,7 +45,7 @@
     }, 
     {
         "pk": 7, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -56,7 +56,7 @@
     }, 
     {
         "pk": 8, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -67,7 +67,7 @@
     }, 
     {
         "pk": 9, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -78,7 +78,7 @@
     }, 
     {
         "pk": 1, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "MA", 
             "level": "s", 
@@ -90,7 +90,7 @@
     }, 
     {
         "pk": 2, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "", 
             "level": "l", 
@@ -101,7 +101,7 @@
     },
     {
         "pk": 10, 
-        "model": "foia.jurisdiction", 
+        "model": "jurisdiction.jurisdiction", 
         "fields": {
             "abbrev": "USA", 
             "level": "f", 

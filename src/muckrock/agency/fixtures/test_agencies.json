@@ -1,7 +1,7 @@
 [
     {
         "pk": 1, 
-        "model": "foia.agency", 
+        "model": "agency.agency", 
         "fields": {
             "fax": "", 
             "contact_salutation": "", 
@@ -27,7 +27,7 @@
     }, 
     {
         "pk": 2, 
-        "model": "foia.agency", 
+        "model": "agency.agency", 
         "fields": {
             "fax": "", 
             "contact_salutation": "", 
@@ -52,7 +52,7 @@
     },
     {
         "pk": 3, 
-        "model": "foia.agency", 
+        "model": "agency.agency", 
         "fields": {
             "fax": "", 
             "contact_salutation": "", 

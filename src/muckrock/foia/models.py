@@ -19,7 +19,9 @@ import logging
 import os
 import re
 
+from agency.models import Agency
 from business_days.business_days import calendars
+from jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
@@ -101,8 +103,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
     status = models.CharField(max_length=10, choices=status)
-    jurisdiction = models.ForeignKey('Jurisdiction')
-    agency = models.ForeignKey('Agency', blank=True, null=True)
+    jurisdiction = models.ForeignKey(Jurisdiction)
+    agency = models.ForeignKey(Agency, blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
@@ -680,115 +682,4 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-
-
-class Jurisdiction(models.Model):
-    """A jursidiction that you may file FOIA requests in"""
-
-    levels = ( ('f', 'Federal'), ('s', 'State'), ('l', 'Local') )
-
-    name = models.CharField(max_length=50)
-    # slug should be slugify(unicode(self))
-    slug = models.SlugField(max_length=55)
-    abbrev = models.CharField(max_length=5, blank=True)
-    level = models.CharField(max_length=1, choices=levels)
-    parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
-    hidden = models.BooleanField(default=False)
-    days = models.PositiveSmallIntegerField(blank=True, null=True)
-
-    def __unicode__(self):
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return '%s, %s' % (self.name, self.parent.abbrev)
-        else:
-            return self.name
-
-    def legal(self):
-        """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return self.parent.abbrev
-        else:
-            return self.abbrev
-
-    def get_days(self):
-        """How many days does an agency have to reply?"""
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return self.parent.days
-        else:
-            return self.days
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['name']
-
-
-class AgencyType(models.Model):
-    """Marks an agency as fufilling requests of this type for its jurisdiction"""
-
-    name = models.CharField(max_length=60)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['name']
-
-
-class Agency(models.Model):
-    """An agency for a particular jurisdiction that has at least one agency type"""
-
-    name = models.CharField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
-    types = models.ManyToManyField(AgencyType, blank=True)
-    approved = models.BooleanField()
-    user = models.ForeignKey(User, null=True, blank=True)
-    appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    can_email_appeals = models.BooleanField()
-
-    address = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-    contact_salutation = models.CharField(blank=True, max_length=30)
-    contact_first_name = models.CharField(blank=True, max_length=100)
-    contact_last_name = models.CharField(blank=True, max_length=100)
-    contact_title = models.CharField(blank=True, max_length=255)
-    url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
-    expires = models.DateField(blank=True, null=True)
-    phone = models.CharField(blank=True, max_length=20)
-    fax = models.CharField(blank=True, max_length=20)
-    notes = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return self.name
-
-    def normalize_fax(self):
-        """Return a fax number suitable for use in a faxaway email address"""
-
-        fax = ''.join(c for c in self.fax if c.isdigit())
-        if len(fax) == 10:
-            return '1' + fax
-        if len(fax) == 11 and fax[0] == '1':
-            return fax
-        return None
-
-    def get_email(self):
-        """Returns an email address to send to"""
-
-        if self.email:
-            return self.email
-        elif self.normalize_fax():
-            return '%s@fax2.faxaway.com' % self.normalize_fax()
-        else:
-            return ''
-
-    def get_other_emails(self):
-        """Returns other emails as a list"""
-        return fields.email_separator_re.split(self.other_emails)
-
-    class Meta:
-        # pylint: disable=R0903
-        verbose_name_plural = 'agencies'
 
