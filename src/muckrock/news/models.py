@@ -12,7 +12,7 @@ from foia.models import FOIARequest
 
 class ArticleManager(models.Manager):
     """Object manager for news articles"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     def get_published(self):
         """Get all published news articles"""
@@ -54,7 +54,7 @@ class Article(models.Model):
                 'slug': self.slug})
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['-pub_date']
         get_latest_by = 'pub_date'
         unique_together = (('slug', 'pub_date'),)

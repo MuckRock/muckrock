@@ -193,9 +193,9 @@ if SentryHandler not in [x.__class__ for x in logger.handlers]:
     logger.propagate = False
     logger.addHandler(logging.StreamHandler())
 
-# pylint: disable-msg=W0611
+# pylint: disable=W0611
 import monkey
 
-# pylint: disable-msg=W0401
-# pylint: disable-msg=W0614
+# pylint: disable=W0401
+# pylint: disable=W0614
 from local_settings import *

@@ -17,25 +17,25 @@ class Rodeo(models.Model):
     question = models.TextField(blank=True)
 
     def __unicode__(self):
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return 'Rodeo for ' + self.document.title
 
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return ('rodeo-detail', [], {'doc_id': self.document.doc_id, 'rodeo_pk': self.pk})
 
     def random_page(self):
         """Return a random page for the user to vote on"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         # do something smarter here to get even votes across pages
         # ensure pages is set
         return randint(1, self.document.pages)
 
     def get_votes(self):
         """Get all votes associated with this rodeo"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         return [vote for option in self.options.all() for vote in option.votes.all()]
 
 class RodeoOption(models.Model):

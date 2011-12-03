@@ -12,7 +12,7 @@ import csv
 from rodeo.models import Rodeo, RodeoOption, RodeoVote
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable-msg=R0904
+# pylint: disable=R0904
 
 class RodeoOptionInline(admin.TabularInline):
     """Rodeo Option Inline admin options"""
@@ -34,8 +34,8 @@ class RodeoAdmin(admin.ModelAdmin):
 
     def csv(self, request, rodeo_pk):
         """Create a CSV file of votes for a rodeo"""
-        # pylint: disable-msg=R0201
-        # pylint: disable-msg=W0613
+        # pylint: disable=R0201
+        # pylint: disable=W0613
         rodeo = get_object_or_404(Rodeo, pk=rodeo_pk)
 
         response = HttpResponse(mimetype='text/csv')

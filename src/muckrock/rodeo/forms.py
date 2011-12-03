@@ -20,7 +20,7 @@ class RodeoVoteForm(forms.ModelForm):
         self.fields['option'].queryset = RodeoOption.objects.filter(rodeo=rodeo)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = RodeoVote
         fields = ['option', 'page']
         widgets = {'page': forms.HiddenInput}

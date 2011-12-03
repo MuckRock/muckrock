@@ -67,7 +67,7 @@ class TableHeaderNode(Node):
     """Tag to create table headers"""
 
     def __init__(self, get, args):
-        # pylint: disable-msg=W0231
+        # pylint: disable=W0231
         self.get = get
         self.args = args
 
