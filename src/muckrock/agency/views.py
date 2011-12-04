@@ -11,6 +11,18 @@ from agency.forms import AgencyForm
 from agency.models import Agency
 from foia.models import FOIARequest
 
+def detail(request, jurisdiction, slug, idx):
+    """Details for an agency"""
+
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
+
+    # viewable?
+
+    return render_to_response('agency/agency_detail.html',
+                              {'agency': agency},
+                              context_instance=RequestContext(request))
+
 @login_required
 def update(request, idx):
     """Allow the user to fill in some information about new agencies they create"""

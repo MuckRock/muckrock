@@ -479,7 +479,7 @@ def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
 
     if not foia.is_viewable(request.user):
         raise Http404()
