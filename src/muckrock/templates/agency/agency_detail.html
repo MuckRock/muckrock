@@ -1,0 +1,115 @@
+
+{% extends "foia/base.html" %}
+{% load thumbnail %}
+
+{% block title %} {{agency.name}} {% endblock %}
+
+{% block content %}
+
+<h1>{{agency.name}}</h1>
+
+<p class="quiet">
+	A <a href="#">{{agency.jurisdiction}}</a> agency added by <a href="{% url acct-ptofile agency.user.username %}">{{agency.user.username}}</a>
+</p>
+
+<div class="left">
+	<img src="{{thumbnail agency.image 510x233}}" alt="" title="" class="bordered alignleft" />
+	<p class = "quiet"><em>Image: {{agency.image_attr_line|safe}}</em></p>
+</div>
+
+<div>
+	<p><strong>Mailing Address:</strong><br />
+	  {% if agency.address %}
+		  agency.address
+			(<a href="#">Map</a>)
+		{% else %}
+	    Unknown <small><em>(<a href="#">Suggest</a>)</em></small>
+		{% endif %}
+	</p>
+	<p><strong>E-mail Address:</strong><br />
+	  {% if agency.email %}
+		  agency.email
+		{% else %}
+	    Unknown <small><em>(<a href="#">Suggest</a>)</em></small>
+		{% endif %}
+	</p>
+	<p><strong>Fax Number:</strong><br />
+	  {% if agency.fax %}
+		  agency.fax
+		{% else %}
+	    Unknown <small><em>(<a href="#">Suggest</a>)</em></small>
+		{% endif %}
+	</p>
+	<p><strong>Average Response Time:</strong><br />
+	   {{agency.average_response_time}}
+	</p>
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<div>
+{{agency.notes|safe}}
+</div>
+
+<table class="data-table">
+	<tbody>
+		<tr class="odd">
+			<th width="30%">Requests Filed</th>
+			<td><strong>
+				<span class="request-stop">{{num_rejected}} Rejected</span><br />
+				<span class="request-wait">{{num_processed}} Awaiting Response</span> (<span class="request-stop">{{num_overdue}} Overdue</span>)<br />
+				<span class="request-wait">{{num_fix}} Requiring Action</span><br />
+				<span class="request-go">{{num_no_docs}} No Responsive Documents</span><br />
+				<span class="request-go">{{num_done}} Complete</span><br />
+				<span>{{num_filed}} Total Filed</strong></span><br />
+			</td>
+		</tr>
+		{% if agency.exemptions %}
+		<tr class="even">
+			<th width="30%">Commonly Cited Exemptions<br />
+			<span class = "quiet small"><em>Based on user tags.</em></th>
+			<td>
+			  <ul>
+					{% for exmp in agency.exemptions %}
+						<li>{{exmp.0}} <span class="quiet small">Tagged {{exmp.1}} times</span></li>
+					{% endfor %}
+				</ul>
+			</td>
+		</tr>
+		{% endif %}
+		<tr class="odd">
+			<th width="30%">Appeal Information<br />
+			<td>
+				{{num_appeals_processed}} appeals awaiting response<br />
+				{{num_appeals_done}} succesful appeals<br />
+				{{num_appeals_rejected}} denied appeals<br />
+				{{num_appeals_response_time}} days average response time
+			</td>
+		</tr>
+	
+</tbody></table>
+
+{% for req in agency.interesting_requests %}
+  <div class="right">
+		<a href="{{ req.get_absolute_url }}">
+			{% if req.documents.all %}
+				<img src="{{ req.documents.all.0.get_medium_thumbnail }}" alt="{{req.documents.all.0.title}}" class="bordered" width="102" height="128" />
+			{% else %}
+				<img src="/static/img/report.png" alt="" class="bordered" height="128" />
+			{% endif %}
+		</a>
+	</div>
+
+	<div>
+		<h4>Most Recently Completed Public Request</h4>
+		<h3><a href="{{ req.get_absolute_url }}">{{ req.title }}</a></h3>
+		<span>
+			<em>Requested by <a href="{% url acct-profile req.user.username %}">{{ req.user.username }}</a> on {{ req.date_submitted|date }} and completed on {{ req.date_completed|date }}. Includes {{ req.total_pages }} pages. Viewed {{ req.times_viewed }} times.</em>
+			<p>{{ req.description }}</p>
+		</span>
+	</div>
+
+	<div class="clearer">&nbsp;</div>
+{% endfor %}
+
+{% endblock %}
