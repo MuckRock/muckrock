@@ -17,12 +17,11 @@ import gdata.analytics.service
 import json
 import logging
 import re
-import sys
 import urllib2
 from datetime import date, timedelta
 from vendor import MultipartPostHandler
 
-from foia.models import FOIADocument, FOIADocTopViewed, FOIARequest
+from foia.models import FOIADocument, FOIARequest
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
@@ -119,29 +118,18 @@ def set_top_viewed_reqs():
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    top_req_paths = [entry.title.text for entry in data.entry
-                if entry.title.text.startswith('ga:pagePath=/foi/view/')]
+    top_req_paths = [(entry.title.text, entry.pageviews) for entry in data.entry
+                     if entry.title.text.startswith('ga:pagePath=/foi/view/')]
     path_re = re.compile('ga:pagePath=/foi/view/' + foia_url)
-    top_reqs = []
-    try:
-        for req_path in top_req_paths:
-            if len(top_reqs) >= 5:
-                break
-            try:
-                req = FOIARequest.objects.get(pk=path_re.match(req_path).group('idx'))
-                if req.is_public():
-                    top_reqs.append(req)
-            except FOIARequest.DoesNotExist:
-                pass
-    except AttributeError:
-        print >> sys.stderr, 'Error in set_top_viewed_reqs'
-        print >> sys.stderr, top_reqs
-        return
 
-    for i, req in enumerate(top_reqs):
-        tv_req, _ = FOIADocTopViewed.objects.get_or_create(rank=i+1, defaults={'req': req})
-        tv_req.req = req
-        tv_req.save()
+    for req_path, pageviews in top_req_paths:
+        try:
+            req = FOIARequest.objects.get(pk=path_re.match(req_path).group('idx'))
+            req.times_viewed = pageviews
+            req.save()
+        except FOIARequest.DoesNotExist:
+            pass
+
 
 
 @periodic_task(run_every=crontab(hour=1, minute=0))

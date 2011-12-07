@@ -122,6 +122,7 @@ class FOIARequest(models.Model):
     updated = models.BooleanField()
     email = models.EmailField(blank=True)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
+    times_viewed = models.IntegerField(default=0)
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -637,18 +638,6 @@ class FOIADocument(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA DocumentCloud Document'
-
-
-class FOIADocTopViewed(models.Model):
-    """Keep track of the top 5 most viewed requests for the front page"""
-
-    req = models.ForeignKey(FOIARequest, null=True)
-    rank = models.PositiveSmallIntegerField(unique=True)
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['rank']
-        verbose_name = 'FOIA Top Viewed Request'
 
 
 class FOIAFile(models.Model):
