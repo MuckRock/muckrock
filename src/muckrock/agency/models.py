@@ -117,7 +117,19 @@ class Agency(models.Model):
                          .filter(documents__pages__gt=0)
                          .annotate(pages=Sum('documents__pages'))
                          .order_by('-pages')),
+            make_req('Most Viewed Request',
+                     self.foiarequest_set
+                         .get_public()
+                         .order_by('-times_viewed')),
         ])
+
+    def average_response_time(self):
+        """Get the average response time from a submitted to completed request"""
+        # pylint: disable=E1101
+
+        reqs = self.foiarequest_set.exclude(date_submitted=None).exclude(date_done=None)
+        return sum((req.date_done - req.date_submitted).days for req in reqs) / reqs.count()
+
 
     class Meta:
         # pylint: disable=R0903
