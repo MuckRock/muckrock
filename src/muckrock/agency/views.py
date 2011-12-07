@@ -4,12 +4,14 @@ Views for the Agency application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
 from agency.forms import AgencyForm
 from agency.models import Agency
 from foia.models import FOIARequest
+from jurisdiction.models import Jurisdiction
 
 def detail(request, jurisdiction, slug, idx):
     """Details for an agency"""
@@ -17,10 +19,16 @@ def detail(request, jurisdiction, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
 
-    # viewable?
+    if not agency.approved:
+        raise Http404()
 
-    return render_to_response('agency/agency_detail.html',
-                              {'agency': agency},
+    context = {'agency': agency}
+
+    for status in ['rejected', 'processed', 'fix', 'no_docs', 'done', 'appealing']:
+        context['num_%s' % status] = agency.foiarequest_set.filter(status=status).count()
+    context['num_overdue'] = agency.foiarequest_set.get_overdue().count()
+
+    return render_to_response('agency/agency_detail.html', context,
                               context_instance=RequestContext(request))
 
 @login_required

@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail, send_mass_mail
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.template.loader import render_to_string
 
 from lamson.mail import MailResponse
@@ -511,6 +511,11 @@ class FOIARequest(models.Model):
         return [{'link': link, 'label': label,
                  'id': 'opener' if label == 'Embed this Document' else ''}
                 for pred, link, label in actions if pred]
+
+    def total_pages(self):
+        """Get the total number of pages for this request"""
+        # pylint: disable=E1101
+        return self.documents.aggregate(Sum('pages'))['pages__sum']
 
 
     class Meta:

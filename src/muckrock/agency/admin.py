@@ -17,6 +17,7 @@ class AgencyTypeAdmin(admin.ModelAdmin):
 
 class AgencyAdmin(admin.ModelAdmin):
     """Agency admin options"""
+    prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
     search_fields = ['name']
