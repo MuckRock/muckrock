@@ -12,8 +12,7 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
-                        FOIADocTopViewed
+from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
@@ -192,4 +191,3 @@ class FOIARequestAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
-admin.site.register(FOIADocTopViewed)
