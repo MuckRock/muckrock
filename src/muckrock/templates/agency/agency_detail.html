@@ -27,21 +27,21 @@
 		  {{ agency.address }}
 			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
 		{% else %}
-	    Unknown <em>(<a href="#">Suggest</a>)</em>
+	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
 		{% endif %}
 	</p>
 	<p><strong>E-mail Address:</strong><br />
 	  {% if agency.email %}
 		  agency.email
 		{% else %}
-	    Unknown <em>(<a href="#">Suggest</a>)</em>
+	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
 		{% endif %}
 	</p>
 	<p><strong>Fax Number:</strong><br />
 	  {% if agency.fax %}
 		  agency.fax
 		{% else %}
-	    Unknown <em>(<a href="#">Suggest</a>)</em>
+	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
 		{% endif %}
 	</p>
 	<p><strong>Average Response Time:</strong><br />
@@ -124,7 +124,7 @@
 
 {% block sidebar %}
 
-	<p><a class="jqbutton" href="#">Submit Correction</a></p>
+	<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
 	<div class="content-separator"></div>
 
 	<div class="section">

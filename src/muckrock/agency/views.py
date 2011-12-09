@@ -4,11 +4,13 @@ Views for the Agency application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.template import RequestContext
 
-from agency.forms import AgencyForm
+from agency.forms import AgencyForm, FlagForm
 from agency.models import Agency
 from foia.models import FOIARequest
 from jurisdiction.models import Jurisdiction
@@ -61,4 +63,25 @@ def update(request, idx):
         form = AgencyForm(instance=agency)
 
     return render_to_response('agency/agency_form.html', {'form': form},
+                              context_instance=RequestContext(request))
+
+def flag(request, jurisdiction, slug, idx):
+    """Flag a correction for an agency's information"""
+
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
+
+    if request.method == 'POST':
+        form = FlagForm(request.POST)
+        if form.is_valid():
+            send_mail('[FLAG] Agency: %s' % agency.name,
+                      render_to_string('agency/flag.txt',
+                                       {'agency': agency, 'user': request.user,
+                                        'reason': form.cleaned_data.get('reason')}),
+                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            messages.info(request, 'Agency correction succesfully submitted')
+            return redirect(agency)
+    else:
+        form = FlagForm()
+    return render_to_response('agency/agency_flag.html', {'form': form, 'agency': agency},
                               context_instance=RequestContext(request))
