@@ -51,6 +51,13 @@ class Agency(models.Model):
     def __unicode__(self):
         return self.name
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        # pylint: disable=E1101
+        return ('agency-detail', [], {'jurisdiction': self.jurisdiction.slug,
+                                      'slug': self.slug, 'idx': self.pk})
+
     def normalize_fax(self):
         """Return a fax number suitable for use in a faxaway email address"""
 

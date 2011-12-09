@@ -19,3 +19,12 @@ class AgencyForm(forms.ModelForm):
         widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
                    'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
+
+class FlagForm(forms.Form):
+    """Form to flag an agency"""
+    reason = forms.CharField(widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}),
+                             label='Reason')
+
+    help_text = 'Submit a correction for an agency in order to let us know that something is ' \
+                'wrong with it, such as providing missing information or correcting incorrect ' \
+                'information.  Please describe the problem as specifically as possibly here:'

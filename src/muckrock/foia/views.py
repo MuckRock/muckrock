@@ -65,6 +65,7 @@ def _foia_form_handler(request, foia, action):
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
                     foia.agency = Agency.objects.create(name=agency_name[:255],
+                                                        slug=slugify(agency_name[:255]),
                                                         jurisdiction=foia.jurisdiction,
                                                         user=request.user, approved=False)
                     send_mail('[AGENCY] %s' % foia.agency.name,
@@ -91,7 +92,8 @@ def _foia_form_handler(request, foia, action):
 
                 if new_agency:
                     return HttpResponseRedirect(reverse('agency-update',
-                                                        kwargs={'idx': foia.agency.pk})
+                        kwargs={'jurisdiction': foia.agency.jurisdiction.slug,
+                                'slug': foia.agency.slug, 'idx': foia.agency.pk})
                                                 + '?foia=%d' % foia.pk)
                 else:
                     return HttpResponseRedirect(foia.get_absolute_url())
