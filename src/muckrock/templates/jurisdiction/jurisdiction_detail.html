@@ -1,60 +1,46 @@
 
-{% extends "agency/base.html" %}
+{% extends "jurisdiction/base.html" %}
 {% load thumbnail %}
 
-{% block title %} {{agency.name}} {% endblock %}
+{% block title %} {{jurisdiction.name}} {% endblock %}
 
 {% block content %}
 
-<h1>{{agency.name}}</h1>
-
-<p class="quiet">
-	A <a href="{% url jurisdiction-detail slug=agency.jurisdiction.slug,idx=agency.jurisdiction.pk %}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
-</p>
+<h1>{{jurisdiction.name}}</h1>
 
 <div class="left">
-	{% if agency.image %}
+	{% if jurisdiction.image %}
 		<img src="{% thumbnail agency.image 510x233 %}" alt="" title="" class="bordered alignleft" />
 	{% else %}
 		<img src="/static/img/city1.jpg" alt="" title="" class="bordered alignleft" />
 	{% endif %}
-	<p class = "quiet"><em>Image: {{agency.image_attr_line|safe}}</em></p>
+	<p class = "quiet"><em>Image: {{jurisdiction.image_attr_line|safe}}</em></p>
 </div>
 
 <div>
-	<p><strong>Mailing Address:</strong><br />
-	  {% if agency.address %}
-		  {{ agency.address }}
-			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
-		{% else %}
-	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
-		{% endif %}
-	</p>
-	<p><strong>E-mail Address:</strong><br />
-	  {% if agency.email %}
-		  agency.email
-		{% else %}
-	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
-		{% endif %}
-	</p>
-	<p><strong>Fax Number:</strong><br />
-	  {% if agency.fax %}
-		  agency.fax
-		{% else %}
-	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
-		{% endif %}
+	<p><strong>Allowed Response Time</strong><br />
+		{% with jurisdiction.get_days as days %}
+			{% if days %}
+				{{days}} day{{days|pluralize}}
+			{% else %}
+				No limit
+			{% endif %}
+		{% endwith %}
 	</p>
 	<p><strong>Average Response Time:</strong><br />
-		{% with agency.average_response_time as average_response_time %}
+		{% with jurisdiction.average_response_time as average_response_time %}
 			{{average_response_time}} day{{average_response_time|pluralize}}
 		{% endwith %}
+	</p>
+	<p><strong>Agencies in Database:</strong><br />
+		 {{jurisdiction.agencies.count}}
 	</p>
 </div>
 
 <div class="clearer">&nbsp;</div>
 
 <div>
-{{agency.notes|safe}}
+{{jurisdiction.notes|safe}}
 </div>
 
 <table class="data-table">
@@ -95,7 +81,9 @@
 	
 </tbody></table>
 
-{% for req in agency.interesting_requests %}
+{# agency table goes here #}
+
+{% for req in jurisdiction.interesting_requests %}
   <div class="right">
 		<a href="{{ req.req.get_absolute_url }}">
 			{% if req.req.documents.all %}
@@ -120,11 +108,13 @@
 
 {% endfor %}
 
+{# local jurisdictions goes here #}
+
 {% endblock %}
 
 {% block sidebar %}
 
-	<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
+	<p><a class="jqbutton" href="{#% url jurisdiction-flag slug=jurisdiction.slug,idx=jurisdiction.pk %#}">Submit Correction</a></p>
 	<div class="content-separator"></div>
 
 	<div class="section">

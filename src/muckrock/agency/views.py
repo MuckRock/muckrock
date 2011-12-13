@@ -14,6 +14,7 @@ from agency.forms import AgencyForm, FlagForm
 from agency.models import Agency
 from foia.models import FOIARequest
 from jurisdiction.models import Jurisdiction
+from jurisdiction.views import collect_stats
 
 def detail(request, jurisdiction, slug, idx):
     """Details for an agency"""
@@ -25,14 +26,7 @@ def detail(request, jurisdiction, slug, idx):
         raise Http404()
 
     context = {'agency': agency}
-
-    for status in ['rejected', 'processed', 'fix', 'no_docs', 'done', 'appealing']:
-        context['num_%s' % status] = agency.foiarequest_set.filter(status=status).count()
-    context['num_overdue'] = agency.foiarequest_set.get_overdue().count()
-    context['num_submitted'] = agency.foiarequest_set.get_submitted().count()
-    context['submitted_reqs'] = agency.foiarequest_set.get_public().order_by('-date_submitted')[:5]
-    context['overdue_reqs'] = agency.foiarequest_set.get_public() \
-                                    .get_overdue().order_by('date_due')[:5]
+    collect_stats(agency, context)
 
     return render_to_response('agency/agency_detail.html', context,
                               context_instance=RequestContext(request))

@@ -2,8 +2,71 @@
 Models for the Jurisdiction application
 """
 from django.db import models
+from django.db.models import Sum
 
-class Jurisdiction(models.Model):
+from tags.models import Tag
+
+class RequestHelper(object):
+    """Helper methods for classes that have a foiarequest_set"""
+
+    def exemptions(self):
+        """Get a list of exemptions tagged for requests from this agency"""
+        # pylint: disable=E1101
+
+        exemption_list = []
+        for tag in Tag.objects.filter(name__startswith='exemption'):
+            count = self.foiarequest_set.filter(tags=tag).count()
+            if count:
+                exemption_list.append({'name': tag.name, 'count': count})
+
+        return exemption_list
+
+    def interesting_requests(self):
+        """Return a list of interesting requests to display on the agency's detail page"""
+        # pylint: disable=E1101
+        # pylint: disable=W0141
+
+        def make_req(headline, reqs):
+            """Make a request dict if there is at least one request in reqs"""
+            if reqs.exists():
+                return {'headline': headline, 'req': reqs[0]}
+
+        return filter(None, [
+            make_req('Most Recently Completed Request',
+                     self.foiarequest_set
+                         .get_done()
+                         .get_public()
+                         .order_by('-date_done')),
+            make_req('Oldest Overdue Request',
+                     self.foiarequest_set
+                         .get_overdue()
+                         .get_public()
+                         .order_by('date_due')),
+            make_req('Largest Fufilled Request',
+                     self.foiarequest_set
+                         .get_done()
+                         .get_public()
+                         .filter(documents__pages__gt=0)
+                         .annotate(pages=Sum('documents__pages'))
+                         .order_by('-pages')),
+            make_req('Most Viewed Request',
+                     self.foiarequest_set
+                         .get_public()
+                         .order_by('-times_viewed')),
+        ])
+
+    def average_response_time(self):
+        """Get the average response time from a submitted to completed request"""
+        # pylint: disable=E1101
+
+        reqs = self.foiarequest_set.exclude(date_submitted=None).exclude(date_done=None)
+        if reqs.exists():
+            return sum((req.date_done - req.date_submitted).days for req in reqs) / reqs.count()
+        else:
+            return 0
+
+
+class Jurisdiction(models.Model, RequestHelper):
     """A jursidiction that you may file FOIA requests in"""
 
     levels = ( ('f', 'Federal'), ('s', 'State'), ('l', 'Local') )
