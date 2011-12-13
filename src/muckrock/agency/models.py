@@ -4,10 +4,8 @@ Models for the Agency application
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import Sum
 
-from jurisdiction.models import Jurisdiction
-from tags.models import Tag
+from jurisdiction.models import Jurisdiction, RequestHelper
 import fields
 
 class AgencyType(models.Model):
@@ -23,7 +21,7 @@ class AgencyType(models.Model):
         ordering = ['name']
 
 
-class Agency(models.Model):
+class Agency(models.Model, RequestHelper):
     """An agency for a particular jurisdiction that has at least one agency type"""
 
     name = models.CharField(max_length=255)
@@ -81,62 +79,6 @@ class Agency(models.Model):
     def get_other_emails(self):
         """Returns other emails as a list"""
         return fields.email_separator_re.split(self.other_emails)
-
-    def exemptions(self):
-        """Get a list of exemptions tagged for requests from this agency"""
-        # pylint: disable=E1101
-
-        exemption_list = []
-        for tag in Tag.objects.filter(name__startswith='exemption'):
-            count = self.foiarequest_set.filter(tags=tag).count()
-            if count:
-                exemption_list.append({'name': tag.name, 'count': count})
-
-        return exemption_list
-
-    def interesting_requests(self):
-        """Return a list of interesting requests to display on the agency's detail page"""
-        # pylint: disable=E1101
-        # pylint: disable=W0141
-
-        def make_req(headline, reqs):
-            """Make a request dict if there is at least one request in reqs"""
-            if reqs.exists():
-                print reqs[0].title
-                print reqs[0].total_pages()
-                return {'headline': headline, 'req': reqs[0]}
-
-        return filter(None, [
-            make_req('Most Recently Completed Request',
-                     self.foiarequest_set
-                         .get_done()
-                         .get_public()
-                         .order_by('-date_done')),
-            make_req('Oldest Overdue Request',
-                     self.foiarequest_set
-                         .get_overdue()
-                         .get_public()
-                         .order_by('date_due')),
-            make_req('Largest Fufilled Request',
-                     self.foiarequest_set
-                         .get_done()
-                         .get_public()
-                         .filter(documents__pages__gt=0)
-                         .annotate(pages=Sum('documents__pages'))
-                         .order_by('-pages')),
-            make_req('Most Viewed Request',
-                     self.foiarequest_set
-                         .get_public()
-                         .order_by('-times_viewed')),
-        ])
-
-    def average_response_time(self):
-        """Get the average response time from a submitted to completed request"""
-        # pylint: disable=E1101
-
-        reqs = self.foiarequest_set.exclude(date_submitted=None).exclude(date_done=None)
-        return sum((req.date_done - req.date_submitted).days for req in reqs) / reqs.count()
-
 
     class Meta:
         # pylint: disable=R0903
