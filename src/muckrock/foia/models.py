@@ -516,7 +516,10 @@ class FOIARequest(models.Model):
     def total_pages(self):
         """Get the total number of pages for this request"""
         # pylint: disable=E1101
-        return self.documents.aggregate(Sum('pages'))['pages__sum']
+        pages = self.documents.aggregate(Sum('pages'))['pages__sum']
+        if pages is None:
+            return 0
+        return pages
 
 
     class Meta:

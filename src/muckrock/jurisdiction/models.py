@@ -8,10 +8,10 @@ from tags.models import Tag
 
 class RequestHelper(object):
     """Helper methods for classes that have a foiarequest_set"""
+    # pylint: disable=E1101
 
     def exemptions(self):
         """Get a list of exemptions tagged for requests from this agency"""
-        # pylint: disable=E1101
 
         exemption_list = []
         for tag in Tag.objects.filter(name__startswith='exemption'):
@@ -23,7 +23,6 @@ class RequestHelper(object):
 
     def interesting_requests(self):
         """Return a list of interesting requests to display on the agency's detail page"""
-        # pylint: disable=E1101
         # pylint: disable=W0141
 
         def make_req(headline, reqs):
@@ -57,13 +56,20 @@ class RequestHelper(object):
 
     def average_response_time(self):
         """Get the average response time from a submitted to completed request"""
-        # pylint: disable=E1101
 
         reqs = self.foiarequest_set.exclude(date_submitted=None).exclude(date_done=None)
         if reqs.exists():
             return sum((req.date_done - req.date_submitted).days for req in reqs) / reqs.count()
         else:
             return 0
+
+    def total_pages(self):
+        """Total pages released"""
+
+        pages = self.foiarequest_set.aggregate(Sum('documents__pages'))['documents__pages__sum']
+        if pages is None:
+            return 0
+        return pages
 
 
 class Jurisdiction(models.Model, RequestHelper):

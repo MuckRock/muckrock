@@ -7,6 +7,9 @@
 {% block content %}
 
 <h1>{{jurisdiction.name}}</h1>
+{% if jurisdiction.parent %}
+	<p><a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
+{% endif %}
 
 <div class="left">
 	{% if jurisdiction.image %}
@@ -81,7 +84,22 @@
 	
 </tbody></table>
 
-{# agency table goes here #}
+<table class="data-table">
+	<tbody>
+			<tr class="odd">
+				<th>Agency</th><th>Requests</th><th>Average Response Time</th><th>Pages Released</th>
+			</tr>
+		{% for agency in jurisdiction.agencies.all %}
+			<tr class="{% cycle 'even' 'odd' %}">
+				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
+				<td>{{agency.foiarequest_set.count}}</td>
+				<td>{% with agency.average_response_time as days %}{{days}} day{{days|pluralize}}{% endwith %}</td>
+				<td>{{agency.total_pages}}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
 
 {% for req in jurisdiction.interesting_requests %}
   <div class="right">
@@ -108,7 +126,16 @@
 
 {% endfor %}
 
-{# local jurisdictions goes here #}
+{% if jurisdiction.level == "s" %}
+		<h3>Local Jurisdictions in {{jurisdiction.name}}</h3>
+		<p><em>MuckRock can currently submit requests in the following {{jurisdiction.name}} local jurisdictions. To add a jurisdiction, e-mail <a href"Info@MuckRock.com">info@muckrock.com</a>. Requests are typically fulfilled within 24 hours.</em>
+		<ul>
+			{% for child in jurisdiction.children.all %}
+				<li><a href="{% url jurisdiction-detail slug=child.slug,idx=child.pk %}">{{child.name}}</a></li>
+			{% endfor %}
+		</ul>
+		<div class="clearer">&nbsp;</div>
+{% endif %}
 
 {% endblock %}
 
