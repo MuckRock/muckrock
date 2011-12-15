@@ -82,6 +82,10 @@ a.twitter {
 	background: url('http://twitter-badges.s3.amazonaws.com/t_mini-b.png') no-repeat left center;
 	padding-left: 18px;
 }
+a.facebook {
+	background: url('/static/img/facebook.png') no-repeat left center;
+	padding-left: 18px;
+}
 
 /* More links */
 a.more {
