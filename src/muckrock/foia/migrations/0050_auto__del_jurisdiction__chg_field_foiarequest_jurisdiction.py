@@ -6,9 +6,9 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
-    depends_on = (
-        ('jurisdiction', '0002_auto__add_jurisdiction'),
-        )
+    #depends_on = (
+    #    ('jurisdiction', '0002_auto__add_jurisdiction'),
+    #    )
     
     def forwards(self, orm):
         
