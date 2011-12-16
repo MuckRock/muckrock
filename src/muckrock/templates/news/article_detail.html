@@ -31,3 +31,78 @@
 
 {% endblock %}
 
+{% block sidebar %}
+	{% if user.is_anonymous %}
+		<h2>Newsletter</h2>
+		<p>Want to be notified about interesting government documents like this one? Sign up for our mailing list. We only send it out when we have something interesting to say, and we'll never sell or spam your address. You can unsubscribe easily any time you want.</p>
+		{% include "foia/mailchimp.html" %}
+		<div class="content-separator"></div>
+	{% endif %}
+
+	<div id="tweet-container" style="display: none;" >
+		<div class="comments" id="tweets">
+			<!-- Tweets go here -->
+		</div>
+		<div class="content-separator"></div>
+	</div>
+
+	<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
+	<div class="content-separator"></div>
+
+{% endblock %}
+
+{% block media %}
+
+	<script type="text/javascript">
+		$(function() {
+			// Enable tweetbacks
+			var MAX_TWEETS = 5;
+			var BASE = 'http://otter.topsy.com/trackbacks.js?callback=?&perpage=' + MAX_TWEETS;
+			var ALL = BASE + '&url=';
+			var INFL = BASE + '&infonly=1&url=';
+			var URL_RE = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+			var TWEET_RE = /@([A-Za-z0-9_]+)/g;
+
+			function urlify(text) {
+				return text.replace(URL_RE,"<a href='$1'>$1</a>").
+							replace(TWEET_RE, "<a href='http://twitter.com/$1'>@$1</a>");
+			}
+
+			function processTweetList(list) {
+				$('#tweet-container').show();
+				$.each(list, function(index, tweet) {
+					$('<div class="comment">' + 
+					'<div class="comment_avatar">' +
+					'<img src="' + tweet.author.photo_url + '" class="avatar avatar-36 photo" height="36" width="36"/>' +
+					'</div>' +
+					'<div class="comment_body">' +
+					'<span class="comment_author">' + 
+					'<a href="' + tweet.permalink_url + '">' +
+					tweet.author.name + '</a></span>' +
+					'<span class="comment_main"><p>' + urlify(tweet.content) + '</p></span>' +
+					'<div class="comment_date">' + tweet.date_alpha + '</div>'+
+					'</div>' +
+					'</div>').appendTo('#tweets');
+				});
+			}
+
+			function getTweets(url) {
+				$.getJSON(ALL + url, function(data) {
+					var response = data.response;
+					if (response.total > MAX_TWEETS) {
+						$.getJSON(INFL + url, function(infl) {
+							processTweetList(infl.response.list);
+							var count = (infl.response.total > MAX_TWEETS ? MAX_TWEETS : infl.response.total);
+						});        
+					} else if (response.total > 0) {
+						processTweetList(response.list);
+					}
+				});
+			}
+			var url = "http://www.muckrock.com{{request.path}}";
+			getTweets(url);
+
+		});
+	</script>
+
+{% endblock %}
