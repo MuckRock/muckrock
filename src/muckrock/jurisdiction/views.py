@@ -8,7 +8,7 @@ from django.template import RequestContext
 from jurisdiction.models import Jurisdiction
 
 def collect_stats(obj, context):
-    """Helper for collection stats"""
+    """Helper for collecting stats"""
     for status in ['rejected', 'processed', 'fix', 'no_docs', 'done', 'appealing']:
         context['num_%s' % status] = obj.foiarequest_set.filter(status=status).count()
     context['num_overdue'] = obj.foiarequest_set.get_overdue().count()

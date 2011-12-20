@@ -93,6 +93,12 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.name
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        # pylint: disable=E1101
+        return ('jurisdiction-detail', [], {'slug': self.slug, 'idx': self.pk})
+
     def legal(self):
         """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
         # pylint: disable=E1101
