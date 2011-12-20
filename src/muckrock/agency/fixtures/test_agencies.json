@@ -3,7 +3,7 @@
         "pk": 1, 
         "model": "agency.agency", 
         "fields": {
-            "fax": "", 
+            "fax": "1-987-654-3210",
             "contact_salutation": "", 
             "name": "Test Agency", 
             "slug": "test-agency", 
@@ -30,7 +30,7 @@
         "pk": 2, 
         "model": "agency.agency", 
         "fields": {
-            "fax": "", 
+            "fax": "987.654.3210", 
             "contact_salutation": "", 
             "name": "MA Clerk", 
             "slug": "ma-clerk", 
@@ -45,7 +45,7 @@
             "address": "456 Nowhere\r\nBoston, MA 02140", 
             "notes": "", 
             "contact_title": "", 
-            "email": "clerk@mass.gov", 
+            "email": "", 
             "types": [
                 1
             ], 
