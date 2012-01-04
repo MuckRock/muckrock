@@ -32,10 +32,11 @@ def detail(request, jurisdiction, slug, idx):
                               context_instance=RequestContext(request))
 
 @login_required
-def update(request, idx):
+def update(request, jurisdiction, slug, idx):
     """Allow the user to fill in some information about new agencies they create"""
 
-    agency = get_object_or_404(Agency, pk=idx)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
 
     if agency.user != request.user or agency.approved:
         messages.error(request, 'You may only edit your own agencies which have '
