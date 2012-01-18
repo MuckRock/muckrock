@@ -29,7 +29,6 @@ from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-@login_required
 def register(request):
     """Pick what kind of account you want to register for"""
     return render_to_response('registration/register.html',
