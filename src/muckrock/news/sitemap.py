@@ -18,5 +18,5 @@ class ArticleSitemap(Sitemap):
 
     def lastmod(self, obj):
         """When was the article last modified?"""
-        # pylint: disable-msg=R0201
+        # pylint: disable=R0201
         return obj.pub_date

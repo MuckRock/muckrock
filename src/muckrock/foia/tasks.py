@@ -36,14 +36,14 @@ class FOIAOptions(dbsettings.Group):
     enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
 options = FOIAOptions()
 
-@task(ignore_result=True)
+@task(ignore_result=True, max_retries=10)
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
     try:
         doc = FOIADocument.objects.get(pk=doc_pk)
     except FOIADocument.DoesNotExist, exc:
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         # give database time to sync
         upload_document_cloud.retry(args=[doc_pk, change], kwargs=kwargs, exc=exc)
 
@@ -51,13 +51,13 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         # not change means we are uploading a new one - it should not have an id yet
         return
 
-    # coerced from unicode to regular strings in order to avoid encoding errors
+    # these need to be encoded -> unicode to regular byte strings
     params = {
-        'title': str(doc.title),
-        'source': str(doc.source),
-        'description': str(doc.description),
-        'access': str(doc.access),
-        'related_article': str('http://www.muckrock.com' + doc.foia.get_absolute_url()),
+        'title': doc.title.encode('utf8'),
+        'source': doc.source.encode('utf8'),
+        'description': doc.description.encode('utf8'),
+        'access': doc.access.encode('utf8'),
+        'related_article': ('http://www.muckrock.com' + doc.foia.get_absolute_url()).encode('utf8'),
         }
     if change:
         params['_method'] = str('put')
@@ -75,13 +75,13 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     try:
         ret = opener.open(request).read()
         if not change:
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
             info = json.loads(ret)
             doc.doc_id = info['id']
             doc.save()
-            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=300)
+            set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except urllib2.URLError, exc:
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
 
@@ -106,7 +106,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         doc.pages = info['document']['pages']
         doc.save()
     except urllib2.URLError, exc:
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
         set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
 
 
@@ -173,7 +173,7 @@ def embargo_warn():
 @periodic_task(run_every=crontab(hour=0, minute=0))
 def set_all_document_cloud_pages():
     """Try and set all document cloud documents that have no page count set"""
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
     for doc in FOIADocument.objects.filter(pages=0):
         set_document_cloud_pages.apply_async(args=[doc.pk])
 
@@ -182,8 +182,8 @@ def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
     """Log celery exceptions to sentry"""
     # http://www.colinhowe.co.uk/2011/02/08/celery-and-sentry-recording-errors/
-    # pylint: disable-msg=R0913
-    # pylint: disable-msg=W0613
+    # pylint: disable=R0913
+    # pylint: disable=W0613
     exc_info = (type(exception), exception, traceback)
     logger.error(
         'Celery job exception: %s(%s)' % (exception.__class__.__name__, exception),

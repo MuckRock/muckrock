@@ -98,7 +98,7 @@ class Profile(models.Model):
 
     def save_customer(self, token=None):
         """Save stripe customer"""
-        # pylint: disable-msg=E1101
+        # pylint: disable=E1101
 
         if token:
             customer = stripe.Customer.create(
@@ -148,5 +148,5 @@ class Statistics(models.Model):
     total_fees = models.IntegerField()
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         ordering = ['-date']

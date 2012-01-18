@@ -3,7 +3,7 @@ Views for the FOIA application
 """
 
 from django import forms
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.core.mail import send_mail
@@ -23,9 +23,9 @@ import stripe
 import sys
 
 from accounts.forms import PaymentForm
-from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAFixForm, FOIAFlagForm, \
-                       FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAAppealForm, \
-                       FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
+from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
+                       FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
+                       FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
 from tags.models import Tag
@@ -36,7 +36,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 
 def _foia_form_handler(request, foia, action):
     """Handle a form for a FOIA request - user to update a FOIA request"""
-    # pylint: disable-msg=R0912
+    # pylint: disable=R0912
 
     def default_form(data=None):
         """Make a default form to update a FOIA request"""
@@ -176,12 +176,30 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url'
 
 def _save_foia_comm(request, foia, form, action):
     """Save the FOI Communication"""
+    if action == 'Admin Fix':
+        foia.email = form.cleaned_data['email']
+        foia.other_emails = form.cleaned_data['other_emails']
     FOIACommunication.objects.create(
-            foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
+            foia=foia, from_who=foia.user.get_full_name(), to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
     foia.submit(appeal=(action == 'Appeal'))
     messages.success(request, '%s succesfully submitted.' % action)
+
+@user_passes_test(lambda u: u.is_staff)
+def admin_fix(request, jurisdiction, slug, idx):
+    """Send an email from the requests auto email address"""
+
+    action = Action(
+        form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Admin Fix'),
+        msg = 'admin fix',
+        tests = [],
+        form_class = lambda _: FOIAAdminFixForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Email from Request Address',
+        value = 'Submit',
+        must_own = False)
+    return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
 def fix(request, jurisdiction, slug, idx):
@@ -278,7 +296,7 @@ def delete(request, jurisdiction, slug, idx):
         msg = 'delete',
         tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
         form_class = lambda _: FOIADeleteForm,
-        return_url = lambda r, f: reverse('foia-list-user', kwargs={'user_name': r.user.username}),
+        return_url = lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
         heading = 'Delete FOI Request',
         value = 'Delete',
         must_own = True,
@@ -396,7 +414,7 @@ def _sort_requests(get, foia_requests, update_top=False):
 
 def _list(request, requests, extra_context=None, kwargs=None):
     """Helper function for creating list views"""
-    # pylint: disable-msg=W0142
+    # pylint: disable=W0142
 
     if not extra_context:
         extra_context = {}
@@ -438,8 +456,15 @@ def list_by_tag(request, tag_slug):
 @login_required
 def my_list(request, view):
     """Views owned by current user"""
-    # pylint: disable-msg=E1103
-    # pylint: disable-msg=R0912
+    # pylint: disable=E1103
+    # pylint: disable=R0912
+
+    def set_read_status(foia_pks, status):
+        """Mark requests as read or unread"""
+        for foia_pk in foia_pks:
+            foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
+            foia.updated = status
+            foia.save()
 
     def handle_post():
         """Handle post data"""
@@ -458,15 +483,14 @@ def my_list(request, view):
                         foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
                         foia.tags.add(tag)
             elif request.POST.get('submit') == 'Mark as Read':
-                for foia_pk in foia_pks:
-                    foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
-                    foia.updated = False
-                    foia.save()
-        except FOIARequest.DoesNotExist, Tag.DoesNotExist:
+                set_read_status(foia_pks, False)
+            elif request.POST.get('submit') == 'Mark as Unread':
+                set_read_status(foia_pks, True)
+        except (FOIARequest.DoesNotExist, Tag.DoesNotExist):
             # bad foia or tag value passed in, just ignore
             pass
-        finally:
-            return redirect('foia-mylist', view=view)
+
+        return redirect('foia-mylist', view=view)
 
     if request.method == 'POST':
         return handle_post()
@@ -480,6 +504,8 @@ def my_list(request, view):
         unsorted = unsorted.filter(status='processed')
     elif view == 'completed':
         unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
+    elif view != 'all':
+        raise Http404()
 
     tag = request.GET.get('tag')
     if tag:

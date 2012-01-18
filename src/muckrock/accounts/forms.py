@@ -15,7 +15,7 @@ class ProfileForm(forms.ModelForm):
     zip_code = USZipCodeField(required=False)
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         model = Profile
 
 
@@ -27,7 +27,7 @@ class UserChangeForm(ProfileForm):
     email = forms.EmailField()
 
     class Meta(ProfileForm.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['first_name', 'last_name', 'email',
                   'address1', 'address2', 'city', 'state', 'zip_code', 'phone']
 
@@ -68,7 +68,7 @@ class CreditCardForm(forms.ModelForm):
         return self.cleaned_data
 
     class Meta:
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         # This is a model form just for inheritance purposes
         model = User
         fields = ['card_number', 'cvc', 'expiration', 'token']
@@ -101,7 +101,7 @@ class UpgradeSubscForm(CreditCardForm):
         return self.cleaned_data
 
     class Meta(CreditCardForm.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'token']
 
 
@@ -124,7 +124,7 @@ class PaymentForm(UpgradeSubscForm):
         return self.cleaned_data
 
     class Meta(UpgradeSubscForm.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
 
 
@@ -150,7 +150,7 @@ class RegisterFree(UserCreationForm):
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
 
     class Meta(UserCreationForm.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
 
     def clean_username(self):
@@ -170,10 +170,10 @@ class RegisterFree(UserCreationForm):
 
 class RegisterPro(RegisterFree, CreditCardForm):
     """Register for a pro account"""
-    # pylint: disable-msg=R0901
+    # pylint: disable=R0901
 
     class Meta(RegisterFree.Meta):
-        # pylint: disable-msg=R0903
+        # pylint: disable=R0903
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2',
                   'card_number', 'cvc', 'expiration', 'token']
 

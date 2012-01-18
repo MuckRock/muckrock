@@ -10,8 +10,8 @@ from mock import Mock
 from templatetags import tags
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=R0201
+# pylint: disable=R0904
 
 class TestTemplatetagsFunctional(TestCase):
     """Functional tests for templatetags"""

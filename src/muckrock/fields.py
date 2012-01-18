@@ -28,7 +28,7 @@ def _is_valid_email(email):
 
 class EmailsListField(CharField):
     """Multi email field"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     widget = forms.Textarea
 
@@ -74,7 +74,7 @@ class GroupedModelChoiceField(ModelChoiceField):
 
 class GroupedModelChoiceIterator(ModelChoiceIterator):
     """Iterator for grouped model choice"""
-    # pylint: disable-msg=R0903
+    # pylint: disable=R0903
     def __iter__(self):
         if self.field.empty_label is not None:
             yield (u"", self.field.empty_label)

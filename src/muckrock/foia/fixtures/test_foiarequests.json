@@ -272,5 +272,22 @@
             "slug": "test-16",
 			"price": "0.00"
         }
+    },
+	{
+        "pk": 17,
+        "model": "foia.foiarequest",
+        "fields": {
+            "status": "processed",
+            "embargo": false,
+            "date_embargo": null,
+            "jurisdiction": 1,
+            "date_done": null,
+            "title": "Unicode’s Title",
+            "date_submitted": "2000-12-29", 
+            "date_submitted": "2001-01-12", 
+            "user": 2,
+            "slug": "test-16",
+			"price": "0.00"
+        }
     }
 ]

@@ -13,8 +13,8 @@ django-debug-toolbar==0.8.3
 mock==0.7.0b2
 django-assets==0.2
 cssutils==0.9.7b3
-celery==2.2.7
-django-celery==2.2.4
+celery==2.4.5
+django-celery==2.4.2
 gdata==2.0.11
 easy-thumbnails==1.0-alpha-8
 django-pingback==0.3
@@ -25,3 +25,4 @@ django-sentry==1.8.5
 pascha==0.5
 -e git://github.com/alfredo/django-dbsettings.git@c6aeddbfa91eb1ea527bd91dd9ab19c38689223a#egg=dbsettings-0.1_alpha-py2.6-dev
 stripe==1.5.18
+redis==2.4.10

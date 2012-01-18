@@ -136,16 +136,29 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
+#CELERY_IMPORTS = ("foia.tasks", )
+
+BROKER_HOST = "localhost"
+BROKER_BACKEND = "redis"
+REDIS_PORT = 6379
+REDIS_HOST = "localhost"
+BROKER_USER = ""
+BROKER_PASSWORD = ""
+BROKER_VHOST = "0"
+REDIS_DB = 0
+REDIS_CONNECT_RETRY = True
+CELERY_SEND_EVENTS = True
+
+#CELERY_RESULT_BACKEND = "redis"
+#CELERY_TASK_RESULT_EXPIRES =  10
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+CELERY_IGNORE_RESULT = True
+CELERY_DISABLE_RATE_LIMITS = True
+
 import djcelery
 djcelery.setup_loader()
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "muckrock"
-BROKER_PASSWORD = "muckrock"
-BROKER_VHOST = "muckrock_vhost"
-CELERY_RESULT_BACKEND = "amqp"
-#CELERY_IMPORTS = ("foia.tasks", )
-CELERY_DISABLE_RATE_LIMITS = True
+
+
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
@@ -185,9 +198,9 @@ if SentryHandler not in [x.__class__ for x in logger.handlers]:
     logger.propagate = False
     logger.addHandler(logging.StreamHandler())
 
-# pylint: disable-msg=W0611
+# pylint: disable=W0611
 import monkey
 
-# pylint: disable-msg=W0401
-# pylint: disable-msg=W0614
+# pylint: disable=W0401
+# pylint: disable=W0614
 from local_settings import *
