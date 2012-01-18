@@ -3,8 +3,8 @@
 Tasks for the account application
 """
 
-from celery.task import periodic_task
 from celery.schedules import crontab
+from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from sentry.client.handlers import SentryHandler
