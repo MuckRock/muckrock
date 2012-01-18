@@ -163,7 +163,7 @@ MONTHLY_REQUESTS = {
     'admin': 100,
     'beta': 5,
     'community': 0,
-    'pro': 5,
+    'pro': 20,
 }
 
 LAMSON_ACTIVATE = True
