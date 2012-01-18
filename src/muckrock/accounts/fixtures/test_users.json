@@ -48,7 +48,61 @@
             "last_login": "2010-07-11 13:28:22", 
             "groups": [], 
             "user_permissions": [], 
-            "password": "sha1$0a28a$51aabb369ba478b3736eea8403196ffce03ed571", 
+            "password": "sha1$449a9$c0cf5db68ccef71392a260dc9dd27326a195b792", 
+            "email": "charles@example.com", 
+            "date_joined": "2010-02-08 22:45:56"
+        }
+    },
+    {
+        "pk": 4, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "admin", 
+            "first_name": "Charles", 
+            "last_name": "Smith", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2010-07-11 13:28:22", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "sha1$449a9$c0cf5db68ccef71392a260dc9dd27326a195b792", 
+            "email": "charles@example.com", 
+            "date_joined": "2010-02-08 22:45:56"
+        }
+    },
+    {
+        "pk": 5, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "community", 
+            "first_name": "Charles", 
+            "last_name": "Smith", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2010-07-11 13:28:22", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "sha1$449a9$c0cf5db68ccef71392a260dc9dd27326a195b792", 
+            "email": "charles@example.com", 
+            "date_joined": "2010-02-08 22:45:56"
+        }
+    },
+    {
+        "pk": 6, 
+        "model": "auth.user", 
+        "fields": {
+            "username": "pro", 
+            "first_name": "Charles", 
+            "last_name": "Smith", 
+            "is_active": true, 
+            "is_superuser": false, 
+            "is_staff": false, 
+            "last_login": "2010-07-11 13:28:22", 
+            "groups": [], 
+            "user_permissions": [], 
+            "password": "sha1$449a9$c0cf5db68ccef71392a260dc9dd27326a195b792", 
             "email": "charles@example.com", 
             "date_joined": "2010-02-08 22:45:56"
         }
