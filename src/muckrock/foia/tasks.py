@@ -1,8 +1,8 @@
 """Celery Tasks for the FOIA application"""
 
-from celery.decorators import periodic_task, task
 from celery.signals import task_failure
 from celery.schedules import crontab
+from celery.task import periodic_task, task
 from django.core import management
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
