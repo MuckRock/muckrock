@@ -190,5 +190,17 @@
             "response": false, 
             "foia": 16
         }
+    }, 
+    {
+        "pk": 17, 
+        "model": "foia.foiacommunication", 
+        "fields": {
+            "from_who": "Mitchell Kotler", 
+            "full_html": false, 
+            "communication": "Test request", 
+            "date": "2010-08-21", 
+            "response": false, 
+            "foia": 17
+        }
     } 
 ]

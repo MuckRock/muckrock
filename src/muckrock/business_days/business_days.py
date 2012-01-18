@@ -37,7 +37,7 @@ class HolidayDate(object):
         """Is the given date an instance of this Holiday?"""
 
         # if the holiday falls on a Sun, observe on Mon
-        # if it falls on Sat, move to Fri is observe_sat if False
+        # if it falls on Sat, move to Fri if observe_sat is False
         weekday = date_.weekday()
         if weekday == SUN or (weekday == SAT and not self.observe_sat):
             return False
@@ -214,6 +214,7 @@ us_holidays_no_columbus = us_holidays[:6] + us_holidays[7:]
 
 calendars = {
     'USA': HolidayCalendar(us_holidays, False),
+    'AZ': HolidayCalendar(us_holidays, False),
     'CA': HolidayCalendar(us_holidays_no_columbus + [
             HolidayDate('Cesar Chavez Day', MAR, 31),
             HolidayEaster('Good Friday')], True),
@@ -227,8 +228,16 @@ calendars = {
             HolidayOrdWeekday("Patriots' Day", APR, MON, 3)], True),
     'ME': HolidayCalendar(us_holidays + [
             HolidayOrdWeekday("Patriot's Day", APR, MON, 3)], False),
+    'NH': HolidayCalendar(us_holidays+ [
+            HolidayOrdWeekday('Day after Thanksgiving', NOV, FRI, 4)], False),
     'NY': HolidayCalendar(us_holidays + [
             HolidayDate("Lincoln's Birthday", FEB, 12),
             ElectionDay()], True),
+    # no mlk or presidents day
+    'RI': HolidayCalendar(us_holidays[:1] + us_holidays[3:] + [
+            HolidayOrdWeekday('Victory Day', AUG, MON, 2)], False),
+    'VT': HolidayCalendar(us_holidays_no_columbus + [
+            HolidayOrdWeekday('Battle of Bennington', AUG, MON, 3),
+            HolidayOrdWeekday('Town Meeting Day', MAR, TUES, 1)], False),
     'WA': HolidayCalendar(us_holidays_no_columbus, False),
 }

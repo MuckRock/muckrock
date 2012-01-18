@@ -6,9 +6,9 @@ from django.conf.urls.defaults import patterns, url
 
 from pingback import register_pingback
 
-# pylint: disable-msg=W0611
+# pylint: disable=W0611
 import foia.signals
-# pylint: enable-msg=W0611
+# pylint: enable=W0611
 from foia import views
 from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from foia.pingbacks import pingback_foia_handler
@@ -32,6 +32,7 @@ urlpatterns = patterns('',
                                       views.doc_cloud_detail, name='foia-doc-cloud-detail'),
     url(r'^update/%s/$' % foia_url,   views.update, name='foia-update'),
     url(r'^fix/%s/$' % foia_url,      views.fix, name='foia-fix'),
+    url(r'^admin-fix/%s/$' % foia_url,views.admin_fix, name='foia-admin-fix'),
     url(r'^appeal/%s/$' % foia_url,   views.appeal, name='foia-appeal'),
     url(r'^flag/%s/$' % foia_url,     views.flag, name='foia-flag'),
     url(r'^add_note/%s/$' % foia_url, views.note, name='foia-note'),

@@ -12,14 +12,14 @@ from news.models import Article
 
 def front_page(request):
     """Get all the details needed for the front page"""
-    # pylint: disable-msg=W0612
-    # pylint: disable-msg=E1103
+    # pylint: disable=W0612
+    # pylint: disable=E1103
 
     featured_article = Article.objects.get_published()[0]
     featured_reqs = FOIARequest.objects.get_public().filter(featured=True)\
                                        .order_by('-date_done')[:3]
 
-    num_requests = FOIARequest.objects.count()
+    num_requests = FOIARequest.objects.exclude(status='started').count()
     num_completed_requests = FOIARequest.objects.filter(status='done').count()
     num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
     num_pages = FOIADocument.objects.aggregate(Sum('pages'))['pages__sum']

@@ -9,6 +9,7 @@ from django.test import TestCase
 import nose.tools
 
 import datetime
+import re
 from operator import attrgetter
 
 from business_days.business_days import calendars
@@ -16,8 +17,8 @@ from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=R0201
+# pylint: disable=R0904
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
@@ -26,7 +27,7 @@ class TestFOIARequestUnit(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable-msg=C0103
+        # pylint: disable=C0103
 
         mail.outbox = []
 
@@ -34,9 +35,9 @@ class TestFOIARequestUnit(TestCase):
 
         # set relay in foia.models to a mock that adds emails to the test mail queue
         class MockRelay(object):
-            # pylint: disable-msg=C0111
-            # pylint: disable-msg=W0613
-            # pylint: disable-msg=R0903
+            # pylint: disable=C0111
+            # pylint: disable=W0613
+            # pylint: disable=R0903
             def deliver(self, message, To=None, From=None):
                 mail.outbox.append(message)
         import foia.models
@@ -161,6 +162,17 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_false(foias[2].is_viewable(AnonymousUser()))
         nose.tools.assert_true (foias[3].is_viewable(AnonymousUser()))
         nose.tools.assert_true (foias[4].is_viewable(AnonymousUser()))
+
+    def test_foia_set_mail_id(self):
+        """Test the set_mail_id function"""
+        foia = FOIARequest.objects.get(pk=17)
+        foia.set_mail_id()
+        mail_id = foia.mail_id
+        nose.tools.ok_(re.match(r'\d{1,4}-\d{8}', mail_id))
+
+        foia.set_mail_id()
+        nose.tools.eq_(mail_id, foia.mail_id)
+
 
      # manager
     def test_manager_get_submitted(self):
@@ -344,16 +356,16 @@ class TestFOIAIntegration(TestCase):
 
     def setUp(self):
         """Set up tests"""
-        # pylint: disable-msg=C0103
-        # pylint: disable-msg=E1003
-        # pylint: disable-msg=C0111
+        # pylint: disable=C0103
+        # pylint: disable=E1003
+        # pylint: disable=C0111
 
         mail.outbox = []
 
         # set relay in foia.models to a mock that adds emails to the test mail queue
         class MockRelay(object):
-            # pylint: disable-msg=W0613
-            # pylint: disable-msg=R0903
+            # pylint: disable=W0613
+            # pylint: disable=R0903
             def deliver(self, message, To=None, From=None):
                 mail.outbox.append(message)
         import foia.models
@@ -386,7 +398,7 @@ class TestFOIAIntegration(TestCase):
 
     def tearDown(self):
         """Tear down tests"""
-        # pylint: disable-msg=C0103
+        # pylint: disable=C0103
 
         import foia.models
 
@@ -404,8 +416,8 @@ class TestFOIAIntegration(TestCase):
 
     def test_request_lifecycle_no_email(self):
         """Test a request going through the full cycle as if we had to physically mail it"""
-        # pylint: disable-msg=R0915
-        # pylint: disable-msg=W0212
+        # pylint: disable=R0915
+        # pylint: disable=W0212
 
         user = User.objects.get(username='adam')
         agency = Agency.objects.get(pk=3)

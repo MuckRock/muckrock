@@ -1,6 +1,6 @@
 {% extends "request_templates/base.txt" %}
 {% block body %}
-This is a request under the Freedom of Information Act.  I hereby request the following records:
+Pursuant to the Vermont public records law (1 V.S.A. §§ 315-320), I hereby request the following records:
 
 {% block content %}{% endblock %}
 

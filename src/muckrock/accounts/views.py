@@ -39,7 +39,7 @@ def register_free(request):
 
     def create_customer(user, **kwargs):
         """Create a stripe customer for community account"""
-        # pylint: disable-msg=W0613
+        # pylint: disable=W0613
         user.get_profile().save_customer()
 
     template = 'registration/register_free.html'
@@ -60,7 +60,7 @@ def register_pro(request):
 
 def _register_acct(request, acct_type, form_class, template, post_hook, extra_context=None):
     """Register for an account"""
-    # pylint: disable-msg=R0913
+    # pylint: disable=R0913
     if request.method == 'POST':
         form = form_class(request.POST)
         if form.is_valid():

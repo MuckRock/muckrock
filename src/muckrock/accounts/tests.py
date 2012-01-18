@@ -21,9 +21,9 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 from settings import MONTHLY_REQUESTS
 
 # allow long names, methods that could be functions and too many public methods in tests
-# pylint: disable-msg=C0103
-# pylint: disable-msg=R0201
-# pylint: disable-msg=R0904
+# pylint: disable=C0103
+# pylint: disable=R0201
+# pylint: disable=R0904
 
 mock_customer = Mock()
 mock_customer.id = 'cus_2jPQblsYu5doOE'
@@ -43,7 +43,7 @@ class TestAccountFormsUnit(TestCase):
 
     def test_user_change_form_email_normal(self):
         """Changing email normally should succeed"""
-        # pylint: disable-msg=W0201
+        # pylint: disable=W0201
         form = UserChangeForm(instance=self.profile)
         form.cleaned_data = {}
         form.cleaned_data['email'] = 'new@example.com'
@@ -366,7 +366,7 @@ class TestAccountFunctional(TestCase):
     def _test_post_view_helper(self, url, template, data,
                                redirect_url='acct-my-profile', username='adam', password='abc'):
         """Helper for logging in, posting to a view, then checking the results"""
-        # pylint: disable-msg=R0913
+        # pylint: disable=R0913
 
         self.client.login(username=username, password=password)
         post_allowed_bad(self.client, reverse(url),

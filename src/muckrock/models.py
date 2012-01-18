@@ -9,7 +9,7 @@ from types import MethodType
 # and modifed by me to actually work
 class ChainableManager(models.Manager):
     """Allows chaining of Manager methods"""
-    # pylint: disable-msg=R0904
+    # pylint: disable=R0904
 
     def get_query_set(self):
         """Dynamically adds custom methods to returned QuerySet"""
@@ -17,7 +17,7 @@ class ChainableManager(models.Manager):
 
         class _QuerySet(qset.__class__):
             """Dynamic class"""
-            # pylint: disable-msg=R0903
+            # pylint: disable=R0903
             pass
 
         for method in [attr for attr in dir(self) if not attr.startswith('__') and

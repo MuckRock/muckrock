@@ -2,16 +2,16 @@
 Email handler for request emails
 """
 
-# pylint: disable-msg=E0611
+# pylint: disable=E0611
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.files import File
 from django.template.loader import render_to_string
 
 import logging
-# pylint: disable-msg=F0401
+# pylint: disable=F0401
 from config.settings import relay
-# pylint: enable-msg=F0401
+# pylint: enable=F0401
 from lamson.routing import route, stateless
 
 import os
@@ -22,13 +22,13 @@ from tempfile import NamedTemporaryFile
 from foia.models import FOIARequest, FOIADocument, FOIACommunication, FOIAFile
 from muckrock.foia.tasks import upload_document_cloud
 
-# pylint: disable-msg=C0103
+# pylint: disable=C0103
 
 @route('(address)@(host)')
 @stateless
 def REQUEST(message, address=None, host=None):
     """Request auto handler"""
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
 
     try:
         # backup all emails we receive here
@@ -109,12 +109,12 @@ def REQUEST(message, address=None, host=None):
 @stateless
 def FAX(message, host=None):
     """Forward fax confirmations to requests@muckrock.com"""
-    # pylint: disable-msg=W0613
+    # pylint: disable=W0613
     relay.deliver(message, To='requests@muckrock.com')
 
 def _upload_file(foia, file_name, part, sender):
     """Upload a file to attach to a FOIA request"""
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
 
     with NamedTemporaryFile() as temp_file:
         temp_file.write(part.get_payload(decode=True))
@@ -124,7 +124,7 @@ def _upload_file(foia, file_name, part, sender):
 
 def _upload_doc_cloud(foia, file_name, part, sender):
     """Upload a document cloud to attach to a FOIA request"""
-    # pylint: disable-msg=E1101
+    # pylint: disable=E1101
 
     access = 'private' if foia.is_embargo() else 'public'
     source = foia.agency.name if foia.agency else sender
@@ -143,7 +143,12 @@ def _allowed_email(email, foia):
     email = email.lower()
     state_tlds = ['state.%s.us' % a.lower() for (a, _) in STATE_CHOICES
                                             if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
-    allowed_tlds = ['.gov', '.mil'] + state_tlds
+    allowed_tlds = [
+        '.gov',
+        '.mil',
+        '.muckrock.com',
+        '@muckrock.com',
+        ] + state_tlds
     if foia.email and '@' in foia.email and email.endswith(foia.email.split('@')[1].lower()):
         return True
     if foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
