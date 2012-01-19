@@ -171,8 +171,8 @@ def _foia_action(request, jurisdiction, slug, idx, action):
                                'action': action.value},
                               context_instance=RequestContext(request))
 
-Action = namedtuple('Action', 'form_actions msg tests form_class return_url'
-                               'heading value must_own template')
+Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
+                              'heading value must_own template')
 
 def _save_foia_comm(request, foia, form, action):
     """Save the FOI Communication"""
