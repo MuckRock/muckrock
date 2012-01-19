@@ -347,6 +347,16 @@ class TestFOIAFunctional(TestCase):
         nose.tools.eq_(foia.status, 'started')
         nose.tools.eq_(foia.agency.pk, 2)
 
+    def test_action_views(self):
+        """Test action views"""
+
+        foia = FOIARequest.objects.get(pk=1)
+        self.client.login(username='adam', password='abc')
+
+        get_allowed(self.client, reverse('foia-flag',
+                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'idx': foia.pk, 'slug': foia.slug}),
+                    ['foia/foiarequest_action.html', 'foia/base-submit.html'])
 
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
