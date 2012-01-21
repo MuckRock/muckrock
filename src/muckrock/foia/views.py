@@ -198,7 +198,8 @@ def admin_fix(request, jurisdiction, slug, idx):
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Email from Request Address',
         value = 'Submit',
-        must_own = False)
+        must_own = False,
+        template = 'foia/foiarequest_action.html')
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
