@@ -190,7 +190,8 @@ def manage_subsc(request):
         form = form_class(request=request)
 
     return render_to_response(template,
-                              {'form': form, 'heading': heading, 'desc': desc},
+                              {'form': form, 'heading': heading, 'desc': desc,
+                               'pub_key': STRIPE_PUB_KEY},
                               context_instance=RequestContext(request))
 
 @login_required
@@ -217,7 +218,7 @@ def buy_requests(request):
         form = PaymentForm(request=request)
 
     return render_to_response('registration/cc.html',
-                              {'form': form, 'heading': 'Buy Requests',
+                              {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Buy Requests',
                                'desc': 'Buy 5 requests for $20.  They may be used at any time.'},
                               context_instance=RequestContext(request))
 
