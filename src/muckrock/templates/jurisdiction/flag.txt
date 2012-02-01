@@ -1,0 +1,12 @@
+{% autoescape off %}
+Submitter: http://www.muckrock.com{% url admin:auth_user_change user.pk %}
+{% if type == "agency" %}
+Agency Admin: http://www.muckrock.com{% url admin:agency_agency_change obj.pk %}
+{% else %}
+Jurisdiction Admin: http://www.muckrock.com{% url admin:jurisdiction_jurisdiction_change obj.pk %}
+{% endif %}
+
+The user {{user}} has flagged the {{type}} {{obj.name}} for the following reason:
+
+{{reason}}
+{% endautoescape %}
