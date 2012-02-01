@@ -8,7 +8,7 @@
 
 <h1>{{jurisdiction.name}}</h1>
 {% if jurisdiction.parent %}
-	<p><a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
+	<p>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
 {% endif %}
 
 <div class="left">
@@ -43,7 +43,7 @@
 <div class="clearer">&nbsp;</div>
 
 <div>
-{{jurisdiction.notes|safe}}
+{{jurisdiction.public_notes|safe}}
 </div>
 
 <table class="data-table">
@@ -129,7 +129,7 @@
 {% if jurisdiction.level == "s" %}
 		<h3>Local Jurisdictions in {{jurisdiction.name}}</h3>
 		<p><em>MuckRock can currently submit requests in the following {{jurisdiction.name}} local jurisdictions. To add a jurisdiction, e-mail <a href"Info@MuckRock.com">info@muckrock.com</a>. Requests are typically fulfilled within 24 hours.</em>
-		<ul>
+		<ul class="children">
 			{% for child in jurisdiction.children.all %}
 				<li><a href="{% url jurisdiction-detail slug=child.slug,idx=child.pk %}">{{child.name}}</a></li>
 			{% endfor %}
@@ -141,7 +141,7 @@
 
 {% block sidebar %}
 
-	<p><a class="jqbutton" href="{#% url jurisdiction-flag slug=jurisdiction.slug,idx=jurisdiction.pk %#}">Submit Correction</a></p>
+	<p><a class="jqbutton" href="{% url jurisdiction-flag slug=jurisdiction.slug,idx=jurisdiction.pk %}">Submit Correction</a></p>
 	<div class="content-separator"></div>
 
 	<div class="section">

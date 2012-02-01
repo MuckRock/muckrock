@@ -1,9 +1,9 @@
 
-{% extends "agency/base.html" %}
+{% extends base %}
 
 {% block content %}
 	<h1>Submit a Correction</h1>
-	<h2>{{agency.name}}</h2>
+	<h2>{{obj.name}}</h2>
 	{% if form.help_text %}<p class="large">{{form.help_text}}</p>{% endif %}
 	<div class="form">
   <form action="" method="post">

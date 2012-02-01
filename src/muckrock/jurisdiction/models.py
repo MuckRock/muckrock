@@ -4,6 +4,8 @@ Models for the Jurisdiction application
 from django.db import models
 from django.db.models import Sum
 
+from easy_thumbnails.fields import ThumbnailerImageField
+
 from tags.models import Tag
 
 class RequestHelper(object):
@@ -85,6 +87,10 @@ class Jurisdiction(models.Model, RequestHelper):
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
     days = models.PositiveSmallIntegerField(blank=True, null=True)
+    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True,
+                                  resize_source={'size': (372, 233), 'crop': 'smart'})
+    image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
+    public_notes = models.TextField(blank=True, help_text='May use html')
 
     def __unicode__(self):
         # pylint: disable=E1101

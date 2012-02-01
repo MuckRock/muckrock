@@ -5,6 +5,8 @@ Models for the Agency application
 from django.contrib.auth.models import User
 from django.db import models
 
+from easy_thumbnails.fields import ThumbnailerImageField
+
 from jurisdiction.models import Jurisdiction, RequestHelper
 import fields
 
@@ -32,6 +34,10 @@ class Agency(models.Model, RequestHelper):
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     can_email_appeals = models.BooleanField()
+    image = ThumbnailerImageField(upload_to='agency_images', blank=True, null=True,
+                                  resize_source={'size': (372, 233), 'crop': 'smart'})
+    image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
+    public_notes = models.TextField(blank=True, help_text='May use html')
 
     address = models.TextField(blank=True)
     email = models.EmailField(blank=True)
