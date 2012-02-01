@@ -49,7 +49,6 @@ class StatisticsAdmin(admin.ModelAdmin):
 admin.site.register(Statistics, StatisticsAdmin)
 admin.site.register(Profile)
 
-print UserAdmin.list_display
 UserAdmin.list_display += ('date_joined',)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
