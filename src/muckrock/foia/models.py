@@ -599,7 +599,7 @@ class FOIADocument(models.Model):
         match = re.match('^(\d+)-(.*)$', self.doc_id)
 
         if match and self.access == 'public':
-            return 'http://s3.documentcloud.org/documents/'\
+            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
             return '/static/img/report.png'
