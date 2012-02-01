@@ -79,7 +79,7 @@ a.feed {
 	padding-left: 18px;
 }
 a.twitter {
-	background: url('http://twitter-badges.s3.amazonaws.com/t_mini-b.png') no-repeat left center;
+	background: url('//twitter-badges.s3.amazonaws.com/t_mini-b.png') no-repeat left center;
 	padding-left: 18px;
 }
 a.facebook {
