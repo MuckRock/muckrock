@@ -4,7 +4,6 @@ Forms for FOIA application
 
 from django import forms
 from django.contrib import messages
-from django.contrib.localflavor.us.forms import USPhoneNumberField
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -16,10 +15,12 @@ import inspect
 import sys
 from datetime import datetime, date, timedelta
 
-from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, Agency, AgencyType
+from agency.models import Agency, AgencyType
+from foia.models import FOIARequest, FOIACommunication, FOIANote
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
+from jurisdiction.models import Jurisdiction
 from muckrock.fields import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
@@ -145,19 +146,6 @@ class FOIAAdminFixForm(forms.ModelForm):
         # pylint: disable=R0903
         model = FOIARequest
         fields = ['email', 'other_emails']
-
-class AgencyForm(forms.ModelForm):
-    """A form for an Agency"""
-
-    phone = USPhoneNumberField(required=False)
-    fax = USPhoneNumberField(required=False)
-
-    class Meta:
-        # pylint: disable=R0903
-        model = Agency
-        fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
-        widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
-                   'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
 
 class FOIAWizardParent(forms.Form):

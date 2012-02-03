@@ -1,0 +1,42 @@
+[
+    {
+        "pk": 1,
+        "model": "taggit.tag",
+        "fields": {
+            "name": "blue",
+            "slug": "blue"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "taggit.tag",
+        "fields": {
+            "name": "green",
+            "slug": "green"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "taggit.tag",
+        "fields": {
+            "name": "exemption 42",
+            "slug": "exemption-42"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "taggit.tag",
+        "fields": {
+            "name": "exemption x",
+            "slug": "exemption-x"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "taggit.tag",
+        "fields": {
+            "name": "exemption 2e",
+            "slug": "exemption-2e"
+        }
+    }
+]
