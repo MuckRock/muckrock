@@ -12,8 +12,7 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
-                        Jurisdiction, Agency, AgencyType, FOIADocTopViewed
+from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
@@ -191,28 +190,4 @@ class FOIARequestAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[idx]))
 
 
-class JurisdictionAdmin(admin.ModelAdmin):
-    """Jurisdiction admin options"""
-    list_display = ('name', 'level')
-    list_filter = ['level']
-    search_fields = ['name']
-
-
-class AgencyTypeAdmin(admin.ModelAdmin):
-    """AgencyType admin options"""
-    list_display = ('name', )
-    search_fields = ['name']
-
-
-class AgencyAdmin(admin.ModelAdmin):
-    """Agency admin options"""
-    list_display = ('name', 'jurisdiction')
-    list_filter = ['approved', 'jurisdiction', 'types']
-    search_fields = ['name']
-
-
 admin.site.register(FOIARequest,  FOIARequestAdmin)
-admin.site.register(Jurisdiction, JurisdictionAdmin)
-admin.site.register(AgencyType,   AgencyTypeAdmin)
-admin.site.register(Agency,       AgencyAdmin)
-admin.site.register(FOIADocTopViewed)

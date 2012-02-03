@@ -13,7 +13,9 @@ import re
 from operator import attrgetter
 
 from business_days.business_days import calendars
-from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction
+from foia.models import FOIARequest, FOIACommunication
+from agency.models import Agency
+from jurisdiction.models import Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests

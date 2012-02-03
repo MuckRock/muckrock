@@ -22,12 +22,14 @@ import logging
 import stripe
 import sys
 
+from agency.models import Agency
 from accounts.forms import PaymentForm
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, AgencyForm, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, FOIACommunication, Jurisdiction, Agency
+                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
+from foia.models import FOIARequest, FOIADocument, FOIACommunication
+from jurisdiction.models import Jurisdiction
 from tags.models import Tag
 from settings import STRIPE_SECRET_KEY
 
@@ -68,6 +70,7 @@ def _foia_form_handler(request, foia, action):
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
                     foia.agency = Agency.objects.create(name=agency_name[:255],
+                                                        slug=slugify(agency_name[:255]),
                                                         jurisdiction=foia.jurisdiction,
                                                         user=request.user, approved=False)
                     send_mail('[AGENCY] %s' % foia.agency.name,
@@ -94,8 +97,9 @@ def _foia_form_handler(request, foia, action):
                 foia.save()
 
                 if new_agency:
-                    return HttpResponseRedirect(reverse('foia-update-agency',
-                                                        kwargs={'idx': foia.agency.pk})
+                    return HttpResponseRedirect(reverse('agency-update',
+                        kwargs={'jurisdiction': foia.agency.jurisdiction.slug,
+                                'slug': foia.agency.slug, 'idx': foia.agency.pk})
                                                 + '?foia=%d' % foia.pk)
                 else:
                     return HttpResponseRedirect(foia.get_absolute_url())
@@ -533,7 +537,7 @@ def detail(request, jurisdiction, slug, idx):
     """Details of a single FOIA request"""
 
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
 
     if not foia.is_viewable(request.user):
         raise Http404()
@@ -565,30 +569,3 @@ def doc_cloud_detail(request, doc_id):
 
     return redirect(doc, permanant=True)
 
-@login_required
-def update_agency(request, idx):
-    """Allow the user to fill in some information about new agencies they create"""
-
-    agency = get_object_or_404(Agency, pk=idx)
-
-    if agency.user != request.user or agency.approved:
-        messages.error(request, 'You may only edit your own agencies which have '
-                                'not been approved yet')
-        return redirect('foia-mylist', view='all')
-
-    if request.method == 'POST':
-        form = AgencyForm(request.POST, instance=agency)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Agency information saved.')
-            foia_pk = request.GET.get('foia')
-            foia = FOIARequest.objects.filter(pk=foia_pk)
-            if foia:
-                return redirect(foia[0])
-            else:
-                return redirect('foia-mylist', view='all')
-    else:
-        form = AgencyForm(instance=agency)
-
-    return render_to_response('foia/agency_form.html', {'form': form},
-                              context_instance=RequestContext(request))
