@@ -79,7 +79,11 @@ a.feed {
 	padding-left: 18px;
 }
 a.twitter {
-	background: url('http://twitter-badges.s3.amazonaws.com/t_mini-b.png') no-repeat left center;
+	background: url('//twitter-badges.s3.amazonaws.com/t_mini-b.png') no-repeat left center;
+	padding-left: 18px;
+}
+a.facebook {
+	background: url('/static/img/facebook.png') no-repeat left center;
 	padding-left: 18px;
 }
 
@@ -237,6 +241,10 @@ input, textarea, select {
 	padding: 4px 5px;
 }
 input:focus, textarea:focus, select:focus {background: #FFFFF5;}
+
+input[disabled], textarea[disabled], select[disabled] {
+	background: #DCDCDC;
+}
 
 /*
 input.button {

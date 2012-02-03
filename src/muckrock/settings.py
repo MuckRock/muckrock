@@ -140,27 +140,14 @@ DEBUG_TOOLBAR_CONFIG = {
 
 #CELERY_IMPORTS = ("foia.tasks", )
 
-BROKER_HOST = "localhost"
-BROKER_BACKEND = "redis"
-REDIS_PORT = 6379
-REDIS_HOST = "localhost"
-BROKER_USER = ""
-BROKER_PASSWORD = ""
-BROKER_VHOST = "0"
-REDIS_DB = 0
-REDIS_CONNECT_RETRY = True
-CELERY_SEND_EVENTS = True
-
-#CELERY_RESULT_BACKEND = "redis"
-#CELERY_TASK_RESULT_EXPIRES =  10
-CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
-CELERY_IGNORE_RESULT = True
-CELERY_DISABLE_RATE_LIMITS = True
-
 import djcelery
 djcelery.setup_loader()
-
-
+BROKER_HOST = "localhost"
+BROKER_PORT = 5672
+BROKER_USER = "muckrock"
+BROKER_PASSWORD = "muckrock"
+BROKER_VHOST = "muckrock_vhost"
+CELERY_RESULT_BACKEND = "amqp"
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
@@ -174,7 +161,12 @@ HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 ASSETS_DEBUG = False
 ASSETS_EXPIRE = 'querystring'
 
-MONTHLY_REQUESTS = 5
+MONTHLY_REQUESTS = {
+    'admin': 100,
+    'beta': 5,
+    'community': 0,
+    'pro': 20,
+}
 
 LAMSON_ACTIVATE = True
 LAMSON_RELAY_HOST = 'localhost'

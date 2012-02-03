@@ -149,6 +149,10 @@ class FOIARequest(models.Model):
         """Can this request be appealed by the user?"""
         return self.status == 'rejected'
 
+    def is_payable(self):
+        """Can this request be payed for by the user?"""
+        return self.status == 'payment' and self.price > 0
+
     def is_deletable(self):
         """Can this request be deleted?"""
         return self.status == 'started'
@@ -490,7 +494,7 @@ class FOIARequest(models.Model):
                 reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
             (self.user == user and self.is_editable(),
                 reverse('foia-update', kwargs=kwargs), 'Update'),
-            (self.user == user and not self.is_editable(),
+            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
                 reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
             (self.user == user and self.is_deletable(),
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
@@ -500,6 +504,8 @@ class FOIARequest(models.Model):
                 reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
             (self.user == user and self.is_appealable(),
                 reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
+            (self.user == user and self.is_payable(),
+                reverse('foia-pay', kwargs=kwargs), 'Pay'),
             (self.public_documents(), '#', 'Embed this Document'),
             (user.is_authenticated() and self.user != user,
                 reverse('foia-follow', kwargs=kwargs),
@@ -604,7 +610,7 @@ class FOIADocument(models.Model):
         match = re.match('^(\d+)-(.*)$', self.doc_id)
 
         if match and self.access == 'public':
-            return 'http://s3.documentcloud.org/documents/'\
+            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
             return '/static/img/report.png'

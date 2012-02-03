@@ -130,15 +130,13 @@ class TestAgencyViews(TestCase):
                      reverse('agency-update',
                              kwargs={'jurisdiction': agency.jurisdiction.slug,
                                      'slug': agency.slug, 'idx': agency.pk}),
-                     agency_data,
-                     'http://testserver' + reverse('foia-mylist', kwargs={'view': 'all'}))
+                     agency_data, reverse('foia-mylist', kwargs={'view': 'all'}))
         foia = FOIARequest.objects.get(pk=1)
         post_allowed(self.client,
                      reverse('agency-update',
                              kwargs={'jurisdiction': agency.jurisdiction.slug,
                                      'slug': agency.slug, 'idx': agency.pk})
                      + '?foia=%d' % foia.pk,
-                     agency_data,
-                     'http://testserver' + foia.get_absolute_url())
+                     agency_data, foia.get_absolute_url())
         agency = Agency.objects.get(pk=3)
         nose.tools.eq_(agency.email, 'test@example.com')
