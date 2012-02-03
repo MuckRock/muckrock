@@ -8,6 +8,7 @@ from django.db import models
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from jurisdiction.models import Jurisdiction, RequestHelper
+from muckrock.models import ChainableManager
 import fields
 
 class AgencyType(models.Model):
@@ -21,6 +22,15 @@ class AgencyType(models.Model):
     class Meta:
         # pylint: disable=R0903
         ordering = ['name']
+
+
+class AgencyManager(ChainableManager):
+    """Object manager for Agencies"""
+    # pylint: disable=R0904
+
+    def get_approved(self):
+        """Get all approved agencies"""
+        return self.filter(approved=True)
 
 
 class Agency(models.Model, RequestHelper):
@@ -51,6 +61,8 @@ class Agency(models.Model, RequestHelper):
     phone = models.CharField(blank=True, max_length=20)
     fax = models.CharField(blank=True, max_length=20)
     notes = models.TextField(blank=True)
+
+    objects = AgencyManager()
 
     def __unicode__(self):
         return self.name

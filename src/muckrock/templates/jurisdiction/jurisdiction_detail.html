@@ -98,7 +98,7 @@
 			<tr class="odd">
 				<th>Agency</th><th>Requests</th><th>Average Response Time</th><th>Pages Released</th>
 			</tr>
-		{% for agency in jurisdiction.agencies.all %}
+		{% for agency in jurisdiction.agencies.get_approved %}
 			<tr class="{% cycle 'even' 'odd' %}">
 				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
 				<td>{{agency.foiarequest_set.count}}</td>
