@@ -11,11 +11,20 @@
 	<p>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
 {% endif %}
 
+{% if not jurisdiction.image %}
+	<div class="error">
+		<h4>Profile Under Construction</h4>
+		<em>
+		<strong>Editor's Note:</strong> We don't have a picture for this entity, yet, but you can help: Send us a link to a public domain (for example, a government photo or image licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons</a>) and if we use it, you'll get a free MuckRock request.  Send all submissions to <a href="mailto:Michael@MuckRock.com">Michael@MuckRock.com</a>.  <strong><br \><a href="http://www.muckrock.com/accounts/register/">Register for a MuckRock account</a></strong>
+		</em>
+	</div>
+{% endif %}
+
 <div class="left">
 	{% if jurisdiction.image %}
 		<img src="{% thumbnail agency.image 510x233 %}" alt="" title="" class="bordered alignleft" />
 	{% else %}
-		<img src="/static/img/city1.jpg" alt="" title="" class="bordered alignleft" />
+		<img src="/static/img/under_construction.jpg" alt="" title="" class="bordered alignleft" />
 	{% endif %}
 	<p class = "quiet"><em>Image: {{jurisdiction.image_attr_line|safe}}</em></p>
 </div>

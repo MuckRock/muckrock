@@ -287,7 +287,8 @@
             "date_submitted": "2001-01-12", 
             "user": 2,
             "slug": "test-16",
-			"price": "0.00"
+			"price": "0.00",
+			"times_viewed": 10
         }
     }
 ]
