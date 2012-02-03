@@ -9,7 +9,7 @@
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
 
-	{% assets filter="jsmin", output="js/main.js", "js/jquery-1.4.2.js", "js/jquery-ui-1.8.4.custom.js", "js/jquery.tipTip.js", "js/datepicker.js", "js/wizard.js", "js/superbly-tagfield.js" %}
+	{% assets filter="jsmin", output="js/main.js", "js/jquery-1.4.2.js", "js/jquery-ui-1.8.4.custom.js", "js/jquery.tipTip.js", "js/datepicker.js", "js/wizard.js", "js/superbly-tagfield.js" "js/jquery.validate.js" %}
 	<script type="text/javascript" src="{{ ASSET_URL }}"></script>
 	{% endassets %}
 
@@ -129,6 +129,7 @@
 						<li><a href="{% url foia-submitted-feed %}" class="feed">Recently Submitted Requests</a></li>
 						<li><a href="{% url foia-done-feed %}" class="feed">Recently Completed Requests</a></li>
 						<li><a href="http://www.twitter.com/muckrocknews" class="twitter">@MuckRockNews</a></li>
+						<li><a href="http://www.facebook.com/muckrock" class="facebook">Like Us</a></li>
 					</ul>
 
 				</div>

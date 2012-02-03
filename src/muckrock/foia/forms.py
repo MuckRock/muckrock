@@ -39,6 +39,9 @@ class FOIARequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(FOIARequestForm, self).__init__(*args, **kwargs)
+        if not (self.request and self.request.user.get_profile().can_embargo()):
+            del self.fields['embargo']
+            self.Meta.fields = ['title', 'agency']
 
     def clean(self):
         """agency is required, but must check combobox name field instead of drop down"""
@@ -57,17 +60,13 @@ class FOIARequestForm(forms.ModelForm):
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 }
 
-class FOIAEmbargoForm(FOIARequestForm):
+class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
 
-    def __init__(self, *args, **kwargs):
-        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
-        del self.fields['agency']
-        del self.fields['request']
-
-    def clean(self):
-        """Do not check agency since we deleted it in this sub form"""
-        return self.cleaned_data
+    embargo = forms.BooleanField(required=False,
+                                 help_text='Embargoing a request keeps it completely private from '
+                                           'other users until the embargo date you set.  '
+                                           'You may change this whenever you want.')
 
     class Meta:
         # pylint: disable=R0903

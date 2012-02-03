@@ -9,7 +9,10 @@
 
 {% block sub-nav %}
 <ul class="tabbed">
-	<li class="{% active request "^/accounts/profile/" %}"><a href="{% url acct-my-profile %}">My Account</a></li>
-	<li class="{% active request "^/accounts/update/" %}"><a href="{% url acct-update %}">Update</a></li>
+	<li class="{% active request "^/accounts/profile/$" %}"><a href="{% url acct-my-profile %}">My Account</a></li>
+	<li class="{% active request "^/accounts/update/" %}"><a href="{% url acct-update %}">Update Profile</a></li>
+	<li class="{% active request "^/accounts/buy_requests/" %}"><a href="{% url acct-buy-requests %}">Buy Requests</a></li>
+	<li class="{% active request "^/accounts/manage_subsc/" %}"><a href="{% url acct-manage-subsc %}">Manage Subscription</a></li>
+	<li class="{% active request "^/accounts/update_cc/" %}"><a href="{% url acct-update-cc %}">Update Credit Card</a></li>
 </ul>
 {% endblock %}
