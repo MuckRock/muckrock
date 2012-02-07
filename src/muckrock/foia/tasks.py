@@ -118,14 +118,14 @@ def set_top_viewed_reqs():
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    top_req_paths = [(entry.title.text, entry.pageviews) for entry in data.entry
+    top_req_paths = [(entry.title.text, int(entry.pageviews.value)) for entry in data.entry
                      if entry.title.text.startswith('ga:pagePath=/foi/view/')]
     path_re = re.compile('ga:pagePath=/foi/view/' + foia_url)
 
-    for req_path, pageviews in top_req_paths:
+    for req_path, page_views in top_req_paths:
         try:
             req = FOIARequest.objects.get(pk=path_re.match(req_path).group('idx'))
-            req.times_viewed = pageviews
+            req.times_viewed = page_views
             req.save()
         except FOIARequest.DoesNotExist:
             pass
