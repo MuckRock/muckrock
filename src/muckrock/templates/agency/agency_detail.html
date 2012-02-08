@@ -41,15 +41,23 @@
 		{% endif %}
 	</p>
 	<p><strong>E-mail Address:</strong><br />
-	  {% if agency.email %}
-		  agency.email
-		{% else %}
+	  {% if agency.email and request.user.get_profile.can_view_emails %}
+		  {{agency.email}}
+		{% endif %}
+	  {% if agency.email and not request.user.get_profile.can_view_emails %}
+		  {% if request.user.is_anonymous %}
+				<a href="{% url acct-register-pro %}"><em class="small">(Available for Pro Users)</em></a>
+			{% else %}
+				<a href="{% url acct-manage-subsc %}"><em class="small">(Available for Pro Users)</em></a>
+			{% endif %}
+		{% endif %}
+	  {% if not agency.email %}
 	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
 		{% endif %}
 	</p>
 	<p><strong>Fax Number:</strong><br />
 	  {% if agency.fax %}
-		  agency.fax
+		  {{agency.fax}}
 		{% else %}
 	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
 		{% endif %}
