@@ -34,7 +34,7 @@
 <div>
 	<p><strong>Mailing Address:</strong><br />
 	  {% if agency.address %}
-		  {{ agency.address }}
+		  {{ agency.address|linebreaks }} 
 			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
 		{% else %}
 	    Unknown <em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>
