@@ -77,6 +77,11 @@ class Profile(models.Model):
 
         return self.acct_type in ['admin', 'beta', 'pro']
 
+    def can_view_emails(self):
+        """Is this user allowed to view all emails and private contact information?"""
+
+        return self.acct_type in ['admin', 'pro']
+
     def get_cc(self):
         """Get the user's CC if they have one on file"""
         return getattr(self.get_customer(), 'active_card', None)
