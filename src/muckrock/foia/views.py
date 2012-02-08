@@ -18,6 +18,7 @@ from django.views.generic import list_detail
 
 from collections import namedtuple
 from datetime import datetime
+from decimal import Decimal
 import logging
 import stripe
 import sys
@@ -146,7 +147,7 @@ def _foia_action(request, jurisdiction, slug, idx, action):
 
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
-    form_class = action.form_class(foia)
+    form_class = action.form_class(request, foia)
 
     if action.must_own and foia.user != request.user:
         messages.error(request, 'You may only %s your own requests' % action.msg)
@@ -164,19 +165,18 @@ def _foia_action(request, jurisdiction, slug, idx, action):
             return HttpResponseRedirect(action.return_url(request, foia))
 
     else:
-        if issubclass(form_class, forms.ModelForm):
+        if isinstance(form_class, type) and issubclass(form_class, forms.ModelForm):
             form = form_class(instance=foia)
         else:
             form = form_class()
 
-    return render_to_response(action.template,
-                              {'form': form, 'foia': foia,
-                               'heading': action.heading,
-                               'action': action.value},
+    context = action.extra_context(foia)
+    context.update({'form': form, 'foia': foia, 'heading': action.heading, 'action': action.value})
+    return render_to_response(action.template, context,
                               context_instance=RequestContext(request))
 
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
-                              'heading value must_own template')
+                              'heading value must_own template extra_context')
 
 def _save_foia_comm(request, foia, form, action):
     """Save the FOI Communication"""
@@ -198,12 +198,13 @@ def admin_fix(request, jurisdiction, slug, idx):
         form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Admin Fix'),
         msg = 'admin fix',
         tests = [],
-        form_class = lambda _: FOIAAdminFixForm,
+        form_class = lambda r, f: FOIAAdminFixForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Email from Request Address',
         value = 'Submit',
         must_own = False,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -214,12 +215,13 @@ def fix(request, jurisdiction, slug, idx):
         form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Fix'),
         msg = 'fix',
         tests = [(lambda f: f.is_fixable(), 'This request has not had a fix request')],
-        form_class = lambda _: FOIAFixForm,
+        form_class = lambda r, f: FOIAFixForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Fix FOIA Request',
         value = 'Fix',
         must_own = True,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -230,12 +232,13 @@ def appeal(request, jurisdiction, slug, idx):
         form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Appeal'),
         msg = 'appeal',
         tests = [(lambda f: f.is_appealable(), 'This request has not been rejected')],
-        form_class = lambda _: FOIAAppealForm,
+        form_class = lambda r, f: FOIAAppealForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Appeal FOIA Request',
         value = 'Appeal',
         must_own = True,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -256,12 +259,13 @@ def flag(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'flag',
         tests = [],
-        form_class = lambda _: FOIAFlagForm,
+        form_class = lambda r, f: FOIAFlagForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Flag FOIA Request',
         value = 'Flag',
         must_own = False,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -279,12 +283,13 @@ def note(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'add notes',
         tests = [],
-        form_class = lambda _: FOIANoteForm,
+        form_class = lambda r, f: FOIANoteForm,
         return_url = lambda r, f: f.get_absolute_url() + '#tabs-notes',
         heading = 'Add Note',
         value = 'Add',
         must_own = True,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -300,12 +305,13 @@ def delete(request, jurisdiction, slug, idx):
         form_actions = form_actions,
         msg = 'delete',
         tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
-        form_class = lambda _: FOIADeleteForm,
+        form_class = lambda r, f: FOIADeleteForm,
         return_url = lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
         heading = 'Delete FOI Request',
         value = 'Delete',
         must_own = True,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
@@ -325,18 +331,20 @@ def embargo(request, jurisdiction, slug, idx):
         msg = 'embargo',
         tests = [(lambda f: f.user.get_profile().can_embargo(),
                   'You may not embargo requests with your account type')],
-        form_class = lambda f: FOIAEmbargoDateForm if f.date_embargo \
-                               else FOIAEmbargoForm,
+        form_class = lambda r, f: FOIAEmbargoDateForm if f.date_embargo \
+                                  else FOIAEmbargoForm,
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Update the Embargo Date',
         value = 'Update',
         must_own = True,
-        template = 'foia/foiarequest_action.html')
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
 def pay_request(request, jurisdiction, slug, idx):
-    """Change the embargo on a request"""
+    """Pay us through CC for the payment on a request"""
+    # pylint: disable=W0142
 
     def form_actions(request, foia, form):
         """Pay for request"""
@@ -367,12 +375,14 @@ def pay_request(request, jurisdiction, slug, idx):
         msg = 'pay for',
         tests = [(lambda f: f.is_payable(),
                   'You may only pay for requests that require a payment')],
-        form_class = lambda _: PaymentForm,
+        form_class = lambda r, f: lambda *args, **kwargs: PaymentForm(request=r, *args, **kwargs),
         return_url = lambda r, f: f.get_absolute_url(),
         heading = 'Pay for Request',
         value = 'Pay',
         must_own = True,
-        template = 'registration/cc.html')
+        template = 'registration/cc.html',
+        extra_context = lambda f: {'desc': 'You will be charged $%.2f for this request' %
+                                   (f.price * Decimal('1.05'))})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
