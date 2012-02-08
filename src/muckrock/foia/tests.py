@@ -196,7 +196,8 @@ class TestFOIARequestUnit(TestCase):
                 nose.tools.ok_(foia.status == 'done')
             else:
                 nose.tools.ok_(
-                        foia.status in ['started', 'submitted', 'processed', 'fix', 'rejected'])
+                        foia.status in ['started', 'submitted', 'processed',
+                                        'fix', 'rejected', 'payment'])
 
 
 class TestFOIAFunctional(TestCase):
@@ -359,6 +360,12 @@ class TestFOIAFunctional(TestCase):
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
                                             'idx': foia.pk, 'slug': foia.slug}),
                     ['foia/foiarequest_action.html', 'foia/base-submit.html'])
+
+        foia = FOIARequest.objects.get(pk=18)
+        get_allowed(self.client, reverse('foia-pay',
+                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'idx': foia.pk, 'slug': foia.slug}),
+                    ['registration/cc.html', 'registration/base.html'])
 
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
