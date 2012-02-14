@@ -79,6 +79,11 @@ class FOIARequestManager(ChainableManager):
         # Change to this after all follow ups have been resolved
         #return self.filter(status='processed', date_followup__lte=date.today())
 
+    def get_undated(self):
+        """Get requests which have an undated document or file"""
+        return self.filter((~Q(files=None)     & Q(files__date=None)) |
+                           (~Q(documents=None) & Q(documents__date=None))).distinct()
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -89,7 +94,7 @@ class FOIARequest(models.Model):
         ('started', 'Draft'),
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
-        ('appealing', 'Awaiting Apeal'),
+        ('appealing', 'Awaiting Appeal'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
