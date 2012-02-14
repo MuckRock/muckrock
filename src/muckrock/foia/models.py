@@ -89,7 +89,7 @@ class FOIARequest(models.Model):
         ('started', 'Draft'),
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
-        ('appealing', 'Awaiting Apeal'),
+        ('appealing', 'Awaiting Appeal'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
