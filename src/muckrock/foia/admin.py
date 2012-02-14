@@ -138,6 +138,8 @@ class FOIARequestAdmin(admin.ModelAdmin):
                                    name='foia-admin-process'),
                                url(r'^followup/$', self.admin_site.admin_view(self.followup),
                                    name='foia-admin-followup'),
+                               url(r'^undated/$', self.admin_site.admin_view(self.undated),
+                                   name='foia-admin-undated'),
                                url(r'^send_update/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.send_update),
                                    name='foia-admin-send-update'),
@@ -165,6 +167,12 @@ class FOIARequestAdmin(admin.ModelAdmin):
         # pylint: disable=R0201
         foias = list(FOIARequest.objects.get_followup())
         return self._list_helper(request, foias, 'Follow Up')
+
+    def undated(self, request):
+        """List all the requests that have undated documents or files"""
+        # pylint: disable=R0201
+        foias = list(FOIARequest.objects.get_undated())
+        return self._list_helper(request, foias, 'Undated')
 
     def send_update(self, request, idx):
         """Manually send the user an update notification"""
