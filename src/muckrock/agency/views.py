@@ -58,6 +58,7 @@ def update(request, jurisdiction, slug, idx):
     return render_to_response('agency/agency_form.html', {'form': form},
                               context_instance=RequestContext(request))
 
+@login_required
 def flag(request, jurisdiction, slug, idx):
     """Flag a correction for an agency's information"""
 
