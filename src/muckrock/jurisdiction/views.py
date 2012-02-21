@@ -2,6 +2,7 @@
 Views for the Jurisdiction application
 """
 
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -51,6 +52,7 @@ def detail(request, slug, idx):
     return render_to_response('jurisdiction/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
+@login_required
 def flag(request, slug, idx):
     """Flag a correction for a jurisdiction's information"""
 
