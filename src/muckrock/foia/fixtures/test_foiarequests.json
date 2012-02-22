@@ -286,8 +286,27 @@
             "date_submitted": "2000-12-29", 
             "date_submitted": "2001-01-12", 
             "user": 2,
-            "slug": "test-16",
-			"price": "0.00"
+            "slug": "unicodes-title",
+			"price": "0.00",
+			"times_viewed": 10
+        }
+    },
+	{
+        "pk": 18,
+        "model": "foia.foiarequest",
+        "fields": {
+            "status": "payment",
+            "embargo": false,
+            "date_embargo": null,
+            "jurisdiction": 1,
+            "date_done": null,
+            "title": "Payment Required",
+            "date_submitted": "2000-12-29", 
+            "date_submitted": "2001-01-12", 
+            "user": 1,
+            "slug": "payment-required",
+			"price": "10.00",
+			"times_viewed": 2
         }
     }
 ]

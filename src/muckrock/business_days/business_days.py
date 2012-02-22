@@ -220,6 +220,8 @@ calendars = {
             HolidayEaster('Good Friday')], True),
     'CT': HolidayCalendar(us_holidays + [
             HolidayDate("Lincoln's Birthday", FEB, 12)], True),
+    'DC': HolidayCalendar(us_holidays + [
+            HolidayDate('Emancipation Day', APR, 16)], False),
     # also remove presidents day
     'FL': HolidayCalendar(us_holidays_no_columbus[:2] + us_holidays_no_columbus[3:] + [
             HolidayOrdWeekday('Day after Thanksgiving', NOV, FRI, 4)], False),

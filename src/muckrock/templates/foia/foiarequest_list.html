@@ -25,10 +25,16 @@
 		</tr>
 		{% for foia in object_list %}
 		<tr class="{% cycle 'even' 'odd' %}">
-			<td><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
+			<td><a href="
+			  {% if request.user == foia.user and foia.status == "started" %}
+					{% url foia-update jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}
+				{% else %}
+					{% url foia-detail jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}
+				{% endif %}
+				">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 			<td><a href="{% url acct-profile foia.user.username %}">{{ foia.user }}</a></td>
 			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
-			<td>{{ foia.jurisdiction }}</td>
+			<td><a href="{% url jurisdiction-detail slug=foia.jurisdiction.slug,idx=foia.jurisdiction.pk %}">{{foia.jurisdiction}}</a></td>
 			<td>{% if foia.date_submitted %}
 						{{ foia.date_submitted|date }}
 					{% else %}

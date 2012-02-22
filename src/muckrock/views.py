@@ -7,7 +7,7 @@ from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.template import RequestContext, Context, loader
 
-from foia.models import FOIARequest, FOIADocument, FOIADocTopViewed
+from foia.models import FOIARequest, FOIADocument
 from news.models import Article
 
 def front_page(request):
@@ -24,7 +24,7 @@ def front_page(request):
     num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
     num_pages = FOIADocument.objects.aggregate(Sum('pages'))['pages__sum']
 
-    most_viewed_reqs = [tv.req for tv in FOIADocTopViewed.objects.select_related(depth=1).all()[:5]]
+    most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
     recent_articles = Article.objects.get_published()[:5]
     overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
 

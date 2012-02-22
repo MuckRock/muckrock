@@ -13,7 +13,9 @@ import re
 from operator import attrgetter
 
 from business_days.business_days import calendars
-from foia.models import FOIARequest, FOIACommunication, Agency, Jurisdiction
+from foia.models import FOIARequest, FOIACommunication
+from agency.models import Agency
+from jurisdiction.models import Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -194,7 +196,8 @@ class TestFOIARequestUnit(TestCase):
                 nose.tools.ok_(foia.status == 'done')
             else:
                 nose.tools.ok_(
-                        foia.status in ['started', 'submitted', 'processed', 'fix', 'rejected'])
+                        foia.status in ['started', 'submitted', 'processed',
+                                        'fix', 'rejected', 'payment'])
 
 
 class TestFOIAFunctional(TestCase):
@@ -314,10 +317,11 @@ class TestFOIAFunctional(TestCase):
         foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
                      'agency': agency.pk, 'combo-name': agency.name}
 
-        post_allowed(self.client, reverse('foia-update',
-                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                             'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data, 'http://testserver' +
+        post_allowed(self.client,
+                     reverse('foia-update',
+                             kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'idx': foia.pk, 'slug': foia.slug}),
+                     foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
@@ -334,10 +338,11 @@ class TestFOIAFunctional(TestCase):
         foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save as Draft',
                      'agency': agency.pk, 'combo-name': agency.name}
 
-        post_allowed(self.client, reverse('foia-update',
-                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                             'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data, 'http://testserver' +
+        post_allowed(self.client,
+                     reverse('foia-update',
+                             kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'idx': foia.pk, 'slug': foia.slug}),
+                     foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': foia.jurisdiction.slug,
                                                     'idx': foia.pk, 'slug': foia.slug}))
         foia = FOIARequest.objects.get(title='Test 6')
@@ -345,6 +350,22 @@ class TestFOIAFunctional(TestCase):
         nose.tools.eq_(foia.status, 'started')
         nose.tools.eq_(foia.agency.pk, 2)
 
+    def test_action_views(self):
+        """Test action views"""
+
+        foia = FOIARequest.objects.get(pk=1)
+        self.client.login(username='adam', password='abc')
+
+        get_allowed(self.client, reverse('foia-flag',
+                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'idx': foia.pk, 'slug': foia.slug}),
+                    ['foia/foiarequest_action.html', 'foia/base-submit.html'])
+
+        foia = FOIARequest.objects.get(pk=18)
+        get_allowed(self.client, reverse('foia-pay',
+                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'idx': foia.pk, 'slug': foia.slug}),
+                    ['registration/cc.html', 'registration/base.html'])
 
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""

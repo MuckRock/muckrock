@@ -12,8 +12,7 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote, \
-                        Jurisdiction, Agency, AgencyType, FOIADocTopViewed
+from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
@@ -139,6 +138,8 @@ class FOIARequestAdmin(admin.ModelAdmin):
                                    name='foia-admin-process'),
                                url(r'^followup/$', self.admin_site.admin_view(self.followup),
                                    name='foia-admin-followup'),
+                               url(r'^undated/$', self.admin_site.admin_view(self.undated),
+                                   name='foia-admin-undated'),
                                url(r'^send_update/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.send_update),
                                    name='foia-admin-send-update'),
@@ -167,6 +168,12 @@ class FOIARequestAdmin(admin.ModelAdmin):
         foias = list(FOIARequest.objects.get_followup())
         return self._list_helper(request, foias, 'Follow Up')
 
+    def undated(self, request):
+        """List all the requests that have undated documents or files"""
+        # pylint: disable=R0201
+        foias = list(FOIARequest.objects.get_undated())
+        return self._list_helper(request, foias, 'Undated')
+
     def send_update(self, request, idx):
         """Manually send the user an update notification"""
         # pylint: disable=R0201
@@ -191,28 +198,4 @@ class FOIARequestAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[idx]))
 
 
-class JurisdictionAdmin(admin.ModelAdmin):
-    """Jurisdiction admin options"""
-    list_display = ('name', 'level')
-    list_filter = ['level']
-    search_fields = ['name']
-
-
-class AgencyTypeAdmin(admin.ModelAdmin):
-    """AgencyType admin options"""
-    list_display = ('name', )
-    search_fields = ['name']
-
-
-class AgencyAdmin(admin.ModelAdmin):
-    """Agency admin options"""
-    list_display = ('name', 'jurisdiction')
-    list_filter = ['approved', 'jurisdiction', 'types']
-    search_fields = ['name']
-
-
 admin.site.register(FOIARequest,  FOIARequestAdmin)
-admin.site.register(Jurisdiction, JurisdictionAdmin)
-admin.site.register(AgencyType,   AgencyTypeAdmin)
-admin.site.register(Agency,       AgencyAdmin)
-admin.site.register(FOIADocTopViewed)
