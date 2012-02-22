@@ -6,7 +6,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail, send_mass_mail
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.template.loader import render_to_string
 
 from lamson.mail import MailResponse
@@ -19,7 +19,9 @@ import logging
 import os
 import re
 
+from agency.models import Agency
 from business_days.business_days import calendars
+from jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
@@ -77,6 +79,11 @@ class FOIARequestManager(ChainableManager):
         # Change to this after all follow ups have been resolved
         #return self.filter(status='processed', date_followup__lte=date.today())
 
+    def get_undated(self):
+        """Get requests which have an undated document or file"""
+        return self.filter((~Q(files=None)     & Q(files__date=None)) |
+                           (~Q(documents=None) & Q(documents__date=None))).distinct()
+
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -87,7 +94,7 @@ class FOIARequest(models.Model):
         ('started', 'Draft'),
         ('submitted', 'Processing'),
         ('processed', 'Awaiting Response'),
-        ('appealing', 'Awaiting Apeal'),
+        ('appealing', 'Awaiting Appeal'),
         ('fix', 'Fix Required'),
         ('payment', 'Payment Required'),
         ('rejected', 'Rejected'),
@@ -101,8 +108,8 @@ class FOIARequest(models.Model):
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
     status = models.CharField(max_length=10, choices=status)
-    jurisdiction = models.ForeignKey('Jurisdiction')
-    agency = models.ForeignKey('Agency', blank=True, null=True)
+    jurisdiction = models.ForeignKey(Jurisdiction)
+    agency = models.ForeignKey(Agency, blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
     date_done = models.DateField(blank=True, null=True, verbose_name='Date response received')
     date_due = models.DateField(blank=True, null=True)
@@ -120,6 +127,7 @@ class FOIARequest(models.Model):
     updated = models.BooleanField()
     email = models.EmailField(blank=True)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
+    times_viewed = models.IntegerField(default=0)
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -145,6 +153,10 @@ class FOIARequest(models.Model):
     def is_appealable(self):
         """Can this request be appealed by the user?"""
         return self.status == 'rejected'
+
+    def is_payable(self):
+        """Can this request be payed for by the user?"""
+        return self.status == 'payment' and self.price > 0
 
     def is_deletable(self):
         """Can this request be deleted?"""
@@ -487,7 +499,7 @@ class FOIARequest(models.Model):
                 reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
             (self.user == user and self.is_editable(),
                 reverse('foia-update', kwargs=kwargs), 'Update'),
-            (self.user == user and not self.is_editable(),
+            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
                 reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
             (self.user == user and self.is_deletable(),
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
@@ -497,6 +509,8 @@ class FOIARequest(models.Model):
                 reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
             (self.user == user and self.is_appealable(),
                 reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
+            (self.user == user and self.is_payable(),
+                reverse('foia-pay', kwargs=kwargs), 'Pay'),
             (self.public_documents(), '#', 'Embed this Document'),
             (user.is_authenticated() and self.user != user,
                 reverse('foia-follow', kwargs=kwargs),
@@ -509,6 +523,14 @@ class FOIARequest(models.Model):
         return [{'link': link, 'label': label,
                  'id': 'opener' if label == 'Embed this Document' else ''}
                 for pred, link, label in actions if pred]
+
+    def total_pages(self):
+        """Get the total number of pages for this request"""
+        # pylint: disable=E1101
+        pages = self.documents.aggregate(Sum('pages'))['pages__sum']
+        if pages is None:
+            return 0
+        return pages
 
 
     class Meta:
@@ -593,7 +615,7 @@ class FOIADocument(models.Model):
         match = re.match('^(\d+)-(.*)$', self.doc_id)
 
         if match and self.access == 'public':
-            return 'http://s3.documentcloud.org/documents/'\
+            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
             return '/static/img/report.png'
@@ -632,18 +654,6 @@ class FOIADocument(models.Model):
         verbose_name = 'FOIA DocumentCloud Document'
 
 
-class FOIADocTopViewed(models.Model):
-    """Keep track of the top 5 most viewed requests for the front page"""
-
-    req = models.ForeignKey(FOIARequest, null=True)
-    rank = models.PositiveSmallIntegerField(unique=True)
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['rank']
-        verbose_name = 'FOIA Top Viewed Request'
-
-
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
     # pylint: disable=E1101
@@ -680,115 +690,4 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-
-
-class Jurisdiction(models.Model):
-    """A jursidiction that you may file FOIA requests in"""
-
-    levels = ( ('f', 'Federal'), ('s', 'State'), ('l', 'Local') )
-
-    name = models.CharField(max_length=50)
-    # slug should be slugify(unicode(self))
-    slug = models.SlugField(max_length=55)
-    abbrev = models.CharField(max_length=5, blank=True)
-    level = models.CharField(max_length=1, choices=levels)
-    parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
-    hidden = models.BooleanField(default=False)
-    days = models.PositiveSmallIntegerField(blank=True, null=True)
-
-    def __unicode__(self):
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return '%s, %s' % (self.name, self.parent.abbrev)
-        else:
-            return self.name
-
-    def legal(self):
-        """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return self.parent.abbrev
-        else:
-            return self.abbrev
-
-    def get_days(self):
-        """How many days does an agency have to reply?"""
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return self.parent.days
-        else:
-            return self.days
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['name']
-
-
-class AgencyType(models.Model):
-    """Marks an agency as fufilling requests of this type for its jurisdiction"""
-
-    name = models.CharField(max_length=60)
-
-    def __unicode__(self):
-        return self.name
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['name']
-
-
-class Agency(models.Model):
-    """An agency for a particular jurisdiction that has at least one agency type"""
-
-    name = models.CharField(max_length=255)
-    jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
-    types = models.ManyToManyField(AgencyType, blank=True)
-    approved = models.BooleanField()
-    user = models.ForeignKey(User, null=True, blank=True)
-    appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    can_email_appeals = models.BooleanField()
-
-    address = models.TextField(blank=True)
-    email = models.EmailField(blank=True)
-    other_emails = fields.EmailsListField(blank=True, max_length=255)
-    contact_salutation = models.CharField(blank=True, max_length=30)
-    contact_first_name = models.CharField(blank=True, max_length=100)
-    contact_last_name = models.CharField(blank=True, max_length=100)
-    contact_title = models.CharField(blank=True, max_length=255)
-    url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
-    expires = models.DateField(blank=True, null=True)
-    phone = models.CharField(blank=True, max_length=20)
-    fax = models.CharField(blank=True, max_length=20)
-    notes = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return self.name
-
-    def normalize_fax(self):
-        """Return a fax number suitable for use in a faxaway email address"""
-
-        fax = ''.join(c for c in self.fax if c.isdigit())
-        if len(fax) == 10:
-            return '1' + fax
-        if len(fax) == 11 and fax[0] == '1':
-            return fax
-        return None
-
-    def get_email(self):
-        """Returns an email address to send to"""
-
-        if self.email:
-            return self.email
-        elif self.normalize_fax():
-            return '%s@fax2.faxaway.com' % self.normalize_fax()
-        else:
-            return ''
-
-    def get_other_emails(self):
-        """Returns other emails as a list"""
-        return fields.email_separator_re.split(self.other_emails)
-
-    class Meta:
-        # pylint: disable=R0903
-        verbose_name_plural = 'agencies'
 

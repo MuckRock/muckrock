@@ -4,7 +4,6 @@ Forms for FOIA application
 
 from django import forms
 from django.contrib import messages
-from django.contrib.localflavor.us.forms import USPhoneNumberField
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -16,10 +15,12 @@ import inspect
 import sys
 from datetime import datetime, date, timedelta
 
-from foia.models import FOIARequest, FOIACommunication, FOIANote, Jurisdiction, Agency, AgencyType
+from agency.models import Agency, AgencyType
+from foia.models import FOIARequest, FOIACommunication, FOIANote
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
+from jurisdiction.models import Jurisdiction
 from muckrock.fields import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
@@ -38,6 +39,9 @@ class FOIARequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(FOIARequestForm, self).__init__(*args, **kwargs)
+        if not (self.request and self.request.user.get_profile().can_embargo()):
+            del self.fields['embargo']
+            self.Meta.fields = ['title', 'agency']
 
     def clean(self):
         """agency is required, but must check combobox name field instead of drop down"""
@@ -56,17 +60,13 @@ class FOIARequestForm(forms.ModelForm):
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 }
 
-class FOIAEmbargoForm(FOIARequestForm):
+class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
 
-    def __init__(self, *args, **kwargs):
-        super(FOIAEmbargoForm, self).__init__(*args, **kwargs)
-        del self.fields['agency']
-        del self.fields['request']
-
-    def clean(self):
-        """Do not check agency since we deleted it in this sub form"""
-        return self.cleaned_data
+    embargo = forms.BooleanField(required=False,
+                                 help_text='Embargoing a request keeps it completely private from '
+                                           'other users until the embargo date you set.  '
+                                           'You may change this whenever you want.')
 
     class Meta:
         # pylint: disable=R0903
@@ -146,19 +146,6 @@ class FOIAAdminFixForm(forms.ModelForm):
         # pylint: disable=R0903
         model = FOIARequest
         fields = ['email', 'other_emails']
-
-class AgencyForm(forms.ModelForm):
-    """A form for an Agency"""
-
-    phone = USPhoneNumberField(required=False)
-    fax = USPhoneNumberField(required=False)
-
-    class Meta:
-        # pylint: disable=R0903
-        model = Agency
-        fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
-        widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
-                   'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
 
 class FOIAWizardParent(forms.Form):

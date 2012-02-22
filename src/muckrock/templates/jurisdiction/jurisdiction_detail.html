@@ -1,0 +1,204 @@
+
+{% extends "jurisdiction/base.html" %}
+{% load thumbnail %}
+
+{% block title %} {{jurisdiction.name}} {% endblock %}
+
+{% block content %}
+
+<h1>{{jurisdiction.name}}</h1>
+{% if jurisdiction.parent %}
+	<p>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
+{% endif %}
+
+{% if not jurisdiction.image %}
+	<div class="error">
+		<h4>Profile Under Construction</h4>
+		<em>
+		<strong>Editor's Note:</strong> We don't have a picture for this entity, yet, but you can help: Send us a link to a public domain (for example, a government photo or image licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons</a>) and if we use it, you'll get a free MuckRock request.  Send all submissions to <a href="mailto:Michael@MuckRock.com">Michael@MuckRock.com</a>.  <strong><br \><a href="http://www.muckrock.com/accounts/register/">Register for a MuckRock account</a></strong>
+		</em>
+	</div>
+{% endif %}
+
+<div class="left">
+	{% if jurisdiction.image %}
+		<img src="{% thumbnail jurisdiction.image 510x233 %}" alt="" title="" class="bordered alignleft" />
+	{% else %}
+		<img src="/static/img/under_construction.jpg" alt="" title="" class="bordered alignleft" />
+	{% endif %}
+	<p class = "quiet"><em>Image: {{jurisdiction.image_attr_line|safe}}</em></p>
+</div>
+
+<div>
+	<p><strong>Allowed Response Time</strong><br />
+		{% with jurisdiction.get_days as days %}
+			{% if days %}
+				{{days}} day{{days|pluralize}}
+			{% else %}
+				No limit
+			{% endif %}
+		{% endwith %}
+	</p>
+	<p><strong>Average Response Time:</strong><br />
+		{% with jurisdiction.average_response_time as average_response_time %}
+			{{average_response_time}} day{{average_response_time|pluralize}}
+		{% endwith %}
+	</p>
+	<p><strong>Agencies in Database:</strong><br />
+		 {{jurisdiction.agencies.count}}
+	</p>
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+<div>
+{{jurisdiction.public_notes|safe}}
+</div>
+
+<table class="data-table">
+	<tbody>
+		<tr class="odd">
+			<th width="30%">Requests Filed</th>
+			<td><strong>
+				<span class="request-stop">{{num_rejected}} Rejected</span><br />
+				<span class="request-wait">{{num_processed}} Awaiting Response</span> (<span class="request-stop">{{num_overdue}} Overdue</span>)<br />
+				<span class="request-wait">{{num_fix}} Requiring Action</span><br />
+				<span class="request-go">{{num_no_docs}} No Responsive Documents</span><br />
+				<span class="request-go">{{num_done}} Complete</span><br />
+				<span>{{num_submitted}} Total Filed</strong></span><br />
+			</td>
+		</tr>
+		{% if agency.exemptions %}
+		<tr class="even">
+			<th width="30%">Commonly Cited Exemptions<br />
+			<span class = "quiet small"><em>Based on user tags.</em></th>
+			<td>
+			  <ul>
+					{% for exmp in agency.exemptions %}
+						<li>{{exmp.name|capfirst}} <span class="quiet small">Tagged {{exmp.count}} time{{exmp.count|pluralize}}</span></li>
+					{% endfor %}
+				</ul>
+			</td>
+		</tr>
+		{% endif %}
+		<tr class="odd">
+			<th width="30%">Appeal Information<br />
+			<td>
+				{{num_appealing}} appeals awaiting response<br />
+				{{num_appeals_done}} succesful appeals<br />
+				{{num_appeals_rejected}} denied appeals<br />
+				{{num_appeals_response_time}} days average response time
+			</td>
+		</tr>
+	
+</tbody></table>
+
+<table class="data-table">
+	<tbody>
+			<tr class="odd">
+				<th>Agency</th><th>Requests</th><th>Average Response Time</th><th>Pages Released</th>
+			</tr>
+		{% for agency in jurisdiction.agencies.get_approved %}
+			<tr class="{% cycle 'even' 'odd' %}">
+				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
+				<td>{{agency.foiarequest_set.count}}</td>
+				<td>{% with agency.average_response_time as days %}{{days}} day{{days|pluralize}}{% endwith %}</td>
+				<td>{{agency.total_pages}}</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>
+
+
+{% for req in jurisdiction.interesting_requests %}
+  <div class="right">
+		<a href="{{ req.req.get_absolute_url }}">
+			{% if req.req.documents.all %}
+				<img src="{{ req.req.documents.all.0.get_medium_thumbnail }}" alt="{{req.req.documents.all.0.title}}" class="bordered" width="102" height="128" />
+			{% else %}
+				<img src="/static/img/report.png" alt="" class="bordered" width="102" />
+			{% endif %}
+		</a>
+	</div>
+
+	<div>
+		<h4>{{req.headline}}</h4>
+		<h3><a href="{{ req.req.get_absolute_url }}">{{ req.req.title }}</a></h3>
+		<span>
+			<em>Requested by <a href="{% url acct-profile req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
+			<p>{{ req.req.description }}</p>
+		</span>
+	</div>
+
+	<div class="clearer">&nbsp;</div>
+	<br />
+
+{% endfor %}
+
+{% if jurisdiction.level == "s" %}
+		<h3>Local Jurisdictions in {{jurisdiction.name}}</h3>
+		<p><em>MuckRock can currently submit requests in the following {{jurisdiction.name}} local jurisdictions. To add a jurisdiction, e-mail <a href"Info@MuckRock.com">info@muckrock.com</a>. Requests are typically fulfilled within 24 hours.</em>
+		<ul class="children">
+			{% for child in jurisdiction.children.all %}
+				<li><a href="{% url jurisdiction-detail slug=child.slug,idx=child.pk %}">{{child.name}}</a></li>
+			{% endfor %}
+		</ul>
+		<div class="clearer">&nbsp;</div>
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+
+	{% if user.is_staff %}
+		<p><a class="jqbutton" href="{% url admin:jurisdiction_jurisdiction_change jurisdiction.pk %}">Admin</a></p>
+	{% endif %}
+	<p><a class="jqbutton" href="{% url jurisdiction-flag slug=jurisdiction.slug,idx=jurisdiction.pk %}">Submit Correction</a></p>
+	<div class="content-separator"></div>
+
+	<div class="section">
+		<div class="section-title">Newly Submitted Requests</div>
+		<div class="section-content">
+			<ul class="nice-list">
+				{% for req in submitted_reqs %}
+				<li><a href="{{ req.get_absolute_url }}">{{ req.title }}</a>
+				    <span class="quiet small">{{ req.date_submitted|date:"SHORT_DATE_FORMAT" }}</span></li>
+				{% empty %}
+				<li>There are no requests at this time.</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+	<div class="section">
+
+		<div class="section-title">
+
+			<div class="left">Oldest Overdue Requests</div>
+			<div class="right"><img src="/static/img/icon-time.gif" width="14" height="14" alt="" /></div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+
+		<div class="section-content">
+
+			<ul class="nice-list">
+				{% for request in overdue_reqs %}
+				<li>
+					<div>
+						<a href="{{ request.get_absolute_url }}"><strong>{{ request.title }}</strong></a>
+					</div>
+					<div class="quiet">{{ request.date_due|timesince }} overdue</div>
+					<div class="clearer">&nbsp;</div>
+				</li>
+				{% empty %}
+				<li>There are no overdue requests at this time.</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+<div class="clearer">&nbsp;</div>
+
+{% endblock %}

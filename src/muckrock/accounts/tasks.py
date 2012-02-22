@@ -3,8 +3,8 @@
 Tasks for the account application
 """
 
-from celery.task import periodic_task
 from celery.schedules import crontab
+from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from sentry.client.handlers import SentryHandler
@@ -13,7 +13,8 @@ import logging
 from datetime import date, timedelta
 
 from accounts.models import Statistics
-from foia.models import FOIARequest, FOIADocument, Agency
+from agency.models import Agency
+from foia.models import FOIARequest, FOIADocument
 
 logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)

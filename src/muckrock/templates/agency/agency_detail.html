@@ -1,0 +1,199 @@
+
+{% extends "agency/base.html" %}
+{% load thumbnail %}
+
+{% block title %} {{agency.name}} {% endblock %}
+
+{% block content %}
+
+<h1>{{agency.name}}</h1>
+
+<p class="quiet">
+	A <a href="{% url jurisdiction-detail slug=agency.jurisdiction.slug,idx=agency.jurisdiction.pk %}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
+</p>
+
+{% if not agency.image %}
+	<div class="error">
+		<h4>Profile Under Construction</h4>
+		<em>
+		<strong>Editor's Note:</strong> We don't have a picture for this entity, yet, but you can help: Send us a link to a public domain (for example, a government photo or image licensed under <a href="http://creativecommons.org/licenses/by/3.0/">Creative Commons</a>) and if we use it, you'll get a free MuckRock request.  Send all submissions to <a href="mailto:Michael@MuckRock.com">Michael@MuckRock.com</a>.  <strong><br \><a href="http://www.muckrock.com/accounts/register/">Register for a MuckRock account</a></strong>
+		</em>
+	</div>
+{% endif %}
+
+<div class="left">
+	{% if agency.image %}
+		<img src="{% thumbnail agency.image 510x233 %}" alt="" title="" class="bordered alignleft" />
+	{% else %}
+		<img src="/static/img/under_construction.jpg" alt="" title="" class="bordered alignleft" />
+	{% endif %}
+	<p class = "quiet"><em>Image: {{agency.image_attr_line|safe}}</em></p>
+
+</div>
+
+<div>
+	<p><strong>Mailing Address:</strong><br />
+	  {% if agency.address %}
+		  {{ agency.address|linebreaks }} 
+			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
+		{% else %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+		{% endif %}
+	</p>
+	<p><strong>E-mail Address:</strong><br />
+	  {% if agency.email and request.user.get_profile.can_view_emails %}
+		  {{agency.email}}
+		{% endif %}
+	  {% if agency.email and not request.user.get_profile.can_view_emails %}
+		  {% if request.user.is_anonymous %}
+				<a href="{% url acct-register-pro %}"><em class="small">(Available for Pro Users)</em></a>
+			{% else %}
+				<a href="{% url acct-manage-subsc %}"><em class="small">(Available for Pro Users)</em></a>
+			{% endif %}
+		{% endif %}
+	  {% if not agency.email %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+		{% endif %}
+	</p>
+	<p><strong>Fax Number:</strong><br />
+	  {% if agency.fax %}
+		  {{agency.fax}}
+		{% else %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+		{% endif %}
+	</p>
+	<p><strong>Average Response Time:</strong><br />
+		{% with agency.average_response_time as average_response_time %}
+			{{average_response_time}} day{{average_response_time|pluralize}}
+		{% endwith %}
+	</p>
+</div>
+
+<div class="clearer">&nbsp;</div>
+
+
+<div>
+{{agency.public_notes|safe}}
+</div>
+
+<table class="data-table">
+	<tbody>
+		<tr class="odd">
+			<th width="30%">Requests Filed</th>
+			<td><strong>
+				<span class="request-stop">{{num_rejected}} Rejected</span><br />
+				<span class="request-wait">{{num_processed}} Awaiting Response</span> (<span class="request-stop">{{num_overdue}} Overdue</span>)<br />
+				<span class="request-wait">{{num_fix}} Requiring Action</span><br />
+				<span class="request-go">{{num_no_docs}} No Responsive Documents</span><br />
+				<span class="request-go">{{num_done}} Complete</span><br />
+				<span>{{num_submitted}} Total Filed</strong></span><br />
+			</td>
+		</tr>
+		{% if agency.exemptions %}
+		<tr class="even">
+			<th width="30%">Commonly Cited Exemptions<br />
+			<span class = "quiet small"><em>Based on user tags.</em></th>
+			<td>
+			  <ul>
+					{% for exmp in agency.exemptions %}
+						<li>{{exmp.name|capfirst}} <span class="quiet small">Tagged {{exmp.count}} time{{exmp.count|pluralize}}</span></li>
+					{% endfor %}
+				</ul>
+			</td>
+		</tr>
+		{% endif %}
+		<tr class="odd">
+			<th width="30%">Appeal Information<br />
+			<td>
+				{{num_appealing}} appeals awaiting response<br />
+				{{num_appeals_done}} succesful appeals<br />
+				{{num_appeals_rejected}} denied appeals<br />
+				{{num_appeals_response_time}} days average response time
+			</td>
+		</tr>
+	
+</tbody></table>
+
+{% for req in agency.interesting_requests %}
+  <div class="right">
+		<a href="{{ req.req.get_absolute_url }}">
+			{% if req.req.documents.all %}
+				<img src="{{ req.req.documents.all.0.get_medium_thumbnail }}" alt="{{req.req.documents.all.0.title}}" class="bordered" width="102" height="128" />
+			{% else %}
+				<img src="/static/img/report.png" alt="" class="bordered" width="102" />
+			{% endif %}
+		</a>
+	</div>
+
+	<div>
+		<h4>{{req.headline}}</h4>
+		<h3><a href="{{ req.req.get_absolute_url }}">{{ req.req.title }}</a></h3>
+		<span>
+			<em>Requested by <a href="{% url acct-profile req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
+			<p>{{ req.req.description }}</p>
+		</span>
+	</div>
+
+	<div class="clearer">&nbsp;</div>
+	<br />
+
+{% endfor %}
+
+{% endblock %}
+
+{% block sidebar %}
+
+	{% if user.is_staff %}
+		<p><a class="jqbutton" href="{% url admin:agency_agency_change agency.pk %}">Admin</a></p>
+	{% endif %}
+	{% if user.is_athenticated %}
+		<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
+		<div class="content-separator"></div>
+	{% endif %}
+
+	<div class="section">
+		<div class="section-title">Newly Submitted Requests</div>
+		<div class="section-content">
+			<ul class="nice-list">
+				{% for req in submitted_reqs %}
+				<li><a href="{{ req.get_absolute_url }}">{{ req.title }}</a>
+				    <span class="quiet small">{{ req.date_submitted|date:"SHORT_DATE_FORMAT" }}</span></li>
+				{% empty %}
+				<li>There are no requests at this time.</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+	<div class="section">
+
+		<div class="section-title">
+
+			<div class="left">Oldest Overdue Requests</div>
+			<div class="right"><img src="/static/img/icon-time.gif" width="14" height="14" alt="" /></div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+
+		<div class="section-content">
+
+			<ul class="nice-list">
+				{% for request in overdue_reqs %}
+				<li>
+					<div>
+						<a href="{{ request.get_absolute_url }}"><strong>{{ request.title }}</strong></a>
+					</div>
+					<div class="quiet">{{ request.date_due|timesince }} overdue</div>
+					<div class="clearer">&nbsp;</div>
+				</li>
+				{% empty %}
+				<li>There are no overdue requests at this time.</li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+
+<div class="clearer">&nbsp;</div>
+
+{% endblock %}
