@@ -29,7 +29,7 @@ def handle_request(request, mail_id):
 
     post = request.POST
     if not _verify(post):
-        return HttpResponseForbidden
+        return HttpResponseForbidden()
     from_ = post.get('from')
 
     try:
@@ -62,9 +62,9 @@ def handle_request(request, mail_id):
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         foia.email = from_email
-        foia.other_emails = ','.join(email for email
+        foia.other_emails = ','.join(email.strip() for email
                              in post.get('To', '').split(',') + post.get('Cc', '').split(',')
-                             if not email.endswith('muckrock.com'))
+                             if email and not email.endswith('muckrock.com'))
         foia.save()
         foia.update(comm.anchor())
 
@@ -83,11 +83,14 @@ def handle_request(request, mail_id):
 
     return HttpResponse('OK')
 
+@csrf_exempt
 def fax(request):
     """Handle fax confirmations"""
 
     if not _verify(request.POST):
         return HttpResponseForbidden
+
+    _forward(request.POST, request.FILES)
     return HttpResponse('OK')
 
 def _verify(post):
@@ -107,7 +110,8 @@ def _forward(post, files, title=''):
     else:
         subject = post.get('subject')
 
-    email = EmailMessage(subject, post.get('body-plain'), post.get('From'), 'requests@muckrock.com')
+    email = EmailMessage(subject, post.get('body-plain'),
+                         post.get('From'), ['requests@muckrock.com'])
     for file_ in files.itervalues():
         email.attach(file_.name, file_.read(), file_.content_type)
 
