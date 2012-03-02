@@ -19,7 +19,7 @@ from email.utils import parseaddr
 
 from foia.models import FOIARequest, FOIACommunication, FOIADocument, FOIAFile
 from muckrock.foia.tasks import upload_document_cloud
-from settings import MAILGUN_API_KEY
+from settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ def _verify(post):
     token = post.get('token')
     timestamp = post.get('timestamp')
     signature = post.get('signature')
-    return (signature == hmac.new(key=MAILGUN_API_KEY,
+    return (signature == hmac.new(key=MAILGUN_ACCESS_KEY,
                                   msg='%s%s' % (timestamp, token),
                                   digestmod=hashlib.sha256).hexdigest()) \
            and int(timestamp) + 300 > time.time()

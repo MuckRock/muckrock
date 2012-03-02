@@ -13,7 +13,7 @@ import os
 import time
 
 from foia.models import FOIARequest
-from settings import MAILGUN_API_KEY
+from settings import MAILGUN_ACCESS_KEY
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
@@ -33,7 +33,7 @@ class TestMailgunViews(TestCase):
         """Add mailgun signature to data"""
         token = 'token'
         timestamp = int(time.time())
-        signature = hmac.new(key=MAILGUN_API_KEY,
+        signature = hmac.new(key=MAILGUN_ACCESS_KEY,
                              msg='%s%s' % (timestamp, token),
                              digestmod=hashlib.sha256).hexdigest()
         data['token'] = token
