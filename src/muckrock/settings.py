@@ -124,6 +124,8 @@ INSTALLED_APPS = (
     'sentry',
     'sentry.client',
     'dbsettings',
+    'storages',
+    #'staticfiles',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
@@ -175,6 +177,10 @@ relay = Relay(host=LAMSON_RELAY_HOST, port=LAMSON_RELAY_PORT, debug=1)
 LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+STATIC_URL = '/static/'
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
