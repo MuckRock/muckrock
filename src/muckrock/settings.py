@@ -176,6 +176,9 @@ LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+MAILGUN_SERVER_NAME = 'requests.muckrock.com'
+
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 # ensure we havent already registered the handler
