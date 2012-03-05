@@ -109,6 +109,7 @@ def _forward(post, files, title=''):
         subject = '%s: %s' % (title, post.get('subject'))
     else:
         subject = post.get('subject')
+    subject = subject.replace('\r', '').replace('\n', '')
 
     email = EmailMessage(subject, post.get('body-plain'),
                          post.get('From'), ['requests@muckrock.com'])
