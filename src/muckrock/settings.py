@@ -182,6 +182,9 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 STATIC_URL = '/static/'
 
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+MAILGUN_SERVER_NAME = 'requests.muckrock.com'
+
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 # ensure we havent already registered the handler
