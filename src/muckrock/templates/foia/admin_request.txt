@@ -1,14 +1,10 @@
 {% autoescape off %}
-Response received from: {{ message.from }} for request {{ request.title }} - {{ request.mail_id }}
+Response received from: {{ post.From }} for request {{ request.title }} - {{ request.mail_id }}
 
 Please set the status!
 Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
 
 {% now "F j, Y" %}
 {{ request.communications.reverse.0.communication }}
-
-{% for str in attachments %}
-{{ str }}
-{% endfor %}
 
 {% endautoescape %}

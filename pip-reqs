@@ -1,4 +1,4 @@
-Django==1.2
+Django==1.2.7
 django-nose==0.0.3
 nose==0.11.3
 psycopg2==2.0.14
@@ -23,9 +23,10 @@ lamson==1.1
 django-taggit==0.9.3
 django-sentry==1.8.5
 pascha==0.5
--e git://github.com/alfredo/django-dbsettings.git@c6aeddbfa91eb1ea527bd91dd9ab19c38689223a#egg=dbsettings-0.1_alpha-py2.6-dev
+#-e git://github.com/alfredo/django-dbsettings.git@c6aeddbfa91eb1ea527bd91dd9ab19c38689223a#egg=dbsettings-0.1_alpha-py2.6-dev
 stripe==1.5.18
 redis==2.4.10
 django-storages==1.1.4
 boto==2.2.2
 django-staticfiles==1.2.1
+django-mailgun==0.2
