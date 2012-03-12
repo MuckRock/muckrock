@@ -127,8 +127,11 @@ def update_cc(request):
         form = CreditCardForm()
 
     card = request.user.get_profile().get_cc()
-    if card:
+    if card and card.card_type and card.last4:
         desc = 'Current card on file: %s ending in %s' % (card.card_type, card.last4)
+    elif card and (not card.card_type or not card.last4):
+        logger.warn('%s has a card with missing information', request.user.username)
+        desc = 'No card currently on file'
     else:
         desc = 'No card currently on file'
 
@@ -207,7 +210,7 @@ def buy_requests(request):
                 user_profile.pay(form, 2000, 'Charge for 5 requests')
                 user_profile.num_requests += 5
                 user_profile.save()
-                logger.info('%s has purchased requests' % (request.user.username))
+                logger.info('%s has purchased requests',  request.user.username)
                 return HttpResponseRedirect(reverse('acct-my-profile'))
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
