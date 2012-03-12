@@ -19,7 +19,7 @@ from south.modelsinspector import add_introspection_rules
 
 add_introspection_rules([], ["^fields\.EmailsListField"])
 
-email_separator_re = re.compile(r'[^\w\.\-\+@_]+')
+email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 
 def _is_valid_email(email):
     """Validates an email address"""
