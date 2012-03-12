@@ -124,6 +124,7 @@ INSTALLED_APPS = (
     'sentry',
     'sentry.client',
     'dbsettings',
+    'storages',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.rodeo',
@@ -175,6 +176,8 @@ relay = Relay(host=LAMSON_RELAY_HOST, port=LAMSON_RELAY_PORT, debug=1)
 LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
