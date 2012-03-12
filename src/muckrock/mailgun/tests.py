@@ -130,8 +130,9 @@ class TestMailgunViews(TestCase):
             nose.tools.eq_(foia.files.all()[0].ffile.name, 'foia_files/data.xls')
 
         finally:
-            os.remove('data.xls')
             foia.files.all()[0].delete()
+            os.remove('data.xls')
+            os.remove('static/foia_files/data.xls')
 
     def test_fax(self):
         """Test a fax confirmation"""
