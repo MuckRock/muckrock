@@ -127,11 +127,8 @@ def update_cc(request):
         form = CreditCardForm()
 
     card = request.user.get_profile().get_cc()
-    if card and card.card_type and card.last4:
-        desc = 'Current card on file: %s ending in %s' % (card.card_type, card.last4)
-    elif card and (not card.card_type or not card.last4):
-        logger.warn('%s has a card with missing information', request.user.username)
-        desc = 'No card currently on file'
+    if card:
+        desc = 'Current card on file: %s ending in %s' % (card.type, card.last4)
     else:
         desc = 'No card currently on file'
 
