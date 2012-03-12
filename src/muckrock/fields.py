@@ -5,6 +5,7 @@ EmailsListField - http://djangosnippets.org/snippets/1958/
 GroupedModelChoiceField - http://djangosnippets.org/snippets/1968/
 """
 
+import os
 import re
 from calendar import monthrange
 from datetime import date
@@ -12,7 +13,7 @@ from itertools import groupby
 
 from django import forms
 from django.core.validators import email_re
-from django.db.models import CharField
+from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
 from south.modelsinspector import add_introspection_rules
@@ -25,6 +26,23 @@ def _is_valid_email(email):
     """Validates an email address"""
     return email_re.match(email)
 
+
+# https://code.djangoproject.com/ticket/11027
+# edited - only filename is stored in db
+def filefield_maxlength_validator(value):
+    """"Check if absolute file path can fit in database table"""
+
+    filename = value.field.generate_filename(value.instance, value.name)
+    bytes_filename = len(filename.encode('utf-8')) # filename length in bytes
+
+    # File path length should fit in table cell
+    if bytes_filename > value.field.max_length:
+        if os.path.isfile(value.path):
+            os.remove(value.path)
+        raise forms.ValidationError(_(u'File name too long.'))
+    return value
+
+FileField.default_validators = FileField.default_validators[:] + [filefield_maxlength_validator]
 
 class EmailsListField(CharField):
     """Multi email field"""
