@@ -16,7 +16,7 @@ cssutils==0.9.7b3
 celery==2.4.5
 django-celery==2.4.2
 gdata==2.0.11
-easy-thumbnails==1.0-alpha-8
+easy-thumbnails==1.0-alpha-21
 django-pingback==0.3
 BeautifulSoup==3.1.0.1
 lamson==1.1
