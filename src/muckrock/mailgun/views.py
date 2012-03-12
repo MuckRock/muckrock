@@ -88,7 +88,7 @@ def fax(request):
     """Handle fax confirmations"""
 
     if not _verify(request.POST):
-        return HttpResponseForbidden
+        return HttpResponseForbidden()
 
     _forward(request.POST, request.FILES)
     return HttpResponse('OK')
