@@ -93,12 +93,12 @@
 						<div class="left text-center">
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
-							<a href="/static/{{comm.document}}">Download</a>
+							<a href="{{comm.document.url}}">Download</a>
 						</div>
 					{% else %}
 						<div class="left text-center">
 							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
-							<a href="/static/{{comm.document}}">Download</a>
+							<a href="{{comm.document.url}}">Download</a>
 						</div>
 						{% if comm.doc_id %}
 							<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
@@ -110,8 +110,8 @@
 				{# file #}
 				{% if comm.class_name == "FOIAFile" %}
 					<div class="left text-center">
-						<a href="/static/{{comm.ffile}}"><img src="/static/img/report.png" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
-						<a href="/static/{{comm.ffile}}">Download</a>
+						<a href="{{comm.ffile.url}}"><img src="/static/img/report.png" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
+						<a href="{{comm.ffile.url}}">Download</a>
 					</div>
 				{% endif %}
 				{# html communication #}
