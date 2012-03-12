@@ -178,6 +178,7 @@ LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
 EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
