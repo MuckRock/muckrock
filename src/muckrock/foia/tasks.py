@@ -6,7 +6,6 @@ from celery.task import periodic_task, task
 from django.core import management
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from sentry.client.handlers import SentryHandler
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
                      GA_USERNAME, GA_PASSWORD, GA_ID
 
@@ -27,8 +26,6 @@ foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)
-if SentryHandler not in [x.__class__ for x in logger.handlers]:
-    logger.addHandler(SentryHandler())
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""

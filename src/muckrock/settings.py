@@ -6,7 +6,6 @@ import os
 from lamson.server import Relay
 
 import logging
-from sentry.client.handlers import SentryHandler
 
 DEBUG = True
 TEMPLATE_DEBUG = True
@@ -121,8 +120,6 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'pingback',
     'taggit',
-    'sentry',
-    'sentry.client',
     'dbsettings',
     'storages',
     'muckrock.accounts',
@@ -185,14 +182,6 @@ MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-# ensure we havent already registered the handler
-if SentryHandler not in [x.__class__ for x in logger.handlers]:
-    logger.addHandler(SentryHandler())
-
-    # Add StreamHandler to sentry's default so you can catch missed exceptions
-    logger = logging.getLogger('sentry.errors')
-    logger.propagate = False
-    logger.addHandler(logging.StreamHandler())
 
 # pylint: disable=W0611
 import monkey
