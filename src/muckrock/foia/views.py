@@ -32,7 +32,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFi
 from foia.models import FOIARequest, FOIADocument, FOIACommunication
 from jurisdiction.models import Jurisdiction
 from tags.models import Tag
-from settings import STRIPE_SECRET_KEY
+from settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -382,7 +382,8 @@ def pay_request(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'registration/cc.html',
         extra_context = lambda f: {'desc': 'You will be charged $%.2f for this request' %
-                                   (f.price * Decimal('1.05'))})
+                                   (f.price * Decimal('1.05')),
+                                   'pub_key': STRIPE_PUB_KEY})
     return _foia_action(request, jurisdiction, slug, idx, action)
 
 @login_required
