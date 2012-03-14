@@ -7,7 +7,6 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.db.models import Sum
-from sentry.client.handlers import SentryHandler
 
 import logging
 from datetime import date, timedelta
@@ -18,8 +17,6 @@ from foia.models import FOIARequest, FOIADocument
 
 logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)
-if SentryHandler not in [x.__class__ for x in logger.handlers]:
-    logger.addHandler(SentryHandler())
 
 @periodic_task(run_every=crontab(hour=0, minute=30))
 def store_statstics():
