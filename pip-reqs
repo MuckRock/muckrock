@@ -21,7 +21,6 @@ django-pingback==0.3
 BeautifulSoup==3.1.0.1
 lamson==1.1
 django-taggit==0.9.3
-django-sentry==1.8.5
 pascha==0.5
 #-e git://github.com/alfredo/django-dbsettings.git@c6aeddbfa91eb1ea527bd91dd9ab19c38689223a#egg=dbsettings-0.1_alpha-py2.6-dev
 stripe==1.5.18
