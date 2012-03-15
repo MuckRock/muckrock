@@ -128,7 +128,6 @@ def set_top_viewed_reqs():
             pass
 
 
-
 @periodic_task(run_every=crontab(hour=1, minute=0))
 def update_index():
     """Update the search index every day at 1AM"""
@@ -159,8 +158,20 @@ def embargo_warn():
 def set_all_document_cloud_pages():
     """Try and set all document cloud documents that have no page count set"""
     # pylint: disable=E1101
+    logger.info('Setting document cloud pages, %d documents with 0 pages',
+                FOIADocument.objects.filter(pages=0).count())
     for doc in FOIADocument.objects.filter(pages=0):
         set_document_cloud_pages.apply_async(args=[doc.pk])
+
+
+@periodic_task(run_every=crontab(hour=0, minute=20))
+def retry_stuck_documents():
+    """Reupload all document cloud documents which are stuck"""
+    # pylint: disable=E1101
+    logger.info('Reupload documents, %d documents are stuck',
+                FOIADocument.objects.filter(doc_id='').count())
+    for doc in FOIADocument.objects.filter(doc_id=''):
+        upload_document_cloud.apply_async(args=[doc.pk, False])
 
 
 def process_failure_signal(exception, traceback, sender, task_id,
