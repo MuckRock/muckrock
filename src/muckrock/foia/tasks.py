@@ -59,7 +59,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         params['_method'] = str('put')
         url = '/documents/%s.json' % doc.doc_id
     else:
-        params['file'] = open(str(doc.document.path), 'rb')
+        params['file'] = doc.document.url
         url = '/upload.json'
 
     opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
