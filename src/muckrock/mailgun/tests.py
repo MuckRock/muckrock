@@ -132,7 +132,8 @@ class TestMailgunViews(TestCase):
         finally:
             foia.files.all()[0].delete()
             os.remove('data.xls')
-            os.remove('static/foia_files/data.xls')
+            if os.path.exists('static/foia_files/data.xls'):
+                os.remove('static/foia_files/data.xls')
 
     def test_fax(self):
         """Test a fax confirmation"""

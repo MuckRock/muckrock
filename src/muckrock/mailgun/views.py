@@ -64,7 +64,7 @@ def handle_request(request, mail_id):
         foia.email = from_email
         foia.other_emails = ','.join(email.strip() for email
                              in post.get('To', '').split(',') + post.get('Cc', '').split(',')
-                             if email and not email.endswith('muckrock.com'))
+                             if email and not email.strip().endswith('muckrock.com'))
         foia.save()
         foia.update(comm.anchor())
 
