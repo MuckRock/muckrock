@@ -349,7 +349,7 @@ def pay_request(request, jurisdiction, slug, idx):
     def form_actions(request, foia, form):
         """Pay for request"""
         try:
-            amount = int(foia.price * 1.05 * 100)
+            amount = int(foia.price * 105)
             request.user.get_profile().pay(form, amount,
                                            'Charge for request %s' % foia.title)
 
@@ -359,7 +359,7 @@ def pay_request(request, jurisdiction, slug, idx):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
             logger.info('%s has paid %0.2f for request %s' %
-                        (request.user.username, amount/100.0, foia.title))
+                        (request.user.username, amount/100, foia.title))
             messages.success(request, 'Your payment was successful')
             return HttpResponseRedirect(reverse('acct-my-profile'))
         except stripe.CardError as exc:
