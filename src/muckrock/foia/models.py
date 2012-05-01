@@ -15,6 +15,7 @@ from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
+import dbsettings
 import logging
 import os
 import re
@@ -25,9 +26,16 @@ from jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
+from values import TextValue
 import fields
 
 logger = logging.getLogger(__name__)
+
+class EmailOptions(dbsettings.Group):
+    """DB settings for sending email"""
+    email_footer = TextValue('email footer')
+options = EmailOptions()
+
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
@@ -320,7 +328,8 @@ class FOIARequest(models.Model):
                      'title': self.title,
                      'status': self.get_status_display(),
                      'link': link,
-                     'follow': self.user != profile.user})
+                     'follow': self.user != profile.user,
+                     'footer': options.email_footer})
                 send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                                   msg, 'info@muckrock.com', [profile.user.email]))
 
