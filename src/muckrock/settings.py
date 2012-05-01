@@ -179,9 +179,6 @@ THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = False
 
-EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
-MAILGUN_SERVER_NAME = 'requests.muckrock.com'
-
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
