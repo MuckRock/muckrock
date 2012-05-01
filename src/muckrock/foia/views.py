@@ -352,10 +352,12 @@ def pay_request(request, jurisdiction, slug, idx):
             amount = int(foia.price * 105)
             request.user.get_profile().pay(form, amount,
                                            'Charge for request %s' % foia.title)
+            foia.status = 'processed'
+            foia.save()
 
             send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
                       render_to_string('foia/admin_payment.txt',
-                                       {'request': foia, 'amount': amount}),
+                                       {'request': foia, 'amount': amount / 100.0}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
             logger.info('%s has paid %0.2f for request %s' %
