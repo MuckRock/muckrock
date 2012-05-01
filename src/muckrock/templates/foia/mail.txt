@@ -15,3 +15,7 @@ questions about our service!
 
 Sincerely,
 The MuckRock Team
+
+
+
+{{footer}}
