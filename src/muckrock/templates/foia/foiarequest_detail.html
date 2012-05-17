@@ -10,7 +10,7 @@
 	<h2>{{object.title}}</h2>
 	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
 	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
-	for {% if object.agency %}the <a href="{% url agency-detail jurisdiction=object.agency.jurisdiction.slug,slug=object.agency.slug,idx=object.agency.pk %}">{{object.agency}}</a> of {% endif %}<a href="{% url jurisdiction-detail slug=object.jurisdiction.slug,idx=object.jurisdiction.pk %}">{{object.jurisdiction}}</a>
+	for {% if object.agency %}the {{ object.agency.link_display|safe }} of {% endif %}<a href="{% url jurisdiction-detail slug=object.jurisdiction.slug,idx=object.jurisdiction.pk %}">{{object.jurisdiction}}</a>
 	{% if object.date_done %} and {% if object.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{object.date_done|date}}{%endif%}
 	</p>
 	{% if object.is_embargo and not object.embargo_date %}

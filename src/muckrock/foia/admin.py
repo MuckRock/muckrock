@@ -13,6 +13,7 @@ from django.views.generic import simple
 from datetime import date, timedelta
 
 from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
+from agency.models import Agency
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
@@ -76,6 +77,21 @@ class FOIANoteInline(admin.TabularInline):
     extra = 1
 
 
+class AgencyChoiceField(forms.models.ModelChoiceField):
+    """Agency choice field includes jurisdiction in label"""
+    def label_from_instance(self, obj):
+        return '%s - %s' % (obj.name, obj.jurisdiction.name)
+
+
+class FOIARequestAdminForm(forms.ModelForm):
+    """Form to include custom agency choice field"""
+    agency = AgencyChoiceField(queryset=Agency.objects.all().order_by('name'))
+
+    class Meta:
+        # pylint: disable=R0903
+        model = FOIARequest
+
+
 class FOIARequestAdmin(admin.ModelAdmin):
     """FOIA Request admin options"""
     prepopulated_fields = {'slug': ('title',)}
@@ -85,6 +101,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     readonly_fields = ['mail_id']
     inlines = [FOIACommunicationInline, FOIADocumentInline, FOIAFileInline, FOIANoteInline]
     save_on_top = True
+    form = FOIARequestAdminForm
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
