@@ -98,6 +98,13 @@ class Agency(models.Model, RequestHelper):
         """Returns other emails as a list"""
         return fields.email_separator_re.split(self.other_emails)
 
+    def link_display(self):
+        """Returns link if approved"""
+        if self.approved:
+            return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
+        else:
+            return self.name
+
     class Meta:
         # pylint: disable=R0903
         verbose_name_plural = 'agencies'
