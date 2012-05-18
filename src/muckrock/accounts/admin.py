@@ -46,8 +46,13 @@ class StatisticsAdmin(admin.ModelAdmin):
 
         return response
 
+
+class ProfileAdmin(admin.ModelAdmin):
+    """Profile admin options"""
+    search_fields = ('user__username', 'user__first_name', 'user__last_name')
+
 admin.site.register(Statistics, StatisticsAdmin)
-admin.site.register(Profile)
+admin.site.register(Profile, ProfileAdmin)
 
 UserAdmin.list_display += ('date_joined',)
 admin.site.unregister(User)
