@@ -187,4 +187,7 @@ import monkey
 
 # pylint: disable=W0401
 # pylint: disable=W0614
-from local_settings import *
+try:
+    from local_settings import *
+except ImportError:
+    pass
