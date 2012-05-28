@@ -9,8 +9,9 @@ coverage.sh
 whoosh
 .coverage
 htmlcov
-src/muckrock/static/foia_*
-src/muckrock/static/news_*
-src/muckrock/static/agency_*
-src/muckrock/static/jurisdiction_*
+static/foia_*
+static/news_*
+static/agency_*
+static/jurisdiction_*
 gitfix
+apache
