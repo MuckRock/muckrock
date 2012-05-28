@@ -92,7 +92,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-ROOT_URLCONF = 'muckrock.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -122,14 +122,14 @@ INSTALLED_APPS = (
     'taggit',
     'dbsettings',
     'storages',
-    'muckrock.accounts',
-    'muckrock.foia',
-    'muckrock.rodeo',
-    'muckrock.news',
-    'muckrock.templatetags',
-    'muckrock.tags',
-    'muckrock.agency',
-    'muckrock.jurisdiction',
+    'accounts',
+    'foia',
+    'rodeo',
+    'news',
+    'templatetags',
+    'tags',
+    'agency',
+    'jurisdiction',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
@@ -148,7 +148,7 @@ BROKER_VHOST = "muckrock_vhost"
 CELERY_RESULT_BACKEND = "amqp"
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
-AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
+AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
 
 TEST_RUNNER = 'django_nose.run_tests'
 
