@@ -152,7 +152,7 @@ AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBacke
 
 TEST_RUNNER = 'django_nose.run_tests'
 
-HAYSTACK_SITECONF = 'muckrock.search_sites'
+HAYSTACK_SITECONF = 'search_sites'
 HAYSTACK_SEARCH_ENGINE = 'whoosh'
 HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 
