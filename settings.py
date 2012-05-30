@@ -200,8 +200,8 @@ try:
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_SECURE_URLS = False
 
-    STRIPE_SECRET_KEY = os.environ['STRIP_SECRET_KEY']
-    STRIPE_PUB_KEY = os.environ['STRIP_PUB_KEY']
+    STRIPE_SECRET_KEY = os.environ['STRIPE_SECRET_KEY']
+    STRIPE_PUB_KEY = os.environ['STRIPE_PUB_KEY']
 
     MAILGUN_ACCESS_KEY = os.environ['MAILGUN_ACCESS_KEY']
     MAILGUN_SERVER_NAME = 'requests.muckrock.com'
