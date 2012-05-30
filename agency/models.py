@@ -2,13 +2,15 @@
 Models for the Agency application
 """
 
+from __future__ import absolute_import
+
 from django.contrib.auth.models import User
 from django.db import models
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock.models import ChainableManager
+from models import ChainableManager
 import fields
 
 class AgencyType(models.Model):

@@ -2,6 +2,8 @@
 Forms for FOIA application
 """
 
+from __future__ import absolute_import
+
 from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -21,7 +23,7 @@ from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
 from jurisdiction.models import Jurisdiction
-from muckrock.fields import GroupedModelChoiceField
+from fields import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
