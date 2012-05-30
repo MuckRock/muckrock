@@ -191,3 +191,13 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+# try to import heroku settings from environment vars
+try:
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    AWS_STORAGE_BUCKET_NAME = 'muckrock'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_SECURE_URLS = False
+except KeyError:
+    pass
