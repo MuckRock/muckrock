@@ -2,6 +2,8 @@
 Models for the FOIA application
 """
 
+from __future__ import absolute_import
+
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mail, send_mass_mail
 from django.core.urlresolvers import reverse
@@ -23,7 +25,7 @@ import re
 from agency.models import Agency
 from business_days.business_days import calendars
 from jurisdiction.models import Jurisdiction
-from muckrock.models import ChainableManager
+from models import ChainableManager
 from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
 from tags.models import Tag, TaggedItemBase
 from values import TextValue
