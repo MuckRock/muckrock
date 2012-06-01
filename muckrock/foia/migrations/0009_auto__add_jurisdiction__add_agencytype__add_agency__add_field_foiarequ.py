@@ -52,14 +52,14 @@ class Migration(SchemaMigration):
         db.add_column('foia_foiarequest', 'jurisdiction_new', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['foia.Jurisdiction']), keep_default=False)
 
         # With new tables created, load the fixtures so we can migrate the data
-        management.call_command('loaddata', 'jurisdictions.json')
-        management.call_command('loaddata', 'agency_types.json')
+        #management.call_command('loaddata', 'jurisdictions.json')
+        #management.call_command('loaddata', 'agency_types.json')
 
         # migrate the data
-        for foia in orm.FOIARequest.objects.all():
-            foia.jurisdiction_new = orm.Jurisdiction.objects.get(slug=foia.jurisdiction)
-            foia.agency_type = orm.AgencyType.objects.get(name=foia.agency)
-            foia.save()
+        #for foia in orm.FOIARequest.objects.all():
+        #    foia.jurisdiction_new = orm.Jurisdiction.objects.get(slug=foia.jurisdiction)
+        #    foia.agency_type = orm.AgencyType.objects.get(name=foia.agency)
+        #    foia.save()
     
     
     def backwards(self, orm):
