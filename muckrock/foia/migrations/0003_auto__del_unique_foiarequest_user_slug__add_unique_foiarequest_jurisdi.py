@@ -8,9 +8,8 @@ class Migration(SchemaMigration):
     
     def forwards(self, orm):
         
-        # Manually removing this, as it does not seem to work on a fresh install (such as Heroku)
         # Removing unique constraint on 'FOIARequest', fields ['user', 'slug']
-        #db.delete_unique('foia_foiarequest', ['user_id', 'slug'])
+        db.delete_unique('foia_foiarequest', ['user_id', 'slug'])
 
         # Adding unique constraint on 'FOIARequest', fields ['jurisdiction', 'user', 'slug']
         db.create_unique('foia_foiarequest', ['jurisdiction', 'user_id', 'slug'])
@@ -18,9 +17,8 @@ class Migration(SchemaMigration):
     
     def backwards(self, orm):
         
-        # Manually removing this, as it does not seem to work on a fresh install (such as Heroku)
         # Adding unique constraint on 'FOIARequest', fields ['user', 'slug']
-        #db.create_unique('foia_foiarequest', ['user_id', 'slug'])
+        db.create_unique('foia_foiarequest', ['user_id', 'slug'])
 
         # Removing unique constraint on 'FOIARequest', fields ['jurisdiction', 'user', 'slug']
         db.delete_unique('foia_foiarequest', ['jurisdiction', 'user_id', 'slug'])
