@@ -28,3 +28,6 @@ django-storages==1.1.4
 boto==2.2.2
 django-mailgun==0.2
 -e git://github.com/hdg700/django-dbsettings.git@a3ad89ff50d4ef55dab52a795ee8789c620e2165#egg=dbsettings-dev
+gunicorn==0.14.3
+gevent==0.13.7
+greenlet==0.3.4
