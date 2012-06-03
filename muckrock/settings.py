@@ -111,6 +111,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
+    'gunicorn',
     'south',
     'django_nose',
     'debug_toolbar',
