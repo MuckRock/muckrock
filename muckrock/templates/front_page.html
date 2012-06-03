@@ -12,6 +12,7 @@
 
 			<div class="left" id="main-left">
 
+				{% if featured_article %}
 				<div class="post">
 					<div class="post-title"><h1>
 						<a href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a>
@@ -35,6 +36,7 @@
 					</div>
 				
 				</div>
+				{% endif %}
 
 				<div class="content-separator"></div>
 				<h1>Featured Documents &amp; Requests</h1>

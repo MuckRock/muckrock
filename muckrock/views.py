@@ -15,7 +15,12 @@ def front_page(request):
     # pylint: disable=W0612
     # pylint: disable=E1103
 
-    featured_article = Article.objects.get_published()[0]
+    try:
+        featured_article = Article.objects.get_published()[0]
+    except IndexError:
+        # no published articles
+        featured_article = None
+
     featured_reqs = FOIARequest.objects.get_public().filter(featured=True)\
                                        .order_by('-date_done')[:3]
 
