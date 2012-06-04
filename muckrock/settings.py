@@ -150,7 +150,6 @@ BROKER_PORT = url.port
 BROKER_USER = url.username
 BROKER_PASSWORD = url.password
 BROKER_VHOST = url.path[1:]
-print BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASSWORD, BROKER_VHOST
 
 # for redis only:
 #BROKER_VHOST = '0'
