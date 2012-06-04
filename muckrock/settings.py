@@ -4,11 +4,19 @@ Django settings for muckrock project
 
 import os
 from lamson.server import Relay
+import urlparse
 
 import logging
 
-DEBUG = True
-TEMPLATE_DEBUG = True
+def boolcheck(s):
+    """Turn env var into proper bool"""
+    if isinstance(s, basestring):
+        return s.lower() in ("yes", "true", "t", "1")
+    else:
+        return bool(s)
+
+DEBUG = boolcheck(os.environ.get('DEBUG', True))
+TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -18,13 +26,6 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
-DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'muckrock'             # Or path to database file if using sqlite3.
-DATABASE_USER = 'muckrock'             # Not used with sqlite3.
-DATABASE_PASSWORD = ''         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -56,9 +57,6 @@ MEDIA_URL = '/static/'
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = '/media/'
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -139,14 +137,31 @@ DEBUG_TOOLBAR_CONFIG = {
 
 #CELERY_IMPORTS = ("foia.tasks", )
 
+urlparse.uses_netloc.append('redis')
+urlparse.uses_netloc.append('amqp')
+#url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/'))
+url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL', 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+
 import djcelery
 djcelery.setup_loader()
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "muckrock"
-BROKER_PASSWORD = "muckrock"
-BROKER_VHOST = "muckrock_vhost"
-CELERY_RESULT_BACKEND = "amqp"
+
+BROKER_HOST = url.hostname
+BROKER_PORT = url.port
+BROKER_USER = url.username
+BROKER_PASSWORD = url.password
+BROKER_VHOST = url.path[1:]
+print BROKER_HOST, BROKER_PORT, BROKER_USER, BROKER_PASSWORD, BROKER_VHOST
+
+# for redis only:
+#BROKER_VHOST = '0'
+#REDIS_PORT = BROKER_PORT
+#REDIS_HOST = BROKER_HOST
+#REDIS_DB = 0
+#REDIS_CONNECT_RETRY = True
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+CELERY_SEND_EVENT = True
+CELERY_IGNORE_RESULTS = True
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
@@ -175,6 +190,8 @@ LAMSON_RECEIVER_HOST = 'localhost'
 LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
+MAILGUN_SERVER_NAME = 'requests.muckrock.com'
+
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 AWS_QUERYSTRING_AUTH = False
@@ -186,6 +203,27 @@ logger.setLevel(logging.DEBUG)
 # pylint: disable=W0611
 import monkey
 
+# these will be set in local settings if not in env var
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_BUCKET_NAME')
+
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
+
+MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
+
+DOCUMNETCLOUD_USERNAME = os.environ.get('DOCUMNETCLOUD_USERNAME')
+DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
+
+GA_USERNAME = os.environ.get('GA_USERNAME')
+GA_PASSWORD = os.environ.get('GA_PASSWORD')
+GA_ID = os.environ.get('GA_ID')
+
 # pylint: disable=W0401
 # pylint: disable=W0614
 try:
@@ -193,26 +231,32 @@ try:
 except ImportError:
     pass
 
-# try to import heroku settings from environment vars
+# Register database schemes in URLs.
+urlparse.uses_netloc.append('postgres')
+urlparse.uses_netloc.append('mysql')
+
 try:
-    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-    AWS_STORAGE_BUCKET_NAME = 'muckrock'
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_SECURE_URLS = False
+    if 'DATABASES' not in locals():
+        DATABASES = {}
 
-    STRIPE_SECRET_KEY = os.environ['STRIPE_SECRET_KEY']
-    STRIPE_PUB_KEY = os.environ['STRIPE_PUB_KEY']
+    if 'DATABASE_URL' in os.environ:
+        url = urlparse.urlparse(os.environ['DATABASE_URL'])
 
-    MAILGUN_ACCESS_KEY = os.environ['MAILGUN_ACCESS_KEY']
-    MAILGUN_SERVER_NAME = 'requests.muckrock.com'
-    MAILGUN_ACCESS_KEY = 'key-68nebk1kar668wteve0xg58j6nnrca17'
+        # Ensure default database exists.
+        DATABASES['default'] = DATABASES.get('default', {})
 
-    DOCUMNETCLOUD_USERNAME = os.environ['DOCUMNETCLOUD_USERNAME']
-    DOCUMENTCLOUD_PASSWORD = os.environ['DOCUMENTCLOUD_PASSWORD']
+        # Update with environment configuration.
+        DATABASES['default'].update({
+            'NAME': url.path[1:],
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port,
+        })
+        if url.scheme == 'postgres':
+            DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
 
-    GA_USERNAME = os.environ['GA_USERNAME']
-    GA_PASSWORD = os.environ['GA_PASSWORD']
-    GA_ID = os.environ['GA_ID']
-except KeyError:
-    pass
+        if url.scheme == 'mysql':
+            DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+except Exception:
+    print 'Unexpected error:', sys.exc_info()
