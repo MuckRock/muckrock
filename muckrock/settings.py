@@ -46,17 +46,23 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = os.path.join(SITE_ROOT, 'static')
+STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
+MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/static/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+STATICFILES_DIRS = (
+    os.path.join(SITE_ROOT, 'assets'),
+)
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -85,6 +91,9 @@ MIDDLEWARE_CLASSES = (
     'pingback.middleware.PingbackMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
+if DEBUG:
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -121,6 +130,7 @@ INSTALLED_APPS = (
     'taggit',
     'dbsettings',
     'storages',
+    'staticfiles',
     'accounts',
     'foia',
     'rodeo',
@@ -191,8 +201,13 @@ LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    #STATIC_URL = 'https://muckrock.s3.amazonaws.com'
+    #MEDIA_URL = 'https://muckrock.s3.amazonaws.com'
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = False
 
