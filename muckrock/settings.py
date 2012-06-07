@@ -8,16 +8,17 @@ import urlparse
 
 import logging
 
-def boolcheck(s):
+def boolcheck(setting):
     """Turn env var into proper bool"""
-    if isinstance(s, basestring):
-        return s.lower() in ("yes", "true", "t", "1")
+    if isinstance(setting, basestring):
+        return setting.lower() in ("yes", "true", "t", "1")
     else:
-        return bool(s)
+        return bool(setting)
 
 DEBUG = boolcheck(os.environ.get('DEBUG', True))
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
+THUMBNAIL_DEBUG = DEBUG
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
@@ -48,21 +49,41 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
+ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash if there is a path component (optional in other cases).
+# Examples: "http://media.lawrence.com", "http://example.com/media/"
+if not DEBUG:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATIC_URL = 'https://muckrock.s3.amazonaws.com/'
+    MEDIA_URL = 'https://muckrock.s3.amazonaws.com/media/'
+else:
+    #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    #THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    #STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    #STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
+    #MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
+    STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
+
+
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_SECURE_URLS = False
+
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -145,12 +166,11 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
-#CELERY_IMPORTS = ("foia.tasks", )
-
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
 #url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/'))
-url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL', 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
+    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
 
 import djcelery
 djcelery.setup_loader()
@@ -182,7 +202,6 @@ HAYSTACK_SEARCH_ENGINE = 'whoosh'
 HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 
 ASSETS_DEBUG = False
-ASSETS_EXPIRE = 'querystring'
 
 MONTHLY_REQUESTS = {
     'admin': 100,
@@ -200,16 +219,6 @@ LAMSON_RECEIVER_PORT = 8823
 LAMSON_ROUTER_HOST = 'requests.muckrock.com'
 
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
-
-if not DEBUG:
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    #STATIC_URL = 'https://muckrock.s3.amazonaws.com'
-    #MEDIA_URL = 'https://muckrock.s3.amazonaws.com'
-
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_SECURE_URLS = False
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -238,6 +247,32 @@ GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
 
+# Register database schemes in URLs.
+urlparse.uses_netloc.append('postgres')
+urlparse.uses_netloc.append('mysql')
+
+DATABASES = {}
+
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
+
+# Update with environment configuration.
+DATABASES['default'] = {
+    'NAME': url.path[1:],
+    'USER': url.username,
+    'PASSWORD': url.password,
+    'HOST': url.hostname,
+    'PORT': url.port,
+}
+
+# test runner seems to want this...
+DATABASE_NAME = DATABASES['default']['NAME']
+
+if url.scheme == 'postgres':
+    DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
+
+if url.scheme == 'mysql':
+    DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+
 # pylint: disable=W0401
 # pylint: disable=W0614
 try:
@@ -245,32 +280,3 @@ try:
 except ImportError:
     pass
 
-# Register database schemes in URLs.
-urlparse.uses_netloc.append('postgres')
-urlparse.uses_netloc.append('mysql')
-
-try:
-    if 'DATABASES' not in locals():
-        DATABASES = {}
-
-    if 'DATABASE_URL' in os.environ:
-        url = urlparse.urlparse(os.environ['DATABASE_URL'])
-
-        # Ensure default database exists.
-        DATABASES['default'] = DATABASES.get('default', {})
-
-        # Update with environment configuration.
-        DATABASES['default'].update({
-            'NAME': url.path[1:],
-            'USER': url.username,
-            'PASSWORD': url.password,
-            'HOST': url.hostname,
-            'PORT': url.port,
-        })
-        if url.scheme == 'postgres':
-            DATABASES['default']['ENGINE'] = 'django.db.backends.postgresql_psycopg2'
-
-        if url.scheme == 'mysql':
-            DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
-except Exception:
-    print 'Unexpected error:', sys.exc_info()

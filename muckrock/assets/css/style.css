@@ -75,7 +75,7 @@ a {
 	text-decoration: underline;
 }
 a.feed {
-	background: url('/static/img/icon-feed.gif') no-repeat left center;
+	background: url('../img/icon-feed.gif') no-repeat left center;
 	padding-left: 18px;
 }
 a.twitter {
@@ -83,7 +83,7 @@ a.twitter {
 	padding-left: 18px;
 }
 a.facebook {
-	background: url('/static/img/facebook.png') no-repeat left center;
+	background: url('../img/facebook.png') no-repeat left center;
 	padding-left: 18px;
 }
 
@@ -475,10 +475,10 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	font-size: 1.5em;
 	padding: 9px 14px;
 }
-#main-nav li {background: url('/static/img/navigation-separator.gif') no-repeat left center;}
+#main-nav li {background: url('../img/navigation-separator.gif') no-repeat left center;}
 #main-nav li:first-child {background: none;}
 #main-nav li.current-tab a, #main-nav a:hover {color: #002;}
-#main-nav li.current-tab a {background: url('/static/img/navigation-arrow.gif') no-repeat center bottom;}
+#main-nav li.current-tab a {background: url('../img/navigation-arrow.gif') no-repeat center bottom;}
 
 
 /* Subnav */
@@ -498,11 +498,11 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 
 .main {margin-bottom: 18px;}
 
-.main#main-three-columns {background: url('/static/img/main-three-columns.gif') repeat-y right top;}
+.main#main-three-columns {background: url('../img/main-three-columns.gif') repeat-y right top;}
 .main#main-three-columns .sidebar {width: 193px;}
 .main#main-three-columns #main-left {width: 520px;}
 
-.main#main-two-columns {background: url('/static/img/main-two-columns.gif') repeat-y right top;}
+.main#main-two-columns {background: url('../img/main-two-columns.gif') repeat-y right top;}
 .main#main-two-columns .sidebar {width: 260px;}
 .main#main-two-columns #main-left {width: 671px;}
 
@@ -541,7 +541,7 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 /* Dashboard */
 
 #dashboard {
-	background: #FAFAFA url('/static/img/dashboard.gif') repeat-y left top;
+	background: #FAFAFA url('../img/dashboard.gif') repeat-y left top;
 	border: 1px solid #E7E7E7;
 }
 

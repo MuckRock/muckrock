@@ -16,7 +16,7 @@ cssutils==0.9.7b3
 celery==2.4.5
 django-celery==2.4.2
 gdata==2.0.17
-easy-thumbnails==1.0-alpha-8
+easy-thumbnails==1.0-alpha-14
 django-pingback==0.3
 BeautifulSoup==3.2.1
 django-taggit==0.9.3
@@ -31,3 +31,4 @@ gunicorn==0.14.3
 gevent==0.13.7
 greenlet==0.3.4
 django-staticfiles==1.2.1
+argparse==1.2.1

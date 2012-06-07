@@ -7,6 +7,8 @@ from django.template.defaultfilters import stringfilter
 
 import re
 
+from settings import STATIC_URL
+
 register = Library()
 
 @register.simple_tag
@@ -87,10 +89,10 @@ class TableHeaderNode(Node):
             if field:
                 if get.get('field') == field and get.get('order') == 'asc':
                     order = 'desc'
-                    img = '&nbsp;<img src="/static/img/down-arrow.png" />'
+                    img = '&nbsp;<img src="%simg/down-arrow.png" />' % STATIC_URL
                 elif get.get('field') == field and get.get('order') == 'desc':
                     order = 'asc'
-                    img = '&nbsp;<img src="/static/img/up-arrow.png" />'
+                    img = '&nbsp;<img src="%simg/up-arrow.png" />' % STATIC_URL
                 else:
                     order = 'asc'
                     img = ''
