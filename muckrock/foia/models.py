@@ -26,7 +26,7 @@ from agency.models import Agency
 from business_days.business_days import calendars
 from jurisdiction.models import Jurisdiction
 from models import ChainableManager
-from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE
+from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE, STATIC_URL
 from tags.models import Tag, TaggedItemBase
 from values import TextValue
 import fields
@@ -629,7 +629,7 @@ class FOIADocument(models.Model):
             return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
-            return '/static/img/report.png'
+            return '%simg/report.png' % STATIC_URL
 
     def get_medium_thumbnail(self):
         """Convenient function for template"""

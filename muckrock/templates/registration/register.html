@@ -1,5 +1,6 @@
 
 {% extends "registration/base.html" %}
+{% load staticfiles %}
 
 {% block content %}
 	<h1>Register for the MuckRock Open Beta</h1>
@@ -70,31 +71,31 @@
 	
 	<p>
 		<a href="http://www.boston.com/news/local/massachusetts/articles/2010/11/11/state_tells_man_he_may_be_jailed_for_releasing_data/">
-		<img src="/static/img/globe_logo.jpg"></a>
+		<img src="{% static "img/globe_logo.jpg" %}"></a>
 	</p>
 	<p>
 		<a href="http://www.niemanlab.org/2010/10/muckrock-makes-foia-requests-easy-but-will-reporters-use-it/">
-		<img src="/static/img/niemanlab.jpg"></a>
+		<img src="{% static "img/niemanlab.jpg" %}"></a>
 	</p>
 	<p>
 		<a href="http://gawker.com/5867410/the-fbi-took-secret-intelligence-from-creepy-cell+phone-tappers">
-		<img src="/static/img/gawker_logo.png"></a>
+		<img src="{% static "img/gawker_logo.png" %}"></a>
 	</p>
 	<p>
 		<a href="http://www.washingtonpost.com/business/technology/fbi-denies-request-for-information-on-carrier-iq/2011/12/13/gIQA17gmrO_story.html">
-		<img src="/static/img/washpo.jpg"></a>
+		<img src="{% static "img/washpo.jpg" %}"></a>
 	</p>
 	<p>
 		<a href="http://thephoenix.com/boston/news/111660-muckrock-city/">
-		<img src="/static/img/phoenix.gif"></a>
+		<img src="{% static "img/phoenix.gif" %}"></a>
 	</p>
 	<p>
 		<a href="http://www.theverge.com/2011/12/12/2631388/fbi-carrier-iq-foia">
-		<img src="/static/img/verge.jpg"></a>
+		<img src="{% static "img/verge.jpg" %}"></a>
 	</p>
 	<p>
 		<a href="http://news.yahoo.com/s/yblog_upshot/20101111/us_yblog_upshot/blogger-could-face-jail-time-and-fine-for-publishing-food-stamps-data">
-		<img src="/static/img/upshot.jpg"></a>
+		<img src="{% static "img/upshot.jpg" %}"></a>
 	</p>
 
 	<em>And many, many more.</em>

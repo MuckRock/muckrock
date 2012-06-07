@@ -3,6 +3,7 @@
 {% load assets %}
 {% load thumbnail %}
 {% load humanize %}
+{% load staticfiles %}
 
 {% block title %}Home{% endblock %}
 {% block headline %}Home{% endblock %}
@@ -49,7 +50,7 @@
 								{% if req.documents.all %}
 									<img src="{{ req.documents.all.0.get_medium_thumbnail }}" alt="{{req.documents.all.0.title}}" class="bordered" width="102" height="128" />
 								{% else %}
-									<img src="/static/img/report.png" alt="" class="bordered" height="128" />
+									<img src="{% static "img/report.png" %}" alt="" class="bordered" height="128" />
 								{% endif %}
 							</a></p>
 							<h4><a href="{{ req.get_absolute_url }}">{{ req.title }}</a></h4>
@@ -129,7 +130,7 @@
 					<div class="section-title">
 
 						<div class="left">Overdue Requests</div>
-						<div class="right"><img src="/static/img/icon-time.gif" width="14" height="14" alt="" /></div>
+						<div class="right"><img src="{% static "img/icon-time.gif" %}" width="14" height="14" alt="" /></div>
 
 						<div class="clearer">&nbsp;</div>
 

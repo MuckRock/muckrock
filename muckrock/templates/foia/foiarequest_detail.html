@@ -2,6 +2,7 @@
 {% extends "foia/base.html" %}
 {% load pingback_tags %}
 {% load tags %}
+{% load staticfiles %}
 
 {% block title %} {{object.title}} {% endblock %}
 
@@ -110,7 +111,7 @@
 				{# file #}
 				{% if comm.class_name == "FOIAFile" %}
 					<div class="left text-center">
-						<a href="{{comm.ffile.url}}"><img src="/static/img/report.png" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
+						<a href="{{comm.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
 						<a href="{{comm.ffile.url}}">Download</a>
 					</div>
 				{% endif %}
