@@ -274,7 +274,7 @@ if url.scheme == 'mysql':
     DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHE_BACKEND = 'memcached://%s/' % os.environ.get('MEMCACHIER_SERVERS')
+    CACHE_BACKEND = 'memcached://%s:11211/' % os.environ.get('MEMCACHIER_SERVERS')
 else:
     CACHE_BACKEND = 'dummy://'
 
