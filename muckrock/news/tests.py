@@ -2,8 +2,6 @@
 Tests using nose for the news application
 """
 
-from __future__ import absolute_import
-
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -11,7 +9,7 @@ import nose.tools
 from datetime import datetime
 
 from news.models import Article
-from tests import get_allowed, get_404
+from muckrock.tests import get_allowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
