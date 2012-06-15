@@ -179,7 +179,9 @@ BROKER_HOST = url.hostname
 BROKER_PORT = url.port
 BROKER_USER = url.username
 BROKER_PASSWORD = url.password
+# pylint: disable=E1101
 BROKER_VHOST = url.path[1:]
+# pylint: enable=E1101
 
 # for redis only:
 #BROKER_VHOST = '0'
@@ -255,6 +257,7 @@ DATABASES = {}
 
 url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
 
+# pylint: disable=E1101
 # Update with environment configuration.
 DATABASES['default'] = {
     'NAME': url.path[1:],

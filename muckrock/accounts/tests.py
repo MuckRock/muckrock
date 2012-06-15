@@ -2,8 +2,6 @@
 Tests using nose for the accounts application
 """
 
-from __future__ import absolute_import
-
 from django.contrib.auth.models import User
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -19,7 +17,7 @@ from mock import Mock, patch
 from accounts.models import Profile
 from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
                            PaymentForm, UpgradeSubscForm
-from tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
+from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from settings import MONTHLY_REQUESTS
 
 # allow long names, methods that could be functions and too many public methods in tests
