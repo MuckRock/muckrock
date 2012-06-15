@@ -32,5 +32,4 @@ gevent==0.13.7
 greenlet==0.3.4
 django-staticfiles==1.2.1
 argparse==1.2.1
-django-pylibmc-sasl==0.2.4
-pylibmc==1.2.3
+python-memcached==1.48
