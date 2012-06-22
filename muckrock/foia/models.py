@@ -3,13 +3,11 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail, send_mass_mail
+from django.core.mail import send_mail, send_mass_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
 from django.template.loader import render_to_string
-
-from lamson.mail import MailResponse
 
 from datetime import datetime, date, timedelta
 from hashlib import md5
@@ -24,7 +22,7 @@ from agency.models import Agency
 from business_days.business_days import calendars
 from jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
-from settings import relay, LAMSON_ROUTER_HOST, LAMSON_ACTIVATE, STATIC_URL
+from settings import MAILGUN_SERVER_NAME, STATIC_URL
 from tags.models import Tag, TaggedItemBase
 from values import TextValue
 import fields
@@ -356,7 +354,7 @@ class FOIARequest(models.Model):
             self.other_emails = self.agency.other_emails
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
-        if LAMSON_ACTIVATE and ((self.email and not appeal) or can_email_appeal):
+        if (self.email and not appeal) or can_email_appeal:
             self.status = 'processed' if not appeal else 'appealing'
             self._send_email()
             self.update_dates()
@@ -398,7 +396,7 @@ class FOIARequest(models.Model):
             self.other_emails = self.agency.other_emails
             self.save()
 
-        if self.email and LAMSON_ACTIVATE:
+        if self.email:
             self._send_email()
         else:
             self.status = 'submitted'
@@ -421,14 +419,15 @@ class FOIARequest(models.Model):
             subject = 'Follow up to Freedom of Information Request: %s' % self.title
         else:
             subject = 'Freedom of Information Request: %s' % self.title
-        msg = MailResponse(From='%s@%s' % (from_addr, LAMSON_ROUTER_HOST),
-                           To=self.email,
-                           Subject=subject,
-                           Body=render_to_string('foia/request.txt', {'request': self}))
+
         cc_addrs = self.get_other_emails()
-        if cc_addrs:
-            msg['cc'] = ','.join(cc_addrs)
-        relay.deliver(msg, To=[self.email, 'requests@muckrock.com'] + cc_addrs)
+        msg = EmailMessage(subject=subject,
+                           body=render_to_string('foia/request.txt', {'request': self}),
+                           from_email='%s@%s' % (from_addr, MAILGUN_SERVER_NAME),
+                           to=[self.email],
+                           bcc=cc_addrs,
+                           headers={'Cc': ','.join(cc_addrs)}) 
+        msg.send(fail_silently=False)
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
@@ -446,7 +445,7 @@ class FOIARequest(models.Model):
             if days:
                 self.date_due = cal.business_days_from(date.today(), days)
 
-        # updated from lamson without setting status or submitted
+        # updated from mailgun without setting status or submitted
         if self.status == 'processed':
 
             # unpause the count down
