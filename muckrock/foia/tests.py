@@ -35,17 +35,6 @@ class TestFOIARequestUnit(TestCase):
 
         self.foia = FOIARequest.objects.get(pk=1)
 
-        # set relay in foia.models to a mock that adds emails to the test mail queue
-        class MockRelay(object):
-            # pylint: disable=C0111
-            # pylint: disable=W0613
-            # pylint: disable=R0903
-            def deliver(self, message, To=None, From=None):
-                mail.outbox.append(message)
-        import foia.models
-        foia.models.relay = MockRelay()
-
-
     # models
     def test_foia_model_unicode(self):
         """Test FOIA Request model's __unicode__ method"""
@@ -103,11 +92,10 @@ class TestFOIARequestUnit(TestCase):
         foia.status = 'submitted'
         foia.save()
         foia.submit()
-        # this is a lamson mail message, not a django mail message
-        nose.tools.eq_(mail.outbox[-1]['from'], '%s@requests.muckrock.com' % foia.get_mail_id())
-        nose.tools.eq_(mail.outbox[-1]['to'], 'test@agency1.gov')
-        nose.tools.eq_(mail.outbox[-1]['cc'], 'other_a@agency1.gov,other_b@agency1.gov')
-        nose.tools.eq_(mail.outbox[-1]['subject'],
+        nose.tools.eq_(mail.outbox[-1].from_email, '%s@requests.muckrock.com' % foia.get_mail_id())
+        nose.tools.eq_(mail.outbox[-1].to, ['test@agency1.gov'])
+        nose.tools.eq_(mail.outbox[-1].bcc, ['other_a@agency1.gov', 'other_b@agency1.gov'])
+        nose.tools.eq_(mail.outbox[-1].subject,
                        'Freedom of Information Request: %s' % foia.title)
         nose.tools.eq_(foia.status, 'processed')
         nose.tools.eq_(foia.date_submitted, datetime.date.today())
@@ -381,14 +369,7 @@ class TestFOIAIntegration(TestCase):
 
         mail.outbox = []
 
-        # set relay in foia.models to a mock that adds emails to the test mail queue
-        class MockRelay(object):
-            # pylint: disable=W0613
-            # pylint: disable=R0903
-            def deliver(self, message, To=None, From=None):
-                mail.outbox.append(message)
         import foia.models
-        foia.models.relay = MockRelay()
 
         # Replace real date and time with mock ones so we can control today's/now's value
         # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
