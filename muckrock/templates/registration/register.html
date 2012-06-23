@@ -1,0 +1,102 @@
+
+{% extends "registration/base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+	<h1>Register for the MuckRock Open Beta</h1>
+	<div class="notice">
+		<h4>Making Access Easy</h4>
+		For the past two years, MuckRock has helped journalists, researchers and everyday citizens file Freedom of Information Requests, breaking national news and illuminating local issues. We're now pleased to open up our site for a public beta: Things are occasionally rough around the edges, but we stand behind all of our paid products with a 30-day 100% money-back guarantee, no questions asked. If you want your questions answered, MuckRock can help by merging the best of web technology with an active, enthusiastic community of document hounds. For organizational accounts or any other questions, please e-mail Michael Morisy at <a href="mailto:Michael@MuckRock.com">Michael@MuckRock.com</a>.
+	</div>
+
+	<div class="clearer">&nbsp;</div>
+
+	<table class="data-table">
+		<tbody>
+			<tr class="odd">
+				<th width="30%">
+					<p align="center"><a class="jqbutton" href="{% url acct-register-free %}">Community Edition</a></p>
+					<span class="quiet small"><em>Perfect for bloggers, non-profits and curious citizens.</em>
+				</th>
+				<td>
+					<ul>
+						<li>No monthly fees.</li>
+						<li>File requests to any federal agency and in 11 states plus D.C.</li>
+						<li>Paper Free: MuckRock scans responses and makes them searchable.</li>
+						<li>See what others are saying about your requests on Facebook, Twitter and blogs.</li>
+						<li>Tightly integrated with Spot.us to crowdfund expensive request fees.</li>
+						<li>File five requests for just $20.</li>
+						<li>Earn free requests by participating in <a href="/assignments/">site assignments.</a>
+					</ul>
+				</td>
+			</tr>
+			<tr class="even">
+				<th width="30%">
+					<p align="center"><a class="jqbutton" href="{% url acct-register-pro %}">Professional Edition</a></p>
+					<span class="quiet small"><em>Designed for journalists, researchers and other professionals.</em>
+				</th>
+				<td>
+				  <ul>
+						<li>Embargo requests and keep them hidden.</li>
+						<li>Priority customer support by phone, IM and e-mail.</li>
+						<li>Premium document conversion: Get paper documents as Excel files, Word documents and more to fit your needs.</li>
+						<li>Exclusive acesss to growing directory of 250 government agencies, including contact information, historical response data and more.</li>
+						<li>File up to 20 requests a month for just $40.</li>
+					</ul>
+				</td>
+			</tr>
+			<tr class="odd">
+				<th width="30%">
+				  <p align="center"><a class="jqbutton" href="mailto:Michael@MuckRock.com">MuckRock for Organizations</a></p>
+						<span class="quiet small"><em>Custom-built plans to meet the needs of your newsroom, thinktank, law firm or other organization.</em>
+				</th>
+				<td>
+				  <ul>
+						<li>Custom plans to meet your organization's needs.</li>
+						<li>Used by reporters at the Boston Globe, Talking Points Memo, Gannett and more.</li>
+						<li>Optional hands on training and regular suggestions to help your organization break news.</li>
+						<li>Tools to allow your readers to quickly suggest requests, improving user engagement.</li>
+						<li>Plans starting at just $2,000 a year.</li>
+						<li>E-mail us for a quote</li>
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+{% endblock %}
+
+
+{% block sidebar %}
+	<h2>As Featured By ...</h2>
+	
+	<p>
+		<a href="http://www.boston.com/news/local/massachusetts/articles/2010/11/11/state_tells_man_he_may_be_jailed_for_releasing_data/">
+		<img src="{% static "img/globe_logo.jpg" %}"></a>
+	</p>
+	<p>
+		<a href="http://www.niemanlab.org/2010/10/muckrock-makes-foia-requests-easy-but-will-reporters-use-it/">
+		<img src="{% static "img/niemanlab.jpg" %}"></a>
+	</p>
+	<p>
+		<a href="http://gawker.com/5867410/the-fbi-took-secret-intelligence-from-creepy-cell+phone-tappers">
+		<img src="{% static "img/gawker_logo.png" %}"></a>
+	</p>
+	<p>
+		<a href="http://www.washingtonpost.com/business/technology/fbi-denies-request-for-information-on-carrier-iq/2011/12/13/gIQA17gmrO_story.html">
+		<img src="{% static "img/washpo.jpg" %}"></a>
+	</p>
+	<p>
+		<a href="http://thephoenix.com/boston/news/111660-muckrock-city/">
+		<img src="{% static "img/phoenix.gif" %}"></a>
+	</p>
+	<p>
+		<a href="http://www.theverge.com/2011/12/12/2631388/fbi-carrier-iq-foia">
+		<img src="{% static "img/verge.jpg" %}"></a>
+	</p>
+	<p>
+		<a href="http://news.yahoo.com/s/yblog_upshot/20101111/us_yblog_upshot/blogger-could-face-jail-time-and-fine-for-publishing-food-stamps-data">
+		<img src="{% static "img/upshot.jpg" %}"></a>
+	</p>
+
+	<em>And many, many more.</em>
+{% endblock %}
