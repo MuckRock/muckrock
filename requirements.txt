@@ -33,3 +33,4 @@ greenlet==0.3.4
 django-staticfiles==1.2.1
 argparse==1.2.1
 python-memcached==1.48
+raven>=1.7.3
