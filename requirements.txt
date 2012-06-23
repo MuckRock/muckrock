@@ -25,7 +25,6 @@ stripe==1.5.18
 redis==2.4.10
 django-storages==1.1.4
 boto==2.2.2
-django-mailgun==0.2
 -e git://github.com/hdg700/django-dbsettings.git@a3ad89ff50d4ef55dab52a795ee8789c620e2165#egg=dbsettings-dev
 gunicorn==0.14.3
 gevent==0.13.7
@@ -34,3 +33,4 @@ django-staticfiles==1.2.1
 argparse==1.2.1
 python-memcached==1.48
 raven>=1.7.3
+-e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
