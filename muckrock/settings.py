@@ -213,7 +213,6 @@ MONTHLY_REQUESTS = {
     'pro': 20,
 }
 
-MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -234,6 +233,10 @@ STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
 STRIPE_PUB_KEY = os.environ.get('STRIPE_PUB_KEY')
 
 MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
+MAILGUN_SERVER_NAME = 'requests.muckrock.com'
+
+EMAIL_SUBJECT_PREFIX = '[Muckrock]'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
 
 DOCUMNETCLOUD_USERNAME = os.environ.get('DOCUMNETCLOUD_USERNAME')
 DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
@@ -241,13 +244,6 @@ DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
-
-EMAIL_HOST = os.environ.get('EMAIL_HOST')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 1025)
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 1025)
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
-EMAIL_SUBJECT_PREFIX = '[Muckrock]'
-EMAIL_USE_TLS = boolcheck(os.environ.get('EMAIL_USE_TLS'))
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')
