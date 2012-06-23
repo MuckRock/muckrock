@@ -426,7 +426,7 @@ class FOIARequest(models.Model):
                            body=render_to_string('foia/request.txt', {'request': self}),
                            from_email='%s@%s' % (from_addr, MAILGUN_SERVER_NAME),
                            to=[self.email],
-                           bcc=cc_addrs,
+                           bcc=cc_addrs + ['requests@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)}) 
         msg.send(fail_silently=False)
 
