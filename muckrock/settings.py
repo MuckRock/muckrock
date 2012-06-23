@@ -192,6 +192,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
+CELERY_IMPORTS = ('foia.tasks', 'accounts.tasks')
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)

@@ -32,7 +32,7 @@ class FOIAOptions(dbsettings.Group):
     enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
 options = FOIAOptions()
 
-@task(ignore_result=True, max_retries=10, name='foia.tasks.upload_document_cloud')
+@task(ignore_result=True, max_retries=10)
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
@@ -81,7 +81,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
 
-@task(ignore_result=True, max_retries=10, name='foia.tasks.set_document_cloud_pages')
+@task(ignore_result=True, max_retries=10)
 def set_document_cloud_pages(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
 
@@ -106,7 +106,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
 
 
-@periodic_task(run_every=crontab(hour=1, minute=10), name='foia.tasks.set_top_viewed_reqs')
+@periodic_task(run_every=crontab(hour=1, minute=10))
 def set_top_viewed_reqs():
     """Get the top 5 most viewed requests from Google Analytics and save them locally"""
 
@@ -128,13 +128,13 @@ def set_top_viewed_reqs():
             pass
 
 
-@periodic_task(run_every=crontab(hour=1, minute=0), name='foia.tasks.update_index')
+@periodic_task(run_every=crontab(hour=1, minute=0))
 def update_index():
     """Update the search index every day at 1AM"""
     management.call_command('update_index')
 
 
-@periodic_task(run_every=crontab(hour=5, minute=0), name='foia.tasks.followup_requests')
+@periodic_task(run_every=crontab(hour=5, minute=0))
 def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
@@ -144,7 +144,7 @@ def followup_requests():
             foia.followup()
 
 
-@periodic_task(run_every=crontab(hour=6, minute=0), name='foia.tasks.embargo_warn')
+@periodic_task(run_every=crontab(hour=6, minute=0))
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
     for foia in FOIARequest.objects.filter(embargo=True,
@@ -154,7 +154,7 @@ def embargo_warn():
                   'info@muckrock.com', [foia.user.email])
 
 
-@periodic_task(run_every=crontab(hour=0, minute=0), name='foia.tasks.set_all_document_cloud_pages')
+@periodic_task(run_every=crontab(hour=0, minute=0))
 def set_all_document_cloud_pages():
     """Try and set all document cloud documents that have no page count set"""
     # pylint: disable=E1101
@@ -164,7 +164,7 @@ def set_all_document_cloud_pages():
         set_document_cloud_pages.apply_async(args=[doc.pk])
 
 
-@periodic_task(run_every=crontab(hour=0, minute=20), name='foia.tasks.retry_stuck_documents')
+@periodic_task(run_every=crontab(hour=0, minute=20))
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     # pylint: disable=E1101
