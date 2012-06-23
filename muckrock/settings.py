@@ -236,7 +236,7 @@ MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
 MAILGUN_SERVER_NAME = 'requests.muckrock.com'
 
 EMAIL_SUBJECT_PREFIX = '[Muckrock]'
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
 DOCUMNETCLOUD_USERNAME = os.environ.get('DOCUMNETCLOUD_USERNAME')
 DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
