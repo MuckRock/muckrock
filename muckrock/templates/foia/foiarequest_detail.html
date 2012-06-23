@@ -1,0 +1,348 @@
+
+{% extends "foia/base.html" %}
+{% load pingback_tags %}
+{% load tags %}
+{% load staticfiles %}
+
+{% block title %} {{object.title}} {% endblock %}
+
+{% block content %}
+	<h1>FOI Request</h1>
+	<h2>{{object.title}}</h2>
+	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
+	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
+	for {% if object.agency %}the {{ object.agency.link_display|safe }} of {% endif %}<a href="{% url jurisdiction-detail slug=object.jurisdiction.slug,idx=object.jurisdiction.pk %}">{{object.jurisdiction}}</a>
+	{% if object.date_done %} and {% if object.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{object.date_done|date}}{%endif%}
+	</p>
+	{% if object.is_embargo and not object.embargo_date %}
+	<p class="notice">
+	This request is embargoed and will not be visible to others until 30 days after a response is received.
+	</p>
+	{% endif %}
+	{% if object.is_embargo and object.embargo_date %}
+	<p class="notice">
+	This request is embargoed and will not be visible until {{ object.embargo_date|date }}.
+	</p>
+	{% endif %}
+	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
+	<p>Status: <span class="request-{{object.color_code}}">
+		{{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
+		{% if past_due %}
+			past due by {{ object.date_due|timesince }}
+		{% else %}
+			due in {{ object.date_due|timeuntil }}
+		{% endif %}
+		{% endif %}
+		{% if object.days_until_due and object.status == 'fix' or object.days_until_due and object.status == 'payment' %},
+			{% if object.days_until_due >= 0 %}
+				due {{ object.days_until_due }} day{{object.days_until_due|pluralize}}
+			{% else %}
+				will be {{ object.days_until_due|abs }} day{{object.days_until_due|pluralize}} past due
+			{% endif %}
+			from when the {% if object.status == 'fix' %}fix{% else %}payment{% endif %} is received
+		{% endif %}
+	</span></p>
+	<div id='tag-links'>Tags:
+		{% for tag in object.tags.all %}
+			<a href="{% url foia-list-tag tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}, {%endif%}
+		{% empty %}
+			None
+		{% endfor %}
+		{% if object.user == request.user %}
+			&nbsp;&mdash;&nbsp;&nbsp;
+			<a href="#" onclick="$('#tag-links').hide('slow'); $('#tag-edit').show('slow');
+			                     $('#tags').superblyTagField({
+														allowNewTags: true,
+														showTagsNumber: 10,
+														preset: [ {% for tag in object.tags.all %}'{{tag.name}}',{% endfor %} ], 
+														tags: [ {% for tag in all_tags %}'{{tag.name}}',{% endfor %} ]});
+													 ">Edit</a>
+		{% endif %}
+	</div>
+	<div id='tag-edit' style="display:none;">
+		<form action="" method="post">
+			<input type='text' name="tags" value="{{object.tag_string}}" id="tags" />
+			<input type="submit" name="submit" value="Submit" class="button" style="margin-top:2px;"/>
+			<em class="quiet" style="float:left;">Enter tags seperated by Enter or a comma</em>
+			<div class="clearer">&nbsp;</div>
+		</form>
+	</div>
+	<br />
+
+	{% if object.public_documents or object.user == user %}
+	<div id="tabs">
+		<ul>
+			<li><a href="#tabs-request">Request</a></li>
+			{% if object.public_documents %}
+			<li><a href="#tabs-documents" onclick="doc_load(); return true">Documents</a></li>
+			{% endif %}
+			{% if object.user == user %}
+			<li><a href="#tabs-notes">Notes</a></li>
+			{% endif %}
+		</ul>
+	{% endif %}
+
+		<div id="tabs-request">
+			{% for comm in communications %}
+			<a name="{{comm.anchor}}"></a>
+			<div class="{% if comm.response %}response{% else %}request{% endif %}">
+				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
+
+				{# document #}
+				{% if comm.class_name == "FOIADocument" %}
+					{% if comm.access == "public" and comm.doc_id %}
+						<div class="left text-center">
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
+							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
+							<a href="{{comm.document.url}}">Download</a>
+						</div>
+					{% else %}
+						<div class="left text-center">
+							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
+							<a href="{{comm.document.url}}">Download</a>
+						</div>
+						{% if comm.doc_id %}
+							<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
+						{% else %}
+							<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
+						{% endif %}
+					{% endif %}
+				{% endif %}
+				{# file #}
+				{% if comm.class_name == "FOIAFile" %}
+					<div class="left text-center">
+						<a href="{{comm.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
+						<a href="{{comm.ffile.url}}">Download</a>
+					</div>
+				{% endif %}
+				{# html communication #}
+				{% if comm.full_html %}
+					{% autoescape off %}{{comm.communication}}{% endautoescape %}
+				{# text communication #}
+				{% else %}
+					{{comm.communication|urlize|linebreaks}}
+				{% endif %}
+
+				<div class="clearer">&nbsp;</div>
+			</div>
+			{% endfor %}
+		</div>
+
+	{% if object.public_documents %}
+		<div id="tabs-documents">
+			<div id="viewer"></div>
+			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+			<script type="text/javascript">
+				function display_doc(doc_id)
+				{
+					$("#tabs").tabs("select", "tabs-documents");
+					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
+						width: 627,
+						height: 600,
+						sidebar: false,
+						container: "#viewer"
+					});
+
+					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
+					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+					$('textarea#embed0').val(embed_code0);
+					$('textarea#embed1').val(embed_code1);
+					$('div[id^="rodeo-"]').hide();
+					$('#rodeo-' + doc_id).show();
+				}
+
+				function get_thumbnail(doc_id)
+				{
+					var idx = doc_id.indexOf('-');
+					var num = doc_id.slice(0, idx);
+					var name = doc_id.slice(idx + 1);
+					return 'http://s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+				}
+
+				function doc_load() {
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					if (!doc_load.loaded) {
+						doc_load.loaded = true;
+						display_doc(default_doc_id);
+					}
+				}
+
+
+				$(function() {
+					var hash = window.location.hash.substring(1);
+					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+
+					if (!hash || ($.inArray(hash, documents) == -1)) {
+						doc_id = default_doc_id;
+					} else {
+						doc_id = hash;
+					}
+					if (hash && hash.substring(0,4) != "tabs") {
+						$("#tabs").tabs("select", "#tabs-documents");
+						display_doc(doc_id);
+						doc_load.loaded = true;
+					}
+
+				});
+
+			</script>
+			<div class="dc-thumbnails">
+
+				<ul class="dc-thumbnails">
+				{% if object.public_documents|length > 1 %}
+					{% for document in object.public_documents %}
+						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" title="{{document.title}}" class="tipTip" /></a></li>
+					{% endfor %}
+				{% endif %}
+				</ul>
+			</div>
+		</div>
+		{% endif %}
+
+		{% if object.user == user %}
+		<div id="tabs-notes">
+			{% for note in object.notes.all %}
+				<div class="note">
+					<strong>{{note.date|date}}:</strong><br />
+					{{note.note|linebreaks}}
+				</div>
+			{% empty %}
+				<p>You don't have any notes on this request.  Note can be used to store private information regarding this request.</p>
+			{% endfor %}
+			<p><a class="jqbutton" href="{% url foia-note jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Add a Note</a></p>
+		</div>
+		{% endif %}
+	{% if object.public_documents or object.user == user %}
+	</div>
+	{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+	{% if object.sidebar_html %}
+		{{ object.sidebar_html|safe }}
+		<div class="content-separator"></div>
+	{% endif %}
+	{% if user.is_anonymous %}
+		<h2>Newsletter</h2>
+		<p>Want to be notified about interesting government documents like this one? Sign up for our mailing list. We only send it out when we have something interesting to say, and we'll never sell or spam your address. You can unsubscribe easily any time you want.</p>
+		{% include "foia/mailchimp.html" %}
+		<div class="content-separator"></div>
+	{% endif %}
+
+	{% if actions %}
+		<h2>Actions</h2>
+		{% for action in actions %}
+			<p><a class="jqbutton" href="{{action.link}}"{% if action.id %} id="{{action.id}}"{% endif %}>{{action.label}}</a></p>
+		{% endfor %}
+	{% endif %}
+	<div id="dialog" title="Embed Code">
+		<p>Copy and paste this code into your site to embed this document in the document viewer:<p>
+		<textarea id="embed0" style="width: 520px; height: 160px"></textarea>
+		<p>Copy and paste this code into your site to create a thumbnail link to this document:<p>
+		<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
+	</div>
+
+	{% if object.tracking_id %}
+		<div>
+		<p>Agency Tracking ID: {{object.tracking_id}}</p>
+		</div>
+		<div class="content-separator"></div>
+	{% endif %}
+
+	{% for doc in object.public_documents.all %}
+		{% if doc.rodeo_set.all %}
+			<div id="rodeo-{{doc.doc_id}}" style="display: none;">
+				<h2>Help to Analyze</h2>
+				<ul>
+					{% for rodeo in doc.rodeo_set.all %}
+						<li><a href="{{rodeo.get_absolute_url}}">{{rodeo.title}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="content-separator"></div>
+		{% endif %}
+	{% endfor %}
+
+	{% get_pingback_list for object as pingbacks %}
+	{% if pingbacks %}
+	    <h2>News & Opinions:</h2>
+	    {% for pingback in pingbacks %}
+	        <div class="b-pingback">
+						<strong><a href="{{pingback.url}}">{{ pingback.title|striptags|safe }}</a></strong><br />
+						<em>{{ pingback.date|date }}</em><br />
+	
+						<p>{{ pingback.content|striptags|safe }}</p>
+	        </div>
+	    {% endfor %}
+		<div class="content-separator"></div>
+	{% endif %}
+
+	<div id="tweet-container" style="display: none;" >
+		<div class="comments" id="tweets">
+			<!-- Tweets go here -->
+		</div>
+		<div class="content-separator"></div>
+	</div>
+
+	<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
+	<div class="content-separator"></div>
+
+{% endblock %}
+
+{% block media %}
+
+	<script type="text/javascript">
+		$(function() {
+			// Enable tweetbacks
+			var MAX_TWEETS = 5;
+			var BASE = 'http://otter.topsy.com/trackbacks.js?callback=?&perpage=' + MAX_TWEETS;
+			var ALL = BASE + '&url=';
+			var INFL = BASE + '&infonly=1&url=';
+			var URL_RE = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+			var TWEET_RE = /@([A-Za-z0-9_]+)/g;
+
+			function urlify(text) {
+				return text.replace(URL_RE,"<a href='$1'>$1</a>").
+							replace(TWEET_RE, "<a href='http://twitter.com/$1'>@$1</a>");
+			}
+
+			function processTweetList(list) {
+				$('#tweet-container').show();
+				$.each(list, function(index, tweet) {
+					$('<div class="comment">' + 
+					'<div class="comment_avatar">' +
+					'<img src="' + tweet.author.photo_url + '" class="avatar avatar-36 photo" height="36" width="36"/>' +
+					'</div>' +
+					'<div class="comment_body">' +
+					'<span class="comment_author">' + 
+					'<a href="' + tweet.permalink_url + '">' +
+					tweet.author.name + '</a></span>' +
+					'<span class="comment_main"><p>' + urlify(tweet.content) + '</p></span>' +
+					'<div class="comment_date">' + tweet.date_alpha + '</div>'+
+					'</div>' +
+					'</div>').appendTo('#tweets');
+				});
+			}
+
+			function getTweets(url) {
+				$.getJSON(ALL + url, function(data) {
+					var response = data.response;
+					if (response.total > MAX_TWEETS) {
+						$.getJSON(INFL + url, function(infl) {
+							processTweetList(infl.response.list);
+							var count = (infl.response.total > MAX_TWEETS ? MAX_TWEETS : infl.response.total);
+						});        
+					} else if (response.total > 0) {
+						processTweetList(response.list);
+					}
+				});
+			}
+			var url = "http://www.muckrock.com{{request.path}}";
+			getTweets(url);
+
+		});
+	</script>
+
+{% endblock %}
