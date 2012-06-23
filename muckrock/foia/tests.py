@@ -94,7 +94,8 @@ class TestFOIARequestUnit(TestCase):
         foia.submit()
         nose.tools.eq_(mail.outbox[-1].from_email, '%s@requests.muckrock.com' % foia.get_mail_id())
         nose.tools.eq_(mail.outbox[-1].to, ['test@agency1.gov'])
-        nose.tools.eq_(mail.outbox[-1].bcc, ['other_a@agency1.gov', 'other_b@agency1.gov'])
+        nose.tools.eq_(mail.outbox[-1].bcc,
+                       ['other_a@agency1.gov', 'other_b@agency1.gov', 'requests@muckrock.com'])
         nose.tools.eq_(mail.outbox[-1].subject,
                        'Freedom of Information Request: %s' % foia.title)
         nose.tools.eq_(foia.status, 'processed')
