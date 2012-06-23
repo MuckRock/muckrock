@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
+    'raven.contrib.django',
     'gunicorn',
     'south',
     'django_nose',
