@@ -18,7 +18,7 @@ from foia.models import FOIARequest, FOIADocument
 logger = logging.getLogger('task')
 logger.setLevel(logging.INFO)
 
-@periodic_task(run_every=crontab(hour=0, minute=30))
+@periodic_task(run_every=crontab(hour=0, minute=30), name='accounts.tasks.store_statstics')
 def store_statstics():
     """Store the daily statistics"""
 
