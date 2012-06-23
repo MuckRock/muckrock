@@ -261,7 +261,8 @@ class FOIARequest(models.Model):
 
     def get_other_emails(self):
         """Get the other emails for this request as a list"""
-        return fields.email_separator_re.split(self.other_emails)
+        # Adding blank emails here breaks mailgun backend
+        return [e for e in fields.email_separator_re.split(self.other_emails) if e]
 
     def get_to_who(self):
         """Who communications are to"""
