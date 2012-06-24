@@ -14,8 +14,7 @@ mock==0.7.0b2
 webassets==0.7.1
 cssutils==0.9.7b3
 gdata==2.0.17
-#easy-thumbnails==1.0-alpha-14
-easy-thumbnails==1.0.3
+easy-thumbnails==1.0-alpha-14
 django-pingback==0.3
 BeautifulSoup==3.2.1
 django-taggit==0.9.3
