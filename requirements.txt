@@ -13,8 +13,6 @@ django-debug-toolbar==0.8.3
 mock==0.7.0b2
 webassets==0.7.1
 cssutils==0.9.7b3
-celery==2.4.5
-django-celery==2.4.2
 gdata==2.0.17
 easy-thumbnails==1.0-alpha-14
 django-pingback==0.3
@@ -35,3 +33,5 @@ python-memcached==1.48
 raven>=1.7.3
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
 newrelic
+celery==2.5.5
+django-celery==2.5.5
