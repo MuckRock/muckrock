@@ -217,7 +217,8 @@ MONTHLY_REQUESTS = {
 
 logger = logging.getLogger()
 logger.setLevel(getattr(logging, os.environ.get('LOGGING_LEVEL', 'DEBUG')))
-setup_logging(SentryHandler())
+if boolcheck(os.environ.get('SENTRY_LOG', False)):
+    setup_logging(SentryHandler())
 
 # pylint: disable=W0611
 import monkey
