@@ -13,7 +13,7 @@ import os
 import time
 
 from foia.models import FOIARequest
-from settings import MAILGUN_ACCESS_KEY
+from settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
@@ -132,8 +132,9 @@ class TestMailgunViews(TestCase):
         finally:
             foia.files.all()[0].delete()
             os.remove('data.xls')
-            if os.path.exists('static/media/foia_files/data.xls'):
-                os.remove('static/media/foia_files/data.xls')
+            file_path = os.path.join(SITE_ROOT, 'static/media/foia_files/data.xls')
+            if os.path.exists(file_path):
+                os.remove(file_path)
 
     def test_fax(self):
         """Test a fax confirmation"""
