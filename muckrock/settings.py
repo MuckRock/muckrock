@@ -6,6 +6,8 @@ import os
 import urlparse
 
 import logging
+from raven.conf import setup_logging
+from raven.contrib.django.handlers import SentryHandler
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -213,9 +215,9 @@ MONTHLY_REQUESTS = {
     'pro': 20,
 }
 
-
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(getattr(logging, os.environ.get('LOGGING_LEVEL', 'DEBUG')))
+setup_logging(SentryHandler())
 
 # pylint: disable=W0611
 import monkey
