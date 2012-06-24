@@ -83,7 +83,7 @@ ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 
 AWS_QUERYSTRING_AUTH = False
-AWS_S3_SECURE_URLS = False
+AWS_S3_SECURE_URLS = True
 
 
 # List of callables that know how to import templates from various sources.
