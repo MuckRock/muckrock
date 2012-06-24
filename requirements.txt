@@ -35,3 +35,4 @@ raven>=1.7.3
 newrelic
 celery==2.5.5
 django-celery==2.5.5
+django-sslify==0.2

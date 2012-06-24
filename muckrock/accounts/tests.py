@@ -497,28 +497,31 @@ class TestAccountFunctional(TestCase):
 
     def test_stripe_webhooks(self):
         """Test webhooks received from stripe"""
+        # pylint: disable=W0142
 
-        response = self.client.post(reverse('acct-webhook'), {})
+        kwargs = {"wsgi.url_scheme": "https"}
+
+        response = self.client.post(reverse('acct-webhook'), {}, **kwargs)
         nose.tools.eq_(response.status_code, 404)
 
         response = self.client.post(reverse('acct-webhook'),
-                                    {'json': json.dumps({'event': 'fake_event'})})
+                                    {'json': json.dumps({'event': 'fake_event'})}, **kwargs)
         nose.tools.eq_(response.status_code, 404)
 
         response = self.client.post(reverse('acct-webhook'),
-                                    {'json': json.dumps({'event': 'ping'})})
+                                    {'json': json.dumps({'event': 'ping'})}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
 
         webhook_json = open(os.path.join(SITE_ROOT, 'accounts/fixtures/'
                             'webhook_recurring_payment_failed.json')).read()
-        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json})
+        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
 
         webhook_json = open(os.path.join('accounts/fixtures/'
                             'webhook_subscription_final_payment_attempt_failed.json')).read()
-        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json})
+        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
         nose.tools.eq_(len(mail.outbox), 2)
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
