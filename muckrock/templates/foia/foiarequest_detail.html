@@ -131,19 +131,19 @@
 	{% if object.public_documents %}
 		<div id="tabs-documents">
 			<div id="viewer"></div>
-			<script src="http://s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+			<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 			<script type="text/javascript">
 				function display_doc(doc_id)
 				{
 					$("#tabs").tabs("select", "tabs-documents");
-					DV.load('http://www.documentcloud.org/documents/' + doc_id + '.js', {
+					DV.load('https://www.documentcloud.org/documents/' + doc_id + '.js', {
 						width: 627,
 						height: 600,
 						sidebar: false,
 						container: "#viewer"
 					});
 
-					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="http://s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("http://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
+					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
 					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
 					$('textarea#embed0').val(embed_code0);
 					$('textarea#embed1').val(embed_code1);
@@ -156,7 +156,7 @@
 					var idx = doc_id.indexOf('-');
 					var num = doc_id.slice(0, idx);
 					var name = doc_id.slice(idx + 1);
-					return 'http://s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+					return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
 				}
 
 				function doc_load() {
@@ -286,7 +286,7 @@
 		<div class="content-separator"></div>
 	</div>
 
-	<div id="fb-root"></div><script src="http://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
+	<div id="fb-root"></div><script src="https://connect.facebook.net/en_US/all.js#appId=168527526530618&amp;xfbml=1"></script><fb:comments href="muckrock.com{{request.path}}" num_posts="3" width="250"></fb:comments>
 	<div class="content-separator"></div>
 
 {% endblock %}
