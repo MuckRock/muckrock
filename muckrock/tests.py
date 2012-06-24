@@ -7,19 +7,22 @@ from django.test import TestCase
 
 import nose.tools
 
-# allow methods that could be functions and too many public methods in tests
+# allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=R0201
 # pylint: disable=R0904
+# pylint: disable=W0142
 
- # helper functions for view testing
+kwargs = {"wsgi.url_scheme": "https"}
+
+# helper functions for view testing
 def get_allowed(client, url, templates=None, base='base.html', context=None, redirect=None):
     """Test a get on a url that is allowed with the users current credntials"""
     # pylint: disable=R0913
-    response = client.get(url, follow=True)
+    response = client.get(url, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
 
     if redirect:
-        nose.tools.eq_(response.redirect_chain, [('http://testserver' + redirect, 302)])
+        nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
 
     # make sure first 3 match (4th one might be form.html, not important)
     if templates:
@@ -33,9 +36,9 @@ def get_allowed(client, url, templates=None, base='base.html', context=None, red
 
 def post_allowed(client, url, data, redirect):
     """Test an allowed post with the given data and redirect location"""
-    response = client.post(url, data, follow=True)
+    response = client.post(url, data, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
-    nose.tools.eq_(response.redirect_chain, [('http://testserver' + redirect, 302)])
+    nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
 
     return response
 
@@ -43,7 +46,7 @@ def post_allowed_bad(client, url, templates, data=None):
     """Test an allowed post with bad data"""
     if data is None:
         data = {'bad': 'data'}
-    response = client.post(url, data)
+    response = client.post(url, data, **kwargs)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
     nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
@@ -51,14 +54,14 @@ def post_allowed_bad(client, url, templates, data=None):
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
     to be viewed only by authenticated users"""
-    redirect = 'http://testserver/accounts/login/?next=' + url
-    response = client.get(url)
+    redirect = 'https://testserver:80/accounts/login/?next=' + url
+    response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 302)
     nose.tools.eq_(response['Location'], redirect)
 
 def get_404(client, url):
     """Test a get on a url that is allowed with the users current credntials"""
-    response = client.get(url)
+    response = client.get(url, **kwargs)
     nose.tools.eq_(response.status_code, 404)
 
     return response

@@ -15,9 +15,10 @@ import time
 from foia.models import FOIARequest
 from settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
-# allow methods that could be functions and too many public methods in tests
+# allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=R0201
 # pylint: disable=R0904
+# pylint: disable=W0142
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
@@ -28,6 +29,7 @@ class TestMailgunViews(TestCase):
         """Set up tests"""
         # pylint: disable=C0103
         mail.outbox = []
+        self.kwargs = {"wsgi.url_scheme": "https"}
 
     def sign(self, data):
         """Add mailgun signature to data"""
@@ -54,7 +56,7 @@ class TestMailgunViews(TestCase):
         }
         self.sign(data)
         response = self.client.post(reverse('mailgun-request',
-                                    kwargs={'mail_id': foia.get_mail_id()}), data)
+                                    kwargs={'mail_id': foia.get_mail_id()}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
         nose.tools.eq_(len(mail.outbox), 3)
@@ -80,7 +82,7 @@ class TestMailgunViews(TestCase):
         }
         self.sign(data)
         response = self.client.post(reverse('mailgun-request',
-                                    kwargs={'mail_id': foia.get_mail_id()}), data)
+                                    kwargs={'mail_id': foia.get_mail_id()}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
         nose.tools.eq_(len(mail.outbox), 1)
@@ -99,7 +101,7 @@ class TestMailgunViews(TestCase):
         }
         self.sign(data)
         response = self.client.post(reverse('mailgun-request',
-                                    kwargs={'mail_id': '123-12345678'}), data)
+                                    kwargs={'mail_id': '123-12345678'}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
         nose.tools.eq_(len(mail.outbox), 1)
@@ -123,7 +125,8 @@ class TestMailgunViews(TestCase):
             }
             self.sign(data)
             response = self.client.post(reverse('mailgun-request',
-                                        kwargs={'mail_id': foia.get_mail_id()}), data)
+                                        kwargs={'mail_id': foia.get_mail_id()}), data,
+                                        **self.kwargs)
             nose.tools.eq_(response.status_code, 200)
 
             foia = FOIARequest.objects.get(pk=1)
@@ -148,7 +151,7 @@ class TestMailgunViews(TestCase):
             'body-plain':    'Test fax.',
         }
         self.sign(data)
-        response = self.client.post(reverse('mailgun-fax'), data)
+        response = self.client.post(reverse('mailgun-fax'), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
         nose.tools.eq_(len(mail.outbox), 1)
