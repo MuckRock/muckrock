@@ -185,6 +185,7 @@ BROKER_PASSWORD = url.password
 # pylint: disable=E1101
 BROKER_VHOST = url.path[1:]
 # pylint: enable=E1101
+BROKER_POOL_LIMIT = int(os.environ.get('BROKER_POOL_LIMIT', 2))
 
 # for redis only:
 #BROKER_VHOST = '0'
