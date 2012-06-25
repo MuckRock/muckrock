@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
 )
 
 if settings.DEBUG:

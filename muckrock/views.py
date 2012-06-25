@@ -4,7 +4,7 @@ Views for muckrock project
 
 from django.db.models import Sum
 from django.http import HttpResponseServerError
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext, Context, loader
 
 from foia.models import FOIARequest, FOIADocument
@@ -35,6 +35,11 @@ def front_page(request):
 
     return render_to_response('front_page.html', locals(),
                               context_instance=RequestContext(request))
+
+def blog(request, path=''):
+    """Redirect to the new blog URL"""
+    # pylint: disable=W0613
+    return redirect('http://blog.muckrock.com/%s/' % path, permanant=True)
 
 def handler500(request):
     """
