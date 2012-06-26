@@ -6,6 +6,7 @@ from django.db.models import Sum
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
+from business_days.models import Holiday, HolidayCalendar
 from tags.models import Tag
 
 class RequestHelper(object):
@@ -86,11 +87,21 @@ class Jurisdiction(models.Model, RequestHelper):
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
-    days = models.PositiveSmallIntegerField(blank=True, null=True)
     image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True,
                                   resize_source={'size': (372, 233), 'crop': 'smart'})
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
+
+    # non local
+    days = models.PositiveSmallIntegerField(blank=True, null=True, help_text='How many days do they'
+                                                                             ' have to respond?')
+    observe_sat = models.BooleanField(help_text='Are holidays observed on Saturdays? '
+                                                '(or are they moved to Friday?)')
+    holidays = models.ManyToManyField(Holiday, blank=True)
+    intro = models.TextField(blank=True, help_text='Intro paragraph for request - '
+                                         'usually includes the pertinant FOI law')
+    waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
+                              'FOI law has special line for waivers')
 
     def __unicode__(self):
         # pylint: disable=E1101
@@ -120,6 +131,14 @@ class Jurisdiction(models.Model, RequestHelper):
             return self.parent.days
         else:
             return self.days
+
+    def get_calendar(self):
+        """Get a calendar of business days for the jurisdiction"""
+        # pylint: disable=E1101
+        if self.level == 'l':
+            return HolidayCalendar(self.parent.holidays.all(), self.parent.observe_sat)
+        else:
+            return HolidayCalendar(self.holidays.all(), self.observe_sat)
 
     class Meta:
         # pylint: disable=R0903
