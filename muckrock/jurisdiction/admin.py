@@ -15,5 +15,15 @@ class JurisdictionAdmin(admin.ModelAdmin):
     list_display = ('name', 'level')
     list_filter = ['level']
     search_fields = ['name']
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug', 'abbrev', 'level', 'parent', 'hidden', 'image',
+                       'image_attr_line', 'public_notes')
+        }),
+        ('Options for states/federal', {
+            'classes': ('collapse',),
+            'fields': ('days', 'observe_sat', 'holidays', 'intro', 'waiver')
+        }),
+    )
 
 admin.site.register(Jurisdiction, JurisdictionAdmin)
