@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     'tags',
     'agency',
     'jurisdiction',
+    'business_days',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
