@@ -15,6 +15,7 @@ class JurisdictionAdmin(admin.ModelAdmin):
     list_display = ('name', 'level')
     list_filter = ['level']
     search_fields = ['name']
+    filter_horizontal = ('holidays', )
     fieldsets = (
         (None, {
             'fields': ('name', 'slug', 'abbrev', 'level', 'parent', 'hidden', 'image',
