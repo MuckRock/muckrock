@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}
+{% extends "request_templates/base.txt" %}
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}{{document_request}}{% endblock %}

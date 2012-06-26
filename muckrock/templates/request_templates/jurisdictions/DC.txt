@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to the District of Columbia Freedom of Information Act of 1974, D.C. Code Ann. § 2-531 et seq. ("D.C. Act"), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}

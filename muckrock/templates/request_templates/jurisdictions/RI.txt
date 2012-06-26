@@ -1,8 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to the Rhode Island Access to Public Records Act ("APRA"), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}
-
