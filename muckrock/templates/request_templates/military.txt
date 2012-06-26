@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}{% load tags%}
+{% extends "request_templates/base.txt" %}{% load tags%}
 {% block title %}Military Service Record for {{full_name}}{% endblock %}
 
 {% block content %}I hereby request confirmation of military service, including dates of enlistment and active and reserve duty, branch of services active with and discharge status of the following individual:

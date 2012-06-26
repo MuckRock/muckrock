@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to the New York State Freedom of Information Law (1977 N.Y. Laws ch. 933), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}

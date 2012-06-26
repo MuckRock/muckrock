@@ -6,7 +6,6 @@ from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -562,16 +561,10 @@ class FOIAWizard(DynamicSessionFormWizard):
             jurisdiction = form_list[0].cleaned_data[level]
         elif level == 'federal':
             jurisdiction = Jurisdiction.objects.get(level='f')
-        else: # pragma: no cover
-            return render_to_response('error.html',
-                     {'message': 'There was an error during form processing'},
-                     context_instance=RequestContext(request))
 
-        template_file = 'request_templates/templates/%s.txt' % template
+        template_file = 'request_templates/%s.txt' % template
         data = form_list[2].cleaned_data if len(form_list) > 2 else {}
         data['jurisdiction'] = jurisdiction
-        data['jurisdiction_template'] = \
-                'request_templates/jurisdictions/%s.txt' % jurisdiction.legal()
 
         title, foia_request = \
             (s.strip() for s in render_to_string(template_file, data,

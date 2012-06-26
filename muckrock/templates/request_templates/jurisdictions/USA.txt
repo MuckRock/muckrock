@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-This is a request under the Freedom of Information Act.  I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}

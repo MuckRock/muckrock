@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}{% load tags%}
+{% extends "request_templates/base.txt" %}{% load tags%}
 {% block title %}FTC Complaints for {{companies|company_title}}{% endblock %}
 
 {% block content %}I would like copies of all complaints to the Federal Trade Commission regarding the following companies:
