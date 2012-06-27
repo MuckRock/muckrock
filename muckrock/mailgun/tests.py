@@ -49,7 +49,7 @@ class TestMailgunViews(TestCase):
         data = {
             'from': 'test@agency.gov',
             'From': 'test@agency.gov',
-            'To':   '%s@requests.muckrock.com, other@agency.gov' % foia.get_mail_id(),
+            'To':   '%s@requests.muckrock.com, <other@agency.gov>' % foia.get_mail_id(),
             'subject': 'Test subject',
             'stripped-text': 'Test normal.',
             'body-plain':    'Test normal.',
