@@ -132,6 +132,22 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.days
 
+    def get_intro(self):
+        """Intro for requests"""
+        # pylint: disable=E1101
+        if self.level == 'l':
+            return self.parent.intro
+        else:
+            return self.intro
+
+    def get_waiver(self):
+        """Waiver paragraph for requests"""
+        # pylint: disable=E1101
+        if self.level == 'l':
+            return self.parent.waiver
+        else:
+            return self.waiver
+
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""
         # pylint: disable=E1101

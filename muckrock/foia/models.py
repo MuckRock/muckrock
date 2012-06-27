@@ -19,7 +19,6 @@ import os
 import re
 
 from agency.models import Agency
-from business_days.business_days import calendars
 from jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from settings import MAILGUN_SERVER_NAME, STATIC_URL
@@ -434,10 +433,7 @@ class FOIARequest(models.Model):
         """Set the due date, follow up date and days until due attributes"""
         # pylint: disable=E1101
 
-        cal = calendars.get(self.jurisdiction.legal())
-        if not cal:
-            logger.warn('%s needs a calendar', self.jurisdiction)
-            cal = calendars['USA']
+        cal = self.jurisdiction.get_calendar()
 
         # first submit
         if not self.date_submitted:

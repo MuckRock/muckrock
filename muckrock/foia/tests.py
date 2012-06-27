@@ -12,7 +12,6 @@ import datetime
 import re
 from operator import attrgetter
 
-from business_days.business_days import calendars
 from foia.models import FOIARequest, FOIACommunication
 from agency.models import Agency
 from jurisdiction.models import Jurisdiction
@@ -423,7 +422,7 @@ class TestFOIAIntegration(TestCase):
         user = User.objects.get(username='adam')
         agency = Agency.objects.get(pk=3)
         jurisdiction = Jurisdiction.objects.get(pk=1)
-        cal = calendars.get(jurisdiction.legal())
+        cal = jurisdiction.get_calendar()
 
         self.set_today(datetime.date(2010, 2, 1))
         nose.tools.eq_(len(mail.outbox), 0)

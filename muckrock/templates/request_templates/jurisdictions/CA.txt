@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to the California's Sunshine Amendment (Cal. Const. Art. I, § 3(b)), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}

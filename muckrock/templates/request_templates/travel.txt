@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}
+{% extends "request_templates/base.txt" %}
 {% block title %}Travel Expense Reports for {{full_name}}{% endblock %}
 
 {% block content %}All travel expense records for {{full_name}}, of the {{department}}.  This includes any copies of receipts or public credit card statements filed as part of the report, with sensitive date removed.{% endblock %}

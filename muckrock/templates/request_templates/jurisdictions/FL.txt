@@ -1,8 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to Florida's Sunshine Law (Fla. Stat. secs. 119.01 to 119.15
-(1995)), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}

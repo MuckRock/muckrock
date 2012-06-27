@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to RCW Ch. 42.56 (Public Records Act), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}
