@@ -47,6 +47,9 @@ class UserChangeForm(ProfileForm):
 class CreditCardForm(forms.ModelForm):
     """A form for the user's CC"""
 
+    name = forms.CharField(required=False, help_text='Name as it appears on card',
+                           widget=forms.TextInput(
+                               attrs={'class': 'card-name stripe-sensitive required'}))
     card_number = forms.CharField(max_length=20, required=False,
                                   widget=forms.TextInput(
                                       attrs={'autocomplete': 'off',
@@ -71,7 +74,7 @@ class CreditCardForm(forms.ModelForm):
         # pylint: disable=R0903
         # This is a model form just for inheritance purposes
         model = User
-        fields = ['card_number', 'cvc', 'expiration', 'token']
+        fields = ['name', 'card_number', 'cvc', 'expiration', 'token']
 
 
 class UpgradeSubscForm(CreditCardForm):
@@ -102,13 +105,13 @@ class UpgradeSubscForm(CreditCardForm):
 
     class Meta(CreditCardForm.Meta):
         # pylint: disable=R0903
-        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'token']
+        fields = ['use_on_file', 'name', 'card_number', 'cvc', 'expiration', 'token']
 
 
 class PaymentForm(UpgradeSubscForm):
     """A form for buying requests"""
 
-    save_cc = forms.BooleanField(required=False, label='Save for future use')
+    save_cc = forms.BooleanField(required=False, initial=True, label='Save for future use')
 
     def clean(self):
         """Validate the form"""
@@ -125,7 +128,7 @@ class PaymentForm(UpgradeSubscForm):
 
     class Meta(UpgradeSubscForm.Meta):
         # pylint: disable=R0903
-        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
+        fields = ['use_on_file', 'name', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
 
 
 class CancelSubscForm(forms.Form):
@@ -175,5 +178,5 @@ class RegisterPro(RegisterFree, CreditCardForm):
     class Meta(RegisterFree.Meta):
         # pylint: disable=R0903
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2',
-                  'card_number', 'cvc', 'expiration', 'token']
+                  'name', 'card_number', 'cvc', 'expiration', 'token']
 

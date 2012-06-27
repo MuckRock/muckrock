@@ -255,8 +255,9 @@ class TestProfileUnit(TestCase):
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
-                        'card': 'token',
+                        'customer': profile.get_customer().id,
                         'description': 'description'}))
+        # XXX check that card isnt saved
 
 
 @patch('stripe.Customer', MockCustomer)
