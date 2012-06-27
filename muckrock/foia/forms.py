@@ -25,7 +25,8 @@ from fields import GroupedModelChoiceField
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
 
-    agency = forms.ModelChoiceField(label='Agency', required=False, queryset=Agency.objects.all(),
+    agency = forms.ModelChoiceField(label='Agency', required=False,
+                                    queryset=Agency.objects.order_by('name'),
                                     widget=forms.Select(attrs={'class': 'combobox'}),
                                     help_text='Select one of the agencies for the jurisdiction you '
                                           'have chosen, or write in the correct agency if known')

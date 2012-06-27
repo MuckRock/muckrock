@@ -267,15 +267,10 @@ class FOIARequest(models.Model):
         """Who communications are to"""
         # pylint: disable=E1101
 
-        if self.agency and self.email:
-            to_who = '%s <%s>' % (self.agency.name, self.email)
-        elif self.agency and self.agency.email:
-            to_who = '%s <%s>' % (self.agency.name, self.agency.email)
-        elif self.agency:
-            to_who = self.agency.name
+        if self.agency:
+            return self.agency.name
         else:
-            to_who = ''
-        return to_who[:255]
+            return ''
 
     def get_saved(self):
         """Get the old model that is saved in the db"""
