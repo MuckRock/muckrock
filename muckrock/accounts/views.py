@@ -21,7 +21,7 @@ import stripe
 import sys
 
 from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
-                           PaymentForm, UpgradeSubscForm, CancelSubscForm
+                           PaymentForm, CancelSubscForm
 from accounts.models import Profile
 from foia.models import FOIARequest
 from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -124,7 +124,7 @@ def update_cc(request):
             return HttpResponseRedirect(reverse('acct-my-profile'))
 
     else:
-        form = CreditCardForm()
+        form = CreditCardForm(initial={'name': request.user.get_full_name()})
 
     card = request.user.get_profile().get_cc()
     if card:
@@ -158,7 +158,7 @@ def manage_subsc(request):
     elif user_profile.acct_type == 'community':
         heading = 'Upgrade to a Pro Account'
         desc = 'Upgrade to a professional account. $40 per month for 10 requests per month.'
-        form_class = UpgradeSubscForm
+        form_class = PaymentForm
         template = 'registration/cc.html'
     elif user_profile.acct_type == 'pro':
         heading = 'Cancel Your Subscription'
@@ -187,7 +187,7 @@ def manage_subsc(request):
             return HttpResponseRedirect(reverse('acct-my-profile'))
 
     else:
-        form = form_class(request=request)
+        form = form_class(request=request, initial={'name': request.user.get_full_name()})
 
     return render_to_response(template,
                               {'form': form, 'heading': heading, 'desc': desc,
@@ -215,7 +215,7 @@ def buy_requests(request):
                 return HttpResponseRedirect(reverse('acct-buy-requests'))
 
     else:
-        form = PaymentForm(request=request)
+        form = PaymentForm(request=request, initial={'name': request.user.get_full_name()})
 
     return render_to_response('registration/cc.html',
                               {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Buy Requests',

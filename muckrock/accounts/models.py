@@ -124,18 +124,13 @@ class Profile(models.Model):
     def pay(self, form, amount, desc):
         """Create a stripe charge for the user"""
         customer = self.get_customer()
-        save_cc = form.cleaned_data.get('save_cc')
         use_on_file = form.cleaned_data.get('use_on_file')
         token = form.cleaned_data.get('token')
 
-        if save_cc:
+        if not use_on_file:
             self.save_cc(token)
-        if use_on_file or save_cc:
-            stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
-                                 description=desc)
-        else:
-            stripe.Charge.create(amount=amount, currency='usd', card=token,
-                                 description=desc)
+
+        stripe.Charge.create(amount=amount, currency='usd', customer=customer.id, description=desc)
 
 
 class Statistics(models.Model):
