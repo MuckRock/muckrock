@@ -47,8 +47,6 @@ class UserChangeForm(ProfileForm):
 class CreditCardForm(forms.ModelForm):
     """A form for the user's CC"""
 
-    name = forms.CharField(required=False, widget=forms.TextInput(
-                            attrs={'class': 'card-name stripe-sensitive required'}))
     card_number = forms.CharField(max_length=20, required=False,
                                   widget=forms.TextInput(
                                       attrs={'autocomplete': 'off',
@@ -73,17 +71,17 @@ class CreditCardForm(forms.ModelForm):
         # pylint: disable=R0903
         # This is a model form just for inheritance purposes
         model = User
-        fields = ['name', 'card_number', 'cvc', 'expiration', 'token']
+        fields = ['card_number', 'cvc', 'expiration', 'token']
 
 
-class PaymentForm(CreditCardForm):
-    """A form for subscribing to pro accounts or buying requests"""
+class UpgradeSubscForm(CreditCardForm):
+    """A form for subscribing to pro accounts"""
 
     use_on_file = forms.BooleanField(required=False, label='Use card on file', initial=True)
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
-        super(PaymentForm, self).__init__(*args, **kwargs)
+        super(UpgradeSubscForm, self).__init__(*args, **kwargs)
 
         card = self.request.user.get_profile().get_cc()
         if not card:
@@ -104,7 +102,30 @@ class PaymentForm(CreditCardForm):
 
     class Meta(CreditCardForm.Meta):
         # pylint: disable=R0903
-        fields = ['use_on_file', 'name', 'card_number', 'cvc', 'expiration', 'token']
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'token']
+
+
+class PaymentForm(UpgradeSubscForm):
+    """A form for buying requests"""
+
+    save_cc = forms.BooleanField(required=False, label='Save for future use')
+
+    def clean(self):
+        """Validate the form"""
+
+        super(PaymentForm, self).clean()
+
+        save_cc = self.cleaned_data.get('save_cc')
+        use_on_file = self.cleaned_data.get('use_on_file')
+
+        if use_on_file and save_cc:
+            raise forms.ValidationError('You may not use the card on file and save a new one')
+
+        return self.cleaned_data
+
+    class Meta(UpgradeSubscForm.Meta):
+        # pylint: disable=R0903
+        fields = ['use_on_file', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
 
 
 class CancelSubscForm(forms.Form):
