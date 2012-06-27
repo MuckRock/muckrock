@@ -124,7 +124,7 @@ def update_cc(request):
             return HttpResponseRedirect(reverse('acct-my-profile'))
 
     else:
-        form = CreditCardForm()
+        form = CreditCardForm(initial={'name': request.user.get_full_name()})
 
     card = request.user.get_profile().get_cc()
     if card:
@@ -187,7 +187,7 @@ def manage_subsc(request):
             return HttpResponseRedirect(reverse('acct-my-profile'))
 
     else:
-        form = form_class(request=request)
+        form = form_class(request=request, initial={'name': request.user.get_full_name()})
 
     return render_to_response(template,
                               {'form': form, 'heading': heading, 'desc': desc,
@@ -215,7 +215,7 @@ def buy_requests(request):
                 return HttpResponseRedirect(reverse('acct-buy-requests'))
 
     else:
-        form = PaymentForm(request=request)
+        form = PaymentForm(request=request, initial={'name': request.user.get_full_name()})
 
     return render_to_response('registration/cc.html',
                               {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Buy Requests',
