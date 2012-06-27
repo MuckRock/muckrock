@@ -35,7 +35,7 @@ def handle_request(request, mail_id):
 
     try:
         foia = FOIARequest.objects.get(mail_id=mail_id)
-        _, from_email = parseaddr(from_)
+        from_realname, from_email = parseaddr(from_)
 
         if not _allowed_email(from_email, foia):
             logger.warning('Bad Sender: %s', from_)
@@ -43,7 +43,7 @@ def handle_request(request, mail_id):
             return HttpResponse('WARNING')
 
         comm = FOIACommunication.objects.create(
-                foia=foia, from_who=from_[:255],
+                foia=foia, from_who=from_realname[:255],
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False,
                 communication=post.get('stripped-text'))
