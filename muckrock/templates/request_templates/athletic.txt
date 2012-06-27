@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}
+{% extends "request_templates/base.txt" %}
 {% block title %}Athletic Personnel Salaries for {{school}}{% endblock %}
 
 {% block content %}Salary data, including total compensation and benefits, for all athletic personnel, including coaches, trainers and support staff, at {{school}}.{% endblock %}

@@ -1,4 +1,4 @@
-{% extends jurisdiction_template %}
+{% extends "request_templates/base.txt" %}
 {% block title %}Pet licensing data for {{jurisdiction.name}}{% endblock %}
 
 {% block content %}All the pet licensing data, including breed, owner address, and animal names for {{jurisdiction.name}}.{% endblock %}

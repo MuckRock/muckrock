@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block body %}
-Pursuant to the Vermont public records law (1 V.S.A. §§ 315-320), I hereby request the following records:
-
-{% block content %}{% endblock %}
-
-{% endblock %}
