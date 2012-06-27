@@ -17,7 +17,7 @@ from mock import Mock, patch
 
 from accounts.models import Profile
 from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
-                           PaymentForm, UpgradeSubscForm
+                           PaymentForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from settings import MONTHLY_REQUESTS, SITE_ROOT
 
@@ -74,24 +74,24 @@ class TestAccountFormsUnit(TestCase):
         form = CreditCardForm(data)
         nose.tools.assert_false(form.is_valid())
 
-    def test_upgrade_subsc_form_init(self):
-        """Test UpgradeSubscForm's init"""
+    def test_payment_form_init(self):
+        """Test PaymentForm's init"""
         mock_profile = Mock()
         mock_profile.get_cc.return_value = None
         mock_request = Mock()
         mock_request.user.get_profile.return_value = mock_profile
-        form = UpgradeSubscForm(request=mock_request)
+        form = PaymentForm(request=mock_request)
         nose.tools.ok_('use_on_file' not in form.fields)
 
         mock_card = Mock()
         mock_card.type = 'Visa'
         mock_card.last4 = '1234'
         mock_profile.get_cc.return_value = mock_card
-        form = UpgradeSubscForm(request=mock_request)
+        form = PaymentForm(request=mock_request)
         nose.tools.eq_(form.fields['use_on_file'].help_text, 'Visa ending in 1234')
 
-    def test_upgrade_subsc_form_clean(self):
-        """Test UpgradeSubscForm's clean"""
+    def test_payment_form_clean(self):
+        """Test PaymentForm's clean"""
         mock_card = Mock()
         mock_card.type = 'Visa'
         mock_card.last4 = '1234'
@@ -101,25 +101,14 @@ class TestAccountFormsUnit(TestCase):
         mock_request.user.get_profile.return_value = mock_profile
 
         data = {'token': 'token', 'use_on_file': False}
-        form = UpgradeSubscForm(data, request=mock_request)
+        form = PaymentForm(data, request=mock_request)
         nose.tools.ok_(form.is_valid())
 
         data = {'use_on_file': False}
-        form = UpgradeSubscForm(data, request=mock_request)
-        nose.tools.assert_false(form.is_valid())
-
-        data = {'use_on_file': True}
-        form = UpgradeSubscForm(data, request=mock_request)
-        nose.tools.ok_(form.is_valid())
-
-    def test_payment_form_clean(self):
-        """Test PaymentForm's clean"""
-        mock_request = Mock()
-        data = {'use_on_file': True, 'save_cc': True}
         form = PaymentForm(data, request=mock_request)
         nose.tools.assert_false(form.is_valid())
 
-        data = {'token': 'token', 'use_on_file': False, 'save_cc': True}
+        data = {'use_on_file': True}
         form = PaymentForm(data, request=mock_request)
         nose.tools.ok_(form.is_valid())
 
@@ -240,8 +229,7 @@ class TestProfileUnit(TestCase):
         profile = Profile.objects.get(pk=1)
         form = Mock()
 
-        # save cc = true
-        form.cleaned_data = {'save_cc': True, 'token': 'token'}
+        form.cleaned_data = {'use_on_file': True, 'token': 'token'}
         profile.pay(form, 4200, 'description')
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
@@ -249,13 +237,12 @@ class TestProfileUnit(TestCase):
                         'customer': profile.get_customer().id,
                         'description': 'description'}))
 
-        # save cc = false and use on file = false, has a token
-        form.cleaned_data = {'use_on_file': False, 'save_cc': False, 'token': 'token'}
+        form.cleaned_data = {'use_on_file': False, 'token': 'token'}
         profile.pay(form, 4200, 'description')
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
-                        'card': 'token',
+                        'customer': profile.get_customer().id,
                         'description': 'description'}))
 
 
