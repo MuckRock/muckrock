@@ -62,6 +62,11 @@
 							// given a valid form, submit the payment details to stripe
 							$(form['submit-button']).attr("disabled", "disabled")
 
+							if ($('#id_use_on_file').is(":checked")) {
+								form.submit();
+								return false;
+							}
+
 							Stripe.createToken({
 									name: $('.card-name').val(),
 									number: $('.card-number').val(),
