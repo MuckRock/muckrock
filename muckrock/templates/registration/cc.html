@@ -10,6 +10,7 @@
 							// Not ideal, but jQuery's validate plugin requires fields to have names
 							// so we add them at the last possible minute, in case any javascript
 							// exceptions have caused other parts of the script to fail.
+							$(".card-name").attr("name", "card-name");
 							$(".card-number").attr("name", "card-number");
 							$(".card-cvc").attr("name", "card-cvc");
 							$(".card-expiry-year").attr("name", "card-expiry-year");
@@ -17,6 +18,7 @@
 					}
 
 					function removeInputNames() {
+							$(".card-name").removeAttr("name");
 							$(".card-number").removeAttr("name");
 							$(".card-cvc").removeAttr("name");
 							$(".card-expiry-year").removeAttr("name");
@@ -24,6 +26,7 @@
 					}
 
 					function disableCC() {
+						$(".card-name").attr("disabled", "disabled");
 						$(".card-number").attr("disabled", "disabled");
 						$(".card-cvc").attr("disabled", "disabled");
 						$(".card-expiry-month").attr("disabled", "disabled");
@@ -32,6 +35,7 @@
 					}
 
 					function enableCC() {
+						$(".card-name").removeAttr("disabled");
 						$(".card-number").removeAttr("disabled");
 						$(".card-cvc").removeAttr("disabled");
 						$(".card-expiry-month").removeAttr("disabled");
@@ -58,7 +62,13 @@
 							// given a valid form, submit the payment details to stripe
 							$(form['submit-button']).attr("disabled", "disabled")
 
+							if ($('#id_use_on_file').is(":checked")) {
+								form.submit();
+								return false;
+							}
+
 							Stripe.createToken({
+									name: $('.card-name').val(),
 									number: $('.card-number').val(),
 									cvc: $('.card-cvc').val(),
 									exp_month: $('.card-expiry-month').val(),

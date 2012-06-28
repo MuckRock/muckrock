@@ -123,13 +123,17 @@ class Profile(models.Model):
 
     def pay(self, form, amount, desc):
         """Create a stripe charge for the user"""
+        # pylint: disable=E1101
+
         customer = self.get_customer()
+        desc = '%s: %s' % (self.user.username, desc)
         save_cc = form.cleaned_data.get('save_cc')
         use_on_file = form.cleaned_data.get('use_on_file')
         token = form.cleaned_data.get('token')
 
-        if save_cc:
+        if not use_on_file and save_cc:
             self.save_cc(token)
+
         if use_on_file or save_cc:
             stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
                                  description=desc)
