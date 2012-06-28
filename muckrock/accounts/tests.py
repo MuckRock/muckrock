@@ -247,7 +247,7 @@ class TestProfileUnit(TestCase):
                        {'amount': 4200,
                         'currency': 'usd',
                         'customer': profile.get_customer().id,
-                        'description': 'description'}))
+                        'description': 'adam: description'}))
 
         # save cc = false and use on file = false, has a token
         form.cleaned_data = {'use_on_file': False, 'save_cc': False, 'token': 'token'}
@@ -255,9 +255,8 @@ class TestProfileUnit(TestCase):
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
-                        'customer': profile.get_customer().id,
-                        'description': 'description'}))
-        # XXX check that card isnt saved
+                        'card': 'token',
+                        'description': 'adam: description'}))
 
 
 @patch('stripe.Customer', MockCustomer)
@@ -486,7 +485,7 @@ class TestAccountFunctional(TestCase):
                        {'amount': 2000,
                         'currency': 'usd',
                         'customer': profile.get_customer().id,
-                        'description': 'Charge for 5 requests'}))
+                        'description': 'adam: Charge for 5 requests'}))
 
         with patch('stripe.Charge') as NewMockCharge:
             NewMockCharge.create.side_effect = stripe.CardError('Message', 'Param', 'Code')
