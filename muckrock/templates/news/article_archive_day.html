@@ -7,8 +7,10 @@
 
 <div class="post-meta archive-pagination">
 	
+	{% if previous_day|date:"Y" != "999" %}
 	<div class="left"><a href="{% url news-archive-day year=previous_day|date:"Y",month=previous_day|date:"b",day=previous_day|date:"d" %}">
 			&#171; Previous page</a></div>
+	{% endif %}
 	{% if next_day %}
 	<div class="right"><a href="{% url news-archive-day year=next_day|date:"Y",month=next_day|date:"b",day=next_day|date:"d" %}">
 			Next page &#187;</a></div>
@@ -30,8 +32,10 @@
 
 <div class="post-meta archive-pagination">
 	
+	{% if previous_day|date:"Y" != "999" %}
 	<div class="left"><a href="{% url news-archive-day year=previous_day|date:"Y",month=previous_day|date:"b",day=previous_day|date:"d" %}">
 			&#171; Previous page</a></div>
+	{% endif %}
 	{% if next_day %}
 	<div class="right"><a href="{% url news-archive-day year=next_day|date:"Y",month=next_day|date:"b",day=next_day|date:"d" %}">
 			Next page &#187;</a></div>
