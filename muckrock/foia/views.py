@@ -184,8 +184,13 @@ def _save_foia_comm(request, foia, form, action):
     if action == 'Admin Fix':
         foia.email = form.cleaned_data['email']
         foia.other_emails = form.cleaned_data['other_emails']
+    if action == 'Admin Fix' and form.cleaned_data['from_email']:
+        from_who = form.cleaned_data['from_email']
+    else:
+        from_who = foia.user.get_full_name()
+
     FOIACommunication.objects.create(
-            foia=foia, from_who=foia.user.get_full_name(), to_who=foia.get_to_who(),
+            foia=foia, from_who=from_who, to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
     foia.submit(appeal=(action == 'Appeal'))
