@@ -10,7 +10,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1984-12-29 11:16:25", 
             "slug": "test-article-1", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -24,7 +24,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1989-12-29 11:16:25", 
             "slug": "test-article-2", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -38,7 +38,7 @@
             "summary": "Summary goes here", 
             "pub_date": "2050-12-29 11:16:25", 
             "slug": "test-article-3", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -52,7 +52,7 @@
             "summary": "Summary goes here", 
             "pub_date": "2050-12-29 11:16:25", 
             "slug": "test-article-4", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -66,7 +66,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1999-01-01 11:16:25", 
             "slug": "test-article-5", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -80,7 +80,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1999-01-01 11:16:25", 
             "slug": "test-article-6", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -94,7 +94,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1999-01-02 11:16:25", 
             "slug": "test-article-7", 
-            "foia": null
+            "foias": []
         }
     }, 
     {
@@ -108,7 +108,7 @@
             "summary": "Summary goes here", 
             "pub_date": "1999-02-02 11:16:25", 
             "slug": "test-article-8", 
-            "foia": null
+            "foias": []
         }
     } 
 ]
