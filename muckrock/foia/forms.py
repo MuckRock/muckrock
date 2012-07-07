@@ -139,13 +139,17 @@ class FOIANoteForm(forms.ModelForm):
 class FOIAAdminFixForm(forms.ModelForm):
     """Form to email from the request's address"""
 
+    from_email = forms.CharField(label='From', required=False,
+                                 help_text='Leaving blank will fill in with request owner')
+    email = forms.EmailField(label='To')
+    other_emails = forms.CharField(label='CC')
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
     class Meta:
         # pylint: disable=R0903
         model = FOIARequest
-        fields = ['email', 'other_emails']
+        fields = ['from_email', 'email', 'other_emails', 'comm']
 
 
 class FOIAWizardParent(forms.Form):
