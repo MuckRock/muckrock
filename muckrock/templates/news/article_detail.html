@@ -17,10 +17,13 @@
 				<p><a href=" {{object.get_absolute_url }}"><img src="{% thumbnail object.image 510x233 %}" alt="" class="bordered" /></a></p>
 				{% endif %}
 				<div class="post-date">by {{object.author.first_name}} {{object.author.last_name}} on {{object.pub_date|date:"DATETIME_FORMAT"}}</div>
-				{% if object.foia %}
-				<div>
-					<p>FOI Request: <a href="{{object.foia.get_absolute_url}}">{{object.foia.title}}</a></p>
-				</div>
+				{% if object.foias.exists %}
+				<p>FOI Requests:</p>
+				<ul>
+					{% for foia in object.foias.all %}
+						<li><a href="{{foia.get_absolute_url}}">{{foia.title}}</a></li>
+					{% endfor %}
+				</ul>
 				{% endif %}
 				<div class="post-body">
 					{% autoescape off %}

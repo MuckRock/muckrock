@@ -35,7 +35,7 @@ class Article(models.Model):
     author = models.ForeignKey(User, limit_choices_to = {'is_staff': True})
     publish = models.BooleanField('Publish on site', default=True,
             help_text='Articles will not appear on the site until their "publish date".')
-    foia = models.ForeignKey(FOIARequest, blank=True, null=True)
+    foias = models.ManyToManyField(FOIARequest, related_name='articles', blank=True, null=True)
     image = ThumbnailerImageField(upload_to='news_images', blank=True, null=True,
                                   resize_source={'size': (510, 233), 'crop': 'smart'})
 
