@@ -445,13 +445,7 @@ class FOIARequest(models.Model):
                 self.date_due = cal.business_days_from(date.today(), self.days_until_due)
                 self.days_until_due = None
 
-            # update follow up date
-            new_date = self.last_comm().date.date() + timedelta(self._followup_days())
-            if self.date_due and self.date_due > new_date:
-                new_date = self.date_due
-
-            if not self.date_followup or self.date_followup < new_date:
-                self.date_followup = new_date
+            self._update_followup_date()
 
         # if we are no longer waiting on the agency, do not follow up
         if self.status != 'processed' and self.date_followup:
@@ -466,6 +460,20 @@ class FOIARequest(models.Model):
             self.date_due = None
 
         self.save()
+
+    def _update_followup_date(self):
+        """Update the follow up date"""
+        try:
+            new_date = self.last_comm().date.date() + timedelta(self._followup_days())
+            if self.date_due and self.date_due > new_date:
+                new_date = self.date_due
+
+            if not self.date_followup or self.date_followup < new_date:
+                self.date_followup = new_date
+
+        except IndexError:
+            # This request has no communications at the moment, cannot asign a follow up date
+            pass
 
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
