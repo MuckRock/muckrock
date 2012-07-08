@@ -42,10 +42,15 @@ def flag_helper(request, obj, type_):
                                'base': '%s/base.html' % type_},
                               context_instance=RequestContext(request))
 
-def detail(request, slug, idx):
+def detail(request, federal_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
 
-    jurisdiction = get_object_or_404(Jurisdiction, slug=slug, pk=idx)
+    jurisdiction = get_object_or_404(Jurisdiction, slug=federal_slug)
+    if state_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=state_slug, parent=jurisdiction)
+    if local_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
+
     context = {'jurisdiction': jurisdiction}
     collect_stats(jurisdiction, context)
 

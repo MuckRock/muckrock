@@ -10,7 +10,7 @@
 <h1>{{agency.name}}</h1>
 
 <p class="quiet">
-	A <a href="{% url jurisdiction-detail slug=agency.jurisdiction.slug,idx=agency.jurisdiction.pk %}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
+	A <a href="{{ agency.jurisdiction.get_absolute_url }}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
 </p>
 
 {% if not agency.image %}
