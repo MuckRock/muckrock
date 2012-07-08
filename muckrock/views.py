@@ -4,10 +4,11 @@ Views for muckrock project
 
 from django.db.models import Sum
 from django.http import HttpResponseServerError
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 
 from foia.models import FOIARequest, FOIADocument
+from jurisdiction.models import Jurisdiction
 from news.models import Article
 
 def front_page(request):
@@ -40,6 +41,20 @@ def blog(request, path=''):
     """Redirect to the new blog URL"""
     # pylint: disable=W0613
     return redirect('http://blog.muckrock.com/%s/' % path, permanant=True)
+
+def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
+    """Redirect to the jurisdiction page"""
+
+    if jurisdiction:
+        jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    if slug and idx:
+        jmodel = get_object_or_404(Jurisdiction, slug=slug, pk=idx)
+
+    if not view:
+        return redirect(jmodel)
+    else:
+        # XXX
+        return redirect(jmodel.get_url(view))
 
 def handler500(request):
     """

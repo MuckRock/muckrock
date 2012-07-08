@@ -478,7 +478,7 @@ def list_by_tag(request, tag_slug):
     return _list(request, foia_requests, extra_context={'subtitle': 'Tagged with "%s"' % tag.name})
 
 @login_required
-def my_list(request, view):
+def my_list(request, view='all'):
     """Views owned by current user"""
     # pylint: disable=E1103
     # pylint: disable=R0912

@@ -114,7 +114,15 @@ class Jurisdiction(models.Model, RequestHelper):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable=E1101
-        return ('jurisdiction-detail', [], {'slug': self.slug, 'idx': self.pk})
+        if self.level == 'l':
+            return ('jurisdiction-detail', [], {'fed_slug': self.parent.parent.slug,
+                                                'state_slug': self.parent.slug,
+                                                'local_slug': self.slug})
+        elif self.level == 's':
+            return ('jurisdiction-detail', [], {'fed_slug': self.parent.slug,
+                                                'state_slug': self.slug})
+        elif self.level == 'f':
+            return ('jurisdiction-detail', [], {'fed_slug': self.slug})
 
     def legal(self):
         """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
@@ -159,5 +167,6 @@ class Jurisdiction(models.Model, RequestHelper):
     class Meta:
         # pylint: disable=R0903
         ordering = ['name']
+        unique_together = ('slug', 'parent')
 
 
