@@ -142,7 +142,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     from_email = forms.CharField(label='From', required=False,
                                  help_text='Leaving blank will fill in with request owner')
     email = forms.EmailField(label='To')
-    other_emails = forms.CharField(label='CC')
+    other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
