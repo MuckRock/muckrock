@@ -44,16 +44,17 @@ def blog(request, path=''):
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
+    # pylint: disable=W0621
+    # pylint: disable=W0613
 
     if jurisdiction:
         jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
-    if slug and idx:
-        jmodel = get_object_or_404(Jurisdiction, slug=slug, pk=idx)
+    if idx:
+        jmodel = get_object_or_404(Jurisdiction, pk=idx)
 
     if not view:
         return redirect(jmodel)
     else:
-        # XXX
         return redirect(jmodel.get_url(view))
 
 def handler500(request):

@@ -12,10 +12,10 @@ jur_url = r'(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?(?:/(?P<local_
 old_jur_url = r'(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 urlpatterns = patterns('',
-    # XXX need a root, list all jurisdictions?
-    url(r'^%s/$' % jur_url,      redirect_to, {'url': 'view'}, name='jurisdiction-default'),
+    url(r'^$',                   views.list_, name='jurisdiction-list'),
     url(r'^%s/view/$' % jur_url, views.detail, name='jurisdiction-detail'),
     url(r'^%s/flag/$' % jur_url, views.flag, name='jurisdiction-flag'),
+    url(r'^%s/$' % jur_url,      redirect_to, {'url': 'view'}, name='jurisdiction-default'),
 
 )
 

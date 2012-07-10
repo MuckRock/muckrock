@@ -58,7 +58,9 @@ urlpatterns = patterns('',
 )
 
 # old patterns for redirects
-actions = ('view', 'update', 'fix', 'admin-fix', 'appeal', 'add_notes', 'delete', 'embargo', 'pay', 'follow')
+# pylint: disable=W0142
+actions = ('view', 'update', 'fix', 'admin-fix', 'appeal',
+           'add_notes', 'delete', 'embargo', 'pay', 'follow')
 urlpatterns += patterns('',
     *(url(r'^%s/%s/$' % (action, old_foia_url), redirect_to,
           {'url': '/foi/%%(jurisdiction)s/%%(idx)s-%%(slug)s/%s/' % action})

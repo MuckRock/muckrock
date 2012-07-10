@@ -28,13 +28,13 @@ class TestJurisdictionUnit(TestCase):
     def test_jurisdiction_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
         nose.tools.eq_(unicode(self.state), u'Massachusetts')
-        nose.tools.eq_(unicode(self.local), u'Boston, MA')
+        nose.tools.eq_(unicode(self.local), u'Boston')
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
         nose.tools.eq_(self.state.get_absolute_url(),
             reverse('jurisdiction-detail',
-                    kwargs={'idx': self.state.pk, 'slug': 'massachusetts'}))
+                    kwargs={'state_slug': self.state.slug, 'fed_slug': self.state.parent.slug}))
 
     def test_jurisdiction_legal(self):
         """Test Jurisdiction model's legal method"""

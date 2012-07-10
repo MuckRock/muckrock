@@ -104,25 +104,30 @@ class Jurisdiction(models.Model, RequestHelper):
                               'FOI law has special line for waivers')
 
     def __unicode__(self):
-        # pylint: disable=E1101
-        if self.level == 'l':
-            return '%s, %s' % (self.name, self.parent.abbrev)
-        else:
-            return self.name
+        return self.name
 
-    @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
+        return self.get_url('detail')
+
+    @models.permalink
+    def get_url(self, view):
+        """The url for this object"""
         # pylint: disable=E1101
+        view = 'jurisdiction-%s' % view
         if self.level == 'l':
-            return ('jurisdiction-detail', [], {'fed_slug': self.parent.parent.slug,
-                                                'state_slug': self.parent.slug,
-                                                'local_slug': self.slug})
+            return (view, [], {'fed_slug': self.parent.parent.slug,
+                               'state_slug': self.parent.slug,
+                               'local_slug': self.slug})
         elif self.level == 's':
-            return ('jurisdiction-detail', [], {'fed_slug': self.parent.slug,
-                                                'state_slug': self.slug})
+            return (view, [], {'fed_slug': self.parent.slug,
+                               'state_slug': self.slug})
         elif self.level == 'f':
-            return ('jurisdiction-detail', [], {'fed_slug': self.slug})
+            return (view, [], {'fed_slug': self.slug})
+
+    def get_url_flag(self):
+        """So we can call from template"""
+        return self.get_url('flag')
 
     def legal(self):
         """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
