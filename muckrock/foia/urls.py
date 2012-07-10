@@ -15,7 +15,7 @@ from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
-foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
+foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 register_pingback(views.detail, pingback_foia_handler)
@@ -35,8 +35,7 @@ urlpatterns = patterns('',
     url(r'^doc_cloud/(?P<doc_id>[\w\d_-]+)/$',
                                            views.doc_cloud_detail, name='foia-doc-cloud-detail'),
     url(r'^(?P<jurisdiction>[\w\d_-]+)/$', jurisdiction, name='foia-jurisdiction'),
-    url(r'^%s/$' % foia_url,               redirect_to, {'url': 'view'}, name='foia-default'),
-    url(r'^%s/view/$' % foia_url,          views.detail, name='foia-detail'),
+    url(r'^%s/$' % foia_url,               views.detail, name='foia-detail'),
     url(r'^%s/update/$' % foia_url,        views.update, name='foia-update'),
     url(r'^%s/fix/$' % foia_url,           views.fix, name='foia-fix'),
     url(r'^%s/admin-fix/$' % foia_url,     views.admin_fix, name='foia-admin-fix'),
@@ -59,9 +58,11 @@ urlpatterns = patterns('',
 
 # old patterns for redirects
 # pylint: disable=W0142
-actions = ('view', 'update', 'fix', 'admin-fix', 'appeal',
-           'add_notes', 'delete', 'embargo', 'pay', 'follow')
+actions = ('update', 'fix', 'admin-fix', 'appeal', 'add_notes',
+           'delete', 'embargo', 'pay', 'follow')
 urlpatterns += patterns('',
+    url(r'^view/%s/$' % old_foia_url, redirect_to,
+        {'url': '/foi/%(jurisdiction)s/%(slug)s-%(idx)s/'}),
     *(url(r'^%s/%s/$' % (action, old_foia_url), redirect_to,
           {'url': '/foi/%%(jurisdiction)s/%%(idx)s-%%(slug)s/%s/' % action})
       for action in actions))
