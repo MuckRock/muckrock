@@ -12,7 +12,7 @@ agency_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 old_agency_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 urlpatterns = patterns('',
-    # XXX need a root, list all agencies?
+    url(r'^$',                        views.list_, name='agency-list'),
     url(r'^%s/$' % agency_url,        redirect_to, {'url': 'view'}, name='agency-default'),
     url(r'^%s/view/$' % agency_url,   views.detail, name='agency-detail'),
     url(r'^%s/update/$' % agency_url, views.update, name='agency-update'),

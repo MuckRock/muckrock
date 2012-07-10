@@ -4,6 +4,7 @@ Views for the Agency application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -27,6 +28,15 @@ def detail(request, jurisdiction, slug, idx):
     collect_stats(agency, context)
 
     return render_to_response('agency/agency_detail.html', context,
+                              context_instance=RequestContext(request))
+
+def list_(request):
+    """List of popular agencies"""
+    agencies = Agency.objects.annotate(num_requests=Count('foiarequest')) \
+                             .order_by('-num_requests')[:10]
+    context = {'agencies': agencies}
+
+    return render_to_response('agency/agency_list.html', context,
                               context_instance=RequestContext(request))
 
 @login_required
