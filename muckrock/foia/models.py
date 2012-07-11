@@ -622,7 +622,7 @@ class FOIADocument(models.Model):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
 
-        if match and self.access == 'public':
+        if match and self.pages > 0 and self.access == 'public':
             return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
