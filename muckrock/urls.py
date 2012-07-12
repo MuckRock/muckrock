@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django_xmlrpc.views import handle_xmlrpc
 
-import accounts.urls, foia.urls, news.urls, rodeo.urls, agency.urls, jurisdiction.urls, mailgun.urls
+import accounts.urls, foia.urls, news.urls, agency.urls, jurisdiction.urls, mailgun.urls
 import haystack.urls, dbsettings.urls
 import settings
 import views
@@ -30,7 +30,6 @@ urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
     url(r'^accounts/', include(accounts.urls)),
     url(r'^foi/', include(foia.urls)),
-    url(r'^foi/', include(rodeo.urls)),
     url(r'^news/', include(news.urls)),
     url(r'^mailgun/', include(mailgun.urls)),
     url(r'^agency/', include(agency.urls)),
