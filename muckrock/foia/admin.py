@@ -12,25 +12,25 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
+from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
 from agency.models import Agency
 from foia.tasks import upload_document_cloud, set_document_cloud_pages
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class FOIADocumentAdminForm(forms.ModelForm):
+class FOIAFileAdminForm(forms.ModelForm):
     """Form to validate document only has ASCII characters in it"""
 
     def __init__(self, *args, **kwargs):
-        super(FOIADocumentAdminForm, self).__init__(*args, **kwargs)
+        super(FOIAFileAdminForm, self).__init__(*args, **kwargs)
         self.clean_title = self._validate('title')
         self.clean_source = self._validate('source')
         self.clean_description = self._validate('description')
 
     class Meta:
         # pylint: disable=R0903
-        model = FOIADocument
+        model = FOIAFile
 
     @staticmethod
     def _only_ascii(text):
@@ -51,18 +51,12 @@ class FOIADocumentAdminForm(forms.ModelForm):
         return inner
 
 
-class FOIADocumentInline(admin.TabularInline):
-    """FOIA Document Inline admin options"""
-    model = FOIADocument
-    form = FOIADocumentAdminForm
-    readonly_fields = ['doc_id', 'pages']
-    extra = 2
-
-
 class FOIAFileInline(admin.TabularInline):
     """FOIA File Inline admin options"""
     model = FOIAFile
-    extra = 1
+    form = FOIAFileAdminForm
+    readonly_fields = ['doc_id', 'pages']
+    extra = 2
 
 
 class FOIACommunicationInline(admin.TabularInline):
@@ -99,7 +93,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
     list_filter = ['status']
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
-    inlines = [FOIACommunicationInline, FOIADocumentInline, FOIAFileInline, FOIANoteInline]
+    inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
 
@@ -142,7 +136,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
             if not change:
                 # its new, so notify the user about it
                 instance.foia.update(instance.anchor())
-            if formset.model == FOIADocument:
+            if formset.model == FOIAFile:
                 upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 
         formset.save_m2m()
@@ -205,9 +199,10 @@ class FOIARequestAdmin(admin.ModelAdmin):
         # pylint: disable=E1101
         # pylint: disable=R0201
 
-        docs = FOIADocument.objects.filter(foia=idx, pages=0)
+        docs = FOIAFile.objects.filter(foia=idx, pages=0)
         for doc in docs:
-            set_document_cloud_pages.apply_async(args=[doc.pk])
+            if doc.is_doccloud():
+                set_document_cloud_pages.apply_async(args=[doc.pk])
 
         messages.info(request, 'Attempting to set the page count for %d documents... Please '
                                'wait while the Document Cloud servers are being accessed'

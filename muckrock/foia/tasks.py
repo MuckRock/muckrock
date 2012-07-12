@@ -20,7 +20,7 @@ import urllib2
 from datetime import date, timedelta
 from vendor import MultipartPostHandler
 
-from foia.models import FOIADocument, FOIARequest
+from foia.models import FOIAFile, FOIARequest
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
@@ -36,14 +36,16 @@ options = FOIAOptions()
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
-    print 'here'
-
     try:
-        doc = FOIADocument.objects.get(pk=doc_pk)
-    except FOIADocument.DoesNotExist, exc:
+        doc = FOIAFile.objects.get(pk=doc_pk)
+    except FOIAFile.DoesNotExist, exc:
         # pylint: disable=E1101
         # give database time to sync
         upload_document_cloud.retry(args=[doc_pk, change], kwargs=kwargs, exc=exc)
+
+    if not doc.is_doccloud():
+        # not a file doc cloud supports, do not attempt to upload
+        return
 
     if doc.doc_id and not change:
         # not change means we are uploading a new one - it should not have an id yet
@@ -63,7 +65,6 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         url = '/documents/%s.json' % doc.doc_id
     else:
         params['file'] = doc.document.url.replace('https', 'http', 1)
-        print 'file:', params['file']
         url = '/upload.json'
 
     opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
@@ -89,10 +90,10 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 def set_document_cloud_pages(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
 
-    doc = FOIADocument.objects.get(pk=doc_pk)
+    doc = FOIAFile.objects.get(pk=doc_pk)
 
-    if doc.pages:
-        # already has pages set, just return
+    if doc.pages or not doc.is_doccloud():
+        # already has pages set or not a doc cloud, just return
         return
 
     request = urllib2.Request('https://www.documentcloud.org/api/documents/%s.json' % doc.doc_id)
@@ -162,9 +163,9 @@ def embargo_warn():
 def set_all_document_cloud_pages():
     """Try and set all document cloud documents that have no page count set"""
     # pylint: disable=E1101
-    logger.info('Setting document cloud pages, %d documents with 0 pages',
-                FOIADocument.objects.filter(pages=0).count())
-    for doc in FOIADocument.objects.filter(pages=0):
+    docs = [doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()]
+    logger.info('Setting document cloud pages, %d documents with 0 pages', len(docs))
+    for doc in docs:
         set_document_cloud_pages.apply_async(args=[doc.pk])
 
 
@@ -172,9 +173,9 @@ def set_all_document_cloud_pages():
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     # pylint: disable=E1101
-    logger.info('Reupload documents, %d documents are stuck',
-                FOIADocument.objects.filter(doc_id='').count())
-    for doc in FOIADocument.objects.filter(doc_id=''):
+    docs = [doc for doc in FOIAFile.objects.filter(doc_id='') if doc.is_doccloud()]
+    logger.info('Reupload documents, %d documents are stuck', len(docs))
+    for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
 

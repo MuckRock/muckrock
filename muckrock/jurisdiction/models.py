@@ -48,8 +48,8 @@ class RequestHelper(object):
                      self.foiarequest_set
                          .get_done()
                          .get_public()
-                         .filter(documents__pages__gt=0)
-                         .annotate(pages=Sum('documents__pages'))
+                         .filter(files__pages__gt=0)
+                         .annotate(pages=Sum('files__pages'))
                          .order_by('-pages')),
             make_req('Most Viewed Request',
                      self.foiarequest_set
@@ -69,7 +69,7 @@ class RequestHelper(object):
     def total_pages(self):
         """Total pages released"""
 
-        pages = self.foiarequest_set.aggregate(Sum('documents__pages'))['documents__pages__sum']
+        pages = self.foiarequest_set.aggregate(Sum('files__pages'))['files__pages__sum']
         if pages is None:
             return 0
         return pages

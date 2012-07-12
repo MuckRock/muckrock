@@ -29,7 +29,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFi
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, FOIACommunication
+from foia.models import FOIARequest, FOIACommunication
 from jurisdiction.models import Jurisdiction
 from tags.models import Tag
 from settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -577,14 +577,3 @@ def detail(request, jurisdiction, slug, idx):
     return render_to_response('foia/foiarequest_detail.html',
                               context,
                               context_instance=RequestContext(request))
-
-def doc_cloud_detail(request, doc_id):
-    """Details of a DocumentCloud document"""
-
-    doc = get_object_or_404(FOIADocument, doc_id=doc_id)
-
-    if not doc.is_viewable(request.user) or not doc.doc_id:
-        raise Http404()
-
-    return redirect(doc, permanant=True)
-

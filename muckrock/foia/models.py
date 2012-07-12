@@ -85,9 +85,8 @@ class FOIARequestManager(ChainableManager):
         #return self.filter(status='processed', date_followup__lte=date.today())
 
     def get_undated(self):
-        """Get requests which have an undated document or file"""
-        return self.filter((~Q(files=None)     & Q(files__date=None)) |
-                           (~Q(documents=None) & Q(documents__date=None))).distinct()
+        """Get requests which have an undated file"""
+        return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
 
 
 class FOIARequest(models.Model):
@@ -200,7 +199,7 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         # pylint: disable=E1101
-        return self.documents.filter(access='public').exclude(doc_id='')
+        return self.files.filter(access='public').exclude(doc_id='')
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
@@ -228,11 +227,10 @@ class FOIARequest(models.Model):
         """Get communications and documents to display on details page"""
         # pylint: disable=E1101
         comms = self.communications.all()
-        docs = self.documents.exclude(date=None)
         files = self.files.exclude(date=None)
         if self.user != user and not user.is_staff:
-            docs = docs.filter(access='public')
-        display_comms = list(comms) + list(docs) + list(files)
+            files = files.filter(access='public')
+        display_comms = list(comms) + list(files)
         display_comms.sort(key=lambda x: x.date)
         return display_comms
 
@@ -290,7 +288,6 @@ class FOIARequest(models.Model):
         # pylint: disable=E1101
 
         qsets = [self.communications.all().order_by('-date'),
-                 self.documents.exclude(date=None).order_by('-date'),
                  self.files.exclude(date=None).order_by('-date')]
 
         dates = []
@@ -535,7 +532,7 @@ class FOIARequest(models.Model):
     def total_pages(self):
         """Get the total number of pages for this request"""
         # pylint: disable=E1101
-        pages = self.documents.aggregate(Sum('pages'))['pages__sum']
+        pages = self.files.aggregate(Sum('pages'))['pages__sum']
         if pages is None:
             return 0
         return pages
@@ -664,19 +661,55 @@ class FOIADocument(models.Model):
 
 class FOIAFile(models.Model):
     """An arbitrary file attached to a FOIA request"""
+
+    access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
+
     # pylint: disable=E1101
     foia = models.ForeignKey(FOIARequest, related_name='files')
     ffile = models.FileField(upload_to='foia_files')
+    title = models.CharField(max_length=70)
     date = models.DateTimeField(null=True)
     source = models.CharField(max_length=70, blank=True)
     description = models.TextField(blank=True)
+    # for doc cloud only
+    access = models.CharField(max_length=12, default='public', choices=access)
+    doc_id = models.SlugField(max_length=80, blank=True, editable=False)
+    pages = models.PositiveIntegerField(default=0, editable=False)
 
     def __unicode__(self):
-        return 'File: %s' % self.ffile.name
+        return self.title
 
     def name(self):
         """Return the basename of the file"""
         return os.path.basename(self.ffile.name)
+
+    def is_doccloud(self):
+        """Is this a file doc cloud can support"""
+
+        _, ext = os.path.splitext(self.ffile.name)
+        return ext.lower() in ['.pdf', '.doc', '.docx']
+
+    def get_thumbnail(self, size='thumbnail', page=1):
+        """Get the url to the thumbnail image"""
+        match = re.match('^(\d+)-(.*)$', self.doc_id)
+
+        if match and self.pages > 0 and self.access == 'public':
+            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
+                   '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
+        else:
+            return '%simg/report.png' % STATIC_URL
+
+    def get_medium_thumbnail(self):
+        """Convenient function for template"""
+        return self.get_thumbnail('small')
+
+    def is_viewable(self, user):
+        """Is this document viewable to user"""
+        return self.access == 'public' and self.foia.is_viewable(user)
+
+    def is_public(self):
+        """Is this document viewable to everyone"""
+        return self.is_viewable(AnonymousUser())
 
     # following methods are to make this quack like a communication for display on the details page
     response = True
@@ -698,4 +731,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
+        ordering = ['foia', 'date']
 

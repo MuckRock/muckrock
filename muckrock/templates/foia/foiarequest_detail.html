@@ -89,8 +89,8 @@
 				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# document #}
-				{% if comm.class_name == "FOIADocument" %}
-					{% if comm.access == "public" and comm.doc_id %}
+				{% if comm.class_name == "FOIAFile" and comm.is_doccloud %}
+					{% if comm.access == "public" and comm.doc_id and comm.pages > 0 %}
 						<div class="left text-center">
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
 							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
@@ -101,7 +101,7 @@
 							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
 							<a href="{{comm.document.url}}">Download</a>
 						</div>
-						{% if comm.doc_id %}
+						{% if comm.doc_id and comm.pages > 0 %}
 							<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
 						{% else %}
 							<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
@@ -109,7 +109,7 @@
 					{% endif %}
 				{% endif %}
 				{# file #}
-				{% if comm.class_name == "FOIAFile" %}
+				{% if comm.class_name == "FOIAFile" and not comm.is_doccloud %}
 					<div class="left text-center">
 						<a href="{{comm.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
 						<a href="{{comm.ffile.url}}">Download</a>
@@ -147,8 +147,6 @@
 					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
 					$('textarea#embed0').val(embed_code0);
 					$('textarea#embed1').val(embed_code1);
-					$('div[id^="rodeo-"]').hide();
-					$('#rodeo-' + doc_id).show();
 				}
 
 				function get_thumbnail(doc_id)
@@ -250,20 +248,6 @@
 		</div>
 		<div class="content-separator"></div>
 	{% endif %}
-
-	{% for doc in object.public_documents.all %}
-		{% if doc.rodeo_set.all %}
-			<div id="rodeo-{{doc.doc_id}}" style="display: none;">
-				<h2>Help to Analyze</h2>
-				<ul>
-					{% for rodeo in doc.rodeo_set.all %}
-						<li><a href="{{rodeo.get_absolute_url}}">{{rodeo.title}}</a></li>
-					{% endfor %}
-				</ul>
-			</div>
-			<div class="content-separator"></div>
-		{% endif %}
-	{% endfor %}
 
 	{% get_pingback_list for object as pingbacks %}
 	{% if pingbacks %}

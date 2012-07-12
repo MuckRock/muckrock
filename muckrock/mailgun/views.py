@@ -17,7 +17,7 @@ import time
 from datetime import datetime
 from email.utils import parseaddr
 
-from foia.models import FOIARequest, FOIACommunication, FOIADocument, FOIAFile
+from foia.models import FOIARequest, FOIACommunication, FOIAFile
 from foia.tasks import upload_document_cloud
 from fields import email_separator_re
 from settings import MAILGUN_ACCESS_KEY
@@ -51,9 +51,7 @@ def handle_request(request, mail_id):
         # handle attachments
         for file_ in request.FILES.itervalues():
             type_ = _file_type(file_)
-            if type_ == 'doc_cloud':
-                _upload_doc_cloud(foia, file_, from_)
-            elif type_ == 'file':
+            if type_ == 'file':
                 _upload_file(foia, file_, from_)
 
         _forward(post, request.FILES)
@@ -127,22 +125,14 @@ def _upload_file(foia, file_, sender):
     """Upload a file to attach to a FOIA request"""
     # pylint: disable=E1101
 
-    foia_file = FOIAFile(foia=foia, date=datetime.now(), source=sender[:70])
-    foia_file.ffile.save(file_.name, file_)
-    foia_file.save()
-
-def _upload_doc_cloud(foia, file_, sender):
-    """Upload a document cloud to attach to a FOIA request"""
-    # pylint: disable=E1101
-
     access = 'private' if foia.is_embargo() else 'public'
     source = foia.agency.name if foia.agency else sender
 
-    foia_doc = FOIADocument(foia=foia, title=os.path.splitext(file_.name)[0],
-                            source=source, access=access, date=datetime.now())
-    foia_doc.document.save(file_.name, file_)
-    foia_doc.save()
-    upload_document_cloud.apply_async(args=[foia_doc.pk, False], countdown=3)
+    foia_file = FOIAFile(foia=foia, title=os.path.splitext(file_.name)[0], date=datetime.now(),
+                         source=source[:70], access=access)
+    foia_file.ffile.save(file_.name, file_)
+    foia_file.save()
+    upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 def _allowed_email(email, foia):
     """Is this an allowed email?"""
@@ -165,17 +155,10 @@ def _allowed_email(email, foia):
 def _file_type(file_):
     """Determine the attachment's file type"""
 
-    doc_cloud_types = [
-        ('application/pdf', 'pdf'),
-        ('application/msword', 'doc'),
-        ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'docx'),
-        ]
     ignore_types = [('application/x-pkcs7-signature', 'p7s')]
 
     if any(file_.content_type == itt or file_.name.endswith(ite) for itt, ite in ignore_types):
         return 'ignore'
-    elif any(file_.content_type == dtt or file_.name.endswith(dte) for dtt, dte in doc_cloud_types):
-        return 'doc_cloud'
     else:
         return 'file'
 

@@ -157,7 +157,6 @@ INSTALLED_APPS = (
     'staticfiles',
     'accounts',
     'foia',
-    'rodeo',
     'news',
     'templatetags',
     'tags',
