@@ -12,9 +12,10 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
 from agency.models import Agency
+from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
 from foia.tasks import upload_document_cloud, set_document_cloud_pages
+from nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
@@ -51,21 +52,21 @@ class FOIAFileAdminForm(forms.ModelForm):
         return inner
 
 
-class FOIAFileInline(admin.TabularInline):
+class FOIAFileInline(NestedTabularInline):
     """FOIA File Inline admin options"""
     model = FOIAFile
     form = FOIAFileAdminForm
     readonly_fields = ['doc_id', 'pages']
-    extra = 2
+    exclude = ['foia']
+    extra = 1
 
-
-class FOIACommunicationInline(admin.TabularInline):
+class FOIACommunicationInline(NestedTabularInline):
     """FOIA Communication Inline admin options"""
     model = FOIACommunication
     extra = 1
+    inlines = [FOIAFileInline]
 
-
-class FOIANoteInline(admin.TabularInline):
+class FOIANoteInline(NestedTabularInline):
     """FOIA Notes Inline admin options"""
     model = FOIANote
     extra = 1
@@ -86,14 +87,14 @@ class FOIARequestAdminForm(forms.ModelForm):
         model = FOIARequest
 
 
-class FOIARequestAdmin(admin.ModelAdmin):
+class FOIARequestAdmin(NestedModelAdmin):
     """FOIA Request admin options"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
-    inlines = [FOIACommunicationInline, FOIAFileInline, FOIANoteInline]
+    inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
 
@@ -122,7 +123,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
             foia.save()
             return
 
-        # check communications, files, and docs for new ones to notify the user of an update
+        # check communications and files for new ones to notify the user of an update
         instances = formset.save(commit=False)
         for instance in instances:
             # only way to tell if its new or not is to check the db
@@ -133,9 +134,12 @@ class FOIARequestAdmin(admin.ModelAdmin):
                 change = False
 
             instance.save()
-            if not change:
-                # its new, so notify the user about it
+            # its new, so notify the user about it
+            if not change and formset.model == FOIACommunication:
                 instance.foia.update(instance.anchor())
+            if not change and formset.model == FOIAFile:
+                instance.comm.foia.update(instance.anchor())
+
             if formset.model == FOIAFile:
                 upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 

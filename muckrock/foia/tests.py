@@ -239,7 +239,7 @@ class TestFOIAFunctional(TestCase):
                     reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
                                                    'jurisdiction': foia.jurisdiction.slug}),
                     ['foia/foiarequest_detail.html', 'foia/base.html'],
-                    context = {'object': foia})
+                    context = {'foia': foia})
 
     def test_feeds(self):
         """Test the RSS feed views"""

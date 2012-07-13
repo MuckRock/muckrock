@@ -4,64 +4,64 @@
 {% load tags %}
 {% load staticfiles %}
 
-{% block title %} {{object.title}} {% endblock %}
+{% block title %} {{foia.title}} {% endblock %}
 
 {% block content %}
 	<h1>FOI Request</h1>
-	<h2>{{object.title}}</h2>
-	<p>Requested by <a href="{% url acct-profile object.user.username %}">{{object.user.username}}</a>
-	{% if object.date_submitted %} on {{object.date_submitted|date}}{%endif%}
-	for {% if object.agency %}the {{ object.agency.link_display|safe }} of {% endif %}<a href="{% url jurisdiction-detail slug=object.jurisdiction.slug,idx=object.jurisdiction.pk %}">{{object.jurisdiction}}</a>
-	{% if object.date_done %} and {% if object.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{object.date_done|date}}{%endif%}
+	<h2>{{foia.title}}</h2>
+	<p>Requested by <a href="{% url acct-profile foia.user.username %}">{{foia.user.username}}</a>
+	{% if foia.date_submitted %} on {{foia.date_submitted|date}}{%endif%}
+	for {% if foia.agency %}the {{ foia.agency.link_display|safe }} of {% endif %}<a href="{% url jurisdiction-detail slug=foia.jurisdiction.slug,idx=foia.jurisdiction.pk %}">{{foia.jurisdiction}}</a>
+	{% if foia.date_done %} and {% if foia.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{foia.date_done|date}}{%endif%}
 	</p>
-	{% if object.is_embargo and not object.embargo_date %}
+	{% if foia.is_embargo and not foia.embargo_date %}
 	<p class="notice">
 	This request is embargoed and will not be visible to others until 30 days after a response is received.
 	</p>
 	{% endif %}
-	{% if object.is_embargo and object.embargo_date %}
+	{% if foia.is_embargo and foia.embargo_date %}
 	<p class="notice">
-	This request is embargoed and will not be visible until {{ object.embargo_date|date }}.
+	This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.
 	</p>
 	{% endif %}
-	<div id="progressbar" title="{{object.percent_complete}}% Complete"></div>
-	<p>Status: <span class="request-{{object.color_code}}">
-		{{object.get_status_display}}{% if object.date_due and object.status == "processed" %},
+	<div id="progressbar" title="{{foia.percent_complete}}% Complete"></div>
+	<p>Status: <span class="request-{{foia.color_code}}">
+		{{foia.get_status_display}}{% if foia.date_due and foia.status == "processed" %},
 		{% if past_due %}
-			past due by {{ object.date_due|timesince }}
+			past due by {{ foia.date_due|timesince }}
 		{% else %}
-			due in {{ object.date_due|timeuntil }}
+			due in {{ foia.date_due|timeuntil }}
 		{% endif %}
 		{% endif %}
-		{% if object.days_until_due and object.status == 'fix' or object.days_until_due and object.status == 'payment' %},
-			{% if object.days_until_due >= 0 %}
-				due {{ object.days_until_due }} day{{object.days_until_due|pluralize}}
+		{% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %},
+			{% if foia.days_until_due >= 0 %}
+				due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}}
 			{% else %}
-				will be {{ object.days_until_due|abs }} day{{object.days_until_due|pluralize}} past due
+				will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due
 			{% endif %}
-			from when the {% if object.status == 'fix' %}fix{% else %}payment{% endif %} is received
+			from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received
 		{% endif %}
 	</span></p>
 	<div id='tag-links'>Tags:
-		{% for tag in object.tags.all %}
+		{% for tag in foia.tags.all %}
 			<a href="{% url foia-list-tag tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}, {%endif%}
 		{% empty %}
 			None
 		{% endfor %}
-		{% if object.user == request.user %}
+		{% if foia.user == request.user %}
 			&nbsp;&mdash;&nbsp;&nbsp;
 			<a href="#" onclick="$('#tag-links').hide('slow'); $('#tag-edit').show('slow');
 			                     $('#tags').superblyTagField({
 														allowNewTags: true,
 														showTagsNumber: 10,
-														preset: [ {% for tag in object.tags.all %}'{{tag.name}}',{% endfor %} ], 
+														preset: [ {% for tag in foia.tags.all %}'{{tag.name}}',{% endfor %} ], 
 														tags: [ {% for tag in all_tags %}'{{tag.name}}',{% endfor %} ]});
 													 ">Edit</a>
 		{% endif %}
 	</div>
 	<div id='tag-edit' style="display:none;">
 		<form action="" method="post">
-			<input type='text' name="tags" value="{{object.tag_string}}" id="tags" />
+			<input type='text' name="tags" value="{{foia.tag_string}}" id="tags" />
 			<input type="submit" name="submit" value="Submit" class="button" style="margin-top:2px;"/>
 			<em class="quiet" style="float:left;">Enter tags seperated by Enter or a comma</em>
 			<div class="clearer">&nbsp;</div>
@@ -69,52 +69,25 @@
 	</div>
 	<br />
 
-	{% if object.public_documents or object.user == user %}
+	{% if foia.public_documents or foia.user == user %}
 	<div id="tabs">
 		<ul>
 			<li><a href="#tabs-request">Request</a></li>
-			{% if object.public_documents %}
+			{% if foia.public_documents %}
 			<li><a href="#tabs-documents" onclick="doc_load(); return true">Documents</a></li>
 			{% endif %}
-			{% if object.user == user %}
+			{% if foia.user == user %}
 			<li><a href="#tabs-notes">Notes</a></li>
 			{% endif %}
 		</ul>
 	{% endif %}
 
 		<div id="tabs-request">
-			{% for comm in communications %}
+			{% for comm in foia.communications.all %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
 				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
-				{# document #}
-				{% if comm.class_name == "FOIAFile" and comm.is_doccloud %}
-					{% if comm.access == "public" and comm.doc_id and comm.pages > 0 %}
-						<div class="left text-center">
-							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true"><img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /></a><br />
-							<a href="#{{comm.doc_id}}" onclick="display_doc('{{comm.doc_id}}'); return true">View</a> |
-							<a href="{{comm.document.url}}">Download</a>
-						</div>
-					{% else %}
-						<div class="left text-center">
-							<img src="{{comm.get_medium_thumbnail}}" alt="{{comm.title}}" title="{{comm.title}}" class="doc-thumb bordered" /><br />
-							<a href="{{comm.document.url}}">Download</a>
-						</div>
-						{% if comm.doc_id and comm.pages > 0 %}
-							<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
-						{% else %}
-							<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
-						{% endif %}
-					{% endif %}
-				{% endif %}
-				{# file #}
-				{% if comm.class_name == "FOIAFile" and not comm.is_doccloud %}
-					<div class="left text-center">
-						<a href="{{comm.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{comm.name}}" title="{{comm.name}}" class="doc-thumb bordered" /></a><br />
-						<a href="{{comm.ffile.url}}">Download</a>
-					</div>
-				{% endif %}
 				{# html communication #}
 				{% if comm.full_html %}
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
@@ -122,13 +95,53 @@
 				{% else %}
 					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
-
 				<div class="clearer">&nbsp;</div>
 			</div>
+
+        {% for file in comm.files.all %}
+
+          <a name="{{file.anchor}}"></a>
+          <div class="{% if comm.response %}response{% else %}request{% endif %}">
+            <strong>{{file.title}}</strong><br />
+
+          {# document #}
+          {% if file.is_doccloud %}
+            {% if file.access == "public" and file.doc_id and file.pages > 0 %}
+              <div class="left text-center">
+                <a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true"><img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /></a><br />
+                <a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true">View</a> |
+                <a href="{{file.document.url}}">Download</a>
+              </div>
+            {% else %}
+              <div class="left text-center">
+                <img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /><br />
+                <a href="{{file.document.url}}">Download</a>
+              </div>
+              {% if file.doc_id and file.pages > 0 %}
+                <p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
+              {% else %}
+                <p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
+              {% endif %}
+            {% endif %}
+          {# file #}
+          {% else %}
+            <div class="left text-center">
+              <a href="{{file.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{file.name}}" title="{{file.name}}" class="doc-thumb bordered" /></a><br />
+              <a href="{{file.ffile.url}}">Download</a>
+            </div>
+          {% endif %}
+
+					{{file.description|urlize|linebreaks}}
+
+          <div class="clearer">&nbsp;</div>
+          </div>
+
+        {% endfor %}
+
 			{% endfor %}
 		</div>
 
-	{% if object.public_documents %}
+	{% if foia.public_documents %}
 		<div id="tabs-documents">
 			<div id="viewer"></div>
 			<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
@@ -144,7 +157,7 @@
 					});
 
 					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
-					var embed_code1 = '<a href="{{object.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+					var embed_code1 = '<a href="{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
 					$('textarea#embed0').val(embed_code0);
 					$('textarea#embed1').val(embed_code1);
 				}
@@ -158,7 +171,7 @@
 				}
 
 				function doc_load() {
-					var default_doc_id = "{{object.public_documents.0.doc_id}}"
+					var default_doc_id = "{{foia.public_documents.0.doc_id}}"
 					if (!doc_load.loaded) {
 						doc_load.loaded = true;
 						display_doc(default_doc_id);
@@ -168,8 +181,8 @@
 
 				$(function() {
 					var hash = window.location.hash.substring(1);
-					var default_doc_id = "{{object.public_documents.0.doc_id}}"
-					var documents = [ {%for doc in object.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+					var default_doc_id = "{{foia.public_documents.0.doc_id}}"
+					var documents = [ {%for doc in foia.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
 
 					if (!hash || ($.inArray(hash, documents) == -1)) {
 						doc_id = default_doc_id;
@@ -188,8 +201,8 @@
 			<div class="dc-thumbnails">
 
 				<ul class="dc-thumbnails">
-				{% if object.public_documents|length > 1 %}
-					{% for document in object.public_documents %}
+				{% if foia.public_documents|length > 1 %}
+					{% for document in foia.public_documents %}
 						<li><a href="#{{document.doc_id}}" onclick="display_doc('{{document.doc_id}}'); return true"><img src="{{document.get_thumbnail}}" alt="{{document.title}}" title="{{document.title}}" class="tipTip" /></a></li>
 					{% endfor %}
 				{% endif %}
@@ -198,9 +211,9 @@
 		</div>
 		{% endif %}
 
-		{% if object.user == user %}
+		{% if foia.user == user %}
 		<div id="tabs-notes">
-			{% for note in object.notes.all %}
+			{% for note in foia.notes.all %}
 				<div class="note">
 					<strong>{{note.date|date}}:</strong><br />
 					{{note.note|linebreaks}}
@@ -208,18 +221,18 @@
 			{% empty %}
 				<p>You don't have any notes on this request.  Note can be used to store private information regarding this request.</p>
 			{% endfor %}
-			<p><a class="jqbutton" href="{% url foia-note jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Add a Note</a></p>
+			<p><a class="jqbutton" href="{% url foia-note jurisdiction=foia.jurisdiction.slug,idx=foia.id,slug=foia.slug %}">Add a Note</a></p>
 		</div>
 		{% endif %}
-	{% if object.public_documents or object.user == user %}
+	{% if foia.public_documents or foia.user == user %}
 	</div>
 	{% endif %}
 
 {% endblock %}
 
 {% block sidebar %}
-	{% if object.sidebar_html %}
-		{{ object.sidebar_html|safe }}
+	{% if foia.sidebar_html %}
+		{{ foia.sidebar_html|safe }}
 		<div class="content-separator"></div>
 	{% endif %}
 	{% if user.is_anonymous %}
@@ -242,14 +255,14 @@
 		<textarea id="embed1" style="width: 520px; height: 90px"></textarea>
 	</div>
 
-	{% if object.tracking_id %}
+	{% if foia.tracking_id %}
 		<div>
-		<p>Agency Tracking ID: {{object.tracking_id}}</p>
+		<p>Agency Tracking ID: {{foia.tracking_id}}</p>
 		</div>
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% get_pingback_list for object as pingbacks %}
+	{% get_pingback_list for foia as pingbacks %}
 	{% if pingbacks %}
 	    <h2>News & Opinions:</h2>
 	    {% for pingback in pingbacks %}

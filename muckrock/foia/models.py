@@ -223,17 +223,6 @@ class FOIARequest(models.Model):
         # pylint: disable=E1101
         return self.communications.all()[0].communication
 
-    def get_communications(self, user):
-        """Get communications and documents to display on details page"""
-        # pylint: disable=E1101
-        comms = self.communications.all()
-        files = self.files.exclude(date=None)
-        if self.user != user and not user.is_staff:
-            files = files.filter(access='public')
-        display_comms = list(comms) + list(files)
-        display_comms.sort(key=lambda x: x.date)
-        return display_comms
-
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # pylint: disable=E1101
@@ -567,8 +556,6 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
-    class_name = 'FOIACommunication'
-
     def anchor(self):
         """Anchor name"""
         return 'comm-%d' % self.pk
@@ -598,8 +585,9 @@ class FOIAFile(models.Model):
     access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
 
     # pylint: disable=E1101
-    foia = models.ForeignKey(FOIARequest, related_name='files')
-    ffile = models.FileField(upload_to='foia_files')
+    foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
+    comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
+    ffile = models.FileField(upload_to='foia_files', verbose_name='File')
     title = models.CharField(max_length=70)
     date = models.DateTimeField(null=True)
     source = models.CharField(max_length=70, blank=True)
@@ -644,19 +632,6 @@ class FOIAFile(models.Model):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
 
-    # following methods are to make this quack like a communication for display on the details page
-    response = True
-    full_html = False
-    class_name = 'FOIAFile'
-
-    def from_who(self):
-        """To quack like a communication"""
-        return self.source
-
-    def communication(self):
-        """To quack like a communication"""
-        return self.description
-
     def anchor(self):
         """Anchor name"""
         return 'file-%d' % self.pk
@@ -664,5 +639,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-        ordering = ['foia', 'date']
+        ordering = ['comm', 'date']
 

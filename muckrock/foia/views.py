@@ -569,8 +569,9 @@ def detail(request, jurisdiction, slug, idx):
         foia.update_tags(request.POST['tags'])
         return redirect(foia)
 
-    context = {'object': foia, 'all_tags': Tag.objects.all(),
-               'communications': foia.get_communications(request.user)}
+    context = {}
+    context['foia'] = foia
+    context['all_tags'] = Tag.objects.all()
     context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
     context['actions'] = foia.actions(request.user)
 
