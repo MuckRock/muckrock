@@ -58,7 +58,7 @@ class FOIAFileInline(NestedTabularInline):
     form = FOIAFileAdminForm
     readonly_fields = ['doc_id', 'pages']
     exclude = ['foia']
-    extra = 1
+    extra = 0
 
 class FOIACommunicationInline(NestedTabularInline):
     """FOIA Communication Inline admin options"""
