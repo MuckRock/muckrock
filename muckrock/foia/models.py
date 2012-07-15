@@ -408,6 +408,9 @@ class FOIARequest(models.Model):
                            to=[self.email],
                            bcc=cc_addrs + ['requests@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)}) 
+        # atach all files from the latest communication
+        for file_ in self.communications.reverse()[0].files.all():
+            msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
     def update_dates(self):
