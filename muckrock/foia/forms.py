@@ -15,7 +15,7 @@ import sys
 from datetime import datetime, date, timedelta
 
 from agency.models import Agency, AgencyType
-from foia.models import FOIARequest, FOIACommunication, FOIANote
+from foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
 from foia.utils import make_template_choices
 from foia.validate import validate_date_order
 from formwizard.forms import DynamicSessionFormWizard
@@ -126,6 +126,8 @@ def foia_comm_form_factory(label):
 
 FOIAFixForm = foia_comm_form_factory('Fix')
 FOIAAppealForm = foia_comm_form_factory('Appeal')
+
+FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
 
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
