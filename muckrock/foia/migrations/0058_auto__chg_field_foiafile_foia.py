@@ -13,6 +13,17 @@ class Migration(SchemaMigration):
     
     
     def backwards(self, orm):
+
+        db.start_transaction()
+        for file_ in orm.FOIAFile.objects.all():
+            try:
+                if not file_.foia:
+                    file_.foia = file_.comm.foia
+                    file_.save()
+            except orm.FOIARequest.DoesNotExist:
+                file_.foia = file_.comm.foia
+                file_.save()
+        db.commit_transaction()
         
         # Changing field 'FOIAFile.foia'
         db.alter_column('foia_foiafile', 'foia_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest']))
