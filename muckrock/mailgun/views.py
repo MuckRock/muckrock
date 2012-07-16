@@ -4,6 +4,7 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
+from django.core.validators import email_re
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -69,7 +70,8 @@ def handle_request(request, mail_id):
                            post.get('Cc', '').split(',')
                         if email]
         foia.other_emails = ','.join(email for email in other_emails
-                                     if not email.endswith('muckrock.com'))
+                                     if email_re.match(email) and
+                                        not email.endswith('muckrock.com'))
         foia.save()
         foia.update(comm.anchor())
 
