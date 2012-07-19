@@ -142,7 +142,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     from_email = forms.CharField(label='From', required=False,
                                  help_text='Leaving blank will fill in with request owner')
     email = forms.EmailField(label='To')
-    other_emails = forms.CharField(label='CC')
+    other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
 
@@ -579,8 +579,9 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         if len(title) > 70:
             title = title[:70]
+        slug = slugify(title) or 'untitled'
         foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
-                                          jurisdiction=jurisdiction, slug=slugify(title),
+                                          jurisdiction=jurisdiction, slug=slug,
                                           agency=agency)
         FOIACommunication.objects.create(
                 foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
@@ -594,7 +595,7 @@ class FOIAWizard(DynamicSessionFormWizard):
                                     kwargs={'jurisdiction': jurisdiction.slug,
                                             'jidx': jurisdiction.pk,
                                             'idx': foia.pk,
-                                            'slug': slugify(title)}))
+                                            'slug': slug}))
 
     def process_step(self, form):
         """Process each step"""

@@ -71,15 +71,16 @@ def _foia_form_handler(request, foia, action):
                 new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
-                    foia.agency = Agency.objects.create(name=agency_name[:255],
-                                                        slug=slugify(agency_name[:255]),
-                                                        jurisdiction=foia.jurisdiction,
-                                                        user=request.user, approved=False)
+                    foia.agency = Agency.objects.create(
+                        name=agency_name[:255],
+                        slug=(slugify(agency_name[:255]) or 'untitled'),
+                        jurisdiction=foia.jurisdiction,
+                        user=request.user, approved=False)
                     send_mail('[AGENCY] %s' % foia.agency.name,
                               render_to_string('foia/admin_agency.txt', {'agency': foia.agency}),
                               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
                     new_agency = True
-                foia.slug = slugify(foia.title)
+                foia.slug = slugify(foia.title) or 'untitled'
                 foia_comm = foia.communications.all()[0]
                 foia_comm.date = datetime.now()
                 foia_comm.communication = form.cleaned_data['request']

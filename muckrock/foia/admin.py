@@ -143,7 +143,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
                 # its new, so notify the user about it
                 instance.foia.update(instance.anchor())
             if formset.model == FOIADocument:
-                upload_document_cloud.apply_async(args=[instance.pk, change], countdown=3)
+                upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 
         formset.save_m2m()
 
