@@ -4,7 +4,6 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
-from django.core.validators import email_re
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -16,11 +15,10 @@ import os
 import sys
 import time
 from datetime import datetime
-from email.utils import parseaddr
+from email.utils import parseaddr, getaddresses
 
 from foia.models import FOIARequest, FOIACommunication, FOIADocument, FOIAFile
 from foia.tasks import upload_document_cloud
-from fields import email_separator_re
 from settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
@@ -64,14 +62,13 @@ def handle_request(request, mail_id):
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         foia.email = from_email
+        foia.other_emails = ','.join(email for name, email
+                                     in getaddresses([post.get('To', ''), post.get('Cc', '')])
+                                     if email and not email.endswith('muckrock.com'))
+        while len(foia.other_emails) > 255:
+            # drop emails until it fits in db
+            foia.other_emails = foia.other_emails[:foia.other_emails.rindex(',')]
 
-        other_emails = [email_separator_re.sub('', email.strip()) for email
-                        in post.get('To', '').split(',') + 
-                           post.get('Cc', '').split(',')
-                        if email]
-        foia.other_emails = ','.join(email for email in other_emails
-                                     if email_re.match(email) and
-                                        not email.endswith('muckrock.com'))
         foia.save()
         foia.update(comm.anchor())
 
