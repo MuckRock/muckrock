@@ -86,7 +86,7 @@
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
-				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
+				<strong>From {{comm.from_who|redact_emails}} {% if comm.to_who %}to {{comm.to_who|redact_emails}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# document #}
 				{% if comm.class_name == "FOIADocument" %}
@@ -120,7 +120,7 @@
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
 				{# text communication #}
 				{% else %}
-					{{comm.communication|urlize|linebreaks}}
+					{{comm.communication|redact_emails|urlize|linebreaks}}
 				{% endif %}
 
 				<div class="clearer">&nbsp;</div>

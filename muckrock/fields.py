@@ -9,10 +9,11 @@ import os
 import re
 from calendar import monthrange
 from datetime import date
+from email.utils import parseaddr
 from itertools import groupby
 
 from django import forms
-from django.core.validators import email_re
+from django.core.validators import email_re, EmailValidator, ValidationError
 from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
@@ -64,6 +65,36 @@ class EmailsListField(CharField):
                 raise forms.ValidationError(_('%s is not a valid e-mail address.') % email)
 
         return value
+
+
+class FullEmailValidator(EmailValidator):
+    """Validate email addresses with full names"""
+    #http://djangosnippets.org/snippets/2635/
+    # pylint: disable=R0903
+
+    def __call__(self, value):
+        # pylint: disable=W0612
+        try:
+            super(FullEmailValidator, self).__call__(value)
+        except ValidationError:
+            # Trivial case failed. Try for possible Full Name <email@address>
+            fullname, email = parseaddr(value)
+            super(FullEmailValidator, self).__call__(email)
+
+validate_full_email = FullEmailValidator(email_re, 'Enter a valid e-mail address.', 'invalid')
+
+
+class FullEmailField(forms.EmailField):
+    """Email field that accepts full name format"""
+    default_validators = [validate_full_email]
+
+    def clean(self, value):
+        """Accept full name emails - only store the email part"""
+        # pylint: disable=W0612
+
+        super(FullEmailField, self).clean(value)
+        fullname, email = parseaddr(value)
+        return email
 
 
 class GroupedModelChoiceField(ModelChoiceField):
