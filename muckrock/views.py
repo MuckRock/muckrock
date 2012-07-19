@@ -47,8 +47,8 @@ def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     # pylint: disable=W0621
     # pylint: disable=W0613
 
-    if jurisdiction:
-        jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    if jurisdiction and idx:
+        jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)
     if idx:
         jmodel = get_object_or_404(Jurisdiction, pk=idx)
 

@@ -43,8 +43,9 @@ class TestFOIARequestUnit(TestCase):
         """Test FOIA Request model's get_absolute_url method"""
 
         nose.tools.eq_(self.foia.get_absolute_url(),
-            reverse('foia-detail', kwargs={'idx': self.foia.id, 'slug': 'test-1',
-                                           'jurisdiction': 'massachusetts'}))
+            reverse('foia-detail', kwargs={'idx': self.foia.pk, 'slug': 'test-1',
+                                           'jurisdiction': 'massachusetts',
+                                           'jidx': self.foia.jurisdiction.pk}))
 
     def test_foia_model_editable(self):
         """Test FOIA Request model's is_editable method"""
@@ -237,7 +238,8 @@ class TestFOIAFunctional(TestCase):
         foia = FOIARequest.objects.get(pk=2)
         get_allowed(self.client,
                     reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
-                                                   'jurisdiction': foia.jurisdiction.slug}),
+                                                   'jurisdiction': foia.jurisdiction.slug,
+                                                   'jidx': foia.jurisdiction.pk}),
                     ['foia/foiarequest_detail.html', 'foia/base.html'],
                     context = {'object': foia})
 
@@ -252,9 +254,11 @@ class TestFOIAFunctional(TestCase):
 
         get_404(self.client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 1, 'slug': 'test-c',
-                                                       'jurisdiction': 'massachusetts'}))
+                                                       'jurisdiction': 'massachusetts',
+                                                       'jidx': 1}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 2, 'slug': 'test-c',
-                                                       'jurisdiction': 'massachusetts'}))
+                                                       'jurisdiction': 'massachusetts',
+                                                       'jidx': 1}))
 
     def test_unallowed_views(self):
         """Test private views while not logged in"""
@@ -263,6 +267,7 @@ class TestFOIAFunctional(TestCase):
         get_post_unallowed(self.client, reverse('foia-create'))
         get_post_unallowed(self.client, reverse('foia-update',
                                            kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                                   'jidx': foia.jurisdiction.pk,
                                                    'idx': foia.pk, 'slug': foia.slug}))
 
     def test_auth_views(self):
@@ -277,11 +282,13 @@ class TestFOIAFunctional(TestCase):
 
         get_allowed(self.client, reverse('foia-update',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
                     ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
         get_404(self.client, reverse('foia-update',
                                 kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                        'jidx': foia.jurisdiction.pk,
                                         'idx': foia.pk, 'slug': 'bad_slug'}))
 
         # post authenticated pages
@@ -289,6 +296,7 @@ class TestFOIAFunctional(TestCase):
                          ['foia/foiawizard_where.html', 'foia/base-submit.html'])
         post_allowed_bad(self.client, reverse('foia-update',
                                          kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                                 'jidx': foia.jurisdiction.pk,
                                                  'idx': foia.pk, 'slug': foia.slug}),
                          ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
@@ -308,9 +316,11 @@ class TestFOIAFunctional(TestCase):
         post_allowed(self.client,
                      reverse('foia-update',
                              kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'jidx': foia.jurisdiction.pk,
                                      'idx': foia.pk, 'slug': foia.slug}),
                      foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
+                                                    'jidx': foia.jurisdiction.pk,
                                                     'idx': foia.pk, 'slug': 'test-a'}))
         foia = FOIARequest.objects.get(title='test a')
         nose.tools.ok_(foia.first_request().startswith('updated request'))
@@ -329,9 +339,11 @@ class TestFOIAFunctional(TestCase):
         post_allowed(self.client,
                      reverse('foia-update',
                              kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                     'jidx': foia.jurisdiction.pk,
                                      'idx': foia.pk, 'slug': foia.slug}),
                      foia_data,
                      reverse('foia-detail', kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                                    'jidx': foia.jurisdiction.pk,
                                                     'idx': foia.pk, 'slug': foia.slug}))
         foia = FOIARequest.objects.get(title='Test 6')
         nose.tools.ok_(foia.first_request().startswith('saved request'))
@@ -346,12 +358,14 @@ class TestFOIAFunctional(TestCase):
 
         get_allowed(self.client, reverse('foia-flag',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
                     ['foia/foiarequest_action.html', 'foia/base-submit.html'])
 
         foia = FOIARequest.objects.get(pk=18)
         get_allowed(self.client, reverse('foia-pay',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
+                                            'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
                     ['registration/cc.html', 'registration/base.html'])
 

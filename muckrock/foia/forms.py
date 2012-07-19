@@ -592,7 +592,8 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         return HttpResponseRedirect(reverse('foia-update',
                                     kwargs={'jurisdiction': jurisdiction.slug,
-                                            'idx': foia.id,
+                                            'jidx': jurisdiction.pk,
+                                            'idx': foia.pk,
                                             'slug': slugify(title)}))
 
     def process_step(self, form):

@@ -145,7 +145,8 @@ class FOIARequest(models.Model):
         """The url for this object"""
         # pylint: disable=E1101
         return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
-                                    'slug': self.slug, 'idx': self.id})
+                                    'jidx': self.jurisdiction.pk,
+                                    'slug': self.slug, 'idx': self.pk})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -500,7 +501,8 @@ class FOIARequest(models.Model):
         """What actions may the given user take on this Request"""
         # pylint: disable=E1101
 
-        kwargs = {'jurisdiction': self.jurisdiction.slug, 'idx': self.pk, 'slug': self.slug}
+        kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
+                  'idx': self.pk, 'slug': self.slug}
 
         actions = [
             (user.is_staff,
