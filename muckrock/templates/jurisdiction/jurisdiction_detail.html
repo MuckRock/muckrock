@@ -101,7 +101,7 @@
 			</tr>
 		{% for agency in jurisdiction.agencies.get_approved %}
 			<tr class="{% cycle 'even' 'odd' %}">
-				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
+				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,jidx=jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
 				<td>{{agency.foiarequest_set.count}}</td>
 				<td>{% with agency.average_response_time as days %}{{days}} day{{days|pluralize}}{% endwith %}</td>
 				<td>{{agency.total_pages}}</td>

@@ -210,7 +210,7 @@
 			{% empty %}
 				<p>You don't have any notes on this request.  Note can be used to store private information regarding this request.</p>
 			{% endfor %}
-			<p><a class="jqbutton" href="{% url foia-note jurisdiction=object.jurisdiction.slug,idx=object.id,slug=object.slug %}">Add a Note</a></p>
+			<p><a class="jqbutton" href="{% url foia-note jurisdiction=object.jurisdiction.slug,jidx=object.jurisdiction.pk,idx=object.id,slug=object.slug %}">Add a Note</a></p>
 		</div>
 		{% endif %}
 	{% if object.public_documents or object.user == user %}
