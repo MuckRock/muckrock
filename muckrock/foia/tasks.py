@@ -36,8 +36,6 @@ options = FOIAOptions()
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
-    print 'here'
-
     try:
         doc = FOIADocument.objects.get(pk=doc_pk)
     except FOIADocument.DoesNotExist, exc:
@@ -63,7 +61,6 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         url = '/documents/%s.json' % doc.doc_id
     else:
         params['file'] = doc.document.url.replace('https', 'http', 1)
-        print 'file:', params['file']
         url = '/upload.json'
 
     opener = urllib2.build_opener(MultipartPostHandler.MultipartPostHandler)
