@@ -17,5 +17,6 @@ Sincerely,
 The MuckRock Team
 
 
-
+{% autoescape off %}
 {{footer}}
+{% endautoescape %}
