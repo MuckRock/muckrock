@@ -223,7 +223,10 @@ class FOIARequest(models.Model):
     def first_request(self):
         """Return the first request text"""
         # pylint: disable=E1101
-        return self.communications.all()[0].communication
+        try:
+            return self.communications.all()[0].communication
+        except IndexError:
+            return ''
 
     def get_communications(self, user):
         """Get communications and documents to display on details page"""
