@@ -223,6 +223,9 @@ logger.setLevel(getattr(logging, os.environ.get('LOGGING_LEVEL', 'DEBUG')))
 if boolcheck(os.environ.get('SENTRY_LOG', False)):
     setup_logging(SentryHandler())
 
+stripe_logger = logging.getLogger('stripe')
+stripe_logger.setLevel(logging.WARNING)
+
 # pylint: disable=W0611
 import monkey
 

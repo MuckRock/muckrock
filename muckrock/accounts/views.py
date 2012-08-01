@@ -279,3 +279,35 @@ def stripe_webhook(request):
                   'info@muckrock.com', [user.email], fail_silently=False)
 
     return HttpResponse()
+
+@csrf_exempt
+def stripe_webhook_v2(request):
+    """Handle webhooks from stripe"""
+
+    if request.method != "POST":
+        return HttpResponse("Invalid Request.", status=400)
+
+    event_json = json.loads(request.raw_post_data)
+
+    logger.info('Received stripe webhook of type %s.  Data: %s' % (event_json['type'], event_json))
+
+    if event_json['type'] == 'invoice.payment_succeeded':
+        user = Profile.objects.get(stripe_id=event_json['data']['object']['customer']).user
+        send_mail('Payment received for pro account', 
+                  render_to_string('registration/pro_receipt.txt',
+                                   {'user': user, 'data': event_json['data']['object']}),
+                  'info@muckrock.com', [user.email], fail_silently=False)
+    elif event_json['type'] == 'invoice.payment_failed':
+        user_profile = Profile.objects.get(stripe_id=event_json['data']['object']['customer'])
+        user = user_profile.user
+        attempt = event_json['data']['object']['attempt_count']
+        if attempt == 4:
+            user_profile.acct_type = 'community'
+            user_profile.save()
+            logger.info('%s subscription has been cancelled due to failed payment', user.username)
+            send_mail(XXX)
+        else:
+            logger.info('Failed payment by %s, attempt %s', user.username, attempt)
+            send_mail(XXX)
+
+    return HttpResponse()
