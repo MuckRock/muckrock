@@ -137,8 +137,8 @@ def _upload_doc_cloud(foia, file_, sender):
     access = 'private' if foia.is_embargo() else 'public'
     source = foia.agency.name if foia.agency else sender
 
-    foia_doc = FOIADocument(foia=foia, title=os.path.splitext(file_.name)[0],
-                            source=source, access=access, date=datetime.now())
+    foia_doc = FOIADocument(foia=foia, title=os.path.splitext(file_.name)[0][:70],
+                            source=source[:70], access=access, date=datetime.now())
     foia_doc.document.save(file_.name, file_)
     foia_doc.save()
     upload_document_cloud.apply_async(args=[foia_doc.pk, False], countdown=3)
