@@ -407,7 +407,7 @@ class FOIARequest(models.Model):
         self.update(comm.anchor())
 
     def _send_email(self):
-        """Send an email of the request to it's email address"""
+        """Send an email of the request to its email address"""
         # pylint: disable=E1101
         # self.email should be set before calling this method
 
