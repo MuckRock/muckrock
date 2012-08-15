@@ -140,7 +140,10 @@ def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup(): 
+    logger.info('foia.tasks.followup_requests task being run')
     if options.enable_followup:
+        logger.info('%d requests to follow up on',
+            FOIARequest.objects.filter(status='processed', date_followup__lte=date.today().count()))
         for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
             foia.followup()
 
