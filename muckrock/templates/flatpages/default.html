@@ -1,8 +1,11 @@
 
 
 {% extends "base.html" %}
+{% load evaluate_tag %} 
 
 {% block title %} {{ flatpage.title }} {% endblock %}
 {% block headline %} About {% endblock %}
 
-{% block content %} {{ flatpage.content }} {% endblock %}
+{% block content %}
+{% evaluate flatpage.content %} 
+{% endblock %}
