@@ -95,48 +95,45 @@
 				{% else %}
 					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
-				<div class="clearer">&nbsp;</div>
-			</div>
 
         {% for file in comm.files.all %}
 
           <a name="{{file.anchor}}"></a>
-          <div class="{% if comm.response %}response{% else %}request{% endif %}">
-            <strong>{{file.title}}</strong><br />
+						<div class="request-file">
+							<strong>{{file.title}}</strong><br />
 
-          {# document #}
-          {% if file.is_doccloud %}
-            {% if file.access == "public" and file.doc_id and file.pages > 0 %}
-              <div class="left text-center">
-                <a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true"><img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /></a><br />
-                <a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true">View</a> |
-                <a href="{{file.document.url}}">Download</a>
-              </div>
-            {% else %}
-              <div class="left text-center">
-                <img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /><br />
-                <a href="{{file.document.url}}">Download</a>
-              </div>
-              {% if file.doc_id and file.pages > 0 %}
-                <p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
-              {% else %}
-                <p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
-              {% endif %}
-            {% endif %}
-          {# file #}
-          {% else %}
-            <div class="left text-center">
-              <a href="{{file.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{file.name}}" title="{{file.name}}" class="doc-thumb bordered" /></a><br />
-              <a href="{{file.ffile.url}}">Download</a>
-            </div>
-          {% endif %}
+							{# document #}
+							{% if file.is_doccloud %}
+								{% if file.access == "public" and file.doc_id and file.pages > 0 %}
+										<a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true"><img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /></a><br />
+										<a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true">View</a> |
+										<a href="{{file.document.url}}">Download</a><br />
+								{% else %}
+										<img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /><br />
+										<a href="{{file.document.url}}">Download</a><br />
+									{% if file.doc_id and file.pages > 0 %}
+										<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
+									{% else %}
+										<p><em><strong>Editor's Note:</strong> This document is processing. It will be viewable in the embedded viewer soon.</em></p>
+									{% endif %}
+								{% endif %}
+							{# file #}
+							{% else %}
+									<a href="{{file.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{file.name}}" title="{{file.name}}" class="doc-thumb bordered" /></a><br />
+									<a href="{{file.ffile.url}}">Download</a><br />
+							{% endif %}
 
-					{{file.description|urlize|linebreaks}}
-
-          <div class="clearer">&nbsp;</div>
-          </div>
+							{{file.description|urlize}}
+						</div>
+						{% if forloop.counter|divisibleby:"3" %}
+							<div class="clearer">&nbsp;</div>
+							<br \>
+						{% endif %}
 
         {% endfor %}
+				<div class="clearer">&nbsp;</div>
+			</div>
+
 
 			{% endfor %}
 		</div>
