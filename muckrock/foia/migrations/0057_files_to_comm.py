@@ -12,10 +12,31 @@ class Migration(DataMigration):
         for file_ in orm.FOIAFile.objects.all():
             try:
                 comm = file_.foia.communications.filter(date__lt=file_.date).reverse()[0]
-                file_.comm = comm
+                if (file_.date - comm.date) < datetime.timedelta(minutes=5):
+                    file_.comm = comm
+                else:
+                    file_.comm = FOIACommunication(
+                        foia=file_.foia,
+                        from_who=file_.source,
+                        to_who='',
+                        date=file_.date,
+                        response=True,
+                        full_html=False,
+                        communication='',
+                        )
                 file_.save()
             except IndexError:
-                print "Index Error for file: %d %s" % (file_.pk, file_.title)
+                # no previous comm
+                file_.comm = FOIACommunication(
+                    foia=file_.foia,
+                    from_who=file_.source,
+                    to_who='',
+                    date=file_.date,
+                    response=True,
+                    full_html=False,
+                    communication='',
+                    )
+                file_.save()
             except ValueError:
                 print "Value Error for file: %d %s" % (file_.pk, file_.title)
     
