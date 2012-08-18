@@ -555,7 +555,7 @@ class FOIACommunication(models.Model):
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
-    communication = models.TextField()
+    communication = models.TextField(blank=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=status, blank=True, null=True)
 
