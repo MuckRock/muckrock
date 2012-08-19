@@ -15,7 +15,7 @@ from accounts.models import Statistics
 from agency.models import Agency
 from foia.models import FOIARequest, FOIADocument
 
-logger = logging.getLogger('task')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 @periodic_task(run_every=crontab(hour=0, minute=30), name='accounts.tasks.store_statstics')

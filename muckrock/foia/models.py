@@ -27,6 +27,7 @@ from values import TextValue
 import fields
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
