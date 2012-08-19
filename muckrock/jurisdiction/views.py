@@ -42,19 +42,38 @@ def flag_helper(request, obj, type_):
                                'base': '%s/base.html' % type_},
                               context_instance=RequestContext(request))
 
-def detail(request, slug, idx):
+def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
 
-    jurisdiction = get_object_or_404(Jurisdiction, slug=slug, pk=idx)
+    jurisdiction = get_object_or_404(Jurisdiction, slug=fed_slug)
+    if state_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=state_slug, parent=jurisdiction)
+    if local_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
+
     context = {'jurisdiction': jurisdiction}
     collect_stats(jurisdiction, context)
 
     return render_to_response('jurisdiction/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
+def list_(request):
+    """List of jurisdictions"""
+    fed_jurs = Jurisdiction.objects.filter(level='f')
+    state_jurs = Jurisdiction.objects.filter(level='s')
+    context = {'fed_jurs': fed_jurs, 'state_jurs': state_jurs}
+
+    return render_to_response('jurisdiction/jurisdiction_list.html', context,
+                              context_instance=RequestContext(request))
+
 @login_required
-def flag(request, slug, idx):
+def flag(request, fed_slug, state_slug, local_slug):
     """Flag a correction for a jurisdiction's information"""
 
-    jurisdiction = get_object_or_404(Jurisdiction, slug=slug, pk=idx)
+    jurisdiction = get_object_or_404(Jurisdiction, slug=fed_slug)
+    if state_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=state_slug, parent=jurisdiction)
+    if local_slug:
+        jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
+
     return flag_helper(request, jurisdiction, 'jurisdiction')

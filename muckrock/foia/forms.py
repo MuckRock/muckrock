@@ -581,8 +581,9 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         if len(title) > 70:
             title = title[:70]
+        slug = slugify(title) or 'untitled'
         foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
-                                          jurisdiction=jurisdiction, slug=slugify(title),
+                                          jurisdiction=jurisdiction, slug=slug,
                                           agency=agency)
         FOIACommunication.objects.create(
                 foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
@@ -594,8 +595,9 @@ class FOIAWizard(DynamicSessionFormWizard):
 
         return HttpResponseRedirect(reverse('foia-update',
                                     kwargs={'jurisdiction': jurisdiction.slug,
-                                            'idx': foia.id,
-                                            'slug': slugify(title)}))
+                                            'jidx': jurisdiction.pk,
+                                            'idx': foia.pk,
+                                            'slug': slug}))
 
     def process_step(self, form):
         """Process each step"""

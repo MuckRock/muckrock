@@ -9,7 +9,7 @@
 
 <h1>{{jurisdiction.name}}</h1>
 {% if jurisdiction.parent %}
-	<p>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{% url jurisdiction-detail slug=jurisdiction.parent.slug,idx=jurisdiction.parent.pk %}">{{jurisdiction.parent.name}}</a></p>
+	<p>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{jurisdiction.parent.name}}</a></p>
 {% endif %}
 
 {% if not jurisdiction.image %}
@@ -101,7 +101,7 @@
 			</tr>
 		{% for agency in jurisdiction.agencies.get_approved %}
 			<tr class="{% cycle 'even' 'odd' %}">
-				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
+				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,jidx=jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
 				<td>{{agency.foiarequest_set.count}}</td>
 				<td>{% with agency.average_response_time as days %}{{days}} day{{days|pluralize}}{% endwith %}</td>
 				<td>{{agency.total_pages}}</td>
@@ -141,7 +141,7 @@
 		<p><em>MuckRock can currently submit requests in the following {{jurisdiction.name}} local jurisdictions. To add a jurisdiction, e-mail <a href"Info@MuckRock.com">info@muckrock.com</a>. Requests are typically fulfilled within 24 hours.</em>
 		<ul class="children">
 			{% for child in jurisdiction.children.all %}
-				<li><a href="{% url jurisdiction-detail slug=child.slug,idx=child.pk %}">{{child.name}}</a></li>
+				<li><a href="{{ child.get_absolute_url }}">{{child.name}}</a></li>
 			{% endfor %}
 		</ul>
 		<div class="clearer">&nbsp;</div>
@@ -154,7 +154,7 @@
 	{% if user.is_staff %}
 		<p><a class="jqbutton" href="{% url admin:jurisdiction_jurisdiction_change jurisdiction.pk %}">Admin</a></p>
 	{% endif %}
-	<p><a class="jqbutton" href="{% url jurisdiction-flag slug=jurisdiction.slug,idx=jurisdiction.pk %}">Submit Correction</a></p>
+	<p><a class="jqbutton" href="{{ jurisdiction.get_url_flag }}">Submit Correction</a></p>
 	<div class="content-separator"></div>
 
 	<div class="section">

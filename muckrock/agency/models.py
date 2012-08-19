@@ -72,6 +72,7 @@ class Agency(models.Model, RequestHelper):
         """The url for this object"""
         # pylint: disable=E1101
         return ('agency-detail', [], {'jurisdiction': self.jurisdiction.slug,
+                                      'jidx': self.jurisdiction.pk,
                                       'slug': self.slug, 'idx': self.pk})
 
     def normalize_fax(self):

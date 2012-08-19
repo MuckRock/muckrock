@@ -4,11 +4,13 @@ from django import forms
 from django.contrib.localflavor.us.forms import USPhoneNumberField
 
 from agency.models import Agency
+from fields import FullEmailField
 
 
 class AgencyForm(forms.ModelForm):
     """A form for an Agency"""
 
+    email = FullEmailField(required=False)
     phone = USPhoneNumberField(required=False)
     fax = USPhoneNumberField(required=False)
 

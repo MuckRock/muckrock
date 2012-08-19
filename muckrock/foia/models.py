@@ -27,6 +27,7 @@ from values import TextValue
 import fields
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
@@ -144,7 +145,8 @@ class FOIARequest(models.Model):
         """The url for this object"""
         # pylint: disable=E1101
         return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
-                                    'slug': self.slug, 'idx': self.id})
+                                    'jidx': self.jurisdiction.pk,
+                                    'slug': self.slug, 'idx': self.pk})
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -221,7 +223,10 @@ class FOIARequest(models.Model):
     def first_request(self):
         """Return the first request text"""
         # pylint: disable=E1101
-        return self.communications.all()[0].communication
+        try:
+            return self.communications.all()[0].communication
+        except IndexError:
+            return ''
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
@@ -389,7 +394,7 @@ class FOIARequest(models.Model):
         self.update(comm.anchor())
 
     def _send_email(self):
-        """Send an email of the request to it's email address"""
+        """Send an email of the request to its email address"""
         # pylint: disable=E1101
         # self.email should be set before calling this method
 
@@ -489,7 +494,8 @@ class FOIARequest(models.Model):
         """What actions may the given user take on this Request"""
         # pylint: disable=E1101
 
-        kwargs = {'jurisdiction': self.jurisdiction.slug, 'idx': self.pk, 'slug': self.slug}
+        kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
+                  'idx': self.pk, 'slug': self.slug}
 
         actions = [
             (user.is_staff,

@@ -15,14 +15,14 @@ import os
 import sys
 import time
 from datetime import datetime
-from email.utils import parseaddr
+from email.utils import parseaddr, getaddresses
 
 from foia.models import FOIARequest, FOIACommunication, FOIAFile
 from foia.tasks import upload_document_cloud
-from fields import email_separator_re
 from settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 @csrf_exempt
 def handle_request(request, mail_id):
@@ -46,7 +46,7 @@ def handle_request(request, mail_id):
                 foia=foia, from_who=from_realname[:255],
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False,
-                communication=post.get('stripped-text'))
+                communication=post.get('stripped-text', ''))
 
         # handle attachments
         for file_ in request.FILES.itervalues():
@@ -61,13 +61,13 @@ def handle_request(request, mail_id):
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         foia.email = from_email
+        foia.other_emails = ','.join(email for name, email
+                                     in getaddresses([post.get('To', ''), post.get('Cc', '')])
+                                     if email and not email.endswith('muckrock.com'))
+        while len(foia.other_emails) > 255:
+            # drop emails until it fits in db
+            foia.other_emails = foia.other_emails[:foia.other_emails.rindex(',')]
 
-        other_emails = [email_separator_re.sub('', email.strip()) for email
-                        in post.get('To', '').split(',') + 
-                           post.get('Cc', '').split(',')
-                        if email]
-        foia.other_emails = ','.join(email for email in other_emails
-                                     if not email.endswith('muckrock.com'))
         foia.save()
         foia.update(comm.anchor())
 
@@ -128,7 +128,7 @@ def _upload_file(foia, file_, sender):
     access = 'private' if foia.is_embargo() else 'public'
     source = foia.agency.name if foia.agency else sender
 
-    foia_file = FOIAFile(foia=foia, title=os.path.splitext(file_.name)[0], date=datetime.now(),
+    foia_file = FOIAFile(foia=foia, title=os.path.splitext(file_.name)[0][:70], date=datetime.now(),
                          source=source[:70], access=access)
     foia_file.ffile.save(file_.name, file_)
     foia_file.save()
