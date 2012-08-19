@@ -24,7 +24,7 @@ class Migration(SchemaMigration):
 
         for file_ in orm.FOIAFile.objects.all():
             if not file_.title:
-                file_.title = os.path.basename(file_.ffile.name)
+                file_.title = os.path.basename(file_.ffile.name)[:70]
                 file_.save()
     
     def backwards(self, orm):
