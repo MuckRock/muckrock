@@ -89,29 +89,29 @@ class FOIARequestManager(ChainableManager):
         return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
 
 
+STATUS = (
+    ('started', 'Draft'),
+    ('submitted', 'Processing'),
+    ('processed', 'Awaiting Response'),
+    ('appealing', 'Awaiting Appeal'),
+    ('fix', 'Fix Required'),
+    ('payment', 'Payment Required'),
+    ('rejected', 'Rejected'),
+    ('no_docs', 'No Responsive Documents'),
+    ('done', 'Completed'),
+    ('partial', 'Partially Completed'),
+    ('abandoned', 'Abandoned'),
+)
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable=R0904
     # pylint: disable=R0902
 
-    status = (
-        ('started', 'Draft'),
-        ('submitted', 'Processing'),
-        ('processed', 'Awaiting Response'),
-        ('appealing', 'Awaiting Appeal'),
-        ('fix', 'Fix Required'),
-        ('payment', 'Payment Required'),
-        ('rejected', 'Rejected'),
-        ('no_docs', 'No Responsive Documents'),
-        ('done', 'Completed'),
-        ('partial', 'Partially Completed'),
-        ('abandoned', 'Abandoned'),
-    )
-
     user = models.ForeignKey(User)
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
-    status = models.CharField(max_length=10, choices=status)
+    status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
@@ -539,16 +539,6 @@ class FOIARequest(models.Model):
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
-    status = (
-        ('processed', 'Awaiting Response'),
-        ('fix', 'Fix Required'),
-        ('payment', 'Payment Required'),
-        ('rejected', 'Rejected'),
-        ('no_docs', 'No Responsive Documents'),
-        ('done', 'Completed'),
-        ('partial', 'Partially Completed'),
-    )
-
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
@@ -557,7 +547,7 @@ class FOIACommunication(models.Model):
     full_html = models.BooleanField()
     communication = models.TextField(blank=True)
     # what status this communication should set the request to - used for machine learning
-    status = models.CharField(max_length=10, choices=status, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 
     def anchor(self):
         """Anchor name"""
@@ -616,12 +606,31 @@ class FOIAFile(models.Model):
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
+        mimetypes = {
+            'avi': 'file-video.png',
+            'bmp': 'file-image.png',
+            'csv': 'file-spreadsheet.png',
+            'gif': 'file-image.png',
+            'jpg': 'file-image.png',
+            'mp3': 'file-audio.png',
+            'mpg': 'file-video.png',
+            'png': 'file-image.png',
+            'ppt': 'file-presentation.png',
+            'pptx': 'file-presentation.png',
+            'tif': 'file-image.png',
+            'wav': 'file-audio.png',
+            'xls': 'file-spreadsheet.png',
+            'xlsx': 'file-spreadsheet.png',
+            'zip': 'file-archive.png',
+        }
 
         if match and self.pages > 0 and self.access == 'public':
             return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
-            return '%simg/report.png' % STATIC_URL
+            ext = os.path.splitext(self.name())[1][1:]
+            filename = mimetypes.get(ext, 'file-document.png')
+            return '%simg/%s' % (STATIC_URL, filename)
 
     def get_medium_thumbnail(self):
         """Convenient function for template"""
