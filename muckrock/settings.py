@@ -163,7 +163,6 @@ INSTALLED_APPS = (
     'agency',
     'jurisdiction',
     'business_days',
-    'rodeo',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
