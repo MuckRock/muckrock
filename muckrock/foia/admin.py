@@ -226,11 +226,18 @@ class FOIAFileAdminFormCommSelect(FOIAFileAdminForm):
         self.fields['comm'].queryset = FOIACommunication.objects.filter(
             foia=self.instance.foia.pk).order_by('date')
 
-class FOIAFileAdmin(NestedModelAdmin):
+class FOIAFileAdmin(admin.ModelAdmin):
     """FOIA File admin options"""
     model = FOIAFile
     form = FOIAFileAdminFormCommSelect
-    readonly_fields = ('foia', 'doc_id', 'pages')
-    exclude = ('access', )
+    readonly_fields = ('foia_link', )
     list_display = ('title', 'date', 'comm')
+    fields = ('title', 'foia_link', 'comm', 'ffile', 'date', 'source', 'description')
+
+    def foia_link(self, obj):
+        change_url = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
+        return '<a href="%s">%s</a>' % (change_url, obj.foia.title)
+    foia_link.short_description = 'FOIA'
+    foia_link.allow_tags = True
+
 admin.site.register(FOIAFile,  FOIAFileAdmin)
