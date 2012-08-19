@@ -24,7 +24,7 @@ from foia.models import FOIADocument, FOIARequest
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 
-logger = logging.getLogger('task')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class FOIAOptions(dbsettings.Group):
