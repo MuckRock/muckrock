@@ -35,6 +35,7 @@ from tags.models import Tag
 from settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def _foia_form_handler(request, foia, action):
@@ -71,15 +72,16 @@ def _foia_form_handler(request, foia, action):
                 new_agency = False
                 if agency_name and (not foia.agency or agency_name != foia.agency.name):
                     # Use the combobox to create a new agency
-                    foia.agency = Agency.objects.create(name=agency_name[:255],
-                                                        slug=slugify(agency_name[:255]),
-                                                        jurisdiction=foia.jurisdiction,
-                                                        user=request.user, approved=False)
+                    foia.agency = Agency.objects.create(
+                        name=agency_name[:255],
+                        slug=(slugify(agency_name[:255]) or 'untitled'),
+                        jurisdiction=foia.jurisdiction,
+                        user=request.user, approved=False)
                     send_mail('[AGENCY] %s' % foia.agency.name,
                               render_to_string('foia/admin_agency.txt', {'agency': foia.agency}),
                               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
                     new_agency = True
-                foia.slug = slugify(foia.title)
+                foia.slug = slugify(foia.title) or 'untitled'
                 foia_comm = foia.communications.all()[0]
                 foia_comm.date = datetime.now()
                 foia_comm.communication = form.cleaned_data['request']
@@ -101,6 +103,7 @@ def _foia_form_handler(request, foia, action):
                 if new_agency:
                     return HttpResponseRedirect(reverse('agency-update',
                         kwargs={'jurisdiction': foia.agency.jurisdiction.slug,
+                                'jidx': foia.agency.jurisdiction.pk,
                                 'slug': foia.agency.slug, 'idx': foia.agency.pk})
                                                 + '?foia=%d' % foia.pk)
                 else:
@@ -128,10 +131,10 @@ def create(request):
     return FOIAWizard(['FOIAWizardWhereForm'], form_dict)(request)
 
 @login_required
-def update(request, jurisdiction, slug, idx):
+def update(request, jurisdiction, jidx, slug, idx):
     """Update a started FOIA Request"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if not foia.is_editable():
@@ -143,10 +146,11 @@ def update(request, jurisdiction, slug, idx):
 
     return _foia_form_handler(request, foia, 'Update')
 
-def _foia_action(request, jurisdiction, slug, idx, action):
+def _foia_action(request, jurisdiction, jidx, slug, idx, action):
     """Generic helper for FOIA actions"""
+    # pylint: disable=R0913
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
     form_class = action.form_class(request, foia)
 
@@ -204,10 +208,10 @@ def _save_foia_comm(request, foia, form, action, formset=None):
     messages.success(request, '%s succesfully submitted.' % action)
 
 @user_passes_test(lambda u: u.is_staff)
-def admin_fix(request, jurisdiction, slug, idx):
+def admin_fix(request, jurisdiction, jidx, slug, idx):
     """Send an email from the requests auto email address"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
 
     if request.method == 'POST':
@@ -225,9 +229,8 @@ def admin_fix(request, jurisdiction, slug, idx):
     return render_to_response('foia/foiarequest_action.html', context,
                               context_instance=RequestContext(request))
 
-
 @login_required
-def fix(request, jurisdiction, slug, idx):
+def fix(request, jurisdiction, jidx, slug, idx):
     """Ammend a 'fix required' FOIA Request"""
 
     action = Action(
@@ -241,10 +244,10 @@ def fix(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def appeal(request, jurisdiction, slug, idx):
+def appeal(request, jurisdiction, jidx, slug, idx):
     """Appeal a rejected FOIA Request"""
 
     action = Action(
@@ -258,10 +261,10 @@ def appeal(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def flag(request, jurisdiction, slug, idx):
+def flag(request, jurisdiction, jidx, slug, idx):
     """Flag a FOI Request as having incorrect information"""
 
     def form_actions(request, foia, form):
@@ -285,10 +288,10 @@ def flag(request, jurisdiction, slug, idx):
         must_own = False,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def note(request, jurisdiction, slug, idx):
+def note(request, jurisdiction, jidx, slug, idx):
     """Add a note to a request"""
 
     def form_actions(_, foia, form):
@@ -309,10 +312,10 @@ def note(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def delete(request, jurisdiction, slug, idx):
+def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
 
     def form_actions(request, foia, _):
@@ -331,10 +334,10 @@ def delete(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def embargo(request, jurisdiction, slug, idx):
+def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
 
     def form_actions(_, foia, form):
@@ -358,10 +361,10 @@ def embargo(request, jurisdiction, slug, idx):
         must_own = True,
         template = 'foia/foiarequest_action.html',
         extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def pay_request(request, jurisdiction, slug, idx):
+def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
     # pylint: disable=W0142
 
@@ -405,13 +408,13 @@ def pay_request(request, jurisdiction, slug, idx):
         extra_context = lambda f: {'desc': 'You will be charged $%.2f for this request' %
                                    (f.price * Decimal('1.05')),
                                    'pub_key': STRIPE_PUB_KEY})
-    return _foia_action(request, jurisdiction, slug, idx, action)
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
-def follow(request, jurisdiction, slug, idx):
+def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
     if foia.user == request.user:
@@ -491,7 +494,7 @@ def list_by_tag(request, tag_slug):
     return _list(request, foia_requests, extra_context={'subtitle': 'Tagged with "%s"' % tag.name})
 
 @login_required
-def my_list(request, view):
+def my_list(request, view='all'):
     """Views owned by current user"""
     # pylint: disable=E1103
     # pylint: disable=R0912
@@ -565,10 +568,10 @@ def list_following(request):
 
     return _list(request, foia_requests, extra_context={'subtitle': 'Following'})
 
-def detail(request, jurisdiction, slug, idx):
+def detail(request, jurisdiction, jidx, slug, idx):
     """Details of a single FOIA request"""
 
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
 
     if not foia.is_viewable(request.user):
@@ -591,3 +594,21 @@ def detail(request, jurisdiction, slug, idx):
     return render_to_response('foia/foiarequest_detail.html',
                               context,
                               context_instance=RequestContext(request))
+
+def redirect_old(request, jurisdiction, slug, idx, action):
+    """Redirect old urls to new urls"""
+    # pylint: disable=W0612
+    # pylint: disable=W0613
+
+    # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
+    foia = get_object_or_404(FOIARequest, pk=idx)
+    jurisdiction = foia.jurisdiction.slug
+    jidx = foia.jurisdiction.pk
+
+    if action == 'view':
+        return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/' % locals())
+
+    if action == 'admin-fix':
+        action = 'admin_fix'
+    
+    return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())

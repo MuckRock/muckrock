@@ -10,7 +10,7 @@
 <h1>{{agency.name}}</h1>
 
 <p class="quiet">
-	A <a href="{% url jurisdiction-detail slug=agency.jurisdiction.slug,idx=agency.jurisdiction.pk %}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
+	A <a href="{{ agency.jurisdiction.get_absolute_url }}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
 </p>
 
 {% if not agency.image %}
@@ -38,7 +38,7 @@
 		  {{ agency.address|linebreaks }} 
 			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
 		{% else %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>E-mail Address:</strong><br />
@@ -53,14 +53,14 @@
 			{% endif %}
 		{% endif %}
 	  {% if not agency.email %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>Fax Number:</strong><br />
 	  {% if agency.fax %}
 		  {{agency.fax}}
 		{% else %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>Average Response Time:</strong><br />
@@ -147,8 +147,8 @@
 	{% if user.is_staff %}
 		<p><a class="jqbutton" href="{% url admin:agency_agency_change agency.pk %}">Admin</a></p>
 	{% endif %}
-	{% if user.is_athenticated %}
-		<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
+	{% if user.is_authenticated %}
+		<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
 		<div class="content-separator"></div>
 	{% endif %}
 

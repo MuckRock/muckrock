@@ -2,6 +2,7 @@
 General temaplate tags
 """
 
+from django import template
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 
@@ -118,3 +119,46 @@ def table_header(parser, token):
 def abs_filter(value):
     """Absolute value of a number"""
     return abs(value)
+
+email_re = re.compile('[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
+
+def email_redactor(match):
+    """Don't redact muckrock emails"""
+    if match.group('domain').endswith('muckrock.com'):
+        return match.group(0)
+    else:
+        return '[redacted]@%s' % match.group('domain')
+
+@register.filter
+def redact_emails(text):
+    """Redact emails from text"""
+    return email_re.sub(email_redactor, text)
+
+# http://stackoverflow.com/questions/1278042/
+# in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
+@register.tag(name="evaluate")
+def do_evaluate(parser, token):
+    """
+    tag usage {% evaluate object.textfield %}
+    """
+    # pylint: disable=W0613
+    try:
+        _, variable = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError, \
+            "%r tag requires a single argument" % token.contents.split()[0]
+    return EvaluateNode(variable)
+
+class EvaluateNode(template.Node):
+    """Node for do_evaluate"""
+    def __init__(self, variable):
+        # pylint: disable=W0231
+        self.variable = template.Variable(variable)
+
+    def render(self, context):
+        try:
+            content = self.variable.resolve(context)
+            tmpl = template.Template(content)
+            return tmpl.render(context)
+        except (template.VariableDoesNotExist, template.TemplateSyntaxError):
+            return 'Error rendering', self.variable

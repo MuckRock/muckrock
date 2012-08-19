@@ -22,9 +22,9 @@ from vendor import MultipartPostHandler
 
 from foia.models import FOIAFile, FOIARequest
 
-foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
+foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 
-logger = logging.getLogger('task')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class FOIAOptions(dbsettings.Group):
@@ -120,7 +120,7 @@ def set_top_viewed_reqs():
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    path_re = re.compile('ga:pagePath=/foi/view/' + foia_url)
+    path_re = re.compile('ga:pagePath=/foi/%s/view' % foia_url)
     top_req_paths = [(entry.title.text, int(entry.pageviews.value)) for entry in data.entry
                      if path_re.match(entry.title.text)]
 
@@ -144,7 +144,10 @@ def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup(): 
+    logger.info('foia.tasks.followup_requests task being run')
     if options.enable_followup:
+        logger.info('%d requests to follow up on',
+            FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()).count())
         for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
             foia.followup()
 

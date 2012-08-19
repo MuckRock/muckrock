@@ -8,7 +8,7 @@ secret at this time, please consider allowing the embargo to expire
 so that the community may benefit by having more public requests.
 
 Direct link to your request:
-http://www.muckrock.com{% url foia-embargo jurisdiction=request.jurisdiction.slug,slug=request.slug,idx=request.pk %}
+http://www.muckrock.com{% url foia-embargo jurisdiction=request.jurisdiction.slug,jidx=request.jurisdiction.pk,slug=request.slug,idx=request.pk %}
 
 Sincerely,
 The MuckRock Team
