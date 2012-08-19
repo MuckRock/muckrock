@@ -215,3 +215,22 @@ class FOIARequestAdmin(NestedModelAdmin):
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
+
+# XXX this is just to clean up dateless files, then delete this code
+
+class FOIAFileAdminFormCommSelect(FOIAFileAdminForm):
+    """Form to select comm"""
+
+    def __init__(self, *args, **kwargs):
+        super(FOIAFileAdminFormCommSelect, self).__init__(*args, **kwargs)
+        self.fields['comm'].queryset = FOIACommunication.objects.filter(
+            foia=self.instance.foia.pk).order_by('date')
+
+class FOIAFileAdmin(NestedModelAdmin):
+    """FOIA File admin options"""
+    model = FOIAFile
+    form = FOIAFileAdminFormCommSelect
+    readonly_fields = ('foia', 'doc_id', 'pages')
+    exclude = ('access', )
+    list_display = ('title', 'date', 'comm')
+admin.site.register(FOIAFile,  FOIAFileAdmin)

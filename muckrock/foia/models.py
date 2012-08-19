@@ -555,6 +555,9 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 
+    def __unicode__(self):
+        return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
+
     def anchor(self):
         """Anchor name"""
         return 'comm-%d' % self.pk
