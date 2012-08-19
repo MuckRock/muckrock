@@ -47,6 +47,9 @@ class Migration(DataMigration):
     
     def backwards(self, orm):
         "Write your backwards methods here."
+
+        for comm in orm.FOIACommunication.objects.filter(communication=''):
+            comm.delete()
     
     models = {
         'agency.agency': {

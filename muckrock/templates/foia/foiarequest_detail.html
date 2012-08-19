@@ -119,7 +119,7 @@
 								{% endif %}
 							{# file #}
 							{% else %}
-									<a href="{{file.ffile.url}}"><img src="{% static "img/report.png" %}" alt="{{file.name}}" title="{{file.name}}" class="doc-thumb bordered" /></a><br />
+									<a href="{{file.ffile.url}}"><img src="{{file.get_medium_thumbnail}}" alt="{{file.name}}" title="{{file.name}}" class="doc-thumb bordered" /></a><br />
 									<a href="{{file.ffile.url}}">Download</a><br />
 							{% endif %}
 
