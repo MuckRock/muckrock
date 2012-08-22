@@ -133,6 +133,9 @@ class FOIARequestAdmin(NestedModelAdmin):
             except formset.model.DoesNotExist:
                 change = False
 
+            if formset.model == FOIAFile:
+                instance.foia = instance.comm.foia
+
             instance.save()
             # its new, so notify the user about it
             if not change and formset.model == FOIACommunication:
