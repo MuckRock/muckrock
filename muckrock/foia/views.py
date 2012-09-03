@@ -60,6 +60,11 @@ def _foia_form_handler(request, foia, action):
     if request.method == 'POST':
         status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
 
+        if request.POST.get('submit') == 'Delete':
+            foia.delete()
+            messages.info(request, 'Request succesfully deleted')
+            return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+
         try:
             foia.status = status_dict[request.POST['submit']]
 
