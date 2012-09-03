@@ -107,10 +107,10 @@
 								{% if file.access == "public" and file.doc_id and file.pages > 0 %}
 										<a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true"><img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /></a><br />
 										<a href="#{{file.doc_id}}" onclick="display_doc('{{file.doc_id}}'); return true">View</a> |
-										<a href="{{file.document.url}}">Download</a><br />
+										<a href="{{file.ffile.url}}">Download</a><br />
 								{% else %}
 										<img src="{{file.get_medium_thumbnail}}" alt="{{file.title}}" title="{{file.title}}" class="doc-thumb bordered" /><br />
-										<a href="{{file.document.url}}">Download</a><br />
+										<a href="{{file.ffile.url}}">Download</a><br />
 									{% if file.doc_id and file.pages > 0 %}
 										<p><em><strong>Editor's Note:</strong> As a security measure, embargoed requests are not viewable in the embedded viewer. When the request is made public, the embedded viewer will appear.</em></p>
 									{% else %}
