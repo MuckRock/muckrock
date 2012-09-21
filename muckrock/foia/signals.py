@@ -19,8 +19,8 @@ def foia_update_embargo(sender, **kwargs):
 
     if request.is_embargo(save=False) != old_request.is_embargo(save=False):
         access = 'private' if request.is_embargo(save=False) else 'public'
-        for doc in request.documents.all():
-            if doc.access != access:
+        for doc in request.files.all():
+            if doc.is_doccloud() and doc.access != access:
                 doc.access = access
                 doc.save()
                 upload_document_cloud.apply_async(args=[doc.pk, True], countdown=3)

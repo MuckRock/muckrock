@@ -7,11 +7,26 @@
 	<h1 class="left">{{ title }}</h1>
 
 	<span class="right">
+		<!--
 		<form action="/search/" method="get">
 			{% csrf_token %}
 			<input type="text" name="q" id="id_q" />
 			<input type="submit" name="submit" value="Search" class="button" />
 		</form>
+		-->
+<div id="cse-search-form" style="width: 40%;" class="right">Loading</div>
+<script src="https://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript"> 
+  google.load('search', '1', {language : 'en', style : google.loader.themes.V2_DEFAULT});
+  google.setOnLoadCallback(function() {
+    var customSearchOptions = {};  var customSearchControl = new google.search.CustomSearchControl(
+      '017198487599982565084:fusxuqszm0u', customSearchOptions);
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.enableSearchboxOnly("http://www.google.com/cse?cx=017198487599982565084:fusxuqszm0u");
+    customSearchControl.draw('cse-search-form', options);
+  }, true);
+</script>
 	</span>
 	<div class="clear">&nbsp;</div>
 

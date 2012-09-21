@@ -27,6 +27,7 @@ from values import TextValue
 import fields
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
@@ -85,34 +86,33 @@ class FOIARequestManager(ChainableManager):
         #return self.filter(status='processed', date_followup__lte=date.today())
 
     def get_undated(self):
-        """Get requests which have an undated document or file"""
-        return self.filter((~Q(files=None)     & Q(files__date=None)) |
-                           (~Q(documents=None) & Q(documents__date=None))).distinct()
+        """Get requests which have an undated file"""
+        return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
 
+
+STATUS = (
+    ('started', 'Draft'),
+    ('submitted', 'Processing'),
+    ('processed', 'Awaiting Response'),
+    ('appealing', 'Awaiting Appeal'),
+    ('fix', 'Fix Required'),
+    ('payment', 'Payment Required'),
+    ('rejected', 'Rejected'),
+    ('no_docs', 'No Responsive Documents'),
+    ('done', 'Completed'),
+    ('partial', 'Partially Completed'),
+    ('abandoned', 'Abandoned'),
+)
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable=R0904
     # pylint: disable=R0902
 
-    status = (
-        ('started', 'Draft'),
-        ('submitted', 'Processing'),
-        ('processed', 'Awaiting Response'),
-        ('appealing', 'Awaiting Appeal'),
-        ('fix', 'Fix Required'),
-        ('payment', 'Payment Required'),
-        ('rejected', 'Rejected'),
-        ('no_docs', 'No Responsive Documents'),
-        ('done', 'Completed'),
-        ('partial', 'Partially Completed'),
-        ('abandoned', 'Abandoned'),
-    )
-
     user = models.ForeignKey(User)
     title = models.CharField(max_length=70)
     slug = models.SlugField(max_length=70)
-    status = models.CharField(max_length=10, choices=status)
+    status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
     date_submitted = models.DateField(blank=True, null=True)
@@ -201,7 +201,7 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         # pylint: disable=E1101
-        return self.documents.filter(access='public').exclude(doc_id='')
+        return self.files.filter(access='public').exclude(doc_id='')
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
@@ -227,18 +227,6 @@ class FOIARequest(models.Model):
             return self.communications.all()[0].communication
         except IndexError:
             return ''
-
-    def get_communications(self, user):
-        """Get communications and documents to display on details page"""
-        # pylint: disable=E1101
-        comms = self.communications.all()
-        docs = self.documents.exclude(date=None)
-        files = self.files.exclude(date=None)
-        if self.user != user and not user.is_staff:
-            docs = docs.filter(access='public')
-        display_comms = list(comms) + list(docs) + list(files)
-        display_comms.sort(key=lambda x: x.date)
-        return display_comms
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
@@ -294,7 +282,6 @@ class FOIARequest(models.Model):
         # pylint: disable=E1101
 
         qsets = [self.communications.all().order_by('-date'),
-                 self.documents.exclude(date=None).order_by('-date'),
                  self.files.exclude(date=None).order_by('-date')]
 
         dates = []
@@ -407,7 +394,7 @@ class FOIARequest(models.Model):
         self.update(comm.anchor())
 
     def _send_email(self):
-        """Send an email of the request to it's email address"""
+        """Send an email of the request to its email address"""
         # pylint: disable=E1101
         # self.email should be set before calling this method
 
@@ -426,6 +413,9 @@ class FOIARequest(models.Model):
                            to=[self.email],
                            bcc=cc_addrs + ['requests@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)}) 
+        # atach all files from the latest communication
+        for file_ in self.communications.reverse()[0].files.all():
+            msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
     def update_dates(self):
@@ -540,7 +530,7 @@ class FOIARequest(models.Model):
     def total_pages(self):
         """Get the total number of pages for this request"""
         # pylint: disable=E1101
-        pages = self.documents.aggregate(Sum('pages'))['pages__sum']
+        pages = self.files.aggregate(Sum('pages'))['pages__sum']
         if pages is None:
             return 0
         return pages
@@ -555,27 +545,18 @@ class FOIARequest(models.Model):
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
-    status = (
-        ('processed', 'Awaiting Response'),
-        ('fix', 'Fix Required'),
-        ('payment', 'Payment Required'),
-        ('rejected', 'Rejected'),
-        ('no_docs', 'No Responsive Documents'),
-        ('done', 'Completed'),
-        ('partial', 'Partially Completed'),
-    )
-
     foia = models.ForeignKey(FOIARequest, related_name='communications')
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
-    communication = models.TextField()
+    communication = models.TextField(blank=True)
     # what status this communication should set the request to - used for machine learning
-    status = models.CharField(max_length=10, choices=status, blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 
-    class_name = 'FOIACommunication'
+    def __unicode__(self):
+        return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
 
     def anchor(self):
         """Anchor name"""
@@ -600,38 +581,65 @@ class FOIANote(models.Model):
         verbose_name = 'FOIA Note'
 
 
-class FOIADocument(models.Model):
-    """A DocumentCloud document attached to a FOIA request"""
+class FOIAFile(models.Model):
+    """An arbitrary file attached to a FOIA request"""
 
     access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
 
     # pylint: disable=E1101
-    foia = models.ForeignKey(FOIARequest, related_name='documents')
-    document = models.FileField(upload_to='foia_documents')
+    foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
+    comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
+    ffile = models.FileField(upload_to='foia_files', verbose_name='File')
     title = models.CharField(max_length=70)
-    source = models.CharField(max_length=70)
-    description = models.TextField(blank=True)
-    access = models.CharField(max_length=12, choices=access)
-    doc_id = models.SlugField(max_length=80, editable=False)
-    pages = models.PositiveIntegerField(default=0, editable=False)
     date = models.DateTimeField(null=True)
+    source = models.CharField(max_length=70, blank=True)
+    description = models.TextField(blank=True)
+    # for doc cloud only
+    access = models.CharField(max_length=12, default='public', choices=access)
+    doc_id = models.SlugField(max_length=80, blank=True, editable=False)
+    pages = models.PositiveIntegerField(default=0, editable=False)
 
     def __unicode__(self):
         return self.title
 
-    def get_absolute_url(self):
-        """The url for this object"""
-        return '%s#%s' % (self.foia.get_absolute_url(), self.doc_id)
+    def name(self):
+        """Return the basename of the file"""
+        return os.path.basename(self.ffile.name)
+
+    def is_doccloud(self):
+        """Is this a file doc cloud can support"""
+
+        _, ext = os.path.splitext(self.ffile.name)
+        return ext.lower() in ['.pdf', '.doc', '.docx']
 
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
         match = re.match('^(\d+)-(.*)$', self.doc_id)
+        mimetypes = {
+            'avi': 'file-video.png',
+            'bmp': 'file-image.png',
+            'csv': 'file-spreadsheet.png',
+            'gif': 'file-image.png',
+            'jpg': 'file-image.png',
+            'mp3': 'file-audio.png',
+            'mpg': 'file-video.png',
+            'png': 'file-image.png',
+            'ppt': 'file-presentation.png',
+            'pptx': 'file-presentation.png',
+            'tif': 'file-image.png',
+            'wav': 'file-audio.png',
+            'xls': 'file-spreadsheet.png',
+            'xlsx': 'file-spreadsheet.png',
+            'zip': 'file-archive.png',
+        }
 
         if match and self.pages > 0 and self.access == 'public':
             return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
                    '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
         else:
-            return '%simg/report.png' % STATIC_URL
+            ext = os.path.splitext(self.name())[1][1:]
+            filename = mimetypes.get(ext, 'file-document.png')
+            return '%simg/%s' % (STATIC_URL, filename)
 
     def get_medium_thumbnail(self):
         """Convenient function for template"""
@@ -645,57 +653,6 @@ class FOIADocument(models.Model):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
 
-    # following methods are to make this quack like a communication for display on the details page
-    response = True
-    full_html = False
-    class_name = 'FOIADocument'
-
-    def from_who(self):
-        """To quack like a communication"""
-        return self.source
-
-    def communication(self):
-        """To quack like a communication"""
-        return self.description
-
-    def anchor(self):
-        """Anchor name"""
-        return 'doc-%d' % self.pk
-
-    class Meta:
-        # pylint: disable=R0903
-        verbose_name = 'FOIA DocumentCloud Document'
-
-
-class FOIAFile(models.Model):
-    """An arbitrary file attached to a FOIA request"""
-    # pylint: disable=E1101
-    foia = models.ForeignKey(FOIARequest, related_name='files')
-    ffile = models.FileField(upload_to='foia_files')
-    date = models.DateTimeField(null=True)
-    source = models.CharField(max_length=70, blank=True)
-    description = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return 'File: %s' % self.ffile.name
-
-    def name(self):
-        """Return the basename of the file"""
-        return os.path.basename(self.ffile.name)
-
-    # following methods are to make this quack like a communication for display on the details page
-    response = True
-    full_html = False
-    class_name = 'FOIAFile'
-
-    def from_who(self):
-        """To quack like a communication"""
-        return self.source
-
-    def communication(self):
-        """To quack like a communication"""
-        return self.description
-
     def anchor(self):
         """Anchor name"""
         return 'file-%d' % self.pk
@@ -703,4 +660,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
+        ordering = ['comm', 'date']
 

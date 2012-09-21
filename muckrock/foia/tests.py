@@ -241,7 +241,7 @@ class TestFOIAFunctional(TestCase):
                                                    'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk}),
                     ['foia/foiarequest_detail.html', 'foia/base.html'],
-                    context = {'object': foia})
+                    context = {'foia': foia})
 
     def test_feeds(self):
         """Test the RSS feed views"""

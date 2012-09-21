@@ -114,8 +114,8 @@
 {% for req in jurisdiction.interesting_requests %}
   <div class="right">
 		<a href="{{ req.req.get_absolute_url }}">
-			{% if req.req.documents.all %}
-				<img src="{{ req.req.documents.all.0.get_medium_thumbnail }}" alt="{{req.req.documents.all.0.title}}" class="bordered" width="102" height="128" />
+			{% if req.req.files.all %}
+				<img src="{{ req.req.files.all.0.get_medium_thumbnail }}" alt="{{req.req.files.all.0.title}}" class="bordered" width="102" height="128" />
 			{% else %}
 				<img src="{% static "img/report.png" %}" alt="" class="bordered" width="102" />
 			{% endif %}

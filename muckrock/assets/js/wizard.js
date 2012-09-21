@@ -134,3 +134,8 @@ $(function() {
 		return false;
 	});
 });
+
+// formsets
+$(function() {
+	$('.formset-container').formset();
+});
