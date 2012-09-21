@@ -28,13 +28,14 @@ from accounts.forms import PaymentForm
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, TEMPLATES
-from foia.models import FOIARequest, FOIADocument, FOIACommunication
+                       FOIAWhatFederalForm, FOIAWizard, FOIAFileFormSet, TEMPLATES
+from foia.models import FOIARequest, FOIACommunication, FOIAFile
 from jurisdiction.models import Jurisdiction
 from tags.models import Tag
 from settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def _foia_form_handler(request, foia, action):
@@ -58,6 +59,11 @@ def _foia_form_handler(request, foia, action):
 
     if request.method == 'POST':
         status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
+
+        if request.POST.get('submit') == 'Delete':
+            foia.delete()
+            messages.info(request, 'Request succesfully deleted')
+            return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
 
         try:
             foia.status = status_dict[request.POST['submit']]
@@ -182,7 +188,7 @@ def _foia_action(request, jurisdiction, jidx, slug, idx, action):
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
                               'heading value must_own template extra_context')
 
-def _save_foia_comm(request, foia, form, action):
+def _save_foia_comm(request, foia, form, action, formset=None):
     """Save the FOI Communication"""
     if action == 'Admin Fix':
         foia.email = form.cleaned_data['email']
@@ -192,10 +198,17 @@ def _save_foia_comm(request, foia, form, action):
     else:
         from_who = foia.user.get_full_name()
 
-    FOIACommunication.objects.create(
+    comm = FOIACommunication.objects.create(
             foia=foia, from_who=from_who, to_who=foia.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=form.cleaned_data['comm'])
+    if formset is not None:
+        foia_files = formset.save(commit=False)
+        for foia_file in foia_files:
+            foia_file.comm = comm
+            foia_file.title = foia_file.name()
+            foia_file.date = comm.date
+            foia_file.save()
     foia.submit(appeal=(action == 'Appeal'))
     messages.success(request, '%s succesfully submitted.' % action)
 
@@ -203,18 +216,23 @@ def _save_foia_comm(request, foia, form, action):
 def admin_fix(request, jurisdiction, jidx, slug, idx):
     """Send an email from the requests auto email address"""
 
-    action = Action(
-        form_actions = lambda req, foia, form: _save_foia_comm(req, foia, form, 'Admin Fix'),
-        msg = 'admin fix',
-        tests = [],
-        form_class = lambda r, f: FOIAAdminFixForm,
-        return_url = lambda r, f: f.get_absolute_url(),
-        heading = 'Email from Request Address',
-        value = 'Submit',
-        must_own = False,
-        template = 'foia/foiarequest_action.html',
-        extra_context = lambda f: {})
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
+
+    if request.method == 'POST':
+        form = FOIAAdminFixForm(request.POST)
+        formset = FOIAFileFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            _save_foia_comm(request, foia, form, 'Admin Fix', formset)
+            return redirect(foia)
+    else:
+        form = FOIAAdminFixForm(instance=foia)
+        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
+
+    context = {'form': form, 'foia': foia, 'heading': 'Email from Request Address',
+               'formset': formset, 'action': 'Submit'}
+    return render_to_response('foia/foiarequest_action.html', context,
+                              context_instance=RequestContext(request))
 
 @login_required
 def fix(request, jurisdiction, jidx, slug, idx):
@@ -572,24 +590,15 @@ def detail(request, jurisdiction, jidx, slug, idx):
         foia.update_tags(request.POST['tags'])
         return redirect(foia)
 
-    context = {'object': foia, 'all_tags': Tag.objects.all(),
-               'communications': foia.get_communications(request.user)}
+    context = {}
+    context['foia'] = foia
+    context['all_tags'] = Tag.objects.all()
     context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
     context['actions'] = foia.actions(request.user)
 
     return render_to_response('foia/foiarequest_detail.html',
                               context,
                               context_instance=RequestContext(request))
-
-def doc_cloud_detail(request, doc_id):
-    """Details of a DocumentCloud document"""
-
-    doc = get_object_or_404(FOIADocument, doc_id=doc_id)
-
-    if not doc.is_viewable(request.user) or not doc.doc_id:
-        raise Http404()
-
-    return redirect(doc, permanant=True)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""

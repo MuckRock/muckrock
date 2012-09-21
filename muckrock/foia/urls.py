@@ -32,8 +32,6 @@ urlpatterns = patterns('',
     url(r'^mylist/(?P<view>\w+)/$',        views.my_list, name='foia-mylist'),
 
     url(r'^new/$',                         views.create, name='foia-create'),
-    url(r'^doc_cloud/(?P<doc_id>[\w\d_-]+)/$',
-                                           views.doc_cloud_detail, name='foia-doc-cloud-detail'),
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
                                            jurisdiction, name='foia-jurisdiction'),
     url(r'^%s/$' % foia_url,               views.detail, name='foia-detail'),

@@ -7,7 +7,7 @@ from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 
-from foia.models import FOIARequest, FOIADocument
+from foia.models import FOIARequest, FOIAFile
 from jurisdiction.models import Jurisdiction
 from news.models import Article
 
@@ -28,7 +28,7 @@ def front_page(request):
     num_requests = FOIARequest.objects.exclude(status='started').count()
     num_completed_requests = FOIARequest.objects.filter(status='done').count()
     num_denied_requests = FOIARequest.objects.filter(status='rejected').count()
-    num_pages = FOIADocument.objects.aggregate(Sum('pages'))['pages__sum']
+    num_pages = FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
 
     most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
     recent_articles = Article.objects.get_published()[:5]

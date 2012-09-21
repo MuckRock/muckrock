@@ -13,9 +13,9 @@ from datetime import date, timedelta
 
 from accounts.models import Statistics
 from agency.models import Agency
-from foia.models import FOIARequest, FOIADocument
+from foia.models import FOIARequest, FOIAFile
 
-logger = logging.getLogger('task')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 @periodic_task(run_every=crontab(hour=0, minute=30), name='accounts.tasks.store_statstics')
@@ -29,7 +29,7 @@ def store_statstics():
         total_requests=FOIARequest.objects.count(),
         total_requests_success=FOIARequest.objects.filter(status='done').count(),
         total_requests_denied=FOIARequest.objects.filter(status='rejected').count(),
-        total_pages=FOIADocument.objects.aggregate(Sum('pages'))['pages__sum'],
+        total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),
         total_fees=FOIARequest.objects.aggregate(Sum('price'))['price__sum'],

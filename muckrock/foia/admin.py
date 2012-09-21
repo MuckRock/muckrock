@@ -12,25 +12,26 @@ from django.views.generic import simple
 
 from datetime import date, timedelta
 
-from foia.models import FOIARequest, FOIADocument, FOIAFile, FOIACommunication, FOIANote
 from agency.models import Agency
+from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
 from foia.tasks import upload_document_cloud, set_document_cloud_pages
+from nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class FOIADocumentAdminForm(forms.ModelForm):
+class FOIAFileAdminForm(forms.ModelForm):
     """Form to validate document only has ASCII characters in it"""
 
     def __init__(self, *args, **kwargs):
-        super(FOIADocumentAdminForm, self).__init__(*args, **kwargs)
+        super(FOIAFileAdminForm, self).__init__(*args, **kwargs)
         self.clean_title = self._validate('title')
         self.clean_source = self._validate('source')
         self.clean_description = self._validate('description')
 
     class Meta:
         # pylint: disable=R0903
-        model = FOIADocument
+        model = FOIAFile
 
     @staticmethod
     def _only_ascii(text):
@@ -51,27 +52,21 @@ class FOIADocumentAdminForm(forms.ModelForm):
         return inner
 
 
-class FOIADocumentInline(admin.TabularInline):
-    """FOIA Document Inline admin options"""
-    model = FOIADocument
-    form = FOIADocumentAdminForm
-    readonly_fields = ['doc_id', 'pages']
-    extra = 2
-
-
-class FOIAFileInline(admin.TabularInline):
+class FOIAFileInline(NestedTabularInline):
     """FOIA File Inline admin options"""
     model = FOIAFile
-    extra = 1
+    form = FOIAFileAdminForm
+    readonly_fields = ['doc_id', 'pages']
+    exclude = ('foia', 'access')
+    extra = 0
 
-
-class FOIACommunicationInline(admin.TabularInline):
+class FOIACommunicationInline(NestedTabularInline):
     """FOIA Communication Inline admin options"""
     model = FOIACommunication
     extra = 1
+    inlines = [FOIAFileInline]
 
-
-class FOIANoteInline(admin.TabularInline):
+class FOIANoteInline(NestedTabularInline):
     """FOIA Notes Inline admin options"""
     model = FOIANote
     extra = 1
@@ -92,14 +87,14 @@ class FOIARequestAdminForm(forms.ModelForm):
         model = FOIARequest
 
 
-class FOIARequestAdmin(admin.ModelAdmin):
+class FOIARequestAdmin(NestedModelAdmin):
     """FOIA Request admin options"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
-    inlines = [FOIACommunicationInline, FOIADocumentInline, FOIAFileInline, FOIANoteInline]
+    inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
 
@@ -128,7 +123,7 @@ class FOIARequestAdmin(admin.ModelAdmin):
             foia.save()
             return
 
-        # check communications, files, and docs for new ones to notify the user of an update
+        # check communications and files for new ones to notify the user of an update
         instances = formset.save(commit=False)
         for instance in instances:
             # only way to tell if its new or not is to check the db
@@ -138,11 +133,17 @@ class FOIARequestAdmin(admin.ModelAdmin):
             except formset.model.DoesNotExist:
                 change = False
 
+            if formset.model == FOIAFile:
+                instance.foia = instance.comm.foia
+
             instance.save()
-            if not change:
-                # its new, so notify the user about it
+            # its new, so notify the user about it
+            if not change and formset.model == FOIACommunication:
                 instance.foia.update(instance.anchor())
-            if formset.model == FOIADocument:
+            if not change and formset.model == FOIAFile:
+                instance.comm.foia.update(instance.anchor())
+
+            if formset.model == FOIAFile:
                 upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 
         formset.save_m2m()
@@ -205,9 +206,10 @@ class FOIARequestAdmin(admin.ModelAdmin):
         # pylint: disable=E1101
         # pylint: disable=R0201
 
-        docs = FOIADocument.objects.filter(foia=idx, pages=0)
+        docs = FOIAFile.objects.filter(foia=idx, pages=0)
         for doc in docs:
-            set_document_cloud_pages.apply_async(args=[doc.pk])
+            if doc.is_doccloud():
+                set_document_cloud_pages.apply_async(args=[doc.pk])
 
         messages.info(request, 'Attempting to set the page count for %d documents... Please '
                                'wait while the Document Cloud servers are being accessed'
@@ -216,3 +218,32 @@ class FOIARequestAdmin(admin.ModelAdmin):
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
+
+# pylint: disable=W0511
+# XXX this is just to clean up dateless files, then delete this code
+
+class FOIAFileAdminFormCommSelect(FOIAFileAdminForm):
+    """Form to select comm"""
+
+    def __init__(self, *args, **kwargs):
+        super(FOIAFileAdminFormCommSelect, self).__init__(*args, **kwargs)
+        self.fields['comm'].queryset = FOIACommunication.objects.filter(
+            foia=self.instance.foia.pk).order_by('date')
+
+class FOIAFileAdmin(admin.ModelAdmin):
+    """FOIA File admin options"""
+    model = FOIAFile
+    form = FOIAFileAdminFormCommSelect
+    readonly_fields = ('foia_link', )
+    list_display = ('title', 'date', 'comm')
+    fields = ('title', 'foia_link', 'comm', 'ffile', 'date', 'source', 'description')
+
+    def foia_link(self, obj):
+        """Link to admin page for corresponding FOIA"""
+        # pylint: disable=R0201
+        change_url = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
+        return '<a href="%s">%s</a>' % (change_url, obj.foia.title)
+    foia_link.short_description = 'FOIA'
+    foia_link.allow_tags = True
+
+admin.site.register(FOIAFile,  FOIAFileAdmin)

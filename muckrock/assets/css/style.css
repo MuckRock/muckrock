@@ -682,6 +682,24 @@ img.alignright, img.right {margin: 0 0 1em 1.5em;}
 	margin: 4px 10px 4px 4px;
 }
 
+.add-row {
+	display: block;
+	clear: both;
+}
+
+.delete-row {
+	display: block;
+	clear: both;
+}
+
+.request-file {
+	float: left;
+	text-align: center;
+	width: 32%;
+	padding-left: 3px;
+	padding-right: 3px;
+}
+
 /* for tweets */
 
 .comment {
