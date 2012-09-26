@@ -291,13 +291,16 @@ def stripe_webhook_v2(request):
     event_json = json.loads(request.raw_post_data)
 
     logger.info('Received stripe webhook of type %s.  Data: %s' % (event_json['type'], event_json))
+    import pprint
+    pprint.pprint(event_json)
 
     if event_json['type'] == 'invoice.payment_succeeded':
         user = Profile.objects.get(stripe_id=event_json['data']['object']['customer']).user
+        amount = '%0.2f' % (event_json['data']['object']['amount_due'] / 100)
         send_mail('Payment received for professional account', 
                   render_to_string('registration/receipt.txt',
                                    {'user': user, 'data': event_json['data']['object'],
-                                    'pro': True}),
+                                    'amount': amount, 'pro': True}),
                   'info@muckrock.com', [user.email], fail_silently=False)
     elif event_json['type'] == 'invoice.payment_failed':
         user_profile = Profile.objects.get(stripe_id=event_json['data']['object']['customer'])

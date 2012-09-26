@@ -116,6 +116,12 @@ MIDDLEWARE_CLASSES = (
 )
 if DEBUG:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+    MIDDLEWARE_CLASSES += ('settings.ExceptionLoggingMiddleware',)
+
+class ExceptionLoggingMiddleware(object):
+    def process_exception(self, request, exception):
+        import traceback
+        print traceback.format_exc()
 
 
 INTERNAL_IPS = ('127.0.0.1',)
