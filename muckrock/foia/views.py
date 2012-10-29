@@ -378,7 +378,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         try:
             amount = int(foia.price * 105)
             request.user.get_profile().pay(form, amount,
-                                           'Charge for request %s' % foia.title)
+                                           'Charge for request: %s %s' % (foia.title, foia.pk))
             foia.status = 'processed'
             foia.save()
 
