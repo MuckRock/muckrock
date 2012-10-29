@@ -119,7 +119,14 @@ if DEBUG:
     MIDDLEWARE_CLASSES += ('settings.ExceptionLoggingMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
+    """Log exceptions to command line
+    
+    useful for debugging non html outputting views, such as stripe webhooks"""
+    # pylint: disable=R0903
+    # pylint: disable=R0201
     def process_exception(self, request, exception):
+        # pylint: disable=W0613
+        """printe the exception traceback"""
         import traceback
         print traceback.format_exc()
 

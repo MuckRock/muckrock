@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -289,36 +289,64 @@ def stripe_webhook_v2(request):
         return HttpResponse("Invalid Request.", status=400)
 
     event_json = json.loads(request.raw_post_data)
+    event_data = event_json['data']['object']
 
     logger.info('Received stripe webhook of type %s.  Data: %s' % (event_json['type'], event_json))
-    import pprint
-    pprint.pprint(event_json)
 
-    if event_json['type'] == 'invoice.payment_succeeded':
-        user = Profile.objects.get(stripe_id=event_json['data']['object']['customer']).user
-        amount = '%0.2f' % (event_json['data']['object']['amount_due'] / 100)
-        send_mail('Payment received for professional account', 
-                  render_to_string('registration/receipt.txt',
-                                   {'user': user, 'data': event_json['data']['object'],
-                                    'amount': amount, 'pro': True}),
-                  'info@muckrock.com', [user.email], fail_silently=False)
+    if event_json['type'] == 'charge.succeeded':
+        user = Profile.objects.get(stripe_id=event_data['customer']).user
+        amount = event_data['amount'] / 100
+        base_amount = amount / 1.05
+        fee_amount = amount - base_amount
+
+        if event_data.get('description') and \
+                event_data['description'].endswith('Charge for 5 requests'):
+            type_ = 'community'
+            url = '/foia/new/'
+        elif event_data.get('description') and \
+                event_data['description'].startswith('Charge for request'):
+            type_ = 'doc'
+            url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
+                                     .get_absolute_url()
+        else:
+            type_ = 'pro'
+            url = '/foia/new/'
+
+        msg = EmailMessage(subject='Payment received for professional account',
+                           body=render_to_string('registration/receipt.txt',
+                               {'user': user,
+                                'id': event_data['id'],
+                                'date': datetime.fromtimestamp(event_data['created']),
+                                'amount': amount,
+                                'base_amount': base_amount,
+                                'fee_amount': fee_amount,
+                                'url': url,
+                                'type': type_}),
+                           from_email='info@muckrock.com',
+                           to=[user.email], bcc=['requests@muckrock.com'])
+        msg.send(fail_silently=False)
+
     elif event_json['type'] == 'invoice.payment_failed':
-        user_profile = Profile.objects.get(stripe_id=event_json['data']['object']['customer'])
+        user_profile = Profile.objects.get(stripe_id=event_data['customer'])
         user = user_profile.user
-        attempt = event_json['data']['object']['attempt_count']
+        attempt = event_data['attempt_count']
         if attempt == 4:
             user_profile.acct_type = 'community'
             user_profile.save()
             logger.info('%s subscription has been cancelled due to failed payment', user.username)
-            send_mail('Payment Failed',
-                      render_to_string('registration/pay_fail.txt',
-                                       {'user': user, 'attempt': attempt}),
-                      'info@muckrock.com', [user.email], fail_silently=False)
+            msg = EmailMessage(subject='Payment Failed',
+                               body=render_to_string('registration/pay_fail.txt',
+                                   {'user': user, 'attempt': 'final'}),
+                               from_email='info@muckrock.com',
+                               to=[user.email], bcc=['requests@muckrock.com'])
+            msg.send(fail_silently=False)
         else:
             logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-            send_mail('Payment Failed',
-                      render_to_string('registration/pay_fail.txt',
-                                       {'user': user, 'attempt': 'final'}),
-                      'info@muckrock.com', [user.email], fail_silently=False)
+            msg = EmailMessage(subject='Payment Failed',
+                               body=render_to_string('registration/pay_fail.txt',
+                                   {'user': user, 'attempt': attempt}),
+                               from_email='info@muckrock.com',
+                               to=[user.email], bcc=['requests@muckrock.com'])
+            msg.send(fail_silently=False)
 
     return HttpResponse()
