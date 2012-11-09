@@ -58,3 +58,12 @@ class Article(models.Model):
         ordering = ['-pub_date']
         get_latest_by = 'pub_date'
         unique_together = (('slug', 'pub_date'),)
+
+
+class Photo(models.Model):
+    """A photograph to embed in a news article"""
+
+    image = models.ImageField(upload_to='news_photos')
+
+    def __unicode__(self):
+        return self.image.name

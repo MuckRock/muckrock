@@ -4,7 +4,7 @@ Admin registration for news models
 
 from django.contrib import admin
 
-from news.models import Article
+from news.models import Article, Photo
 
 class ArticleAdmin(admin.ModelAdmin):
     """Model Admin for a news article"""
@@ -17,4 +17,5 @@ class ArticleAdmin(admin.ModelAdmin):
     search_fields = ['title', 'body']
 
 admin.site.register(Article, ArticleAdmin)
+admin.site.register(Photo)
 
