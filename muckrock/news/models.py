@@ -7,8 +7,10 @@ from django.db import models
 
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
+from taggit.managers import TaggableManager
 
 from foia.models import FOIARequest
+from tags.models import TaggedItemBase
 
 class ArticleManager(models.Manager):
     """Object manager for news articles"""
@@ -40,6 +42,7 @@ class Article(models.Model):
                                   resize_source={'size': (510, 233), 'crop': 'smart'})
 
     objects = ArticleManager()
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
         return self.title
