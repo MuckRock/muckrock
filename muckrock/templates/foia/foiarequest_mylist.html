@@ -59,13 +59,15 @@
 	{% with request.GET.order as ord %}
 	{% with request.GET.field as field %}
 	{% with request.GET.per_page as pp %}
+	{% with request.GET.tag as tag %}
 	<ul>
-		<li class="{% active request "^/foi/mylist/all/" %}"><a href="{% url foia-mylist view="all" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">All</a></li>
-		<li class="{% active request "^/foi/mylist/drafts/" %}"><a href="{% url foia-mylist view="drafts" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Drafts</a></li>
-		<li class="{% active request "^/foi/mylist/action/" %}"><a href="{% url foia-mylist view="action" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Action Required</a></li>
-		<li class="{% active request "^/foi/mylist/waiting/" %}"><a href="{% url foia-mylist view="waiting" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Waiting</a></li>
-		<li class="{% active request "^/foi/mylist/completed/" %}"><a href="{% url foia-mylist view="completed" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Completed</a></li>
+		<li class="{% active request "^/foi/mylist/all/" %}"><a href="{% url foia-mylist view="all" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">All</a></li>
+		<li class="{% active request "^/foi/mylist/drafts/" %}"><a href="{% url foia-mylist view="drafts" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Drafts</a></li>
+		<li class="{% active request "^/foi/mylist/action/" %}"><a href="{% url foia-mylist view="action" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Action Required</a></li>
+		<li class="{% active request "^/foi/mylist/waiting/" %}"><a href="{% url foia-mylist view="waiting" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Waiting</a></li>
+		<li class="{% active request "^/foi/mylist/completed/" %}"><a href="{% url foia-mylist view="completed" %}?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Completed</a></li>
 	</ul>
+	{% endwith %}
 	{% endwith %}
 	{% endwith %}
 	{% endwith %}
