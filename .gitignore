@@ -1,6 +1,5 @@
 
-*.swp
-*.swo
+*.sw*
 *.pyc
 local_settings.py
 fabfile.py
