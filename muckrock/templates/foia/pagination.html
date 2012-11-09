@@ -5,12 +5,13 @@
 	{% with request.GET.order as ord %}
 	{% with request.GET.field as field %}
 	{% with request.GET.per_page as pp %}
+	{% with request.GET.tag as tag %}
 		
 		<div class="nav-left">
 			{% if page_obj.has_previous %}
-			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">&#171; First page</a>
+			<a href="?page=1{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">&#171; First page</a>
 			&nbsp; &nbsp;
-			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">&#171; Previous page</a>
+			<a href="?page={{page_obj.previous_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">&#171; Previous page</a>
 			{% else %}
 			&nbsp;
 			{% endif %}
@@ -20,14 +21,15 @@
 		</div>
 		{% if page_obj.has_next %}
 		<div class="nav-right">
-			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Next page &#187;</a>
+			<a href="?page={{page_obj.next_page_number}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Next page &#187;</a>
 			&nbsp; &nbsp;
-			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}">Last page &#187;</a>
+			<a href="?page={{paginator.num_pages}}{%if ord%}&amp;order={{ord}}{%endif%}{%if field%}&amp;field={{field}}{%endif%}{%if pp%}&amp;per_page={{pp}}{%endif%}{%if tag%}&amp;tag={{tag}}{%endif%}">Last page &#187;</a>
 		</div>
 		{% endif %}
 
 		<div class="clearer">&nbsp;</div>
 
+	{% endwith %}
 	{% endwith %}
 	{% endwith %}
 	{% endwith %}
