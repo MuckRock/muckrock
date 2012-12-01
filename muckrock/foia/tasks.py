@@ -4,10 +4,12 @@ from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.core import management
+from django.core.files import File
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
-                     GA_USERNAME, GA_PASSWORD, GA_ID
+                     GA_USERNAME, GA_PASSWORD, GA_ID, \
+                     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_AUTOIMPORT_BUCKET_NAME
 
 
 import dbsettings
@@ -17,10 +19,13 @@ import json
 import logging
 import re
 import urllib2
-from datetime import date, timedelta
+from boto.s3.connection import S3Connection
+from datetime import date, datetime, timedelta
+from tempfile import NamedTemporaryFile
 from vendor import MultipartPostHandler
 
-from foia.models import FOIAFile, FOIARequest
+from foia.models import FOIAFile, FOIARequest, FOIACommunication
+from foia.codes import CODES
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 
@@ -181,6 +186,73 @@ def retry_stuck_documents():
     for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
+
+@periodic_task(run_every=crontab(hour=2, minute=0), name='foia.tasks.autoimport')
+def autoimport():
+    """Auto import documents from S3"""
+    # pylint: disable=R0914
+    p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
+                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-zA-Z-]+)')
+    log = []
+
+    conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+    bucket = conn.get_bucket(AWS_AUTOIMPORT_BUCKET_NAME)
+    for key in bucket.list('scans'):
+        if key.name == 'scans/':
+            continue
+        file_name = key.name[6:]
+        m_name = p_name.match(file_name)
+        if not m_name:
+            key.copy(bucket, 'review/%s' % file_name)
+            key.delete()
+            log.append('ERROR: %s does not match the file name format' % file_name)
+            continue
+        foia_pks = [pk[2:] for pk in m_name.group('docs').split()]
+        file_date = datetime(int(m_name.group('year')) + 2000,
+                             int(m_name.group('month')),
+                             int(m_name.group('day')))
+        title, status, body = CODES[m_name.group('code')]
+        for foia_pk in foia_pks:
+            try:
+                # pylint: disable=E1101
+                foia = FOIARequest.objects.get(pk=foia_pk)
+                access = 'private' if foia.is_embargo() else 'public'
+                source = foia.agency.name if foia.agency else ''
+
+                comm = FOIACommunication.objects.create(
+                        foia=foia, from_who=source,
+                        to_who=foia.user.get_full_name(), response=True,
+                        date=file_date, full_html=False,
+                        communication=body)
+
+                foia_file = FOIAFile(foia=foia, comm=comm, title=title,
+                                     date=file_date, source=source[:70], access=access)
+
+                tmp_file = NamedTemporaryFile()
+                key.get_contents_to_file(tmp_file)
+                foia_file.ffile.save(file_name, File(tmp_file))
+                foia_file.save()
+
+                foia.status = status or foia.status
+                foia.save()
+
+                log.append('SUCCESS: %s uploaded to FOIA Request %s with a status of %s' %
+                           (file_name, foia_pk, foia.status))
+
+                upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
+            except FOIARequest.DoesNotExist:
+                key.copy(bucket, 'review/%s' % file_name)
+                log.append('ERROR: %s references FOIA Request %s, but it does not exist' %
+                           (file_name, foia_pk))
+            except Exception as exc:
+                key.copy(bucket, 'review/%s' % file_name)
+                log.append('ERROR: %s has caused an unknown error. %s' % (file_name, exc))
+        # delete key after processing all requests for it
+        key.delete()
+    log_msg = '\n'.join(log)
+    send_mail('[AUTOIMPORT] %s Logs' % datetime.now(), log_msg, 'info@muckrock.com',
+              ['requests@muckrock.com'], fail_silently=False)
+    
 
 def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):

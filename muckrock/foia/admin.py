@@ -14,7 +14,7 @@ from datetime import date, timedelta
 
 from agency.models import Agency
 from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
-from foia.tasks import upload_document_cloud, set_document_cloud_pages
+from foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
 from nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
@@ -163,7 +163,10 @@ class FOIARequestAdmin(NestedModelAdmin):
                                    name='foia-admin-send-update'),
                                url(r'^retry_pages/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.retry_pages),
-                                   name='foia-admin-retry-pages'))
+                                   name='foia-admin-retry-pages'),
+                               url(r'^autoimport/$',
+                                   self.admin_site.admin_view(self.autoimport),
+                                   name='foia-admin-autoimport'))
         return my_urls + urls
 
     def _list_helper(self, request, foias, action):
@@ -215,6 +218,13 @@ class FOIARequestAdmin(NestedModelAdmin):
                                'wait while the Document Cloud servers are being accessed'
                                % docs.count())
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[idx]))
+
+    def autoimport(self, request):
+        """Autoimport documents from S3"""
+        # pylint: disable=R0201
+        autoimport.apply_async()
+        messages.info(request, 'Auotimport started')
+        return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
