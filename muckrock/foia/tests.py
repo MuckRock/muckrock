@@ -405,6 +405,10 @@ class TestFOIAIntegration(TestCase):
                 self.date_followup = MockDateTime(self.date_followup.year,
                                                   self.date_followup.month,
                                                   self.date_followup.day)
+            if self.date_done:
+                self.date_done = MockDateTime(self.date_done.year,
+                                              self.date_done.month,
+                                              self.date_done.day)
             super(FOIARequest, self).save(*args, **kwargs)
         self.FOIARequest_save = foia.models.FOIARequest.save
         foia.models.FOIARequest.save = save
