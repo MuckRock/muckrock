@@ -223,7 +223,7 @@ def autoimport():
                         foia=foia, from_who=source,
                         to_who=foia.user.get_full_name(), response=True,
                         date=file_date, full_html=False,
-                        communication=body)
+                        communication=body, status=status)
 
                 foia_file = FOIAFile(foia=foia, comm=comm, title=title,
                                      date=file_date, source=source[:70], access=access)
@@ -235,6 +235,7 @@ def autoimport():
 
                 foia.status = status or foia.status
                 foia.save()
+                foia.update(comm.anchor())
 
                 log.append('SUCCESS: %s uploaded to FOIA Request %s with a status of %s' %
                            (file_name, foia_pk, foia.status))
