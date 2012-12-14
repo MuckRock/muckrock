@@ -186,11 +186,14 @@ def retry_stuck_documents():
     for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
 
+class SizeError(Exception):
+    """Uploaded file is not the correct size"""
 
 @periodic_task(run_every=crontab(hour=2, minute=0), name='foia.tasks.autoimport')
 def autoimport():
     """Auto import documents from S3"""
     # pylint: disable=R0914
+    # pylint: disable=R0915
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
                         r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-zA-Z-]+)')
     log = []
@@ -232,6 +235,9 @@ def autoimport():
                 key.get_contents_to_file(tmp_file)
                 foia_file.ffile.save(file_name, File(tmp_file))
                 foia_file.save()
+                tmp_file.close()
+                if key.size != foia_file.ffile.size:
+                    raise SizeError
 
                 foia.status = status or foia.status
                 foia.save()
@@ -245,6 +251,12 @@ def autoimport():
                 key.copy(bucket, 'review/%s' % file_name)
                 log.append('ERROR: %s references FOIA Request %s, but it does not exist' %
                            (file_name, foia_pk))
+            except SizeError:
+                key.copy(bucket, 'review/%s' % file_name)
+                foia_file.delete()
+                comm.delete()
+                log.append('ERROR: %s was the wrong size after being uploaded - retry' %
+                           (file_name))
             except Exception as exc:
                 key.copy(bucket, 'review/%s' % file_name)
                 log.append('ERROR: %s has caused an unknown error. %s' % (file_name, exc))
