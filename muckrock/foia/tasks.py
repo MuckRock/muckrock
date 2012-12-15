@@ -188,6 +188,9 @@ def retry_stuck_documents():
 
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
+    def __init__(self, orig_size, upload_size):
+        self.orig_size = orig_size
+        self.upload_size = upload_size
 
 @periodic_task(run_every=crontab(hour=2, minute=0), name='foia.tasks.autoimport')
 def autoimport():
@@ -242,7 +245,7 @@ def autoimport():
                 foia_file.save()
                 tmp_file.close()
                 if key.size != foia_file.ffile.size:
-                    raise SizeError
+                    raise SizeError(key.size, foia_file.ffile.size)
 
                 foia.status = status or foia.status
                 foia.save()
@@ -256,12 +259,12 @@ def autoimport():
                 key.copy(bucket, 'review/%s' % file_name)
                 log.append('ERROR: %s references FOIA Request %s, but it does not exist' %
                            (file_name, foia_pk))
-            except SizeError:
+            except SizeError as exc:
                 key.copy(bucket, 'review/%s' % file_name)
                 foia_file.delete()
                 comm.delete()
-                log.append('ERROR: %s was the wrong size after being uploaded - retry' %
-                           (file_name))
+                log.append('ERROR: %s was %s bytes and after uploaded was %s bytes - retry' %
+                           (file_name, exc.orig_size, exc.upload_size))
             except Exception as exc:
                 key.copy(bucket, 'review/%s' % file_name)
                 log.append('ERROR: %s has caused an unknown error. %s' % (file_name, exc))
