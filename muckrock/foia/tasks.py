@@ -21,7 +21,6 @@ import re
 import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
-from tempfile import NamedTemporaryFile
 from vendor import MultipartPostHandler
 
 from foia.models import FOIAFile, FOIARequest, FOIACommunication
@@ -189,6 +188,7 @@ def retry_stuck_documents():
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
     def __init__(self, orig_size, upload_size):
+        # pylint: disable=W0231
         self.orig_size = orig_size
         self.upload_size = upload_size
 
@@ -239,11 +239,10 @@ def autoimport():
                 foia_file = FOIAFile(foia=foia, comm=comm, title=title,
                                      date=file_date, source=source[:70], access=access)
 
-                tmp_file = NamedTemporaryFile()
+                tmp_file = foia_file.ffile.open('wb')
                 key.get_contents_to_file(tmp_file)
                 foia_file.ffile.save(file_name, File(tmp_file))
                 foia_file.save()
-                tmp_file.close()
                 if key.size != foia_file.ffile.size:
                     raise SizeError(key.size, foia_file.ffile.size)
 
