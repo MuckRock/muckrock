@@ -4,6 +4,7 @@ from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
 from django.core import management
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
@@ -238,7 +239,10 @@ def autoimport():
                 foia_file = FOIAFile(foia=foia, comm=comm, title=title,
                                      date=file_date, source=source[:70], access=access)
 
-                foia_file.ffile.save(file_name, key.get_contents_as_string(), save=True)
+                con_file = ContentFile(key.get_contents_as_string())
+                foia_file.ffile.save(file_name, con_file)
+                con_file.close()
+                foia_file.save()
                 if key.size != foia_file.ffile.size:
                     raise SizeError(key.size, foia_file.ffile.size)
 
