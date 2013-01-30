@@ -62,7 +62,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         'description': doc.description.encode('utf8'),
         'access': doc.access.encode('utf8'),
         'related_article': ('https://www.muckrock.com' + 
-                            doc.foia.get_absolute_url()).encode('utf8'),
+                            doc.get_foia().get_absolute_url()).encode('utf8'),
         }
     if change:
         params['_method'] = str('put')

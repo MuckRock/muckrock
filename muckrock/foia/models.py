@@ -652,6 +652,10 @@ class FOIAFile(models.Model):
         """Convenient function for template"""
         return self.get_thumbnail('small')
 
+    def get_foia(self):
+        """Get FOIA - self.foia should be refactored out"""
+        return self.foia or self.comm.foia
+
     def is_viewable(self, user):
         """Is this document viewable to user"""
         return self.access == 'public' and self.foia.is_viewable(user)
