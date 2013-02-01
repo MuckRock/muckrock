@@ -237,8 +237,10 @@ class FOIAFileAdminFormCommSelect(FOIAFileAdminForm):
 
     def __init__(self, *args, **kwargs):
         super(FOIAFileAdminFormCommSelect, self).__init__(*args, **kwargs)
-        self.fields['comm'].queryset = FOIACommunication.objects.filter(
-            foia=self.instance.get_foia().pk).order_by('date')
+        foia = self.instance.get_foia()
+        if foia:
+            self.fields['comm'].queryset = FOIACommunication.objects.filter(
+                foia=foia.pk).order_by('date')
 
 class FOIAFileAdmin(admin.ModelAdmin):
     """FOIA File admin options"""
