@@ -654,7 +654,10 @@ class FOIAFile(models.Model):
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""
-        return self.foia or self.comm.foia
+        if self.foia:
+            return self.foia
+        if self.comm and self.comm.foia:
+            return self.comm.foia
 
     def is_viewable(self, user):
         """Is this document viewable to user"""
