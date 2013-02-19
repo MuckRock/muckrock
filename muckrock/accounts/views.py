@@ -291,7 +291,8 @@ def stripe_webhook_v2(request):
     event_json = json.loads(request.raw_post_data)
     event_data = event_json['data']['object']
 
-    logger.info('Received stripe webhook of type %s.  Data: %s' % (event_json['type'], event_json))
+    logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s' % \
+        (event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json))
 
     if event_json['type'] == 'charge.succeeded':
         try:
