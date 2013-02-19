@@ -26,3 +26,4 @@ class Answer(models.Model):
     user = models.ForeignKey(User)
     date = models.DateTimeField()
     question = models.ForeignKey(Question, related_name='answers')
+    answer = models.TextField(blank=True)
