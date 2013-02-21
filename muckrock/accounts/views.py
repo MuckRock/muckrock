@@ -295,11 +295,8 @@ def stripe_webhook_v2(request):
         (event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json))
 
     if event_json['type'] == 'charge.succeeded':
-        try:
-            user = Profile.objects.get(stripe_id=event_data['customer']).user
-        except Profile.DoesNotExist:
-            # db is not synced yet, return 404 and let stripe retry - we should be synced by then
-            raise Http404
+        username = event_data['description'][:event_data['description'].index(':')]
+        user = User.objects.get(username=username)
         amount = event_data['amount'] / 100
         base_amount = amount / 1.05
         fee_amount = amount - base_amount
