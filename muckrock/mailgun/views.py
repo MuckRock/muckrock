@@ -109,9 +109,9 @@ def _verify(post):
 def _forward(post, files, title=''):
     """Forward an email from mailgun to admin"""
     if title:
-        subject = '%s: %s' % (title, post.get('subject'))
+        subject = '%s: %s' % (title, post.get('subject', ''))
     else:
-        subject = post.get('subject')
+        subject = post.get('subject', '')
     subject = subject.replace('\r', '').replace('\n', '')
 
     email = EmailMessage(subject, post.get('body-plain'),
