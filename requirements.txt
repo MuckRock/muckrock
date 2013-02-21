@@ -37,3 +37,4 @@ celery==2.5.5
 django-celery==2.5.5
 django-sslify==0.2
 pysolr==3.0.5
+lxml==3.1.0
