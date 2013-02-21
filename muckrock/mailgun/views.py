@@ -130,7 +130,7 @@ def _upload_file(foia, comm, file_, sender):
 
     foia_file = FOIAFile(foia=foia, comm=comm, title=os.path.splitext(file_.name)[0][:70],
                          date=datetime.now(), source=source[:70], access=access)
-    foia_file.ffile.save(file_.name, file_)
+    foia_file.ffile.save(file_.name[:100], file_)
     foia_file.save()
     upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
