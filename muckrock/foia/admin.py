@@ -5,6 +5,7 @@ Admin registration for FOIA models
 from django import forms
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -81,6 +82,7 @@ class AgencyChoiceField(forms.models.ModelChoiceField):
 class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom agency choice field"""
     agency = AgencyChoiceField(queryset=Agency.objects.all().order_by('name'))
+    user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'))
 
     class Meta:
         # pylint: disable=R0903
