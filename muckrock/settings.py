@@ -218,8 +218,12 @@ AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
 TEST_RUNNER = 'django_nose.run_tests'
 
 HAYSTACK_SITECONF = 'search_sites'
-HAYSTACK_SEARCH_ENGINE = 'whoosh'
-HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
+HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
+
+if HAYSTACK_SEARCH_ENGINE == 'whoosh':
+    HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
+elif HAYSTACK_SEARCH_ENGINE == 'solr':
+    HAYSTACK_SOLR_URL = os.environ.get('WEBSOLR_URL', '')
 
 ASSETS_DEBUG = False
 
