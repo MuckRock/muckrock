@@ -28,7 +28,7 @@ class TestJurisdictionUnit(TestCase):
     def test_jurisdiction_unicode(self):
         """Test Jurisdiction model's __unicode__ method"""
         nose.tools.eq_(unicode(self.state), u'Massachusetts')
-        nose.tools.eq_(unicode(self.local), u'Boston')
+        nose.tools.eq_(unicode(self.local), u'Boston, MA')
 
     def test_jurisdiction_url(self):
         """Test Jurisdiction model's get_absolute_url method"""
