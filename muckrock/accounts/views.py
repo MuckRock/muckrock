@@ -294,9 +294,23 @@ def stripe_webhook_v2(request):
     logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s' % \
         (event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json))
 
-    if event_json['type'] == 'charge.succeeded':
-        username = event_data['description'][:event_data['description'].index(':')]
+    description = event_data.get('description')
+    customer = event_data.get('customer')
+    if description:
+        username = description[:description.index(':')]
         user = User.objects.get(username=username)
+    elif customer:
+        try:
+            user = Profile.objects.get(stripe_id=customer).user
+        except Profile.DoesNotExist:
+            # db is not synced yet, return 404 and let stripe retry - we should be synced by then
+            raise Http404
+    elif event_json['type'] in ['charge.succeeded', 'invoice.payment_failed']:
+        logger.warning('Cannot figure out customer from stripe webhook, no receipt sent: %s'
+                       % event_json)
+        return HttpResponse()
+
+    if event_json['type'] == 'charge.succeeded':
         amount = event_data['amount'] / 100
         base_amount = amount / 1.05
         fee_amount = amount - base_amount
@@ -329,9 +343,8 @@ def stripe_webhook_v2(request):
         msg.send(fail_silently=False)
 
     elif event_json['type'] == 'invoice.payment_failed':
-        user_profile = Profile.objects.get(stripe_id=event_data['customer'])
-        user = user_profile.user
         attempt = event_data['attempt_count']
+        user_profile = user.get_profile()
         if attempt == 4:
             user_profile.acct_type = 'community'
             user_profile.save()
