@@ -296,7 +296,7 @@ def stripe_webhook_v2(request):
 
     description = event_data.get('description')
     customer = event_data.get('customer')
-    if description:
+    if description and ':' in description:
         username = description[:description.index(':')]
         user = User.objects.get(username=username)
     elif customer:
