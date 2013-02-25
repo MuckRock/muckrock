@@ -100,6 +100,12 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
+class FOIAMultipleSubmitForm(forms.Form):
+    """Form to select multiple agencies to submit to"""
+
+    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
+    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
+
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
 
