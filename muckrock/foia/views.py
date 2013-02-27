@@ -167,15 +167,17 @@ def confirm_multiple(request, foia):
         if request.POST.get('submit') == 'Confirm':
             for agency in agencies:
                 # make a copy of the foia (and its communication) for each agency
-                foia.pk = None
-                foia.mail_id = ''
-                foia.agency = agency
-                foia.jurisdiction = agency.jurisdiction
-                foia.save()
-                foia_comm.pk = None
-                foia_comm.foia = foia
-                foia_comm.save()
-                foia.submit()
+
+                new_foia = FOIARequest.objects.create(user=foia.user, status='started',
+                                                      title=foia.title, slug=foia.slug,
+                                                      jurisdiction=agency.jurisdiction,
+                                                      agency=agency)
+                FOIACommunication.objects.create(
+                        foia=new_foia, from_who=foia_comm.from_who, to_who=foia_comm.to_who,
+                        date=datetime.now(), response=False, full_html=False,
+                        communication=foia_comm.communication)
+
+                new_foia.submit()
             messages.success(request, 'Request has been submitted to selected agencies')
         else:
             messages.info(request, 'Multiple agency submit has been cancelled')
