@@ -284,6 +284,7 @@ def stripe_webhook(request):
 @csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
+    # pylint: disable=R0914
 
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
@@ -319,16 +320,19 @@ def stripe_webhook_v2(request):
                 event_data['description'].endswith('Charge for 5 requests'):
             type_ = 'community'
             url = '/foia/new/'
+            subject = 'Payment received for additional requests'
         elif event_data.get('description') and \
-                event_data['description'].startswith('Charge for request'):
+                'Charge for request' in event_data['description']:
             type_ = 'doc'
             url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
                                      .get_absolute_url()
+            subject = 'Payment received for request fee'
         else:
             type_ = 'pro'
             url = '/foia/new/'
+            subject = 'Payment received for professional account'
 
-        msg = EmailMessage(subject='Payment received for professional account',
+        msg = EmailMessage(subject=subject,
                            body=render_to_string('registration/receipt.txt',
                                {'user': user,
                                 'id': event_data['id'],
