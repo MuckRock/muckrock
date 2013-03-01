@@ -4,6 +4,9 @@ Admin registration for Jurisdiction models
 
 from django.contrib import admin
 
+from adaptor.model import CsvModel
+from adaptor.fields import CharField, DjangoModelField
+
 #from jurisdiction.models import Jurisdiction
 from foia.models import Jurisdiction
 
@@ -28,3 +31,17 @@ class JurisdictionAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(Jurisdiction, JurisdictionAdmin)
+
+
+class JurisdictionCsvModel(CsvModel):
+    """CSV import model for jurisdictions"""
+
+    name = CharField()
+    slug = CharField()
+    level = CharField(transform=lambda x: x.lower()[0])
+    parent = DjangoModelField(Jurisdiction, pk='name')
+
+    class Meta:
+        # pylint: disable=R0903
+        dbModel = Jurisdiction
+        delimiter = ','
