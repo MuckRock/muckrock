@@ -184,11 +184,20 @@ DEBUG_TOOLBAR_CONFIG = {
 
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
-#url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/'))
-url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
-    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+urlparse.uses_netloc.append('ironmq')
+#url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
+#    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+if 'IRON_MQ_PROJECT_ID' in os.environ:
+    url = 'ironmq://%s:%s@' % \
+        (os.environ.get('IRON_MQ_PROJECT_ID'), os.environ.get('IRON_MQ_TOKEN'))
+else:
+    url = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
+url = urlparse.urlparse(url)
 
 import djcelery
+# pylint: disable=W0611
+import iron_celery
+# pylint: enable=W0611
 djcelery.setup_loader()
 
 BROKER_HOST = url.hostname
