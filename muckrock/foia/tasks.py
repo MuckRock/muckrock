@@ -17,10 +17,12 @@ import base64
 import gdata.analytics.service
 import json
 import logging
+import os.path
 import re
 import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
+from decimal import Decimal
 from vendor import MultipartPostHandler
 
 from foia.models import FOIAFile, FOIARequest, FOIACommunication
@@ -198,7 +200,7 @@ def autoimport():
     # pylint: disable=R0914
     # pylint: disable=R0915
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-zA-Z-]+)')
+                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-zA-Z-]+)(?::(?P<arg>.+))')
     log = []
 
     conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
@@ -206,14 +208,16 @@ def autoimport():
     for key in bucket.list('scans'):
         if key.name == 'scans/':
             continue
-        file_name = key.name[6:]
+        file_name = os.path.splitext(key.name[6:])[0]
+
         m_name = p_name.match(file_name)
+        code = m_name.group('code')
         if not m_name:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
             log.append('ERROR: %s does not match the file name format' % file_name)
             continue
-        if m_name.group('code') not in CODES:
+        if code not in CODES:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
             log.append('ERROR: %s uses an unknown code' % file_name)
@@ -222,7 +226,7 @@ def autoimport():
         file_date = datetime(int(m_name.group('year')) + 2000,
                              int(m_name.group('month')),
                              int(m_name.group('day')))
-        title, status, body = CODES[m_name.group('code')]
+        title, status, body = CODES[code]
         for foia_pk in foia_pks:
             try:
                 # pylint: disable=E1101
@@ -247,6 +251,8 @@ def autoimport():
                     raise SizeError(key.size, foia_file.ffile.size)
 
                 foia.status = status or foia.status
+                if code == 'FEE' and m_name.group('arg'):
+                    foia.price = Decimal(m_name.group('arg'))
                 foia.save()
                 foia.update(comm.anchor())
 
