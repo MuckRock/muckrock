@@ -208,15 +208,16 @@ def autoimport():
     for key in bucket.list('scans'):
         if key.name == 'scans/':
             continue
-        file_name = os.path.splitext(key.name[6:])[0]
+        file_name = key.name[6:]
+        file_name_no_ext = os.path.splitext(file_name)[0]
 
-        m_name = p_name.match(file_name)
+        m_name = p_name.match(file_name_no_ext)
         if not m_name:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
             log.append('ERROR: %s does not match the file name format' % file_name)
             continue
-        code = m_name.group('code')
+        code = m_name.group('code').upper()
         if code not in CODES:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
