@@ -3,13 +3,16 @@ Admin registration for Agency models
 """
 
 from django import forms
-from django.contrib import admin
+from django.conf.urls.defaults import patterns, url
+from django.contrib import admin, messages
 from django.contrib.auth.models import User
+from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 
 from agency.models import AgencyType, Agency
+from agency.forms import CSVImportForm
 from jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
@@ -38,20 +41,45 @@ class AgencyAdmin(admin.ModelAdmin):
     search_fields = ['name']
     form = AgencyAdminForm
 
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super(AgencyAdmin, self).get_urls()
+        my_urls = patterns('', url(r'^import/$', self.admin_site.admin_view(self.csv_import),
+                                   name='agency-admin-import'))
+        return my_urls + urls
+
+    def csv_import(self, request):
+        """Import a CSV file of agencies"""
+        # pylint: disable=R0201
+
+        if request.method == 'POST':
+            form = CSVImportForm(request.POST, request.FILES)
+            if form.is_valid():
+                AgencyCsvModel.import_data(data=request.FILES['csv_file'])
+                messages.success(request, 'CSV imported')
+                return redirect('admin:agency_agency_changelist')
+        else:
+            form = CSVImportForm()
+
+        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email',
+                  'contact first name', 'contact last name', 'url', 'phone', 'fax']
+        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields})
+
+
 admin.site.register(AgencyType, AgencyTypeAdmin)
 admin.site.register(Agency,     AgencyAdmin)
 
 
+def get_jurisdiction(full_name):
+    """Get the jurisdiction from its name and parent"""
+    # pylint: disable=E1101
+    name, parent_abbrev = full_name.split(', ')
+    parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
+    return Jurisdiction.objects.get(name=name, parent=parent).pk
+
+
 class AgencyCsvModel(CsvModel):
     """CSV import model for agency"""
-
-    @staticmethod
-    def get_jurisdiction(full_name):
-        """Get the jurisdiction from its name and parent"""
-        # pylint: disable=E1101
-        name, parent_abbrev = full_name.split(', ')
-        parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
-        return Jurisdiction.objects.get(name=name, parent=parent).pk
 
     name = CharField()
     slug = CharField()
@@ -69,3 +97,4 @@ class AgencyCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Agency
         delimiter = ','
+        update = {'keys': ['name', 'jurisdiction']}
