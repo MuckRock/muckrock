@@ -41,3 +41,4 @@ lxml==3.1.0
 cssselect==0.7.1
 django-adaptors==0.2.3
 iron-celery==0.3.1
+kombu==2.5.6
