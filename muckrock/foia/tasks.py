@@ -211,12 +211,12 @@ def autoimport():
         file_name = os.path.splitext(key.name[6:])[0]
 
         m_name = p_name.match(file_name)
-        code = m_name.group('code')
         if not m_name:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
             log.append('ERROR: %s does not match the file name format' % file_name)
             continue
+        code = m_name.group('code')
         if code not in CODES:
             key.copy(bucket, 'review/%s' % file_name)
             key.delete()
