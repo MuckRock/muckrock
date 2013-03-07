@@ -110,8 +110,8 @@ class FOIARequest(models.Model):
     # pylint: disable=R0902
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=70)
-    slug = models.SlugField(max_length=70)
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)

@@ -30,7 +30,7 @@ from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFi
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, FOIAFileFormSet, FOIAMultipleSubmitForm, \
-                       TEMPLATES
+                       AgencyConfirmForm, TEMPLATES
 from foia.models import FOIARequest, FOIACommunication, FOIAFile
 from jurisdiction.models import Jurisdiction
 from tags.models import Tag
@@ -150,6 +150,7 @@ def submit_multiple(request, foia):
 @user_passes_test(lambda u: u.is_staff)
 def confirm_multiple(request, foia):
     """Display the selected agencies and allow the user to confirm them"""
+    # pylint: disable=R0914
 
     agency_type = request.GET.get('agency_type')
     jurisdiction = request.GET.get('jurisdiction')
@@ -160,32 +161,38 @@ def confirm_multiple(request, foia):
     if jurisdiction:
         agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
                                    Q(jurisdiction__parent=jurisdiction))
+    choices = [(a.pk, a.name) for a in agencies]
 
     if request.method == 'POST':
-        foia = FOIARequest.objects.get(pk=foia)
-        foia_comm = foia.communications.all()[0]
-        if request.POST.get('submit') == 'Confirm':
-            for agency in agencies:
-                # make a copy of the foia (and its communication) for each agency
+        form = AgencyConfirmForm(request.POST, choices=choices)
+        if form.is_valid():
+            foia = FOIARequest.objects.get(pk=foia)
+            foia_comm = foia.communications.all()[0]
+            if request.POST.get('submit') == 'Confirm':
+                for agency_pk in form.cleaned_data['agencies']:
+                    # make a copy of the foia (and its communication) for each agency
+                    agency = Agency.objects.get(pk=agency_pk)
+                    title = '%s (%s)' % (foia.title, agency.name)
+                    new_foia = FOIARequest.objects.create(user=foia.user, status='started',
+                                                          title=title, slug=foia.slug,
+                                                          jurisdiction=agency.jurisdiction,
+                                                          agency=agency)
+                    FOIACommunication.objects.create(
+                            foia=new_foia, from_who=foia_comm.from_who, to_who=foia_comm.to_who,
+                            date=datetime.now(), response=False, full_html=False,
+                            communication=foia_comm.communication)
 
-                new_foia = FOIARequest.objects.create(user=foia.user, status='started',
-                                                      title=foia.title, slug=foia.slug,
-                                                      jurisdiction=agency.jurisdiction,
-                                                      agency=agency)
-                FOIACommunication.objects.create(
-                        foia=new_foia, from_who=foia_comm.from_who, to_who=foia_comm.to_who,
-                        date=datetime.now(), response=False, full_html=False,
-                        communication=foia_comm.communication)
-
-                new_foia.submit()
-            messages.success(request, 'Request has been submitted to selected agencies')
-        else:
-            messages.info(request, 'Multiple agency submit has been cancelled')
+                    new_foia.submit()
+                messages.success(request, 'Request has been submitted to selected agencies')
+            else:
+                messages.info(request, 'Multiple agency submit has been cancelled')
 
         return redirect(foia)
 
+    default = [pk for pk, _ in choices]
+    form = AgencyConfirmForm(choices=choices, initial={'agencies': default})
 
-    return render_to_response('foia/foiarequest_confirm_multiple.html', {'agencies': agencies},
+    return render_to_response('foia/foiarequest_confirm_multiple.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
