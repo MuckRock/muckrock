@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'dbsettings',
     'storages',
     'staticfiles',
+    'tinymce',
     'accounts',
     'foia',
     'news',
