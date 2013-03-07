@@ -78,7 +78,7 @@ class TestFOIARequestUnit(TestCase):
         self.foia.status = 'fix'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.eq_(len(mail.outbox), 3)
 
         # if the user views it and clears the updated flag, we do get another email
         self.foia.updated = False
@@ -86,7 +86,7 @@ class TestFOIARequestUnit(TestCase):
         self.foia.status = 'rejected'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.eq_(len(mail.outbox), 4)
 
         foia = FOIARequest.objects.get(pk=6)
         foia.status = 'submitted'
@@ -541,7 +541,7 @@ class TestFOIAIntegration(TestCase):
 
         # check that a notification has not been sent to the user since they habe not
         # cleared the updated flag yet by viewing it
-        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.eq_(len(mail.outbox), 4)
         # make sure dates were set correctly
         nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
         nose.tools.eq_(foia.date_due, old_date_due)
