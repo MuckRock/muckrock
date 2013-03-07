@@ -106,6 +106,16 @@ class FOIAMultipleSubmitForm(forms.Form):
     agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
     jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
 
+class AgencyConfirmForm(forms.Form):
+    """Confirm agencies for a multiple submit"""
+
+    def __init__(self, *args, **kwargs):
+        self.choices = kwargs.pop('choices', [])
+        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
+        self.fields['agencies'].choices = self.choices
+
+    agencies = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple)
+
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
 

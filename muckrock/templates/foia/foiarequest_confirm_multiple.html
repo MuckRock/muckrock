@@ -4,14 +4,10 @@
 {% block content %}
 	<h1>Confirm Agencies</h1>
 	<p class="large">Are you sure you want to submit this request to these agencies?</p>
-	<ul>
-	{% for agency in agencies %}
-		<li>{{agency}}</li>
-	{% endfor %}
-	</ul>
 	<div class="form">
   <form action="" method="post" enctype="multipart/form-data">
 		<fieldset>
+			{% include "form.html" %}
 			<input type="submit" name="submit" value="Confirm" class="button" />
 			<input type="submit" name="submit" value="Cancel" class="right button" />
 		</fieldset>
