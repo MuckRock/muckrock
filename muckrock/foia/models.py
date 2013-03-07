@@ -296,28 +296,26 @@ class FOIARequest(models.Model):
         """Various actions whenever the request has been updated"""
         # pylint: disable=E1101
 
-        # mark the request as updated and notify the user
-        if not self.updated:
-            self.updated = True
-            self.save()
+        self.updated = True
+        self.save()
 
-            link = self.get_absolute_url()
-            if anchor:
-                link += '#' + anchor
+        link = self.get_absolute_url()
+        if anchor:
+            link += '#' + anchor
 
-            send_data = []
-            for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
-                msg = render_to_string('foia/mail.txt',
-                    {'name': profile.user.get_full_name(),
-                     'title': self.title,
-                     'status': self.get_status_display(),
-                     'link': link,
-                     'follow': self.user != profile.user,
-                     'footer': options.email_footer})
-                send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
-                                  msg, 'info@muckrock.com', [profile.user.email]))
+        send_data = []
+        for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+            msg = render_to_string('foia/mail.txt',
+                {'name': profile.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': link,
+                 'follow': self.user != profile.user,
+                 'footer': options.email_footer})
+            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
+                              msg, 'info@muckrock.com', [profile.user.email]))
 
-            send_mass_mail(send_data, fail_silently=False)
+        send_mass_mail(send_data, fail_silently=False)
 
         self.update_dates()
 
