@@ -11,7 +11,7 @@ from adaptor.fields import CharField, DjangoModelField
 
 #from jurisdiction.models import Jurisdiction
 from foia.models import Jurisdiction
-from agency.forms import CSVImportForm
+from jurisdiction.forms import CSVImportForm
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

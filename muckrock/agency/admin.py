@@ -55,8 +55,11 @@ class AgencyAdmin(admin.ModelAdmin):
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
-                AgencyCsvModel.import_data(data=request.FILES['csv_file'])
+                agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'])
                 messages.success(request, 'CSV imported')
+                if form.cleaned_data['type_']:
+                    for agency in agencies:
+                        agency.object.types.add(form.cleaned_data['type_'])
                 return redirect('admin:agency_agency_changelist')
         else:
             form = CSVImportForm()
