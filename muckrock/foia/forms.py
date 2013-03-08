@@ -100,6 +100,22 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
+class FOIAMultipleSubmitForm(forms.Form):
+    """Form to select multiple agencies to submit to"""
+
+    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
+    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
+
+class AgencyConfirmForm(forms.Form):
+    """Confirm agencies for a multiple submit"""
+
+    def __init__(self, *args, **kwargs):
+        self.choices = kwargs.pop('choices', [])
+        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
+        self.fields['agencies'].choices = self.choices
+
+    agencies = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple)
+
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
 
@@ -143,7 +159,8 @@ class FOIAAdminFixForm(forms.ModelForm):
 
     from_email = forms.CharField(label='From', required=False,
                                  help_text='Leaving blank will fill in with request owner')
-    email = forms.EmailField(label='To')
+    email = forms.EmailField(label='To', required=False,
+                             help_text='Leave blank to send to agency default')
     other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))

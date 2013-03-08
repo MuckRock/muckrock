@@ -19,6 +19,7 @@ from django.views.generic import list_detail
 from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
+from urllib import urlencode
 import logging
 import stripe
 import sys
@@ -28,7 +29,8 @@ from accounts.forms import PaymentForm
 from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
-                       FOIAWhatFederalForm, FOIAWizard, FOIAFileFormSet, TEMPLATES
+                       FOIAWhatFederalForm, FOIAWizard, FOIAFileFormSet, FOIAMultipleSubmitForm, \
+                       AgencyConfirmForm, TEMPLATES
 from foia.models import FOIARequest, FOIACommunication, FOIAFile
 from jurisdiction.models import Jurisdiction
 from tags.models import Tag
@@ -58,7 +60,8 @@ def _foia_form_handler(request, foia, action):
         return form
 
     if request.method == 'POST':
-        status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started'}
+        status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started',
+                       'Submit to Multiple Agencies': 'started'}
 
         if request.POST.get('submit') == 'Delete':
             foia.delete()
@@ -105,6 +108,10 @@ def _foia_form_handler(request, foia, action):
 
                 foia.save()
 
+                if request.POST['submit'] == 'Submit to Multiple Agencies':
+                    return HttpResponseRedirect(reverse('foia-submit-multiple',
+                                                        kwargs={'foia': foia.pk}))
+
                 if new_agency:
                     return HttpResponseRedirect(reverse('agency-update',
                         kwargs={'jurisdiction': foia.agency.jurisdiction.slug,
@@ -122,6 +129,70 @@ def _foia_form_handler(request, foia, action):
 
     return render_to_response('foia/foiarequest_form.html',
                               {'form': form, 'action': action},
+                              context_instance=RequestContext(request))
+
+@user_passes_test(lambda u: u.is_staff)
+def submit_multiple(request, foia):
+    """Submit a request to multiple agencies"""
+
+    if request.method == 'POST':
+        form = FOIAMultipleSubmitForm(request.POST)
+        if form.is_valid():
+            url = reverse('foia-confirm-multiple', kwargs={'foia': foia})
+            url += '?' + urlencode([(k, v.pk) for k, v in form.cleaned_data.iteritems() if v])
+            return HttpResponseRedirect(url)
+    else:
+        form = FOIAMultipleSubmitForm()
+
+    return render_to_response('foia/foiarequest_submit_multiple.html', {'form': form},
+                              context_instance=RequestContext(request))
+
+@user_passes_test(lambda u: u.is_staff)
+def confirm_multiple(request, foia):
+    """Display the selected agencies and allow the user to confirm them"""
+    # pylint: disable=R0914
+
+    agency_type = request.GET.get('agency_type')
+    jurisdiction = request.GET.get('jurisdiction')
+
+    agencies = Agency.objects.all()
+    if agency_type:
+        agencies = agencies.filter(types__id=agency_type)
+    if jurisdiction:
+        agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
+                                   Q(jurisdiction__parent=jurisdiction))
+    choices = [(a.pk, a.name) for a in agencies]
+
+    if request.method == 'POST':
+        form = AgencyConfirmForm(request.POST, choices=choices)
+        if form.is_valid():
+            foia = FOIARequest.objects.get(pk=foia)
+            foia_comm = foia.communications.all()[0]
+            if request.POST.get('submit') == 'Confirm':
+                for agency_pk in form.cleaned_data['agencies']:
+                    # make a copy of the foia (and its communication) for each agency
+                    agency = Agency.objects.get(pk=agency_pk)
+                    title = '%s (%s)' % (foia.title, agency.name)
+                    new_foia = FOIARequest.objects.create(user=foia.user, status='started',
+                                                          title=title, slug=foia.slug,
+                                                          jurisdiction=agency.jurisdiction,
+                                                          agency=agency)
+                    FOIACommunication.objects.create(
+                            foia=new_foia, from_who=foia_comm.from_who, to_who=foia_comm.to_who,
+                            date=datetime.now(), response=False, full_html=False,
+                            communication=foia_comm.communication)
+
+                    new_foia.submit()
+                messages.success(request, 'Request has been submitted to selected agencies')
+            else:
+                messages.info(request, 'Multiple agency submit has been cancelled')
+
+        return redirect(foia)
+
+    default = [pk for pk, _ in choices]
+    form = AgencyConfirmForm(choices=choices, initial={'agencies': default})
+
+    return render_to_response('foia/foiarequest_confirm_multiple.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
@@ -190,8 +261,9 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
 
 def _save_foia_comm(request, foia, form, action, formset=None):
     """Save the FOI Communication"""
-    if action == 'Admin Fix':
+    if action == 'Admin Fix' and form.cleaned_data['email']:
         foia.email = form.cleaned_data['email']
+    if action == 'Admin Fix' and form.cleaned_data['other_emails']:
         foia.other_emails = form.cleaned_data['other_emails']
     if action == 'Admin Fix' and form.cleaned_data['from_email']:
         from_who = form.cleaned_data['from_email']

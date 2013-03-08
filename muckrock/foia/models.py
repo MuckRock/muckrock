@@ -45,7 +45,7 @@ class FOIARequestManager(ChainableManager):
 
     def get_done(self):
         """Get all FOIA requests with responses"""
-        return self.filter(status='done')
+        return self.filter(status='done').exclude(date_done=None)
 
     def get_editable(self):
         """Get all editable FOIA requests"""
@@ -110,8 +110,8 @@ class FOIARequest(models.Model):
     # pylint: disable=R0902
 
     user = models.ForeignKey(User)
-    title = models.CharField(max_length=70)
-    slug = models.SlugField(max_length=70)
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS)
     jurisdiction = models.ForeignKey(Jurisdiction)
     agency = models.ForeignKey(Agency, blank=True, null=True)
@@ -296,28 +296,26 @@ class FOIARequest(models.Model):
         """Various actions whenever the request has been updated"""
         # pylint: disable=E1101
 
-        # mark the request as updated and notify the user
-        if not self.updated:
-            self.updated = True
-            self.save()
+        self.updated = True
+        self.save()
 
-            link = self.get_absolute_url()
-            if anchor:
-                link += '#' + anchor
+        link = self.get_absolute_url()
+        if anchor:
+            link += '#' + anchor
 
-            send_data = []
-            for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
-                msg = render_to_string('foia/mail.txt',
-                    {'name': profile.user.get_full_name(),
-                     'title': self.title,
-                     'status': self.get_status_display(),
-                     'link': link,
-                     'follow': self.user != profile.user,
-                     'footer': options.email_footer})
-                send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
-                                  msg, 'info@muckrock.com', [profile.user.email]))
+        send_data = []
+        for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+            msg = render_to_string('foia/mail.txt',
+                {'name': profile.user.get_full_name(),
+                 'title': self.title,
+                 'status': self.get_status_display(),
+                 'link': link,
+                 'follow': self.user != profile.user,
+                 'footer': options.email_footer})
+            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
+                              msg, 'info@muckrock.com', [profile.user.email]))
 
-            send_mass_mail(send_data, fail_silently=False)
+        send_mass_mail(send_data, fail_silently=False)
 
         self.update_dates()
 
@@ -596,7 +594,7 @@ class FOIAFile(models.Model):
     # pylint: disable=E1101
     foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
-    ffile = models.FileField(upload_to='foia_files', verbose_name='File')
+    ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
     title = models.CharField(max_length=70)
     date = models.DateTimeField(null=True)
     source = models.CharField(max_length=70, blank=True)

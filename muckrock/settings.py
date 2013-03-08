@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'dbsettings',
     'storages',
     'staticfiles',
+    'tinymce',
     'accounts',
     'foia',
     'news',
@@ -184,11 +185,21 @@ DEBUG_TOOLBAR_CONFIG = {
 
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
+urlparse.uses_netloc.append('ironmq')
 #url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/'))
-url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
-    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+#url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
+#    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
+if 'IRON_MQ_PROJECT_ID' in os.environ:
+    BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
+                                      os.environ.get('IRON_MQ_TOKEN'))
+else:
+    BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
+url = urlparse.urlparse(BROKER_URL)
 
 import djcelery
+# pylint: disable=W0611
+import iron_celery
+# pylint: enable=W0611
 djcelery.setup_loader()
 
 BROKER_HOST = url.hostname
@@ -218,8 +229,12 @@ AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
 TEST_RUNNER = 'django_nose.run_tests'
 
 HAYSTACK_SITECONF = 'search_sites'
-HAYSTACK_SEARCH_ENGINE = 'whoosh'
-HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
+HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
+
+if HAYSTACK_SEARCH_ENGINE == 'whoosh':
+    HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
+elif HAYSTACK_SEARCH_ENGINE == 'solr':
+    HAYSTACK_SOLR_URL = os.environ.get('WEBSOLR_URL', '')
 
 ASSETS_DEBUG = False
 

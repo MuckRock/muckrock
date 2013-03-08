@@ -171,11 +171,13 @@ def manage_subsc(request):
         form = form_class(request.POST, request=request)
 
         if user_profile.acct_type == 'community' and form.is_valid():
-            if not form.cleaned_data['use_on_file']:
+            if not form.cleaned_data.get('use_on_file'):
                 user_profile.save_cc(form.cleaned_data['token'])
             customer = user_profile.get_customer()
             customer.update_subscription(plan='pro')
             user_profile.acct_type = 'pro'
+            user_profile.date_update = datetime.now()
+            user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
             messages.success(request, 'You have been succesfully upgraded to a Pro Account!')
             return HttpResponseRedirect(reverse('acct-my-profile'))
@@ -284,6 +286,7 @@ def stripe_webhook(request):
 @csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
+    # pylint: disable=R0914
 
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
@@ -291,14 +294,26 @@ def stripe_webhook_v2(request):
     event_json = json.loads(request.raw_post_data)
     event_data = event_json['data']['object']
 
-    logger.info('Received stripe webhook of type %s.  Data: %s' % (event_json['type'], event_json))
+    logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s' % \
+        (event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json))
 
-    if event_json['type'] == 'charge.succeeded':
+    description = event_data.get('description')
+    customer = event_data.get('customer')
+    if description and ':' in description:
+        username = description[:description.index(':')]
+        user = User.objects.get(username=username)
+    elif customer:
         try:
-            user = Profile.objects.get(stripe_id=event_data['customer']).user
+            user = Profile.objects.get(stripe_id=customer).user
         except Profile.DoesNotExist:
             # db is not synced yet, return 404 and let stripe retry - we should be synced by then
             raise Http404
+    elif event_json['type'] in ['charge.succeeded', 'invoice.payment_failed']:
+        logger.warning('Cannot figure out customer from stripe webhook, no receipt sent: %s'
+                       % event_json)
+        return HttpResponse()
+
+    if event_json['type'] == 'charge.succeeded':
         amount = event_data['amount'] / 100
         base_amount = amount / 1.05
         fee_amount = amount - base_amount
@@ -307,16 +322,19 @@ def stripe_webhook_v2(request):
                 event_data['description'].endswith('Charge for 5 requests'):
             type_ = 'community'
             url = '/foia/new/'
+            subject = 'Payment received for additional requests'
         elif event_data.get('description') and \
-                event_data['description'].startswith('Charge for request'):
+                'Charge for request' in event_data['description']:
             type_ = 'doc'
             url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
                                      .get_absolute_url()
+            subject = 'Payment received for request fee'
         else:
             type_ = 'pro'
             url = '/foia/new/'
+            subject = 'Payment received for professional account'
 
-        msg = EmailMessage(subject='Payment received for professional account',
+        msg = EmailMessage(subject=subject,
                            body=render_to_string('registration/receipt.txt',
                                {'user': user,
                                 'id': event_data['id'],
@@ -331,9 +349,8 @@ def stripe_webhook_v2(request):
         msg.send(fail_silently=False)
 
     elif event_json['type'] == 'invoice.payment_failed':
-        user_profile = Profile.objects.get(stripe_id=event_data['customer'])
-        user = user_profile.user
         attempt = event_data['attempt_count']
+        user_profile = user.get_profile()
         if attempt == 4:
             user_profile.acct_type = 'community'
             user_profile.save()
