@@ -1,0 +1,19 @@
+
+{% extends "qanda/base.html" %}
+
+{% block title %}Ask a Question{% endblock %}
+
+{% block content %}
+
+	<h2>Ask a Question</h2>
+	<div class="form">
+  <form action="" method="post">
+		<fieldset>
+			{% include "form.html" %}
+			<input type="submit" name="submit" value="Submit" class="button" />
+		</fieldset>
+  </form>
+	</div>
+
+{% endblock %}
+

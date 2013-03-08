@@ -7,6 +7,7 @@ from django.db import models
 
 from taggit.managers import TaggableManager
 
+from foia.models import FOIARequest
 from tags.models import TaggedItemBase
 
 class Question(models.Model):
@@ -15,9 +16,18 @@ class Question(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
+    foia = models.ForeignKey(FOIARequest, blank=True, null=True)
     question = models.TextField(blank=True)
     date = models.DateTimeField()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+
+    def __unicode__(self):
+        return self.title
+
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('question-detail', [], {'slug': self.slug, 'idx': self.pk})
 
 
 class Answer(models.Model):
