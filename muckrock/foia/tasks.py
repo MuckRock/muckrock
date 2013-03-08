@@ -279,6 +279,30 @@ def autoimport():
     log_msg = '\n'.join(log)
     send_mail('[AUTOIMPORT] %s Logs' % datetime.now(), log_msg, 'info@muckrock.com',
               ['requests@muckrock.com'], fail_silently=False)
+
+
+@periodic_task(run_every=crontab(hour=3, minute=0), name='foia.tasks.notify_unanswered')
+def notify_unanswered():
+    """Notify admins of highly overdue requests"""
+    foias = FOIARequest.objects.get_overdue()
+    data = []
+
+    for foia in foias:
+        comms = foia.communications.filter(response=True).order_by('-date')
+        if comms:
+            days_since_response = (datetime.now() - comms[0].date).days
+        else:
+            # no response ever, set large days late
+            days_since_response = 9999
+        if days_since_response > 60:
+            data.append((days_since_response, foia))
+
+    data.sort(reverse=True)
+    total = len(data)
+
+    send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
+              render_to_string('foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
+              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
     
 
 def process_failure_signal(exception, traceback, sender, task_id,
