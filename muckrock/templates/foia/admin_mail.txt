@@ -7,6 +7,8 @@ Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change reque
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}{% if request.agency.address %}Agency Address:
 {{request.agency.address}}
+{% endif %}{% if request.agency.notes and not request.agency.email and not request.agency.fax %}Notes:
+{{request.agency.notes}}
 {% endif %}
 
 {% else %}

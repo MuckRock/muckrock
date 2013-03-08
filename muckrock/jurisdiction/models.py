@@ -104,7 +104,11 @@ class Jurisdiction(models.Model, RequestHelper):
                               'FOI law has special line for waivers')
 
     def __unicode__(self):
-        return self.name
+        # pylint: disable=E1101
+        if self.level == 'l' and self.parent:
+            return '%s, %s' % (self.name, self.parent.abbrev)
+        else:
+            return self.name
 
     def get_absolute_url(self):
         """The url for this object"""

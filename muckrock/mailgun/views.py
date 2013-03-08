@@ -109,9 +109,9 @@ def _verify(post):
 def _forward(post, files, title=''):
     """Forward an email from mailgun to admin"""
     if title:
-        subject = '%s: %s' % (title, post.get('subject'))
+        subject = '%s: %s' % (title, post.get('subject', ''))
     else:
-        subject = post.get('subject')
+        subject = post.get('subject', '')
     subject = subject.replace('\r', '').replace('\n', '')
 
     email = EmailMessage(subject, post.get('body-plain'),
@@ -130,7 +130,7 @@ def _upload_file(foia, comm, file_, sender):
 
     foia_file = FOIAFile(foia=foia, comm=comm, title=os.path.splitext(file_.name)[0][:70],
                          date=datetime.now(), source=source[:70], access=access)
-    foia_file.ffile.save(file_.name, file_)
+    foia_file.ffile.save(file_.name[:100], file_)
     foia_file.save()
     upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 

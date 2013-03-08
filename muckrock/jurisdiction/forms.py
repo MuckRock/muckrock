@@ -11,3 +11,8 @@ class FlagForm(forms.Form):
                 'something is wrong with it, such as providing missing information or correcting ' \
                 'incorrect information.  Please describe the problem as specifically as possibly ' \
                 'here:'
+
+
+class CSVImportForm(forms.Form):
+    """Import a CSV file of models"""
+    csv_file = forms.FileField()
