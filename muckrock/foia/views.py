@@ -261,8 +261,9 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
 
 def _save_foia_comm(request, foia, form, action, formset=None):
     """Save the FOI Communication"""
-    if action == 'Admin Fix':
+    if action == 'Admin Fix' and form.cleaned_data['email']:
         foia.email = form.cleaned_data['email']
+    if action == 'Admin Fix' and form.cleaned_data['other_emails']:
         foia.other_emails = form.cleaned_data['other_emails']
     if action == 'Admin Fix' and form.cleaned_data['from_email']:
         from_who = form.cleaned_data['from_email']
