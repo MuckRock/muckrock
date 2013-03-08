@@ -9,7 +9,7 @@
 	<div>
 		<ul>
 			{% for question in object_list %}
-			<li><a href="{% url question-detail slug=question.slug,object_id=question.pk %}">{{question.title}}</a></li>
+			<li><a href="{% url question-detail slug=question.slug,idx=question.pk %}">{{question.title}}</a></li>
 			{% endfor %}
 		</ul>
 	</div>
