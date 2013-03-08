@@ -171,11 +171,13 @@ def manage_subsc(request):
         form = form_class(request.POST, request=request)
 
         if user_profile.acct_type == 'community' and form.is_valid():
-            if not form.cleaned_data['use_on_file']:
+            if not form.cleaned_data.get('use_on_file'):
                 user_profile.save_cc(form.cleaned_data['token'])
             customer = user_profile.get_customer()
             customer.update_subscription(plan='pro')
             user_profile.acct_type = 'pro'
+            user_profile.date_update = datetime.now()
+            user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
             messages.success(request, 'You have been succesfully upgraded to a Pro Account!')
             return HttpResponseRedirect(reverse('acct-my-profile'))
