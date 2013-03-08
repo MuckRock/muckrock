@@ -1,0 +1,19 @@
+
+{% extends "qanda/base.html" %}
+
+{% block title %}Questions{% endblock %}
+
+{% block content %}
+
+	<h2>Questions</h2>
+	<div>
+		<ul>
+			{% for question in object_list %}
+			<li><a href="{% url question-detail slug=question.slug,idx=question.pk %}">{{question.title}}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+
+
+{% endblock %}
+
