@@ -177,6 +177,7 @@ INSTALLED_APPS = (
     'agency',
     'jurisdiction',
     'business_days',
+    'qanda',
 )
 
 DEBUG_TOOLBAR_CONFIG = {

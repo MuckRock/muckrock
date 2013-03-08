@@ -1,0 +1,25 @@
+
+{% extends "qanda/base.html" %}
+
+{% block title %} {{object.title}} {% endblock %}
+
+{% block content %}
+
+			<div class="request">
+				<div class="post-title">
+					<h2>{{object.title}}</h2>
+				</div>
+				<div class="post-date">by <a href="{% url acct-profile object.user.username %}">{{object.user}}</a> on {{object.date|date:"DATETIME_FORMAT"}}</div>
+				<div class="post-body">
+					{{object.question|urlize|linebreaks}}
+				</div>
+				{% for answer in object.answers.all %}
+					<div class="response">
+						<div class="post-date">by <a href="{% url acct-profile answer.user.username %}">{{answer.user}}</a> on {{answer.date|date:"DATETIME_FORMAT"}}</div>
+					{{answer.answer|urlize|linebreaks}}
+					</div>
+				{% endfor %}
+				<a href="{% url answer-create slug=object.slug,idx=object.pk %}" class="jqbutton">Reply</a>
+			</div>
+
+{% endblock %}
