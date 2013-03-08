@@ -200,7 +200,8 @@ def autoimport():
     # pylint: disable=R0914
     # pylint: disable=R0915
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-zA-Z-]+)(?::(?P<arg>.+))?', re.I)
+                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?::(?P<arg>\S+))?'
+                        r'(?: ID:(?P<id>\S+))?', re.I)
     log = []
 
     conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
@@ -254,6 +255,8 @@ def autoimport():
                 foia.status = status or foia.status
                 if code == 'FEE' and m_name.group('arg'):
                     foia.price = Decimal(m_name.group('arg'))
+                if m_name.group('id'):
+                    foia.tracking_id = m_name.group('id')
                 foia.save()
                 foia.update(comm.anchor())
 
