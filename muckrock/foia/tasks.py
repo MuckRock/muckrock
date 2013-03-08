@@ -196,8 +196,8 @@ def autoimport():
     # pylint: disable=R0914
     # pylint: disable=R0912
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?::(?P<arg>\S+))?'
-                        r'(?: ID:(?P<id>\S+))?', re.I)
+                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
+                        r'(?: ID#(?P<id>\S+))?', re.I)
     log = []
 
     def s3_copy(bucket, key_or_pre, dest_name):
