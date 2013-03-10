@@ -88,7 +88,7 @@
         "model": "news.article", 
         "fields": {
             "body": "Body goes here", 
-            "author": 7, 
+            "author": 1, 
             "title": "Test Article 7", 
             "publish": true, 
             "summary": "Summary goes here", 
@@ -102,7 +102,7 @@
         "model": "news.article", 
         "fields": {
             "body": "Body goes here", 
-            "author": 8, 
+            "author": 2, 
             "title": "Test Article 8", 
             "publish": true, 
             "summary": "Summary goes here", 

@@ -14,6 +14,7 @@ from muckrock.tests import get_allowed, get_404
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
 # pylint: disable=R0904
+# pylint: disable=E1103
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""
@@ -53,10 +54,9 @@ class TestNewsFunctional(TestCase):
 
     # views
     def test_news_index(self):
-        """Should return the 5 lates articles"""
-        response = get_allowed(self.client, reverse('news-index'),
-                               ['news/article_archive.html', 'news/base.html'])
-        nose.tools.eq_(len(response.context['latest']), 5)
+        """Should redirect to list"""
+        get_allowed(self.client, reverse('news-index'),
+                    ['news/article_list.html', 'news/base.html'])
 
     def test_news_archive_year(self):
         """Should return all articles in the given year"""

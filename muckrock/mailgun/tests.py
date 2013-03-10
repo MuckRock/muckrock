@@ -19,11 +19,12 @@ from settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 # pylint: disable=R0201
 # pylint: disable=R0904
 # pylint: disable=W0142
+# pylint: disable=E1103
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
-    fixtures = ['test_users.json', 'test_profiles.json', 'jurisdictions.json',
-                'test_foiarequests.json']
+    fixtures = ['holidays.json', 'agency_types.json', 'test_agencies.json', 'test_users.json',
+                'test_profiles.json', 'jurisdictions.json', 'test_foiarequests.json']
 
     def setUp(self):
         """Set up tests"""

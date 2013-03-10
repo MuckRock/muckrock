@@ -3,7 +3,7 @@ URL mappings for the FOIA application
 """
 
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import redirect_to
+from django.views.generic.base import RedirectView
 
 from pingback import register_pingback
 
@@ -15,21 +15,24 @@ from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
+# pylint: disable=E1120
+
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 register_pingback(views.detail, pingback_foia_handler)
 
 urlpatterns = patterns('',
-    url(r'^$',                             redirect_to, {'url': 'list'}, name='foia-root'),
-    url(r'^list/$',                        views.list_, name='foia-list'),
+    url(r'^$',                             RedirectView.as_view(url='list'), name='foia-root'),
+    url(r'^list/$',                        views.List.as_view(), name='foia-list'),
     url(r'^list/user-(?P<user_name>[\w\d_.@i]+)/$',
-                                           views.list_by_user, name='foia-list-user'),
+                                           views.ListByUser.as_view(), name='foia-list-user'),
     url(r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
-                                           views.list_by_tag, name='foia-list-tag'),
-    url(r'^list/following/$',              views.list_following, name='foia-list-following'),
-    url(r'^mylist/$',                      views.my_list, name='foia-mylist-all'),
-    url(r'^mylist/(?P<view>\w+)/$',        views.my_list, name='foia-mylist'),
+                                           views.ListByTag.as_view(), name='foia-list-tag'),
+    url(r'^list/following/$',              views.ListFollowing.as_view(),
+                                           name='foia-list-following'),
+    url(r'^mylist/$',                      views.MyList.as_view(), name='foia-mylist-all'),
+    url(r'^mylist/(?P<view>\w+)/$',        views.MyList.as_view(), name='foia-mylist'),
 
     url(r'^new/$',                         views.create, name='foia-create'),
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
@@ -52,10 +55,10 @@ urlpatterns = patterns('',
 
     # old patterns for redirects
     url(r'^list/user/(?P<user_name>[\w\d_.@i]+)/$',
-                                           redirect_to, {'url': '/foi/list/user-%(user_name)s'}),
+                                          RedirectView.as_view(url='/foi/list/user-%(user_name)s')),
     url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',
-                                           redirect_to, {'url': '/foi/list/tag-%(tag_slug)s'}),
+                                          RedirectView.as_view(url='/foi/list/tag-%(tag_slug)s')),
     url(r'^(?P<action>[\w_-]+)/%s/$' % old_foia_url,
-                                           views.redirect_old), 
+                                          views.redirect_old), 
 )
 

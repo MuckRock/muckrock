@@ -26,7 +26,7 @@ def get_allowed(client, url, templates=None, base='base.html', context=None, red
 
     # make sure first 3 match (4th one might be form.html, not important)
     if templates:
-        nose.tools.eq_([t.name for t in response.template][:3], templates + [base])
+        nose.tools.eq_([t.name for t in response.templates][:3], templates + [base])
 
     if context:
         for key, value in context.iteritems():
@@ -49,7 +49,7 @@ def post_allowed_bad(client, url, templates, data=None):
     response = client.post(url, data, **kwargs)
     nose.tools.eq_(response.status_code, 200)
     # make sure first 3 match (4th one might be form.html, not important
-    nose.tools.eq_([t.name for t in response.template][:3], templates + ['base.html'])
+    nose.tools.eq_([t.name for t in response.templates][:3], templates + ['base.html'])
 
 def get_post_unallowed(client, url):
     """Test an unauthenticated get and post on a url that is allowed
@@ -69,8 +69,8 @@ def get_404(client, url):
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_foiarequests.json', 'test_news.json']
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_agencies.json',
+                'test_users.json', 'test_foiarequests.json', 'test_news.json']
 
     # tests for base level views
     def test_views(self):

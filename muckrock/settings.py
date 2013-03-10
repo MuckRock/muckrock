@@ -76,25 +76,19 @@ else:
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
-
-
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+    'django.template.loaders.filesystem.Loader',
+    'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.load_template_source',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.auth',
+    'django.contrib.auth.context_processors.auth',
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
@@ -106,7 +100,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 MIDDLEWARE_CLASSES = (
     'sslify.middleware.SSLifyMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.middleware.csrf.CsrfResponseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -154,6 +147,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
+    'django.contrib.staticfiles',
+    #'staticfiles',
     'raven.contrib.django',
     'gunicorn',
     'south',
@@ -167,7 +162,6 @@ INSTALLED_APPS = (
     'taggit',
     'dbsettings',
     'storages',
-    'staticfiles',
     'tinymce',
     'accounts',
     'foia',
@@ -310,10 +304,16 @@ if url.scheme == 'postgres':
 if url.scheme == 'mysql':
     DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
+
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHE_BACKEND = 'memcached://%s:11211/' % os.environ.get('MEMCACHIER_SERVERS')
-else:
-    CACHE_BACKEND = 'dummy://'
+    CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
+    CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
+    
 
 # pylint: disable=W0401
 # pylint: disable=W0614
