@@ -16,7 +16,8 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 
 class TestAgencyUnit(TestCase):
     """Unit tests for Agencies"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_agencies.json']
+    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
+                'test_agencies.json']
 
     def setUp(self):
         """Set up tests"""
@@ -53,8 +54,8 @@ class TestAgencyUnit(TestCase):
 
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
-    fixtures = ['test_users.json', 'jurisdictions.json', 'agency_types.json', 'test_agencies.json',
-                'test_foiarequests.json']
+    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
+                'test_agencies.json', 'test_foiarequests.json']
 
     def setUp(self):
         """Set up tests"""

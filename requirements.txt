@@ -8,7 +8,7 @@ South==0.7
 ipython==0.10
 django-haystack==1.0.1-final
 whoosh==0.3.18
-django-debug-toolbar==0.8.3
+django-debug-toolbar==0.9.4
 mock==0.7.0b2
 webassets==0.7.1
 cssutils==0.9.7b3
