@@ -5,10 +5,6 @@ Django settings for muckrock project
 import os
 import urlparse
 
-import logging
-from raven.conf import setup_logging
-from raven.contrib.django.handlers import SentryHandler
-
 def boolcheck(setting):
     """Turn env var into proper bool"""
     if isinstance(setting, basestring):
@@ -216,7 +212,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
-CELERY_IMPORTS = ('foia.tasks', 'accounts.tasks')
+CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks')
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
@@ -263,7 +259,7 @@ LOGGING = {
             'class': 'django.utils.log.NullHandler',
         },
         'console':{
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
