@@ -8,8 +8,8 @@ from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.views.generic import simple
+from django.shortcuts import render_to_response, get_object_or_404
+from django.template import RequestContext
 
 from datetime import date, timedelta
 
@@ -176,8 +176,9 @@ class FOIARequestAdmin(NestedModelAdmin):
         # pylint: disable=R0201
         foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
                                         y.communications.latest('date').date))
-        return simple.direct_to_template(request, template='foia/admin_process.html',
-                                         extra_context={'object_list': foias, 'action': action})
+        return render_to_response('foia/admin_process.html',
+                                  {'object_list': foias, 'action': action},
+                                  context_instance=RequestContext(request))
 
     def process(self, request):
         """List all the requests that need to be processed"""

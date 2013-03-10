@@ -6,9 +6,3 @@
 {% block title %}News{% endblock %}
 {% block headline %}News{% endblock %}
 
-{% block sub-nav %}
-<ul class="tabbed">
-	<li class="{% active request "(^/$)|(^/news/$)" %}"><a href="{% url news-index %}">Latest</a></li>
-	<li class="{% active request "^/news/archives/" %}"><a href="{% url news-archive %}">Archives</a></li>
-</ul>
-{% endblock %}

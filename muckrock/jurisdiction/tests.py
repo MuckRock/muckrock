@@ -15,9 +15,9 @@ from jurisdiction.models import Jurisdiction
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""
-    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_agencies.json',
-                'test_foiarequests.json', 'test_foiacommunications.json', 'test_foiafiles.json',
-                'tags.json', 'taggit.json', 'tagged_item_base.json']
+    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
+                'test_agencies.json', 'test_foiarequests.json', 'test_foiacommunications.json',
+                'test_foiafiles.json', 'tags.json', 'taggit.json', 'tagged_item_base.json']
 
     def setUp(self):
         """Set up tests"""

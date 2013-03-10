@@ -8,6 +8,7 @@
 	<div class="clear">&nbsp;</div>
 
 	<form action="" method="post">
+	{% csrf_token %}
 	<select name="tag" class="combobox">
 		<option value=""></option>
 		{% for tag in all_tags %}
