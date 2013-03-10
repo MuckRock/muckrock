@@ -240,13 +240,70 @@ MONTHLY_REQUESTS = {
     'pro': 20,
 }
 
-logger = logging.getLogger()
-logger.setLevel(getattr(logging, os.environ.get('LOGGING_LEVEL', 'DEBUG')))
-if boolcheck(os.environ.get('SENTRY_LOG', False)):
-    setup_logging(SentryHandler())
-
-stripe_logger = logging.getLogger('stripe')
-stripe_logger.setLevel(logging.WARNING)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['console', 'sentry'],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'sentry': {
+            'level': 'ERROR',
+            'class': 'raven.contrib.django.handlers.SentryHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['null'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['sentry'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'muckrock': {
+            'handlers': ['console', 'sentry'],
+            'level': 'INFO',
+        },
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'raven': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    }
+}
 
 # pylint: disable=W0611
 import monkey
