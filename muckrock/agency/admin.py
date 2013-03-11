@@ -64,8 +64,8 @@ class AgencyAdmin(admin.ModelAdmin):
         else:
             form = CSVImportForm()
 
-        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email',
-                  'contact first name', 'contact last name', 'url', 'phone', 'fax']
+        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email', 'other_emails',
+                  'contact first name', 'contact last name', 'contact_title', 'url', 'phone', 'fax']
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields})
 
 
@@ -89,6 +89,7 @@ class AgencyCsvModel(CsvModel):
     jurisdiction = DjangoModelField(Jurisdiction, prepare=get_jurisdiction)
     address = CharField()
     email = CharField()
+    other_emails = CharField()
     contact_first_name = CharField()
     contact_last_name = CharField()
     contact_title = CharField()
