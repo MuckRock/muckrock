@@ -6,7 +6,6 @@ from django.db.models import Sum
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
-from django.utils.decorators import method_decorator
 
 from foia.models import FOIARequest, FOIAFile
 from jurisdiction.models import Jurisdiction
@@ -68,20 +67,3 @@ def handler500(request):
 
     template = loader.get_template('500.html')
     return HttpResponseServerError(template.render(Context({'request': request})))
-
-
-# http://stackoverflow.com/a/8429311
-def class_view_decorator(function_decorator):
-    """Convert a function based decorator into a class based decorator usable
-    on class based Views.
-
-    Can't subclass the `view` as it breaks inheritance (super in particular),
-    so we monkey-patch instead.
-    """
-
-    def simple_decorator(view):
-        """Wrap the dispatch method"""
-        view.dispatch = method_decorator(function_decorator)(view.dispatch)
-        return view
-
-    return simple_decorator

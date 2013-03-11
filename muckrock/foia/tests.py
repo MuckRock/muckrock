@@ -20,13 +20,11 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
 # pylint: disable=R0904
-# pylint: disable=E1103
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_agencies.json',
+                'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json']
 
     def setUp(self):
         """Set up tests"""
@@ -193,9 +191,8 @@ class TestFOIARequestUnit(TestCase):
 
 class TestFOIAFunctional(TestCase):
     """Functional tests for FOIA"""
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json',
-                'test_agencies.json']
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_profiles.json',
+                'test_foiarequests.json', 'test_foiacommunications.json', 'test_agencies.json']
 
     # views
     def test_foia_list(self):
@@ -375,9 +372,8 @@ class TestFOIAFunctional(TestCase):
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
+    fixtures = ['jurisdictions.json', 'agency_types.json', 'test_users.json', 'test_agencies.json',
+                'test_profiles.json', 'test_foiarequests.json', 'test_foiacommunications.json']
 
     def setUp(self):
         """Set up tests"""
