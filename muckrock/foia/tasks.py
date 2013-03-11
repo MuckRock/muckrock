@@ -122,6 +122,7 @@ def set_top_viewed_reqs():
     """Get the top 5 most viewed requests from Google Analytics and save them locally"""
 
     client = gdata.analytics.service.AnalyticsDataService()
+    client.ssl = True
     client.ClientLogin(GA_USERNAME, GA_PASSWORD)
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
