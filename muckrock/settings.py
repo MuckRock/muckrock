@@ -256,9 +256,6 @@ LOGGING = {
         },
     },
     'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        }
     },
     'handlers': {
         'null': {
@@ -273,14 +270,13 @@ LOGGING = {
         'sentry': {
             'level': 'ERROR',
             'class': 'raven.contrib.django.handlers.SentryHandler',
-            'filters': ['require_debug_false'],
         },
     },
     'loggers': {
         'django': {
             'handlers': ['null'],
             'propagate': True,
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.request': {
             'handlers': ['sentry'],
@@ -289,7 +285,7 @@ LOGGING = {
         },
         'muckrock': {
             'handlers': ['console', 'sentry'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.db.backends': {
             'level': 'ERROR',
