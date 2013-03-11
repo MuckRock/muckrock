@@ -3,15 +3,14 @@ URL mappings for the Q&A application
 """
 
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.list import ListView
+from django.views.generic.list_detail import object_list
 
 from qanda import views
 from qanda.models import Question
 
-# pylint: disable=E1120
-
 urlpatterns = patterns('',
-        url(r'^$',              ListView.as_view(model=Question), name='question-index'),
+        url(r'^$',              object_list, {'queryset': Question.objects.all()},
+                                name='question-index'),
         url(r'^new/$',          views.create_question, name='question-create'),
         url(r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)$',
                                 views.question_detail, name='question-detail'),
