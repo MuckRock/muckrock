@@ -287,7 +287,7 @@ LOGGING = {
         },
         'muckrock': {
             'handlers': ['console', 'sentry'],
-            'level': 'INFO',
+            'level': 'WARNING',
         },
         'django.db.backends': {
             'level': 'ERROR',
