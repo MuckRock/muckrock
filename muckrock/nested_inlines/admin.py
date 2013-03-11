@@ -31,6 +31,8 @@ class NestedModelAdmin(ModelAdmin):
         inline_admin_formsets = []
         media = []
         prefixes = prefixes or {}
+        if not hasattr(admin, 'inline_instances'):
+            admin.inline_instances = admin.get_inline_instances(request)
         for form_set, inline in zip(admin.get_formsets(request), admin.inline_instances):
             prefix = form_set.get_default_prefix()
             prefixes[prefix] = prefixes.get(prefix, 0) + 1
@@ -42,7 +44,7 @@ class NestedModelAdmin(ModelAdmin):
             fieldsets = list(inline.get_fieldsets(request))
             readonly = list(inline.get_readonly_fields(request))
             inline_admin_formset = helpers.InlineAdminFormSet(inline, formset,
-                fieldsets, readonly, model_admin=admin)
+                fieldsets, readonly_fields=readonly, model_admin=admin)
             inline_admin_formsets.append(inline_admin_formset)
             media.append(inline_admin_formset.media)
 
@@ -128,7 +130,6 @@ class NestedModelAdmin(ModelAdmin):
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
-            'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
             'level': 1,
         }
@@ -207,7 +208,6 @@ class NestedModelAdmin(ModelAdmin):
             'media': mark_safe(media),
             'inline_admin_formsets': inline_admin_formsets,
             'errors': helpers.AdminErrorList(form, formsets),
-            'root_path': self.admin_site.root_path,
             'app_label': opts.app_label,
             'level': 1,
         }
