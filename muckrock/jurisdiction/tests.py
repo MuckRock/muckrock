@@ -6,8 +6,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import nose.tools
 
-from foia.models import FOIARequest
-from jurisdiction.models import Jurisdiction
+from muckrock.foia.models import FOIARequest
+from muckrock.jurisdiction.models import Jurisdiction
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201

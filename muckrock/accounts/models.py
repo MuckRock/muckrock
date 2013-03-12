@@ -9,8 +9,8 @@ from django.db import models
 from datetime import datetime
 import stripe
 
-from foia.models import FOIARequest
-from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
+from muckrock.foia.models import FOIARequest
+from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 
 stripe.api_key = STRIPE_SECRET_KEY
 

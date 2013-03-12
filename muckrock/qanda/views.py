@@ -9,8 +9,8 @@ from django.template.defaultfilters import slugify
 
 from datetime import datetime
 
-from qanda.models import Question
-from qanda.forms import QuestionForm, AnswerForm
+from muckrock.qanda.models import Question
+from muckrock.qanda.forms import QuestionForm, AnswerForm
 
 def question_detail(request, slug, idx):
     """Question page"""

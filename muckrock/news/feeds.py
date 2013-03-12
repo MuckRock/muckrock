@@ -5,7 +5,7 @@ Feeds for the News application
 # pylint: disable=E0611
 from django.contrib.syndication.views import Feed
 
-from news.models import Article
+from muckrock.news.models import Article
 
 class LatestEntries(Feed):
     """An RSS Feed for news articles"""

@@ -18,13 +18,13 @@ import logging
 import os
 import re
 
-from agency.models import Agency
-from jurisdiction.models import Jurisdiction
+from muckrock.agency.models import Agency
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
-from settings import MAILGUN_SERVER_NAME, STATIC_URL
-from tags.models import Tag, TaggedItemBase
-from values import TextValue
-import fields
+from muckrock.settings import MAILGUN_SERVER_NAME, STATIC_URL
+from muckrock.tags.models import Tag, TaggedItemBase
+from muckrock.values import TextValue
+from muckrock import fields
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -62,12 +62,12 @@ class FOIARequestManager(ChainableManager):
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gt=datetime.today())))
+                                ~Q(embargo=True, date_embargo__gt=date.today())))
         else:
             # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gt=datetime.today())
+                       .exclude(embargo=True, date_embargo__gt=date.today())
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""

@@ -8,11 +8,11 @@ from django.views.generic.base import RedirectView
 from pingback import register_pingback
 
 # pylint: disable=W0611
-import foia.signals
+import muckrock.foia.signals
 # pylint: enable=W0611
-from foia import views
-from foia.feeds import LatestSubmittedRequests, LatestDoneRequests
-from foia.pingbacks import pingback_foia_handler
+from muckrock.foia import views
+from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests
+from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
 # pylint: disable=E1120

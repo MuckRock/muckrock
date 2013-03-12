@@ -9,9 +9,9 @@ from django.shortcuts import render_to_response, redirect
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 
-#from jurisdiction.models import Jurisdiction
-from foia.models import Jurisdiction
-from jurisdiction.forms import CSVImportForm
+#from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.foia.models import Jurisdiction
+from muckrock.jurisdiction.forms import CSVImportForm
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

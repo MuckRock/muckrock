@@ -12,8 +12,8 @@ import nose.tools
 import os
 import time
 
-from foia.models import FOIARequest
-from settings import MAILGUN_ACCESS_KEY, SITE_ROOT
+from muckrock.foia.models import FOIARequest
+from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
 # allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=R0201

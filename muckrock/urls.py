@@ -13,14 +13,14 @@ from django.contrib.sitemaps.views import sitemap
 from django.views.decorators.csrf import csrf_exempt
 
 from django_xmlrpc.views import handle_xmlrpc
-
-import accounts.urls, foia.urls, news.urls, agency.urls, jurisdiction.urls, mailgun.urls, \
-       qanda.urls
 import haystack.urls, dbsettings.urls
-import settings
-import views
-from foia.sitemap import FoiaSitemap
-from news.sitemap import ArticleSitemap
+
+import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
+       muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls
+import muckrock.settings as settings
+import muckrock.views as views
+from muckrock.foia.sitemap import FoiaSitemap
+from muckrock.news.sitemap import ArticleSitemap
 
 admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
@@ -29,14 +29,14 @@ sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
 
 urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
-    url(r'^accounts/', include(accounts.urls)),
-    url(r'^foi/', include(foia.urls)),
-    url(r'^news/', include(news.urls)),
-    url(r'^mailgun/', include(mailgun.urls)),
-    url(r'^agency/', include(agency.urls)),
-    url(r'^place/', include(jurisdiction.urls.urlpatterns)),
-    url(r'^jurisdiction/', include(jurisdiction.urls.old_urlpatterns)),
-    url(r'^questions/', include(qanda.urls)),
+    url(r'^accounts/', include(muckrock.accounts.urls)),
+    url(r'^foi/', include(muckrock.foia.urls)),
+    url(r'^news/', include(muckrock.news.urls)),
+    url(r'^mailgun/', include(muckrock.mailgun.urls)),
+    url(r'^agency/', include(muckrock.agency.urls)),
+    url(r'^place/', include(muckrock.jurisdiction.urls.urlpatterns)),
+    url(r'^jurisdiction/', include(muckrock.jurisdiction.urls.old_urlpatterns)),
+    url(r'^questions/', include(muckrock.qanda.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
     url(r'^settings/', include(dbsettings.urls)),

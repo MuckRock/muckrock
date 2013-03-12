@@ -11,9 +11,9 @@ from django.db.models import Sum
 import logging
 from datetime import date, timedelta
 
-from accounts.models import Statistics
-from agency.models import Agency
-from foia.models import FOIARequest, FOIAFile
+from muckrock.accounts.models import Statistics
+from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest, FOIAFile
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

@@ -9,8 +9,8 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 
-from jurisdiction.forms import FlagForm
-from jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.forms import FlagForm
+from muckrock.jurisdiction.models import Jurisdiction
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""

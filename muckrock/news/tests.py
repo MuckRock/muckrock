@@ -8,7 +8,7 @@ from django.test import TestCase
 import nose.tools
 from datetime import datetime
 
-from news.models import Article
+from muckrock.news.models import Article
 from muckrock.tests import get_allowed, get_404
 
 # allow methods that could be functions and too many public methods in tests

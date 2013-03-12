@@ -31,6 +31,7 @@ MANAGERS = ADMINS
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'America/New_York'
+USE_TZ = False
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -75,7 +76,6 @@ else:
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 
-
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
@@ -105,7 +105,7 @@ MIDDLEWARE_CLASSES = (
 )
 if DEBUG:
     MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-    MIDDLEWARE_CLASSES += ('settings.ExceptionLoggingMiddleware',)
+    MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
@@ -124,7 +124,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'muckrock.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -159,15 +159,15 @@ INSTALLED_APPS = (
     'dbsettings',
     'storages',
     'tinymce',
-    'accounts',
-    'foia',
-    'news',
-    'templatetags',
-    'tags',
-    'agency',
-    'jurisdiction',
-    'business_days',
-    'qanda',
+    'muckrock.accounts',
+    'muckrock.foia',
+    'muckrock.news',
+    'muckrock.templatetags',
+    'muckrock.tags',
+    'muckrock.agency',
+    'muckrock.jurisdiction',
+    'muckrock.business_days',
+    'muckrock.qanda',
 )
 
 DEBUG_TOOLBAR_CONFIG = {
@@ -215,11 +215,12 @@ CELERY_IGNORE_RESULTS = True
 CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks')
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
-AUTHENTICATION_BACKENDS = ('accounts.backends.CaseInsensitiveModelBackend',)
+AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
 
-TEST_RUNNER = 'django_nose.run_tests'
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+SOUTH_TESTS_MIGRATE = False
 
-HAYSTACK_SITECONF = 'search_sites'
+HAYSTACK_SITECONF = 'muckrock.search_sites'
 HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
 
 if HAYSTACK_SEARCH_ENGINE == 'whoosh':
@@ -285,7 +286,7 @@ LOGGING = {
         },
         'muckrock': {
             'handlers': ['console', 'sentry'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
         'django.db.backends': {
             'level': 'ERROR',

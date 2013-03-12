@@ -3,8 +3,8 @@
 from django import forms
 from django.contrib.localflavor.us.forms import USPhoneNumberField
 
-from agency.models import Agency, AgencyType
-from fields import FullEmailField
+from muckrock.agency.models import Agency, AgencyType
+from muckrock.fields import FullEmailField
 
 
 class AgencyForm(forms.ModelForm):

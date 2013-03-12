@@ -11,9 +11,9 @@ from django.shortcuts import render_to_response, redirect
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 
-from agency.models import AgencyType, Agency
-from agency.forms import CSVImportForm
-from jurisdiction.models import Jurisdiction
+from muckrock.agency.models import AgencyType, Agency
+from muckrock.agency.forms import CSVImportForm
+from muckrock.jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

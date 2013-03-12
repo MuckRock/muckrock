@@ -1,7 +1,7 @@
 from django.utils.datastructures import SortedDict
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from formwizard.storage import get_storage
+from muckrock.formwizard.storage import get_storage
 from django import forms
 
 class FormWizard(object):
@@ -383,14 +383,14 @@ class SessionFormWizard(FormWizard):
     A FormWizard with pre-configured SessionStorageBackend.
     """
     def __init__(self, *args, **kwargs):
-        super(SessionFormWizard, self).__init__('formwizard.storage.session.SessionStorage', *args, **kwargs)
+        super(SessionFormWizard, self).__init__('muckrock.formwizard.storage.session.SessionStorage', *args, **kwargs)
 
 class CookieFormWizard(FormWizard):
     """
     A FormWizard with pre-configured CookieStorageBackend.
     """
     def __init__(self, *args, **kwargs):
-        super(CookieFormWizard, self).__init__('formwizard.storage.cookie.CookieStorage', *args, **kwargs)
+        super(CookieFormWizard, self).__init__('muckrock.formwizard.storage.cookie.CookieStorage', *args, **kwargs)
 
 class DynamicFormWizard(FormWizard):
     """
@@ -462,4 +462,4 @@ class DynamicSessionFormWizard(DynamicFormWizard):
     A DynamicFormWizard with pre-configured SessionStorageBackend.
     """
     def __init__(self, *args, **kwargs):
-        super(DynamicSessionFormWizard, self).__init__('formwizard.storage.session.DynamicSessionStorage', *args, **kwargs)
+        super(DynamicSessionFormWizard, self).__init__('muckrock.formwizard.storage.session.DynamicSessionStorage', *args, **kwargs)

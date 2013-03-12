@@ -7,8 +7,8 @@ from django.db import models
 
 from taggit.managers import TaggableManager
 
-from foia.models import FOIARequest
-from tags.models import TaggedItemBase
+from muckrock.foia.models import FOIARequest
+from muckrock.tags.models import TaggedItemBase
 
 class Question(models.Model):
     """A question to which the community can respond"""

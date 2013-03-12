@@ -1,4 +1,4 @@
-from formwizard.storage.base import BaseStorage
+from muckrock.formwizard.storage.base import BaseStorage
 
 class SessionStorage(BaseStorage):
     step_session_key = 'step'

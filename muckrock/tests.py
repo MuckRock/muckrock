@@ -5,12 +5,15 @@ Tests for site level functionality and helper functions for application tests
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
+import logging
 import nose.tools
 
 # allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=R0201
 # pylint: disable=R0904
 # pylint: disable=W0142
+
+logging.disable(logging.CRITICAL)
 
 kwargs = {"wsgi.url_scheme": "https"}
 

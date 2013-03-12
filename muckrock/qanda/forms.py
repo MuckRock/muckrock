@@ -4,7 +4,7 @@ Forms for Q&A application
 
 from django import forms
 
-from qanda.models import Question, Answer
+from muckrock.qanda.models import Question, Answer
 
 class QuestionForm(forms.ModelForm):
     """A form for a Question"""

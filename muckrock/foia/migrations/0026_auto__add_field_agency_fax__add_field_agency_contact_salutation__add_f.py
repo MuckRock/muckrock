@@ -24,7 +24,7 @@ class Migration(SchemaMigration):
         db.add_column('foia_agency', 'url', self.gf('django.db.models.fields.URLField')(default='', max_length=200, blank=True), keep_default=False)
 
         # Adding field 'Agency.other_emails'
-        db.add_column('foia_agency', 'other_emails', self.gf('fields.EmailsListField')(default='', max_length=255, blank=True), keep_default=False)
+        db.add_column('foia_agency', 'other_emails', self.gf('muckrock.fields.EmailsListField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'Agency.expires'
         db.add_column('foia_agency', 'expires', self.gf('django.db.models.fields.DateField')(null=True, blank=True), keep_default=False)
@@ -130,7 +130,7 @@ class Migration(SchemaMigration):
             'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'agencies'", 'to': "orm['foia.Jurisdiction']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
             'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'other_emails': ('fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
+            'other_emails': ('muckrock.fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
             'phone': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
             'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['foia.AgencyType']", 'symmetrical': 'False', 'blank': 'True'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),

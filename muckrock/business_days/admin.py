@@ -4,6 +4,6 @@ Admin registration for business day models
 
 from django.contrib import admin
 
-from business_days.models import Holiday
+from muckrock.business_days.models import Holiday
 
 admin.site.register(Holiday)

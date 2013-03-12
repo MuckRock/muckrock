@@ -12,9 +12,9 @@ import datetime
 import re
 from operator import attrgetter
 
-from foia.models import FOIARequest, FOIACommunication
-from agency.models import Agency
-from jurisdiction.models import Jurisdiction
+from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.agency.models import Agency
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -387,7 +387,7 @@ class TestFOIAIntegration(TestCase):
 
         mail.outbox = []
 
-        import foia.models
+        import muckrock.foia.models
 
         # Replace real date and time with mock ones so we can control today's/now's value
         # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
@@ -402,8 +402,8 @@ class TestFOIAIntegration(TestCase):
         self.orig_datetime = datetime.datetime
         datetime.date = MockDate
         datetime.datetime = MockDateTime
-        foia.models.date = datetime.date
-        foia.models.datetime = datetime.datetime
+        muckrock.foia.models.date = datetime.date
+        muckrock.foia.models.datetime = datetime.datetime
         def save(self, *args, **kwargs):
             if self.date_followup:
                 self.date_followup = MockDateTime(self.date_followup.year,
@@ -414,22 +414,22 @@ class TestFOIAIntegration(TestCase):
                                               self.date_done.month,
                                               self.date_done.day)
             super(FOIARequest, self).save(*args, **kwargs)
-        self.FOIARequest_save = foia.models.FOIARequest.save
-        foia.models.FOIARequest.save = save
+        self.FOIARequest_save = muckrock.foia.models.FOIARequest.save
+        muckrock.foia.models.FOIARequest.save = save
         self.set_today(datetime.date(2010, 1, 1))
 
     def tearDown(self):
         """Tear down tests"""
         # pylint: disable=C0103
 
-        import foia.models
+        import muckrock.foia.models
 
         # restore the original date and datetime for other tests
         datetime.date = self.orig_date
         datetime.datetime = self.orig_datetime
-        foia.models.date = datetime.date
-        foia.models.datetime = datetime.datetime
-        foia.models.FOIARequest.save = self.FOIARequest_save
+        muckrock.foia.models.date = datetime.date
+        muckrock.foia.models.datetime = datetime.datetime
+        muckrock.foia.models.FOIARequest.save = self.FOIARequest_save
 
     def set_today(self, date):
         """Set what datetime thinks today is"""

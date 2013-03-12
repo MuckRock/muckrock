@@ -17,9 +17,9 @@ import time
 from datetime import datetime
 from email.utils import parseaddr, getaddresses
 
-from foia.models import FOIARequest, FOIACommunication, FOIAFile
-from foia.tasks import upload_document_cloud
-from settings import MAILGUN_ACCESS_KEY
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+from muckrock.foia.tasks import upload_document_cloud
+from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

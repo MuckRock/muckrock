@@ -4,7 +4,7 @@ Admin registration for Q&A models
 
 from django.contrib import admin
 
-from qanda.models import Question, Answer
+from muckrock.qanda.models import Question, Answer
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

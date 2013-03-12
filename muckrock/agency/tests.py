@@ -6,8 +6,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 import nose.tools
 
-from agency.models import Agency
-from foia.models import FOIARequest
+from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # allow methods that could be functions and too many public methods in tests

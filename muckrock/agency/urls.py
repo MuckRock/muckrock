@@ -4,7 +4,7 @@ URL mappings for the Agency application
 
 from django.conf.urls.defaults import patterns, url
 
-from agency import views
+from muckrock.agency import views
 from muckrock.views import jurisdiction
 
 agency_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'

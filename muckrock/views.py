@@ -8,9 +8,9 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
 
-from foia.models import FOIARequest, FOIAFile
-from jurisdiction.models import Jurisdiction
-from news.models import Article
+from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.news.models import Article
 
 def front_page(request):
     """Get all the details needed for the front page"""

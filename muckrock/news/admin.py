@@ -4,7 +4,7 @@ Admin registration for news models
 
 from django.contrib import admin
 
-from news.models import Article, Photo
+from muckrock.news.models import Article, Photo
 
 class ArticleAdmin(admin.ModelAdmin):
     """Model Admin for a news article"""

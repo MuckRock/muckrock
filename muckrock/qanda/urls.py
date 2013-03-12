@@ -5,8 +5,8 @@ URL mappings for the Q&A application
 from django.conf.urls.defaults import patterns, url
 from django.views.generic.list import ListView
 
-from qanda import views
-from qanda.models import Question
+from muckrock.qanda import views
+from muckrock.qanda.models import Question
 
 # pylint: disable=E1120
 

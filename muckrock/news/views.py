@@ -5,7 +5,7 @@ Views for the news application
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
-from news.models import Article
+from muckrock.news.models import Article
 
 # pylint: disable=R0901
 

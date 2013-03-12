@@ -10,8 +10,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
 from tinymce.models import HTMLField
 
-from foia.models import FOIARequest
-from tags.models import TaggedItemBase
+from muckrock.foia.models import FOIARequest
+from muckrock.tags.models import TaggedItemBase
 
 class ArticleManager(models.Manager):
     """Object manager for news articles"""

@@ -14,13 +14,13 @@ import inspect
 import sys
 from datetime import datetime, date, timedelta
 
-from agency.models import Agency, AgencyType
-from foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
-from foia.utils import make_template_choices
-from foia.validate import validate_date_order
-from formwizard.forms import DynamicSessionFormWizard
-from jurisdiction.models import Jurisdiction
-from fields import GroupedModelChoiceField
+from muckrock.agency.models import Agency, AgencyType
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
+from muckrock.foia.utils import make_template_choices
+from muckrock.foia.validate import validate_date_order
+from muckrock.formwizard.forms import DynamicSessionFormWizard
+from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.fields import GroupedModelChoiceField
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
