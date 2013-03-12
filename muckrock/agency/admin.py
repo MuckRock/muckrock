@@ -101,4 +101,4 @@ class AgencyCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Agency
         delimiter = ','
-        update = {'keys': ['name', 'jurisdiction']}
+        update = {'keys': ['slug', 'jurisdiction']}
