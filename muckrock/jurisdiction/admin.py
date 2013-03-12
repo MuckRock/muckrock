@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
+from django_tablib.admin import TablibAdmin
 
 #from jurisdiction.models import Jurisdiction
 from foia.models import Jurisdiction
@@ -16,7 +17,7 @@ from jurisdiction.forms import CSVImportForm
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class JurisdictionAdmin(admin.ModelAdmin):
+class JurisdictionAdmin(TablibAdmin):
     """Jurisdiction admin options"""
     list_display = ('name', 'level')
     list_filter = ['level']
@@ -32,6 +33,7 @@ class JurisdictionAdmin(admin.ModelAdmin):
             'fields': ('days', 'observe_sat', 'holidays', 'intro', 'waiver')
         }),
     )
+    formats = ['xls', 'csv']
 
     def get_urls(self):
         """Add custom URLs here"""
