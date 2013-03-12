@@ -347,7 +347,7 @@ def autoimport():
 @periodic_task(run_every=crontab(hour=3, minute=0), name='foia.tasks.notify_unanswered')
 def notify_unanswered():
     """Notify admins of highly overdue requests"""
-    foias = FOIARequest.objects.get_overdue()
+    foias = FOIARequest.objects.get_overdue().order_by('date_submitted')
     data = []
 
     for foia in foias:
@@ -360,7 +360,6 @@ def notify_unanswered():
         if days_since_response > 60:
             data.append((days_since_response, foia))
 
-    data.sort(reverse=True)
     total = len(data)
 
     send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
