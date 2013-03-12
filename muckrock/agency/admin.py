@@ -10,6 +10,7 @@ from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
 from adaptor.fields import BooleanField, CharField, DjangoModelField
+from django_tablib.admin import TablibAdmin
 import logging
 import sys
 
@@ -37,13 +38,14 @@ class AgencyAdminForm(forms.ModelForm):
         model = Agency
 
 
-class AgencyAdmin(admin.ModelAdmin):
+class AgencyAdmin(TablibAdmin):
     """Agency admin options"""
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
     search_fields = ['name']
     form = AgencyAdminForm
+    formats = ['xls', 'csv']
 
     def get_urls(self):
         """Add custom URLs here"""

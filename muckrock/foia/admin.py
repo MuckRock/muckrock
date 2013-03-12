@@ -12,6 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import simple
 
 from datetime import date, timedelta
+from django_tablib.admin import TablibAdmin
 
 from agency.models import Agency
 from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
@@ -89,7 +90,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         model = FOIARequest
 
 
-class FOIARequestAdmin(NestedModelAdmin):
+class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
     """FOIA Request admin options"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
@@ -99,6 +100,7 @@ class FOIARequestAdmin(NestedModelAdmin):
     inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
+    formats = ['xls', 'csv', 'html']
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""

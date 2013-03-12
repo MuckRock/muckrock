@@ -169,6 +169,7 @@ INSTALLED_APPS = (
     'storages',
     'staticfiles',
     'tinymce',
+    'django_tablib',
     'accounts',
     'foia',
     'news',
