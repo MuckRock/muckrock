@@ -7,7 +7,7 @@ from django.test import TestCase
 import nose.tools
 from mock import Mock
 
-from templatetags import tags
+from muckrock.templatetags.templatetags import tags
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201

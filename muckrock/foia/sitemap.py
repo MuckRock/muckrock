@@ -4,7 +4,7 @@ Sitemap for FOIA application
 
 from django.contrib.sitemaps import Sitemap
 
-from foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest
 
 class FoiaSitemap(Sitemap):
     """Sitemap for FOIA Requests"""

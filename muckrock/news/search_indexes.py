@@ -5,7 +5,7 @@ Search Index for the news application
 from haystack.indexes import SearchIndex, CharField, DateTimeField
 from haystack import site
 
-from news.models import Article
+from muckrock.news.models import Article
 
 class ArticleIndex(SearchIndex):
     """Search index for news articles"""

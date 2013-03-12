@@ -7,9 +7,9 @@ from django.db import models
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
-from jurisdiction.models import Jurisdiction, RequestHelper
+from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.models import ChainableManager
-import fields
+from  muckrock import fields
 
 class AgencyType(models.Model):
     """Marks an agency as fufilling requests of this type for its jurisdiction"""

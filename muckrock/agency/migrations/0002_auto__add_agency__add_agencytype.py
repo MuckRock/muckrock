@@ -44,7 +44,7 @@ class Migration(SchemaMigration):
             'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'agencies'", 'to': "orm['foia.Jurisdiction']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'other_emails': ('fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
+            'other_emails': ('muckrock.fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
             'phone': ('django.db.models.fields.CharField', [], {'max_length': '20', 'blank': 'True'}),
             'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['agency.AgencyType']", 'symmetrical': 'False', 'blank': 'True'}),
             'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),

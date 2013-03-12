@@ -6,23 +6,23 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib.auth.decorators import login_required
 import django.contrib.auth.views as auth_views
 
-import accounts.views
+import muckrock.accounts.views as views
 
 urlpatterns = patterns('',
     url(r'^login/$',             auth_views.login, name='acct-login'),
     url(r'^logout/$',            auth_views.logout, name='acct-logout'),
-    url(r'^profile/$',           login_required(accounts.views.profile), name='acct-my-profile'),
+    url(r'^profile/$',           login_required(views.profile), name='acct-my-profile'),
     url(r'^profile/(?P<user_name>[\w\d_.@ ]+)/$',
-                                 accounts.views.profile, name='acct-profile'),
-    url(r'^register/$',          accounts.views.register, name='acct-register'),
-    url(r'^register/free/$',     accounts.views.register_free, name='acct-register-free'),
-    url(r'^register/pro/$',      accounts.views.register_pro, name='acct-register-pro'),
-    url(r'^update/$',            accounts.views.update, name='acct-update'),
-    url(r'^update_cc/$',         accounts.views.update_cc, name='acct-update-cc'),
-    url(r'^manage_subsc/$',      accounts.views.manage_subsc, name='acct-manage-subsc'),
-    url(r'^buy_requests/$',      accounts.views.buy_requests, name='acct-buy-requests'),
-    url(r'^stripe_webhook/$',    accounts.views.stripe_webhook, name='acct-webhook'),
-    url(r'^stripe_webhook_v2/$', accounts.views.stripe_webhook_v2, name='acct-webhook-v2'),
+                                 views.profile, name='acct-profile'),
+    url(r'^register/$',          views.register, name='acct-register'),
+    url(r'^register/free/$',     views.register_free, name='acct-register-free'),
+    url(r'^register/pro/$',      views.register_pro, name='acct-register-pro'),
+    url(r'^update/$',            views.update, name='acct-update'),
+    url(r'^update_cc/$',         views.update_cc, name='acct-update-cc'),
+    url(r'^manage_subsc/$',      views.manage_subsc, name='acct-manage-subsc'),
+    url(r'^buy_requests/$',      views.buy_requests, name='acct-buy-requests'),
+    url(r'^stripe_webhook/$',    views.stripe_webhook, name='acct-webhook'),
+    url(r'^stripe_webhook_v2/$', views.stripe_webhook_v2, name='acct-webhook-v2'),
     url(r'^change_pw/$',         auth_views.password_change, name='acct-change-pw'),
     url(r'^change_pw_done/$',    auth_views.password_change_done, name='acct-change-pw-done'),
     url(r'^reset_pw/$',          auth_views.password_reset, name='acct-reset-pw'),

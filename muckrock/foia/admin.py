@@ -13,10 +13,10 @@ from django.template import RequestContext
 
 from datetime import date, timedelta
 
-from agency.models import Agency
-from foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
-from foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
-from nested_inlines.admin import NestedModelAdmin, NestedTabularInline
+from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
+from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
+from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

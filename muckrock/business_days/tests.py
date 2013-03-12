@@ -7,8 +7,8 @@ from django.test import TestCase
 import nose.tools
 from datetime import date
 
-from business_days.models import Holiday
-from jurisdiction.models import Jurisdiction
+from muckrock.business_days.models import Holiday
+from muckrock.jurisdiction.models import Jurisdiction
 
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=C0103

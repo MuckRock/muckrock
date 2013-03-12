@@ -2,8 +2,8 @@
 
 from django.db.models.signals import pre_save
 
-from foia.models import FOIARequest
-from foia.tasks import upload_document_cloud
+from muckrock.foia.models import FOIARequest
+from muckrock.foia.tasks import upload_document_cloud
 
 def foia_update_embargo(sender, **kwargs):
     """When embargo has possibly been switched, update the document cloud permissions"""

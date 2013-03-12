@@ -6,7 +6,7 @@ from django.contrib import admin
 
 from taggit.models import Tag as TaggitTag
 
-from tags.models import Tag
+from muckrock.tags.models import Tag
 
 class TagAdmin(admin.ModelAdmin):
     """Model Admin for a tag"""

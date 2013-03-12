@@ -1,7 +1,7 @@
 """Register pingback for FOIA Requests"""
 
-from foia.models import FOIARequest
-from jurisdiction.models import Jurisdiction
+from muckrock.foia.models import FOIARequest
+from muckrock.jurisdiction.models import Jurisdiction
 
 def pingback_foia_handler(**kwargs):
     """Get the FOIA request for the pingback"""

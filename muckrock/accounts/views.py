@@ -20,11 +20,11 @@ import logging
 import stripe
 import sys
 
-from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
+from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
                            PaymentForm, UpgradeSubscForm, CancelSubscForm
-from accounts.models import Profile
-from foia.models import FOIARequest
-from settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.accounts.models import Profile
+from muckrock.foia.models import FOIARequest
+from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

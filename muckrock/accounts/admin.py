@@ -10,7 +10,7 @@ from django.http import HttpResponse
 
 import csv
 
-from accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Statistics
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904

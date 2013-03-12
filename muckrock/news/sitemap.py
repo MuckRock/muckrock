@@ -4,7 +4,7 @@ Sitemap for News application
 
 from django.contrib.sitemaps import Sitemap
 
-from news.models import Article
+from muckrock.news.models import Article
 
 class ArticleSitemap(Sitemap):
     """Sitemap for Articles"""

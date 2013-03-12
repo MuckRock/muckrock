@@ -5,7 +5,7 @@ Search Index for the FOIA application
 from haystack.indexes import SearchIndex, CharField
 from haystack import site
 
-from foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest
 
 class FOIARequestIndex(SearchIndex):
     """Search index for FOIA requests"""

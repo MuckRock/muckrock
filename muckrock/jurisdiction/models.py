@@ -6,8 +6,8 @@ from django.db.models import Sum
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
-from business_days.models import Holiday, HolidayCalendar
-from tags.models import Tag
+from muckrock.business_days.models import Holiday, HolidayCalendar
+from muckrock.tags.models import Tag
 
 class RequestHelper(object):
     """Helper methods for classes that have a foiarequest_set"""

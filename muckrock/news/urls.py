@@ -6,9 +6,9 @@ from django.conf.urls.defaults import patterns, url
 from django.views.generic.base import RedirectView
 from django.views.generic.dates import DayArchiveView, MonthArchiveView
 
-from news import views
-from news.models import Article
-from news.feeds import LatestEntries
+from muckrock.news import views
+from muckrock.news.models import Article
+from muckrock.news.feeds import LatestEntries
 
 # pylint: disable=E1120
 # pylint: disable=W0142

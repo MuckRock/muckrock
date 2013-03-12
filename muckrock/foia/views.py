@@ -24,17 +24,17 @@ import logging
 import stripe
 import sys
 
-from agency.models import Agency
-from accounts.forms import PaymentForm
-from foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
+from muckrock.agency.models import Agency
+from muckrock.accounts.forms import PaymentForm
+from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIAFixForm, \
                        FOIAFlagForm, FOIANoteForm, FOIAEmbargoForm, FOIAEmbargoDateForm, \
                        FOIAAppealForm, FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, \
                        FOIAWhatFederalForm, FOIAWizard, FOIAFileFormSet, FOIAMultipleSubmitForm, \
                        AgencyConfirmForm, TEMPLATES
-from foia.models import FOIARequest, FOIACommunication, FOIAFile
-from jurisdiction.models import Jurisdiction
-from tags.models import Tag
-from settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.tags.models import Tag
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.views import class_view_decorator
 
 # pylint: disable=R0901

@@ -8,7 +8,7 @@ from django.template.defaultfilters import stringfilter
 
 import re
 
-from settings import STATIC_URL
+from muckrock.settings import STATIC_URL
 
 register = Library()
 

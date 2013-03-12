@@ -5,7 +5,7 @@ Feeds for the FOIA application
 # pylint: disable=E0611
 from django.contrib.syndication.views import Feed
 
-from foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest
 
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""

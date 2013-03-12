@@ -15,11 +15,11 @@ import os
 from datetime import datetime, timedelta
 from mock import Mock, patch
 
-from accounts.models import Profile
-from accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
+from muckrock.accounts.models import Profile
+from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
                            PaymentForm, UpgradeSubscForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
-from settings import MONTHLY_REQUESTS, SITE_ROOT
+from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=C0103
@@ -520,7 +520,7 @@ class TestAccountFunctional(TestCase):
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
 
-        webhook_json = open(os.path.join('accounts/fixtures/'
+        webhook_json = open(os.path.join(SITE_ROOT, 'accounts/fixtures/'
                             'webhook_subscription_final_payment_attempt_failed.json')).read()
         response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
         nose.tools.eq_(response.status_code, 200)

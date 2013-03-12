@@ -7,7 +7,7 @@ from django.core import management
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
+from muckrock.settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
                      GA_USERNAME, GA_PASSWORD, GA_ID, \
                      AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_AUTOIMPORT_BUCKET_NAME
 
@@ -23,10 +23,10 @@ import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from vendor import MultipartPostHandler
+from muckrock.vendor import MultipartPostHandler
 
-from foia.models import FOIAFile, FOIARequest, FOIACommunication
-from foia.codes import CODES
+from muckrock.foia.models import FOIAFile, FOIARequest, FOIACommunication
+from muckrock.foia.codes import CODES
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 
