@@ -10,10 +10,14 @@ from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
 from adaptor.fields import BooleanField, CharField, DjangoModelField
+import logging
+import sys
 
 from agency.models import AgencyType, Agency
 from agency.forms import CSVImportForm
 from jurisdiction.models import Jurisdiction
+
+logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
@@ -51,13 +55,18 @@ class AgencyAdmin(admin.ModelAdmin):
     def csv_import(self, request):
         """Import a CSV file of agencies"""
         # pylint: disable=R0201
+        # pylint: disable=W0703
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
-                agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
-                                                      extra_fields=['True'])
-                messages.success(request, 'CSV imported')
+                try:
+                    agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
+                                                          extra_fields=['True'])
+                    messages.success(request, 'CSV imported')
+                except Exception as exc:
+                    messages.error(request, 'ERROR: %s' % str(exc))
+                    logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
                 if form.cleaned_data['type_']:
                     for agency in agencies:
                         agency.object.types.add(form.cleaned_data['type_'])
