@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
-from adaptor.fields import CharField, DjangoModelField
+from adaptor.fields import BooleanField, CharField, DjangoModelField
 
 from agency.models import AgencyType, Agency
 from agency.forms import CSVImportForm
@@ -55,7 +55,8 @@ class AgencyAdmin(admin.ModelAdmin):
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
-                agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'])
+                agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
+                                                      extra_fields=['True'])
                 messages.success(request, 'CSV imported')
                 if form.cleaned_data['type_']:
                     for agency in agencies:
@@ -96,6 +97,7 @@ class AgencyCsvModel(CsvModel):
     url = CharField()
     phone = CharField()
     fax = CharField()
+    approved = BooleanField()
 
     class Meta:
         # pylint: disable=R0903
