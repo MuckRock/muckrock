@@ -150,11 +150,31 @@ class Statistics(models.Model):
     total_requests = models.IntegerField()
     total_requests_success = models.IntegerField()
     total_requests_denied = models.IntegerField()
+    total_requests_draft = models.IntegerField(null=True)
+    total_requests_submitted = models.IntegerField(null=True)
+    total_requests_awaiting_response = models.IntegerField(null=True)
+    total_requests_awaiting_appeal = models.IntegerField(null=True)
+    total_requests_fix_required = models.IntegerField(null=True)
+    total_requests_payment_required = models.IntegerField(null=True)
+    total_requests_no_docs = models.IntegerField(null=True)
+    total_requests_partial = models.IntegerField(null=True)
+    total_requests_abandoned = models.IntegerField(null=True)
+
     total_pages = models.IntegerField()
     total_users = models.IntegerField()
     users_today = models.ManyToManyField(User)
     total_agencies = models.IntegerField()
     total_fees = models.IntegerField()
+
+    pro_users = models.IntegerField(null=True)
+    pro_user_names = models.TextField(blank=True)
+
+    total_page_views = models.IntegerField(null=True)
+
+    daily_requests_pro = models.IntegerField(null=True)
+    daily_requests_community = models.IntegerField(null=True)
+    daily_requests_beta = models.IntegerField(null=True)
+    daily_articles = models.IntegerField(null=True)
 
     class Meta:
         # pylint: disable=R0903

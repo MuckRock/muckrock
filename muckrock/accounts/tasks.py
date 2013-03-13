@@ -8,12 +8,15 @@ from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
+import gdata.analytics.service
 import logging
 from datetime import date, timedelta
 
-from muckrock.accounts.models import Statistics
+from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.news.models import Article
+from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +26,41 @@ def store_statstics():
 
     yesterday = date.today() - timedelta(1)
 
+    client = gdata.analytics.service.AnalyticsDataService()
+    client.ssl = True
+    client.ClientLogin(GA_USERNAME, GA_PASSWORD)
+    data = client.GetData(ids=GA_ID,  metrics='ga:pageviews', start_date=yesterday.isoformat(),
+                          end_date=yesterday.isoformat())
+    total_page_views = data.entry[0].pageviews.value
+
     stats = Statistics.objects.create(
         date=yesterday,
         total_requests=FOIARequest.objects.count(),
         total_requests_success=FOIARequest.objects.filter(status='done').count(),
         total_requests_denied=FOIARequest.objects.filter(status='rejected').count(),
+        total_requests_draft=FOIARequest.objects.filter(status='started').count(),
+        total_requests_submitted=FOIARequest.objects.filter(status='submitted').count(),
+        total_requests_awaiting_response=FOIARequest.objects.filter(status='processed').count(),
+        total_requests_awaiting_appeal=FOIARequest.objects.filter(status='appealing').count(),
+        total_requests_fix_required=FOIARequest.objects.filter(status='fix').count(),
+        total_requests_payment_required=FOIARequest.objects.filter(status='payment').count(),
+        total_requests_no_docs=FOIARequest.objects.filter(status='no_docs').count(),
+        total_requests_partial=FOIARequest.objects.filter(status='partial').count(),
+        total_requests_abandoned=FOIARequest.objects.filter(status='abandoned').count(),
         total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),
         total_fees=FOIARequest.objects.aggregate(Sum('price'))['price__sum'],
+        pro_users=Profile.objects.filter(acct_type='pro').count(),
+        pro_user_names=';'.join(p.user.username for p in Profile.objects.filter(acct_type='pro')),
+        total_page_views=total_page_views,
+        daily_requests_pro=FOIARequest.objects.filter(user__profile__acct_type='pro',
+                                                      date_submitted=yesterday).count(),
+        daily_requests_community=FOIARequest.objects.filter(user__profile__acct_type='community',
+                                                      date_submitted=yesterday).count(),
+        daily_requests_beta=FOIARequest.objects.filter(user__profile__acct_type='beta',
+                                                      date_submitted=yesterday).count(),
+        daily_articles=Article.objects.filter(pub_date=yesterday).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
