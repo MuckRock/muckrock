@@ -8,10 +8,11 @@ from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404
+from django.views.generic import simple
 
 from datetime import date, timedelta
+from django_tablib.admin import TablibAdmin
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
@@ -89,8 +90,9 @@ class FOIARequestAdminForm(forms.ModelForm):
         model = FOIARequest
 
 
-class FOIARequestAdmin(NestedModelAdmin):
+class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
     """FOIA Request admin options"""
+    change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
@@ -99,6 +101,7 @@ class FOIARequestAdmin(NestedModelAdmin):
     inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
+    formats = ['xls', 'csv', 'html']
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
@@ -176,9 +179,8 @@ class FOIARequestAdmin(NestedModelAdmin):
         # pylint: disable=R0201
         foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
                                         y.communications.latest('date').date))
-        return render_to_response('foia/admin_process.html',
-                                  {'object_list': foias, 'action': action},
-                                  context_instance=RequestContext(request))
+        return simple.direct_to_template(request, template='foia/admin_process.html',
+                                         extra_context={'object_list': foias, 'action': action})
 
     def process(self, request):
         """List all the requests that need to be processed"""

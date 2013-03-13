@@ -9,11 +9,16 @@ from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
-from adaptor.fields import CharField, DjangoModelField
+from adaptor.fields import BooleanField, CharField, DjangoModelField
+from django_tablib.admin import TablibAdmin
+import logging
+import sys
 
 from muckrock.agency.models import AgencyType, Agency
 from muckrock.agency.forms import CSVImportForm
 from muckrock.jurisdiction.models import Jurisdiction
+
+logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
@@ -33,13 +38,15 @@ class AgencyAdminForm(forms.ModelForm):
         model = Agency
 
 
-class AgencyAdmin(admin.ModelAdmin):
+class AgencyAdmin(TablibAdmin):
     """Agency admin options"""
+    change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
     search_fields = ['name']
     form = AgencyAdminForm
+    formats = ['xls', 'csv']
 
     def get_urls(self):
         """Add custom URLs here"""
@@ -51,12 +58,18 @@ class AgencyAdmin(admin.ModelAdmin):
     def csv_import(self, request):
         """Import a CSV file of agencies"""
         # pylint: disable=R0201
+        # pylint: disable=W0703
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
-                agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'])
-                messages.success(request, 'CSV imported')
+                try:
+                    agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
+                                                          extra_fields=['True'])
+                    messages.success(request, 'CSV imported')
+                except Exception as exc:
+                    messages.error(request, 'ERROR: %s' % str(exc))
+                    logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
                 if form.cleaned_data['type_']:
                     for agency in agencies:
                         agency.object.types.add(form.cleaned_data['type_'])
@@ -64,8 +77,8 @@ class AgencyAdmin(admin.ModelAdmin):
         else:
             form = CSVImportForm()
 
-        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email',
-                  'contact first name', 'contact last name', 'url', 'phone', 'fax']
+        fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email', 'other_emails',
+                  'contact first name', 'contact last name', 'contact_title', 'url', 'phone', 'fax']
         return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields})
 
 
@@ -89,15 +102,17 @@ class AgencyCsvModel(CsvModel):
     jurisdiction = DjangoModelField(Jurisdiction, prepare=get_jurisdiction)
     address = CharField()
     email = CharField()
+    other_emails = CharField()
     contact_first_name = CharField()
     contact_last_name = CharField()
     contact_title = CharField()
     url = CharField()
     phone = CharField()
     fax = CharField()
+    approved = BooleanField()
 
     class Meta:
         # pylint: disable=R0903
         dbModel = Agency
         delimiter = ','
-        update = {'keys': ['name', 'jurisdiction']}
+        update = {'keys': ['slug', 'jurisdiction']}

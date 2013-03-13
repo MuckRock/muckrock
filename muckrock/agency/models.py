@@ -58,8 +58,8 @@ class Agency(models.Model, RequestHelper):
     contact_title = models.CharField(blank=True, max_length=255)
     url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
     expires = models.DateField(blank=True, null=True)
-    phone = models.CharField(blank=True, max_length=20)
-    fax = models.CharField(blank=True, max_length=20)
+    phone = models.CharField(blank=True, max_length=30)
+    fax = models.CharField(blank=True, max_length=30)
     notes = models.TextField(blank=True)
 
     objects = AgencyManager()

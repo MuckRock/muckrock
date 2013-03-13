@@ -25,7 +25,6 @@ from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 # pylint: disable=C0103
 # pylint: disable=R0201
 # pylint: disable=R0904
-# pylint: disable=E1103
 
 mock_customer = Mock()
 mock_customer.id = 'cus_2jPQblsYu5doOE'

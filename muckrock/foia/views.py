@@ -14,7 +14,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from django.template import RequestContext
-from django.views.generic.list import ListView
+from django.views.generic import list_detail
 
 from collections import namedtuple
 from datetime import datetime
@@ -509,103 +509,89 @@ def follow(request, jurisdiction, jidx, slug, idx):
 
     return redirect(foia)
 
+def _sort_requests(get, foia_requests, update_top=False):
+    """Sort's the FOIA requests"""
+    order = get.get('order', 'desc')
+    field = get.get('field', 'date_submitted')
 
-class ListBase(ListView):
-    """Base list view for other list views to inherit from"""
+    if order not in ['asc', 'desc']:
+        order = 'desc'
+    if field not in ['title', 'status', 'user', 'jurisdiction', 'date']:
+        field = 'date_submitted'
 
-    def sort_requests(self, foia_requests, update_top=False):
-        """Sort's the FOIA requests"""
+    if field == 'date':
+        field = 'date_submitted'
+    if field == 'jurisdiction':
+        field += '__name'
 
-        get = self.request.GET
+    ob_field = '-' + field if order == 'desc' else field
 
-        order = get.get('order', 'desc')
-        field = get.get('field', 'date_submitted')
+    if update_top:
+        return foia_requests.order_by('-updated', ob_field)
+    else:
+        return foia_requests.order_by(ob_field)
 
-        if order not in ['asc', 'desc']:
-            order = 'desc'
-        if field not in ['title', 'status', 'user', 'jurisdiction', 'date']:
-            field = 'date_submitted'
+def _list(request, requests, extra_context=None, kwargs=None):
+    """Helper function for creating list views"""
+    # pylint: disable=W0142
 
-        if field == 'date':
-            field = 'date_submitted'
-        if field == 'jurisdiction':
-            field += '__name'
+    if not extra_context:
+        extra_context = {}
+    if not kwargs:
+        kwargs = {}
+    extra_context['title'] = 'FOI Requests'
 
-        ob_field = '-' + field if order == 'desc' else field
+    try:
+        per_page = min(int(request.GET.get('per_page', 10)), 100)
+    except ValueError:
+        per_page = 10
+    return list_detail.object_list(request, requests, paginate_by=per_page,
+                                   extra_context=extra_context, **kwargs)
 
-        if update_top:
-            return foia_requests.order_by('-updated', ob_field)
-        else:
-            return foia_requests.order_by(ob_field)
+def list_(request):
+    """List all viewable FOIA requests"""
 
-    def get_paginate_by(self, queryset):
-        try:
-            return min(int(self.request.GET.get('per_page', 10)), 100)
-        except ValueError:
-            return 10
+    foia_requests = _sort_requests(request.GET, FOIARequest.objects.get_viewable(request.user))
+    return _list(request, foia_requests)
 
-    def get_context_data(self, **kwargs):
-        context = super(ListBase, self).get_context_data(**kwargs)
-        context['title'] = 'FOI Requests'
-        return context
-
-
-class List(ListBase):
-    """List all viewable FOIA Requests"""
-
-    def get_queryset(self):
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user))
-
-
-class ListByUser(ListBase):
+def list_by_user(request, user_name):
     """List of all FOIA requests by a given user"""
 
-    def get_queryset(self):
-        user = get_object_or_404(User, username=self.kwargs['user_name'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(user=user))
+    user = get_object_or_404(User, username=user_name)
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user).filter(user=user))
 
-    def get_context_data(self, **kwargs):
-        context = super(ListByUser, self).get_context_data(**kwargs)
-        context['subtitle'] = 'by %s' % self.kwargs['user_name']
-        return context
+    return _list(request, foia_requests, extra_context={'subtitle': 'by %s' % user_name})
 
+def list_by_tag(request, tag_slug):
+    """List of all FOIA requests by a given user"""
 
-class ListByTag(ListBase):
-    """List of all FOIA requests by a given tag"""
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    foia_requests = _sort_requests(request.GET,
+                                   FOIARequest.objects.get_viewable(request.user).filter(tags=tag))
 
-    def get_queryset(self):
-        tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(tags=tag))
+    return _list(request, foia_requests, extra_context={'subtitle': 'Tagged with "%s"' % tag.name})
 
-    def get_context_data(self, **kwargs):
-        context = super(ListByTag, self).get_context_data(**kwargs)
-        tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
-        context['subtitle'] = 'Tagged with %s' % tag.name
-        return context
+@login_required
+def my_list(request, view='all'):
+    """Views owned by current user"""
+    # pylint: disable=E1103
+    # pylint: disable=R0912
 
-
-@class_view_decorator(login_required)
-class MyList(ListBase):
-    """View requests owned by current user"""
-    template_name = 'foia/foiarequest_mylist.html'
-
-    def set_read_status(self, foia_pks, status):
+    def set_read_status(foia_pks, status):
         """Mark requests as read or unread"""
         for foia_pk in foia_pks:
-            foia = FOIARequest.objects.get(pk=foia_pk, user=self.request.user)
+            foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
             foia.updated = status
             foia.save()
 
-    def post(self, request, view='all'):
-        """Handle updating tags"""
+    def handle_post():
+        """Handle post data"""
         try:
-            post = request.POST
-            foia_pks = post.getlist('foia')
-            if post.get('submit') == 'Add Tag':
-                tag_pk = post.get('tag')
-                tag_name = Tag.normalize(post.get('combo-name'))
+            foia_pks = request.POST.getlist('foia')
+            if request.POST.get('submit') == 'Add Tag':
+                tag_pk = request.POST.get('tag')
+                tag_name = Tag.normalize(request.POST.get('combo-name'))
                 if tag_pk:
                     tag = Tag.objects.get(pk=tag_pk)
                 elif tag_name:
@@ -615,59 +601,51 @@ class MyList(ListBase):
                     for foia_pk in foia_pks:
                         foia = FOIARequest.objects.get(pk=foia_pk, user=request.user)
                         foia.tags.add(tag)
-            elif post.get('submit') == 'Mark as Read':
-                self.set_read_status(foia_pks, False)
-            elif post.get('submit') == 'Mark as Unread':
-                self.set_read_status(foia_pks, True)
+            elif request.POST.get('submit') == 'Mark as Read':
+                set_read_status(foia_pks, False)
+            elif request.POST.get('submit') == 'Mark as Unread':
+                set_read_status(foia_pks, True)
         except (FOIARequest.DoesNotExist, Tag.DoesNotExist):
             # bad foia or tag value passed in, just ignore
             pass
 
         return redirect('foia-mylist', view=view)
 
-    def get_queryset(self):
-        """Get FOIAs for this view"""
-        unsorted = FOIARequest.objects.filter(user=self.request.user)
-        view = self.kwargs.get('view', 'all')
-        if view == 'drafts':
-            unsorted = unsorted.get_editable()
-        elif view == 'action':
-            unsorted = unsorted.filter(status__in=['fix', 'payment'])
-        elif view == 'waiting':
-            unsorted = unsorted.filter(status='processed')
-        elif view == 'completed':
-            unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
-        elif view != 'all':
-            raise Http404()
+    if request.method == 'POST':
+        return handle_post()
 
-        tag = self.request.GET.get('tag')
-        if tag:
-            unsorted = unsorted.filter(tags__slug=tag)
+    unsorted = FOIARequest.objects.filter(user=request.user)
+    if view == 'drafts':
+        unsorted = unsorted.get_editable()
+    elif view == 'action':
+        unsorted = unsorted.filter(status__in=['fix', 'payment'])
+    elif view == 'waiting':
+        unsorted = unsorted.filter(status='processed')
+    elif view == 'completed':
+        unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
+    elif view != 'all':
+        raise Http404()
 
-        return self.sort_requests(unsorted, update_top=True)
+    tag = request.GET.get('tag')
+    if tag:
+        unsorted = unsorted.filter(tags__slug=tag)
+    tags = Tag.objects.filter(foiarequest__user=request.user).distinct()
 
-    def get_context_data(self, **kwargs):
-        context = super(MyList, self).get_context_data(**kwargs)
-        context['tags'] = Tag.objects.filter(foiarequest__user=self.request.user).distinct()
-        context['all_tags'] = Tag.objects.all()
-        return context
+    foia_requests = _sort_requests(request.GET, unsorted, update_top=True)
 
+    return _list(request, foia_requests,
+                 extra_context={'tags': tags, 'all_tags': Tag.objects.all()},
+                 kwargs={'template_name': 'foia/foiarequest_mylist.html'})
 
-@class_view_decorator(login_required)
-class ListFollowing(ListBase):
+@login_required
+def list_following(request):
     """List of all FOIA requests the user is following"""
 
-    def get_queryset(self):
-        """Get FOIAs for this view"""
-        return self.sort_requests(
-            FOIARequest.objects.get_viewable(self.request.user)
-                               .filter(followed_by=self.request.user.get_profile()))
+    foia_requests = _sort_requests(request.GET,
+        FOIARequest.objects.get_viewable(request.user)
+                           .filter(followed_by=request.user.get_profile()))
 
-    def get_context_data(self, **kwargs):
-        context = super(ListFollowing, self).get_context_data(**kwargs)
-        context['subtitle'] = 'Following'
-        return context
-
+    return _list(request, foia_requests, extra_context={'subtitle': 'Following'})
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details of a single FOIA request"""
