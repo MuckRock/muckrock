@@ -19,7 +19,7 @@ from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
 from south.modelsinspector import add_introspection_rules
 
-add_introspection_rules([], ["^fields\.EmailsListField"])
+add_introspection_rules([], ["^muckrock\.fields\.EmailsListField"])
 
 email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 

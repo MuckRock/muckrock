@@ -536,11 +536,3 @@ class TestAccountFunctional(TestCase):
         get_allowed(self.client, reverse('acct-logout'),
                     ['registration/logged_out.html', 'registration/base.html'])
         get_post_unallowed(self.client, reverse('acct-my-profile'))
-
-    def test_admin_views(self):
-        """Test additional admin views"""
-
-        self.client.login(username='adam', password='abc')
-        response = get_allowed(self.client, reverse('admin:stats-csv'))
-        nose.tools.eq_(response['content-type'], 'text/csv')
-
