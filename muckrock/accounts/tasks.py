@@ -17,7 +17,7 @@ from muckrock.foia.models import FOIARequest, FOIAFile
 
 logger = logging.getLogger(__name__)
 
-@periodic_task(run_every=crontab(hour=0, minute=30), name='muckrock.accounts.tasks.store_statstics')
+@periodic_task(run_every=crontab(hour=0, minute=30), name='accounts.tasks.store_statstics')
 def store_statstics():
     """Store the daily statistics"""
 

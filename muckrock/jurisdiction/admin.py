@@ -8,6 +8,7 @@ from django.shortcuts import render_to_response, redirect
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
+from django_tablib.admin import TablibAdmin
 
 #from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.foia.models import Jurisdiction
@@ -16,8 +17,9 @@ from muckrock.jurisdiction.forms import CSVImportForm
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class JurisdictionAdmin(admin.ModelAdmin):
+class JurisdictionAdmin(TablibAdmin):
     """Jurisdiction admin options"""
+    change_list_template = 'admin/jurisdiction/jurisdiction/change_list.html'
     list_display = ('name', 'level')
     list_filter = ['level']
     search_fields = ['name']
@@ -32,6 +34,7 @@ class JurisdictionAdmin(admin.ModelAdmin):
             'fields': ('days', 'observe_sat', 'holidays', 'intro', 'waiver')
         }),
     )
+    formats = ['xls', 'csv']
 
     def get_urls(self):
         """Add custom URLs here"""
@@ -71,4 +74,4 @@ class JurisdictionCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Jurisdiction
         delimiter = ','
-        update = {'keys': ['name', 'parent']}
+        update = {'keys': ['slug', 'parent']}
