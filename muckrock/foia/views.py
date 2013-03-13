@@ -40,7 +40,6 @@ from muckrock.views import class_view_decorator
 # pylint: disable=R0901
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def _foia_form_handler(request, foia, action):

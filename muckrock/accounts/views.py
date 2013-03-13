@@ -27,7 +27,6 @@ from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def register(request):

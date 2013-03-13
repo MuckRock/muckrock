@@ -22,7 +22,6 @@ from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 @csrf_exempt
 def handle_request(request, mail_id):
