@@ -31,7 +31,6 @@ from muckrock.foia.codes import CODES
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""

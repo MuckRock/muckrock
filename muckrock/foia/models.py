@@ -27,7 +27,6 @@ from muckrock.values import TextValue
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
