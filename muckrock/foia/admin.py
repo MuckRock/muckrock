@@ -92,6 +92,7 @@ class FOIARequestAdminForm(forms.ModelForm):
 
 class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
     """FOIA Request admin options"""
+    change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']

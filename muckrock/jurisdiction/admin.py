@@ -19,6 +19,7 @@ from jurisdiction.forms import CSVImportForm
 
 class JurisdictionAdmin(TablibAdmin):
     """Jurisdiction admin options"""
+    change_list_template = 'admin/jurisdiction/jurisdiction/change_list.html'
     list_display = ('name', 'level')
     list_filter = ['level']
     search_fields = ['name']

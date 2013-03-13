@@ -40,6 +40,7 @@ class AgencyAdminForm(forms.ModelForm):
 
 class AgencyAdmin(TablibAdmin):
     """Agency admin options"""
+    change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
