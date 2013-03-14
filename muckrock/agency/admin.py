@@ -7,6 +7,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
+from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import BooleanField, CharField, DjangoModelField
@@ -79,7 +80,8 @@ class AgencyAdmin(TablibAdmin):
 
         fields = ['name', 'slug', 'jurisdiction ("Boston, MA")', 'address', 'email', 'other_emails',
                   'contact first name', 'contact last name', 'contact_title', 'url', 'phone', 'fax']
-        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields})
+        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
+                                  context_instance=RequestContext(request))
 
 
 admin.site.register(AgencyType, AgencyTypeAdmin)
