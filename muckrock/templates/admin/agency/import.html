@@ -1,14 +1,14 @@
 
 {% extends "admin/base_site.html" %}
-{% load adminmedia %}
+{% load staticfiles %}
 
 {% block extrahead %}
 {% endblock %}
 {% block coltype %}flex{% endblock %}
 {% block bodyclass %}change-list{% endblock %}
-{% block stylesheet %}{% admin_media_prefix %}css/base.css{% endblock %}
+{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}
 {% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}/css/changelists.css" />
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="/admin/">Home</a>&nbsp;&rsaquo;&nbsp;{{page_title}}</div>{% endblock %}
 {% block content %}
