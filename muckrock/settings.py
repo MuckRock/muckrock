@@ -101,6 +101,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pingback.middleware.PingbackMiddleware',
+    'urlauth.middleware.AuthKeyMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 if DEBUG:
@@ -160,6 +161,7 @@ INSTALLED_APPS = (
     'storages',
     'tinymce',
     'django_tablib',
+    'urlauth',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -237,6 +239,9 @@ if HAYSTACK_SEARCH_ENGINE == 'whoosh':
     HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 elif HAYSTACK_SEARCH_ENGINE == 'solr':
     HAYSTACK_SOLR_URL = os.environ.get('WEBSOLR_URL', '')
+
+URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
+URLAUTH_AUTHKEY_NAME = 'authkey'
 
 ASSETS_DEBUG = False
 

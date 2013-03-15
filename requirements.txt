@@ -43,3 +43,4 @@ iron-celery==0.3.1
 kombu==2.5.6
 django-tinymce==1.5.1b4
 django-tablib==2.4.1
+django-urlauth==0.1.8
