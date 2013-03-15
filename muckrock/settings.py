@@ -224,6 +224,15 @@ SOUTH_TESTS_MIGRATE = False
 HAYSTACK_SITECONF = 'muckrock.search_sites'
 HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
 
+TINYMCE_DEFAULT_CONFIG = {
+    'theme': 'advanced',
+    'theme_advanced_buttons1': 'bold,italic,underline,strikethrough,|,indent,outdent,blockquote,|,'
+                               'undo,redo,|,bullist,numlist,|,link,unlink,image,|,cleanup,code',
+    'theme_advanced_buttons2': '',
+    'theme_advanced_buttons3': '',
+    'theme_advanced_statusbar_location': 'none',
+}
+
 if HAYSTACK_SEARCH_ENGINE == 'whoosh':
     HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
 elif HAYSTACK_SEARCH_ENGINE == 'solr':
