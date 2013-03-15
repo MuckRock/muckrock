@@ -101,7 +101,7 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
     inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm
-    formats = ['xls', 'csv', 'html']
+    formats = ['xls', 'csv']
 
     def save_model(self, request, obj, form, change):
         """Actions to take when a request is saved from the admin"""
