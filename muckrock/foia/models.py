@@ -13,6 +13,7 @@ from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
+from urlauth.models import AuthKey
 import dbsettings
 import logging
 import os
@@ -298,12 +299,13 @@ class FOIARequest(models.Model):
         self.updated = True
         self.save()
 
-        link = self.get_absolute_url()
-        if anchor:
-            link += '#' + anchor
-
         send_data = []
         for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+
+            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=profile.user.pk)
+            if anchor:
+                link += '#' + anchor
+
             msg = render_to_string('foia/mail.txt',
                 {'name': profile.user.get_full_name(),
                  'title': self.title,
@@ -354,11 +356,12 @@ class FOIARequest(models.Model):
         # whether it is automailed or not, notify the followers (but not the owner)
         send_data = []
         for profile in self.followed_by.all():
+            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=profile.user.pk)
             msg = render_to_string('foia/mail.txt',
                 {'name': profile.user.get_full_name(),
                  'title': self.title,
                  'status': self.get_status_display(),
-                 'link': self.get_absolute_url(),
+                 'link': link,
                  'follow': self.user != profile.user})
             send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
                               msg, 'info@muckrock.com', [profile.user.email]))
