@@ -73,6 +73,9 @@ else:
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
+TINY_MCE_ROOT = os.path.join(SITE_ROOT, 'tiny_mce')
+TINYMCE_JS_URL = '/tiny_mce/tiny_mce.js'
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 
