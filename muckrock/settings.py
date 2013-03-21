@@ -288,7 +288,7 @@ LOGGING = {
         'mail_admins': {
             'level': 'WARNING',
             'class': 'django.utils.log.AdminEmailHandler',
-        }
+        },
         'sentry': {
             'level': 'ERROR',
             'class': 'raven.contrib.django.handlers.SentryHandler',
