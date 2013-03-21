@@ -285,6 +285,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        'mail_admins': {
+            'level': 'WARNING',
+            'class': 'django.utils.log.AdminEmailHandler',
+        }
         'sentry': {
             'level': 'ERROR',
             'class': 'raven.contrib.django.handlers.SentryHandler',
@@ -303,7 +307,7 @@ LOGGING = {
             'propagate': False,
         },
         'muckrock': {
-            'handlers': ['console', 'sentry'],
+            'handlers': ['console', 'mail_admins', 'sentry'],
             'level': 'WARNING',
         },
         'django.db.backends': {
