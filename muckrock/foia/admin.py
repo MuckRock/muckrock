@@ -235,33 +235,3 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
 
-# pylint: disable=W0511
-# XXX this is just to clean up dateless files, then delete this code
-
-class FOIAFileAdminFormCommSelect(FOIAFileAdminForm):
-    """Form to select comm"""
-
-    def __init__(self, *args, **kwargs):
-        super(FOIAFileAdminFormCommSelect, self).__init__(*args, **kwargs)
-        foia = self.instance.get_foia()
-        if foia:
-            self.fields['comm'].queryset = FOIACommunication.objects.filter(
-                foia=foia.pk).order_by('date')
-
-class FOIAFileAdmin(admin.ModelAdmin):
-    """FOIA File admin options"""
-    model = FOIAFile
-    form = FOIAFileAdminFormCommSelect
-    readonly_fields = ('foia_link', )
-    list_display = ('title', 'date', 'comm')
-    fields = ('title', 'foia_link', 'comm', 'ffile', 'date', 'source', 'description')
-
-    def foia_link(self, obj):
-        """Link to admin page for corresponding FOIA"""
-        # pylint: disable=R0201
-        change_url = reverse('admin:foia_foiarequest_change', args=(obj.foia.pk,))
-        return '<a href="%s">%s</a>' % (change_url, obj.foia.title)
-    foia_link.short_description = 'FOIA'
-    foia_link.allow_tags = True
-
-admin.site.register(FOIAFile,  FOIAFileAdmin)
