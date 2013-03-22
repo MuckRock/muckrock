@@ -82,7 +82,8 @@ class AgencyChoiceField(forms.models.ModelChoiceField):
 
 class FOIARequestAdminForm(forms.ModelForm):
     """Form to include custom agency choice field"""
-    agency = AgencyChoiceField(queryset=Agency.objects.all().order_by('name'))
+    agency = AgencyChoiceField(queryset=Agency.objects.select_related('jurisdiction')
+                                                      .order_by('name'))
     user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'))
 
     class Meta:

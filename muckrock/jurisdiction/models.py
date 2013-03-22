@@ -83,6 +83,7 @@ class Jurisdiction(models.Model, RequestHelper):
     name = models.CharField(max_length=50)
     # slug should be slugify(unicode(self))
     slug = models.SlugField(max_length=55)
+    full_name = models.CharField(max_length=55, blank=True)
     abbrev = models.CharField(max_length=5, blank=True)
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
@@ -105,8 +106,12 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def __unicode__(self):
         # pylint: disable=E1101
-        if self.level == 'l' and self.parent:
-            return '%s, %s' % (self.name, self.parent.abbrev)
+        if self.level == 'l' and not self.full_name:
+            self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
+            self.save()
+            return self.full_name
+        elif self.level == 'l':
+            return self.full_name
         else:
             return self.name
 
