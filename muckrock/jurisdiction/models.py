@@ -106,7 +106,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def __unicode__(self):
         # pylint: disable=E1101
-        if self.level == 'l' and not self.full_name:
+        if self.level == 'l' and not self.full_name and self.parent:
             self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
             self.save()
             return self.full_name
