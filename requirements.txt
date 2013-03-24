@@ -32,15 +32,15 @@ python-memcached==1.48
 raven>=1.7.3
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
 newrelic
-celery==2.5.5
-django-celery==2.5.5
+celery==3.0.17
+django-celery==3.0.11
 django-sslify==0.2
 pysolr==3.0.5
 lxml==3.1.0
 cssselect==0.7.1
 django-adaptors==0.2.3
 iron-celery==0.3.1
-kombu==2.5.6
+kombu==2.5.8
 django-tinymce==1.5.1b4
 django-tablib==2.4.1
 django-urlauth==0.1.8
