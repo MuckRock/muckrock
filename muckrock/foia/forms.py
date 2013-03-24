@@ -47,7 +47,8 @@ class FOIARequestForm(forms.ModelForm):
         """agency is required, but must check combobox name field instead of drop down"""
 
         agency_name = self.request.POST.get('combo-name')
-        if not agency_name:
+        submit = self.request.POST.get('submit')
+        if not agency_name and not submit == 'Submit to Multiple Agencies':
             self._errors['agency'] = self.error_class(['This field is required.'])
 
         return self.cleaned_data
