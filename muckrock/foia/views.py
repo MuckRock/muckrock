@@ -161,9 +161,13 @@ def confirm_multiple(request, foia):
     if agency_type:
         agencies = agencies.filter(types__id=agency_type)
     if jurisdiction:
-        agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
-                                   Q(jurisdiction__parent=jurisdiction))
-    choices = [(a.pk, a.name) for a in agencies]
+        jmodel = Jurisdiction.objects.get(pk=jurisdiction)
+        if jmodel.level == 's':
+            agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
+                                       Q(jurisdiction__parent=jurisdiction))
+        else:
+            agencies = agencies.filter(jurisdiction=jurisdiction)
+    choices = [(a.pk, '%s, %s' % (a.name, a.jurisdiction)) for a in agencies]
 
     if request.method == 'POST':
         form = AgencyConfirmForm(request.POST, choices=choices)
