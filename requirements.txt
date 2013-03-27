@@ -6,8 +6,8 @@ pil==1.1.7
 coverage==3.3.1
 South==0.7
 ipython==0.10
-django-haystack==1.0.1-final
-whoosh==0.3.18
+django-haystack==1.2.7
+Whoosh==2.4.1
 django-debug-toolbar==0.9.4
 mock==0.7.0b2
 webassets==0.7.1
