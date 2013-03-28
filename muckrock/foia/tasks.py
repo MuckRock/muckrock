@@ -86,7 +86,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             doc.doc_id = info['id']
             doc.save()
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
-    except urllib2.URLError, exc:
+    except (urllib2.URLError, urllib2.HTTPError) as exc:
         # pylint: disable=E1101
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
