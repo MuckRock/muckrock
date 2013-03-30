@@ -6,8 +6,8 @@ pil==1.1.7
 coverage==3.3.1
 South==0.7
 ipython==0.10
-django-haystack==1.0.1-final
-whoosh==0.3.18
+django-haystack==1.2.7
+Whoosh==2.4.1
 django-debug-toolbar==0.9.4
 mock==0.7.0b2
 webassets==0.7.1
@@ -31,7 +31,7 @@ argparse==1.2.1
 python-memcached==1.48
 raven>=1.7.3
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
-newrelic
+newrelic==1.10.2.38
 celery==3.0.17
 django-celery==3.0.11
 django-sslify==0.2
