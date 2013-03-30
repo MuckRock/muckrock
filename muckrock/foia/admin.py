@@ -15,7 +15,7 @@ from datetime import date, timedelta
 from django_tablib.admin import TablibAdmin
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote
+from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote, STATUS
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
 from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
@@ -170,6 +170,9 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
                                url(r'^retry_pages/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.retry_pages),
                                    name='foia-admin-retry-pages'),
+                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
+                                   self.admin_site.admin_view(self.set_status),
+                                   name='foia-admin-set-status'),
                                url(r'^autoimport/$',
                                    self.admin_site.admin_view(self.autoimport),
                                    name='foia-admin-autoimport'))
@@ -232,6 +235,30 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
         autoimport.apply_async()
         messages.info(request, 'Auotimport started')
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
+
+    def set_status(self, request, idx, status):
+        """Set the status of the request"""
+        # pylint: disable=R0201
+
+        try:
+            foia = FOIARequest.objects.get(pk=idx)
+        except FOIARequest.DoesNotExist:
+            messages.error(request, '%s is not a valid FOIA Request' % idx)
+            return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
+
+        if status not in [s for (s, _) in STATUS]:
+            messages.error(request, '%s is not a valid status' % status)
+        else:
+            foia.status = status
+            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                foia.date_done = date.today()
+            foia.save()
+            last_comm = foia.last_comm()
+            last_comm.status = status
+            last_comm.save()
+            messages.success(request, 'Status set to %s' % foia.get_status_display())
+        return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
+
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)

@@ -137,8 +137,8 @@ def _allowed_email(email, foia):
     """Is this an allowed email?"""
 
     email = email.lower()
-    state_tlds = ['state.%s.us' % a.lower() for (a, _) in STATE_CHOICES
-                                            if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
+    state_tlds = ['%s.us' % a.lower() for (a, _) in STATE_CHOICES
+                                      if a not in ('AS', 'DC', 'GU', 'MP', 'PR', 'VI')]
     allowed_tlds = [
         '.gov',
         '.mil',

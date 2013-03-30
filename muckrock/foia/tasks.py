@@ -56,6 +56,11 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         # not change means we are uploading a new one - it should not have an id yet
         return
 
+    if not doc.doc_id and change:
+        # if we are changing it must have an id - this should never happen but it is!
+        logger.warn('Upload Doc Cloud: Changing without a doc id: %s', doc.pk)
+        return
+
     # these need to be encoded -> unicode to regular byte strings
     params = {
         'title': doc.title.encode('utf8'),
@@ -86,8 +91,9 @@ def upload_document_cloud(doc_pk, change, **kwargs):
             doc.doc_id = info['id']
             doc.save()
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
-    except urllib2.URLError, exc:
+    except (urllib2.URLError, urllib2.HTTPError) as exc:
         # pylint: disable=E1101
+        logger.warn('Upload Doc Cloud error: %s %s', url, doc.pk)
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
 
