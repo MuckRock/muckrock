@@ -8,19 +8,21 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
-from django.template.loader import render_to_string
+from django.template.loader import get_template
 
 import inspect
 import sys
 from datetime import datetime, date, timedelta
 
 from muckrock.agency.models import Agency, AgencyType
+from muckrock.fields import GroupedModelChoiceField
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
 from muckrock.foia.utils import make_template_choices
 from muckrock.foia.validate import validate_date_order
 from muckrock.formwizard.forms import DynamicSessionFormWizard
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.fields import GroupedModelChoiceField
+from muckrock.utils import get_node
+
 
 class FOIARequestForm(forms.ModelForm):
     """A form for a FOIA Request"""
@@ -578,8 +580,9 @@ class FOIAWizard(DynamicSessionFormWizard):
 
     def done(self, request, form_list):
         """Wizard has been completed"""
+        # pylint: disable=R0914
 
-        template = form_list[1].cleaned_data['template']
+        template_name = form_list[1].cleaned_data['template']
 
         level = form_list[0].cleaned_data['level']
         if level == 'local' or level == 'state':
@@ -587,22 +590,26 @@ class FOIAWizard(DynamicSessionFormWizard):
         elif level == 'federal':
             jurisdiction = Jurisdiction.objects.get(level='f')
 
-        template_file = 'request_templates/%s.txt' % template
+        template_file = 'request_templates/%s.txt' % template_name
         data = form_list[2].cleaned_data if len(form_list) > 2 else {}
         data['jurisdiction'] = jurisdiction
 
-        title, foia_request = \
-            (s.strip() for s in render_to_string(template_file, data,
-                                                 RequestContext(request)).split('\n', 1))
+        template = get_template(template_file)
+        context = RequestContext(request, data)
+        requested_docs = get_node(template, context, 'content')
 
-        agency = TEMPLATES[template].get_agency(jurisdiction)
+        title, foia_request = \
+            (s.strip() for s in template.render(context).split('\n', 1))
+
+        agency = TEMPLATES[template_name].get_agency(jurisdiction)
 
         if len(title) > 70:
             title = title[:70]
         slug = slugify(title) or 'untitled'
         foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
                                           jurisdiction=jurisdiction, slug=slug,
-                                          agency=agency)
+                                          agency=agency, requested_docs=requested_docs,
+                                          description=requested_docs)
         FOIACommunication.objects.create(
                 foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
                 date=datetime.now(), response=False, full_html=False, communication=foia_request)
