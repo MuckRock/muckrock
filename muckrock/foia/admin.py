@@ -250,7 +250,12 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
             messages.error(request, '%s is not a valid status' % status)
         else:
             foia.status = status
+            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                foia.date_done = date.today()
             foia.save()
+            last_comm = foia.last_comm()
+            last_comm.status = status
+            last_comm.save()
             messages.success(request, 'Status set to %s' % foia.get_status_display())
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
