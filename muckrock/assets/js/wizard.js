@@ -1,3 +1,4 @@
+django = {'jQuery': $};
 
  // Wizard location page to enable/disable selects
  $(document).ready(function(){
