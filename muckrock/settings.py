@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
+    'django.contrib.markup',
     'django.contrib.staticfiles',
     #'staticfiles',
     'raven.contrib.django',
@@ -166,6 +167,7 @@ INSTALLED_APPS = (
     'tinymce',
     'django_tablib',
     'urlauth',
+    'epiceditor',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -248,7 +250,7 @@ elif HAYSTACK_SEARCH_ENGINE == 'solr':
 URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
 URLAUTH_AUTHKEY_NAME = 'authkey'
 
-ASSETS_DEBUG = False
+ASSETS_DEBUG = True
 
 MONTHLY_REQUESTS = {
     'admin': 100,
