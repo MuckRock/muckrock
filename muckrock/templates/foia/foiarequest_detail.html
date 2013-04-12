@@ -134,9 +134,19 @@
         {% endfor %}
 				<div class="clearer">&nbsp;</div>
 			</div>
-
-
 			{% endfor %}
+			<form action="" method="post" style="display:none" id="action-form">
+				{% csrf_token %}
+				<textarea name="text" style="width:612px; height: 200px"></textarea>
+				<input type="submit" name="submit" value="Submit" class="button" />
+				<a href="#" onclick="cancelActionButton(); return false" class="jqbutton right">Cancel</a>
+			</form>
+			<p id='action-buttons'>
+			<a href="#" onclick="actionButton('Follow Up'); return false" class="jqbutton tipTip" title="Send a message directly to the agency">Follow Up</a>
+			<a href="#" onclick="actionButton('Get Advice'); return false" class="jqbutton tipTip" title="Get answers to your question from Muckrock's FOIA expert community">Get Advice</a>
+			<a href="#" onclick="actionButton('Problem?'); return false" class="jqbutton tipTip" title="Something broken, buggy, or off?  Let us know and we'll fix it">Problem?</a>
+			<a href="#" onclick="actionButton('Appeal'); return false" class="jqbutton tipTip" title="Submit an appeal">Appeal</a>
+			</p>
 		</div>
 
 	{% if foia.public_documents %}
