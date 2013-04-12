@@ -372,10 +372,10 @@ class FOIARequest(models.Model):
         """Send a follow up email for this request"""
         # pylint: disable=E1101
 
-        comm = FOIACommunication.objects.create(
-                foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
-                date=datetime.now(), response=False, full_html=False,
-                communication=render_to_string('foia/followup.txt', {'request': self}))
+        FOIACommunication.objects.create(
+            foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
+            date=datetime.now(), response=False, full_html=False,
+            communication=render_to_string('foia/followup.txt', {'request': self}))
 
         if not self.email and self.agency:
             self.email = self.agency.get_email()
@@ -391,7 +391,7 @@ class FOIARequest(models.Model):
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-        self.update(comm.anchor())
+        # Do not self.update() here for now to avoid excessive emails
 
     def _send_email(self):
         """Send an email of the request to its email address"""
