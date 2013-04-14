@@ -33,8 +33,9 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                        AgencyConfirmForm, TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.tags.models import Tag
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.tags.models import Tag
+from muckrock.qanda.models import Question
 from muckrock.views import class_view_decorator
 
 # pylint: disable=R0901
@@ -682,9 +683,43 @@ def detail(request, jurisdiction, jidx, slug, idx):
         foia.updated = False
         foia.save()
 
-    if request.method == 'POST' and foia.user == request.user:
-        foia.update_tags(request.POST['tags'])
-        return redirect(foia)
+    if request.method == 'POST':
+        # Tags
+        if request.POST.get('submit') == 'Submit' and foia.user == request.user:
+            foia.update_tags(request.POST.get('tags'))
+            return redirect(foia)
+        elif request.POST.get('submit') == 'Follow Up' and foia.user == request.user:
+            FOIACommunication.objects.create(
+                foia=foia, from_who=foia.user.get_full_name(), to_who=foia.get_to_who(),
+                date=datetime.now(), response=False, full_html=False,
+                communication=request.POST.get('text'))
+            foia.submit()
+            messages.success(request, 'Follow up succesfully sent')
+            return redirect(foia)
+        elif request.POST.get('submit') == 'Get Advice' and foia.user == request.user:
+            title = 'Question about request: %s' % foia.title
+            question = Question.objects.create(
+                user=request.user, title=title, slug=slugify(title), foia=foia,
+                question=request.POST.get('text'), date=datetime.now())
+            messages.success(request, 'Question succesfully posted')
+            return redirect(question)
+        elif request.POST.get('submit') == 'Problem?':
+            send_mail('[FLAG] Freedom of Information Request: %s' % foia.title,
+                      render_to_string('foia/flag.txt',
+                                       {'request': foia, 'user': request.user,
+                                        'reason': request.POST.get('text')}),
+                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            messages.info(request, 'Problem succesfully reported')
+            return redirect(foia)
+        elif request.POST.get('submit') == 'Appeal' and foia.user == request.user and \
+             foia.is_appealable():
+            FOIACommunication.objects.create(
+                foia=foia, from_who=foia.user.get_full_name(), to_who=foia.get_to_who(),
+                date=datetime.now(), response=False, full_html=False,
+                communication=request.POST.get('text'))
+            foia.submit(appeal=True)
+            messages.success(request, 'Appeal succesfully sent')
+            return redirect(foia)
 
     context = {}
     context['foia'] = foia
