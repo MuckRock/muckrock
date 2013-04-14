@@ -158,7 +158,12 @@ class FOIARequest(models.Model):
 
     def is_appealable(self):
         """Can this request be appealed by the user?"""
-        return self.status == 'rejected'
+        if self.status in ['processed', 'appealing']:
+            # can appeal these only if they are over due
+            return self.date_due < date.today()
+
+        # otherwise it can be appealed as long as it has actually been sent to the agency
+        return self.status not in ['started', 'submitted']
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
