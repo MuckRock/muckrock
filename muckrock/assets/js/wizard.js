@@ -1,3 +1,4 @@
+django = {'jQuery': $};
 
  // Wizard location page to enable/disable selects
  $(document).ready(function(){
@@ -139,3 +140,17 @@ $(function() {
 $(function() {
 	$('.formset-container').formset();
 });
+
+function actionButton(name) {
+	$('#action-form > input').attr('value', name);
+	$('#action-buttons').hide();
+	$('#action-form').show(400);
+	$('html, body').animate({scrollTop: $(window).scrollTop() + 100});
+	return false;
+}
+
+function cancelActionButton(name) {
+	$('#action-form').hide(400);
+	$('#action-buttons').show();
+	return false;
+}
