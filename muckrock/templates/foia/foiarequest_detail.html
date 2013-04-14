@@ -135,6 +135,7 @@
 				<div class="clearer">&nbsp;</div>
 			</div>
 			{% endfor %}
+			{% if actions.bottom %}
 			<form action="" method="post" style="display:none" id="action-form">
 				{% csrf_token %}
 				<textarea name="text" style="width:612px; height: 200px"></textarea>
@@ -142,11 +143,11 @@
 				<a href="#" onclick="cancelActionButton(); return false" class="jqbutton right">Cancel</a>
 			</form>
 			<p id='action-buttons'>
-			<a href="#" onclick="actionButton('Follow Up'); return false" class="jqbutton tipTip" title="Send a message directly to the agency">Follow Up</a>
-			<a href="#" onclick="actionButton('Get Advice'); return false" class="jqbutton tipTip" title="Get answers to your question from Muckrock's FOIA expert community">Get Advice</a>
-			<a href="#" onclick="actionButton('Problem?'); return false" class="jqbutton tipTip" title="Something broken, buggy, or off?  Let us know and we'll fix it">Problem?</a>
-			<a href="#" onclick="actionButton('Appeal'); return false" class="jqbutton tipTip" title="Submit an appeal">Appeal</a>
+				{% for action in actions.bottom %}
+					<a class="jqbutton tipTip" href="#" title="{{action.title}}" onclick="actionButton('{{action.label}}'); return false">{{action.label}}</a>
+				{% endfor %}
 			</p>
+			{% endif %}
 		</div>
 
 	{% if foia.public_documents %}
@@ -250,9 +251,9 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% if actions %}
+	{% if actions.side %}
 		<h2>Actions</h2>
-		{% for action in actions %}
+		{% for action in actions.side %}
 			<p><a class="jqbutton" href="{{action.link}}"{% if action.id %} id="{{action.id}}"{% endif %}>{{action.label}}</a></p>
 		{% endfor %}
 	{% endif %}

@@ -509,7 +509,7 @@ class FOIARequest(models.Model):
         kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
                   'idx': self.pk, 'slug': self.slug}
 
-        actions = [
+        side_actions = [
             (user.is_staff,
                 reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
             (self.user == user and self.is_editable(),
@@ -518,12 +518,8 @@ class FOIARequest(models.Model):
                 reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
             (self.user == user and self.is_deletable(),
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
-            (self.user == user and self.is_fixable(),
-                reverse('foia-fix', kwargs=kwargs), 'Fix'),
             (user.is_staff,
                 reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
-            (self.user == user and self.is_appealable(),
-                reverse('foia-appeal', kwargs=kwargs), 'Appeal'),
             (self.user == user and self.is_payable(),
                 reverse('foia-pay', kwargs=kwargs), 'Pay'),
             (self.public_documents(), '#', 'Embed this Document'),
@@ -531,13 +527,26 @@ class FOIARequest(models.Model):
                 reverse('foia-follow', kwargs=kwargs),
                 'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
                            else 'Follow'),
-            (user.is_authenticated(),
-                reverse('foia-flag', kwargs=kwargs), 'Submit Correction'),
             ]
 
-        return [{'link': link, 'label': label,
-                 'id': 'opener' if label == 'Embed this Document' else ''}
-                for pred, link, label in actions if pred]
+        bottom_actions = [
+            (self.user == user,
+                'Follow Up', 'Send a message directly to the agency'),
+            (self.user == user,
+                'Get Advice', "Get answers to your question from Muckrock's FOIA expert community"),
+            (user.is_authenticated(),
+                'Problem?', "Something broken, buggy, or off?  Let us know and we'll fix it"),
+            (self.user == user and self.is_appealable(),
+                'Appeal', 'Submit an appeal'),
+            ]
+
+        side_action_links = [{'link': link, 'label': label,
+                              'id': 'opener' if label == 'Embed this Document' else ''}
+                             for pred, link, label in side_actions if pred]
+        bottom_action_links = [{'label': label, 'title': title}
+                               for pred, label, title in bottom_actions if pred]
+
+        return {'side': side_action_links, 'bottom': bottom_action_links}
 
     def total_pages(self):
         """Get the total number of pages for this request"""
