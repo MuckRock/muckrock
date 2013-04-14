@@ -134,9 +134,20 @@
         {% endfor %}
 				<div class="clearer">&nbsp;</div>
 			</div>
-
-
 			{% endfor %}
+			{% if actions.bottom %}
+			<form action="" method="post" style="display:none" id="action-form">
+				{% csrf_token %}
+				<textarea name="text" style="width:612px; height: 200px"></textarea>
+				<input type="submit" name="submit" value="Submit" class="button" />
+				<a href="#" onclick="cancelActionButton(); return false" class="jqbutton right">Cancel</a>
+			</form>
+			<p id='action-buttons'>
+				{% for action in actions.bottom %}
+					<a class="jqbutton tipTip" href="#" title="{{action.title}}" onclick="actionButton('{{action.label}}'); return false">{{action.label}}</a>
+				{% endfor %}
+			</p>
+			{% endif %}
 		</div>
 
 	{% if foia.public_documents %}
@@ -240,9 +251,9 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% if actions %}
+	{% if actions.side %}
 		<h2>Actions</h2>
-		{% for action in actions %}
+		{% for action in actions.side %}
 			<p><a class="jqbutton" href="{{action.link}}"{% if action.id %} id="{{action.id}}"{% endif %}>{{action.label}}</a></p>
 		{% endfor %}
 	{% endif %}

@@ -5,6 +5,7 @@ Forms for Q&A application
 from django import forms
 
 from muckrock.qanda.models import Question, Answer
+from epiceditor.widgets import EpicEditorWidget
 
 class QuestionForm(forms.ModelForm):
     """A form for a Question"""
@@ -13,7 +14,7 @@ class QuestionForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Question
         fields = ['title', 'question']
-        widgets = {'question': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
+        widgets = {'question': EpicEditorWidget(attrs={'style': 'width:450px; height:200px;'})}
 
 class AnswerForm(forms.ModelForm):
     """A form for an Answer"""
@@ -22,4 +23,4 @@ class AnswerForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Answer
         fields = ['answer']
-        widgets = {'area': forms.Textarea(attrs={'style': 'width:450px; height:200px;'})}
+        widgets = {'answer': EpicEditorWidget(attrs={'style': 'width:450px; height:200px;'})}
