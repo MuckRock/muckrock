@@ -359,12 +359,6 @@ class TestFOIAFunctional(TestCase):
         foia = FOIARequest.objects.get(pk=1)
         self.client.login(username='adam', password='abc')
 
-        get_allowed(self.client, reverse('foia-flag',
-                                    kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                            'jidx': foia.jurisdiction.pk,
-                                            'idx': foia.pk, 'slug': foia.slug}),
-                    ['foia/foiarequest_action.html', 'foia/base-submit.html'])
-
         foia = FOIARequest.objects.get(pk=18)
         get_allowed(self.client, reverse('foia-pay',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,

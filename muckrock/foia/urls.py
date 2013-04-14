@@ -20,7 +20,7 @@ from muckrock.views import jurisdiction
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
-register_pingback(views.detail, pingback_foia_handler)
+register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
 urlpatterns = patterns('',
     url(r'^$',                             RedirectView.as_view(url='list'), name='foia-root'),
@@ -39,12 +39,9 @@ urlpatterns = patterns('',
                                            jurisdiction, name='foia-jurisdiction'),
     url(r'(?P<foia>\d+)/submit_multiple',  views.submit_multiple, name='foia-submit-multiple'),
     url(r'(?P<foia>\d+)/confirm_multiple', views.confirm_multiple, name='foia-confirm-multiple'),
-    url(r'^%s/$' % foia_url,               views.detail, name='foia-detail'),
+    url(r'^%s/$' % foia_url,               views.Detail.as_view(), name='foia-detail'),
     url(r'^%s/update/$' % foia_url,        views.update, name='foia-update'),
-    url(r'^%s/fix/$' % foia_url,           views.fix, name='foia-fix'),
     url(r'^%s/admin_fix/$' % foia_url,     views.admin_fix, name='foia-admin-fix'),
-    url(r'^%s/appeal/$' % foia_url,        views.appeal, name='foia-appeal'),
-    url(r'^%s/flag/$' % foia_url,          views.flag, name='foia-flag'),
     url(r'^%s/add_note/$' % foia_url,      views.note, name='foia-note'),
     url(r'^%s/delete/$' % foia_url,        views.delete, name='foia-delete'),
     url(r'^%s/embargo/$' % foia_url,       views.embargo, name='foia-embargo'),
