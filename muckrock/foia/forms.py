@@ -3,12 +3,6 @@ Forms for FOIA application
 """
 
 from django import forms
-from django.contrib import messages
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from django.template.defaultfilters import slugify
-from django.template import RequestContext
-from django.template.loader import get_template
 
 import inspect
 import sys
@@ -16,12 +10,10 @@ from datetime import datetime, date, timedelta
 
 from muckrock.agency.models import Agency, AgencyType
 from muckrock.fields import GroupedModelChoiceField
-from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
+from muckrock.foia.models import FOIARequest, FOIAFile, FOIANote
 from muckrock.foia.utils import make_template_choices
 from muckrock.foia.validate import validate_date_order
-from muckrock.formwizard.forms import DynamicSessionFormWizard
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.utils import get_node
 
 
 class FOIARequestForm(forms.ModelForm):
@@ -552,91 +544,4 @@ class FOIAWhatFederalForm(forms.Form):
     """A form to select what template to use for a federal request"""
 
     template = forms.ChoiceField(choices=FEDERAL_TEMPLATE_CHOICES)
-
-class FOIAWizard(DynamicSessionFormWizard):
-    """Wizard to create FOIA requests"""
-    # pylint: disable=R0904
-
-    def done(self, request, form_list):
-        """Wizard has been completed"""
-        # pylint: disable=R0914
-
-        template_name = form_list[1].cleaned_data['template']
-
-        level = form_list[0].cleaned_data['level']
-        if level == 'local' or level == 'state':
-            jurisdiction = form_list[0].cleaned_data[level]
-        elif level == 'federal':
-            jurisdiction = Jurisdiction.objects.get(level='f')
-
-        template_file = 'request_templates/%s.txt' % template_name
-        data = form_list[2].cleaned_data if len(form_list) > 2 else {}
-        data['jurisdiction'] = jurisdiction
-
-        template = get_template(template_file)
-        context = RequestContext(request, data)
-        requested_docs = get_node(template, context, 'content')
-
-        title, foia_request = \
-            (s.strip() for s in template.render(context).split('\n', 1))
-
-        agency = TEMPLATES[template_name].get_agency(jurisdiction)
-
-        if len(title) > 70:
-            title = title[:70]
-        slug = slugify(title) or 'untitled'
-        foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
-                                          jurisdiction=jurisdiction, slug=slug,
-                                          agency=agency, requested_docs=requested_docs,
-                                          description=requested_docs)
-        FOIACommunication.objects.create(
-                foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
-                date=datetime.now(), response=False, full_html=False, communication=foia_request)
-
-        messages.success(request, 'Request succesfully created.  Please review it and make any '
-                                  'changes that you need.  You may save it for future review or '
-                                  'submit it when you are ready.')
-
-        return HttpResponseRedirect(reverse('foia-update',
-                                    kwargs={'jurisdiction': jurisdiction.slug,
-                                            'jidx': jurisdiction.pk,
-                                            'idx': foia.pk,
-                                            'slug': slug}))
-
-    def process_step(self, form):
-        """Process each step"""
-
-        # add 'what' step
-        if self.get_step_index() == 0:
-            level = form.cleaned_data['level']
-            if level == 'local':
-                self.append_form_list('FOIAWhatLocalForm', 1)
-                self.update_extra_context({'template_choices': LOCAL_TEMPLATE_CHOICES})
-            elif level == 'state':
-                self.append_form_list('FOIAWhatStateForm', 1)
-                self.update_extra_context({'template_choices': STATE_TEMPLATE_CHOICES})
-            elif level == 'federal':
-                self.append_form_list('FOIAWhatFederalForm', 1)
-                self.update_extra_context({'template_choices': FEDERAL_TEMPLATE_CHOICES})
-
-        # add final template specific step
-        if self.get_step_index() == 1:
-            template = TEMPLATES[form.cleaned_data['template']]
-            if template.base_fields:
-                self.update_extra_context({'heading': template.name})
-                self.append_form_list(template.__name__, 2)
-
-        return self.get_form_step_data(form)
-
-    def get_template(self):
-        """Template name"""
-
-        step = self.get_step_index()
-        if step == 0:
-            return 'foia/foiawizard_where.html'
-        elif step == 1:
-            return 'foia/foiawizard_what.html'
-        else:
-            return 'foia/foiawizard_form.html'
-
 

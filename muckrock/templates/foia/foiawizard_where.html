@@ -5,17 +5,18 @@
 <h1>Which level of government do you want to file to?</h1>
 <em class="large">Different levels of government have different information, but we suggest starting as local as makes sense and working your way up.</em>
 <div id="progressbar" title="0% Complete"></div><br />
-{% if form.errors %}
-<div class="error">{{ form.errors }}</div>
+{% if wizard.form.errors %}
+<div class="error">{{ wizard.form.errors }}</div>
 {% endif %}
 	<div class="form">
   <form action="" method="post">
 		<fieldset>
 			{% csrf_token %}
+			{{ wizard.management_form }}
 			<table class="form">
 				<tr>
 					<td>
-						<input type="radio" name="{{form_step}}-level" value="federal" id="federal" />
+						<input type="radio" name="{{wizard.steps.current}}-level" value="federal" id="federal" />
 						<label for="federal">
 							Federal
 						</label>
@@ -23,7 +24,7 @@
 				</tr>
 				<tr>
 					<td>
-						<input type="radio" name="{{form_step}}-level" value="state" id="state" />
+						<input type="radio" name="{{wizard.steps.current}}-level" value="state" id="state" />
 						<label for="state">
 							State
 						</label>
@@ -31,12 +32,12 @@
 				</tr>
 				<tr>
 					<td>
-						{{form.state}}
+						{{wizard.form.state}}
 					</td>
 				</tr>
 				<tr>
 					<td>
-						<input type="radio" name="{{form_step}}-level" value="local" id="local" />
+						<input type="radio" name="{{wizard.steps.current}}-level" value="local" id="local" />
 						<label for="local">
 							Local
 						</label>
@@ -44,7 +45,7 @@
 				</tr>
 				<tr>
 					<td>
-						{{form.local}}
+						{{wizard.form.local}}
 					</td>
 				</tr>
 			</table>

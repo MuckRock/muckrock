@@ -295,8 +295,6 @@ class TestFOIAFunctional(TestCase):
                                         'idx': foia.pk, 'slug': 'bad_slug'}))
 
         # post authenticated pages
-        post_allowed_bad(self.client, reverse('foia-create'),
-                         ['foia/foiawizard_where.html', 'foia/base-submit.html'])
         post_allowed_bad(self.client, reverse('foia-update',
                                          kwargs={'jurisdiction': foia.jurisdiction.slug,
                                                  'jidx': foia.jurisdiction.pk,
