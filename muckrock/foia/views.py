@@ -3,16 +3,17 @@ Views for the FOIA application
 """
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
-from django.contrib import messages
+from django.contrib.formtools.wizard.views import SessionWizardView
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -30,12 +31,13 @@ from muckrock.accounts.forms import PaymentForm
 from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIANoteForm, \
                                 FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
-                                FOIAWizard, FOIAFileFormSet, FOIAMultipleSubmitForm, \
-                                AgencyConfirmForm, TEMPLATES
+                                FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
+                                TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
+from muckrock.utils import get_node
 from muckrock.qanda.models import Question
 from muckrock.views import class_view_decorator
 
@@ -203,16 +205,111 @@ def confirm_multiple(request, foia):
     return render_to_response('foia/foiarequest_confirm_multiple.html', {'form': form},
                               context_instance=RequestContext(request))
 
+class FOIAWizard(SessionWizardView):
+    """Wizard to create FOIA requests"""
+    # pylint: disable=R0904
+
+    def done(self, form_list):
+        """Wizard has been completed"""
+        # pylint: disable=R0914
+
+        data = self.get_all_cleaned_data()
+
+        template_name = data['template']
+
+        level = data['level']
+        if level == 'local' or level == 'state':
+            jurisdiction = data[level]
+        elif level == 'federal':
+            jurisdiction = Jurisdiction.objects.get(level='f')
+
+        template_file = 'request_templates/%s.txt' % template_name
+        data['jurisdiction'] = jurisdiction
+
+        template = get_template(template_file)
+        context = RequestContext(self.request, data)
+        requested_docs = get_node(template, context, 'content')
+
+        title, foia_request = \
+            (s.strip() for s in template.render(context).split('\n', 1))
+
+        agency = TEMPLATES[template_name].get_agency(jurisdiction)
+
+        if len(title) > 70:
+            title = title[:70]
+        slug = slugify(title) or 'untitled'
+        foia = FOIARequest.objects.create(user=self.request.user, status='started', title=title,
+                                          jurisdiction=jurisdiction, slug=slug,
+                                          agency=agency, requested_docs=requested_docs,
+                                          description=requested_docs)
+        FOIACommunication.objects.create(
+                foia=foia, from_who=self.request.user.get_full_name(), to_who=foia.get_to_who(),
+                date=datetime.now(), response=False, full_html=False, communication=foia_request)
+
+        messages.success(self.request, 'Request succesfully created.  Please review it and make '
+                                        'any changes that you need.  You may save it for future '
+                                        'review or submit it when you are ready.')
+
+        return HttpResponseRedirect(reverse('foia-update',
+                                    kwargs={'jurisdiction': jurisdiction.slug,
+                                            'jidx': jurisdiction.pk,
+                                            'idx': foia.pk,
+                                            'slug': slug}))
+
+    def get_context_data(self, form, **kwargs):
+        """Add extra context to certain steps"""
+        context = super(FOIAWizard, self).get_context_data(form=form, **kwargs)
+        if self.steps.index == 2:
+            template = TEMPLATES[self.get_all_cleaned_data().get('template')]
+            context.update({'heading': template.name})
+        return context
+
+    def get_template_names(self):
+        """Template name"""
+
+        if self.steps.current == 'FOIAWizardWhereForm':
+            return 'foia/foiawizard_where.html'
+        elif self.steps.current.startswith('FOIAWhat'):
+            return 'foia/foiawizard_what.html'
+        else:
+            return 'foia/foiawizard_form.html'
+
 @login_required
 def create(request):
     """Create a new foia request using the wizard"""
 
+    def display_what_form(level):
+        """Display which 'What Form'"""
+        def condition(wizard):
+            """For condition dict"""
+            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
+            return cleaned_data.get('level') == level
+        return condition
+
+    def display_template_form(template):
+        """Display which 'Template Form'"""
+        def condition(wizard):
+            """For condition dict"""
+            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
+            what_form = 'FOIAWhat%sForm' % cleaned_data.get('level', '').capitalize()
+            cleaned_data = wizard.get_cleaned_data_for_step(what_form) or {}
+            return cleaned_data.get('template') == template
+        return condition
+
     # collect all the forms so that the wizard can access them
-    form_dict = dict((t.__name__, t) for t in TEMPLATES.values())
-    form_dict.update((form.__name__, form) for form in
-                     [FOIAWizardWhereForm, FOIAWhatLocalForm,
-                      FOIAWhatStateForm, FOIAWhatFederalForm])
-    return FOIAWizard(['FOIAWizardWhereForm'], form_dict)(request)
+    wizard_forms = [(form.__name__, form) for form in
+        [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm]]
+    wizard_forms += [(t.__name__, t) for t in TEMPLATES.values()]
+
+    condition_dict = {
+        'FOIAWhatLocalForm':   display_what_form('local'),
+        'FOIAWhatStateForm':   display_what_form('state'),
+        'FOIAWhatFederalForm': display_what_form('federal'),
+    }
+    condition_dict.update(dict((t.__name__, display_template_form(tslug))
+                               for tslug, t in TEMPLATES.iteritems()))
+
+    return FOIAWizard.as_view(wizard_forms, condition_dict=condition_dict)(request)
 
 @login_required
 def update(request, jurisdiction, jidx, slug, idx):

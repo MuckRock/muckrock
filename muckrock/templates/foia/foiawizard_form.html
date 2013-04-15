@@ -3,14 +3,17 @@
 
 {% block content %}
 <h1>What are the details of your request?</h1>
-{% if extra_context.heading %}
-<h2>{{extra_context.heading}}</h2>
+{% if heading %}
+<h2>{{heading}}</h2>
 {% endif %}
 <div id="progressbar" title="67% Complete"></div><br />
 	<div class="form">
   <form action="" method="post">
+		{{ wizard.management_form }}
 		<fieldset>
+			{% with wizard.form as form %}
 			{% include "form.html" %}
+			{% endwith %}
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>
@@ -18,10 +21,10 @@
 {% endblock %}
 
 {% block sidebar %}
-{% if form.long_desc %}
+{% if wizard.form.long_desc %}
 <h2>About this Template:</h2>
 <p>
-{{form.long_desc}}
+{{wizard.form.long_desc}}
 </p>
 {% endif %}
 {% endblock %}
