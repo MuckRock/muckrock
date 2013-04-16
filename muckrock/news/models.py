@@ -8,7 +8,6 @@ from django.db import models
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from taggit.managers import TaggableManager
-from tinymce.models import HTMLField
 
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
@@ -34,7 +33,7 @@ class Article(models.Model):
     kicker = models.CharField(max_length=200, blank=True)
     slug = models.SlugField(help_text='A "Slug" is a unique URL-friendly title for an object.')
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
-    body = HTMLField('Body text')
+    body = models.TextField('Body text')
     author = models.ForeignKey(User, limit_choices_to = {'is_staff': True})
     publish = models.BooleanField('Publish on site', default=True,
             help_text='Articles will not appear on the site until their "publish date".')
