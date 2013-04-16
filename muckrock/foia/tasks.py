@@ -28,7 +28,7 @@ from muckrock.vendor import MultipartPostHandler
 from muckrock.foia.models import FOIAFile, FOIARequest, FOIACommunication
 from muckrock.foia.codes import CODES
 
-foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<idx>\d+)-(?P<slug>[\w\d_-]+)'
+foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +132,7 @@ def set_top_viewed_reqs():
     data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
                           start_date=(date.today() - timedelta(days=30)).isoformat(),
                           end_date=date.today().isoformat(), sort='-ga:pageviews')
-    path_re = re.compile('ga:pagePath=/foi/%s/view' % foia_url)
+    path_re = re.compile('ga:pagePath=/foi/%s/' % foia_url)
     top_req_paths = [(entry.title.text, int(entry.pageviews.value)) for entry in data.entry
                      if path_re.match(entry.title.text)]
 
