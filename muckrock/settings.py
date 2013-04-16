@@ -249,7 +249,7 @@ URLAUTH_AUTHKEY_NAME = 'authkey'
 ASSETS_DEBUG = False
 
 MONTHLY_REQUESTS = {
-    'admin': 100,
+    'admin': 20,
     'beta': 5,
     'community': 0,
     'pro': 20,
