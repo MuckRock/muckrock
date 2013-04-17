@@ -1,4 +1,6 @@
-html { padding-bottom:10px; }
+html {
+  padding-bottom:10px;
+}
 
 body {
   border:1px inset #AAA;
