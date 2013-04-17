@@ -2,7 +2,7 @@
 {% extends "news/base.html" %}
 
 {% load thumbnail %}
-{% load markup %}
+{% load markdown_deux_tags %}
 
 {% block title %} {{object.title}} {% endblock %}
 
@@ -29,7 +29,7 @@
 				{% endif %}
 				<div class="post-body">
 					{% autoescape off %}
-					{{object.body|markdown}}
+					{{object.body|markdown:"trusted"}}
 					{% endautoescape %}
 				</div>
 			</div>
