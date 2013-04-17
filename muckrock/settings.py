@@ -5,6 +5,7 @@ Django settings for muckrock project
 import os
 import urlparse
 
+
 def boolcheck(setting):
     """Turn env var into proper bool"""
     if isinstance(setting, basestring):
@@ -164,6 +165,7 @@ INSTALLED_APPS = (
     'django_tablib',
     'urlauth',
     'epiceditor',
+    'markdown_deux',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -254,6 +256,22 @@ MONTHLY_REQUESTS = {
     'community': 0,
     'pro': 20,
 }
+
+MARKDOWN_DEUX_STYLES = {
+    "default": {
+        "extras": {
+            "code-friendly": None,
+        },
+        "safe_mode": "escape",
+    },
+    "trusted": {
+        "extras": {
+            "code-friendly": None,
+        },
+        "safe_mode": False,
+    }
+}
+
 
 LOGGING = {
     'version': 1,

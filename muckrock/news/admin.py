@@ -13,7 +13,7 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
 
     body = forms.CharField(widget=AdminEpicEditorWidget(themes={'editor': 'epic-light-2.css',
-                                                                'preview': 'preview-light.css'}))
+                                                                'preview': 'github.css'}))
     
     class Meta:
         # pylint: disable=R0903

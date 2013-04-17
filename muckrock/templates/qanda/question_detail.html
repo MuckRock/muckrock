@@ -1,7 +1,7 @@
 
 {% extends "qanda/base.html" %}
 
-{% load markup %}
+{% load markdown_deux_tags %}
 
 {% block title %} {{object.title}} {% endblock %}
 
@@ -13,12 +13,12 @@
 				</div>
 				<div class="post-date">by <a href="{% url acct-profile object.user.username %}">{{object.user}}</a> on {{object.date|date:"DATETIME_FORMAT"}}</div>
 				<div class="post-body">
-					{{object.question|markdown:"safe"}}
+					{{object.question|markdown}}
 				</div>
 				{% for answer in object.answers.all %}
 					<div class="response">
 						<div class="post-date">by <a href="{% url acct-profile answer.user.username %}">{{answer.user}}</a> on {{answer.date|date:"DATETIME_FORMAT"}}</div>
-					{{answer.answer|markdown:"safe"}}
+					{{answer.answer|markdown}}
 					</div>
 				{% endfor %}
 				<a href="{% url answer-create slug=object.slug,idx=object.pk %}" class="jqbutton">Reply</a>
