@@ -45,3 +45,4 @@ django-tablib==2.4.1
 django-urlauth==0.1.8
 django-epiceditor==0.2.1.2
 Markdown==2.3.1
+django-markdown-deux==1.0.4
