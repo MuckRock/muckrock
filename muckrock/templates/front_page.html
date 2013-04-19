@@ -28,7 +28,7 @@
 						<p><a href=" {{featured_article.get_absolute_url }}"><img src="{% thumbnail featured_article.image 510x233 %}" alt="" class="bordered" /></a></p>
 						{% endif %}
 
-					<div class="post-date">by {{ featured_article.author.get_full_name }} on {{ featured_article.pub_date|date:"DATETIME_FORMAT" }}</div>
+					<div class="post-date">by {{ featured_article.get_authors_names }} on {{ featured_article.pub_date|date:"DATETIME_FORMAT" }}</div>
 
 						<p class="large">{% autoescape off %}{{ featured_article.summary }}{% endautoescape %}</p>
 

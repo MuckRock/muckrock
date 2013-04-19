@@ -1,4 +1,4 @@
 {{ object.title }}
-{{ object.author.get_full_name }}
+{{ object.get_authors_names }}
 {{ object.summary }}
 {{ object.body }}

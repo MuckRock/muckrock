@@ -34,7 +34,8 @@ class Article(models.Model):
     slug = models.SlugField(help_text='A "Slug" is a unique URL-friendly title for an object.')
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
     body = models.TextField('Body text')
-    author = models.ForeignKey(User, limit_choices_to = {'is_staff': True})
+    authors = models.ManyToManyField(User, related_name='authored_articles')
+    editors = models.ManyToManyField(User, related_name='edited_articles', blank=True, null=True)
     publish = models.BooleanField('Publish on site', default=True,
             help_text='Articles will not appear on the site until their "publish date".')
     foias = models.ManyToManyField(FOIARequest, related_name='articles', blank=True, null=True)
@@ -61,6 +62,17 @@ class Article(models.Model):
         # epiceditor likes to stick non breaking spaces in here for some reason
         self.body = self.body.replace(u'\xa0', ' ')
         super(Article, self).save(*args, **kwargs)
+
+    def get_authors_names(self):
+        """Get all authors names for a byline"""
+        # pylint: disable=E1101
+        authors = list(self.authors.all())
+        names = ', '.join(a.get_full_name() for a in authors[:-1])
+        if names:
+            names = ' & '.join([names, authors[-1].get_full_name()])
+        else:
+            names = authors[-1].get_full_name()
+        return names
 
     class Meta:
         # pylint: disable=R0903
