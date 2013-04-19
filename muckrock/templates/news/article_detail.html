@@ -18,7 +18,7 @@
 				{% if object.image %}
 				<p><a href=" {{object.get_absolute_url }}"><img src="{% thumbnail object.image 510x233 %}" alt="" class="bordered" /></a></p>
 				{% endif %}
-				<div class="post-date">by {{object.author.first_name}} {{object.author.last_name}} on {{object.pub_date|date:"DATETIME_FORMAT"}}</div>
+				<div class="post-date">by {{ object.get_authors_names }} on {{object.pub_date|date:"DATETIME_FORMAT"}}</div>
 				{% if object.foias.exists %}
 				<p>FOI Requests:</p>
 				<ul>

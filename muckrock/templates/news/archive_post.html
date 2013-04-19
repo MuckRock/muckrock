@@ -9,7 +9,7 @@
 	<div class="archive-post-title">
 		<h3><a href="{{article.get_absolute_url}}">{{article.title}}</a></h3>
 		<div class="post-date">{{article.pub_date|date:"g:i A, l, F j, Y"}} by
-			{{article.author.first_name}} {{article.author.last_name}}</div>
+			{{ article.get_authors_names }}</div>
 	</div>
 
 	<div class="clearer">&nbsp;</div>
