@@ -10,7 +10,7 @@ from datetime import datetime, date, timedelta
 
 from muckrock.agency.models import Agency, AgencyType
 from muckrock.fields import GroupedModelChoiceField
-from muckrock.foia.models import FOIARequest, FOIAFile, FOIANote
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote
 from muckrock.foia.utils import make_template_choices
 from muckrock.foia.validate import validate_date_order
 from muckrock.jurisdiction.models import Jurisdiction
@@ -37,16 +37,6 @@ class FOIARequestForm(forms.ModelForm):
             del self.fields['embargo']
             self.Meta.fields = ['title', 'agency']
 
-    def clean(self):
-        """agency is required, but must check combobox name field instead of drop down"""
-
-        agency_name = self.request.POST.get('combo-name')
-        submit = self.request.POST.get('submit')
-        if not agency_name and not submit == 'Submit to Multiple Agencies':
-            self._errors['agency'] = self.error_class(['This field is required.'])
-
-        return self.cleaned_data
-
     class Meta:
         # pylint: disable=R0903
         model = FOIARequest
@@ -54,6 +44,22 @@ class FOIARequestForm(forms.ModelForm):
         widgets = {
                 'title': forms.TextInput(attrs={'style': 'width:450px;'}),
                 }
+
+class FOIAMultiRequestForm(forms.ModelForm):
+    """A form for a FOIA Multi-Request"""
+
+    embargo = forms.BooleanField(required=False,
+                                 help_text='Embargoing a request keeps it completely private from '
+                                           'other users until the embargo date you set.  '
+                                           'You may change this whenever you want.')
+    requested_docs = forms.CharField(label='Request',
+        widget=forms.Textarea(attrs={'style': 'width:450px; height:50px;'}))
+
+    class Meta:
+        # pylint: disable=R0903
+        model = FOIAMultiRequest
+        fields = ['title', 'embargo', 'requested_docs']
+        widgets = {'title': forms.TextInput(attrs={'style': 'width:450px;'})}
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
@@ -506,7 +512,8 @@ class FOIAWizardWhereForm(forms.Form):
 
     level = forms.ChoiceField(choices=(('federal', 'Federal'),
                                        ('state', 'State'),
-                                       ('local', 'Local')))
+                                       ('local', 'Local'),
+                                       ('multi', 'Multiple Agencies')))
     state = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
     local = GroupedModelChoiceField(

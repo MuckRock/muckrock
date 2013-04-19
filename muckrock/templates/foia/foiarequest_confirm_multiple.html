@@ -7,6 +7,10 @@
 	<div class="form">
   <form action="" method="post" enctype="multipart/form-data">
 		<fieldset>
+			<span class="right">
+			<input type="checkbox" checked="true" onclick="$('input[id^=id_agencies]').attr('checked', this.checked)" id="toggle_all" />
+      <label for="toggle_all">Select/Unselect All</label>
+			</span>
 			{% include "form.html" %}
 			<input type="submit" name="submit" value="Confirm" class="button" />
 			<input type="submit" name="submit" value="Cancel" class="right button" />
