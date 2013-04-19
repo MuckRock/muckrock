@@ -5,6 +5,7 @@ Django settings for muckrock project
 import os
 import urlparse
 
+
 def boolcheck(setting):
     """Turn env var into proper bool"""
     if isinstance(setting, basestring):
@@ -72,9 +73,6 @@ else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
-
-TINY_MCE_ROOT = os.path.join(SITE_ROOT, 'tiny_mce')
-TINYMCE_JS_URL = '/tiny_mce/tiny_mce.js'
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
@@ -164,10 +162,10 @@ INSTALLED_APPS = (
     'taggit',
     'dbsettings',
     'storages',
-    'tinymce',
     'django_tablib',
     'urlauth',
     'epiceditor',
+    'markdown_deux',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -250,14 +248,30 @@ elif HAYSTACK_SEARCH_ENGINE == 'solr':
 URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
 URLAUTH_AUTHKEY_NAME = 'authkey'
 
-ASSETS_DEBUG = True
+ASSETS_DEBUG = False
 
 MONTHLY_REQUESTS = {
-    'admin': 100,
+    'admin': 20,
     'beta': 5,
     'community': 0,
     'pro': 20,
 }
+
+MARKDOWN_DEUX_STYLES = {
+    "default": {
+        "extras": {
+            "code-friendly": None,
+        },
+        "safe_mode": "escape",
+    },
+    "trusted": {
+        "extras": {
+            "code-friendly": None,
+        },
+        "safe_mode": False,
+    }
+}
+
 
 LOGGING = {
     'version': 1,
