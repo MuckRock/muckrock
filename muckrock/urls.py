@@ -45,12 +45,6 @@ urlpatterns = patterns('',
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
 )
 
-urlpatterns += patterns('',
-    url(r'^tiny_mce/(?P<path>.*)$', 'django.views.static.serve', {
-        'document_root': settings.TINY_MCE_ROOT,
-    }),
-)
-
 if settings.DEBUG:
     urlpatterns += patterns('',
         url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {

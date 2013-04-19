@@ -41,8 +41,8 @@ cssselect==0.7.1
 django-adaptors==0.2.3
 iron-celery==0.3.1
 kombu==2.5.8
-django-tinymce==1.5.1b4
 django-tablib==2.4.1
 django-urlauth==0.1.8
 django-epiceditor==0.2.1.2
 Markdown==2.3.1
+django-markdown-deux==1.0.4
