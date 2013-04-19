@@ -56,6 +56,12 @@ class Article(models.Model):
                 'day': self.pub_date.strftime('%d'),
                 'slug': self.slug})
 
+    def save(self, *args, **kwargs):
+        """Save the news article"""
+        # epiceditor likes to stick non breaking spaces in here for some reason
+        self.body = self.body.replace(u'\xa0', ' ')
+        super(Article, self).save(*args, **kwargs)
+
     class Meta:
         # pylint: disable=R0903
         ordering = ['-pub_date']
