@@ -1,23 +1,30 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-class Migration(DataMigration):
+class Migration(SchemaMigration):
     
     def forwards(self, orm):
-        "Write your forwards methods here."
-        for foia in orm.FOIARequest.objects.all():
-            try:
-                foia.requested_docs = foia.communications.all()[0].communication
-            except IndexError:
-                pass
-            foia.save()
+        
+        # Adding model 'FOIAMultiRequest'
+        db.create_table('foia_foiamultirequest', (
+            ('embargo', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('requested_docs', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=255, db_index=True)),
+        ))
+        db.send_create_signal('foia', ['FOIAMultiRequest'])
     
     
     def backwards(self, orm):
-        "Write your backwards methods here."
+        
+        # Deleting model 'FOIAMultiRequest'
+        db.delete_table('foia_foiamultirequest')
+    
     
     models = {
         'agency.agency': {
@@ -67,7 +74,7 @@ class Migration(DataMigration):
         },
         'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 3, 30, 11, 3, 2, 121847)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 19, 12, 47, 16, 863153)'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -75,7 +82,7 @@ class Migration(DataMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 3, 30, 11, 3, 2, 121741)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 19, 12, 47, 16, 863053)'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -123,6 +130,15 @@ class Migration(DataMigration):
             'pages': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'source': ('django.db.models.fields.CharField', [], {'max_length': '70', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '70'})
+        },
+        'foia.foiamultirequest': {
+            'Meta': {'object_name': 'FOIAMultiRequest'},
+            'embargo': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'requested_docs': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'db_index': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'foia.foianote': {
             'Meta': {'object_name': 'FOIANote'},

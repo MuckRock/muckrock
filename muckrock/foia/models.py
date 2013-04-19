@@ -566,6 +566,31 @@ class FOIARequest(models.Model):
         verbose_name = 'FOIA Request'
 
 
+class FOIAMultiRequest(models.Model):
+    """A Freedom of Information Act request"""
+    # pylint: disable=R0904
+    # pylint: disable=R0902
+
+    user = models.ForeignKey(User)
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255)
+    embargo = models.BooleanField()
+    requested_docs = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.title
+
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('foia-multi-update', [], {'slug': self.slug, 'idx': self.pk})
+
+    class Meta:
+        # pylint: disable=R0903
+        ordering = ['title']
+        verbose_name = 'FOIA Multi-Request'
+
+
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 

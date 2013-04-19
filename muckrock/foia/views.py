@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
-from django.template import RequestContext
+from django.template import RequestContext, Context
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
@@ -32,8 +32,8 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
-                                TEMPLATES 
-from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+                                FOIAMultiRequestForm, TEMPLATES 
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -114,10 +114,6 @@ def _foia_form_handler(request, foia, action):
 
                 foia.save()
 
-                if request.POST['submit'] == 'Submit to Multiple Agencies':
-                    return HttpResponseRedirect(reverse('foia-submit-multiple',
-                                                        kwargs={'foia': foia.pk}))
-
                 if new_agency:
                     return HttpResponseRedirect(reverse('agency-update',
                         kwargs={'jurisdiction': foia.agency.jurisdiction.slug,
@@ -125,7 +121,7 @@ def _foia_form_handler(request, foia, action):
                                 'slug': foia.agency.slug, 'idx': foia.agency.pk})
                                                 + '?foia=%d' % foia.pk)
                 else:
-                    return HttpResponseRedirect(foia.get_absolute_url())
+                    return redirect(foia)
 
         except KeyError:
             # bad post, not possible from web form
@@ -137,14 +133,16 @@ def _foia_form_handler(request, foia, action):
                               {'form': form, 'action': action},
                               context_instance=RequestContext(request))
 
-@user_passes_test(lambda u: u.is_staff)
-def submit_multiple(request, foia):
+@login_required
+def submit_multiple(request, slug, idx):
     """Submit a request to multiple agencies"""
+
+    get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if request.method == 'POST':
         form = FOIAMultipleSubmitForm(request.POST)
         if form.is_valid():
-            url = reverse('foia-confirm-multiple', kwargs={'foia': foia})
+            url = reverse('foia-confirm-multiple', kwargs={'idx': idx, 'slug': slug})
             url += '?' + urlencode([(k, v.pk) for k, v in form.cleaned_data.iteritems() if v])
             return HttpResponseRedirect(url)
     else:
@@ -153,10 +151,12 @@ def submit_multiple(request, foia):
     return render_to_response('foia/foiarequest_submit_multiple.html', {'form': form},
                               context_instance=RequestContext(request))
 
-@user_passes_test(lambda u: u.is_staff)
-def confirm_multiple(request, foia):
+@login_required
+def confirm_multiple(request, slug, idx):
     """Display the selected agencies and allow the user to confirm them"""
     # pylint: disable=R0914
+
+    foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     agency_type = request.GET.get('agency_type')
     jurisdiction = request.GET.get('jurisdiction')
@@ -171,33 +171,39 @@ def confirm_multiple(request, foia):
                                        Q(jurisdiction__parent=jurisdiction))
         else:
             agencies = agencies.filter(jurisdiction=jurisdiction)
-    choices = [(a.pk, '%s, %s' % (a.name, a.jurisdiction)) for a in agencies]
+    choices = [(a.pk, '%s - %s' % (a.name, a.jurisdiction)) for a in agencies]
 
+    # XXX check for payment
     if request.method == 'POST':
         form = AgencyConfirmForm(request.POST, choices=choices)
         if form.is_valid():
-            foia = FOIARequest.objects.get(pk=foia)
-            foia_comm = foia.communications.all()[0]
             if request.POST.get('submit') == 'Confirm':
                 for agency_pk in form.cleaned_data['agencies']:
                     # make a copy of the foia (and its communication) for each agency
                     agency = Agency.objects.get(pk=agency_pk)
                     title = '%s (%s)' % (foia.title, agency.name)
+                    template = get_template('request_templates/none.txt')
+                    context = Context({'document_request': foia.requested_docs})
+                    foia_request = template.render(context).split('\n', 1)[1].strip()
+
                     new_foia = FOIARequest.objects.create(user=foia.user, status='started',
-                                                          title=title, slug=foia.slug,
+                                                          title=title, slug=slugify(title),
                                                           jurisdiction=agency.jurisdiction,
-                                                          agency=agency)
+                                                          agency=agency, embargo=foia.embargo,
+                                                          requested_docs=foia.requested_docs,
+                                                          description=foia.requested_docs)
                     FOIACommunication.objects.create(
-                            foia=new_foia, from_who=foia_comm.from_who, to_who=foia_comm.to_who,
-                            date=datetime.now(), response=False, full_html=False,
-                            communication=foia_comm.communication)
+                            foia=new_foia, from_who=new_foia.user.get_full_name(),
+                            to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                            full_html=False, communication=foia_request)
 
                     new_foia.submit()
                 messages.success(request, 'Request has been submitted to selected agencies')
             else:
                 messages.info(request, 'Multiple agency submit has been cancelled')
 
-        return redirect(foia)
+        foia.delete()
+        return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
 
     default = [pk for pk, _ in choices]
     form = AgencyConfirmForm(choices=choices, initial={'agencies': default})
@@ -222,6 +228,8 @@ class FOIAWizard(SessionWizardView):
             jurisdiction = data[level]
         elif level == 'federal':
             jurisdiction = Jurisdiction.objects.get(level='f')
+        elif level == 'multi':
+            jurisdiction = None
 
         template_file = 'request_templates/%s.txt' % template_name
         data['jurisdiction'] = jurisdiction
@@ -238,23 +246,32 @@ class FOIAWizard(SessionWizardView):
         if len(title) > 70:
             title = title[:70]
         slug = slugify(title) or 'untitled'
-        foia = FOIARequest.objects.create(user=self.request.user, status='started', title=title,
-                                          jurisdiction=jurisdiction, slug=slug,
-                                          agency=agency, requested_docs=requested_docs,
-                                          description=requested_docs)
-        FOIACommunication.objects.create(
-                foia=foia, from_who=self.request.user.get_full_name(), to_who=foia.get_to_who(),
-                date=datetime.now(), response=False, full_html=False, communication=foia_request)
+        if jurisdiction:
+            foia = FOIARequest.objects.create(user=self.request.user, status='started', title=title,
+                                              jurisdiction=jurisdiction, slug=slug,
+                                              agency=agency, requested_docs=requested_docs,
+                                              description=requested_docs)
+            FOIACommunication.objects.create(
+                    foia=foia, from_who=self.request.user.get_full_name(), to_who=foia.get_to_who(),
+                    date=datetime.now(), response=False, full_html=False,
+                    communication=foia_request)
+        else:
+            foia = FOIAMultiRequest.objects.create(user=self.request.user, title=title, slug=slug,
+                                                   requested_docs=requested_docs)
 
         messages.success(self.request, 'Request succesfully created.  Please review it and make '
-                                        'any changes that you need.  You may save it for future '
-                                        'review or submit it when you are ready.')
+                                       'any changes that you need.  You may save it for future '
+                                       'review or submit it when you are ready.')
 
-        return HttpResponseRedirect(reverse('foia-update',
-                                    kwargs={'jurisdiction': jurisdiction.slug,
-                                            'jidx': jurisdiction.pk,
-                                            'idx': foia.pk,
-                                            'slug': slug}))
+        if jurisdiction:
+            return HttpResponseRedirect(reverse('foia-update',
+                                        kwargs={'jurisdiction': jurisdiction.slug,
+                                                'jidx': jurisdiction.pk,
+                                                'idx': foia.pk,
+                                                'slug': slug}))
+        else:
+            return HttpResponseRedirect(reverse('foia-multi-update',
+                                        kwargs={'idx': foia.pk, 'slug': slug}))
 
     def get_context_data(self, form, **kwargs):
         """Add extra context to certain steps"""
@@ -278,12 +295,12 @@ class FOIAWizard(SessionWizardView):
 def create(request):
     """Create a new foia request using the wizard"""
 
-    def display_what_form(level):
+    def display_what_form(levels):
         """Display which 'What Form'"""
         def condition(wizard):
             """For condition dict"""
             cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            return cleaned_data.get('level') == level
+            return cleaned_data.get('level') in levels
         return condition
 
     def display_template_form(template):
@@ -291,7 +308,10 @@ def create(request):
         def condition(wizard):
             """For condition dict"""
             cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            what_form = 'FOIAWhat%sForm' % cleaned_data.get('level', '').capitalize()
+            level = cleaned_data.get('level', '').capitalize()
+            if level == 'Multi':
+                level = 'Local'
+            what_form = 'FOIAWhat%sForm' % level
             cleaned_data = wizard.get_cleaned_data_for_step(what_form) or {}
             return cleaned_data.get('template') == template
         return condition
@@ -302,9 +322,9 @@ def create(request):
     wizard_forms += [(t.__name__, t) for t in TEMPLATES.values()]
 
     condition_dict = {
-        'FOIAWhatLocalForm':   display_what_form('local'),
-        'FOIAWhatStateForm':   display_what_form('state'),
-        'FOIAWhatFederalForm': display_what_form('federal'),
+        'FOIAWhatLocalForm':   display_what_form(('local', 'multi')),
+        'FOIAWhatStateForm':   display_what_form(('state',)),
+        'FOIAWhatFederalForm': display_what_form(('federal',)),
     }
     condition_dict.update(dict((t.__name__, display_template_form(tslug))
                                for tslug, t in TEMPLATES.iteritems()))
@@ -326,6 +346,48 @@ def update(request, jurisdiction, jidx, slug, idx):
         return redirect(foia)
 
     return _foia_form_handler(request, foia, 'Update')
+
+@login_required
+def multirequest_update(request, slug, idx):
+    """Update a started FOIA MultiRequest"""
+
+    foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
+
+    if foia.user != request.user:
+        messages.error(request, 'You may only edit your own requests')
+        return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+
+    if request.method == 'POST':
+        if request.POST.get('submit') == 'Delete':
+            foia.delete()
+            messages.info(request, 'Request succesfully deleted')
+            return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+
+        try:
+            form = FOIAMultiRequestForm(request.POST, instance=foia)
+
+            if form.is_valid():
+
+                foia = form.save(commit=False)
+                foia.user = request.user
+                foia.slug = slugify(foia.title) or 'untitled'
+                foia.save()
+
+                if request.POST['submit'] == 'Submit Requests':
+                    return HttpResponseRedirect(reverse('foia-submit-multiple',
+                                                        kwargs={'idx': foia.pk, 'slug': foia.slug}))
+
+                messages.success(request, 'Request has been saved')
+                return redirect(foia)
+
+        except KeyError:
+            # bad post, not possible from web form
+            form = FOIAMultiRequestForm(instance=foia)
+    else:
+        form = FOIAMultiRequestForm(instance=foia)
+
+    return render_to_response('foia/foiamultirequest_form.html', {'form': form, 'foia': foia},
+                              context_instance=RequestContext(request))
 
 def _foia_action(request, jurisdiction, jidx, slug, idx, action):
     """Generic helper for FOIA actions"""

@@ -15,7 +15,8 @@ from datetime import date, timedelta
 from django_tablib.admin import TablibAdmin
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication, FOIANote, STATUS
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACommunication, \
+                                 FOIANote, STATUS
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
 from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
@@ -262,4 +263,5 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
 
 
 admin.site.register(FOIARequest,  FOIARequestAdmin)
+admin.site.register(FOIAMultiRequest)
 
