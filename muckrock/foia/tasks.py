@@ -37,7 +37,7 @@ class FOIAOptions(dbsettings.Group):
     enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
 options = FOIAOptions()
 
-@task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.upload_document_cloud')
+@task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
 def upload_document_cloud(doc_pk, change, **kwargs):
     """Upload a document to Document Cloud"""
 
@@ -46,7 +46,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     except FOIAFile.DoesNotExist, exc:
         # pylint: disable=E1101
         # give database time to sync
-        upload_document_cloud.retry(args=[doc_pk, change], kwargs=kwargs, exc=exc)
+        upload_document_cloud.retry(countdown=300, args=[doc_pk, change], kwargs=kwargs, exc=exc)
 
     if not doc.is_doccloud():
         # not a file doc cloud supports, do not attempt to upload
