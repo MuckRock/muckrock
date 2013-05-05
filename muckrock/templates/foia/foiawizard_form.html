@@ -14,6 +14,9 @@
 			{% with wizard.form as form %}
 			{% include "form.html" %}
 			{% endwith %}
+			{% if wizard.steps.prev %}
+			<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="jqbutton">Previous</button>
+			{% endif %}
 			<input type="submit" name="submit" value="Next" class="button" />
 		</fieldset>
   </form>

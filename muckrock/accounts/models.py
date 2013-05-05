@@ -72,6 +72,24 @@ class Profile(models.Model):
         else:
             return False
 
+    def multiple_requests(self, num):
+        """How many requests of each type would be used for this user to make num requests"""
+        request_dict = {'monthly_requests': 0, 'reg_requests': 0, 'extra_requests': 0}
+        monthly = self.get_monthly_requests()
+        if monthly > num:
+            request_dict['monthly_requests'] = num
+            return request_dict
+        else:
+            request_dict['monthly_requests'] = monthly
+            num -= monthly
+        if self.num_requests > num:
+            request_dict['reg_requests'] = num
+            return request_dict
+        else:
+            request_dict['reg_requests'] = self.num_requests
+            request_dict['extra_requests'] = num - self.num_requests
+            return request_dict
+
     def can_embargo(self):
         """Is this user allowed to embargo?"""
 

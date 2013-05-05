@@ -261,7 +261,31 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
 
+class FOIAMultiRequestAdmin(NestedModelAdmin, TablibAdmin):
+    """FOIA Multi Request admin options"""
+    change_form_template = 'admin/foia/multifoiarequest/change_form.html'
+    prepopulated_fields = {'slug': ('title',)}
+    list_display = ('title', 'user')
+    search_fields = ['title', 'requested_docs']
 
-admin.site.register(FOIARequest,  FOIARequestAdmin)
-admin.site.register(FOIAMultiRequest)
+    def get_urls(self):
+        """Add custom URLs here"""
+        urls = super(FOIAMultiRequestAdmin, self).get_urls()
+        my_urls = patterns('', url(r'^submit/(?P<idx>\d+)/$',
+                                   self.admin_site.admin_view(self.submit),
+                                   name='multifoia-admin-submit'))
+        return my_urls + urls
+
+    def submit(self, request, idx):
+        """Submit the multi request"""
+        # pylint: disable=R0201
+
+        foia = get_object_or_404(FOIAMultiRequest, pk=idx)
+        foia.submit()
+        messages.info(request, 'Multi request has been submitted')
+        return HttpResponseRedirect(reverse('admin:foia_foiamultirequest_changelist'))
+
+
+admin.site.register(FOIARequest, FOIARequestAdmin)
+admin.site.register(FOIAMultiRequest, FOIAMultiRequestAdmin)
 

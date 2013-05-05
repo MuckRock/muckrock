@@ -14,14 +14,13 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
-from django.template import RequestContext, Context
+from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
-from urllib import urlencode
 import logging
 import stripe
 import sys
@@ -133,83 +132,112 @@ def _foia_form_handler(request, foia, action):
                               {'form': form, 'action': action},
                               context_instance=RequestContext(request))
 
-@login_required
-def submit_multiple(request, slug, idx):
-    """Submit a request to multiple agencies"""
+class SubmitMultipleWizard(SessionWizardView):
+    """Wizard to submit a request to multiple agencies"""
+    # pylint: disable=R0904
 
-    get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
+    templates = {
+        'submit': 'foia/foiarequest_submit_multiple.html',
+        'agency': 'foia/foiarequest_confirm_multiple.html',
+        'pay':    'foia/foiarequest_pay_multiple.html',
+    }
+    agencies = None
 
-    if request.method == 'POST':
-        form = FOIAMultipleSubmitForm(request.POST)
-        if form.is_valid():
-            url = reverse('foia-confirm-multiple', kwargs={'idx': idx, 'slug': slug})
-            url += '?' + urlencode([(k, v.pk) for k, v in form.cleaned_data.iteritems() if v])
-            return HttpResponseRedirect(url)
-    else:
-        form = FOIAMultipleSubmitForm()
+    def done(self, form_list, **kwargs):
+        """Pay for extra requests if necessary and then file all the requests"""
 
-    return render_to_response('foia/foiarequest_submit_multiple.html', {'form': form},
-                              context_instance=RequestContext(request))
+        foia = get_object_or_404(FOIAMultiRequest, slug=kwargs['slug'], pk=kwargs['idx'])
 
-@login_required
-def confirm_multiple(request, slug, idx):
-    """Display the selected agencies and allow the user to confirm them"""
-    # pylint: disable=R0914
+        data = self.get_all_cleaned_data()
+        agencies = data['agencies']
+        user = self.request.user
+        profile = user.get_profile()
 
-    foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
+        # handle # requests and payment
+        request_dict = profile.multiple_requests(agencies.count())
+        profile.monthly_requests -= request_dict['monthly_requests']
+        profile.num_requests -= request_dict['reg_requests']
+        profile.save()
+        payment_required = 400 * request_dict['extra_requests']
 
-    agency_type = request.GET.get('agency_type')
-    jurisdiction = request.GET.get('jurisdiction')
+        if payment_required > 0:
+            profile.pay(form_list[-1], payment_required,
+                        'Charge for multi request: %s %s' % (foia.title, foia.pk))
+            logger.info('%s has paid %0.2f for request %s',
+                        user.username, payment_required/100, foia.title)
 
-    agencies = Agency.objects.all()
-    if agency_type:
-        agencies = agencies.filter(types__id=agency_type)
-    if jurisdiction:
-        jmodel = Jurisdiction.objects.get(pk=jurisdiction)
-        if jmodel.level == 's':
-            agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
-                                       Q(jurisdiction__parent=jurisdiction))
-        else:
-            agencies = agencies.filter(jurisdiction=jurisdiction)
-    choices = [(a.pk, '%s - %s' % (a.name, a.jurisdiction)) for a in agencies]
+        # file all of the requests
+        foia.agencies = agencies
+        foia.save()
+        messages.success(self.request, 'Request has been submitted to selected agencies')
+        send_mail('[MULTI] Freedom of Information Request: %s' % (foia.title),
+                  render_to_string('foia/multi_mail.txt', {'request': foia}),
+                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-    # XXX check for payment
-    if request.method == 'POST':
-        form = AgencyConfirmForm(request.POST, choices=choices)
-        if form.is_valid():
-            if request.POST.get('submit') == 'Confirm':
-                for agency_pk in form.cleaned_data['agencies']:
-                    # make a copy of the foia (and its communication) for each agency
-                    agency = Agency.objects.get(pk=agency_pk)
-                    title = '%s (%s)' % (foia.title, agency.name)
-                    template = get_template('request_templates/none.txt')
-                    context = Context({'document_request': foia.requested_docs})
-                    foia_request = template.render(context).split('\n', 1)[1].strip()
-
-                    new_foia = FOIARequest.objects.create(user=foia.user, status='started',
-                                                          title=title, slug=slugify(title),
-                                                          jurisdiction=agency.jurisdiction,
-                                                          agency=agency, embargo=foia.embargo,
-                                                          requested_docs=foia.requested_docs,
-                                                          description=foia.requested_docs)
-                    FOIACommunication.objects.create(
-                            foia=new_foia, from_who=new_foia.user.get_full_name(),
-                            to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                            full_html=False, communication=foia_request)
-
-                    new_foia.submit()
-                messages.success(request, 'Request has been submitted to selected agencies')
-            else:
-                messages.info(request, 'Multiple agency submit has been cancelled')
-
-        foia.delete()
+        # redirect to your foias
         return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
 
-    default = [pk for pk, _ in choices]
-    form = AgencyConfirmForm(choices=choices, initial={'agencies': default})
+    def get_template_names(self):
+        return self.templates[self.steps.current]
 
-    return render_to_response('foia/foiarequest_confirm_multiple.html', {'form': form},
-                              context_instance=RequestContext(request))
+    def _get_agencies(self):
+        """Get and cache the agncies selected in the submit step"""
+        if self.agencies:
+            return self.agencies
+        else:
+            data = self.get_cleaned_data_for_step('submit')
+            agency_type = data.get('agency_type')
+            jurisdiction = data.get('jurisdiction')
+            agencies = Agency.objects.all()
+            if agency_type:
+                agencies = agencies.filter(types=agency_type)
+            if jurisdiction and jurisdiction.level == 's':
+                agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
+                                           Q(jurisdiction__parent=jurisdiction))
+            elif jurisdiction:
+                agencies = agencies.filter(jurisdiction=jurisdiction)
+            self.agencies = agencies
+            return agencies
+
+    def get_form_kwargs(self, step=None):
+        if step == 'agency':
+            return {'queryset': self._get_agencies()}
+        elif step == 'pay':
+            return {'request': self.request}
+        else:
+            return {}
+
+    def get_form_initial(self, step):
+        if step == 'agency':
+            return {'agencies': self._get_agencies()}
+        elif step == 'pay':
+            return {'name': self.request.user.get_full_name()}
+        else:
+            return self.initial_dict.get(step, {})
+
+    def get_context_data(self, form, **kwargs):
+        """Add extra context to certain steps"""
+        context = super(SubmitMultipleWizard, self).get_context_data(form=form, **kwargs)
+        if self.steps.current == 'pay':
+            data = self.get_cleaned_data_for_step('agency')
+            num_requests = data['agencies'].count()
+            extra_context = self.request.user.get_profile().multiple_requests(num_requests)
+            extra_context['payment_required'] = 4 * extra_context['extra_requests']
+            extra_context['pub_key'] = STRIPE_PUB_KEY
+            context.update(extra_context)
+        return context
+
+@login_required
+def multiple(request, **kwargs):
+    """Submit a multi agency request using the wizard"""
+
+    multi_forms = [
+        ('submit', FOIAMultipleSubmitForm),
+        ('agency', AgencyConfirmForm),
+        ('pay', PaymentForm),
+        ]
+
+    return SubmitMultipleWizard.as_view(multi_forms)(request, **kwargs)
 
 class FOIAWizard(SessionWizardView):
     """Wizard to create FOIA requests"""
@@ -374,7 +402,7 @@ def multirequest_update(request, slug, idx):
                 foia.save()
 
                 if request.POST['submit'] == 'Submit Requests':
-                    return HttpResponseRedirect(reverse('foia-submit-multiple',
+                    return HttpResponseRedirect(reverse('foia-multi',
                                                         kwargs={'idx': foia.pk, 'slug': foia.slug}))
 
                 messages.success(request, 'Request has been saved')
@@ -619,7 +647,7 @@ class ListBase(ListView):
     """Base list view for other list views to inherit from"""
 
     def sort_requests(self, foia_requests, update_top=False):
-        """Sort's the FOIA requests"""
+        """Sorts the FOIA requests"""
 
         get = self.request.GET
 
@@ -708,6 +736,8 @@ class MyList(ListBase):
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
+            # Allow multi requests to have tags
+            _ = post.getlist('multi')
             if post.get('submit') == 'Add Tag':
                 tag_pk = post.get('tag')
                 tag_name = Tag.normalize(post.get('combo-name'))
@@ -730,9 +760,36 @@ class MyList(ListBase):
 
         return redirect('foia-mylist', view=view)
 
+    def merge_requests(self, foia_requests, multi_requests):
+        """Merges the sorted FOIA requests with the multi requests"""
+
+        get = self.request.GET
+
+        order = get.get('order', 'desc')
+        field = get.get('field', 'date_submitted')
+
+        updated_foia_requests = [f for f in foia_requests if f.updated]
+        other_foia_requests   = [f for f in foia_requests if not f.updated]
+
+        if field == 'title':
+            both = list(other_foia_requests) + list(multi_requests)
+            both.sort(key=lambda x: x.title, reverse=(order != 'asc'))
+            both = updated_foia_requests + both
+        elif field == 'status':
+            both = list(other_foia_requests) + list(multi_requests)
+            both.sort(key=lambda x: x.status, reverse=(order != 'asc'))
+            both = updated_foia_requests + both
+        elif order == 'asc':
+            both = list(updated_foia_requests) + list(other_foia_requests) + list(multi_requests)
+        else:
+            both = list(updated_foia_requests) + list(multi_requests) + list(other_foia_requests)
+
+        return both
+
     def get_queryset(self):
         """Get FOIAs for this view"""
         unsorted = FOIARequest.objects.filter(user=self.request.user)
+        multis = FOIAMultiRequest.objects.filter(user=self.request.user)
         view = self.kwargs.get('view', 'all')
         if view == 'drafts':
             unsorted = unsorted.get_editable()
@@ -748,8 +805,12 @@ class MyList(ListBase):
         tag = self.request.GET.get('tag')
         if tag:
             unsorted = unsorted.filter(tags__slug=tag)
+            multis = multis.filter(tags__slug=tag)
 
-        return self.sort_requests(unsorted, update_top=True)
+        sorted_requests = self.sort_requests(unsorted, update_top=True)
+        if view in ['drafts', 'all']:
+            sorted_requests = self.merge_requests(sorted_requests, multis)
+        return sorted_requests
 
     def get_context_data(self, **kwargs):
         context = super(MyList, self).get_context_data(**kwargs)

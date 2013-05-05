@@ -6,12 +6,15 @@
 	<p class="large">Are you sure you want to submit this request to these agencies?</p>
 	<div class="form">
   <form action="" method="post" enctype="multipart/form-data">
+		{{ wizard.management_form }}
 		<fieldset>
 			<span class="right">
-			<input type="checkbox" checked="true" onclick="$('input[id^=id_agencies]').attr('checked', this.checked)" id="toggle_all" />
+			<input type="checkbox" checked="true" onclick="$('input[id^=id_agency]').attr('checked', this.checked)" id="toggle_all" />
       <label for="toggle_all">Select/Unselect All</label>
 			</span>
+			{% with wizard.form as form %}
 			{% include "form.html" %}
+			{% endwith %}
 			<input type="submit" name="submit" value="Confirm" class="button" />
 			<input type="submit" name="submit" value="Cancel" class="right button" />
 		</fieldset>

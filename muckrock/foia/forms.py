@@ -111,11 +111,16 @@ class AgencyConfirmForm(forms.Form):
     """Confirm agencies for a multiple submit"""
 
     def __init__(self, *args, **kwargs):
-        self.choices = kwargs.pop('choices', [])
+        self.queryset = kwargs.pop('queryset', [])
         super(AgencyConfirmForm, self).__init__(*args, **kwargs)
-        self.fields['agencies'].choices = self.choices
+        self.fields['agencies'].queryset = self.queryset
 
-    agencies = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple)
+    class AgencyChoiceField(forms.ModelMultipleChoiceField):
+        """Add jurisdiction to agency label"""
+        def label_from_instance(self, obj):
+            return '%s - %s' % (obj.name, obj.jurisdiction)
+
+    agencies = AgencyChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
 
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""

@@ -29,20 +29,29 @@
 		</tr>
 		{% for foia in object_list %}
 		<tr class="{% if foia.updated %}updated{% else %}{% cycle 'even' 'odd' %}{% endif %}">
-			<td><input type="checkbox" name="foia" value="{{foia.pk}}" /></td>
+			<td><input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" /></td>
 			<td><a href="
-			  {% if request.user == foia.user and foia.status == "started" %}
+			  {% if request.user == foia.user and foia.status == "started" and foia.foia_type == "foia" %}
 					{% url foia-update jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
-				{% else %}
+				{% elif foia.foia_type == "foia" %}
 					{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+				{% else %}
+					{% url foia-multi-update idx=foia.pk,slug=foia.slug %}
 				{% endif %}
 			">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 			<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
-			<td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{foia.jurisdiction}}</a></td>
+			<td>{% if foia.jurisdiction %}
+					<a href="{{ foia.jurisdiction.get_absolute_url }}">{{foia.jurisdiction}}</a>
+					{% else %}
+					&mdash;
+					{% endif %}
+			</td>
 			<td>{% if foia.date_submitted %}
 						{{ foia.date_submitted|date:"SHORT_DATE_FORMAT" }}
-					{% else %}
+					{% elif foia.foia_type == "foia" %}
 						{{ foia.communications.all.0.date|date:"SHORT_DATE_FORMAT" }}
+					{% else %}
+					&mdash;
 					{% endif %}
 			</td>
 		</tr>
