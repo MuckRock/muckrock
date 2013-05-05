@@ -87,14 +87,14 @@
 			{% for comm in foia.communications.all %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
-				<strong>From {{comm.from_who|redact_emails}} {% if comm.to_who %}to {{comm.to_who|redact_emails}} {% endif %}on {{comm.date|date}}:</strong><br />
+				<strong>From {{comm.from_who}} {% if comm.to_who %}to {{comm.to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# html communication #}
 				{% if comm.full_html %}
 					{% autoescape off %}{{comm.communication}}{% endautoescape %}
 				{# text communication #}
 				{% else %}
-					{{comm.communication|redact_emails|urlize|linebreaks}}
+					{{comm.communication|urlize|linebreaks}}
 				{% endif %}
 
         {% for file in comm.files.all %}
