@@ -404,6 +404,7 @@ class FOIARequest(models.Model):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         # Do not self.update() here for now to avoid excessive emails
+        self.update_dates()
 
     def _send_email(self):
         """Send an email of the request to its email address"""

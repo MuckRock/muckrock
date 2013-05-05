@@ -166,6 +166,13 @@ class TestFOIARequestUnit(TestCase):
         foia.set_mail_id()
         nose.tools.eq_(mail_id, foia.mail_id)
 
+    def test_foia_followup(self):
+        """Make sure the follow up date is set correctly"""
+        # pylint: disable=W0212
+        foia = FOIARequest.objects.get(pk=15)
+        foia.followup()
+        nose.tools.eq_(foia.date_followup,
+                       datetime.date.today() + datetime.timedelta(foia._followup_days()))
 
      # manager
     def test_manager_get_submitted(self):

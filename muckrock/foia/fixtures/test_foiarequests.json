@@ -253,7 +253,8 @@
             "date_due": "2001-01-10", 
             "user": 1,
             "slug": "test-15",
-			"price": "0.00"
+			"price": "0.00",
+			"email": "example@example.com"
         }
     },
 	{
