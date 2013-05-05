@@ -6,8 +6,11 @@
 	<p class="large">Selecting an agency type will restrict the agencies to those of that type.  Leave it blank for all types.  Selecting a jurisdiction will restrict it to agencies in that jurisdiction (If you select a state, that state's local jurisdictions will also be included).  Leave it blank to select agencies from all jurisdictions.  After submitting, you will be shown a list of all agencies that matched your criteria and asked to confirm that you want to submit this request to all of them.</p>
 	<div class="form">
   <form action="" method="post" enctype="multipart/form-data">
+		{{ wizard.management_form }}
 		<fieldset>
+			{% with wizard.form as form %}
 			{% include "form.html" %}
+			{% endwith %}
 			<input type="submit" name="submit" value="Submit" class="button" />
 		</fieldset>
   </form>

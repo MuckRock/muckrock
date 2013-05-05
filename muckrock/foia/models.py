@@ -7,7 +7,9 @@ from django.core.mail import send_mail, send_mass_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
-from django.template.loader import render_to_string
+from django.template.defaultfilters import slugify
+from django.template.loader import render_to_string, get_template
+from django.template import Context
 
 from datetime import datetime, date, timedelta
 from hashlib import md5
@@ -137,6 +139,8 @@ class FOIARequest(models.Model):
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+
+    foia_type = 'foia'
 
     def __unicode__(self):
         return self.title
@@ -576,6 +580,14 @@ class FOIAMultiRequest(models.Model):
     slug = models.SlugField(max_length=255)
     embargo = models.BooleanField()
     requested_docs = models.TextField(blank=True)
+    agencies = models.ManyToManyField(Agency, related_name='agencies', blank=True, null=True)
+
+    tags = TaggableManager(through=TaggedItemBase, blank=True)
+
+    color_code = 'wait'
+    status = 'started'
+    get_status_display = 'Draft'
+    foia_type = 'multi'
 
     def __unicode__(self):
         return self.title
@@ -584,6 +596,31 @@ class FOIAMultiRequest(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('foia-multi-update', [], {'slug': self.slug, 'idx': self.pk})
+
+    def submit(self):
+        """Submit the multi request to all of the agencies"""
+        # pylint: disable=E1101
+        for agency in self.agencies.all():
+            # make a copy of the foia (and its communication) for each agency
+            title = '%s (%s)' % (self.title, agency.name)
+            template = get_template('request_templates/none.txt')
+            context = Context({'document_request': self.requested_docs,
+                               'jurisdiction': agency.jurisdiction,
+                               'user': self.user})
+            foia_request = template.render(context).split('\n', 1)[1].strip()
+
+            new_foia = FOIARequest.objects.create(
+                user=self.user, status='started', title=title, slug=slugify(title),
+                jurisdiction=agency.jurisdiction, agency=agency, embargo=self.embargo,
+                requested_docs=self.requested_docs, description=self.requested_docs)
+
+            FOIACommunication.objects.create(
+                    foia=new_foia, from_who=new_foia.user.get_full_name(),
+                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                    full_html=False, communication=foia_request)
+
+            new_foia.submit()
+        self.delete()
 
     class Meta:
         # pylint: disable=R0903
