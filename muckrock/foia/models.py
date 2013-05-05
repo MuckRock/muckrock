@@ -103,7 +103,7 @@ STATUS = (
     ('no_docs', 'No Responsive Documents'),
     ('done', 'Completed'),
     ('partial', 'Partially Completed'),
-    ('abandoned', 'Abandoned'),
+    ('abandoned', 'Withdrawn'),
 )
 
 class FOIARequest(models.Model):
