@@ -85,10 +85,12 @@
 		<tr class="odd">
 			<th width="30%">Appeal Information<br />
 			<td>
-				{{num_appealing}} appeals awaiting response<br />
+				{{num_appealing}} appeal{{num_appealing|pluralize}} awaiting response<br />
+				{% comment %}
 				{{num_appeals_done}} succesful appeals<br />
 				{{num_appeals_rejected}} denied appeals<br />
 				{{num_appeals_response_time}} days average response time
+				{% endcomment %}
 			</td>
 		</tr>
 	
