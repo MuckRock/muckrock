@@ -25,7 +25,7 @@ register_pingback(views.Detail.as_view(), pingback_foia_handler)
 urlpatterns = patterns('',
     url(r'^$',                             RedirectView.as_view(url='list'), name='foia-root'),
     url(r'^list/$',                        views.List.as_view(), name='foia-list'),
-    url(r'^list/user-(?P<user_name>[\w\d_.@i]+)/$',
+    url(r'^list/user-(?P<user_name>[\w\d_.@ ]+)/$',
                                            views.ListByUser.as_view(), name='foia-list-user'),
     url(r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
                                            views.ListByTag.as_view(), name='foia-list-tag'),
@@ -54,7 +54,7 @@ urlpatterns = patterns('',
     url(r'^feeds/completed/$',             LatestDoneRequests(), name='foia-done-feed'),
 
     # old patterns for redirects
-    url(r'^list/user/(?P<user_name>[\w\d_.@i]+)/$',
+    url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
                                           RedirectView.as_view(url='/foi/list/user-%(user_name)s')),
     url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',
                                           RedirectView.as_view(url='/foi/list/tag-%(tag_slug)s')),
