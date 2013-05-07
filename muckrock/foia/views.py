@@ -347,7 +347,9 @@ def create(request):
     # collect all the forms so that the wizard can access them
     wizard_forms = [(form.__name__, form) for form in
         [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm]]
-    wizard_forms += [(t.__name__, t) for t in TEMPLATES.values()]
+    # if the form has no base fields, it requires no additional information and should not be
+    # included in the wizard ie pet data
+    wizard_forms += [(t.__name__, t) for t in TEMPLATES.values() if t.base_fields]
 
     condition_dict = {
         'FOIAWhatLocalForm':   display_what_form(('local', 'multi')),
