@@ -601,7 +601,8 @@ class FOIAMultiRequest(models.Model):
     def submit(self):
         """Submit the multi request to all of the agencies"""
         # pylint: disable=E1101
-        for agency in self.agencies.all():
+        agencies = self.agencies.all()
+        for agency in agencies:
             # make a copy of the foia (and its communication) for each agency
             title = '%s (%s)' % (self.title, agency.name)
             template = get_template('request_templates/none.txt')
