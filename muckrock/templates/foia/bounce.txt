@@ -1,0 +1,8 @@
+{% autoescape off %}
+The email address {{recipient}} has bounced with the following error: {{error}}
+
+It is the email address (Or in the CC) for the following agencies:
+{% for agency in agencies %}
+Agency Admin: http://www.muckrock.com{% url admin:agency_agency_change agency.pk %}
+{% endfor %}
+{% endautoescape %}

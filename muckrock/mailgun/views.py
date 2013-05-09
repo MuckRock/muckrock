@@ -4,6 +4,7 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +18,7 @@ import time
 from datetime import datetime
 from email.utils import parseaddr, getaddresses
 
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
@@ -93,6 +95,25 @@ def fax(request):
         return HttpResponseForbidden()
 
     _forward(request.POST, request.FILES)
+    return HttpResponse('OK')
+
+@csrf_exempt
+def bounces(request):
+    """Notify when an email is bounced"""
+
+    if not _verify(request.POST):
+        return HttpResponseForbidden()
+
+    recipient = request.POST.get('recipient', 'none@example.com')
+    agencies = Agency.objects.filter(Q(email=recipient) |
+                                     Q(other_emails__contains=recipient))
+
+    send_mail('[BOUNCED] %s' % recipient,
+              render_to_string('foia/bounce.txt',
+                               {'agencies': agencies, 'recipient': recipient,
+                                'error': request.POST.get('error')}),
+              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
     return HttpResponse('OK')
 
 def _verify(post):
