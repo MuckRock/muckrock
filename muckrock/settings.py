@@ -106,8 +106,8 @@ MIDDLEWARE_CLASSES = (
     'urlauth.middleware.AuthKeyMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
+MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
@@ -179,6 +179,7 @@ INSTALLED_APPS = (
 
 
 def show_toolbar(request):
+    """show toolbar for me on the site"""
     if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False)) and
             request.user and request.user.username == 'mitch'):
         return True
