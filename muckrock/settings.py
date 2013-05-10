@@ -177,7 +177,15 @@ INSTALLED_APPS = (
     'muckrock.qanda',
 )
 
+
+def show_toolbar(request):
+    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False)) and
+            request.user and request.user.username == 'mitch'):
+        return True
+    return False
+
 DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': show_toolbar,
     'INTERCEPT_REDIRECTS': False,
 }
 
