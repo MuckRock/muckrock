@@ -140,6 +140,7 @@ class SubmitMultipleWizard(SessionWizardView):
         'submit': 'foia/foiarequest_submit_multiple.html',
         'agency': 'foia/foiarequest_confirm_multiple.html',
         'pay':    'foia/foiarequest_pay_multiple.html',
+        'nopay':  'foia/foiarequest_pay_multiple.html',
     }
     agencies = None
 
@@ -186,6 +187,8 @@ class SubmitMultipleWizard(SessionWizardView):
             return self.agencies
         else:
             data = self.get_cleaned_data_for_step('submit')
+            if not data:
+                return None
             agency_type = data.get('agency_type')
             jurisdiction = data.get('jurisdiction')
             agencies = Agency.objects.all()
@@ -218,7 +221,7 @@ class SubmitMultipleWizard(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         """Add extra context to certain steps"""
         context = super(SubmitMultipleWizard, self).get_context_data(form=form, **kwargs)
-        if self.steps.current == 'pay':
+        if self.steps.current in ['pay', 'nopay']:
             data = self.get_cleaned_data_for_step('agency')
             num_requests = data['agencies'].count()
             extra_context = self.request.user.get_profile().multiple_requests(num_requests)
@@ -235,9 +238,27 @@ def multiple(request, **kwargs):
         ('submit', FOIAMultipleSubmitForm),
         ('agency', AgencyConfirmForm),
         ('pay', PaymentForm),
+        ('nopay', forms.Form),
         ]
 
-    return SubmitMultipleWizard.as_view(multi_forms)(request, **kwargs)
+    def payment_req(wizard):
+        """Is a payment form required?"""
+        data = wizard.get_cleaned_data_for_step('agency')
+        if data:
+            agencies = data.get('agencies')
+        if data and agencies:
+            num_requests = agencies.count()
+            extra_context = wizard.request.user.get_profile().multiple_requests(num_requests)
+            return extra_context['extra_requests'] > 0
+        return False
+
+    condition_dict = {
+        'pay': payment_req,
+        'nopay': lambda wizard: not payment_req(wizard),
+    }
+
+    return SubmitMultipleWizard.as_view(multi_forms,
+        condition_dict=condition_dict)(request, **kwargs)
 
 class FOIAWizard(SessionWizardView):
     """Wizard to create FOIA requests"""
