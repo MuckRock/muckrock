@@ -32,7 +32,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
@@ -888,6 +888,7 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
+        context['choices'] = STATUS
         return context
 
     def post(self, request, **kwargs):
@@ -897,7 +898,8 @@ class Detail(DetailView):
         foia = self.get_object()
 
         actions = {
-            'Submit': self._tags,
+            'status': self._status,
+            'tags': self._tags,
             'Follow Up': self._follow_up,
             'Get Advice': self._question,
             'Problem?': self._flag,
@@ -905,7 +907,7 @@ class Detail(DetailView):
         }
 
         try:
-            return actions[request.POST['submit']](request, foia)
+            return actions[request.POST['action']](request, foia)
         except KeyError:
             # should never happen if submitting form from web page properly
             return redirect(foia)
@@ -915,6 +917,15 @@ class Detail(DetailView):
         # pylint: disable=R0201
         if foia.user == request.user:
             foia.update_tags(request.POST.get('tags'))
+        return redirect(foia)
+
+    def _status(self, request, foia):
+        """Handle updating status"""
+        # pylint: disable=R0201
+        status = request.POST.get('status')
+        if foia.user == request.user and status in [s for s, _ in STATUS]:
+            foia.status = status
+            foia.save()
         return redirect(foia)
 
     def _follow_up(self, request, foia):
