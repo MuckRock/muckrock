@@ -25,7 +25,7 @@
 	</p>
 	{% endif %}
 	<div id="progressbar" title="{{foia.percent_complete}}% Complete"></div>
-	<p>Status: <span class="request-{{foia.color_code}}">
+	<p id="status">Status: <span class="request-{{foia.color_code}}">
 		{{foia.get_status_display}}{% if foia.date_due and foia.status == "processed" %},
 		{% if past_due %}
 			past due by {{ foia.date_due|timesince }}
@@ -41,7 +41,27 @@
 			{% endif %}
 			from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received
 		{% endif %}
-	</span></p>
+		</span>
+		{% if foia.user == request.user %}
+			&nbsp;&mdash;&nbsp;&nbsp;
+			<a href="#" onclick="$('#status').hide('slow'); $('#status-edit').show('slow');">Edit</a>
+		{% endif %}
+	</p>
+	<div id='status-edit' style="display:none;">
+		<form action="" method="post">
+		{% csrf_token %}
+		<input type="hidden" name="action" value="status" />
+		<label for="status">Status: </label>
+			<select name="status">
+				{% for choice in choices %}
+					<option value="{{choice.0}}">{{choice.1}}</option>
+				{% endfor %}
+			</select>
+			</select>
+			<input type="submit" name="submit" value="Submit" class="button" style="margin-top:2px;"/>
+			<div class="clearer">&nbsp;</div>
+		</form>
+	</div>
 	<div id='tag-links'>Tags:
 		{% for tag in foia.tags.all %}
 			<a href="{% url foia-list-tag tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}, {%endif%}
@@ -62,6 +82,7 @@
 	<div id='tag-edit' style="display:none;">
 		<form action="" method="post">
 		{% csrf_token %}
+			<input type="hidden" name="action" value="tags" />
 			<input type='text' name="tags" value="{{foia.tag_string}}" id="tags" />
 			<input type="submit" name="submit" value="Submit" class="button" style="margin-top:2px;"/>
 			<em class="quiet" style="float:left;">Enter tags seperated by Enter or a comma</em>
@@ -138,6 +159,7 @@
 			{% if actions.bottom %}
 			<form action="" method="post" style="display:none" id="action-form">
 				{% csrf_token %}
+				<input type="hidden" name="action" value="" />
 				<textarea name="text" style="width:612px; height: 200px"></textarea>
 				<input type="submit" name="submit" value="Submit" class="button" />
 				<a href="#" onclick="cancelActionButton(); return false" class="jqbutton right">Cancel</a>
