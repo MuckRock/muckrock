@@ -188,7 +188,7 @@
 					});
 
 					var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
-					var embed_code1 = '<a href="{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+					var embed_code1 = '<a href="https://www.muckrock.com{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
 					$('textarea#embed0').val(embed_code0);
 					$('textarea#embed1').val(embed_code1);
 				}

@@ -7,6 +7,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect
+from django.template.defaultfilters import slugify
 from django.template import RequestContext
 
 from adaptor.model import CsvModel
@@ -67,13 +68,19 @@ class AgencyAdmin(TablibAdmin):
                 try:
                     agencies = AgencyCsvModel.import_data(data=request.FILES['csv_file'],
                                                           extra_fields=['True'])
-                    messages.success(request, 'CSV imported')
+                    messages.success(request, 'CSV - %d agencies imported' % len(agencies))
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
                     logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
-                if form.cleaned_data['type_']:
+                else:
+                    if form.cleaned_data['type_']:
+                        for agency in agencies:
+                            agency.object.types.add(form.cleaned_data['type_'])
                     for agency in agencies:
-                        agency.object.types.add(form.cleaned_data['type_'])
+                        aobj = agency.object
+                        if not aobj.slug:
+                            aobj.slug = slugify(aobj.name)
+                            aobj.save()
                 return redirect('admin:agency_agency_changelist')
         else:
             form = CSVImportForm()
@@ -91,9 +98,12 @@ admin.site.register(Agency,     AgencyAdmin)
 def get_jurisdiction(full_name):
     """Get the jurisdiction from its name and parent"""
     # pylint: disable=E1101
-    name, parent_abbrev = full_name.split(', ')
-    parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
-    return Jurisdiction.objects.get(name=name, parent=parent).pk
+    if ', ' in full_name:
+        name, parent_abbrev = full_name.split(', ')
+        parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
+        return Jurisdiction.objects.get(name=name, parent=parent).pk
+    else:
+        return Jurisdiction.objects.get(name=full_name).pk
 
 
 class AgencyCsvModel(CsvModel):
@@ -117,4 +127,4 @@ class AgencyCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Agency
         delimiter = ','
-        update = {'keys': ['slug', 'jurisdiction']}
+        update = {'keys': ['name', 'jurisdiction']}

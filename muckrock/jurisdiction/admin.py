@@ -5,14 +5,19 @@ Admin registration for Jurisdiction models
 from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
 from django.shortcuts import render_to_response, redirect
+from django.template.defaultfilters import slugify
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
 from django_tablib.admin import TablibAdmin
+import logging
+import sys
 
 #from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.foia.models import Jurisdiction
 from muckrock.jurisdiction.forms import CSVImportForm
+
+logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
@@ -46,12 +51,24 @@ class JurisdictionAdmin(TablibAdmin):
     def csv_import(self, request):
         """Import a CSV file of jurisdictions"""
         # pylint: disable=R0201
+        # pylint: disable=W0703
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
             if form.is_valid():
-                JurisdictionCsvModel.import_data(data=request.FILES['csv_file'])
-                messages.success(request, 'CSV imported')
+                try:
+                    jurisdictions = JurisdictionCsvModel.import_data(data=request.FILES['csv_file'])
+                    messages.success(request,
+                        'CSV - %d jurisdictions imported' % len(jurisdictions))
+                except Exception as exc:
+                    messages.error(request, 'ERROR: %s' % str(exc))
+                    logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
+                else:
+                    for jurisdiction in jurisdictions:
+                        jobj = jurisdiction.object
+                        if not jobj.slug:
+                            jobj.slug = slugify(jobj.name)
+                            jobj.save()
                 return redirect('admin:jurisdiction_jurisdiction_changelist')
         else:
             form = CSVImportForm()
@@ -74,4 +91,4 @@ class JurisdictionCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Jurisdiction
         delimiter = ','
-        update = {'keys': ['slug', 'parent']}
+        update = {'keys': ['name', 'parent']}
