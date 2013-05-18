@@ -313,7 +313,7 @@ def stripe_webhook_v2(request):
         return HttpResponse()
 
     if event_json['type'] == 'charge.succeeded':
-        amount = event_data['amount'] / 100
+        amount = event_data['amount'] / 100.0
         base_amount = amount / 1.05
         fee_amount = amount - base_amount
 
