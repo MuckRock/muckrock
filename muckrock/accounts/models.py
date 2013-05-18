@@ -28,7 +28,7 @@ class Profile(models.Model):
     address1 = models.CharField(max_length=50, blank=True, verbose_name='address')
     address2 = models.CharField(max_length=50, blank=True, verbose_name='address (line 2)')
     city = models.CharField(max_length=60, blank=True)
-    state = USStateField(blank=True, default='MA')
+    state = USStateField(blank=True)
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
     follows = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
