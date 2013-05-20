@@ -7,6 +7,7 @@ CODES = {
 	'NRD': ('No Responsive Documents', 'no_docs', 'A no responsive documents response.'),
 	'NRD-T': ('No Responsive Documents', 'no_docs', 'Potentially responsive documents were transferred to another department.'),
 	'RES-C': ('Cover Letter', 'processed', 'A cover letter granting the request and outlining any exempted materials, if any.'),
+	'RES-P': ('Partial Responsive Documents', 'partial', 'A first set of responsive documents from the agency, with more to be sent at a specified date.'),
 	'RES': ('Responsive Documents', 'done', 'A copy of documents responsive to the request.'),
 	'FEE-R': ('Fee Waiver Rejected', 'payment', 'A letter stating the request for reduced or waived fees has been rejected.'),
 	'FEE-A': ('Fee Waiver Accepted', 'processed', 'A letter stating the request for reduced or waived fees has been accepted.'),
