@@ -19,6 +19,7 @@ class Question(models.Model):
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
     question = models.TextField(blank=True)
     date = models.DateTimeField()
+    answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):
@@ -29,6 +30,10 @@ class Question(models.Model):
         """The url for this object"""
         return ('question-detail', [], {'slug': self.slug, 'idx': self.pk})
 
+    class Meta:
+        # pylint: disable=R0903
+        ordering = ['-date']
+
 
 class Answer(models.Model):
     """An answer to a proposed question"""
@@ -37,3 +42,13 @@ class Answer(models.Model):
     date = models.DateTimeField()
     question = models.ForeignKey(Question, related_name='answers')
     answer = models.TextField(blank=True)
+
+    def save(self, *args, **kwargs):
+        """Update the questions answer date when you save the answer"""
+        # pylint: disable=E1101
+        super(Answer, self).save(*args, **kwargs)
+        question = self.question
+        question.answer_date = self.date
+        question.save()
+
+
