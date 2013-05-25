@@ -103,7 +103,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pingback.middleware.PingbackMiddleware',
-    'urlauth.middleware.AuthKeyMiddleware',
+    'muckrock.middleware.AuthKeyMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
