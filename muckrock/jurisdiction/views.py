@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.views import view_options
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
@@ -52,6 +53,10 @@ def detail(request, fed_slug, state_slug, local_slug):
         jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
 
     context = {'jurisdiction': jurisdiction}
+    if request.user.is_anonymous():
+        context['sidebar'] = view_options.anon_jurisdiction_sidebar
+    else:
+        context['sidebar'] = view_options.jurisdiction_sidebar
     collect_stats(jurisdiction, context)
 
     return render_to_response('jurisdiction/jurisdiction_detail.html', context,

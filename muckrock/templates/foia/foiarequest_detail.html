@@ -266,10 +266,10 @@
 		{{ foia.sidebar_html|safe }}
 		<div class="content-separator"></div>
 	{% endif %}
-	{% if user.is_anonymous %}
-		<h2>Newsletter</h2>
-		<p>Want to be notified about interesting government documents like this one? Sign up for our mailing list. We only send it out when we have something interesting to say, and we'll never sell or spam your address. You can unsubscribe easily any time you want.</p>
-		{% include "foia/mailchimp.html" %}
+	{% if sidebar %}
+		{% autoescape off %}
+		{{ sidebar }}
+		{% endautoescape %}
 		<div class="content-separator"></div>
 	{% endif %}
 

@@ -38,7 +38,7 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 from muckrock.utils import get_node
 from muckrock.qanda.models import Question
-from muckrock.views import class_view_decorator
+from muckrock.views import class_view_decorator, view_options
 
 # pylint: disable=R0901
 
@@ -889,6 +889,10 @@ class Detail(DetailView):
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS
+        if self.request.user.is_anonymous():
+            context['sidebar'] = view_options.anon_request_sidebar
+        else:
+            context['sidebar'] = view_options.request_sidebar
         return context
 
     def post(self, request, **kwargs):

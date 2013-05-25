@@ -6,6 +6,7 @@ from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
 from muckrock.news.models import Article
+from muckrock.views import view_options
 
 # pylint: disable=R0901
 
@@ -23,6 +24,14 @@ class NewsDetail(DateDetailView):
     def get_allow_future(self):
         """Can future posts be seen?"""
         return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        context = super(NewsDetail, self).get_context_data(**kwargs)
+        if self.request.user.is_anonymous():
+            context['sidebar'] = view_options.anon_article_sidebar
+        else:
+            context['sidebar'] = view_options.article_sidebar
+        return context
 
 
 class NewsYear(YearArchiveView):
