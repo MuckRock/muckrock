@@ -14,6 +14,7 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats, flag_helper
+from muckrock.views import view_options
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -25,6 +26,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
         raise Http404()
 
     context = {'agency': agency}
+    if request.user.is_anonymous():
+        context['sidebar'] = view_options.anon_agency_sidebar
+    else:
+        context['sidebar'] = view_options.agency_sidebar
     collect_stats(agency, context)
 
     return render_to_response('agency/agency_detail.html', context,

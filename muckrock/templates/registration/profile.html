@@ -88,6 +88,14 @@
 {% endblock %}
 
 {% block sidebar %}
+
+	{% if sidebar %}
+		{% autoescape off %}
+		{{ sidebar }}
+		{% endautoescape %}
+		<div class="content-separator"></div>
+	{% endif %}
+
 	{% if user == user_obj %}
 		<p class="largest"><strong><a href="{% url acct-buy-requests %}">Buy more requests!</a></strong></p>
 	{% endif %}

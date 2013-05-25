@@ -146,6 +146,13 @@
 
 {% block sidebar %}
 
+	{% if sidebar %}
+		{% autoescape off %}
+		{{ sidebar }}
+		{% endautoescape %}
+		<div class="content-separator"></div>
+	{% endif %}
+
 	{% if user.is_staff %}
 		<p><a class="jqbutton" href="{% url admin:agency_agency_change agency.pk %}">Admin</a></p>
 	{% endif %}
