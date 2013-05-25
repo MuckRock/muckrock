@@ -107,7 +107,9 @@ def update(request):
             return HttpResponseRedirect(reverse('acct-my-profile'))
     else:
         user_profile = request.user.get_profile()
-        form = UserChangeForm(initial=request.user.__dict__, instance=user_profile)
+        initial = {'first_name': request.user.first_name, 'last_name': request.user.last_name,
+                   'email': request.user.email}
+        form = UserChangeForm(initial=initial, instance=user_profile)
 
     return render_to_response('registration/update.html', {'form': form},
                               context_instance=RequestContext(request))
