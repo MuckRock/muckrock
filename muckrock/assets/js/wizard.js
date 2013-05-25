@@ -146,6 +146,7 @@ function actionButton(name) {
 	$('#action-buttons').hide();
 	$('#action-form').show(400);
 	$('html, body').animate({scrollTop: $(window).scrollTop() + 100});
+	$('#action-form > textarea').focus();
 	return false;
 }
 
