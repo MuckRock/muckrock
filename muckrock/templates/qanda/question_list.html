@@ -3,11 +3,11 @@
 
 {% load tags %}
 
-{% block title %}Questions{% endblock %}
+{% block title %}{{title}}{% endblock %}
 
 {% block content %}
 
-	<h2>Questions</h2>
+	<h2>{{title}}</h2>
 	<p>Below are questions asked and answered by MuckRock users about Freedom of Information Act and public records requests from all fifty states. Have a public records problem of your own? Register for an account and <a href="{% url question-create %}">ask today</a>, or show off your FOIA-jitsu by answering others' questions. Please keep questions general enough that others can find the answers, <em>i.e., "How do I appeal information exempted under (b)(2)?" rather than "Why was my request rejected?"</em>. This way, this resource becomes more useful for everyone.</p>
 
 	<div class="post-meta archive-pagination">

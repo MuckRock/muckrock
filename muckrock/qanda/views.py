@@ -66,16 +66,31 @@ class List(ListView):
     paginate_by = 10
     model = Question
 
+    def get_context_data(self, **kwargs):
+        context = super(List, self).get_context_data(**kwargs)
+        context['title'] = 'Questions'
+        return context
+
 
 class ListUnanswered(ListView):
     """List of unanswered questions"""
     paginate_by = 10
     queryset = Question.objects.annotate(num_answers=Count('answers')).filter(num_answers=0)
 
+    def get_context_data(self, **kwargs):
+        context = super(ListUnanswered, self).get_context_data(**kwargs)
+        context['title'] = 'Unanswered Questions'
+        return context
+
 
 class ListRecent(ListView):
     """List of recently answered questions"""
     paginate_by = 10
     queryset = Question.objects.exclude(answer_date=None).order_by('-answer_date')
+
+    def get_context_data(self, **kwargs):
+        context = super(ListRecent, self).get_context_data(**kwargs)
+        context['title'] = 'Recently Answered Questions'
+        return context
 
 
