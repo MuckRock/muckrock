@@ -171,7 +171,8 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
                                url(r'^retry_pages/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.retry_pages),
                                    name='foia-admin-retry-pages'),
-                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
+                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/'
+                                   r'(?:(?P<dateord>\d+)/)?$',
                                    self.admin_site.admin_view(self.set_status),
                                    name='foia-admin-set-status'),
                                url(r'^autoimport/$',
@@ -237,7 +238,7 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
         messages.info(request, 'Auotimport started')
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
 
-    def set_status(self, request, idx, status):
+    def set_status(self, request, idx, status, dateord=None):
         """Set the status of the request"""
         # pylint: disable=R0201
 
@@ -251,8 +252,8 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
             messages.error(request, '%s is not a valid status' % status)
         else:
             foia.status = status
-            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                foia.date_done = date.today()
+            if status in ['rejected', 'no_docs', 'done', 'abandoned'] and dateord:
+                foia.date_done = date.fromordinal(int(dateord))
             foia.save()
             last_comm = foia.last_comm()
             last_comm.status = status

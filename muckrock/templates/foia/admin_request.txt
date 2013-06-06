@@ -2,14 +2,14 @@
 Response received from: {{ post.From }} for request {{ request.title }} - {{ request.mail_id }}
 
 Please set the status!
-Set status as Completed: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "done" %}
-Set status as Rejected: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "rejected" %}
-Set status as Partially Completed: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "partial" %}
-Set status as No Responsive Documents: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "no_docs" %}
-Set status as Fix Required: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "fix" %}
-Set status as Payment Required: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "payment" %}
-Set status as Withdrawn: http://www.muckrock.com{% url admin:foia-admin-set-status request.pk "abandoned" %}
-Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
+Set status as Completed: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "done" date %}
+Set status as Rejected: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "rejected" date %}
+Set status as Partially Completed: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "partial" %}
+Set status as No Responsive Documents: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "no_docs" date %}
+Set status as Fix Required: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "fix" %}
+Set status as Payment Required: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "payment" %}
+Set status as Withdrawn: https://www.muckrock.com{% url admin:foia-admin-set-status request.pk "abandoned" date %}
+Request Admin: https://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
 
 {% now "F j, Y" %}
 {{ request.communications.reverse.0.communication }}

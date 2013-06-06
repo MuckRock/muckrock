@@ -466,13 +466,6 @@ class FOIARequest(models.Model):
             self.days_until_due = cal.business_days_between(last_date, self.date_due)
             self.date_due = None
 
-        # if response received, set date done
-        if self.status in ['done', 'partial', 'rejected', 'abandaoned']:
-            last_date = self.last_comm_date()
-            if not last_date:
-                last_date = date.today()
-            self.date_done = last_date
-
         self.save()
 
     def _update_followup_date(self):
