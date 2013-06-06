@@ -15,7 +15,7 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, date
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
@@ -58,7 +58,8 @@ def handle_request(request, mail_id):
         _forward(post, request.FILES)
         send_mail('[RESPONSE] Freedom of Information Request: %s' % foia.title,
                   render_to_string('foia/admin_request.txt',
-                                   {'request': foia, 'post': post}),
+                                   {'request': foia, 'post': post,
+                                    'date': date.today().toordinal()}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         foia.email = from_email
