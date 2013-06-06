@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
 import hmac
+import json
 import logging
 import os
 import sys
@@ -106,12 +107,19 @@ def bounces(request):
         return HttpResponseForbidden()
 
     recipient = request.POST.get('recipient', 'none@example.com')
-    agencies = Agency.objects.filter(Q(email=recipient) |
-                                     Q(other_emails__contains=recipient))
+    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
+                                     Q(other_emails__icontains=recipient))
+    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
+                                       Q(other_emails__icontains=recipient))
+    headers = request.POST.get('message-headers')
+    _, from_email = parseaddr(json.loads(headers).get('From'))
+    foia_id = from_email[:from_email.index('-')]
+    foia = FOIARequest.objects.get(pk=foia_id)
 
     send_mail('[BOUNCED] %s' % recipient,
               render_to_string('foia/bounce.txt',
                                {'agencies': agencies, 'recipient': recipient,
+                                'foia': foia, 'foias': foias,
                                 'error': request.POST.get('error')}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
