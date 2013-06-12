@@ -14,7 +14,7 @@ urlpatterns = patterns('',
         url(r'^recent/$',     views.ListRecent.as_view(), name='question-recent'),
         url(r'^new/$',        views.create_question, name='question-create'),
         url(r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)$',
-                              views.question_detail, name='question-detail'),
+                              views.Detail.as_view(), name='question-detail'),
         url(r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer$',
                               views.create_answer, name='answer-create'),
 )
