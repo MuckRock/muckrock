@@ -2,23 +2,62 @@
 Views for the QandA application
 """
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
+from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from datetime import datetime
 
-from muckrock.qanda.models import Question
+from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 
-def question_detail(request, slug, idx):
-    """Question page"""
-    question = get_object_or_404(Question, slug=slug, pk=idx)
-    return render_to_response('qanda/question_detail.html', {'object': question},
-                              context_instance=RequestContext(request))
+class Detail(DetailView):
+    """Question detail view"""
+    model = Question
+
+    def post(self, request, **kwargs):
+        """Edit the question or answer"""
+        # pylint: disable=W0613
+
+        question = self.get_object()
+        obj_type = request.POST.get('object')
+
+        if obj_type == 'question':
+            self._question(request, question)
+        elif obj_type == 'answer':
+            try:
+                self._answer(request)
+            except Answer.DoesNotExist:
+                pass
+
+        return redirect(question)
+
+    def _question(self, request, question):
+        """Edit the question"""
+        # pylint: disable=R0201
+        if request.user == question.user or request.user.is_staff:
+            question.question = request.POST.get('question')
+            question.save()
+            messages.success(request, 'Question succesfully updated')
+        else:
+            messages.error(request, 'You may only edit your own questions')
+
+    def _answer(self, request):
+        """Edit an answer"""
+        # pylint: disable=R0201
+        answer = Answer.objects.get(pk=request.POST.get('answer-pk'))
+        if request.user == answer.user or request.user.is_staff:
+            answer.answer = request.POST.get('answer')
+            answer.save()
+            messages.success(request, 'Answer succesfully updated')
+        else:
+            messages.error(request, 'You may only edit your own answers')
+
 
 @login_required
 def create_question(request):
