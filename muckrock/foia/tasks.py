@@ -206,7 +206,7 @@ def autoimport():
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
                         r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
                         r'(?: ID#(?P<id>\S+))?', re.I)
-    log = []
+    log = ['Start Time: %s' % datetime.now()]
 
     def s3_copy(bucket, key_or_pre, dest_name):
         """Copy an s3 key or prefix"""
@@ -346,6 +346,7 @@ def autoimport():
                 log.append('ERROR: %s has caused an unknown error. %s' % (file_name, exc))
         # delete key after processing all requests for it
         s3_delete(bucket, key)
+    log.append('End Time: %s' % datetime.now())
     log_msg = '\n'.join(log)
     send_mail('[AUTOIMPORT] %s Logs' % datetime.now(), log_msg, 'info@muckrock.com',
               ['requests@muckrock.com'], fail_silently=False)
