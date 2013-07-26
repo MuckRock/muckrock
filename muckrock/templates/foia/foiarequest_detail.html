@@ -47,6 +47,11 @@
 			<a href="#" onclick="$('#status').hide('slow'); $('#status-edit').show('slow');">Edit</a>
 		{% endif %}
 	</p>
+
+	{% if foia.has_crowdfund %}
+	<p><a href="{% url crowdfund-detail pk=foia.crowdfund.pk %}">Crowdfunding</a></p>
+	{% endif %}
+
 	<div id='status-edit' style="display:none;">
 		<form action="" method="post">
 		{% csrf_token %}
@@ -266,6 +271,14 @@
 		{{ foia.sidebar_html|safe }}
 		<div class="content-separator"></div>
 	{% endif %}
+
+	{% if foia.has_crowdfund %}
+		<h1>Help Crowdfund</h1>
+		<h2>${{foia.crowdfund.payment_received}} raised out of ${{foia.crowdfund.payment_required}}</h2>
+		<a href="{% url crowdfund-contribute-reqs pk=foia.crowdfund.pk %}" class="jqbutton">Contribute</a>
+		<div class="content-separator"></div>
+	{% endif %}
+
 	{% if sidebar %}
 		{% autoescape off %}
 		{{ sidebar }}

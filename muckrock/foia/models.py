@@ -22,6 +22,7 @@ import os
 import re
 
 from muckrock.agency.models import Agency
+from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME, STATIC_URL
@@ -174,7 +175,7 @@ class FOIARequest(models.Model):
 
     def is_payable(self):
         """Can this request be payed for by the user?"""
-        return self.status == 'payment' and self.price > 0
+        return self.status == 'payment' and self.price > 0 and not self.has_crowdfund()
 
     def is_deletable(self):
         """Can this request be deleted?"""
@@ -204,6 +205,14 @@ class FOIARequest(models.Model):
             self.save()
 
         return False
+
+    def has_crowdfund(self):
+        """Does this request have crowdfunding enabled?"""
+        try:
+            self.crowdfund
+            return True
+        except CrowdfundRequest.DoesNotExist:
+            return False
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
@@ -523,6 +532,8 @@ class FOIARequest(models.Model):
                 reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
             (self.user == user and self.is_payable(),
                 reverse('foia-pay', kwargs=kwargs), 'Pay'),
+            (self.user == user and self.is_payable(),
+                reverse('foia-crowdfund', kwargs=kwargs), 'Crowdfund'),
             (self.public_documents(), '#', 'Embed this Document'),
             (user.is_authenticated() and self.user != user,
                 reverse('foia-follow', kwargs=kwargs),

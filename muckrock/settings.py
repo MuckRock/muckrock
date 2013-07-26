@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     'muckrock.jurisdiction',
     'muckrock.business_days',
     'muckrock.qanda',
+    'muckrock.crowdfund',
 )
 
 

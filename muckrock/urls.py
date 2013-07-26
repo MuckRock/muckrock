@@ -16,7 +16,8 @@ from django_xmlrpc.views import handle_xmlrpc
 import haystack.urls, dbsettings.urls
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
-       muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls
+       muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
+       muckrock.crowdfund.urls
 import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.foia.sitemap import FoiaSitemap
@@ -37,6 +38,7 @@ urlpatterns = patterns('',
     url(r'^place/', include(muckrock.jurisdiction.urls.urlpatterns)),
     url(r'^jurisdiction/', include(muckrock.jurisdiction.urls.old_urlpatterns)),
     url(r'^questions/', include(muckrock.qanda.urls)),
+    url(r'^crowdfund/', include(muckrock.crowdfund.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
     url(r'^settings/', include(dbsettings.urls)),

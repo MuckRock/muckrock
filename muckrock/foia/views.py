@@ -27,6 +27,8 @@ import sys
 
 from muckrock.agency.models import Agency
 from muckrock.accounts.forms import PaymentForm
+from muckrock.crowdfund.forms import CrowdfundEnableForm
+from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixForm, FOIANoteForm, \
                                 FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
@@ -643,6 +645,29 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         extra_context = lambda f: {'desc': 'You will be charged $%.2f for this request' %
                                    (f.price * Decimal('1.05')),
                                    'pub_key': STRIPE_PUB_KEY})
+    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+
+@login_required
+def crowdfund_request(request, jurisdiction, jidx, slug, idx):
+    """Enable crowdfunding on the request"""
+    # pylint: disable=W0142
+
+    action = Action(
+        form_actions = lambda r, f, _: CrowdfundRequest.objects.create(foia=f,
+                                           payment_required=f.price * Decimal('1.05')),
+        msg = 'enabled crowdfunding for',
+        tests = [(lambda f: f.is_payable(),
+                  'You may only pay for requests that require a payment')],
+        form_class = lambda r, f: CrowdfundEnableForm,
+        return_url = lambda r, f: f.get_absolute_url(),
+        heading = 'Enable Crowdfunding for Request',
+        value = 'Crowdfund',
+        must_own = True,
+        template = 'foia/foiarequest_action.html',
+        extra_context = lambda f: {'desc': 'By enabling crowdfunding, others will be able to '
+                                           'contribute funds toward the money required to fufill '
+                                           'this request'}
+    )
     return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required

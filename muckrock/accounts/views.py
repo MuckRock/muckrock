@@ -336,6 +336,10 @@ def stripe_webhook_v2(request):
             url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
                                      .get_absolute_url()
             subject = 'Payment received for request fee'
+        elif event_data.get('description') and \
+                'Contribute to Crowdfunding' in event_data['description']:
+            # XXX
+            subject = 'Payment received for crowdfunding a request'
         else:
             type_ = 'pro'
             url = '/foia/new/'
