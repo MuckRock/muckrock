@@ -6,7 +6,7 @@ from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
 from muckrock.news.models import Article
-from muckrock.views import view_options
+from muckrock.sidebar.models import Sidebar
 
 # pylint: disable=R0901
 
@@ -28,9 +28,9 @@ class NewsDetail(DateDetailView):
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
         if self.request.user.is_anonymous():
-            context['sidebar'] = view_options.anon_article_sidebar
+            context['sidebar'] = Sidebar.objects.get_text('anon_article')
         else:
-            context['sidebar'] = view_options.article_sidebar
+            context['sidebar'] = Sidebar.objects.get_text('article')
         return context
 
 
