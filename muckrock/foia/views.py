@@ -38,7 +38,8 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 from muckrock.utils import get_node
 from muckrock.qanda.models import Question
-from muckrock.views import class_view_decorator, view_options
+from muckrock.sidebar.models import Sidebar
+from muckrock.views import class_view_decorator
 
 # pylint: disable=R0901
 
@@ -890,9 +891,9 @@ class Detail(DetailView):
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS
         if self.request.user.is_anonymous():
-            context['sidebar'] = view_options.anon_request_sidebar
+            context['sidebar'] = Sidebar.objects.get_text('anon_request')
         else:
-            context['sidebar'] = view_options.request_sidebar
+            context['sidebar'] = Sidebar.objects.get_text('request')
         return context
 
     def post(self, request, **kwargs):
