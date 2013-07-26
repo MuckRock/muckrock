@@ -25,7 +25,7 @@ from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
-from muckrock.views import view_options
+from muckrock.sidebar.models import Sidebar
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -241,9 +241,9 @@ def profile(request, user_name=None):
 
     context = {'user_obj': user_obj, 'foia_requests': foia_requests}
     if request.user.is_anonymous():
-        context['sidebar'] = view_options.anon_profile_sidebar
+        context['sidebar'] = Sidebar.objects.get_text('anon_profile')
     else:
-        context['sidebar'] = view_options.profile_sidebar
+        context['sidebar'] = Sidebar.objects.get_text('profile')
 
     return render_to_response('registration/profile.html', context,
                               context_instance=RequestContext(request))

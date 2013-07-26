@@ -8,26 +8,9 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
 
-import dbsettings
-
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
-from muckrock.values import TextValue
-
-class ViewOptions(dbsettings.Group):
-    """DB settings for sending email"""
-    article_sidebar = TextValue('article sidebar')
-    request_sidebar = TextValue('request sidebar')
-    agency_sidebar = TextValue('agency sidebar')
-    jurisdiction_sidebar = TextValue('jurisdiction sidebar')
-    profile_sidebar = TextValue('profile sidebar')
-    anon_article_sidebar = TextValue('anonymous article sidebar')
-    anon_request_sidebar = TextValue('anonymous request sidebar')
-    anon_agency_sidebar = TextValue('anonymous agency sidebar')
-    anon_jurisdiction_sidebar = TextValue('anonymous jurisdiction sidebar')
-    anon_profile_sidebar = TextValue('anonymous profile sidebar')
-view_options = ViewOptions('Sidebar HTML')
 
 def front_page(request):
     """Get all the details needed for the front page"""
