@@ -196,15 +196,13 @@ DEBUG_TOOLBAR_CONFIG = {
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
 urlparse.uses_netloc.append('ironmq')
-#url = urlparse.urlparse(os.environ.get('REDISTOGO_URL', 'redis://localhost:6379/'))
-#url = urlparse.urlparse(os.environ.get('CLOUDAMQP_URL',
-#    'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'))
-if 'IRON_MQ_PROJECT_ID' in os.environ:
+if 'REDISTOGO_URL' in os.environ:
+    BROKER_URL = os.environ['REDISTOGO_URL']
+elif 'IRON_MQ_PROJECT_ID' in os.environ:
     BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
                                       os.environ.get('IRON_MQ_TOKEN'))
 else:
     BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
-url = urlparse.urlparse(BROKER_URL)
 
 import djcelery
 # pylint: disable=W0611
@@ -212,21 +210,6 @@ import iron_celery
 # pylint: enable=W0611
 djcelery.setup_loader()
 
-#BROKER_HOST = url.hostname
-#BROKER_PORT = url.port
-#BROKER_USER = url.username
-#BROKER_PASSWORD = url.password
-## pylint: disable=E1101
-#BROKER_VHOST = url.path[1:]
-## pylint: enable=E1101
-#BROKER_POOL_LIMIT = int(os.environ.get('BROKER_POOL_LIMIT', 2))
-
-# for redis only:
-#BROKER_VHOST = '0'
-#REDIS_PORT = BROKER_PORT
-#REDIS_HOST = BROKER_HOST
-#REDIS_DB = 0
-#REDIS_CONNECT_RETRY = True
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
