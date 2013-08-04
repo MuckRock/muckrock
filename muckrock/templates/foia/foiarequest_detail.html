@@ -48,10 +48,6 @@
 		{% endif %}
 	</p>
 
-	{% if foia.has_crowdfund %}
-	<p><a href="{% url crowdfund-detail pk=foia.crowdfund.pk %}">Crowdfunding</a></p>
-	{% endif %}
-
 	<div id='status-edit' style="display:none;">
 		<form action="" method="post">
 		{% csrf_token %}

@@ -21,9 +21,9 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-class ProjectDetail(DetailView):
-    """Detail View for a Project"""
-    model = Project
+#class ProjectDetail(DetailView):
+#    """Detail View for a Project"""
+#    model = Project
 
 def _contribute(request, pk, model, redirect_url):
     """Contribute to a crowdfunding request or project"""
@@ -40,6 +40,7 @@ def _contribute(request, pk, model, redirect_url):
                 user_profile.pay(form, amount * 100, 'Contribute to Crowdfunding')
                 crowdfund.payment_received += amount
                 crowdfund.save()
+                CrowdfundRequestPayment.create(request.user, crowdfund, amount)
                 messages.success(request, 'You have succesfully contributed %.2f' % amount)
                 logger.info('%s has contributed to crowdfund',  request.user.username)
             except stripe.CardError as exc:
@@ -66,7 +67,7 @@ def contribute_request(request, pk):
             kwargs={'jurisdiction': crowdfund.foia.jurisdiction.slug,
                     'jidx': crowdfund.foia.jurisdiction.pk,
                     'slug': crowdfund.foia.slug,
-                    'idx': crowdfund.foia.pk}))
+                    'idx': crowdfund.foia.pk})
 
     return _contribute(request, pk, CrowdfundRequest, redirect_url)
 
@@ -78,6 +79,6 @@ def contribute_project(request, pk):
         """Redirect to the Project detail page"""
         return reverse('project-detail',
             kwargs={'slug': crowdfund.project.slug,
-                    'idx': crowdfund.project.pk}))
+                    'idx': crowdfund.project.pk})
 
     return _contribute(request, pk, CrowdfundProject, redirect_url)
