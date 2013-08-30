@@ -112,9 +112,14 @@ def bounces(request):
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
                                        Q(other_emails__icontains=recipient))
     headers = request.POST.get('message-headers')
-    _, from_email = parseaddr(json.loads(headers).get('From'))
-    foia_id = from_email[:from_email.index('-')]
-    foia = FOIARequest.objects.get(pk=foia_id)
+    parsed_headers = json.loads(headers)
+    try:
+        from_header = [v for k, v in parsed_headers if k == 'From'][0]
+        _, from_email = parseaddr(from_header)
+        foia_id = from_email[:from_email.index('-')]
+        foia = FOIARequest.objects.get(pk=foia_id)
+    except (IndexError, ValueError):
+        foia = None
 
     send_mail('[BOUNCED] %s' % recipient,
               render_to_string('foia/bounce.txt',
