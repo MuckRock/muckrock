@@ -10,3 +10,4 @@ class CrowdfundRequestAdmin(admin.ModelAdmin):
     """Model Admin for crowdfund request"""
 
 admin.site.register(CrowdfundRequest, CrowdfundRequestAdmin)
+admin.site.register(CrowdfundRequestPayment)

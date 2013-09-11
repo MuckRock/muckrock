@@ -14,7 +14,8 @@ import logging
 import stripe
 import sys
 
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject, \
+                                      CrowdfundRequestPayment, CrowdfundProjectPayment
 from muckrock.crowdfund.forms import CrowdfundPayForm
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
@@ -25,10 +26,10 @@ stripe.api_key = STRIPE_SECRET_KEY
 #    """Detail View for a Project"""
 #    model = Project
 
-def _contribute(request, pk, model, redirect_url):
+def _contribute(request, pk, cf_model, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""
     
-    crowdfund = get_object_or_404(model, pk=pk)
+    crowdfund = get_object_or_404(cf_model, pk=pk)
 
     if request.method == 'POST':
         form = CrowdfundPayForm(request.POST, request=request)
@@ -40,7 +41,7 @@ def _contribute(request, pk, model, redirect_url):
                 user_profile.pay(form, amount * 100, 'Contribute to Crowdfunding')
                 crowdfund.payment_received += amount
                 crowdfund.save()
-                CrowdfundRequestPayment.create(request.user, crowdfund, amount)
+                payment_model.create(request.user, crowdfund, amount)
                 messages.success(request, 'You have succesfully contributed %.2f' % amount)
                 logger.info('%s has contributed to crowdfund',  request.user.username)
             except stripe.CardError as exc:
@@ -69,7 +70,7 @@ def contribute_request(request, pk):
                     'slug': crowdfund.foia.slug,
                     'idx': crowdfund.foia.pk})
 
-    return _contribute(request, pk, CrowdfundRequest, redirect_url)
+    return _contribute(request, pk, CrowdfundRequest, CrowdfundRequestPayment, redirect_url)
 
 @login_required
 def contribute_project(request, pk):
@@ -81,4 +82,11 @@ def contribute_project(request, pk):
             kwargs={'slug': crowdfund.project.slug,
                     'idx': crowdfund.project.pk})
 
-    return _contribute(request, pk, CrowdfundProject, redirect_url)
+    return _contribute(request, pk, CrowdfundProject, CrowdfundProjectPayment, redirect_url)
+
+def project_detail(request, slug, pk):
+    """Project details"""
+
+    project = get_object_or_404(Project, slug=slug, pk=pk)
+
+    return render_to_response('crowdfund/project_detail.html', {'project': project})

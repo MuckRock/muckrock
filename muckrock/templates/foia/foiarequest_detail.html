@@ -271,7 +271,7 @@
 	{% if foia.has_crowdfund %}
 		<h1>Help Crowdfund</h1>
 		<h2>${{foia.crowdfund.payment_received}} raised out of ${{foia.crowdfund.payment_required}}</h2>
-		<a href="{% url crowdfund-contribute-reqs pk=foia.crowdfund.pk %}" class="jqbutton">Contribute</a>
+		<a href="{% url foia-contribute pk=foia.crowdfund.pk %}" class="jqbutton">Contribute</a>
 		<div class="content-separator"></div>
 	{% endif %}
 

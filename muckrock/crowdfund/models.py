@@ -16,6 +16,16 @@ class CrowdfundABC(models.Model):
         abstract = True
 
 
+class CrowdfundPaymentABC(models.Model):
+    """Abstract base class for crowdfunding objects"""
+    user = models.ForeignKey(User)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
 
@@ -23,12 +33,9 @@ class CrowdfundRequest(CrowdfundABC):
     payments = models.ManyToManyField(User, through='CrowdfundRequestPayment')
 
 
-class CrowdfundRequestPayment(models.Model):
+class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
-    user = models.ForeignKey(User)
     crowdfund = models.ForeignKey(CrowdfundRequest)
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
 
 
 class Project(models.Model):
@@ -44,4 +51,9 @@ class CrowdfundProject(Crowdfund):
     """Keep track of crowdfunding for a project"""
 
     project = models.OneToOneField(Project, related_name='crowdfund')
+    payments = models.ManyToManyField(User, through='CrowdfundProjectPayment')
 
+
+class CrowdfundProjectPayment(CrowdfundPaymentABC):
+    """M2M intermediate model"""
+    crowdfund = models.ForeignKey(CrowdfundProject)
