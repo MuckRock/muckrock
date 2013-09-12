@@ -343,7 +343,7 @@ class FOIAMinutesForm(FOIAWizardParent):
 class FOIATravelForm(FOIAWizardParent):
     """A form to fill in a travel expense request template"""
 
-    full_name = forms.CharField(help_text='Government employee you would like travel recipets from')
+    full_name = forms.CharField(help_text='Government employee you would like travel receipts from')
     department = forms.CharField(help_text='Department or office he or she is in')
 
     slug = 'travel'
@@ -487,7 +487,7 @@ class FOIAMilitaryForm(FOIAWizardParent):
     category = 'Genealogy'
     level = 'f'
     agency_type = 'Clerk'
-    short_desc = "Verify and individual's military service records"
+    short_desc = "Verify an individual's military service records"
     long_desc = 'Please be advised that military service verification can be a very slow process'
 
 class FOIABlankForm(FOIAWizardParent):
