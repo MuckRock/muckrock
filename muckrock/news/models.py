@@ -36,7 +36,7 @@ class Article(models.Model):
     body = models.TextField('Body text')
     authors = models.ManyToManyField(User, related_name='authored_articles')
     editors = models.ManyToManyField(User, related_name='edited_articles', blank=True, null=True)
-    publish = models.BooleanField('Publish on site', default=True,
+    publish = models.BooleanField('Publish on site', default=False,
             help_text='Articles will not appear on the site until their "publish date".')
     foias = models.ManyToManyField(FOIARequest, related_name='articles', blank=True, null=True)
     image = ThumbnailerImageField(upload_to='news_images', blank=True, null=True,

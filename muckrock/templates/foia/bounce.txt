@@ -2,7 +2,11 @@
 The email address {{recipient}} has bounced with the following error: {{error}}
 
 It was sent for the following request:
+{% if foia %}
 FOIA Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change foia.pk %}
+{% else %}
+Could not be determined
+{% endif %}
 
 It is also the email for the following requests:
 {% for foia in foias %}
