@@ -18,7 +18,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 import logging
 import stripe
@@ -477,7 +477,8 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
 
     action = Action(
         form_actions = lambda r, f, _: CrowdfundRequest.objects.create(foia=f,
-                                           payment_required=f.price * Decimal('1.05')),
+                                           payment_required=f.price * Decimal('1.05'),
+                                           date_due=date.today() + timedelta(30)),
         msg = 'enabled crowdfunding for',
         tests = [(lambda f: f.is_payable(),
                   'You may only pay for requests that require a payment')],

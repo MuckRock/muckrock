@@ -22,7 +22,6 @@ import os
 import re
 
 from muckrock.agency.models import Agency
-from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME, STATIC_URL
@@ -208,11 +207,7 @@ class FOIARequest(models.Model):
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
-        try:
-            self.crowdfund
-            return True
-        except CrowdfundRequest.DoesNotExist:
-            return False
+        return hasattr(self, 'crowdfund')
 
     def embargo_date(self):
         """The date this request comes off of embargo"""

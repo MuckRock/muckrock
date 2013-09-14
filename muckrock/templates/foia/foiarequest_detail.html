@@ -268,10 +268,16 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% if foia.has_crowdfund %}
-		<h1>Help Crowdfund</h1>
+	{% if foia.has_crowdfund and not foia.crowdfund.expired %}
+		<h1>Help fund this request</h1>
 		<h2>${{foia.crowdfund.payment_received}} raised out of ${{foia.crowdfund.payment_required}}</h2>
-		<a href="{% url foia-contribute pk=foia.crowdfund.pk %}" class="jqbutton">Contribute</a>
+		<h3>{{foia.crowdfund.date_due|timeuntil}} to go</h3>
+		<a href="{% url foia-contribute jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.id,slug=foia.slug %}" class="jqbutton">Contribute</a>
+		<div class="content-separator"></div>
+	{% endif %}
+	{% if foia.has_crowdfund and foia.crowdfund.expired %}
+		<h1>Crowdfunding Completed</h1>
+		<h2>${{foia.crowdfund.payment_received}} raised out of ${{foia.crowdfund.payment_required}}</h2>
 		<div class="content-separator"></div>
 	{% endif %}
 

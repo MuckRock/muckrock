@@ -15,5 +15,6 @@ class CrowdfundEnableForm(forms.Form):
 
 class CrowdfundPayForm(PaymentForm):
     """Form to pay for crowdfunding"""
+    # pylint: disable=R0901
 
     amount = forms.DecimalField()

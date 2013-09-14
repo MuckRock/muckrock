@@ -23,6 +23,7 @@ import sys
 from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
                            PaymentForm, UpgradeSubscForm, CancelSubscForm
 from muckrock.accounts.models import Profile
+from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.sidebar.models import Sidebar
@@ -293,7 +294,9 @@ def stripe_webhook(request):
 @csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
+    # pylint: disable=R0912
     # pylint: disable=R0914
+    # pylint: disable=R0915
 
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
@@ -338,7 +341,9 @@ def stripe_webhook_v2(request):
             subject = 'Payment received for request fee'
         elif event_data.get('description') and \
                 'Contribute to Crowdfunding' in event_data['description']:
-            # XXX
+            type_ = 'crowdfunding'
+            url = CrowdfundRequest.objects.get(id=event_data['description'].split()[-1])\
+                                          .foia.get_absolute_url()
             subject = 'Payment received for crowdfunding a request'
         else:
             type_ = 'pro'
@@ -356,7 +361,7 @@ def stripe_webhook_v2(request):
                                 'url': url,
                                 'type': type_}),
                            from_email='info@muckrock.com',
-                           to=[user.email], bcc=['requests@muckrock.com'])
+                           to=[user.email], bcc=['info@muckrock.com'])
         msg.send(fail_silently=False)
 
     elif event_json['type'] == 'invoice.payment_failed':
