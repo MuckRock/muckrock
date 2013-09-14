@@ -5,6 +5,7 @@ Models for the Agency application
 from django.contrib.auth.models import User
 from django.db import models
 
+from datetime import date
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
@@ -105,6 +106,12 @@ class Agency(models.Model, RequestHelper):
             return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
         else:
             return self.name
+
+    def expired(self):
+        """Is this agency expired?"""
+
+        if self.expires:
+            return self.expires < date.today()
 
     class Meta:
         # pylint: disable=R0903

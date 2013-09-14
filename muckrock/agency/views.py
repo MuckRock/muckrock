@@ -9,6 +9,8 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
+from datetime import date
+
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest
@@ -96,3 +98,29 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/' % locals())
 
     return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
+def stale(request):
+    """List all stale agencies"""
+
+    agencies = Agency.objects.all()
+    stale_agencies = []
+
+    for agency in agencies:
+        foias = agency.foiarequest_set.get_open()
+        if foias:
+            latest_responses = [foia.last_comm_date() for foia in foias if foia.last_comm_date()]
+            if latest_responses:
+                latest_response = (date.today() - max(latest_responses)).days
+                if latest_response >= 30:
+                    stale_agencies.append((agency, len(foias), latest_response))
+                    continue
+            else:
+                stale_agencies.append((agency, len(foias), None))
+                continue
+        if agency.expired():
+            stale_agencies.append((agency, None, None))
+
+    return render_to_response('agency/agency_stale.html',
+                              {'stale_agencies': stale_agencies},
+                              context_instance=RequestContext(request))
+

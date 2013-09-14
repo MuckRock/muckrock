@@ -87,6 +87,10 @@ class FOIARequestManager(ChainableManager):
         # Change to this after all follow ups have been resolved
         #return self.filter(status='processed', date_followup__lte=date.today())
 
+    def get_open(self):
+        """Get requests which we are awaiting a response from"""
+        return self.filter(status__in=['processed', 'appealing'])
+
     def get_undated(self):
         """Get requests which have an undated file"""
         return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
