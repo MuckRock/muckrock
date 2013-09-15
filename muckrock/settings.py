@@ -215,7 +215,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
-CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks')
+CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks', 'muckrock.agency.tasks')
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)

@@ -10,7 +10,7 @@ from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
 from muckrock.models import ChainableManager
-from  muckrock import fields
+from muckrock import fields
 
 class AgencyType(models.Model):
     """Marks an agency as fufilling requests of this type for its jurisdiction"""
@@ -49,6 +49,7 @@ class Agency(models.Model, RequestHelper):
                                   resize_source={'size': (372, 233), 'crop': 'smart'})
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
+    stale = models.BooleanField(default=False)
 
     address = models.TextField(blank=True)
     email = models.EmailField(blank=True)
@@ -112,6 +113,15 @@ class Agency(models.Model, RequestHelper):
 
         if self.expires:
             return self.expires < date.today()
+
+    def latest_response(self):
+        """When was the last time we heard from them?"""
+        # pylint: disable=E1101
+        foias = self.foiarequest_set.get_open()
+        if foias:
+            latest_responses = [foia.last_comm_date() for foia in foias if foia.last_comm_date()]
+            if latest_responses:
+                return (date.today() - max(latest_responses)).days
 
     class Meta:
         # pylint: disable=R0903

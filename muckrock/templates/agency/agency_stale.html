@@ -1,0 +1,33 @@
+
+{% extends "agency/base.html" %}
+
+{% block title %} Stale Agencies {% endblock %}
+
+{% block content %}
+
+	<h1>Stale Agencies</h1>
+
+	<p><em><strong>Editor's note:</strong> The following agencies appear to be stale: They've likely either updated their contact information without updating us, have an overly aggressive spam filter blocking user requests, or otherwise are simply unresponsive. MuckRock staff is regularly following up with these agencies to ensure communications remain active.</em></p>
+
+
+	<p><em>The list is ranked by number of outstanding requests, and includes all agencies that MuckRock has received no communication from in the past 30 days or which we have marked as having an expired contact.</em></p>
+
+	{% for agency in stale_agencies %}
+
+		<h3><a href="{% url agency-detail jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">{{ agency.name }}</a> {% if user.is_staff %}<small><a href="{% url admin:agency_agency_change agency.pk %}">Admin</a></small>{% endif %}</h3>
+
+		<p><em><strong>Number of open requests: </strong> {{agency.foiarequest_set.get_open}} request{{agency.foiarequest_set.get_open|pluralize}}</em></p>
+		<p><em><strong>Last Response: </strong>{{agency.latest_response}} days</em></p>
+		{% if agency.expired %}
+		<p><em><strong>Expired on: </strong>{{agency.expires}} days</em></p>
+		{% endif %}
+
+		<ul>
+			{% for foia in agency.foiarequest_set.get_open %}
+			 <li><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}">{{foia.title}}</a></li>
+			{% endfor %}
+		</ul>
+
+	{% endfor %}
+
+{% endblock %}
