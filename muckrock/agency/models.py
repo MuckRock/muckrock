@@ -122,7 +122,7 @@ class Agency(models.Model, RequestHelper):
         for foia in foias:
             responses = foia.communications.filter(response=True).order_by('-date')
             if responses:
-                latest_responses.append(responses[0].date)
+                latest_responses.append(responses[0].date.date)
         if latest_responses:
             return (date.today() - max(latest_responses)).days
 
