@@ -118,10 +118,13 @@ class Agency(models.Model, RequestHelper):
         """When was the last time we heard from them?"""
         # pylint: disable=E1101
         foias = self.foiarequest_set.get_open()
-        if foias:
-            latest_responses = [foia.last_comm_date() for foia in foias if foia.last_comm_date()]
-            if latest_responses:
-                return (date.today() - max(latest_responses)).days
+        latest_responses = []
+        for foia in foias:
+            responses = foia.communications.filter(response=True).order_by('-date')
+            if responses:
+                latest_responses.append(responses[0].date)
+        if latest_responses:
+            return (date.today() - max(latest_responses)).days
 
     class Meta:
         # pylint: disable=R0903
