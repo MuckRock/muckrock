@@ -14,6 +14,7 @@ from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 
 from datetime import datetime
+import HTMLParser
 import logging
 
 from muckrock.agency.models import Agency
@@ -150,6 +151,9 @@ class FOIAWizard(SessionWizardView):
         template = get_template(template_file)
         context = RequestContext(self.request, data)
         requested_docs = get_node(template, context, 'content')
+        # unescape the content from the template
+        html_parser = HTMLParser.HTMLParser()
+        requested_docs = html_parser.unescape(requested_docs)
 
         title, foia_request = \
             (s.strip() for s in template.render(context).split('\n', 1))
