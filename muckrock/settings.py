@@ -78,6 +78,7 @@ else:
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
+AWS_S3_FILE_OVERWRITE = False
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
