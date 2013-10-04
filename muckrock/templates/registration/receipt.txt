@@ -14,9 +14,9 @@ Payment ID: {{id}}
 Payment Date: {{date|date}}
 Payment Card: **** **** **** {{user.get_profile.get_cc.last4}}
 
-{% if type == "doc" %}Request Fee: ${{base_amount|floatformat:2}}{% endif %}
-{% if type != "crowdfund" %}Payment Proceesing Fee (5%): ${{fee_amount|floatformat:2}}{% endif %}
-Total Charge: ${{amount|floatformat:2}}
+{% if type == "doc" %}Request Fee: ${{base_amount|floatformat:2}}
+Payment Proceesing Fee (5%): ${{fee_amount|floatformat:2}}
+{% endif %}Total Charge: ${{amount|floatformat:2}}
 
 {% if type == "pro" %}This charge will recur monthly. For questions or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081. To change or cancel your subscription, visit the Manage Subscription page:
 
