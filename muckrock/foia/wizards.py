@@ -61,8 +61,9 @@ class SubmitMultipleWizard(SessionWizardView):
             logger.info('%s has paid %0.2f for request %s',
                         user.username, payment_required/100, foia.title)
 
-        # file all of the requests
+        # mark to be filed
         foia.agencies = agencies
+        foia.status = 'submitted'
         foia.save()
         messages.success(self.request, 'Request has been submitted to selected agencies')
         send_mail('[MULTI] Freedom of Information Request: %s' % (foia.title),
@@ -174,7 +175,7 @@ class FOIAWizard(SessionWizardView):
                     communication=foia_request)
         else:
             foia = FOIAMultiRequest.objects.create(user=self.request.user, title=title, slug=slug,
-                                                   requested_docs=requested_docs)
+                                                   requested_docs=requested_docs, status='started')
 
         messages.success(self.request, 'Request succesfully created.  Please review it and make '
                                        'any changes that you need.  You may save it for future '

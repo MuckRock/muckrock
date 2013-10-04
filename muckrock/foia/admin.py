@@ -269,7 +269,7 @@ class FOIAMultiRequestAdmin(NestedModelAdmin, TablibAdmin):
     """FOIA Multi Request admin options"""
     change_form_template = 'admin/foia/multifoiarequest/change_form.html'
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'user')
+    list_display = ('title', 'user', 'status')
     search_fields = ['title', 'requested_docs']
 
     def get_urls(self):

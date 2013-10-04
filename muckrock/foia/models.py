@@ -582,15 +582,13 @@ class FOIAMultiRequest(models.Model):
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
+    status = models.CharField(max_length=10, choices=STATUS[:2])
     embargo = models.BooleanField()
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(Agency, related_name='agencies', blank=True, null=True)
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
-    color_code = 'wait'
-    status = 'started'
-    get_status_display = 'Draft'
     foia_type = 'multi'
 
     def __unicode__(self):
@@ -626,6 +624,11 @@ class FOIAMultiRequest(models.Model):
 
             new_foia.submit()
         self.delete()
+
+    def color_code(self):
+        """Get the color code for the current status"""
+        colors = {'started':   'wait', 'submitted': 'go'}
+        return colors.get(self.status, 'go')
 
     class Meta:
         # pylint: disable=R0903
