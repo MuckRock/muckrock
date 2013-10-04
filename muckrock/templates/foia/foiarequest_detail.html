@@ -3,6 +3,7 @@
 {% load pingback_tags %}
 {% load tags %}
 {% load staticfiles %}
+{% load humanize %}
 
 {% block title %} {{foia.title}} {% endblock %}
 
@@ -270,7 +271,7 @@
 
 	{% if foia.has_crowdfund and not foia.crowdfund.expired %}
 		<h1>Help fund this request</h1>
-		<h2>${{foia.crowdfund.payment_received}} raised out of ${{foia.crowdfund.payment_required}}</h2>
+		<h2>${{foia.crowdfund.payment_received|intcomma}} raised out of ${{foia.crowdfund.payment_required|intcomma}}</h2>
 		<h3>{{foia.crowdfund.date_due|timeuntil}} to go</h3>
 		<a href="{% url foia-contribute jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.id,slug=foia.slug %}" class="jqbutton">Contribute</a>
 		<div class="content-separator"></div>
