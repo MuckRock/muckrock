@@ -17,4 +17,6 @@ urlpatterns = patterns('',
                               views.Detail.as_view(), name='question-detail'),
         url(r'^(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/answer$',
                               views.create_answer, name='answer-create'),
+        url(r'^change-subscription/$',
+                              views.subscribe, name='question-subscribe'),
 )

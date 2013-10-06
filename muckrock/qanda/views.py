@@ -4,6 +4,7 @@ Views for the QandA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -71,6 +72,7 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
+            question.notify()
             return redirect(question)
     else:
         form = QuestionForm()
@@ -98,6 +100,21 @@ def create_answer(request, slug, idx):
 
     return render_to_response('qanda/answer_form.html', {'form': form, 'question': question},
                               context_instance=RequestContext(request))
+
+@login_required
+def subscribe(request):
+    """Subscribe or unsubscribe to new questions"""
+    profile = request.user.get_profile()
+
+    if profile.follow_questions:
+        profile.follow_questions = False
+        messages.info(request, 'You are now unsubscribed from new question notifications')
+    else:
+        profile.follow_questions = True
+        messages.success(request, 'You are now subscribed to new question notifications')
+    profile.save()
+
+    return redirect(reverse('question-index'))
 
 
 class List(ListView):

@@ -3,10 +3,15 @@ Models for the Q&A application
 """
 
 from django.contrib.auth.models import User
+from django.core.mail import send_mass_mail
+from django.core.urlresolvers import reverse
 from django.db import models
+from django.template.loader import render_to_string
 
 from taggit.managers import TaggableManager
+from urlauth.models import AuthKey
 
+from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
@@ -29,6 +34,16 @@ class Question(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('question-detail', [], {'slug': self.slug, 'idx': self.pk})
+
+    def notify(self):
+        """Email users who want to be notified of new questions"""
+        send_data = []
+        for profile in Profile.objects.filter(follow_questions=True):
+            link = AuthKey.objects.wrap_url(reverse('question-subscribe'), uid=profile.user.pk)
+            msg = render_to_string('qanda/notify.txt', {'question': self, 'link': link})
+            send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
+                              'info@muckrock.com', [profile.user.email]))
+        send_mass_mail(send_data, fail_silently=False)
 
     class Meta:
         # pylint: disable=R0903

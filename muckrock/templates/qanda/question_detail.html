@@ -56,3 +56,15 @@
 			</div>
 
 {% endblock %}
+
+{% block sidebar %}
+
+	{% if user.profile.follow_questions %}
+		<a href="{% url question-subscribe %}" class="jqbutton">Unsubscribe from new question notifications"</a>
+	{% else %}
+		<a href="{% url question-subscribe %}" class="jqbutton">Notify me of all new questions</a>
+	{% endif %}
+
+	<div class="content-separator"></div>
+
+{% endblock %}

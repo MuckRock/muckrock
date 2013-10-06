@@ -33,6 +33,7 @@ class Profile(models.Model):
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
     follows = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
+    follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)
 
     # paid for requests
