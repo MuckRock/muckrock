@@ -33,7 +33,7 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
             try:
                 amount = form.cleaned_data['amount']
                 user_profile = request.user.get_profile()
-                user_profile.pay(form, amount * 100, 'Contribute to Crowdfunding: %s %s' %
+                user_profile.pay(form, int(amount * 100), 'Contribute to Crowdfunding: %s %s' %
                                                      (crowdfund, crowdfund.pk))
                 crowdfund.payment_received += amount
                 crowdfund.save()
