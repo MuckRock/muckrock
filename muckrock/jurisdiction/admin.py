@@ -6,6 +6,7 @@ from django.conf.urls.defaults import patterns, url
 from django.contrib import admin, messages
 from django.shortcuts import render_to_response, redirect
 from django.template.defaultfilters import slugify
+from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
@@ -74,7 +75,8 @@ class JurisdictionAdmin(TablibAdmin):
             form = CSVImportForm()
 
         fields = ['name', 'slug', 'level', 'parent']
-        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields})
+        return render_to_response('admin/agency/import.html', {'form': form, 'fields': fields},
+                                  context_instance=RequestContext(request))
 
 admin.site.register(Jurisdiction, JurisdictionAdmin)
 
