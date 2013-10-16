@@ -602,27 +602,32 @@ class FOIAMultiRequest(models.Model):
     def submit(self):
         """Submit the multi request to all of the agencies"""
         # pylint: disable=E1101
+        
+        # break the agencies into chunks of 50 to not timeout the database
         agencies = self.agencies.all()
-        for agency in agencies:
-            # make a copy of the foia (and its communication) for each agency
-            title = '%s (%s)' % (self.title, agency.name)
-            template = get_template('request_templates/none.txt')
-            context = Context({'document_request': self.requested_docs,
-                               'jurisdiction': agency.jurisdiction,
-                               'user': self.user})
-            foia_request = template.render(context).split('\n', 1)[1].strip()
+        agency_chunks = [agencies[i*50:(i+1)*50] for i in xrange(agencies.count()/50 + 1)]
 
-            new_foia = FOIARequest.objects.create(
-                user=self.user, status='started', title=title, slug=slugify(title),
-                jurisdiction=agency.jurisdiction, agency=agency, embargo=self.embargo,
-                requested_docs=self.requested_docs, description=self.requested_docs)
+        for agency_chunk in agency_chunks:
+            for agency in agency_chunk:
+                # make a copy of the foia (and its communication) for each agency
+                title = '%s (%s)' % (self.title, agency.name)
+                template = get_template('request_templates/none.txt')
+                context = Context({'document_request': self.requested_docs,
+                                   'jurisdiction': agency.jurisdiction,
+                                   'user': self.user})
+                foia_request = template.render(context).split('\n', 1)[1].strip()
 
-            FOIACommunication.objects.create(
-                    foia=new_foia, from_who=new_foia.user.get_full_name(),
-                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                    full_html=False, communication=foia_request)
+                new_foia = FOIARequest.objects.create(
+                    user=self.user, status='started', title=title, slug=slugify(title),
+                    jurisdiction=agency.jurisdiction, agency=agency, embargo=self.embargo,
+                    requested_docs=self.requested_docs, description=self.requested_docs)
 
-            new_foia.submit()
+                FOIACommunication.objects.create(
+                        foia=new_foia, from_who=new_foia.user.get_full_name(),
+                        to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                        full_html=False, communication=foia_request)
+
+                new_foia.submit()
         self.delete()
 
     def color_code(self):
