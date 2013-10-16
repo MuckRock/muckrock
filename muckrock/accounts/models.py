@@ -24,6 +24,12 @@ class Profile(models.Model):
         ('pro', 'Professional'),
     )
 
+    email_prefs = (
+        ('instant', 'Instant'),
+        ('daily', 'Daily'),
+        ('weekly', 'Weekly'),
+    )
+
     user = models.ForeignKey(User, unique=True)
     address1 = models.CharField(max_length=50, blank=True, verbose_name='address')
     address2 = models.CharField(max_length=50, blank=True, verbose_name='address (line 2)')
@@ -33,8 +39,12 @@ class Profile(models.Model):
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
     follows = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
+    notifications = models.ManyToManyField(FOIARequest, related_name='notify', blank=True)
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)
+
+    # prefrences
+    email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily')
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -161,6 +171,71 @@ class Profile(models.Model):
             stripe.Charge.create(amount=amount, currency='usd', card=token,
                                  description=desc)
 
+    def notify(self, foia):
+        """Notify a user that foia has been updated or mark to be notified later
+           according to preference"""
+
+        if self.email_pref == 'instant':
+            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=self.user.pk)
+            if anchor:
+                link += '#' + anchor
+
+            msg = render_to_string('foia/mail.txt',
+                {'name': self.user.get_full_name(),
+                 'title': foia.title,
+                 'status': foia.get_status_display(),
+                 'link': link,
+                 'follow': self.user != foia.user,
+                 'footer': options.email_footer})
+            send_mail('[MuckRock] FOI request "%s" has been updated' % foia.title,
+                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+        else:
+            self.notifications.add(foia)
+            self.save()
+
+    def send_notifications(self):
+        """Send deferred notifications"""
+
+        subjects = {
+            'done': "you've got new MuckRock docs!",
+            'partial': "you've got new MuckRock docs!",
+            'rejected': 'an agency rejected a MuckRock request - appeal?',
+            'fix': 'we need help fixing a MuckRock request.',
+            'payment': 'an agency wants payment for a MuckRock request.'
+        }
+        status_order = ['done', 'partial', 'rejected', 'fix', 'payment']
+
+        def get_subject(status, total_foias):
+            """Get subject for a given status"""
+            if status in subjects:
+                return subjects[status]
+            elif total_foias > 1:
+                return '%d MuckRock requests have updates.' % total_foias
+            else:
+                return 'a MuckRock request has been updated'
+
+        foias = sorted(self.notifications.all(),
+            key=lambda f: status_order.index(f.status) if f.status in status_order else 100)
+        grouped_foias = list(list(g) for g in groupby(foias,
+            lambda f: f.status if f.status != 'partial' else 'done'))
+        if not grouped_foias:
+            return
+        if len(grouped_foias) == 1:
+            subject = '%s, %s!' % (self.user.first_name,
+                                   get_subject(grouped_foias[0][0], len(foias)))
+        else:
+            subject = '%s, %s  Plus, %s' % (self.user.first_name,
+                                            get_subject(grouped_foias[0][0], len(foias)),
+                                            get_subject(grouped_foias[1][0], len(foias)))
+
+        msg = render_to_string('foia/notify_mail.txt',
+            {'name': self.user.get_full_name(),
+             'foias': grouped_foias,
+             'footer': options.email_footer})
+        send_mail(subject, msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+
 
 class Statistics(models.Model):
     """Nightly statistics"""
@@ -199,3 +274,4 @@ class Statistics(models.Model):
     class Meta:
         # pylint: disable=R0903
         ordering = ['-date']
+

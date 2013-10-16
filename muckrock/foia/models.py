@@ -319,24 +319,8 @@ class FOIARequest(models.Model):
         self.updated = True
         self.save()
 
-        send_data = []
         for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
-
-            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=profile.user.pk)
-            if anchor:
-                link += '#' + anchor
-
-            msg = render_to_string('foia/mail.txt',
-                {'name': profile.user.get_full_name(),
-                 'title': self.title,
-                 'status': self.get_status_display(),
-                 'link': link,
-                 'follow': self.user != profile.user,
-                 'footer': options.email_footer})
-            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
-                              msg, 'info@muckrock.com', [profile.user.email]))
-
-        send_mass_mail(send_data, fail_silently=False)
+            profile.notify(self)
 
         self.update_dates()
 
