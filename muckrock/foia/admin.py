@@ -17,7 +17,8 @@ from django_tablib.admin import TablibAdmin
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACommunication, \
                                  FOIANote, STATUS
-from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport
+from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport, \
+                                submit_multi_request
 from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
@@ -284,9 +285,10 @@ class FOIAMultiRequestAdmin(NestedModelAdmin, TablibAdmin):
         """Submit the multi request"""
         # pylint: disable=R0201
 
-        foia = get_object_or_404(FOIAMultiRequest, pk=idx)
-        foia.submit()
-        messages.info(request, 'Multi request has been submitted')
+        get_object_or_404(FOIAMultiRequest, pk=idx)
+        submit_multi_request.apply_async(args=[idx])
+
+        messages.info(request, 'Multi request is being submitted...')
         return HttpResponseRedirect(reverse('admin:foia_foiamultirequest_changelist'))
 
 
