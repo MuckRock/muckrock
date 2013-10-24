@@ -111,6 +111,13 @@ def bounces(request):
                                      Q(other_emails__icontains=recipient))
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
                                        Q(other_emails__icontains=recipient))
+
+    event = request.POST.get('event')
+    if event == 'bounced':
+        error = request.POST.get('error')
+    elif event == 'dropped':
+        error = request.POST.get('description')
+
     headers = request.POST.get('message-headers')
     parsed_headers = json.loads(headers)
     try:
@@ -121,11 +128,10 @@ def bounces(request):
     except (IndexError, ValueError):
         foia = None
 
-    send_mail('[BOUNCED] %s' % recipient,
+    send_mail('[%s] %s' % (event.upper(), recipient),
               render_to_string('foia/bounce.txt',
                                {'agencies': agencies, 'recipient': recipient,
-                                'foia': foia, 'foias': foias,
-                                'error': request.POST.get('error')}),
+                                'foia': foia, 'foias': foias, 'error': error}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
     return HttpResponse('OK')
