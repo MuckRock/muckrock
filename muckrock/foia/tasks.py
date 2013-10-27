@@ -6,11 +6,9 @@ from celery.task import periodic_task, task
 from django.core import management
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from muckrock.settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
-                     GA_USERNAME, GA_PASSWORD, GA_ID, \
-                     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_AUTOIMPORT_BUCKET_NAME
-
+from django.template.defaultfilters import slugify
+from django.template.loader import render_to_string, get_template
+from django.template import Context
 
 import dbsettings
 import base64
@@ -23,10 +21,13 @@ import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from muckrock.vendor import MultipartPostHandler
 
-from muckrock.foia.models import FOIAFile, FOIARequest, FOIACommunication
+from muckrock.foia.models import FOIAFile, FOIARequest, FOIAMultiRequest, FOIACommunication
 from muckrock.foia.codes import CODES
+from muckrock.settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
+                     GA_USERNAME, GA_PASSWORD, GA_ID, \
+                     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_AUTOIMPORT_BUCKET_NAME
+from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 
@@ -120,6 +121,41 @@ def set_document_cloud_pages(doc_pk, **kwargs):
     except urllib2.URLError, exc:
         # pylint: disable=E1101
         set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
+
+
+@task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.submit_multi_request')
+def submit_multi_request(req_pk, **kwargs):
+    """Submit a multi request to all agencies"""
+    # pylint: disable=E1101
+    # pylint: disable=W0613
+    req = FOIAMultiRequest.objects.get(pk=req_pk)
+    
+    # break the agencies into chunks of 50 to not timeout the database
+    agencies = req.agencies.all()
+    agency_chunks = [agencies[i*50:(i+1)*50] for i in xrange(agencies.count()/50 + 1)]
+
+    for agency_chunk in agency_chunks:
+        for agency in agency_chunk:
+            # make a copy of the foia (and its communication) for each agency
+            title = '%s (%s)' % (req.title, agency.name)
+            template = get_template('request_templates/none.txt')
+            context = Context({'document_request': req.requested_docs,
+                               'jurisdiction': agency.jurisdiction,
+                               'user': req.user})
+            foia_request = template.render(context).split('\n', 1)[1].strip()
+
+            new_foia = FOIARequest.objects.create(
+                user=req.user, status='started', title=title, slug=slugify(title),
+                jurisdiction=agency.jurisdiction, agency=agency, embargo=req.embargo,
+                requested_docs=req.requested_docs, description=req.requested_docs)
+
+            FOIACommunication.objects.create(
+                    foia=new_foia, from_who=new_foia.user.get_full_name(),
+                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                    full_html=False, communication=foia_request)
+
+            new_foia.submit()
+    req.delete()
 
 
 @periodic_task(run_every=crontab(hour=1, minute=10), name='muckrock.foia.tasks.set_top_viewed_reqs')

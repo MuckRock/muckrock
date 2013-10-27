@@ -86,7 +86,7 @@ class SubmitMultipleWizard(SessionWizardView):
                 return None
             agency_type = data.get('agency_type')
             jurisdiction = data.get('jurisdiction')
-            agencies = Agency.objects.all()
+            agencies = Agency.objects.get_approved()
             if agency_type:
                 agencies = agencies.filter(types=agency_type)
             if jurisdiction and jurisdiction.level == 's':

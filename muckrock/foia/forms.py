@@ -9,7 +9,6 @@ import sys
 from datetime import datetime, date, timedelta
 
 from muckrock.agency.models import Agency, AgencyType
-from muckrock.fields import GroupedModelChoiceField
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote
 from muckrock.foia.utils import make_template_choices
 from muckrock.foia.validate import validate_date_order
@@ -521,9 +520,10 @@ class FOIAWizardWhereForm(forms.Form):
                                        ('multi', 'Multiple Agencies')))
     state = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
-    local = GroupedModelChoiceField(
+    local = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
-        group_by_field='parent', required=False)
+        widget=forms.Select(attrs={'class': 'combobox'}),
+        required=False)
 
     def clean(self):
         """Make sure state or local is required based off of choice of level"""
