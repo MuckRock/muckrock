@@ -14,7 +14,6 @@ from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
 from urlauth.models import AuthKey
-import dbsettings
 import logging
 import os
 import re
@@ -24,16 +23,9 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME, STATIC_URL
 from muckrock.tags.models import Tag, TaggedItemBase
-from muckrock.values import TextValue
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
-
-class EmailOptions(dbsettings.Group):
-    """DB settings for sending email"""
-    email_footer = TextValue('email footer')
-options = EmailOptions()
-
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
@@ -313,6 +305,8 @@ class FOIARequest(models.Model):
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=E1101
+        # pylint: disable=W0613
+        # Do something with anchor
 
         self.updated = True
         self.save()

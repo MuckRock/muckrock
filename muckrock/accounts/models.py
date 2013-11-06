@@ -4,15 +4,28 @@ Models for the accounts application
 
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
+from django.core.mail import send_mail
 from django.db import models
+from django.template.loader import render_to_string
 
 from datetime import datetime
+from itertools import groupby
+from urlauth.models import AuthKey
+import dbsettings
 import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
+from muckrock.values import TextValue
 
 stripe.api_key = STRIPE_SECRET_KEY
+
+class EmailOptions(dbsettings.Group):
+    """DB settings for sending email"""
+    email_footer = TextValue('email footer')
+options = EmailOptions()
+
+
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -174,11 +187,10 @@ class Profile(models.Model):
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later
            according to preference"""
+        # pylint: disable=E1101
 
         if self.email_pref == 'instant':
             link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=self.user.pk)
-            if anchor:
-                link += '#' + anchor
 
             msg = render_to_string('foia/mail.txt',
                 {'name': self.user.get_full_name(),
@@ -196,6 +208,7 @@ class Profile(models.Model):
 
     def send_notifications(self):
         """Send deferred notifications"""
+        # pylint: disable=E1101
 
         subjects = {
             'done': "you've got new MuckRock docs!",
@@ -203,6 +216,13 @@ class Profile(models.Model):
             'rejected': 'an agency rejected a MuckRock request - appeal?',
             'fix': 'we need help fixing a MuckRock request.',
             'payment': 'an agency wants payment for a MuckRock request.'
+        }
+        category = {
+            'done': 'Completed Requests',
+            'partial': 'Completed Requests',
+            'rejected': 'Rejected Requests',
+            'fix': 'Requests Needing Action',
+            'payment': 'Requests Needing Action',
         }
         status_order = ['done', 'partial', 'rejected', 'fix', 'payment']
 
@@ -217,23 +237,25 @@ class Profile(models.Model):
 
         foias = sorted(self.notifications.all(),
             key=lambda f: status_order.index(f.status) if f.status in status_order else 100)
-        grouped_foias = list(list(g) for g in groupby(foias,
-            lambda f: f.status if f.status != 'partial' else 'done'))
+        grouped_foias = list((s, list(fs)) for s, fs in groupby(foias,
+            lambda f: category.get(f.status, 'Recently Updated Requests')))
         if not grouped_foias:
             return
         if len(grouped_foias) == 1:
             subject = '%s, %s!' % (self.user.first_name,
-                                   get_subject(grouped_foias[0][0], len(foias)))
+                                   get_subject(grouped_foias[0][1][0].status, len(foias)))
         else:
             subject = '%s, %s  Plus, %s' % (self.user.first_name,
-                                            get_subject(grouped_foias[0][0], len(foias)),
-                                            get_subject(grouped_foias[1][0], len(foias)))
+                                            get_subject(grouped_foias[0][0][0].status, len(foias)),
+                                            get_subject(grouped_foias[1][0][0].status, len(foias)))
 
-        msg = render_to_string('foia/notify_mail.txt',
+        msg = render_to_string('registration/notify_mail.txt',
             {'name': self.user.get_full_name(),
              'foias': grouped_foias,
              'footer': options.email_footer})
         send_mail(subject, msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+
+        self.notifications.clear()
 
 
 
