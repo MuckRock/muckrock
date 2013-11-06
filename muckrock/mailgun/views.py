@@ -111,7 +111,8 @@ def bounces(request):
     agencies = Agency.objects.filter(Q(email__iexact=recipient) |
                                      Q(other_emails__icontains=recipient))
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
-                                       Q(other_emails__icontains=recipient))
+                                       Q(other_emails__icontains=recipient))\
+                               .filter(status__in=['processed', 'appealing', 'fix', 'payment'])
 
     event = request.POST.get('event')
     if event == 'bounced':
