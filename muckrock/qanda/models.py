@@ -66,4 +66,8 @@ class Answer(models.Model):
         question.answer_date = self.date
         question.save()
 
+    class Meta:
+        # pylint: disable=R0903
+        ordering = ['date']
+
 

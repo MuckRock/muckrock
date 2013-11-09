@@ -48,7 +48,8 @@ def handle_request(request, mail_id):
                 foia=foia, from_who=from_realname[:255],
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False,
-                communication=post.get('stripped-text', ''))
+                communication='%s\n%s' %
+                    (post.get('stripped-text', ''), post.get('stripped-signature')))
 
         # handle attachments
         for file_ in request.FILES.itervalues():
@@ -110,7 +111,8 @@ def bounces(request):
     agencies = Agency.objects.filter(Q(email__iexact=recipient) |
                                      Q(other_emails__icontains=recipient))
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
-                                       Q(other_emails__icontains=recipient))
+                                       Q(other_emails__icontains=recipient))\
+                               .filter(status__in=['processed', 'appealing', 'fix', 'payment'])
 
     event = request.POST.get('event')
     if event == 'bounced':
