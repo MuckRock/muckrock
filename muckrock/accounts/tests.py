@@ -384,7 +384,7 @@ class TestAccountFunctional(TestCase):
                      'email': 'mitch@muckrock.com',   'user': user,
                      'address1': '123 main st',       'address2': '',
                      'city': 'boston', 'state': 'MA', 'zip_code': '02140',
-                     'phone': '555-123-4567'}
+                     'phone': '555-123-4567',         'email_pref': 'instant'}
 
         self._test_post_view_helper('acct-update', 'update', user_data)
 

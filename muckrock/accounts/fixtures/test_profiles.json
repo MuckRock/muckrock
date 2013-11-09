@@ -14,6 +14,7 @@
 			"num_requests": 10,
 			"acct_type": "beta",
             "zip_code": "02140",
+            "email_pref": "instant",
 			"stripe_id": "cus_RTW3KxBMCknuhB"
         }
     }, 
@@ -31,6 +32,7 @@
             "monthly_requests": 0, 
 			"num_requests": 10,
 			"acct_type": "beta",
+            "email_pref": "instant",
             "zip_code": "02140"
         }
     }, 
@@ -48,6 +50,7 @@
             "monthly_requests": 0, 
 			"num_requests": 0,
 			"acct_type": "beta",
+            "email_pref": "instant",
             "zip_code": "02140"
         }
     },
@@ -65,6 +68,7 @@
             "monthly_requests": 0, 
 			"num_requests": 0,
 			"acct_type": "admin",
+            "email_pref": "instant",
             "zip_code": "02140"
         }
     },
@@ -82,6 +86,7 @@
             "monthly_requests": 0, 
 			"num_requests": 0,
 			"acct_type": "community",
+            "email_pref": "instant",
             "zip_code": "02140"
         }
     },
@@ -99,6 +104,7 @@
             "monthly_requests": 0, 
 			"num_requests": 0,
 			"acct_type": "pro",
+            "email_pref": "instant",
             "zip_code": "02140"
         }
     }

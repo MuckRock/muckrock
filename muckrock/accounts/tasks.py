@@ -67,3 +67,20 @@ def store_statstics():
                                             last_login__month=yesterday.month,
                                             last_login__day=yesterday.day)
     stats.save()
+
+def _notices(email_pref):
+    """Send out notices"""
+    for profile in Profile.objects.filter(email_pref=email_pref, notifications__isnull=False)\
+                          .distinct():
+        profile.send_notifications()
+
+@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.accounts.tasks.daily_notices')
+def daily_notices():
+    """Send out daily notices"""
+    _notices('daily')
+
+@periodic_task(run_every=crontab(day_of_week='mon', hour=10, minute=0),
+               name='muckrock.accounts.tasks.weekly')
+def weekly_notices():
+    """Send out weekly notices"""
+    _notices('weekly')

@@ -57,7 +57,9 @@ class Profile(models.Model):
     acct_type = models.CharField(max_length=10, choices=acct_types)
 
     # prefrences
-    email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily')
+    email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily',
+                                  verbose_name='Email Preference', help_text='Receive email updates'
+                                  ' to your requests instantly or in a daily or weekly digest')
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -190,7 +192,7 @@ class Profile(models.Model):
         # pylint: disable=E1101
 
         if self.email_pref == 'instant':
-            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=self.user.pk)
+            link = AuthKey.objects.wrap_url(foia.get_absolute_url(), uid=self.user.pk)
 
             msg = render_to_string('foia/mail.txt',
                 {'name': self.user.get_full_name(),
@@ -231,7 +233,7 @@ class Profile(models.Model):
             if status in subjects:
                 return subjects[status]
             elif total_foias > 1:
-                return '%d MuckRock requests have updates.' % total_foias
+                return '%d MuckRock requests have updates' % total_foias
             else:
                 return 'a MuckRock request has been updated'
 
@@ -242,7 +244,7 @@ class Profile(models.Model):
         if not grouped_foias:
             return
         if len(grouped_foias) == 1:
-            subject = '%s, %s!' % (self.user.first_name,
+            subject = '%s, %s' % (self.user.first_name,
                                    get_subject(grouped_foias[0][1][0].status, len(foias)))
         else:
             subject = '%s, %s  Plus, %s' % (self.user.first_name,
