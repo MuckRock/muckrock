@@ -4,7 +4,7 @@ psycopg2==2.0.14
 wsgiref==0.1.2
 pil==1.1.7
 coverage==3.3.1
-South==0.7
+South==0.8.2
 ipython==0.10
 django-haystack==1.2.7
 Whoosh==2.4.1
