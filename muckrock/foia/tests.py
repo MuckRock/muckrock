@@ -100,7 +100,7 @@ class TestFOIARequestUnit(TestCase):
                        ['other_a@agency1.gov', 'other_b@agency1.gov', 'requests@muckrock.com'])
         nose.tools.eq_(mail.outbox[-1].subject,
                        'Freedom of Information Request: %s' % foia.title)
-        nose.tools.eq_(foia.status, 'processed')
+        nose.tools.eq_(foia.status, 'ack')
         nose.tools.eq_(foia.date_submitted, datetime.date.today())
         nose.tools.ok_(foia.date_due > datetime.date.today())
 

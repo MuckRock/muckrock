@@ -271,6 +271,7 @@ class Statistics(models.Model):
     total_requests_denied = models.IntegerField()
     total_requests_draft = models.IntegerField(null=True)
     total_requests_submitted = models.IntegerField(null=True)
+    total_requests_awaiting_ack = models.IntegerField(null=True)
     total_requests_awaiting_response = models.IntegerField(null=True)
     total_requests_awaiting_appeal = models.IntegerField(null=True)
     total_requests_fix_required = models.IntegerField(null=True)

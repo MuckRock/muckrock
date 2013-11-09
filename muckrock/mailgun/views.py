@@ -112,7 +112,8 @@ def bounces(request):
                                      Q(other_emails__icontains=recipient))
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
                                        Q(other_emails__icontains=recipient))\
-                               .filter(status__in=['processed', 'appealing', 'fix', 'payment'])
+                               .filter(status__in=['ack', 'processed', 'appealing', 'fix',
+                                                   'payment'])
 
     event = request.POST.get('event')
     if event == 'bounced':

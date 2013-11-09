@@ -67,7 +67,7 @@ class FOIARequestManager(ChainableManager):
 
     def get_overdue(self):
         """Get all overdue FOIA requests"""
-        return self.filter(status='processed', date_due__lt=date.today())
+        return self.filter(status__in=['ack', 'processed'], date_due__lt=date.today())
 
     def get_followup(self):
         """Get requests which require us to follow up on with the agency"""
@@ -79,7 +79,7 @@ class FOIARequestManager(ChainableManager):
 
     def get_open(self):
         """Get requests which we are awaiting a response from"""
-        return self.filter(status__in=['processed', 'appealing'])
+        return self.filter(status__in=['ack', 'processed', 'appealing'])
 
     def get_undated(self):
         """Get requests which have an undated file"""
@@ -89,6 +89,7 @@ class FOIARequestManager(ChainableManager):
 STATUS = (
     ('started', 'Draft'),
     ('submitted', 'Processing'),
+    ('ack', 'Awaiting Acknowledgement'),
     ('processed', 'Awaiting Response'),
     ('appealing', 'Awaiting Appeal'),
     ('fix', 'Fix Required'),
@@ -215,10 +216,10 @@ class FOIARequest(models.Model):
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
-        percents = {'started':   25,  'submitted': 50, 'processed': 75,
-                    'fix':       75,  'payment':   75, 'rejected': 100,
-                    'no_docs':   100, 'done':     100, 'partial':   90,
-                    'abandoned': 100, 'appealing': 75}
+        percents = {'started':   25, 'submitted':  50, 'ack':       65, 
+                    'processed': 75, 'fix':        75, 'payment':   75,
+                    'rejected': 100, 'no_docs':   100, 'done':     100,
+                    'partial':   90, 'abandoned': 100, 'appealing': 75}
         return percents.get(self.status, 0)
 
     def color_code(self):
@@ -227,7 +228,7 @@ class FOIARequest(models.Model):
         colors = {'started':   'wait', 'submitted': 'go',   'processed': processed,
                   'fix':       'wait', 'payment':   'wait', 'rejected':  'stop',
                   'no_docs':   'stop', 'done':      'go',   'partial': 'go',
-                  'abandoned': 'stop', 'appealing': processed}
+                  'abandoned': 'stop', 'appealing': processed, 'ack': processed}
         return colors.get(self.status, 'go')
 
     def first_request(self):
@@ -336,7 +337,7 @@ class FOIARequest(models.Model):
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if (self.email and not appeal) or can_email_appeal:
-            self.status = 'processed' if not appeal else 'appealing'
+            self.status = 'ack' if not appeal else 'appealing'
             self._send_email()
             self.update_dates()
         else:

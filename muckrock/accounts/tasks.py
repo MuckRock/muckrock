@@ -40,6 +40,7 @@ def store_statstics():
         total_requests_denied=FOIARequest.objects.filter(status='rejected').count(),
         total_requests_draft=FOIARequest.objects.filter(status='started').count(),
         total_requests_submitted=FOIARequest.objects.filter(status='submitted').count(),
+        total_requests_awaiting_ack=FOIARequest.objects.filter(status='ack').count(),
         total_requests_awaiting_response=FOIARequest.objects.filter(status='processed').count(),
         total_requests_awaiting_appeal=FOIARequest.objects.filter(status='appealing').count(),
         total_requests_fix_required=FOIARequest.objects.filter(status='fix').count(),

@@ -32,6 +32,7 @@ class FoiaSitemap(Sitemap):
         return {
             'started': 0.3,
             'submitted': 0.5,
+            'ack': 0.6,
             'processed': 0.6,
             'fix': 0.6,
             'payment': 0.6,
