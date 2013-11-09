@@ -124,10 +124,10 @@ email_re = re.compile('[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4
 
 def email_redactor(match):
     """Don't redact muckrock emails"""
-    if match.group('domain').endswith('muckrock.com'):
+    if match.group('domain') != 'requests.muckrock.com':
         return match.group(0)
     else:
-        return '[redacted]@%s' % match.group('domain')
+        return 'requests@muckrock.com'
 
 @register.filter
 def redact_emails(text):
@@ -136,6 +136,7 @@ def redact_emails(text):
 
 # http://stackoverflow.com/questions/1278042/
 # in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
+
 @register.tag(name="evaluate")
 def do_evaluate(parser, token):
     """
