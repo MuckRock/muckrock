@@ -2,6 +2,7 @@
 {% extends "registration/base.html" %}
 
 {% load tags %}
+{% load markdown_deux_tags %}
 
 {% block content %}
 
@@ -90,9 +91,7 @@
 {% block sidebar %}
 
 	{% if sidebar %}
-		{% autoescape off %}
-		{{ sidebar }}
-		{% endautoescape %}
+		{{ sidebar|markdown:"trusted" }}
 		<div class="content-separator"></div>
 	{% endif %}
 

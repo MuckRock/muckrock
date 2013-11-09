@@ -4,6 +4,7 @@
 {% load tags %}
 {% load staticfiles %}
 {% load humanize %}
+{% load markdown_deux_tags %}
 
 {% block title %} {{foia.title}} {% endblock %}
 
@@ -283,9 +284,7 @@
 	{% endif %}
 
 	{% if sidebar %}
-		{% autoescape off %}
-		{{ sidebar }}
-		{% endautoescape %}
+		{{ sidebar|markdown:"trusted" }}
 		<div class="content-separator"></div>
 	{% endif %}
 

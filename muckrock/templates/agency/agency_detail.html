@@ -2,6 +2,7 @@
 {% extends "agency/base.html" %}
 {% load thumbnail %}
 {% load staticfiles %}
+{% load markdown_deux_tags %}
 
 {% block title %} {{agency.name}} {% endblock %}
 
@@ -74,7 +75,7 @@
 
 
 <div>
-{{agency.public_notes|safe}}
+{{agency.public_notes|markdown:"trusted"}}
 </div>
 
 <table class="data-table">
@@ -148,9 +149,7 @@
 {% block sidebar %}
 
 	{% if sidebar %}
-		{% autoescape off %}
-		{{ sidebar }}
-		{% endautoescape %}
+		{{ sidebar|markdown:"trusted" }}
 		<div class="content-separator"></div>
 	{% endif %}
 

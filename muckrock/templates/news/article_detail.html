@@ -38,9 +38,7 @@
 
 {% block sidebar %}
 	{% if sidebar %}
-		{% autoescape off %}
-		{{ sidebar }}
-		{% endautoescape %}
+		{{ sidebar|markdown:"trusted" }}
 		<div class="content-separator"></div>
 	{% endif %}
 

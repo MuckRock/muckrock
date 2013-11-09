@@ -2,6 +2,7 @@
 {% extends "jurisdiction/base.html" %}
 {% load thumbnail %}
 {% load staticfiles %}
+{% load markdown_deux_tags %}
 
 {% block title %} {{jurisdiction.name}} {% endblock %}
 
@@ -53,7 +54,7 @@
 <div class="clearer">&nbsp;</div>
 
 <div>
-{{jurisdiction.public_notes|safe}}
+{{jurisdiction.public_notes|markdown:"trusted"}}
 </div>
 
 <table class="data-table">
@@ -155,9 +156,7 @@
 {% block sidebar %}
 
 	{% if sidebar %}
-		{% autoescape off %}
-		{{ sidebar }}
-		{% endautoescape %}
+		{{ sidebar|markdown:"trusted" }}
 		<div class="content-separator"></div>
 	{% endif %}
 
