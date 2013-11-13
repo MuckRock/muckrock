@@ -335,8 +335,11 @@ class FOIARequest(models.Model):
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
 
+        approved_agency = self.agency and self.agency.approved
+        can_email = self.email and not appeal
+
         # if the request can be emailed, email it, otherwise send a notice to the admin
-        if (self.email and not appeal) or can_email_appeal:
+        if approved_agency and (can_email or can_email_appeal):
             if appeal:
                 self.status = 'appealing'
             elif self.communications.filter(response=True).exists():
