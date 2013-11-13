@@ -248,8 +248,8 @@ class Profile(models.Model):
                                    get_subject(grouped_foias[0][1][0].status, len(foias)))
         else:
             subject = '%s, %s  Plus, %s' % (self.user.first_name,
-                                            get_subject(grouped_foias[0][0][0].status, len(foias)),
-                                            get_subject(grouped_foias[1][0][0].status, len(foias)))
+                                            get_subject(grouped_foias[0][1][0].status, len(foias)),
+                                            get_subject(grouped_foias[1][1][0].status, len(foias)))
 
         msg = render_to_string('registration/notify_mail.txt',
             {'name': self.user.get_full_name(),
