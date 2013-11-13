@@ -72,6 +72,8 @@ def handle_request(request, mail_id):
             # drop emails until it fits in db
             foia.other_emails = foia.other_emails[:foia.other_emails.rindex(',')]
 
+        if foia.status == 'ack':
+            foia.status = 'processed'
         foia.save()
         foia.update(comm.anchor())
 

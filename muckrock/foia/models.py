@@ -337,7 +337,12 @@ class FOIARequest(models.Model):
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if (self.email and not appeal) or can_email_appeal:
-            self.status = 'ack' if not appeal else 'appealing'
+            if appeal:
+                self.status = 'appealing'
+            elif self.communications.filter(response=True).exists():
+                self.status = 'processed'
+            else:
+                self.status = 'ack'
             self._send_email()
             self.update_dates()
         else:
