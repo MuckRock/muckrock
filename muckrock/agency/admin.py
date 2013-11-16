@@ -33,7 +33,8 @@ class AgencyTypeAdmin(admin.ModelAdmin):
 
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
-    user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'))
+    user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'),
+                                         required=False)
 
     class Meta:
         # pylint: disable=R0903
