@@ -226,7 +226,9 @@ class Profile(models.Model):
             'fix': 'Requests Needing Action',
             'payment': 'Requests Needing Action',
         }
-        status_order = ['done', 'partial', 'rejected', 'fix', 'payment']
+        status_order = ['done', 'partial', 'rejected', 'fix', 'payment',
+                        'no_docs', 'abandoned', 'appealing', 'started',
+                        'submitted', 'ack', 'processed']
 
         def get_subject(status, total_foias):
             """Get subject for a given status"""
