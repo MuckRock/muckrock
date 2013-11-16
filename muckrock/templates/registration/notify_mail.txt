@@ -1,3 +1,4 @@
+{% autoescape off %}
 Hi {{name}},
 
 Here's a summary of recent updates on your requests and the requests you
@@ -20,3 +21,4 @@ https://www.muckrock.com{% url foia-mylist view="completed" %}{% endif %}{% if s
 https://www.muckrock.com{% url foia-mylist view="action" %}{% endif %}
 	{% endfor %}
 {% endfor %}
+{% endautoescape %}
