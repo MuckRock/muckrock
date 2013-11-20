@@ -777,8 +777,9 @@ class Detail(DetailView):
         # pylint: disable=R0201
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if (foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or \
-           (request.user.is_staff and status in [s for s, _ in STATUS]): 
+        if ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or
+           (request.user.is_staff and status in [s for s, _ in STATUS])) and \
+           foia.status not in ['started', 'submitted']: 
             foia.status = status
             foia.save()
             send_mail('%s changed the status of "%s" to %s' %
