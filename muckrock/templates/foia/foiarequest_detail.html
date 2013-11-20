@@ -288,6 +288,16 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
+	{% if foia.followed_by.all %}
+		<h2>Followers</h2>
+		<ul>
+		{% for follower in foia.followed_by.all %}
+			<li><a href="{{follower.get_absolute_url}}">{{follower.user.username}}</a></li>
+		{% endfor %}
+		</ul>
+		<div class="content-separator"></div>
+	{% endif %}
+
 	{% if actions.side %}
 		<h2>Actions</h2>
 		{% for action in actions.side %}

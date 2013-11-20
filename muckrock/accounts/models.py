@@ -73,6 +73,12 @@ class Profile(models.Model):
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        # pylint: disable=E1101
+        return ('acct-profile', [], {'user_name': self.user.username})
+
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
 
