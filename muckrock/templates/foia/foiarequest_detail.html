@@ -45,7 +45,7 @@
 		{% endif %}
 		</span>
 		{% if foia.user == request.user or request.user.is_staff %}
-		  {% if foia.status != 'started' and foia.status != 'submitted' and foia.status != 'ack' %}
+		  {% if foia.status != 'started' and foia.status != 'submitted' %}
 			&nbsp;&mdash;&nbsp;&nbsp;
 			<a href="#" onclick="$('#status').hide('slow'); $('#status-edit').show('slow');">Edit</a>
 			{% endif %}
