@@ -94,10 +94,11 @@ class TestFOIARequestUnit(TestCase):
         foia.status = 'submitted'
         foia.save()
         foia.submit()
-        nose.tools.eq_(mail.outbox[-1].from_email, '%s@requests.muckrock.com' % foia.get_mail_id())
+        nose.tools.eq_(mail.outbox[-1].from_email, '%s <%s@requests.muckrock.com>' % 
+            (foia.user.get_full_name(), foia.get_mail_id()))
         nose.tools.eq_(mail.outbox[-1].to, ['test@agency1.gov'])
         nose.tools.eq_(mail.outbox[-1].bcc,
-                       ['other_a@agency1.gov', 'other_b@agency1.gov', 'requests@muckrock.com'])
+                       ['other_a@agency1.gov', 'other_b@agency1.gov', 'diagnostics@muckrock.com'])
         nose.tools.eq_(mail.outbox[-1].subject,
                        'Freedom of Information Request: %s' % foia.title)
         nose.tools.eq_(foia.status, 'ack')

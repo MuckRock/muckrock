@@ -4,7 +4,7 @@ Models for the accounts application
 
 from django.contrib.auth.models import User
 from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
@@ -207,8 +207,11 @@ class Profile(models.Model):
                  'link': link,
                  'follow': self.user != foia.user,
                  'footer': options.email_footer})
-            send_mail('[MuckRock] FOI request "%s" has been updated' % foia.title,
-                      msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+            email = EmailMessage(subject='[MuckRock] FOI request "%s" has been updated'
+                                         % foia.title,
+                                 body=msg, from_email='info@muckrock.com',
+                                 to=[self.user.email], bcc=['diagnostics@muckrock.com'])
+            email.send(fail_silently=False)
 
         else:
             self.notifications.add(foia)
@@ -263,7 +266,10 @@ class Profile(models.Model):
             {'name': self.user.get_full_name(),
              'foias': grouped_foias,
              'footer': options.email_footer})
-        send_mail(subject, msg, 'info@muckrock.com', [self.user.email], fail_silently=False)
+        email = EmailMessage(subject=subject, body=msg,
+                             from_email='info@muckrock.com',
+                             to=[self.user.email], bcc=['diagnostics@muckrock.com'])
+        email.send(fail_silently=False)
 
         self.notifications.clear()
 

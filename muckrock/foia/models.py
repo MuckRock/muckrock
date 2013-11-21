@@ -406,19 +406,20 @@ class FOIARequest(models.Model):
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
         if self.tracking_id:
-            subject = 'Follow up to Freedom of Information Request #%s' % self.tracking_id
+            subject = 'RE: Freedom of Information Request #%s' % self.tracking_id
         elif self.communications.count() > 1:
-            subject = 'Follow up to Freedom of Information Request: %s' % self.title
+            subject = 'RE: Freedom of Information Request: %s' % self.title
         else:
             subject = 'Freedom of Information Request: %s' % self.title
 
         cc_addrs = self.get_other_emails()
+        from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         msg = EmailMessage(subject=subject,
                            body=render_to_string('foia/request.txt', {'request': self}),
-                           from_email='%s@%s' % (from_addr, MAILGUN_SERVER_NAME),
+                           from_email='%s <%s>' % (self.user.get_full_name(), from_email),
                            to=[self.email],
-                           bcc=cc_addrs + ['requests@muckrock.com'],
-                           headers={'Cc': ','.join(cc_addrs)}) 
+                           bcc=cc_addrs + ['diagnostics@muckrock.com'],
+                           headers={'Cc': ','.join(cc_addrs)})
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
