@@ -290,22 +290,23 @@
 		<div class="content-separator"></div>
 	{% endif %}
 
-	{% if foia.followed_by.all %}
-		<h2>Followers</h2>
-		<ul>
-		{% for follower in foia.followed_by.all %}
-			<li><a href="{{follower.get_absolute_url}}">{{follower.user.username}}</a></li>
-		{% endfor %}
-		</ul>
-		<div class="content-separator"></div>
-	{% endif %}
-
 	{% if actions.side %}
 		<h2>Actions</h2>
 		{% for action in actions.side %}
 			<p><a class="jqbutton" href="{{action.link}}"{% if action.id %} id="{{action.id}}"{% endif %}>{{action.label}}</a></p>
 		{% endfor %}
+		<div class="content-separator"></div>
 	{% endif %}
+
+		{% if foia.followed_by.all.count == 1 %}
+			<em>1 person is currently following this request.{% if user.is_anonymous %}  <a href="{% url acct-register %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
+			<div class="content-separator"></div>
+		{% endif %}
+		{% if foia.followed_by.all.count > 1 %}
+			<em>{{foia.followed_by.all.count}} people are currently following this request.{% if user.is_anonymous %}  <a href="{% url acct-register %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
+			<div class="content-separator"></div>
+		{% endif %}
+
 	<div id="dialog" title="Embed Code">
 		<p>Copy and paste this code into your site to embed this document in the document viewer:<p>
 		<textarea id="embed0" style="width: 520px; height: 160px"></textarea>
