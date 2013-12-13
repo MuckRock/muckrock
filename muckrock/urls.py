@@ -13,11 +13,13 @@ from django.contrib.sitemaps.views import sitemap
 from django.views.decorators.csrf import csrf_exempt
 
 from django_xmlrpc.views import handle_xmlrpc
+from rest_framework.routers import DefaultRouter
 import haystack.urls, dbsettings.urls
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls
+import muckrock.agency.views, muckrock.foia.views, muckrock.jurisdiction.views
 import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.foia.sitemap import FoiaSitemap
@@ -27,6 +29,11 @@ admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
 
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
+
+router = DefaultRouter()
+router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
+router.register(r'agency', muckrock.agency.views.AgencyViewSet)
+router.register(r'foia', muckrock.foia.views.FOIARequestViewSet)
 
 urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
@@ -42,6 +49,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
     url(r'^settings/', include(dbsettings.urls)),
+    url(r'^api_v1/', include(router.urls)),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),

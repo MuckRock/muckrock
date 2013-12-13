@@ -20,6 +20,7 @@ from django.views.generic.list import ListView
 from collections import namedtuple
 from datetime import datetime, date, timedelta
 from decimal import Decimal
+from rest_framework import viewsets
 import logging
 import stripe
 import sys
@@ -34,6 +35,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
+from muckrock.foia.serializers import FOIARequestSerializer
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -850,3 +852,11 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         action = 'admin_fix'
     
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
+
+class FOIARequestViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read only API views for FOIARequest"""
+    # pylint: disable=R0904
+    queryset = FOIARequest.objects.all()
+    serializer_class = FOIARequestSerializer
+    filter_fields = ('user', 'status', 'jurisdiction__name', 'agency__name', 'email', 'tags__name')

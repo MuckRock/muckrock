@@ -9,8 +9,11 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
+from rest_framework import viewsets
+
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
+from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats, flag_helper
@@ -105,3 +108,10 @@ def stale(request):
                               {'stale_agencies': agencies},
                               context_instance=RequestContext(request))
 
+
+class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read only API views for Agency"""
+    # pylint: disable=R0901
+    # pylint: disable=R0904
+    queryset = Agency.objects.all()
+    serializer_class = AgencySerializer

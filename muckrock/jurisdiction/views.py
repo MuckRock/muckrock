@@ -9,8 +9,11 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 
+from rest_framework import viewsets
+
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.jurisdiction.serializers import JurisdictionSerializer
 from muckrock.sidebar.models import Sidebar
 
 def collect_stats(obj, context):
@@ -82,3 +85,11 @@ def flag(request, fed_slug, state_slug, local_slug):
         jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
 
     return flag_helper(request, jurisdiction, 'jurisdiction')
+
+
+class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
+    """Read only API views for Jurisdiction"""
+    # pylint: disable=R0901
+    # pylint: disable=R0904
+    queryset = Jurisdiction.objects.all()
+    serializer_class = JurisdictionSerializer
