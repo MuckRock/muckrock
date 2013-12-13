@@ -20,7 +20,7 @@ CODES = {
 	'FIX-F': ('Fee Agreement Required', 'fix', 'The user must agree to pay fees in order for the process to be continued being processed.  No payment is due at this time.'),
 	'FIX-V': ('Fix Required', 'fix', 'A fix is required to perfect the request. The request has been rejected as being too vague, burdensome or otherwise unprocessable.'),
 	'FIX-I': ('Fix Required', 'fix', 'A letter stating that a certificate of identity, proof of death, or other privacy-related fix is required in order to continue processing the request.'),
-	'FIX': ('Fix Required', 'fix', 'A fix is required to perfect the requesfix is required to perfect the request.'),
+	'FIX': ('Fix Required', 'fix', 'A fix is required to perfect the request.'),
 	'FWD': ('Request Forwarded', None, 'The request has been forwarded from one agency to another agency or department for further review or follow up.'),
 	'INT': ('Interim Response', 'processed', 'An interim response, stating the request is being processed.'),
 	'INT-D': ('Interim Response', 'processed', 'An interim response, stating the request has been delayed'),
