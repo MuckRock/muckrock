@@ -10,6 +10,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
 from rest_framework import viewsets
+import django_filters
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
@@ -109,9 +110,21 @@ def stale(request):
                               context_instance=RequestContext(request))
 
 
-class AgencyViewSet(viewsets.ReadOnlyModelViewSet):
-    """Read only API views for Agency"""
+class AgencyViewSet(viewsets.ModelViewSet):
+    """API views for Agency"""
     # pylint: disable=R0901
     # pylint: disable=R0904
     queryset = Agency.objects.all()
     serializer_class = AgencySerializer
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Agencies"""
+        # pylint: disable=E1101
+        # pylint: disable=R0903
+        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
+        types = django_filters.CharFilter(name='types__name')
+        class Meta:
+            model = Agency
+            fields = ('name', 'jurisdiction', 'types')
+
+    filter_class = Filter

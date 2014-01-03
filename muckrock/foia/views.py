@@ -21,6 +21,7 @@ from collections import namedtuple
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from rest_framework import viewsets
+import django_filters
 import logging
 import stripe
 import sys
@@ -35,7 +36,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
-from muckrock.foia.serializers import FOIARequestSerializer
+from muckrock.foia.serializers import FOIARequestSerializer, IsOwnerOrStaffOrReadOnly
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -854,9 +855,25 @@ def redirect_old(request, jurisdiction, slug, idx, action):
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
 
-class FOIARequestViewSet(viewsets.ReadOnlyModelViewSet):
-    """Read only API views for FOIARequest"""
+class FOIARequestViewSet(viewsets.ModelViewSet):
+    """API views for FOIARequest"""
     # pylint: disable=R0904
-    queryset = FOIARequest.objects.all()
+    permission_classes = (IsOwnerOrStaffOrReadOnly,)
+    model = FOIARequest
     serializer_class = FOIARequestSerializer
-    filter_fields = ('user', 'status', 'jurisdiction__name', 'agency__name', 'email', 'tags__name')
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for FOIA Requests"""
+        # pylint: disable=E1101
+        # pylint: disable=R0903
+        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
+        agency = django_filters.CharFilter(name='agency__name')
+        tags = django_filters.CharFilter(name='tags__name')
+        class Meta:
+            model = FOIARequest
+            fields = ('user', 'status', 'jurisdiction', 'agency', 'email', 'tags')
+
+    filter_class = Filter
+
+    def get_queryset(self):
+        return FOIARequest.objects.get_viewable(self.request.user)

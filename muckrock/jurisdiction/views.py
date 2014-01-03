@@ -87,9 +87,10 @@ def flag(request, fed_slug, state_slug, local_slug):
     return flag_helper(request, jurisdiction, 'jurisdiction')
 
 
-class JurisdictionViewSet(viewsets.ReadOnlyModelViewSet):
-    """Read only API views for Jurisdiction"""
+class JurisdictionViewSet(viewsets.ModelViewSet):
+    """API views for Jurisdiction"""
     # pylint: disable=R0901
     # pylint: disable=R0904
     queryset = Jurisdiction.objects.all()
     serializer_class = JurisdictionSerializer
+    filter_fields = ('name', 'abbrev', 'level', 'parent')

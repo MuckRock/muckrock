@@ -170,6 +170,7 @@ INSTALLED_APPS = (
     'epiceditor',
     'markdown_deux',
     'rest_framework',
+    'rest_framework.authtoken',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -414,7 +415,12 @@ REST_FRAMEWORK = {
     'PAGINATE_BY': 20,                 # Default to 20
     'PAGINATE_BY_PARAM': 'page_size',  # Allow client to override, using `?page_size=xxx`.
     'MAX_PAGINATE_BY': 100,            # Maximum limit allowed when using `?page_size=xxx`.
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_FILTER_BACKENDS':
+        ('rest_framework.filters.DjangoFilterBackend',),
+    'DEFAULT_AUTHENTICATION_CLASSES':
+        ('rest_framework.authentication.TokenAuthentication',),
+    'DEFAULT_PERMISSION_CLASSES':
+        ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
     
 
