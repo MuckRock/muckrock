@@ -439,7 +439,7 @@ class FOIARequest(models.Model):
                 self.date_due = cal.business_days_from(date.today(), days)
 
         # updated from mailgun without setting status or submitted
-        if self.status == 'processed':
+        if self.status in ['ack', 'processed']:
 
             # unpause the count down
             if self.days_until_due is not None:
@@ -449,7 +449,7 @@ class FOIARequest(models.Model):
             self._update_followup_date()
 
         # if we are no longer waiting on the agency, do not follow up
-        if self.status != 'processed' and self.date_followup:
+        if self.status not in ['ack', 'processed'] and self.date_followup:
             self.date_followup = None
 
         # if we need to respond, pause the count down until we do
