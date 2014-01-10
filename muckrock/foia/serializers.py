@@ -32,6 +32,7 @@ class IsOwnerOrStaffOrReadOnly(permissions.BasePermission):
 
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""
+    ffile = serializers.CharField(source='ffile.url', read_only=True)
     class Meta:
         model = FOIAFile
         exclude = ('foia', 'comm')
@@ -54,5 +55,5 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         model = FOIARequest
         fields = ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
                   'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
-                  'date_followup', 'price', 'requested_docs', 'description', 'tracking_id', 'email',
-                  'other_emails', 'tags')
+                  'date_followup', 'embargo', 'date_embargo', 'price', 'requested_docs',
+                  'description', 'tracking_id', 'tags')

@@ -50,10 +50,12 @@ urlpatterns = patterns('',
     url(r'^search/', include(haystack.urls)),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
+    url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
 )
+
 
 if settings.DEBUG:
     urlpatterns += patterns('',

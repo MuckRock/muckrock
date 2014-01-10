@@ -36,7 +36,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
-from muckrock.foia.serializers import FOIARequestSerializer, IsOwnerOrStaffOrReadOnly
+from muckrock.foia.serializers import FOIARequestSerializer #, IsOwnerOrStaffOrReadOnly
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -858,7 +858,6 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 class FOIARequestViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=R0904
-    permission_classes = (IsOwnerOrStaffOrReadOnly,)
     model = FOIARequest
     serializer_class = FOIARequestSerializer
 
@@ -871,7 +870,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         tags = django_filters.CharFilter(name='tags__name')
         class Meta:
             model = FOIARequest
-            fields = ('user', 'status', 'jurisdiction', 'agency', 'email', 'tags')
+            fields = ('user', 'title', 'status', 'jurisdiction', 'agency', 'embargo', 'tags')
 
     filter_class = Filter
 

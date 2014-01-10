@@ -12,4 +12,5 @@ class JurisdictionSerializer(serializers.ModelSerializer):
     """Serializer for Jurisidction model"""
     class Meta:
         model = Jurisdiction
-        fields = ('id', 'name', 'slug', 'full_name', 'abbrev', 'level', 'parent', 'public_notes')
+        fields = ('id', 'name', 'slug', 'full_name', 'abbrev', 'level', 'parent', 'public_notes',
+                  'days')

@@ -13,7 +13,7 @@ class AgencySerializer(serializers.ModelSerializer):
     types = serializers.RelatedField(many=True)
     class Meta:
         model = Agency
-        fields = ('id', 'name', 'slug', 'jurisdiction', 'types', 'public_notes', 'address', 'email',
-                  'other_emails', 'contact_salutation', 'contact_first_name', 'contact_last_name',
+        fields = ('id', 'name', 'slug', 'jurisdiction', 'types', 'public_notes', 'address',
+                  'contact_salutation', 'contact_first_name', 'contact_last_name',
                   'contact_title', 'url', 'expires', 'phone', 'fax')
 
