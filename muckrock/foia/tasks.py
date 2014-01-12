@@ -194,9 +194,10 @@ def followup_requests():
     #for foia in FOIARequest.objects.get_followup(): 
     logger.info('foia.tasks.followup_requests task being run')
     if options.enable_followup:
-        logger.info('%d requests to follow up on',
-            FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()).count())
-        for foia in FOIARequest.objects.filter(status='processed', date_followup__lte=date.today()):
+        foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
+                                                   date_followup__lte=date.today())
+        logger.info('%d requests to follow up on', foia_requests.count())
+        for foia in foia_requests:
             foia.followup()
 
 

@@ -671,7 +671,7 @@ class MyList(ListBase):
         elif view == 'action':
             unsorted = unsorted.filter(status__in=['fix', 'payment'])
         elif view == 'waiting':
-            unsorted = unsorted.filter(status='processed')
+            unsorted = unsorted.filter(status__in=['ack', 'processed'])
         elif view == 'completed':
             unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
         elif view != 'all':
