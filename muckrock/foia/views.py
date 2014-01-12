@@ -865,8 +865,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         """API Filter for FOIA Requests"""
         # pylint: disable=E1101
         # pylint: disable=R0903
-        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
         agency = django_filters.CharFilter(name='agency__name')
+        jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
+        user = django_filters.CharFilter(name='user__username')
         tags = django_filters.CharFilter(name='tags__name')
         class Meta:
             model = FOIARequest
