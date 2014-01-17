@@ -16,7 +16,7 @@ gdata==2.0.17
 easy-thumbnails==1.0-alpha-14
 django-pingback==0.3
 BeautifulSoup==3.2.1
-django-taggit==0.9.3
+django-taggit==0.11.2
 pascha==0.5
 stripe==1.7.9
 redis==2.4.10
