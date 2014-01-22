@@ -59,6 +59,15 @@ class Detail(DetailView):
         else:
             messages.error(request, 'You may only edit your own answers')
 
+    def get_context_data(self, **kwargs):
+        context = super(Detail, self).get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_authenticated() and context['object'].followed_by.filter(user=user):
+            context['follow_label'] = 'Unfollow'
+        else:
+            context['follow_label'] = 'Follow'
+        return context
+
 
 @login_required
 def create_question(request):
@@ -72,13 +81,30 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
-            question.notify()
+            question.notify_new()
+            question.followed_by.add(request.user.get_profile())
             return redirect(question)
     else:
         form = QuestionForm()
 
     return render_to_response('qanda/question_form.html', {'form': form},
                               context_instance=RequestContext(request))
+
+@login_required
+def follow(request, slug, idx):
+    """Follow or unfollow a question"""
+
+    question = get_object_or_404(Question, slug=slug, id=idx)
+
+    if question.followed_by.filter(user=request.user):
+        question.followed_by.remove(request.user.get_profile())
+        messages.info(request, 'You are no longer following %s' % question.title)
+    else:
+        question.followed_by.add(request.user.get_profile())
+        messages.info(request, 'You are now following %s.  You will be notified whenever an '
+                               'answer is posted.' % question.title)
+
+    return redirect(question)
 
 @login_required
 def create_answer(request, slug, idx):
@@ -94,6 +120,7 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
+            answer.question.notify_update()
             return redirect(answer.question)
     else:
         form = AnswerForm()

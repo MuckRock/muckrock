@@ -51,7 +51,9 @@ class Profile(models.Model):
         'If you do not want this information to be public, please leave blank.')
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    follows = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
+    follows_foia = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
+    follows_question = models.ManyToManyField('qanda.Question', related_name='followed_by',
+                                              blank=True)
     notifications = models.ManyToManyField(FOIARequest, related_name='notify', blank=True)
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)

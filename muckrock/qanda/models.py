@@ -35,13 +35,26 @@ class Question(models.Model):
         """The url for this object"""
         return ('question-detail', [], {'slug': self.slug, 'idx': self.pk})
 
-    def notify(self):
+    def notify_new(self):
         """Email users who want to be notified of new questions"""
         send_data = []
         for profile in Profile.objects.filter(follow_questions=True):
             link = AuthKey.objects.wrap_url(reverse('question-subscribe'), uid=profile.user.pk)
             msg = render_to_string('qanda/notify.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
+                              'info@muckrock.com', [profile.user.email]))
+        send_mass_mail(send_data, fail_silently=False)
+
+    def notify_update(self):
+        """Email users who want to be notified of updates to this question"""
+        # pylint: disable=E1101
+        send_data = []
+        for profile in self.followed_by.all():
+            link = AuthKey.objects.wrap_url(reverse('question-follow',
+                                                    kwargs={'slug': self.slug, 'idx': self.pk}),
+                                            uid=profile.user.pk)
+            msg = render_to_string('qanda/follow.txt', {'question': self, 'link': link})
+            send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
 

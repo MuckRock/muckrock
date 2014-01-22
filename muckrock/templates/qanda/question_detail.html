@@ -62,10 +62,12 @@
 
 {% block sidebar %}
 
+		<p><a href="{% url question-follow slug=object.slug,idx=object.pk %}" class="jqbutton">{{follow_label}} this question</a></p>
+
 	{% if user.profile.follow_questions %}
-		<a href="{% url question-subscribe %}" class="jqbutton">Unsubscribe from new question notifications"</a>
+		<p><a href="{% url question-subscribe %}" class="jqbutton">Unsubscribe from new question notifications</a></p>
 	{% else %}
-		<a href="{% url question-subscribe %}" class="jqbutton">Notify me of all new questions</a>
+		<p><a href="{% url question-subscribe %}" class="jqbutton">Notify me of all new questions</a></p>
 	{% endif %}
 
 	<div class="content-separator"></div>

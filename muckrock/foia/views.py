@@ -810,7 +810,7 @@ class Detail(DetailView):
                 user=request.user, title=title, slug=slugify(title), foia=foia,
                 question=request.POST.get('text'), date=datetime.now())
             messages.success(request, 'Question succesfully posted')
-            question.notify()
+            question.notify_new()
             return redirect(question)
         else:
             return redirect(foia)
