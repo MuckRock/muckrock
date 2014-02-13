@@ -357,7 +357,7 @@ def autoimport():
                 comm = FOIACommunication.objects.create(
                         foia=foia, from_who=source,
                         to_who=foia.user.get_full_name(), response=True,
-                        date=file_date, full_html=False,
+                        date=file_date, full_html=False, delivered='mail',
                         communication=body, status=status)
 
                 foia.status = status or foia.status

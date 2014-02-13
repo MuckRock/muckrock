@@ -337,6 +337,7 @@ class FOIARequest(models.Model):
 
         approved_agency = self.agency and self.agency.approved
         can_email = self.email and not appeal
+        comm = self.last_comm()
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if approved_agency and (can_email or can_email_appeal):
@@ -347,6 +348,8 @@ class FOIARequest(models.Model):
             else:
                 self.status = 'ack'
             self._send_email()
+            comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+            comm.save()
             self.update_dates()
         else:
             self.status = 'submitted'
@@ -356,6 +359,8 @@ class FOIARequest(models.Model):
                       render_to_string('foia/admin_mail.txt',
                                        {'request': self, 'appeal': appeal}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            comm.delivered = 'mail'
+            comm.save()
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
@@ -377,7 +382,7 @@ class FOIARequest(models.Model):
         """Send a follow up email for this request"""
         # pylint: disable=E1101
 
-        FOIACommunication.objects.create(
+        comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
             communication=render_to_string('foia/followup.txt', {'request': self}))
@@ -389,12 +394,16 @@ class FOIARequest(models.Model):
 
         if self.email:
             self._send_email()
+            comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+            comm.save()
         else:
             self.status = 'submitted'
             self.save()
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
                       render_to_string('foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            comm.delivered = 'mail'
+            comm.save()
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
@@ -596,6 +605,12 @@ class FOIAMultiRequest(models.Model):
         verbose_name = 'FOIA Multi-Request'
 
 
+DELIVERED = (
+    ('fax', 'Fax'),
+    ('email', 'Email'),
+    ('mail', 'Mail'),
+)
+
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
@@ -606,6 +621,7 @@ class FOIACommunication(models.Model):
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField(blank=True)
+    delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
 

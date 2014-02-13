@@ -47,7 +47,7 @@ def handle_request(request, mail_id):
         comm = FOIACommunication.objects.create(
                 foia=foia, from_who=from_realname[:255],
                 to_who=foia.user.get_full_name(), response=True,
-                date=datetime.now(), full_html=False,
+                date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
                     (post.get('stripped-text', ''), post.get('stripped-signature')))
 
