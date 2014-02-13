@@ -37,7 +37,7 @@ class JurisdictionAdmin(TablibAdmin):
         }),
         ('Options for states/federal', {
             'classes': ('collapse',),
-            'fields': ('days', 'observe_sat', 'holidays', 'intro', 'waiver')
+            'fields': ('days', 'observe_sat', 'holidays', 'use_business_days', 'intro', 'waiver')
         }),
     )
     formats = ['xls', 'csv']

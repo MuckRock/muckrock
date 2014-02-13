@@ -7,7 +7,7 @@ from django.test import TestCase
 import nose.tools
 from datetime import date
 
-from muckrock.business_days.models import Holiday
+from muckrock.business_days.models import Holiday, Calendar
 from muckrock.jurisdiction.models import Jurisdiction
 
 # allow long names, methods that could be functions and too many public methods in tests
@@ -25,6 +25,7 @@ class TestBusinessDayUnit(TestCase):
         self.mlk_day = Holiday.objects.get(name='Martin Luther King, Jr. Day')
         self.good_friday = Holiday.objects.get(name='Good Friday')
         self.usa_cal = Jurisdiction.objects.get(name='United States of America').get_calendar()
+        self.gen_cal = Calendar()
 
     def test_holiday_date_match(self):
         """Test matching for a holiday that occurs on a specific date"""
@@ -68,4 +69,16 @@ class TestBusinessDayUnit(TestCase):
         """Test business_days_between"""
 
         nose.tools.eq_(self.usa_cal.business_days_between(date(2010, 11, 1),
-                                                              date(2010, 12, 15)), 30)
+                                                          date(2010, 12, 15)), 30)
+
+    def test_calendar_days_from(self):
+        """Test business_days_from for calendar days"""
+
+        nose.tools.eq_(self.gen_cal.business_days_from(date(2010, 11, 1), 30),
+                       date(2010, 12, 1))
+
+    def test_calendar_days_between(self):
+        """Test business_days_between for calendar days"""
+
+        nose.tools.eq_(self.gen_cal.business_days_between(date(2010, 11, 1),
+                                                          date(2010, 12, 1)), 30)

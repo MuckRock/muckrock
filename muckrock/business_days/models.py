@@ -155,3 +155,24 @@ class HolidayCalendar(object):
             if self.is_business_day(date_a):
                 num += 1
         return num * sign
+
+
+class Calendar(object):
+    """A set of holidays"""
+    # pylint: disable=R0201
+
+    def is_holiday(self, _):
+        """Is given date a holiday?"""
+        return None
+
+    def is_business_day(self, _):
+        """Is the given date a business day?"""
+        return True
+
+    def business_days_from(self, date_, num):
+        """Returns the date n business days from the given date"""
+        return date_ + timedelta(num)
+
+    def business_days_between(self, date_a, date_b):
+        """How many business days are between the given dates?"""
+        return abs((date_a - date_b).days)

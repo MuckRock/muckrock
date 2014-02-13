@@ -6,7 +6,7 @@ from django.db.models import Sum
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
-from muckrock.business_days.models import Holiday, HolidayCalendar
+from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 from muckrock.tags.models import Tag
 
 class RequestHelper(object):
@@ -99,6 +99,8 @@ class Jurisdiction(models.Model, RequestHelper):
     observe_sat = models.BooleanField(help_text='Are holidays observed on Saturdays? '
                                                 '(or are they moved to Friday?)')
     holidays = models.ManyToManyField(Holiday, blank=True)
+    use_business_days = models.BooleanField(default=True, help_text='Response time in business days'
+                                                                    ' (or calendar days)?')
     intro = models.TextField(blank=True, help_text='Intro paragraph for request - '
                                          'usually includes the pertinant FOI law')
     waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
@@ -173,8 +175,12 @@ class Jurisdiction(models.Model, RequestHelper):
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""
         # pylint: disable=E1101
-        if self.level == 'l':
+        if self.level == 'l' and not self.parent.use_business_days:
+            return Calendar()
+        elif self.level == 'l' and self.parent.use_business_days:
             return HolidayCalendar(self.parent.holidays.all(), self.parent.observe_sat)
+        elif not self.use_business_days:
+            return Calendar()
         else:
             return HolidayCalendar(self.holidays.all(), self.observe_sat)
 
