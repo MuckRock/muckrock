@@ -62,7 +62,7 @@ class Profile(models.Model):
     website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     twitter = models.CharField(max_length=255, blank=True)
     profile = models.TextField(blank=True)
-    location = models.ForeignKey(Jurisdiction)
+    location = models.ForeignKey(Jurisdiction, blank=True, null=True)
     linkedin = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)

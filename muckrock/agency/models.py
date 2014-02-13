@@ -67,6 +67,10 @@ class Agency(models.Model, RequestHelper):
     website = models.CharField(max_length=255, blank=True)
     twitter = models.CharField(max_length=255, blank=True)
     twitter_handles = models.TextField(blank=True)
+    foia_logs = models.URLField(blank=True, verbose_name='FOIA Logs',
+                                help_text='Begin with http://')
+    foia_guide = models.URLField(blank=True, verbose_name='FOIA Processing Guide',
+                                 help_text='Begin with http://')
     exempt = models.BooleanField(default=False)
 
     objects = AgencyManager()
