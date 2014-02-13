@@ -10,6 +10,22 @@ from epiceditor.widgets import AdminEpicEditorWidget
 
 from muckrock.news.models import Article, Photo
 
+class AuthorListFilter(admin.SimpleListFilter):
+    """Filter by authors"""
+    title = 'Author'
+    parameter_name = 'author'
+
+    def lookups(self, request, model_admin):
+        """All authors"""
+        authors = User.objects.exclude(authored_articles=None)
+        return tuple((a.pk, a.get_full_name()) for a in authors)
+
+    def queryset(self, request, queryset):
+        """Articles by the selected author"""
+        if self.value():
+            return queryset.filter(authors=self.value())
+
+
 class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
 
@@ -23,6 +39,7 @@ class ArticleAdminForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Article
 
+
 class ArticleAdmin(admin.ModelAdmin):
     """Model Admin for a news article"""
     # pylint: disable=R0904
@@ -30,9 +47,10 @@ class ArticleAdmin(admin.ModelAdmin):
     form = ArticleAdminForm
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'get_authors_names', 'pub_date', 'publish')
-    list_filter = ['pub_date']
+    list_filter = ['pub_date', AuthorListFilter]
     date_hierarchy = 'pub_date'
     search_fields = ['title', 'body']
+    save_on_top = True
 
 admin.site.register(Article, ArticleAdmin)
 admin.site.register(Photo)
