@@ -15,6 +15,7 @@ import dbsettings
 import stripe
 
 from muckrock.foia.models import FOIARequest
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
 
@@ -57,6 +58,14 @@ class Profile(models.Model):
     notifications = models.ManyToManyField(FOIARequest, related_name='notify', blank=True)
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)
+
+    website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
+    twitter = models.CharField(max_length=255, blank=True)
+    profile = models.TextField(blank=True)
+    location = models.ForeignKey(Jurisdiction)
+    linkedin = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
+    public_email = models.EmailField(max_length=255, blank=True)
+    pgp_public_key = models.TextField(blank=True)
 
     # prefrences
     email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily',

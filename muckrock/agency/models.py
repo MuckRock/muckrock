@@ -58,11 +58,16 @@ class Agency(models.Model, RequestHelper):
     contact_first_name = models.CharField(blank=True, max_length=100)
     contact_last_name = models.CharField(blank=True, max_length=100)
     contact_title = models.CharField(blank=True, max_length=255)
-    url = models.URLField(blank=True, verbose_name='Website', help_text='Begin with http://')
+    url = models.URLField(blank=True, verbose_name='FOIA Web Page', help_text='Begin with http://')
     expires = models.DateField(blank=True, null=True)
     phone = models.CharField(blank=True, max_length=30)
     fax = models.CharField(blank=True, max_length=30)
     notes = models.TextField(blank=True)
+
+    website = models.CharField(max_length=255, blank=True)
+    twitter = models.CharField(max_length=255, blank=True)
+    twitter_handles = models.TextField(blank=True)
+    exempt = models.BooleanField(default=False)
 
     objects = AgencyManager()
 
