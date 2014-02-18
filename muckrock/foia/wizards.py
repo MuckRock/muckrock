@@ -161,10 +161,8 @@ class FOIAWizard(SessionWizardView):
 
         agency = TEMPLATES[template_name].get_agency(jurisdiction)
 
-        if len(title) > 70:
-            title = title[:70]
         slug = slugify(title) or 'untitled'
-        if jurisdiction:
+        if level != 'multi':
             foia = FOIARequest.objects.create(user=self.request.user, status='started', title=title,
                                               jurisdiction=jurisdiction, slug=slug,
                                               agency=agency, requested_docs=requested_docs,
@@ -181,7 +179,7 @@ class FOIAWizard(SessionWizardView):
                                        'any changes that you need.  You may save it for future '
                                        'review or submit it when you are ready.')
 
-        if jurisdiction:
+        if level != 'multi':
             return HttpResponseRedirect(reverse('foia-update',
                                         kwargs={'jurisdiction': jurisdiction.slug,
                                                 'jidx': jurisdiction.pk,

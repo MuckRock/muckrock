@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
+from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
@@ -20,7 +20,8 @@ from django.views.generic.list import ListView
 from collections import namedtuple
 from datetime import datetime, date, timedelta
 from decimal import Decimal
-from rest_framework import viewsets
+from rest_framework import decorators, status as http_status, viewsets
+from rest_framework.response import Response
 import django_filters
 import logging
 import stripe
@@ -36,7 +37,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
-from muckrock.foia.serializers import FOIARequestSerializer #, IsOwnerOrStaffOrReadOnly
+from muckrock.foia.serializers import FOIARequestSerializer, FOIAPermissions
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -858,8 +859,10 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 class FOIARequestViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=R0904
+    # pylint: disable=C0103
     model = FOIARequest
     serializer_class = FOIARequestSerializer
+    permission_classes = (FOIAPermissions,)
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
@@ -877,3 +880,67 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return FOIARequest.objects.get_viewable(self.request.user)
+
+    def create(self, request):
+        """Submit new request"""
+        data = request.DATA
+        try:
+            jurisdiction = Jurisdiction.objects.get(pk=int(data['jurisdiction']))
+            agency = Agency.objects.get(pk=int(data['agency']))
+            if agency.jurisdiction != jurisdiction:
+                raise ValueError
+
+            requested_docs = data['document_request']
+            template = get_template('request_templates/none.txt')
+            context = RequestContext(request, {'title': data['title'],
+                                               'document_request': requested_docs,
+                                               'jurisdiction': jurisdiction})
+            title, foia_request = \
+                (s.strip() for s in template.render(context).split('\n', 1))
+
+
+            slug = slugify(title) or 'untitled'
+            foia = FOIARequest.objects.create(user=request.user, status='started', title=title,
+                                              jurisdiction=jurisdiction, slug=slug,
+                                              agency=agency, requested_docs=requested_docs,
+                                              description=requested_docs)
+            FOIACommunication.objects.create(
+                    foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
+                    date=datetime.now(), response=False, full_html=False,
+                    communication=foia_request)
+
+            if request.user.get_profile().make_request():
+                foia.submit()
+                return Response({'status': 'FOI Request submitted',
+                                 'Location': foia.get_absolute_url()},
+                                 status=http_status.HTTP_201_CREATED)
+            else:
+                return Response({'status': 'Error - Out of requests.  FOI Request has been saved.',
+                                 'Location': foia.get_absolute_url()},
+                                 status=http_status.HTTP_402_PAYMENT_REQUIRED)
+
+        except KeyError:
+            return Response({'status': 'Missing data - Please supply title, document_request, '
+                                       'jurisdiction, and agency'},
+                             status=http_status.HTTP_400_BAD_REQUEST)
+        except (ValueError, Jurisdiction.DoesNotExist, Agency.DoesNotExist):
+            return Response({'status': 'Bad data - please supply jurisdiction and agency as the PK '
+                                       'of existing entities.  Agency must be in Jurisdiction.'},
+                             status=http_status.HTTP_400_BAD_REQUEST)
+
+    @decorators.action()
+    def followup(self, request, pk=None):
+        """Followup on a request"""
+        # XXX include appeals in here
+
+    @decorators.action()
+    def pay(self, request, pk=None):
+        """Pay for a request"""
+
+    @decorators.action(methods=['POST', 'DELETE'])
+    def follow(self, request, pk=None):
+        """Follow or unfollow a request"""
+        if request.REQUEST_METHOD == 'POST':
+            "follow request"
+        if request.REQUEST_METHOD == 'DELETE':
+            "unfollow request"
