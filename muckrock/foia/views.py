@@ -37,7 +37,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES 
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
-from muckrock.foia.serializers import FOIARequestSerializer, FOIAPermissions
+from muckrock.foia.serializers import FOIARequestSerializer, FOIAPermissions, IsOwner
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -928,10 +928,13 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                        'of existing entities.  Agency must be in Jurisdiction.'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action()
+    @decorators.action(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
         """Followup on a request"""
-        # XXX include appeals in here
+        foia = get_object_or_404(FOIARequest, pk=pk)
+
+        _save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
+                        'Appeal succesfully sent', appeal=True)
 
     @decorators.action()
     def pay(self, request, pk=None):

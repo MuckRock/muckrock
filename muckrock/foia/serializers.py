@@ -29,6 +29,19 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
             return True
         return super(FOIAPermissions, self).has_object_permission(request, view, obj)
 
+class IsOwner(permissions.BasePermission):
+    """
+    Object-level permission to allow access only to owners of an object
+    """
+
+    def has_object_permission(self, request, view, obj):
+        """Grant permission?"""
+        # Instance must have an attribute named `user`.
+        if obj.user == request.user:
+            return True
+        else:
+            return False
+
 
 class FOIAFileSerializer(serializers.ModelSerializer):
     """Serializer for FOIA File model"""

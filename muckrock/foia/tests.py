@@ -372,6 +372,7 @@ class TestFOIAFunctional(TestCase):
                                             'idx': foia.pk, 'slug': foia.slug}),
                     ['registration/cc.html', 'registration/base.html'])
 
+
 class TestFOIAIntegration(TestCase):
     """Integration tests for FOIA"""
 
