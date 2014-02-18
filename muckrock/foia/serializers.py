@@ -37,10 +37,7 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         """Grant permission?"""
         # Instance must have an attribute named `user`.
-        if obj.user == request.user:
-            return True
-        else:
-            return False
+        return obj.user == request.user
 
 
 class FOIAFileSerializer(serializers.ModelSerializer):

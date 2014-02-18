@@ -203,6 +203,17 @@ class Profile(models.Model):
             stripe.Charge.create(amount=amount, currency='usd', card=token,
                                  description=desc)
 
+    def api_pay(self, amount, desc):
+        """Create a stripe charge for the user through the API"""
+        # pylint: disable=E1101
+
+        customer = self.get_customer()
+        desc = '%s: %s' % (self.user.username, desc)
+
+        # always use card on file
+        stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
+                             description=desc)
+
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later
            according to preference"""

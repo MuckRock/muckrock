@@ -21,6 +21,7 @@ from collections import namedtuple
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from rest_framework import decorators, status as http_status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 import django_filters
 import logging
@@ -931,19 +932,86 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     @decorators.action(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
         """Followup on a request"""
-        foia = get_object_or_404(FOIARequest, pk=pk)
+        try:
+            foia = FOIARequest.objects.get(pk=pk)
+            self.check_object_permissions(request, foia)
 
-        _save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
-                        'Appeal succesfully sent', appeal=True)
+            FOIACommunication.objects.create(
+                foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
+                date=datetime.now(), response=False, full_html=False,
+                communication=request.DATA['text'])
 
-    @decorators.action()
+            appeal = request.DATA.get('appeal', False) and foia.is_appealable()
+            foia.submit(appeal=appeal)
+
+            if appeal:
+                status = 'Appeal submitted'
+            else:
+                status = 'Follow up submitted'
+
+            return Response({'status': status},
+                             status=http_status.HTTP_200_OK)
+
+        except FOIARequest.DoesNotExist:
+            return Response({'status': 'Not Found'}, status=http_status.HTTP_404_NOT_FOUND)
+
+        except KeyError:
+            return Response({'status': 'Missing data - Please supply text for followup'},
+                             status=http_status.HTTP_400_BAD_REQUEST)
+
+    @decorators.action(permission_classes=(IsOwner,))
     def pay(self, request, pk=None):
         """Pay for a request"""
+        try:
+            foia = FOIARequest.objects.get(pk=pk)
+            self.check_object_permissions(request, foia)
+            if foia.status != 'payment':
+                return Response({'status': 'Payment not required'},
+                                status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(methods=['POST', 'DELETE'])
+            amount = int(foia.price * 105)
+            request.user.get_profile().api_pay(amount,
+                                               'Charge for request: %s %s' % (foia.title, foia.pk))
+
+            foia.status = 'processed'
+            foia.save()
+
+            send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
+                      render_to_string('foia/admin_payment.txt',
+                                       {'request': foia, 'amount': amount / 100.0}),
+                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
+            logger.info('%s has paid %0.2f for request %s' %
+                        (request.user.username, amount / 100.0, foia.title))
+
+            return Response({'status': 'You have paid $%0.2f for the request' % (amount / 100.0)},
+                             status=http_status.HTTP_200_OK)
+
+        except FOIARequest.DoesNotExist:
+            return Response({'status': 'Not Found'}, status=http_status.HTTP_404_NOT_FOUND)
+
+        except stripe.CardError as exc:
+            return Response({'status': 'Stripe Card Error: %s' % exc},
+                            status=http_status.HTTP_400_BAD_REQUEST)
+
+    @decorators.action(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""
-        if request.REQUEST_METHOD == 'POST':
-            "follow request"
-        if request.REQUEST_METHOD == 'DELETE':
-            "unfollow request"
+
+        try:
+            foia = FOIARequest.objects.get(pk=pk)
+            self.check_object_permissions(request, foia)
+
+            if foia.user == request.user:
+                return Response({'status': 'You may not follow your own request'},
+                                status=http_status.HTTP_400_BAD_REQUEST)
+
+            if request.method == 'POST':
+                foia.followed_by.add(request.user.get_profile())
+                return Response({'status': 'Following'}, status=http_status.HTTP_200_OK)
+            if request.method == 'DELETE':
+                foia.followed_by.remove(request.user.get_profile())
+                return Response({'status': 'Not following'}, status=http_status.HTTP_200_OK)
+
+        except FOIARequest.DoesNotExist:
+            return Response({'status': 'Not Found'}, status=http_status.HTTP_404_NOT_FOUND)
