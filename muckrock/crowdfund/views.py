@@ -38,7 +38,7 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                 crowdfund.payment_received += amount
                 crowdfund.save()
                 payment_model.objects.create(user=request.user, crowdfund=crowdfund, amount=amount)
-                messages.success(request, 'You have succesfully contributed %.2f' % amount)
+                messages.success(request, 'You have succesfully contributed $%.2f' % amount)
                 logger.info('%s has contributed to crowdfund',  request.user.username)
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
