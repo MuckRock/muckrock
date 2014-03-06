@@ -207,3 +207,13 @@ class CCExpField(forms.MultiValueField):
             day = monthrange(year, month)[1]
             return date(year, month, day)
         return None
+
+
+#https://github.com/fusionbox/django-fusionbox/blob/master/fusionbox/forms/fields.py
+class USDCurrencyField(forms.DecimalField):
+    """
+    Form field for entering dollar amounts. Allows an optional leading dollar
+    sign, which gets stripped.
+    """
+    def clean(self, value):
+        return super(USDCurrencyField, self).clean(value.lstrip('$'))
