@@ -156,6 +156,14 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.days
 
+    def get_day_type(self):
+        """Does this jurisdiction use business or calendar days?"""
+        # pylint: disable=E1101
+        if self.level == 'l':
+            return 'business' if self.parent.use_business_days else 'calendar'
+        else:
+            return 'business' if self.use_business_days else 'calendar'
+
     def get_intro(self):
         """Intro for requests"""
         # pylint: disable=E1101
