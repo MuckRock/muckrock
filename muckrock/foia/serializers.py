@@ -18,7 +18,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
     def has_permission(self, request, view):
         """Allow authenticated users to submit requests"""
-        if request.user.is_authenticated() and request.method == 'POST':
+        if request.user.is_authenticated() and request.method in ['POST', 'PATCH']:
             return True
         return super(FOIAPermissions, self).has_permission(request, view)
 
@@ -27,7 +27,10 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
         # Instance must have an attribute named `user`.
         if obj.user == request.user and request.method == 'PATCH':
             return True
-        return super(FOIAPermissions, self).has_object_permission(request, view, obj)
+
+        # XXX
+        return super(FOIAPermissions, self).has_permission(request, view)
+
 
 class IsOwner(permissions.BasePermission):
     """
@@ -38,6 +41,19 @@ class IsOwner(permissions.BasePermission):
         """Grant permission?"""
         # Instance must have an attribute named `user`.
         return obj.user == request.user
+
+
+class TagListSerializer(serializers.RelatedField):
+
+    def from_native(self, data):
+        if type(data) is not list:
+            raise ParseError("expected a list of data")
+        return data
+
+    def to_native(self, obj):
+        if type(obj) is not list:
+            return [tag.name for tag in obj.all()]
+        return obj
 
 
 class FOIAFileSerializer(serializers.ModelSerializer):
@@ -55,11 +71,12 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
         model = FOIACommunication
         exclude = ('foia',)
 
+
 class FOIANoteSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Note model"""
     class Meta:
         model = FOIANote
-        exclude = ('foia',)
+        exclude = ('id', 'foia')
 
 
 class FOIARequestSerializer(serializers.ModelSerializer):
@@ -87,15 +104,16 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         if not foia:
             self.fields.pop('notes')
 
-        if foia and request.method == ['PATCH'] and request.user == foia.user \
+        if foia and request.method == 'PATCH' and request.user == foia.user \
                 and not request.user.is_staff:
             # they may only update notes, tags, and embargo
             # XXX test
             for field in ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
                           'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
                           'date_followup', 'date_embargo', 'price', 'requested_docs',
-                          'description', 'tracking_id', 'mail_id'):
+                          'description', 'tracking_id'):
                 self.fields.pop(field)
+
 
     class Meta:
         model = FOIARequest
