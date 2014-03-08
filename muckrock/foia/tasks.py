@@ -104,7 +104,7 @@ def set_document_cloud_pages(doc_pk, **kwargs):
 
     doc = FOIAFile.objects.get(pk=doc_pk)
 
-    if doc.pages or not doc.is_doccloud():
+    if doc.pages or not doc.is_doccloud() or not doc.doc_id:
         # already has pages set or not a doc cloud, just return
         return
 
@@ -192,13 +192,16 @@ def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup(): 
-    logger.info('foia.tasks.followup_requests task being run')
+    log = []
     if options.enable_followup:
         foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
                                                    date_followup__lte=date.today())
-        logger.info('%d requests to follow up on', foia_requests.count())
         for foia in foia_requests:
+            log.append('%s - %s' % (foia.status, foia.title))
             foia.followup()
+
+        send_mail('[LOG] Follow Ups', '\n'.join(log), 'info@muckrock.com',
+                  ['requests@muckrock.com', 'mitch@muckrock.com'])
 
 
 @periodic_task(run_every=crontab(hour=6, minute=0), name='muckrock.foia.tasks.embargo_warn')

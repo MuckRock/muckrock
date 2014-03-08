@@ -5,6 +5,7 @@ Forms for Crowdfund application
 from django import forms
 
 from muckrock.accounts.forms import PaymentForm
+from muckrock.fields import USDCurrencyField
 
 class CrowdfundEnableForm(forms.Form):
     """Form to confirm enable crowdfunding on a FOIA"""
@@ -17,4 +18,4 @@ class CrowdfundPayForm(PaymentForm):
     """Form to pay for crowdfunding"""
     # pylint: disable=R0901
 
-    amount = forms.DecimalField()
+    amount = USDCurrencyField()

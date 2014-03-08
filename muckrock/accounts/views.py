@@ -161,7 +161,7 @@ def manage_subsc(request):
 
     elif user_profile.acct_type == 'community':
         heading = 'Upgrade to a Pro Account'
-        desc = 'Upgrade to a professional account. $40 per month for 10 requests per month.'
+        desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'
         form_class = UpgradeSubscForm
         template = 'registration/cc.html'
     elif user_profile.acct_type == 'pro':

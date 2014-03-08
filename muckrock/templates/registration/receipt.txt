@@ -1,10 +1,9 @@
-
 Hi {{user.first_name}},
 
 {% if first and type == "pro" %}Thanks for joining MuckRock. This e-mail confirms your purchase of a Professional Account. To file your first request, click here:{% endif %}{% if not first and type == "pro" %}Thanks for using MuckRock. This e-mail confirms your monthly renewal of a Professional Account. To file a new request, click here:{% endif %}{% if type == "community" %}Thanks for using MuckRock. This e-mail confirms your purchase of 5 requests. To file a new request, click here:{% endif %}{% if type == "doc" %}Thank you for using MuckRock. This e-mail confirms your payment of a request fee through MuckRock.com. No further action is required, and you can check the current status of your request here:{% endif %}{% if type == "corwdfunding" %}Thank you for using MuckRock.  This e-mail confirms your payment towards crowdfunding a request through MuckRock.com.  No further action is required, and you can check the current status of the request here:{% endif %}
 https://www.muckrock.com{{ url }}
 
-{% if type == "pro" %}Your membership includes up to 10 requests per month, and includes the ability to embargo requests as well as priority support.{% endif %}
+{% if type == "pro" %}Your membership includes up to 20 requests per month, and includes the ability to embargo requests as well as priority support.{% endif %}
 
 Your Receipt Details:
 
