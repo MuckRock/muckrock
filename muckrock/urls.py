@@ -19,7 +19,7 @@ import haystack.urls, dbsettings.urls
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls
-import muckrock.agency.views, muckrock.foia.views, muckrock.jurisdiction.views
+import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views
 import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.foia.sitemap import FoiaSitemap
@@ -33,7 +33,7 @@ sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
 router = DefaultRouter()
 router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
 router.register(r'agency', muckrock.agency.views.AgencyViewSet)
-router.register(r'foia', muckrock.foia.views.FOIARequestViewSet)
+router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
 
 urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),

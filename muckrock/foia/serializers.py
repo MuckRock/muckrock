@@ -28,7 +28,7 @@ class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
         if obj.user == request.user and request.method == 'PATCH':
             return True
 
-        # XXX
+        # check non-object has permission here if the user doesn't own the object
         return super(FOIAPermissions, self).has_permission(request, view)
 
 
@@ -41,19 +41,6 @@ class IsOwner(permissions.BasePermission):
         """Grant permission?"""
         # Instance must have an attribute named `user`.
         return obj.user == request.user
-
-
-class TagListSerializer(serializers.RelatedField):
-
-    def from_native(self, data):
-        if type(data) is not list:
-            raise ParseError("expected a list of data")
-        return data
-
-    def to_native(self, obj):
-        if type(obj) is not list:
-            return [tag.name for tag in obj.all()]
-        return obj
 
 
 class FOIAFileSerializer(serializers.ModelSerializer):
@@ -106,13 +93,10 @@ class FOIARequestSerializer(serializers.ModelSerializer):
 
         if foia and request.method == 'PATCH' and request.user == foia.user \
                 and not request.user.is_staff:
-            # they may only update notes, tags, and embargo
-            # XXX test
-            for field in ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
-                          'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
-                          'date_followup', 'date_embargo', 'price', 'requested_docs',
-                          'description', 'tracking_id'):
-                self.fields.pop(field)
+            allowed = ['notes', 'tags', 'embargo']
+            for field in self.fields.keys():
+                if field not in allowed:
+                    self.fields.pop(field)
 
 
     class Meta:
