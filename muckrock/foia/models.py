@@ -338,7 +338,7 @@ class FOIARequest(models.Model):
         approved_agency = self.agency and self.agency.approved
         can_email = self.email and not appeal
         comm = self.last_comm()
-
+        
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if approved_agency and (can_email or can_email_appeal):
             if appeal:
@@ -348,8 +348,6 @@ class FOIARequest(models.Model):
             else:
                 self.status = 'ack'
             self._send_email()
-            comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
-            comm.save()
             self.update_dates()
         else:
             self.status = 'submitted'
@@ -394,8 +392,6 @@ class FOIARequest(models.Model):
 
         if self.email:
             self._send_email()
-            comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
-            comm.save()
         else:
             self.status = 'submitted'
             self.save()
@@ -433,6 +429,12 @@ class FOIARequest(models.Model):
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
+
+        # get last comm to set delivered and raw_email
+        comm = self.communications.reverse()[0]
+        comm.raw_email = msg.message()
+        comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
+        comm.save()
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
@@ -624,6 +626,8 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+
+    raw_email = models.TextField(blank=True)
 
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])

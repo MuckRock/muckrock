@@ -85,6 +85,7 @@ class FOIARequestSerializer(serializers.ModelSerializer):
 
         if not request.user.is_staff:
             self.fields.pop('mail_id')
+            self.fields['communications'].fields.pop('raw_email')
 
         if foia and request.user != foia.user and not request.user.is_staff:
             self.fields.pop('notes')

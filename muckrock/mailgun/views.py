@@ -49,7 +49,8 @@ def handle_request(request, mail_id):
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
-                    (post.get('stripped-text', ''), post.get('stripped-signature')))
+                    (post.get('stripped-text', ''), post.get('stripped-signature')),
+                raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
 
         # handle attachments
         for file_ in request.FILES.itervalues():
