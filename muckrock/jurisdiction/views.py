@@ -11,6 +11,7 @@ from django.template.loader import render_to_string
 
 from rest_framework import viewsets
 
+from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
@@ -55,7 +56,11 @@ def detail(request, fed_slug, state_slug, local_slug):
     if local_slug:
         jurisdiction = get_object_or_404(Jurisdiction, slug=local_slug, parent=jurisdiction)
 
-    context = {'jurisdiction': jurisdiction}
+    foia_requests = FOIARequest.objects.get_viewable(request.user)\
+                                       .filter(jurisdiction=jurisdiction)\
+                                       .order_by('-date_submitted')[:5]
+
+    context = {'jurisdiction': jurisdiction, 'foia_requests': foia_requests}
     if request.user.is_anonymous():
         context['sidebar'] = Sidebar.objects.get_text('anon_jurisdiction')
     else:

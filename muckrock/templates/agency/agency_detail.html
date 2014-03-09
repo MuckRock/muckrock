@@ -119,6 +119,43 @@
 	
 </tbody></table>
 
+<h3>Latest Requests</h3>
+	{% if foia_requests %}
+		<table class="data-table">
+			<tr class="odd">
+				<th width="40%">Title</th>
+				<th width="20%">Status</th>
+				<th width="25%">Jurisdiction</th>
+				<th width="15%">Date</th>
+			</tr>
+			{% for foia in foia_requests %}
+			<tr class="{% cycle 'even' 'odd' %}">
+				<td><a href="
+			  {% if request.user == foia.user and foia.status == "started" %}
+					{% url foia-update jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+				{% else %}
+					{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+				{% endif %}
+				">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
+				<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
+				<td>{{ foia.jurisdiction }}</td>
+				<td>{% if foia.date_submitted %}
+							{{ foia.date_submitted|date:"SHORT_DATE_FORMAT" }}
+						{% else %}
+							{{ foia.communications.all.0.date|date:"SHORT_DATE_FORMAT" }}
+						{% endif %}
+				</td>
+			</tr>
+			{% endfor %}
+		</table>
+
+		<p class="largest">
+			<a href="{% url foia-list-agency agency=agency.slug,idx=agency.pk %}">View all...</a>
+		</p>
+	{% else %}
+		<em class="large">No requests yet!</em>
+	{% endif %}
+
 {% for req in agency.interesting_requests %}
   <div class="right">
 		<a href="{{ req.req.get_absolute_url }}">

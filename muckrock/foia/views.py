@@ -576,6 +576,38 @@ class ListByUser(ListBase):
         return context
 
 
+class ListByAgency(ListBase):
+    """List of all FOIA requests by a given agency"""
+
+    def get_queryset(self):
+        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
+        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
+                                                     .filter(agency=agency))
+
+    def get_context_data(self, **kwargs):
+        context = super(ListByAgency, self).get_context_data(**kwargs)
+        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
+        context['subtitle'] = 'for %s' % agency.name
+        return context
+
+
+class ListByJurisdiction(ListBase):
+    """List of all FOIA requests by a given jurisdiction"""
+
+    def get_queryset(self):
+        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
+                                         pk=self.kwargs['idx'])
+        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
+                                                     .filter(jurisdiction=jurisdiction))
+
+    def get_context_data(self, **kwargs):
+        context = super(ListByJurisdiction, self).get_context_data(**kwargs)
+        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
+                                         pk=self.kwargs['idx'])
+        context['subtitle'] = 'for %s' % jurisdiction.name
+        return context
+
+
 class ListByTag(ListBase):
     """List of all FOIA requests by a given tag"""
 
