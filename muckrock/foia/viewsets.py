@@ -9,7 +9,7 @@ from django.template import RequestContext
 
 from datetime import datetime
 from rest_framework import decorators, status as http_status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 import django_filters
 import logging
@@ -17,7 +17,8 @@ import stripe
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.foia.serializers import FOIARequestSerializer, FOIAPermissions, IsOwner
+from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSerializer, \
+                                      FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=R0901
@@ -187,3 +188,12 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         if 'tags' in self.request.DATA:
             obj.tags.set(*self.request.DATA['tags'])
         return super(FOIARequestViewSet, self).post_save(obj, created=created)
+
+
+class FOIACommunicationViewSet(viewsets.ModelViewSet):
+    """API views for FOIARequest"""
+    # pylint: disable=R0904
+    # pylint: disable=C0103
+    model = FOIACommunication
+    serializer_class = FOIACommunicationSerializer
+    permission_classes = (DjangoModelPermissions,)

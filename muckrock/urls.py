@@ -37,6 +37,7 @@ router = DefaultRouter()
 router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
 router.register(r'agency', muckrock.agency.views.AgencyViewSet)
 router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
+router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet)
 
 urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
