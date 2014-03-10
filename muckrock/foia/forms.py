@@ -519,7 +519,7 @@ class FOIAWizardWhereForm(forms.Form):
                                        ('state', 'State'),
                                        ('local', 'Local'),
                                        ('multi', 'Multiple Agencies')))
-    state = forms.ModelChoiceField(
+    state = autocomplete_light.ModelChoiceField('StateAutocomplete',
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
     local = autocomplete_light.ModelChoiceField('LocalAutocomplete',
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
