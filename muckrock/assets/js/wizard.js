@@ -3,22 +3,22 @@ django = {'jQuery': $};
  // Wizard location page to enable/disable selects
  $(document).ready(function(){
 		 $("input[name='FOIAWizardWhereForm-local-autocomplete']").attr("disabled", "disabled");
-		 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
+		 $("input[name='FOIAWizardWhereForm-state-autocomplete']").attr("disabled", "disabled");
 		 $("input[name='FOIAWizardWhereForm-level']").change(function(){
 				 if ($("input[name='FOIAWizardWhereForm-level']:checked").val() == 'local') {
 					 $("input[name='FOIAWizardWhereForm-local-autocomplete']").removeAttr("disabled");
-					 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
+					 $("input[name='FOIAWizardWhereForm-state-autocomplete']").attr("disabled", "disabled");
 				 }
 				 else if ($("input[name='FOIAWizardWhereForm-level']:checked").val() == 'state') {
-					 $("select[name='FOIAWizardWhereForm-state']").removeAttr("disabled");
+					 $("input[name='FOIAWizardWhereForm-state-autocomplete']").removeAttr("disabled");
 					 $("input[name='FOIAWizardWhereForm-local-autocomplete']").attr("disabled", "disabled");
 				 }
 				 else if ($("input[name='FOIAWizardWhereForm-level']:checked").val() == 'federal') {
-					 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
+					 $("input[name='FOIAWizardWhereForm-state-autocomplete']").attr("disabled", "disabled");
 					 $("input[name='FOIAWizardWhereForm-local-autocomplete']").attr("disabled", "disabled");
 				 }
 				 else if ($("input[name='FOIAWizardWhereForm-level']:checked").val() == 'multi') {
-					 $("select[name='FOIAWizardWhereForm-state']").attr("disabled", "disabled");
+					 $("input[name='FOIAWizardWhereForm-state-autocomplete']").attr("disabled", "disabled");
 					 $("input[name='FOIAWizardWhereForm-local-autocomplete']").attr("disabled", "disabled");
 				 }
 				 $(this).blur();
