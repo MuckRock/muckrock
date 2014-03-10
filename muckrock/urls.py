@@ -14,7 +14,10 @@ from django.views.decorators.csrf import csrf_exempt
 
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
+import autocomplete_light
 import haystack.urls, dbsettings.urls
+
+autocomplete_light.autodiscover()
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
@@ -51,6 +54,7 @@ urlpatterns = patterns('',
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
+    url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),

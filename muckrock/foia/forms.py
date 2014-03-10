@@ -4,6 +4,7 @@ Forms for FOIA application
 
 from django import forms
 
+import autocomplete_light
 import inspect
 import sys
 from datetime import datetime, date, timedelta
@@ -520,9 +521,8 @@ class FOIAWizardWhereForm(forms.Form):
                                        ('multi', 'Multiple Agencies')))
     state = forms.ModelChoiceField(
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
-    local = forms.ModelChoiceField(
+    local = autocomplete_light.ModelChoiceField('LocalAutocomplete',
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
-        widget=forms.Select(attrs={'class': 'combobox'}),
         required=False)
 
     def clean(self):

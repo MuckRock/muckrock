@@ -10,9 +10,10 @@
 	<meta name="author" content="" />
   <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
 
-	{% assets filters="rjsmin", output="js/main.js", "js/jquery-1.4.2.js", "js/jquery-ui-1.8.4.custom.js", "js/jquery.tipTip.js", "js/datepicker.js", "js/wizard.js", "js/superbly-tagfield.js", "js/jquery.validate.js", "js/jquery.formset.js" %}
+	{% assets filters="rjsmin", output="js/main.js", "js/jquery-1.8.3.js", "js/jquery-ui-1.8.4.custom.js", "js/jquery.tipTip.js", "js/datepicker.js", "js/wizard.js", "js/superbly-tagfield.js", "js/jquery.validate.js", "js/jquery.formset.js" %}
 	<script type="text/javascript" src="{{ ASSET_URL }}"></script>
 	{% endassets %}
+	{% include 'autocomplete_light/static.html' %}
 
 	{% assets filters="cssutils", output="css/main.css", "css/jquery-ui-1.8.4.custom.css", "css/tipTip.css", "css/style.css" "css/superbly-tagfield.css" %}
 	<link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" media="screen" />

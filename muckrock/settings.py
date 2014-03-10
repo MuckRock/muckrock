@@ -171,6 +171,7 @@ INSTALLED_APPS = (
     'markdown_deux',
     'rest_framework',
     'rest_framework.authtoken',
+    'autocomplete_light',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -247,7 +248,7 @@ elif HAYSTACK_SEARCH_ENGINE == 'solr':
 URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
 URLAUTH_AUTHKEY_NAME = 'authkey'
 
-ASSETS_DEBUG = False
+ASSETS_DEBUG = True
 
 MONTHLY_REQUESTS = {
     'admin': 20,
