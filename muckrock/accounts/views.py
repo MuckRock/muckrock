@@ -15,6 +15,8 @@ from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
 from datetime import datetime, date
+from rest_framework import viewsets
+from rest_framework.permissions import DjangoModelPermissions
 import json
 import logging
 import stripe
@@ -23,6 +25,7 @@ import sys
 from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
                            PaymentForm, UpgradeSubscForm, CancelSubscForm
 from muckrock.accounts.models import Profile
+from muckrock.accounts.serializers import UserSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -387,3 +390,13 @@ def stripe_webhook_v2(request):
             msg.send(fail_silently=False)
 
     return HttpResponse()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """API views for User"""
+    # pylint: disable=R0901
+    # pylint: disable=R0904
+    model = User
+    serializer_class = UserSerializer
+    permission_classes = (DjangoModelPermissions,)
+    filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')

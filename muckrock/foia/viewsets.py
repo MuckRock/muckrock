@@ -20,12 +20,12 @@ from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.serializers import FOIARequestSerializer, FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
 
-# pylint: disable=R0901
 
 logger = logging.getLogger(__name__)
 
 class FOIARequestViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
+    # pylint: disable=R0901
     # pylint: disable=R0904
     # pylint: disable=C0103
     model = FOIARequest
@@ -40,6 +40,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
         jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
         user = django_filters.CharFilter(name='user__username')
         tags = django_filters.CharFilter(name='tags__name')
+
         class Meta:
             model = FOIARequest
             fields = ('user', 'title', 'status', 'jurisdiction', 'agency', 'embargo', 'tags')

@@ -6,7 +6,6 @@ from rest_framework import serializers, permissions
 
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
 
-# Nest communications and files in here
 # pylint: disable=R0903
 
 class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
