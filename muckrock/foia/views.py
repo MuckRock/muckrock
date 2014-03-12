@@ -302,7 +302,8 @@ def _foia_action(request, jurisdiction, jidx, slug, idx, action):
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
                               'heading value must_own template extra_context')
 
-def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False):
+def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False,
+                    snail=False):
     """Save the FOI Communication"""
     # pylint: disable=R0913
     comm = FOIACommunication.objects.create(
@@ -316,7 +317,7 @@ def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal
             foia_file.title = foia_file.name()
             foia_file.date = comm.date
             foia_file.save()
-    foia.submit(appeal=appeal)
+    foia.submit(appeal=appeal, snail=snail)
     messages.success(request, message)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -339,7 +340,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             else:
                 from_who = foia.user.get_full_name()
             _save_foia_comm(request, foia, from_who, form.cleaned_data['comm'],
-                            'Admin Fix submitted', formset)
+                            'Admin Fix submitted', formset, snail=form.cleaned_data['snail_mail'])
             return redirect(foia)
     else:
         form = FOIAAdminFixForm(instance=foia)

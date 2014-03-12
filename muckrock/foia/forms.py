@@ -149,6 +149,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+    snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 
     class Meta:
         # pylint: disable=R0903

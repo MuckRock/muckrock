@@ -317,7 +317,7 @@ class FOIARequest(models.Model):
 
         self.update_dates()
 
-    def submit(self, appeal=False):
+    def submit(self, appeal=False, snail=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=E1101
 
@@ -340,7 +340,7 @@ class FOIARequest(models.Model):
         comm = self.last_comm()
         
         # if the request can be emailed, email it, otherwise send a notice to the admin
-        if approved_agency and (can_email or can_email_appeal):
+        if not snail and approved_agency and (can_email or can_email_appeal):
             if appeal:
                 self.status = 'appealing'
             elif self.communications.filter(response=True).exists():
