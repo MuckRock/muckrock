@@ -84,6 +84,9 @@ class FOIARequestSerializer(serializers.ModelSerializer):
 
         if not request.user.is_staff:
             self.fields.pop('mail_id')
+            self.fields.pop('email')
+        if not request.user.is_staff and 'raw_email' in self.fields['communications'].fields:
+            self.fields['communications'].fields.pop('raw_email')
 
         if foia and request.user != foia.user and not request.user.is_staff:
             self.fields.pop('notes')
@@ -103,4 +106,4 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
                   'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
                   'date_followup', 'embargo', 'date_embargo', 'price', 'requested_docs',
-                  'description', 'tracking_id', 'tags', 'mail_id', 'notes')
+                  'description', 'tracking_id', 'tags', 'mail_id', 'email', 'notes')

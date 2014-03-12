@@ -171,6 +171,7 @@ INSTALLED_APPS = (
     'markdown_deux',
     'rest_framework',
     'rest_framework.authtoken',
+    'autocomplete_light',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

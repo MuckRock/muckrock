@@ -4,6 +4,7 @@ Forms for FOIA application
 
 from django import forms
 
+import autocomplete_light
 import inspect
 import sys
 from datetime import datetime, date, timedelta
@@ -148,6 +149,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body',
                            widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'}))
+    snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 
     class Meta:
         # pylint: disable=R0903
@@ -518,11 +520,10 @@ class FOIAWizardWhereForm(forms.Form):
                                        ('state', 'State'),
                                        ('local', 'Local'),
                                        ('multi', 'Multiple Agencies')))
-    state = forms.ModelChoiceField(
+    state = autocomplete_light.ModelChoiceField('StateAutocomplete',
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
-    local = forms.ModelChoiceField(
+    local = autocomplete_light.ModelChoiceField('LocalAutocomplete',
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
-        widget=forms.Select(attrs={'class': 'combobox'}),
         required=False)
 
     def clean(self):

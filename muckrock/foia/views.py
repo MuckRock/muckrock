@@ -302,7 +302,8 @@ def _foia_action(request, jurisdiction, jidx, slug, idx, action):
 Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
                               'heading value must_own template extra_context')
 
-def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False):
+def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False,
+                    snail=False):
     """Save the FOI Communication"""
     # pylint: disable=R0913
     comm = FOIACommunication.objects.create(
@@ -316,7 +317,7 @@ def _save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal
             foia_file.title = foia_file.name()
             foia_file.date = comm.date
             foia_file.save()
-    foia.submit(appeal=appeal)
+    foia.submit(appeal=appeal, snail=snail)
     messages.success(request, message)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -339,7 +340,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             else:
                 from_who = foia.user.get_full_name()
             _save_foia_comm(request, foia, from_who, form.cleaned_data['comm'],
-                            'Admin Fix submitted', formset)
+                            'Admin Fix submitted', formset, snail=form.cleaned_data['snail_mail'])
             return redirect(foia)
     else:
         form = FOIAAdminFixForm(instance=foia)
@@ -573,6 +574,38 @@ class ListByUser(ListBase):
     def get_context_data(self, **kwargs):
         context = super(ListByUser, self).get_context_data(**kwargs)
         context['subtitle'] = 'by %s' % self.kwargs['user_name']
+        return context
+
+
+class ListByAgency(ListBase):
+    """List of all FOIA requests by a given agency"""
+
+    def get_queryset(self):
+        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
+        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
+                                                     .filter(agency=agency))
+
+    def get_context_data(self, **kwargs):
+        context = super(ListByAgency, self).get_context_data(**kwargs)
+        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
+        context['subtitle'] = 'for %s' % agency.name
+        return context
+
+
+class ListByJurisdiction(ListBase):
+    """List of all FOIA requests by a given jurisdiction"""
+
+    def get_queryset(self):
+        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
+                                         pk=self.kwargs['idx'])
+        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
+                                                     .filter(jurisdiction=jurisdiction))
+
+    def get_context_data(self, **kwargs):
+        context = super(ListByJurisdiction, self).get_context_data(**kwargs)
+        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
+                                         pk=self.kwargs['idx'])
+        context['subtitle'] = 'for %s' % jurisdiction.name
         return context
 
 

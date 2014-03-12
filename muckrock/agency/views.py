@@ -29,7 +29,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
     if not agency.approved:
         raise Http404()
 
-    context = {'agency': agency}
+    foia_requests = FOIARequest.objects.get_viewable(request.user)\
+                                       .filter(agency=agency)\
+                                       .order_by('-date_submitted')[:5]
+
+    context = {'agency': agency, 'foia_requests': foia_requests}
     if request.user.is_anonymous():
         context['sidebar'] = Sidebar.objects.get_text('anon_agency')
     else:
