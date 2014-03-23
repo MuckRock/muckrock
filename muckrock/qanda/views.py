@@ -13,9 +13,11 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from datetime import datetime
+from rest_framework import viewsets
 
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
+from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 
 class Detail(DetailView):
     """Question detail view"""
@@ -177,3 +179,17 @@ class ListRecent(ListView):
         return context
 
 
+class QuestionViewSet(viewsets.ModelViewSet):
+    """API views for Question"""
+    # pylint: disable=R0904
+    # pylint: disable=C0103
+    model = Question
+    serializer_class = QuestionSerializer
+    permission_classes = (QuestionPermissions,)
+
+    def pre_save(self, obj):
+        if not obj.pk:
+            obj.date = datetime.now()
+            obj.slug = slugify(obj.title)
+            obj.user = self.request.user
+        return super(QuestionViewSet, self).pre_save(obj)

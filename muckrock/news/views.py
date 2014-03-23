@@ -5,7 +5,12 @@ Views for the news application
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
+from rest_framework import viewsets
+from rest_framework.permissions import DjangoModelPermissions
+import django_filters
+
 from muckrock.news.models import Article
+from muckrock.news.serializers import ArticleSerializer
 from muckrock.sidebar.models import Sidebar
 
 # pylint: disable=R0901
@@ -60,3 +65,25 @@ class List(ListView):
         context = super(List, self).get_context_data(**kwargs)
         context['years'] = [date.year for date in Article.objects.dates('pub_date', 'year')][::-1]
         return context
+
+
+class ArticleViewSet(viewsets.ModelViewSet):
+    """API views for User"""
+    # pylint: disable=R0901
+    # pylint: disable=R0904
+    model = Article
+    serializer_class = ArticleSerializer
+    permission_classes = (DjangoModelPermissions,)
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for Articles"""
+        # pylint: disable=E1101
+        # pylint: disable=R0903
+        authors = django_filters.CharFilter(name='authors__username')
+        tags = django_filters.CharFilter(name='tags__name')
+
+        class Meta:
+            model = Article
+            fields = ('title', 'pub_date', 'authors', 'foias', 'tags')
+
+    filter_class = Filter

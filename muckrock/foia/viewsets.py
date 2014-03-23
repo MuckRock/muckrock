@@ -21,12 +21,12 @@ from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSe
                                       FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
 
+# pylint: disable=R0901
 
 logger = logging.getLogger(__name__)
 
 class FOIARequestViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
-    # pylint: disable=R0901
     # pylint: disable=R0904
     # pylint: disable=C0103
     model = FOIARequest

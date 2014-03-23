@@ -1,5 +1,5 @@
 """
-Serilizers for the FOIA application API
+Serilizers for the accounts application API
 """
 
 from django.contrib.auth.models import User

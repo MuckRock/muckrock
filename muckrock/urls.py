@@ -23,7 +23,7 @@ import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
-       muckrock.accounts.views
+       muckrock.accounts.views, muckrock.sidebar.viewsets
 import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.foia.sitemap import FoiaSitemap
@@ -38,8 +38,11 @@ router = DefaultRouter()
 router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
 router.register(r'agency', muckrock.agency.views.AgencyViewSet)
 router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
+router.register(r'question', muckrock.qanda.views.QuestionViewSet)
 router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet)
 router.register(r'user', muckrock.accounts.views.UserViewSet)
+router.register(r'news', muckrock.news.views.ArticleViewSet)
+router.register(r'sidebar', muckrock.sidebar.viewsets.SidebarViewSet)
 
 urlpatterns = patterns('',
     url(r'^$', views.front_page, name='index'),
