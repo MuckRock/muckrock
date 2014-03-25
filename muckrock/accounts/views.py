@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from datetime import datetime, date
 from rest_framework import viewsets
-from rest_framework.permissions import DjangoModelPermissions
+from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
 import logging
 import stripe
@@ -24,8 +24,8 @@ import sys
 
 from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
                            PaymentForm, UpgradeSubscForm, CancelSubscForm
-from muckrock.accounts.models import Profile
-from muckrock.accounts.serializers import UserSerializer
+from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
@@ -400,3 +400,13 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (DjangoModelPermissions,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
+
+
+class StatisticsViewSet(viewsets.ModelViewSet):
+    """API views for Statistics"""
+    # pylint: disable=R0901
+    # pylint: disable=R0904
+    model = Statistics
+    serializer_class = StatisticsSerializer
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
+    filter_fields = ('date',)

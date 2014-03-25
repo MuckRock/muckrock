@@ -39,6 +39,7 @@ router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet
 router.register(r'agency', muckrock.agency.views.AgencyViewSet)
 router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
 router.register(r'question', muckrock.qanda.views.QuestionViewSet)
+router.register(r'statistics', muckrock.accounts.views.StatisticsViewSet)
 router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet)
 router.register(r'user', muckrock.accounts.views.UserViewSet)
 router.register(r'news', muckrock.news.views.ArticleViewSet)

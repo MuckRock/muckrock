@@ -13,7 +13,10 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from datetime import datetime
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
@@ -183,9 +186,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""
     # pylint: disable=R0904
     # pylint: disable=C0103
+    # pylint: disable=R0901
     model = Question
     serializer_class = QuestionSerializer
     permission_classes = (QuestionPermissions,)
+    filter_fields = ('title', 'foia',)
 
     def pre_save(self, obj):
         if not obj.pk:
@@ -193,3 +198,19 @@ class QuestionViewSet(viewsets.ModelViewSet):
             obj.slug = slugify(obj.title)
             obj.user = self.request.user
         return super(QuestionViewSet, self).pre_save(obj)
+
+    @action(permission_classes=(IsAuthenticated,))
+    def answer(self, request, pk=None):
+        """Answer a question"""
+        try:
+            question = Question.objects.get(pk=pk)
+            self.check_object_permissions(request, question)
+            Answer.objects.create(user=request.user, date=datetime.now(), question=question,
+                                  answer=request.DATA['answer'])
+            return Response({'status': 'Answer submitted'},
+                             status=status.HTTP_200_OK)
+        except Question.DoesNotExist:
+            return Response({'status': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        except KeyError:
+            return Response({'status': 'Missing data - Please supply answer'},
+                             status=status.HTTP_400_BAD_REQUEST)
