@@ -14,7 +14,7 @@
 
 	{% for agency in stale_agencies %}
 
-		<h3><a href="{% url agency-detail jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">{{ agency.name }}</a> {% if user.is_staff %}<small><a href="{% url admin:agency_agency_change agency.pk %}">Admin</a></small>{% endif %}</h3>
+		<h3><a href="{% url 'agency-detail' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a> {% if user.is_staff %}<small><a href="{% url 'admin:agency_agency_change' agency.pk %}">Admin</a></small>{% endif %}</h3>
 
 		{% with agency.foiarequest_set.get_open.count as open_requests %}
 		<p><em><strong>Number of open requests: </strong> {{open_requests}} request{{open_requests|pluralize}}</em></p>
@@ -26,7 +26,7 @@
 
 		<ul>
 			{% for foia in agency.foiarequest_set.get_open %}
-			 <li><a href="{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}">{{foia.title}}</a></li>
+			 <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{foia.title}}</a></li>
 			{% endfor %}
 		</ul>
 

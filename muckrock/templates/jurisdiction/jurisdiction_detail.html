@@ -111,9 +111,9 @@
 			<tr class="{% cycle 'even' 'odd' %}">
 				<td><a href="
 			  {% if request.user == foia.user and foia.status == "started" %}
-					{% url foia-update jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% else %}
-					{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% endif %}
 				">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 				<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
@@ -129,7 +129,7 @@
 		</table>
 
 		<p class="largest">
-			<a href="{% url foia-list-jurisdiction jurisdiction=jurisdiction.slug,idx=jurisdiction.pk %}">View all...</a>
+			<a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}">View all...</a>
 		</p>
 	{% else %}
 		<em class="large">No requests yet!</em>
@@ -142,7 +142,7 @@
 			</tr>
 		{% for agency in jurisdiction.agencies.get_approved %}
 			<tr class="{% cycle 'even' 'odd' %}">
-				<td><strong><a href="{% url agency-detail jurisdiction=jurisdiction.slug,jidx=jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">{{agency.name}}</a></strong></td>
+				<td><strong><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{agency.name}}</a></strong></td>
 				<td>{{agency.foiarequest_set.count}}</td>
 				<td>{% with agency.average_response_time as days %}{{days}} day{{days|pluralize}}{% endwith %}</td>
 				<td>{{agency.total_pages}}</td>
@@ -167,7 +167,7 @@
 		<h4>{{req.headline}}</h4>
 		<h3><a href="{{ req.req.get_absolute_url }}">{{ req.req.title }}</a></h3>
 		<span>
-			<em>Requested by <a href="{% url acct-profile req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
+			<em>Requested by <a href="{% url 'acct-profile' req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
 			<p>{{ req.req.description }}</p>
 		</span>
 	</div>
@@ -198,7 +198,7 @@
 	{% endif %}
 
 	{% if user.is_staff %}
-		<p><a class="jqbutton" href="{% url admin:jurisdiction_jurisdiction_change jurisdiction.pk %}">Admin</a></p>
+		<p><a class="jqbutton" href="{% url 'admin:jurisdiction_jurisdiction_change' jurisdiction.pk %}">Admin</a></p>
 	{% endif %}
 	<p><a class="jqbutton" href="{{ jurisdiction.get_url_flag }}">Submit Correction</a></p>
 	<div class="content-separator"></div>

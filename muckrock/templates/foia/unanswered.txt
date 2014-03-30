@@ -6,5 +6,5 @@ The following 20 requests have not received any agency communication for at leas
 Request: {{foia.1.title}} - MR{{foia.1.pk}}
 Time since last communication: {{foia.0}} days
 Have they ever responded: {%if foia.0 == 9999%}No{% else %}Yes{% endif %}
-Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change foia.1.pk %}
+Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.1.pk %}
 {% endfor %}

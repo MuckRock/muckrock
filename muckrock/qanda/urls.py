@@ -2,7 +2,7 @@
 URL mappings for the Q&A application
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from muckrock.qanda import views
 from muckrock.qanda.feeds import LatestQuestions

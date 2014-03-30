@@ -11,7 +11,7 @@
 <h1>{{agency.name}}</h1>
 
 <p class="quiet">
-	A <a href="{{ agency.jurisdiction.get_absolute_url }}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url acct-profile agency.user.username %}">{{agency.user.username}}</a>{% endif %}
+	A <a href="{{ agency.jurisdiction.get_absolute_url }}">{{agency.jurisdiction}}</a> agency{% if agency.user %} added by <a href="{% url 'acct-profile' agency.user.username %}">{{agency.user.username}}</a>{% endif %}
 </p>
 
 {% if not agency.image %}
@@ -39,7 +39,7 @@
 		  {{ agency.address|linebreaks }} 
 			(<a href="http://maps.google.com?q={{agency.address|urlencode}}" target="_blank">Map</a>)
 		{% else %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>E-mail Address:</strong><br />
@@ -48,20 +48,20 @@
 		{% endif %}
 	  {% if agency.email and not request.user.get_profile.can_view_emails %}
 		  {% if request.user.is_anonymous %}
-				<a href="{% url acct-register-pro %}"><em class="small">(Available for Pro Users)</em></a>
+				<a href="{% url 'acct-register-pro' %}"><em class="small">(Available for Pro Users)</em></a>
 			{% else %}
-				<a href="{% url acct-manage-subsc %}"><em class="small">(Available for Pro Users)</em></a>
+				<a href="{% url 'acct-manage-subsc' %}"><em class="small">(Available for Pro Users)</em></a>
 			{% endif %}
 		{% endif %}
 	  {% if not agency.email %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>Fax Number:</strong><br />
 	  {% if agency.fax %}
 		  {{agency.fax}}
 		{% else %}
-	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Suggest</a>)</em>{% endif %}
+	    Unknown {% if user.is_authenticated %}<em>(<a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a>)</em>{% endif %}
 		{% endif %}
 	</p>
 	<p><strong>Average Response Time:</strong><br />
@@ -132,9 +132,9 @@
 			<tr class="{% cycle 'even' 'odd' %}">
 				<td><a href="
 			  {% if request.user == foia.user and foia.status == "started" %}
-					{% url foia-update jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% else %}
-					{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% endif %}
 				">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 				<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
@@ -150,7 +150,7 @@
 		</table>
 
 		<p class="largest">
-			<a href="{% url foia-list-agency agency=agency.slug,idx=agency.pk %}">View all...</a>
+			<a href="{% url 'foia-list-agency' agency=agency.slug idx=agency.pk %}">View all...</a>
 		</p>
 	{% else %}
 		<em class="large">No requests yet!</em>
@@ -171,7 +171,7 @@
 		<h4>{{req.headline}}</h4>
 		<h3><a href="{{ req.req.get_absolute_url }}">{{ req.req.title }}</a></h3>
 		<span>
-			<em>Requested by <a href="{% url acct-profile req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
+			<em>Requested by <a href="{% url 'acct-profile' req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %} Viewed {{ req.req.times_viewed }} times.</em>
 			<p>{{ req.req.description }}</p>
 		</span>
 	</div>
@@ -191,10 +191,10 @@
 	{% endif %}
 
 	{% if user.is_staff %}
-		<p><a class="jqbutton" href="{% url admin:agency_agency_change agency.pk %}">Admin</a></p>
+		<p><a class="jqbutton" href="{% url 'admin:agency_agency_change' agency.pk %}">Admin</a></p>
 	{% endif %}
 	{% if user.is_authenticated %}
-		<p><a class="jqbutton" href="{% url agency-flag jurisdiction=agency.jurisdiction.slug,jidx=agency.jurisdiction.pk,slug=agency.slug,idx=agency.pk %}">Submit Correction</a></p>
+		<p><a class="jqbutton" href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Submit Correction</a></p>
 		<div class="content-separator"></div>
 	{% endif %}
 

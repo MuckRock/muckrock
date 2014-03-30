@@ -7,9 +7,9 @@
 
 {% block sub-nav %}
 <ul class="tabbed">
-	<li class="{% active request "^/questions/$" %}"><a href="{% url question-index %}">All Questions</a></li>
-	<li class="{% active request "^/questions/new/$" %}"><a href="{% url question-create %}">Ask a Question</a></li>
-	<li class="{% active request "^/questions/unanswered/$" %}"><a href="{% url question-unanswered %}">Unanswered Questions</a></li>
-	<li class="{% active request "^/questions/recent/$" %}"><a href="{% url question-recent %}">Recently Answered Questions</a></li>
+	<li class="{% active request "^/questions/$" %}"><a href="{% url 'question-index' %}">All Questions</a></li>
+	<li class="{% active request "^/questions/new/$" %}"><a href="{% url 'question-create' %}">Ask a Question</a></li>
+	<li class="{% active request "^/questions/unanswered/$" %}"><a href="{% url 'question-unanswered' %}">Unanswered Questions</a></li>
+	<li class="{% active request "^/questions/recent/$" %}"><a href="{% url 'question-recent' %}">Recently Answered Questions</a></li>
 </ul>
 {% endblock %}

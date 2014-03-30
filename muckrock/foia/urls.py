@@ -2,7 +2,7 @@
 URL mappings for the FOIA application
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
 from pingback import register_pingback

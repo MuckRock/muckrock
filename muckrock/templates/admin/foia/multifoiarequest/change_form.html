@@ -3,6 +3,6 @@
 
 {% block form_top %}
 	{% if original.agencies.count %}
-		<p><a href="{% url admin:multifoia-admin-submit idx=object_id %}">Submit this MultiRequest</a></p>
+		<p><a href="{% url 'admin:multifoia-admin-submit' idx=object_id %}">Submit this MultiRequest</a></p>
 		{% endif %}
 {% endblock %}

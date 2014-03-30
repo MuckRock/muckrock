@@ -105,7 +105,7 @@
 							<li><span class="quiet">{{forloop.counter}}.</span>
 							<a href="{{ req.get_absolute_url }}">{{ req.title }}</a></li>
 							{% endfor %}
-							<li><a href="{% url foia-list %}" class="more">Browse all documents &#187;</a></li>
+							<li><a href="{% url 'foia-list' %}" class="more">Browse all documents &#187;</a></li>
 						</ul>
 					</div>
 				</div>
@@ -118,7 +118,7 @@
 							{% for article in recent_articles %}
 							<li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>
 							{% endfor %}
-							<li><a href="{% url news-index %}" class="more">View all news &#187;</a></li>
+							<li><a href="{% url 'news-index' %}" class="more">View all news &#187;</a></li>
 						</ul>
 						
 					</div>
@@ -149,7 +149,7 @@
 							{% empty %}
 							<li>There are no overdue requests at this time.</li>
 							{% endfor %}
-							<li><a href="{% url foia-list %}" class="more">Browse all &#187;</a></li>
+							<li><a href="{% url 'foia-list' %}" class="more">Browse all &#187;</a></li>
 						</ul>
 					</div>
 				</div>

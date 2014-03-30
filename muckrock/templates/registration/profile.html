@@ -58,9 +58,9 @@
 			<tr class="{% cycle 'even' 'odd' %}">
 				<td><a href="
 			  {% if request.user == foia.user and foia.status == "started" %}
-					{% url foia-update jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% else %}
-					{% url foia-detail jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.pk,slug=foia.slug %}
+					{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% endif %}
 				">{{ foia.title }}</a>{% if foia.tags.all %}&nbsp;&ndash;&nbsp;<em class="quiet">{% for tag in foia.tags.all %}{{tag.name}}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}</em></td>
 				<td><span class="request-{{foia.color_code}}">{{ foia.get_status_display }}</span></td>
@@ -77,9 +77,9 @@
 
 		<p class="largest">
 		{% if user == user_obj %}
-			<a href="{% url foia-mylist view="all" %}">View all...</a>
+			<a href="{% url 'foia-mylist' view="all" %}">View all...</a>
 		{% else %}
-			<a href="{% url foia-list-user user_name=user_obj.username %}">View all...</a>
+			<a href="{% url 'foia-list-user' user_name=user_obj.username %}">View all...</a>
 		{% endif %}
 		</p>
 	{% else %}
@@ -96,6 +96,6 @@
 	{% endif %}
 
 	{% if user == user_obj %}
-		<p class="largest"><strong><a href="{% url acct-buy-requests %}">Buy more requests!</a></strong></p>
+		<p class="largest"><strong><a href="{% url 'acct-buy-requests' %}">Buy more requests!</a></strong></p>
 	{% endif %}
 {% endblock %}

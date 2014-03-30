@@ -11,7 +11,7 @@
 {% block content %}
 	<h1>FOI Request</h1>
 	<h2>{{foia.title}}</h2>
-	<p>Requested by <a href="{% url acct-profile foia.user.username %}">{{foia.user.username}}</a>
+	<p>Requested by <a href="{% url 'acct-profile' foia.user.username %}">{{foia.user.username}}</a>
 	{% if foia.date_submitted %} on {{foia.date_submitted|date}}{%endif%}
 	for {% if foia.agency %}the {{ foia.agency.link_display|safe }} of {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{foia.jurisdiction}}</a>
 	{% if foia.date_done %} and {% if foia.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{foia.date_done|date}}{%endif%}
@@ -69,7 +69,7 @@
 	</div>
 	<div id='tag-links'>Tags:
 		{% for tag in foia.tags.all %}
-			<a href="{% url foia-list-tag tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}, {%endif%}
+			<a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a>{% if not forloop.last %}  {%endif%}
 		{% empty %}
 			None
 		{% endfor %}
@@ -257,7 +257,7 @@
 			{% empty %}
 				<p>You don't have any notes on this request.  Note can be used to store private information regarding this request.</p>
 			{% endfor %}
-			<p><a class="jqbutton" href="{% url foia-note jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.id,slug=foia.slug %}">Add a Note</a></p>
+			<p><a class="jqbutton" href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Add a Note</a></p>
 		</div>
 		{% endif %}
 	{% if foia.public_documents or foia.user == user %}
@@ -276,7 +276,7 @@
 		<h1>Help fund this request</h1>
 		<h2>${{foia.crowdfund.payment_received|intcomma}} raised out of ${{foia.crowdfund.payment_required|intcomma}}</h2>
 		<h3>{{foia.crowdfund.date_due|timeuntil}} to go</h3>
-		<a href="{% url foia-contribute jurisdiction=foia.jurisdiction.slug,jidx=foia.jurisdiction.pk,idx=foia.id,slug=foia.slug %}" class="jqbutton">Contribute</a>
+		<a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="jqbutton">Contribute</a>
 		<div class="content-separator"></div>
 	{% endif %}
 	{% if foia.has_crowdfund and foia.crowdfund.expired %}
@@ -299,11 +299,11 @@
 	{% endif %}
 
 		{% if foia.followed_by.all.count == 1 %}
-			<em>1 person is currently following this request.{% if user.is_anonymous %}  <a href="{% url acct-register %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
+			<em>1 person is currently following this request.{% if user.is_anonymous %}  <a href="{% url 'acct-register' %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
 			<div class="content-separator"></div>
 		{% endif %}
 		{% if foia.followed_by.all.count > 1 %}
-			<em>{{foia.followed_by.all.count}} people are currently following this request.{% if user.is_anonymous %}  <a href="{% url acct-register %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
+			<em>{{foia.followed_by.all.count}} people are currently following this request.{% if user.is_anonymous %}  <a href="{% url 'acct-register' %}">Register for a free account</a> to get updates to this request.{% endif %}</em>
 			<div class="content-separator"></div>
 		{% endif %}
 

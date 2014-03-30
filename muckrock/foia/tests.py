@@ -10,6 +10,7 @@ import nose.tools
 
 import datetime
 import re
+from datetime import date as real_date
 from operator import attrgetter
 
 from muckrock.foia.models import FOIARequest, FOIACommunication
@@ -392,13 +393,21 @@ class TestFOIAIntegration(TestCase):
 
         # Replace real date and time with mock ones so we can control today's/now's value
         # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
+        #http://tech.yunojuno.com/mocking-dates-with-django
         class MockDate(datetime.date):
             def __add__(self, other):
                 d = super(MockDate, self).__add__(other)
                 return MockDate(d.year, d.month, d.day)
+            class MockDateType(type):
+                "Used to ensure the FakeDate returns True to function calls."
+                def __instancecheck__(self, instance):
+                    return isinstance(instance, real_date)
+            # this forces the FakeDate to return True to the isinstance date check
+            __metaclass__ = MockDateType
         class MockDateTime(datetime.datetime):
             def date(self):
                 return MockDate(self.year, self.month, self.day)
+
         self.orig_date = datetime.date
         self.orig_datetime = datetime.datetime
         datetime.date = MockDate

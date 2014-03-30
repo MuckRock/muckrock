@@ -6,11 +6,11 @@
 
 Have an answer? Let them know:
 
-https://www.muckrock.com{% url question-detail idx=question.pk,slug=question.slug %}
+https://www.muckrock.com{% url 'question-detail' idx=question.pk slug=question.slug %}
 
 Check out other questions:
 
-https://www.muckrock.com{% url question-index %}
+https://www.muckrock.com{% url 'question-index' %}
 
 Unsubscribe from question notifications:
 

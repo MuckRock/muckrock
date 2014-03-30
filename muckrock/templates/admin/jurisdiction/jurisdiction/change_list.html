@@ -4,7 +4,7 @@
 
 {% block content %}
 	<ul>
-		<li><a href="{% url admin:jurisdiction-admin-import %}">CSV Import</a></li>
+		<li><a href="{% url 'admin:jurisdiction-admin-import' %}">CSV Import</a></li>
 	</ul>
 	{{block.super}}
 {% endblock %}

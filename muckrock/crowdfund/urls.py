@@ -2,7 +2,7 @@
 URL mappings for the crowdfund application
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from muckrock.crowdfund import views
 

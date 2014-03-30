@@ -171,6 +171,7 @@ INSTALLED_APPS = (
     'markdown_deux',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_swagger',
     'autocomplete_light',
     'muckrock.accounts',
     'muckrock.foia',
@@ -305,6 +306,7 @@ LOGGING = {
         },
         'mail_admins': {
             'level': 'WARNING',
+            'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
         },
         'sentry': {

@@ -3,7 +3,7 @@ Hi {{name}},
 
 Here's a summary of recent updates on your requests and the requests you
 follow. Change your notification preferences at:
-https://www.muckrock.com{% url acct-update %}
+https://www.muckrock.com{% url 'acct-update' %}
 
 {% for status, s_foias in foias %}
 {{ status }}
@@ -17,8 +17,8 @@ https://www.muckrock.com{% url acct-update %}
 {% endif %}https://www.muckrock.com{{foia.get_absolute_url}}
 
 {% if status == "Completed Requests" %}See ALL your completed requests here:
-https://www.muckrock.com{% url foia-mylist view="completed" %}{% endif %}{% if status == "Requests Needing Action" %}See ALL request needing attention here:
-https://www.muckrock.com{% url foia-mylist view="action" %}{% endif %}
+https://www.muckrock.com{% url 'foia-mylist' view="completed" %}{% endif %}{% if status == "Requests Needing Action" %}See ALL request needing attention here:
+https://www.muckrock.com{% url 'foia-mylist' view="action" %}{% endif %}
 	{% endfor %}
 {% endfor %}
 {% endautoescape %}

@@ -4,10 +4,10 @@ URL mappings for muckrock project
 
 # pylint: disable=W0611
 # these are called dynmically
-from django.conf.urls.defaults import handler404
+from django.conf.urls import handler404
 from views import handler500
 # pylint: enable=W0611
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.views.decorators.csrf import csrf_exempt
@@ -61,6 +61,7 @@ urlpatterns = patterns('',
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
+    url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),

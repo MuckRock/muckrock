@@ -1,8 +1,8 @@
 {% autoescape off %}
-Submitter: http://www.muckrock.com{% url admin:auth_user_change request.user.pk %}
-Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
+Submitter: http://www.muckrock.com{% url 'admin:auth_user_change' request.user.pk %}
+Request Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' request.pk %}
 {% if not appeal %}
-{% if request.agency %}Agency Admin: http://www.muckrock.com{% url admin:agency_agency_change request.agency.pk %}
+{% if request.agency %}Agency Admin: http://www.muckrock.com{% url 'admin:agency_agency_change' request.agency.pk %}
 {% endif %}{% if request.agency.email %}Agency Email: {{request.agency.email}}
 {% endif %}{% if request.agency.fax %}Agency Fax: {{request.agency.fax}}@fax2.faxaway.com
 {% endif %}{% if request.agency.address %}Agency Address:
@@ -12,7 +12,7 @@ Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change reque
 {% endif %}
 
 {% else %}
-{% if request.agency.appeal_agency %}Appeal Agency Admin: http://www.muckrock.com{% url admin:agency_agency_change request.agency.appeal_agency.pk %}
+{% if request.agency.appeal_agency %}Appeal Agency Admin: http://www.muckrock.com{% url 'admin:agency_agency_change' request.agency.appeal_agency.pk %}
 {% if request.agency.appeal_agency.address %}Address: {{request.agency.appeal_agency.address}}
 {% endif %}
 {% endif %}

@@ -3,15 +3,15 @@
 
 {% block content %}
 
-<h2>Archives for {{year}}</h2>
+<h2>Archives for {{year|date:"Y"}}</h2>
 
 	<div class="post-meta archive-pagination">
 		
-		{% if prev_year %}
-		<div class="left"><a href="{% url news-archive-year year=prev_year %}">&#171; Previous page</a></div>
+		{% if previous_year.year > 999 %}
+		<div class="left"><a href="{% url 'news-archive-year' year=previous_year|date:"Y" %}">&#171; Previous page</a></div>
 		{% endif %}
 		{% if next_year %}
-		<div class="right"><a href="{% url news-archive-year year=next_year %}">Next page &#187;</a></div>
+		<div class="right"><a href="{% url 'news-archive-year' year=next_year|date:"Y" %}">Next page &#187;</a></div>
 		{% endif %}
 
 		<div class="clearer">&nbsp;</div>
@@ -30,11 +30,11 @@
 
 	<div class="post-meta archive-pagination">
 
-		{% if prev_year %}
-		<div class="left"><a href="{% url news-archive-year year=prev_year %}">&#171; Previous page</a></div>
+		{% if previous_year.year > 999 %}
+		<div class="left"><a href="{% url 'news-archive-year' year=previous_year|date:"Y" %}">&#171; Previous page</a></div>
 		{% endif %}
 		{% if next_year %}
-		<div class="right"><a href="{% url news-archive-year year=next_year %}">Next page &#187;</a></div>
+		<div class="right"><a href="{% url 'news-archive-year' year=next_year|date:"Y" %}">Next page &#187;</a></div>
 		{% endif %}
 
 		<div class="clearer">&nbsp;</div>
@@ -45,12 +45,12 @@
 
 {% block sidebar %}
 
-<p><a href="{% url news-archive %}">Go to all archives</a></p>
+<p><a href="{% url 'news-archive' %}">Go to all archives</a></p>
 
 <h2>Months</h2>
 <ul>
 	{% for month_date in date_list %}
-	<li><a href="{% url news-archive-month year=year,month=month_date|date:"b" %}">{{month_date|date:"F"}}</a></li>
+	<li><a href="{% url 'news-archive-month' year=year|date:"Y" month=month_date|date:"b" %}">{{month_date|date:"F"}}</a></li>
 	{% endfor %}
 </ul>
 

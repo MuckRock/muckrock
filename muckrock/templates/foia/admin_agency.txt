@@ -1,6 +1,6 @@
 {% autoescape off %}
-Submitter: http://www.muckrock.com{% url admin:auth_user_change agency.user.pk %}
-Agency Admin: http://www.muckrock.com{% url admin:agency_agency_change agency.pk %}
+Submitter: http://www.muckrock.com{% url 'admin:auth_user_change' agency.user.pk %}
+Agency Admin: http://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}
 
 A new agency has been created.  Please verify the information and approve it.
 {% endautoescape %}

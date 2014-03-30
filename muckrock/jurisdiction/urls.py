@@ -2,7 +2,7 @@
 URL mappings for the jurisdiction application
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from muckrock.jurisdiction import views
 from muckrock.views import jurisdiction

@@ -3,7 +3,7 @@ Admin registration for Agency models
 """
 
 from django import forms
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, redirect

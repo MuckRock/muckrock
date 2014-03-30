@@ -46,15 +46,6 @@ class NewsYear(YearArchiveView):
     make_object_list = True
     queryset = Article.objects.get_published()
 
-    def get_context_data(self, **kwargs):
-        context = super(NewsYear, self).get_context_data(**kwargs)
-        year = int(self.kwargs['year'])
-        if year > 1000:
-            context['prev_year'] = year - 1
-        if year < 9999:
-            context['next_year'] = year + 1
-        return context
-
 
 class List(ListView):
     """List of news articles"""

@@ -35,7 +35,7 @@ class StatisticsSerializer(serializers.ModelSerializer):
         # pylint: disable=E1101
         # pylint: disable=E1002
         super(StatisticsSerializer, self).__init__(*args, **kwargs)
-        if not self.context['request'].user.is_staff:
+        if 'request' not in self.context or not self.context['request'].user.is_staff:
             staff_only = ('pro_users', 'pro_user_names', 'total_page_views', 'daily_requests_pro',
                           'daily_requests_community', 'daily_requests_beta', 'daily_articles')
             for field in staff_only:

@@ -37,11 +37,11 @@
 					{% if user.is_staff %}
 					<li><a href="/admin/">Admin</a></li>
 					{% endif %}
-				<li><a href="{% url acct-my-profile %}">My Account</a></li>
-				<li><a href="{% url acct-logout %}">Log Out</a></li>
+				<li><a href="{% url 'acct-my-profile' %}">My Account</a></li>
+				<li><a href="{% url 'acct-logout' %}">Log Out</a></li>
 				{% else %}
-				<li><a href="{% url acct-login %}">Log in</a></li>
-				<li><a href="{% url acct-register %}">Register</a></li>
+				<li><a href="{% url 'acct-login' %}">Log in</a></li>
+				<li><a href="{% url 'acct-register' %}">Register</a></li>
 				{% endif %}
 			</ul>
 
@@ -67,7 +67,7 @@
 
 			<div id="site-title">
 
-				<h1><a href="{%url index%}">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
+				<h1><a href="{% url 'index'%}">MuckRock</a> <span> / {% block headline %}News{% endblock %}</span></h1>
 
 			</div>
 
@@ -77,12 +77,12 @@
 
 					<ul class="tabbed">
 						{% block main-nav %}
-						<li class="{% active request "^/news/" %}"><a href="{%url news-index%}">News</a></li>
-						<li class="{% active request "^/foi/((new)|(update)|(delete))/" %}"><a href="{%url foia-create%}">Submit Request</a></li>
-						<li class="{% active request "^/foi/((list)|(view)|(mylist))/" %}"><a href="{%url foia-list%}">FOI Requests</a></li>
-						<li class="{% active request "^/questions/" %}"><a href="{%url question-index%}">FOI Questions</a></li>
-						{# <li class="{% active request "^/questions/" %}"><a href="{%url question-index%}">Questions</a></li> #}
-						<li class="{% active request "^/accounts/" %}"><a href="{%url acct-my-profile%}">Account</a></li>
+						<li class="{% active request "^/news/" %}"><a href="{% url 'news-index'%}">News</a></li>
+						<li class="{% active request "^/foi/((new)|(update)|(delete))/" %}"><a href="{% url 'foia-create'%}">Submit Request</a></li>
+						<li class="{% active request "^/foi/((list)|(view)|(mylist))/" %}"><a href="{% url 'foia-list'%}">FOI Requests</a></li>
+						<li class="{% active request "^/questions/" %}"><a href="{% url 'question-index'%}">FOI Questions</a></li>
+						{# <li class="{% active request "^/questions/" %}"><a href="{% url 'question-index'%}">Questions</a></li> #}
+						<li class="{% active request "^/accounts/" %}"><a href="{% url 'acct-my-profile'%}">Account</a></li>
 						<li><a href="/about/">About</a></li>
 						{% endblock %}
 					</ul>
@@ -128,10 +128,10 @@
 				
 					<div class="column-title">Follow Us</div>
 					<ul class="plain-list">
-						<li><a href="{% url news-feed %}" class="feed">Latest News</a></li>
-						<li><a href="{% url foia-submitted-feed %}" class="feed">Recently Submitted Requests</a></li>
-						<li><a href="{% url foia-done-feed %}" class="feed">Recently Completed Requests</a></li>
-						<li><a href="{% url question-feed %}" class="feed">Latest Questions</a></li>
+						<li><a href="{% url 'news-feed' %}" class="feed">Latest News</a></li>
+						<li><a href="{% url 'foia-submitted-feed' %}" class="feed">Recently Submitted Requests</a></li>
+						<li><a href="{% url 'foia-done-feed' %}" class="feed">Recently Completed Requests</a></li>
+						<li><a href="{% url 'question-feed' %}" class="feed">Latest Questions</a></li>
 						<li><a href="http://www.twitter.com/muckrock" class="twitter">@MuckRock</a></li>
 						<li><a href="http://www.facebook.com/muckrock" class="facebook">Like Us</a></li>
 					</ul>

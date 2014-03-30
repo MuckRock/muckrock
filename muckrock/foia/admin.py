@@ -3,7 +3,7 @@ Admin registration for FOIA models
 """
 
 from django import forms
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse

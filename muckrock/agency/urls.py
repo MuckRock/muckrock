@@ -2,7 +2,7 @@
 URL mappings for the Agency application
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from muckrock.agency import views
 from muckrock.views import jurisdiction

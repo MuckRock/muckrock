@@ -76,7 +76,7 @@
 <h2>Years</h2>
 <ul>
 	{% for year in years %}
-	<li><a href="{% url news-archive-year year=year %}">{{year}}</a></li>
+	<li><a href="{% url 'news-archive-year' year=year %}">{{year}}</a></li>
 	{% endfor %}
 </ul>
 

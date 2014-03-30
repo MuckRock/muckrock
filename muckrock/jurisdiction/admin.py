@@ -2,7 +2,7 @@
 Admin registration for Jurisdiction models
 """
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.shortcuts import render_to_response, redirect
 from django.template.defaultfilters import slugify

@@ -1,5 +1,5 @@
 {% autoescape off %}
-Request Admin: http://www.muckrock.com{% url admin:foia_foiarequest_change request.pk %}
+Request Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' request.pk %}
 
 Request {{ request.title }} has received a payment for ${{amount|stringformat:".2f"}} from {{request.user.username}}.
 
