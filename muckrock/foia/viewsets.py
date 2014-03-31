@@ -26,7 +26,9 @@ from muckrock.jurisdiction.models import Jurisdiction
 logger = logging.getLogger(__name__)
 
 class FOIARequestViewSet(viewsets.ModelViewSet):
-    """API views for FOIARequest"""
+    """API views for FOIARequest
+    Filter fields: `user`, `title`, `status`, `jurisdiction`, `agency`, `embargo`, `tags`
+    """
     # pylint: disable=R0904
     # pylint: disable=C0103
     model = FOIARequest
