@@ -427,6 +427,8 @@ REST_FRAMEWORK = {
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
 
+ALLOWED_HOSTS = ['.muckrock.com']
+
 
 # pylint: disable=W0401
 # pylint: disable=W0614
