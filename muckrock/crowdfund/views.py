@@ -25,7 +25,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 
 def _contribute(request, crowdfund, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""
-    
+
     if request.method == 'POST':
         form = CrowdfundPayForm(request.POST, request=request)
 
@@ -39,7 +39,7 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                 crowdfund.save()
                 payment_model.objects.create(user=request.user, crowdfund=crowdfund, amount=amount)
                 messages.success(request, 'You have succesfully contributed $%.2f' % amount)
-                logger.info('%s has contributed to crowdfund',  request.user.username)
+                logger.info('%s has contributed to crowdfund', request.user.username)
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
                 logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
@@ -60,7 +60,7 @@ def contribute_request(request, jurisdiction, jidx, slug, idx):
 
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
-    crowdfund = get_object_or_404(CrowdfundRequest,  foia=foia)
+    crowdfund = get_object_or_404(CrowdfundRequest, foia=foia)
     if crowdfund.expired():
         raise Http404()
 

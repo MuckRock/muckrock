@@ -150,8 +150,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                        {'request': foia, 'amount': amount / 100.0}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-            logger.info('%s has paid %0.2f for request %s' %
-                        (request.user.username, amount / 100.0, foia.title))
+            logger.info('%s has paid %0.2f for request %s',
+                        request.user.username, amount / 100.0, foia.title)
 
             return Response({'status': 'You have paid $%0.2f for the request' % (amount / 100.0)},
                              status=http_status.HTTP_200_OK)

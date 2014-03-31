@@ -216,7 +216,7 @@ def buy_requests(request):
                 user_profile.pay(form, 2000, 'Charge for 5 requests')
                 user_profile.num_requests += 5
                 user_profile.save()
-                logger.info('%s has purchased requests',  request.user.username)
+                logger.info('%s has purchased requests', request.user.username)
                 return HttpResponseRedirect(reverse('acct-my-profile'))
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
@@ -307,8 +307,8 @@ def stripe_webhook_v2(request):
     event_json = json.loads(request.raw_post_data)
     event_data = event_json['data']['object']
 
-    logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s' % \
-        (event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json))
+    logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s',
+        event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json)
 
     description = event_data.get('description')
     customer = event_data.get('customer')
@@ -322,8 +322,8 @@ def stripe_webhook_v2(request):
             # db is not synced yet, return 404 and let stripe retry - we should be synced by then
             raise Http404
     elif event_json['type'] in ['charge.succeeded', 'invoice.payment_failed']:
-        logger.warning('Cannot figure out customer from stripe webhook, no receipt sent: %s'
-                       % event_json)
+        logger.warning('Cannot figure out customer from stripe webhook, no receipt sent: %s',
+                       event_json)
         return HttpResponse()
 
     if event_json['type'] == 'charge.succeeded':

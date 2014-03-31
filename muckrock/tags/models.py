@@ -7,6 +7,8 @@ from django.db import models
 
 from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 
+# pylint: disable=model-missing-unicode
+
 class Tag(TaggitTag):
     """Custom Tag Class"""
     user = models.ForeignKey(User, null=True, blank=True)

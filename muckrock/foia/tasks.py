@@ -68,7 +68,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
         'source': doc.source.encode('utf8'),
         'description': doc.description.encode('utf8'),
         'access': doc.access.encode('utf8'),
-        'related_article': ('https://www.muckrock.com' + 
+        'related_article': ('https://www.muckrock.com' +
                             doc.get_foia().get_absolute_url()).encode('utf8'),
         }
     if change:
@@ -129,7 +129,7 @@ def submit_multi_request(req_pk, **kwargs):
     # pylint: disable=E1101
     # pylint: disable=W0613
     req = FOIAMultiRequest.objects.get(pk=req_pk)
-    
+
     # break the agencies into chunks of 50 to not timeout the database
     agencies = req.agencies.all()
     agency_chunks = [agencies[i*50:(i+1)*50] for i in xrange(agencies.count()/50 + 1)]
@@ -191,7 +191,7 @@ def update_index():
 def followup_requests():
     """Follow up on any requests that need following up on"""
     # change to this after all follows up have been resolved
-    #for foia in FOIARequest.objects.get_followup(): 
+    #for foia in FOIARequest.objects.get_followup():
     log = []
     if options.enable_followup:
         foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
@@ -415,7 +415,7 @@ def notify_unanswered():
     send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
               render_to_string('foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-    
+
 
 def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
@@ -425,7 +425,7 @@ def process_failure_signal(exception, traceback, sender, task_id,
     # pylint: disable=W0613
     exc_info = (type(exception), exception, traceback)
     logger.error(
-        'Celery job exception: %s(%s)' % (exception.__class__.__name__, exception),
+        'Celery job exception: %s(%s)', exception.__class__.__name__, exception,
         exc_info=exc_info,
         extra={
             'data': {

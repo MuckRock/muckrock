@@ -120,7 +120,7 @@ def abs_filter(value):
     """Absolute value of a number"""
     return abs(value)
 
-email_re = re.compile('[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
+email_re = re.compile(r'[a-zA-Z0-9._%+-]+@(?P<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4})')
 
 def email_redactor(match):
     """Don't redact muckrock emails"""
@@ -146,8 +146,8 @@ def do_evaluate(parser, token):
     try:
         _, variable = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError, \
-            "%r tag requires a single argument" % token.contents.split()[0]
+        raise template.TemplateSyntaxError("%r tag requires a single argument" %
+                                           token.contents.split()[0])
     return EvaluateNode(variable)
 
 class EvaluateNode(template.Node):

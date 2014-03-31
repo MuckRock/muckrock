@@ -29,7 +29,7 @@ def store_statstics():
     client = gdata.analytics.service.AnalyticsDataService()
     client.ssl = True
     client.ClientLogin(GA_USERNAME, GA_PASSWORD)
-    data = client.GetData(ids=GA_ID,  metrics='ga:pageviews', start_date=yesterday.isoformat(),
+    data = client.GetData(ids=GA_ID, metrics='ga:pageviews', start_date=yesterday.isoformat(),
                           end_date=yesterday.isoformat())
     total_page_views = data.entry[0].pageviews.value
 

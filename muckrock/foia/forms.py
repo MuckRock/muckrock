@@ -509,8 +509,8 @@ class FOIABlankForm(FOIAWizardParent):
 TEMPLATES = dict((form.slug, form) for form_name, form in inspect.getmembers(sys.modules[__name__],
                  lambda member: inspect.isclass(member) and issubclass(member, FOIAWizardParent))
                  if form is not FOIAWizardParent)
-LOCAL_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 'l')
-STATE_TEMPLATE_CHOICES   = make_template_choices(TEMPLATES, 's')
+LOCAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'l')
+STATE_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 's')
 FEDERAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'f')
 
 class FOIAWizardWhereForm(forms.Form):

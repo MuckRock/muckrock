@@ -71,6 +71,9 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers')
     answer = models.TextField(blank=True)
 
+    def __unicode__(self):
+        return "%s's answer to %s" % (self.user.username, self.question.title)
+
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
         # pylint: disable=E1101

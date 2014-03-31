@@ -32,9 +32,9 @@ class TestTemplatetagsFunctional(TestCase):
         mock_page_obj.paginator.num_pages = 10
 
         links = '&hellip;&nbsp;' + \
-                ''.join('<a href="?page=%d">%d</a>&nbsp;&nbsp;' % (i, i) for i in range(2,5)) + \
+                ''.join('<a href="?page=%d">%d</a>&nbsp;&nbsp;' % (i, i) for i in range(2, 5)) + \
                 '5' + \
-                ''.join('&nbsp;&nbsp;<a href="?page=%d">%d</a>' % (i, i) for i in range(6,9)) + \
+                ''.join('&nbsp;&nbsp;<a href="?page=%d">%d</a>' % (i, i) for i in range(6, 9)) + \
                 '&nbsp;&hellip;'
 
         nose.tools.eq_(tags.page_links(mock_page_obj, None, None), links)

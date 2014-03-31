@@ -27,7 +27,6 @@ class EmailOptions(dbsettings.Group):
 options = EmailOptions()
 
 
-
 class Profile(models.Model):
     """User profile information for muckrock"""
 
@@ -296,9 +295,9 @@ class Profile(models.Model):
         self.notifications.clear()
 
 
-
 class Statistics(models.Model):
     """Nightly statistics"""
+    # pylint: disable=invalid-name
 
     date = models.DateField()
 
@@ -331,6 +330,9 @@ class Statistics(models.Model):
     daily_requests_community = models.IntegerField(null=True)
     daily_requests_beta = models.IntegerField(null=True)
     daily_articles = models.IntegerField(null=True)
+
+    def __unicode__(self):
+        return 'Stats for %s' % self.date
 
     class Meta:
         # pylint: disable=R0903

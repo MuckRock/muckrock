@@ -115,7 +115,7 @@ if DEBUG:
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
-    
+
     useful for debugging non html outputting views, such as stripe webhooks"""
     # pylint: disable=R0903
     # pylint: disable=R0201
@@ -426,7 +426,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES':
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
-    
+
 
 # pylint: disable=W0401
 # pylint: disable=W0614

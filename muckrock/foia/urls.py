@@ -17,6 +17,7 @@ from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
 # pylint: disable=E1120
+# pylint: disable=bad-whitespace
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
@@ -68,6 +69,6 @@ urlpatterns = patterns('',
     url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',
                                           RedirectView.as_view(url='/foi/list/tag-%(tag_slug)s')),
     url(r'^(?P<action>[\w_-]+)/%s/$' % old_foia_url,
-                                          views.redirect_old), 
+                                          views.redirect_old),
 )
 

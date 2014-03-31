@@ -28,13 +28,14 @@ class AuthorListFilter(admin.SimpleListFilter):
 
 class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
+    # pylint: disable=too-few-public-methods
 
     body = forms.CharField(widget=AdminEpicEditorWidget(themes={'editor': 'epic-light-2.css',
                                                                 'preview': 'github.css'}))
     authors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'))
     editors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'),
                                              required=False)
-    
+
     class Meta:
         # pylint: disable=R0903
         model = Article

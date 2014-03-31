@@ -6,8 +6,8 @@ https://gist.github.com/richleland/1324335
 """
 
 from storages.backends.s3boto import S3BotoStorage
- 
- 
+
+
 class S3StaticStorage(S3BotoStorage):
     """S3 storage backend that sets trailing slash properly"""
     # pylint: disable=W0223

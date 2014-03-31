@@ -12,6 +12,7 @@ from muckrock.news.feeds import LatestEntries
 
 # pylint: disable=E1120
 # pylint: disable=W0142
+# pylint: disable=bad-whitespace
 
 article_args = {'queryset': Article.objects.get_published()}
 article_date_list_args = dict(article_args, date_field='pub_date', allow_empty=True)
@@ -29,5 +30,5 @@ urlpatterns = patterns('',
                             name='news-archive-month'),
         url(r'^archives/(?P<year>\d{4})/$',
                             views.NewsYear.as_view(), name='news-archive-year'),
-        url(r'^feeds/$', LatestEntries(), name='news-feed'),
+        url(r'^feeds/$',    LatestEntries(), name='news-feed'),
 )

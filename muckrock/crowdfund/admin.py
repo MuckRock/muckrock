@@ -21,8 +21,8 @@ class CrowdfundRequestAdmin(admin.ModelAdmin):
 
     list_display = ('foia', 'payment_required', 'payment_received', 'date_due')
     date_hierarchy = 'date_due'
-    inlines =  [CrowdfundRequestPaymentAdmin]
-     
+    inlines = [CrowdfundRequestPaymentAdmin]
+
 
 
 admin.site.register(CrowdfundRequest, CrowdfundRequestAdmin)

@@ -18,7 +18,7 @@ import HTMLParser
 import logging
 
 from muckrock.agency.models import Agency
-from muckrock.foia.forms import TEMPLATES 
+from muckrock.foia.forms import TEMPLATES
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication
 from muckrock.settings import STRIPE_PUB_KEY

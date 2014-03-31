@@ -18,6 +18,9 @@ from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
+# MockDate breaks pylint-django
+# pylint: skip-file
+
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
 # pylint: disable=R0904

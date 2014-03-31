@@ -54,6 +54,7 @@ class TestJurisdictionUnit(TestCase):
 
     def test_interesting_requests(self):
         """Test the RequestHelper interesting requests mixin method with Jurisdictions"""
+        # pylint: disable=bad-whitespace
 
         nose.tools.eq_(self.state.interesting_requests(),
            [

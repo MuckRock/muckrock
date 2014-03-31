@@ -63,7 +63,7 @@ class JurisdictionAdmin(TablibAdmin):
                         'CSV - %d jurisdictions imported' % len(jurisdictions))
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
+                    logger.error('Import error: %s', exc, exc_info=sys.exc_info())
                 else:
                     for jurisdiction in jurisdictions:
                         jobj = jurisdiction.object

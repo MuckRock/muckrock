@@ -20,12 +20,14 @@ class Holiday(models.Model):
         ('election', 'Election'),
     )
 
+    # pylint: disable=bad-whitespace
     months = (
         (1, 'January'),  (2, 'February'),  (3, 'March'),
         (4, 'April'),    (5, 'May'),       (6, 'June'),
         (7, 'July'),     (8, 'August'),    (9, 'September'),
         (10, 'October'), (11, 'November'), (12, 'December'),
     )
+    # pylint: enable=bad-whitespace
 
     weekdays = (
         (0, 'Monday'),
@@ -100,7 +102,7 @@ class Holiday(models.Model):
         """match for election day"""
         # pylint: disable=R0201
         return date_.month == NOV and date_.weekday() == TUES and \
-               date_.day >=2 and date_.day <= 8
+               date_.day >= 2 and date_.day <= 8
 
 
 class HolidayCalendar(object):

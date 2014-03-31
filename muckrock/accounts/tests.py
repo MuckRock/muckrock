@@ -194,7 +194,7 @@ class TestProfileUnit(TestCase):
         profile = Profile.objects.get(pk=1)
         card = profile.get_cc()
         nose.tools.eq_(card.last4, mock_customer.active_card.last4)
-        nose.tools.eq_(card.type,  mock_customer.active_card.type)
+        nose.tools.eq_(card.type, mock_customer.active_card.type)
 
         with patch('stripe.Customer') as NewMockCustomer:
             new_mock_customer = Mock()
@@ -273,6 +273,7 @@ class TestAccountFunctional(TestCase):
     # views
     def test_anon_views(self):
         """Test public views while not logged in"""
+        # pylint: disable=bad-whitespace
 
         urls_and_templates = [
                 (reverse('acct-profile', args=['adam']), 'registration/profile.html'),
@@ -350,6 +351,7 @@ class TestAccountFunctional(TestCase):
 
     def test_auth_views(self):
         """Test private views while logged in"""
+        # pylint: disable=bad-whitespace
 
         self.client.login(username='adam', password='abc')
 
@@ -378,6 +380,7 @@ class TestAccountFunctional(TestCase):
 
     def test_update_view(self):
         """Test the account update view"""
+        # pylint: disable=bad-whitespace
 
         user = User.objects.get(username='adam')
         user_data = {'first_name': 'mitchell',        'last_name': 'kotler',
@@ -406,7 +409,7 @@ class TestAccountFunctional(TestCase):
                                     redirect_url='acct-change-pw-done')
         self.client.logout()
         nose.tools.assert_false(self.client.login(username='adam', password='abc'))
-        nose.tools.assert_true (self.client.login(username='adam', password='123'))
+        nose.tools.assert_true(self.client.login(username='adam', password='123'))
 
     def test_update_cc_view(self):
         """Test updating a credit card"""

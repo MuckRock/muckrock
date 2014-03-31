@@ -16,6 +16,6 @@ class CrowdfundEnableForm(forms.Form):
 
 class CrowdfundPayForm(PaymentForm):
     """Form to pay for crowdfunding"""
-    # pylint: disable=R0901
+    # pylint: disable=R0901, too-few-public-methods
 
     amount = USDCurrencyField()

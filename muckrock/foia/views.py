@@ -32,7 +32,7 @@ from muckrock.foia.forms import FOIARequestForm, FOIADeleteForm, FOIAAdminFixFor
                                 FOIAEmbargoForm, FOIAEmbargoDateForm, FOIAWizardWhereForm, \
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
                                 FOIAFileFormSet, FOIAMultipleSubmitForm, AgencyConfirmForm, \
-                                FOIAMultiRequestForm, TEMPLATES 
+                                FOIAMultiRequestForm, TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIACommunication, FOIAFile, STATUS
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
@@ -363,16 +363,16 @@ def note(request, jurisdiction, jidx, slug, idx):
         foia_note.save()
 
     action = Action(
-        form_actions = form_actions,
-        msg = 'add notes',
-        tests = [],
-        form_class = lambda r, f: FOIANoteForm,
-        return_url = lambda r, f: f.get_absolute_url() + '#tabs-notes',
-        heading = 'Add Note',
-        value = 'Add',
-        must_own = True,
-        template = 'foia/foiarequest_action.html',
-        extra_context = lambda f: {})
+        form_actions=form_actions,
+        msg='add notes',
+        tests=[],
+        form_class=lambda r, f: FOIANoteForm,
+        return_url=lambda r, f: f.get_absolute_url() + '#tabs-notes',
+        heading='Add Note',
+        value='Add',
+        must_own=True,
+        template='foia/foiarequest_action.html',
+        extra_context=lambda f: {})
     return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
@@ -385,16 +385,16 @@ def delete(request, jurisdiction, jidx, slug, idx):
         messages.info(request, 'Request succesfully deleted')
 
     action = Action(
-        form_actions = form_actions,
-        msg = 'delete',
-        tests = [(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
-        form_class = lambda r, f: FOIADeleteForm,
-        return_url = lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
-        heading = 'Delete FOI Request',
-        value = 'Delete',
-        must_own = True,
-        template = 'foia/foiarequest_action.html',
-        extra_context = lambda f: {})
+        form_actions=form_actions,
+        msg='delete',
+        tests=[(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
+        form_class=lambda r, f: FOIADeleteForm,
+        return_url=lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
+        heading='Delete FOI Request',
+        value='Delete',
+        must_own=True,
+        template='foia/foiarequest_action.html',
+        extra_context=lambda f: {})
     return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
@@ -410,18 +410,18 @@ def embargo(request, jurisdiction, jidx, slug, idx):
                     foia.pk, foia.title, foia.embargo)
 
     action = Action(
-        form_actions = form_actions,
-        msg = 'embargo',
-        tests = [(lambda f: f.user.get_profile().can_embargo(),
+        form_actions=form_actions,
+        msg='embargo',
+        tests=[(lambda f: f.user.get_profile().can_embargo(),
                   'You may not embargo requests with your account type')],
-        form_class = lambda r, f: FOIAEmbargoDateForm if f.date_embargo \
+        form_class=lambda r, f: FOIAEmbargoDateForm if f.date_embargo \
                                   else FOIAEmbargoForm,
-        return_url = lambda r, f: f.get_absolute_url(),
-        heading = 'Update the Embargo Date',
-        value = 'Update',
-        must_own = True,
-        template = 'foia/foiarequest_action.html',
-        extra_context = lambda f: {})
+        return_url=lambda r, f: f.get_absolute_url(),
+        heading='Update the Embargo Date',
+        value='Update',
+        must_own=True,
+        template='foia/foiarequest_action.html',
+        extra_context=lambda f: {})
     return _foia_action(request, jurisdiction, jidx, slug, idx, action)
 
 @login_required
@@ -443,8 +443,8 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
                                        {'request': foia, 'amount': amount / 100.0}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-            logger.info('%s has paid %0.2f for request %s' %
-                        (request.user.username, amount/100, foia.title))
+            logger.info('%s has paid %0.2f for request %s',
+                        request.user.username, amount/100, foia.title)
             messages.success(request, 'Your payment was successful')
             return HttpResponseRedirect(reverse('acct-my-profile'))
         except stripe.CardError as exc:
@@ -456,17 +456,17 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
                         'idx': foia.pk}))
 
     action = Action(
-        form_actions = form_actions,
-        msg = 'pay for',
-        tests = [(lambda f: f.is_payable(),
+        form_actions=form_actions,
+        msg='pay for',
+        tests=[(lambda f: f.is_payable(),
                   'You may only pay for requests that require a payment')],
-        form_class = lambda r, f: lambda *args, **kwargs: PaymentForm(request=r, *args, **kwargs),
-        return_url = lambda r, f: f.get_absolute_url(),
-        heading = 'Pay for Request',
-        value = 'Pay',
-        must_own = True,
-        template = 'registration/cc.html',
-        extra_context = lambda f: {'desc': 'You will be charged $%.2f for this request' %
+        form_class=lambda r, f: lambda *args, **kwargs: PaymentForm(request=r, *args, **kwargs),
+        return_url=lambda r, f: f.get_absolute_url(),
+        heading='Pay for Request',
+        value='Pay',
+        must_own=True,
+        template='registration/cc.html',
+        extra_context=lambda f: {'desc': 'You will be charged $%.2f for this request' %
                                    (f.price * Decimal('1.05')),
                                    'pub_key': STRIPE_PUB_KEY})
     return _foia_action(request, jurisdiction, jidx, slug, idx, action)
@@ -477,19 +477,19 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     # pylint: disable=W0142
 
     action = Action(
-        form_actions = lambda r, f, _: CrowdfundRequest.objects.create(foia=f,
+        form_actions=lambda r, f, _: CrowdfundRequest.objects.create(foia=f,
                                            payment_required=f.price * Decimal('1.05'),
                                            date_due=date.today() + timedelta(30)),
-        msg = 'enabled crowdfunding for',
-        tests = [(lambda f: f.is_payable(),
+        msg='enabled crowdfunding for',
+        tests=[(lambda f: f.is_payable(),
                   'You may only pay for requests that require a payment')],
-        form_class = lambda r, f: CrowdfundEnableForm,
-        return_url = lambda r, f: f.get_absolute_url(),
-        heading = 'Enable Crowdfunding for Request',
-        value = 'Crowdfund',
-        must_own = True,
-        template = 'foia/foiarequest_action.html',
-        extra_context = lambda f: {'desc': 'By enabling crowdfunding, others will be able to '
+        form_class=lambda r, f: CrowdfundEnableForm,
+        return_url=lambda r, f: f.get_absolute_url(),
+        heading='Enable Crowdfunding for Request',
+        value='Crowdfund',
+        must_own=True,
+        template='foia/foiarequest_action.html',
+        extra_context=lambda f: {'desc': 'By enabling crowdfunding, others will be able to '
                                            'contribute funds toward the money required to fufill '
                                            'this request'}
     )
@@ -674,7 +674,7 @@ class MyList(ListBase):
         field = get.get('field', 'date_submitted')
 
         updated_foia_requests = [f for f in foia_requests if f.updated]
-        other_foia_requests   = [f for f in foia_requests if not f.updated]
+        other_foia_requests = [f for f in foia_requests if not f.updated]
 
         if field == 'title':
             both = list(other_foia_requests) + list(multi_requests)
@@ -812,7 +812,7 @@ class Detail(DetailView):
         old_status = foia.get_status_display()
         if ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or
            (request.user.is_staff and status in [s for s, _ in STATUS])) and \
-           foia.status not in ['started', 'submitted']: 
+           foia.status not in ['started', 'submitted']:
             foia.status = status
             foia.save()
             send_mail('%s changed the status of "%s" to %s' %
@@ -881,6 +881,6 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     if action == 'admin-fix':
         action = 'admin_fix'
-    
+
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 

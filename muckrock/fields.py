@@ -19,7 +19,7 @@ from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
 from south.modelsinspector import add_introspection_rules
 
-add_introspection_rules([], ["^muckrock\.fields\.EmailsListField"])
+add_introspection_rules([], [r"^muckrock\.fields\.EmailsListField"])
 
 email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
 
@@ -131,7 +131,7 @@ class GroupedModelChoiceIterator(ModelChoiceIterator):
             if self.field.choice_cache is None:
                 self.field.choice_cache = [
                     (self.field.group_label(group), [self.choice(ch) for ch in choices])
-                        for group,choices in groupby(self.queryset.all(),
+                        for group, choices in groupby(self.queryset.all(),
                             key=lambda row: getattr(row, self.field.group_by_field))
                 ]
             for choice in self.field.choice_cache:
@@ -181,8 +181,7 @@ class CCExpField(forms.MultiValueField):
                     attrs={'class': 'card-expiry-year stripe-sensitive required'})),
         )
         super(CCExpField, self).__init__(fields, *args, **kwargs)
-        self.widget = CCExpWidget(widgets =
-            [fields[0].widget, fields[1].widget])
+        self.widget = CCExpWidget(widgets=[fields[0].widget, fields[1].widget])
 
     def clean(self, value):
         """Make sure the expiration date i sin the future"""

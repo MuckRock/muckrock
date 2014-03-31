@@ -10,7 +10,7 @@ from datetime import date
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
-    # pylint: disable=R0903
+    # pylint: disable=R0903, model-missing-unicode
     payment_required = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     payment_received = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     date_due = models.DateField()
@@ -25,7 +25,7 @@ class CrowdfundABC(models.Model):
 
 class CrowdfundPaymentABC(models.Model):
     """Abstract base class for crowdfunding objects"""
-    # pylint: disable=R0903
+    # pylint: disable=R0903, model-missing-unicode
     user = models.ForeignKey(User)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
@@ -63,6 +63,9 @@ class Project(models.Model):
     description = models.TextField(blank=True)
     foias = models.ManyToManyField('foia.FOIARequest', related_name='foias', blank=True, null=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class CrowdfundProject(CrowdfundABC):
     """Keep track of crowdfunding for a project"""
@@ -70,7 +73,11 @@ class CrowdfundProject(CrowdfundABC):
     project = models.OneToOneField(Project, related_name='crowdfund')
     payments = models.ManyToManyField(User, through='CrowdfundProjectPayment')
 
+    def __unicode__(self):
+        return self.project.name
+
 
 class CrowdfundProjectPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
+    # pylint: disable=model-missing-unicode
     crowdfund = models.ForeignKey(CrowdfundProject)

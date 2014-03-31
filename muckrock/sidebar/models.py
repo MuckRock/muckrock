@@ -5,16 +5,16 @@ Sidebar Models
 from django.db import models
 
 SIDEBAR_TITLES = (
-   ('article', 'Article'), 
-   ('request', 'Request'), 
-   ('agency', 'Agency'), 
-   ('jurisdiction', 'Jurisdiction'), 
-   ('profile', 'Profile'), 
-   ('anon_article', 'Anonymous Article'), 
-   ('anon_request', 'Anonymous Request'), 
-   ('anon_agency', 'Anonymous Agency'), 
-   ('anon_jurisdiction', 'Anonymous Jurisdiction'), 
-   ('anon_profile', 'Anonymous Profile'), 
+   ('article', 'Article'),
+   ('request', 'Request'),
+   ('agency', 'Agency'),
+   ('jurisdiction', 'Jurisdiction'),
+   ('profile', 'Profile'),
+   ('anon_article', 'Anonymous Article'),
+   ('anon_request', 'Anonymous Request'),
+   ('anon_agency', 'Anonymous Agency'),
+   ('anon_jurisdiction', 'Anonymous Jurisdiction'),
+   ('anon_profile', 'Anonymous Profile'),
 )
 
 class SidebarManager(models.Manager):
@@ -29,9 +29,13 @@ class SidebarManager(models.Manager):
         except Sidebar.DoesNotExist:
             return ''
 
+
 class Sidebar(models.Model):
     """Text to put into the sidebar"""
     title = models.CharField(max_length=255, unique=True, choices=SIDEBAR_TITLES)
     text = models.TextField(blank=True)
 
     objects = SidebarManager()
+
+    def __unicode__(self):
+        return self.title

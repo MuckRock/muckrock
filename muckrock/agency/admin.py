@@ -72,7 +72,7 @@ class AgencyAdmin(TablibAdmin):
                     messages.success(request, 'CSV - %d agencies imported' % len(agencies))
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
-                    logger.error('Import error: %s' % exc, exc_info=sys.exc_info())
+                    logger.error('Import error: %s', exc, exc_info=sys.exc_info())
                 else:
                     if form.cleaned_data['type_']:
                         for agency in agencies:
@@ -93,7 +93,7 @@ class AgencyAdmin(TablibAdmin):
 
 
 admin.site.register(AgencyType, AgencyTypeAdmin)
-admin.site.register(Agency,     AgencyAdmin)
+admin.site.register(Agency, AgencyAdmin)
 
 
 def get_jurisdiction(full_name):

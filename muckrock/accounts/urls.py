@@ -8,6 +8,8 @@ import django.contrib.auth.views as auth_views
 
 import muckrock.accounts.views as views
 
+# pylint: disable=bad-whitespace
+
 urlpatterns = patterns('',
     url(r'^login/$',             auth_views.login, name='acct-login'),
     url(r'^logout/$',            auth_views.logout, name='acct-logout'),

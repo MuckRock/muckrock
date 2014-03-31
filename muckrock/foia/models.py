@@ -216,7 +216,7 @@ class FOIARequest(models.Model):
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
-        percents = {'started':   25, 'submitted':  50, 'ack':       65, 
+        percents = {'started':   25, 'submitted':  50, 'ack':       65,
                     'processed': 75, 'fix':        75, 'payment':   75,
                     'rejected': 100, 'no_docs':   100, 'done':     100,
                     'partial':   90, 'abandoned': 100, 'appealing': 75}
@@ -224,6 +224,7 @@ class FOIARequest(models.Model):
 
     def color_code(self):
         """Get the color code for the current status"""
+        # pylint: disable=bad-whitespace
         processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
         colors = {'started':   'wait', 'submitted': 'go',   'processed': processed,
                   'fix':       'wait', 'payment':   'wait', 'rejected':  'stop',
@@ -338,7 +339,7 @@ class FOIARequest(models.Model):
         approved_agency = self.agency and self.agency.approved
         can_email = self.email and not appeal
         comm = self.last_comm()
-        
+
         # if the request can be emailed, email it, otherwise send a notice to the admin
         if not snail and approved_agency and (can_email or can_email_appeal):
             if appeal:
@@ -649,6 +650,9 @@ class FOIANote(models.Model):
     date = models.DateTimeField()
     note = models.TextField()
 
+    def __unicode__(self):
+        return 'Note for %s on %s' % (self.foia.title, self.date)
+
     class Meta:
         # pylint: disable=R0903
         ordering = ['foia', 'date']
@@ -688,7 +692,7 @@ class FOIAFile(models.Model):
 
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
-        match = re.match('^(\d+)-(.*)$', self.doc_id)
+        match = re.match(r'^(\d+)-(.*)$', self.doc_id)
         mimetypes = {
             'avi': 'file-video.png',
             'bmp': 'file-image.png',

@@ -7,6 +7,8 @@ from django.conf.urls import patterns, url
 from muckrock.jurisdiction import views
 from muckrock.views import jurisdiction
 
+# pylint: disable=bad-whitespace
+
 jur_url = r'(?P<fed_slug>[\w\d_-]+)(?:/(?P<state_slug>[\w\d_-]+))?(?:/(?P<local_slug>[\w\d_-]+))?'
 old_jur_url = r'(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 

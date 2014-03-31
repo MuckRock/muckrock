@@ -8,6 +8,7 @@ from muckrock.qanda import views
 from muckrock.qanda.feeds import LatestQuestions
 
 # pylint: disable=E1120
+# pylint: disable=bad-whitespace
 
 urlpatterns = patterns('',
     url(r'^$',            views.List.as_view(), name='question-index'),
