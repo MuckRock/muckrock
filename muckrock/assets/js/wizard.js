@@ -147,7 +147,7 @@ $(function() {
 });
 
 function actionButton(name) {
-	$('#action-form > input').attr('value', name);
+	$('#action-form > [name="action"]').attr('value', name);
 	$('#action-buttons').hide();
 	$('#action-form').show(400);
 	$('html, body').animate({scrollTop: $(window).scrollTop() + 100});
