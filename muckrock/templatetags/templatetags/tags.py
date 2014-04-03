@@ -5,6 +5,7 @@ General temaplate tags
 from django import template
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
+from django.utils.html import escape
 
 import re
 
@@ -25,7 +26,7 @@ def page_links_common(page_obj, option_dict):
 
     def make_link(num, skip):
         """Make a link to page num"""
-        options = ''.join('&amp;%s=%s' % (k, v) for k, v in option_dict.iteritems() if v)
+        options = ''.join('&amp;%s=%s' % (k, escape(v)) for k, v in option_dict.iteritems() if v)
         if num != skip:
             return '<a href="?page=%d%s">%d</a>' % (num, options, num)
         else:
@@ -81,7 +82,7 @@ class TableHeaderNode(Node):
 
         def get_args(*args):
             """Append get args to url if they are present"""
-            return ''.join('&amp;%s=%s' % (arg, get[arg]) for arg in args if arg in get)
+            return ''.join('&amp;%s=%s' % (arg, escape(get[arg])) for arg in args if arg in get)
 
         html = ''
         for width, field in self.args:
