@@ -86,6 +86,11 @@ class Agency(models.Model, RequestHelper):
                                       'jidx': self.jurisdiction.pk,
                                       'slug': self.slug, 'idx': self.pk})
 
+    def save(self, *args, **kwargs):
+        """Save the agency"""
+        self.email = self.email.strip()
+        super(Agency, self).save(*args, **kwargs)
+
     def normalize_fax(self):
         """Return a fax number suitable for use in a faxaway email address"""
 
