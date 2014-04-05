@@ -429,7 +429,7 @@ REST_FRAMEWORK = {
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
 
-ALLOWED_HOSTS = ['.muckrock.com']
+ALLOWED_HOSTS = ['muckrock.herokuapp.com', '.muckrock.com']
 
 
 # pylint: disable=W0401
