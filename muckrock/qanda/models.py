@@ -33,7 +33,7 @@ class Question(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('question-detail', [], {'slug': self.slug, 'idx': self.pk})
+        return ('question-detail', [], {'slug': self.slug, 'pk': self.pk})
 
     def notify_new(self):
         """Email users who want to be notified of new questions"""

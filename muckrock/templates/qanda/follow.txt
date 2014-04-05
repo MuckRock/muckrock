@@ -3,7 +3,7 @@ Hi,
 
 A question you follow on MuckRock has a new answer. Read it here:
 
-https://www.muckrock.com{% url 'question-detail' idx=question.pk slug=question.slug %}
+https://www.muckrock.com{% url 'question-detail' pk=question.pk slug=question.slug %}
 
 Check out other questions:
 
