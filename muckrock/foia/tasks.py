@@ -102,7 +102,10 @@ def upload_document_cloud(doc_pk, change, **kwargs):
 def set_document_cloud_pages(doc_pk, **kwargs):
     """Get the number of pages from the document cloud server and save it locally"""
 
-    doc = FOIAFile.objects.get(pk=doc_pk)
+    try:
+        doc = FOIAFile.objects.get(pk=doc_pk)
+    except FOIAFile.DoesNotExist:
+        return
 
     if doc.pages or not doc.is_doccloud() or not doc.doc_id:
         # already has pages set or not a doc cloud, just return
