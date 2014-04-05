@@ -790,6 +790,7 @@ class Detail(DetailView):
             'Get Advice': self._question,
             'Problem?': self._flag,
             'Appeal': self._appeal,
+            'move_comm': self._move_comm,
         }
 
         try:
@@ -864,6 +865,27 @@ class Detail(DetailView):
             _save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
                             'Appeal succesfully sent', appeal=True)
         return redirect(foia)
+
+    def _move_comm(self, request, foia):
+        """Admin moves a communication to a different FOIA"""
+        # pylint: disable=no-self-use
+        if request.user.is_staff:
+            try:
+                comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+                new_foia = FOIARequest.objects.get(pk=request.POST['new_foia_pk'])
+                comm.foia = new_foia
+                comm.save()
+                for file_ in comm.files.all():
+                    file_.foia = new_foia
+                    file_.save()
+                return redirect(new_foia)
+            except (KeyError, FOIACommunication.DoesNotExist):
+                return redirect(foia)
+            except FOIARequest.DoesNotExist:
+                messages.error(request, 'FOIA %s does not exist' % request.POST['new_foia_pk'])
+                return redirect(foia)
+        else:
+            return redirect(foia)
 
 
 def redirect_old(request, jurisdiction, slug, idx, action):
