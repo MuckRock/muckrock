@@ -124,14 +124,14 @@ def bounces(request):
     elif event == 'dropped':
         error = request.POST.get('description')
 
-    headers = request.POST.get('message-headers')
-    parsed_headers = json.loads(headers)
     try:
+        headers = request.POST['message-headers']
+        parsed_headers = json.loads(headers)
         from_header = [v for k, v in parsed_headers if k == 'From'][0]
         _, from_email = parseaddr(from_header)
         foia_id = from_email[:from_email.index('-')]
         foia = FOIARequest.objects.get(pk=foia_id)
-    except (IndexError, ValueError):
+    except (IndexError, ValueError, KeyError):
         foia = None
 
     send_mail('[%s] %s' % (event.upper(), recipient),
