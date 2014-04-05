@@ -155,7 +155,6 @@ INSTALLED_APPS = (
     'raven.contrib.django',
     'gunicorn',
     'south',
-    'django_nose',
     'debug_toolbar',
     'haystack',
     'django_assets',
@@ -185,6 +184,8 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
 )
+if DEBUG:
+    INSTALLED_APPS += ('django_nose',)
 
 
 def show_toolbar(request):
@@ -225,8 +226,9 @@ CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks', 'muckrock.ag
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-SOUTH_TESTS_MIGRATE = False
+if DEBUG:
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    SOUTH_TESTS_MIGRATE = False
 
 HAYSTACK_SITECONF = 'muckrock.search_sites'
 HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
