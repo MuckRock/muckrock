@@ -29,6 +29,7 @@ options = EmailOptions()
 
 class Profile(models.Model):
     """User profile information for muckrock"""
+    # pylint: disable=too-many-public-methods
 
     acct_types = (
         ('admin', 'Admin'),
@@ -70,6 +71,9 @@ class Profile(models.Model):
     email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily',
                                   verbose_name='Email Preference', help_text='Receive email updates'
                                   ' to your requests instantly or in a daily or weekly digest')
+    use_autologin = models.BooleanField(default=True,
+                                        help_text='Links you receive in emails from us will contain'
+                                                  ' a one time token to automatically log you in')
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
@@ -219,7 +223,7 @@ class Profile(models.Model):
         # pylint: disable=E1101
 
         if self.email_pref == 'instant':
-            link = AuthKey.objects.wrap_url(foia.get_absolute_url(), uid=self.user.pk)
+            link = self.wrap_url(foia.get_absolute_url())
 
             msg = render_to_string('foia/mail.txt',
                 {'name': self.user.get_full_name(),
@@ -293,6 +297,13 @@ class Profile(models.Model):
         email.send(fail_silently=False)
 
         self.notifications.clear()
+
+    def wrap_url(self, link):
+        """Wrap a URL for autologin"""
+        if self.use_autologin:
+            return AuthKey.objects.wrap_url(link, uid=self.user.pk)
+        else:
+            return link
 
 
 class Statistics(models.Model):

@@ -29,7 +29,7 @@ class UserChangeForm(ProfileForm):
     class Meta(ProfileForm.Meta):
         # pylint: disable=R0903
         fields = ['first_name', 'last_name', 'email', 'address1', 'address2', 'city', 'state',
-                  'zip_code', 'phone', 'email_pref']
+                  'zip_code', 'phone', 'email_pref', 'use_autologin']
 
     def clean_email(self):
         """Validates that a user does not exist with the given e-mail address"""

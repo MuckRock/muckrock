@@ -13,7 +13,6 @@ from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
-from urlauth.models import AuthKey
 import logging
 import os
 import re
@@ -365,7 +364,7 @@ class FOIARequest(models.Model):
         # whether it is automailed or not, notify the followers (but not the owner)
         send_data = []
         for profile in self.followed_by.all():
-            link = AuthKey.objects.wrap_url(self.get_absolute_url(), uid=profile.user.pk)
+            link = profile.wrap_url(self.get_absolute_url())
             msg = render_to_string('foia/mail.txt',
                 {'name': profile.user.get_full_name(),
                  'title': self.title,

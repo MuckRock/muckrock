@@ -9,7 +9,6 @@ from django.db import models
 from django.template.loader import render_to_string
 
 from taggit.managers import TaggableManager
-from urlauth.models import AuthKey
 
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
@@ -39,7 +38,7 @@ class Question(models.Model):
         """Email users who want to be notified of new questions"""
         send_data = []
         for profile in Profile.objects.filter(follow_questions=True):
-            link = AuthKey.objects.wrap_url(reverse('question-subscribe'), uid=profile.user.pk)
+            link = profile.wrap_url(reverse('question-subscribe'))
             msg = render_to_string('qanda/notify.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
@@ -50,9 +49,8 @@ class Question(models.Model):
         # pylint: disable=E1101
         send_data = []
         for profile in self.followed_by.all():
-            link = AuthKey.objects.wrap_url(reverse('question-follow',
-                                                    kwargs={'slug': self.slug, 'idx': self.pk}),
-                                            uid=profile.user.pk)
+            link = profile.wrap_url(reverse('question-follow',
+                                             kwargs={'slug': self.slug, 'idx': self.pk}))
             msg = render_to_string('qanda/follow.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
