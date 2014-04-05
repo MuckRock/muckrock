@@ -11,6 +11,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import RedirectView
 
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
@@ -66,6 +67,7 @@ urlpatterns = patterns('',
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
+    url(r'^favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
 )
 
 
