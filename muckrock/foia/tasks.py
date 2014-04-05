@@ -200,7 +200,7 @@ def followup_requests():
         foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
                                                    date_followup__lte=date.today())
         for foia in foia_requests:
-            log.append('%s - %s' % (foia.status, foia.title))
+            log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             foia.followup()
 
         send_mail('[LOG] Follow Ups', '\n'.join(log), 'info@muckrock.com',
