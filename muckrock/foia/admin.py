@@ -6,6 +6,7 @@ from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
@@ -187,10 +188,15 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
     def _list_helper(self, request, foias, action):
         """List all the requests that need to be processed"""
         # pylint: disable=R0201
-        foias.sort(cmp=lambda x, y: cmp(x.communications.latest('date').date,
-                                        y.communications.latest('date').date))
+        paginator = Paginator(foias, 10)
+        try:
+            page = paginator.page(request.GET.get('page'))
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
         return render_to_response('foia/admin_process.html',
-                                  {'object_list': foias, 'action': action},
+                                  {'page': page, 'action': action},
                                   context_instance=RequestContext(request))
 
     def process(self, request):
