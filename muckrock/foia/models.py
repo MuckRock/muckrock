@@ -667,9 +667,9 @@ class FOIAFile(models.Model):
     foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
-    title = models.CharField(max_length=70)
+    title = models.CharField(max_length=255)
     date = models.DateTimeField(null=True)
-    source = models.CharField(max_length=70, blank=True)
+    source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
     access = models.CharField(max_length=12, default='public', choices=access)
