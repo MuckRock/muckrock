@@ -17,6 +17,7 @@ DEBUG = boolcheck(os.environ.get('DEBUG', True))
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
+AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
@@ -66,12 +67,13 @@ if not DEBUG:
     STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
     STATIC_URL = 'https://muckrock.s3.amazonaws.com/'
     MEDIA_URL = 'https://muckrock.s3.amazonaws.com/media/'
+elif AWS_DEBUG:
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
+    MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
 else:
-    #DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    #THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    #STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    #STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
-    #MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
