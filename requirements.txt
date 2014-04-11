@@ -50,3 +50,4 @@ djangorestframework==2.3.10
 django-filter==0.7
 django-autocomplete-light==2.0.0a15
 django-rest-swagger==0.1.14
+waitress==0.8.8
