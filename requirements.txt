@@ -51,4 +51,4 @@ django-filter==0.7
 django-autocomplete-light==2.0.0a15
 django-rest-swagger==0.1.14
 waitress==0.8.8
--e git://github.com/alex/django-taggit.git@f478e34f8e82c20b04f5992ae5299d7cf41c2b9f#egg=django_taggit-origin/develop
+-e git://github.com/alex/django-taggit.git@f478e34f8e82c20b04f5992ae5299d7cf41c2b9f#egg=django_taggit-origin
