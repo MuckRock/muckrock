@@ -4,8 +4,6 @@ Admin registration for tag models
 
 from django.contrib import admin
 
-from taggit.models import Tag as TaggitTag
-
 from muckrock.tags.models import Tag
 
 class TagAdmin(admin.ModelAdmin):
@@ -17,4 +15,3 @@ class TagAdmin(admin.ModelAdmin):
     list_filter = ['user']
 
 admin.site.register(Tag, TagAdmin)
-admin.site.unregister(TaggitTag)
