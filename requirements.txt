@@ -51,5 +51,5 @@ django-autocomplete-light==2.0.0a15
 django-rest-swagger==0.1.14
 waitress==0.8.8
 -e git://github.com/alex/django-taggit.git@f478e34f8e82c20b04f5992ae5299d7cf41c2b9f#egg=django_taggit-origin
--e git+git@github.com:sciyoshi/django-dbsettings.git@4a1aeaa89d33da1b59f505370c4176e1cf3fdec4#egg=django_dbsettings-master
 Pillow==2.4.0
+-e git://github.com/hdg700/django-dbsettings.git@a3ad89ff50d4ef55dab52a795ee8789c620e2165#egg=dbsettings-dev
