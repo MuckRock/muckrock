@@ -262,6 +262,7 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
             messages.error(request, '%s is not a valid status' % status)
         else:
             foia.status = status
+            foia.update()
             if status in ['rejected', 'no_docs', 'done', 'abandoned'] and dateord:
                 foia.date_done = date.fromordinal(int(dateord))
             foia.save()
