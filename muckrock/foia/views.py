@@ -872,13 +872,25 @@ class Detail(DetailView):
         if request.user.is_staff:
             try:
                 comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-                new_foia = FOIARequest.objects.get(pk=request.POST['new_foia_pk'])
-                comm.foia = new_foia
-                comm.save()
-                for file_ in comm.files.all():
-                    file_.foia = new_foia
-                    file_.save()
-                return redirect(new_foia)
+                files = comm.files.all()
+                new_foias = FOIARequest.objects.filter(
+                    pk__in=request.POST['new_foia_pk'].split(','))
+                for new_foia in new_foias:
+                    comm.pk = None
+                    comm.foia = new_foia
+                    comm.save()
+                    for file_ in files:
+                        file_.pk = None
+                        file_.foia = new_foia
+                        file_.comm = comm
+                        file_.save()
+                comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+                comm.delete()
+                msg = 'Communication moved to the following requests:<br>'
+                href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+                msg += '<br>'.join(href(f) for f in new_foias)
+                messages.success(request, msg)
+                return redirect(foia)
             except (KeyError, FOIACommunication.DoesNotExist):
                 return redirect(foia)
             except FOIARequest.DoesNotExist:
