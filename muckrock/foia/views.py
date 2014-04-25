@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models import Q
@@ -876,6 +877,7 @@ class Detail(DetailView):
                 new_foias = FOIARequest.objects.filter(
                     pk__in=request.POST['new_foia_pk'].split(','))
                 for new_foia in new_foias:
+                    # setting pk to none clones the request to a new entry in the db
                     comm.pk = None
                     comm.foia = new_foia
                     comm.save()
@@ -883,6 +885,10 @@ class Detail(DetailView):
                         file_.pk = None
                         file_.foia = new_foia
                         file_.comm = comm
+                        # make a copy of the file on the storage backend
+                        new_ffile = ContentFile(file_.ffile.read())
+                        new_ffile.name = file_.ffile.name
+                        file_.ffile = new_ffile
                         file_.save()
                 comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
                 comm.delete()
