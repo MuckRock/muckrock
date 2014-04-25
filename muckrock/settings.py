@@ -434,6 +434,9 @@ REST_FRAMEWORK = {
 
 ALLOWED_HOSTS = ['muckrock.herokuapp.com', '.muckrock.com']
 
+SOUTH_MIGRATION_MODULES = {
+    'taggit': 'taggit.south_migrations',
+}
 
 # pylint: disable=W0401
 # pylint: disable=W0614
