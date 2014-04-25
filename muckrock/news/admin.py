@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from epiceditor.widgets import AdminEpicEditorWidget
+from reversion import VersionAdmin
 
 from muckrock.news.models import Article, Photo
 
@@ -41,7 +42,7 @@ class ArticleAdminForm(forms.ModelForm):
         model = Article
 
 
-class ArticleAdmin(admin.ModelAdmin):
+class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""
     # pylint: disable=R0904
 

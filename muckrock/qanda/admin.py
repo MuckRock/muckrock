@@ -4,6 +4,8 @@ Admin registration for Q&A models
 
 from django.contrib import admin
 
+from reversion import VersionAdmin
+
 from muckrock.qanda.models import Question, Answer
 
 # These inhereit more than the allowed number of public methods
@@ -14,7 +16,7 @@ class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 1
 
-class QuestionAdmin(admin.ModelAdmin):
+class QuestionAdmin(VersionAdmin):
     """Quesiton Admin"""
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'date')

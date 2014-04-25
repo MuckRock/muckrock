@@ -13,7 +13,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 from datetime import date, timedelta
-from django_tablib.admin import TablibAdmin
+from reversion import VersionAdmin
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACommunication, \
@@ -94,7 +94,7 @@ class FOIARequestAdminForm(forms.ModelForm):
         model = FOIARequest
 
 
-class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
+class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     """FOIA Request admin options"""
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
@@ -273,7 +273,7 @@ class FOIARequestAdmin(NestedModelAdmin, TablibAdmin):
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
 
-class FOIAMultiRequestAdmin(NestedModelAdmin, TablibAdmin):
+class FOIAMultiRequestAdmin(VersionAdmin):
     """FOIA Multi Request admin options"""
     change_form_template = 'admin/foia/multifoiarequest/change_form.html'
     prepopulated_fields = {'slug': ('title',)}

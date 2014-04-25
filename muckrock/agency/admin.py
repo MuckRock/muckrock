@@ -12,7 +12,7 @@ from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import BooleanField, CharField, DjangoModelField
-from django_tablib.admin import TablibAdmin
+from reversion import VersionAdmin
 import logging
 import sys
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class AgencyTypeAdmin(admin.ModelAdmin):
+class AgencyTypeAdmin(VersionAdmin):
     """AgencyType admin options"""
     list_display = ('name', )
     search_fields = ['name']
@@ -41,7 +41,7 @@ class AgencyAdminForm(forms.ModelForm):
         model = Agency
 
 
-class AgencyAdmin(TablibAdmin):
+class AgencyAdmin(VersionAdmin):
     """Agency admin options"""
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}

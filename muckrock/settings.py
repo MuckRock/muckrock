@@ -174,6 +174,7 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'autocomplete_light',
+    'reversion',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

@@ -10,7 +10,7 @@ from django.template import RequestContext
 
 from adaptor.model import CsvModel
 from adaptor.fields import CharField, DjangoModelField
-from django_tablib.admin import TablibAdmin
+from reversion import VersionAdmin
 import logging
 import sys
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
 
-class JurisdictionAdmin(TablibAdmin):
+class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
     change_list_template = 'admin/jurisdiction/jurisdiction/change_list.html'
     list_display = ('name', 'level')
