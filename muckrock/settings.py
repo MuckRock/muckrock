@@ -110,6 +110,7 @@ MIDDLEWARE_CLASSES = (
     'pingback.middleware.PingbackMiddleware',
     'muckrock.middleware.AuthKeyMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'reversion.middleware.RevisionMiddleware',
 )
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
