@@ -36,6 +36,8 @@ logger = logging.getLogger(__name__)
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""
     enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
+    enable_weekend_followup = dbsettings.BooleanValue('whether to send automated followups '
+                                                      'or not on the weekends')
 options = FOIAOptions()
 
 @task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
@@ -196,7 +198,9 @@ def followup_requests():
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup():
     log = []
-    if options.enable_followup:
+    # weekday returns 5 for sat and 6 for sun
+    is_weekday = datetime.today().weekday() < 5
+    if options.enable_followup and (options.enable_weekend_followup or is_weekday):
         foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
                                                    date_followup__lte=date.today())
         for foia in foia_requests:
