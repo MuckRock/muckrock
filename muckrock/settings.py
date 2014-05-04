@@ -22,7 +22,16 @@ AWS_DEBUG = False
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000 #one year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_FRAME_DENY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
 
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
@@ -103,7 +112,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 MIDDLEWARE_CLASSES = (
-    'sslify.middleware.SSLifyMiddleware',
+    'djangosecure.middleware.SecurityMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -179,6 +188,7 @@ INSTALLED_APPS = (
     'rest_framework_swagger',
     'autocomplete_light',
     'reversion',
+    'djangosecure',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

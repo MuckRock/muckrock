@@ -54,3 +54,4 @@ waitress==0.8.8
 Pillow==2.4.0
 -e git://github.com/hdg700/django-dbsettings.git@a3ad89ff50d4ef55dab52a795ee8789c620e2165#egg=dbsettings-dev
 django-reversion==1.7.1
+django-secure==1.0
