@@ -4,6 +4,7 @@ Views for the Agency application
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -109,8 +110,15 @@ def stale(request):
     """List all stale agencies"""
 
     agencies = Agency.objects.filter(stale=True)
+    paginator = Paginator(agencies, 10)
+    try:
+        page = paginator.page(request.GET.get('page'))
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
     return render_to_response('agency/agency_stale.html',
-                              {'stale_agencies': agencies},
+                              {'stale_agencies': page},
                               context_instance=RequestContext(request))
 
 

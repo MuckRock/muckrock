@@ -32,4 +32,20 @@
 
 	{% endfor %}
 
+<div class="pagination">
+    <span class="step-links">
+        {% if stale_agencies.has_previous %}
+            <a href="?page={{ stale_agencies.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ stale_agencies.number }} of {{ stale_agencies.paginator.num_pages }}.
+        </span>
+
+        {% if stale_agencies.has_next %}
+            <a href="?page={{ stale_agencies.next_page_number }}">next</a>
+        {% endif %}
+    </span>
+</div>
+
 {% endblock %}
