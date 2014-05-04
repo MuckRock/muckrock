@@ -26,15 +26,20 @@ from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
-def _make_orphan_comm(from_realname, to_email, post):
+def _make_orphan_comm(from_realname, from_, to_email, post, files):
     """Make an orphan commuication"""
-    FOIACommunication.objects.create(
+    comm = FOIACommunication.objects.create(
             from_who=from_realname[:255],
             to_who=to_email[:255], response=True,
             date=datetime.now(), full_html=False, delivered='email',
             communication='%s\n%s' %
                 (post.get('stripped-text', ''), post.get('stripped-signature')),
             raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+    # handle attachments
+    for file_ in files.itervalues():
+        type_ = _file_type(file_)
+        if type_ == 'file':
+            _upload_file(None, comm, file_, from_)
 
 @csrf_exempt
 def handle_request(request, mail_id):
@@ -53,7 +58,7 @@ def handle_request(request, mail_id):
 
         if not _allowed_email(from_email, foia):
             logger.warning('Bad Sender: %s', from_)
-            _make_orphan_comm(from_realname, to_email, post)
+            _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
             _forward(post, request.FILES, 'Bad Sender')
             return HttpResponse('WARNING')
 
@@ -95,8 +100,8 @@ def handle_request(request, mail_id):
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
+        _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
         _forward(post, request.FILES, 'Invalid Address')
-        _make_orphan_comm(from_realname, to_email, post)
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward
@@ -185,12 +190,12 @@ def _upload_file(foia, comm, file_, sender):
     """Upload a file to attach to a FOIA request"""
     # pylint: disable=E1101
 
-    access = 'private' if foia.is_embargo() else 'public'
-    source = foia.agency.name if foia.agency else sender
+    access = 'private' if foia and foia.is_embargo() else 'public'
+    source = foia.agency.name if foia and foia.agency else sender
 
     foia_file = FOIAFile(foia=foia, comm=comm, title=os.path.splitext(file_.name)[0][:70],
                          date=datetime.now(), source=source[:70], access=access)
-    foia_file.ffile.save(file_.name[:100], file_)
+    foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
     foia_file.save()
     upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
