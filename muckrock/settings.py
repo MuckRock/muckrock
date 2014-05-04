@@ -21,6 +21,8 @@ AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
+SESSION_COOKIE_SECURE = True
+
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
 )
