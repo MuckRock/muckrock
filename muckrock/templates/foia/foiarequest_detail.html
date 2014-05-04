@@ -168,7 +168,17 @@
 					<input type="text" name="new_foia_pk" value="" />
 					<input type="submit" name="submit" value="Submit" class="button" />
 				</form>
-				<a href="#" class="smaller right" onclick="$('#move-{{comm.pk}}-form').show(400); return false">Move Communication</a>
+				<form action="" method="post" style="display:none" id="delete-{{comm.pk}}-form">
+					{% csrf_token %}
+					<input type="hidden" name="action" value="delete_comm" />
+					<input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+					<input type="submit" name="submit" value="Delete - Are you sure?" class="button" />
+				</form>
+				<span class="smaller right">
+					<a href="#" onclick="$('#move-{{comm.pk}}-form').show(400); return false">Move</a>
+					|
+					<a href="#" onclick="$('#delete-{{comm.pk}}-form').show(400); return false">Delete</a>
+				</span>
 				{% endif %}
 
 				<div class="clearer">&nbsp;</div>

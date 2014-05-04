@@ -616,7 +616,7 @@ DELIVERED = (
 class FOIACommunication(models.Model):
     """A single communication of a FOIA request"""
 
-    foia = models.ForeignKey(FOIARequest, related_name='communications')
+    foia = models.ForeignKey(FOIARequest, related_name='communications', blank=True, null=True)
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField()

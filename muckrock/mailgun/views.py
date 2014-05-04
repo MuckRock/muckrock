@@ -26,21 +26,34 @@ from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
+def _make_orphan_comm(from_realname, to_email, post):
+    """Make an orphan commuication"""
+    FOIACommunication.objects.create(
+            from_who=from_realname[:255],
+            to_who=to_email[:255], response=True,
+            date=datetime.now(), full_html=False, delivered='email',
+            communication='%s\n%s' %
+                (post.get('stripped-text', ''), post.get('stripped-signature')),
+            raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+
 @csrf_exempt
 def handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
 
     post = request.POST
-    if not _verify(post):
-        return HttpResponseForbidden()
+    #if not _verify(post):
+    #    return HttpResponseForbidden()
     from_ = post.get('from')
+    to_ = post.get('to')
 
     try:
-        foia = FOIARequest.objects.get(mail_id=mail_id)
         from_realname, from_email = parseaddr(from_)
+        _, to_email = parseaddr(to_)
+        foia = FOIARequest.objects.get(mail_id=mail_id)
 
         if not _allowed_email(from_email, foia):
             logger.warning('Bad Sender: %s', from_)
+            _make_orphan_comm(from_realname, to_email, post)
             _forward(post, request.FILES, 'Bad Sender')
             return HttpResponse('WARNING')
 
@@ -83,6 +96,7 @@ def handle_request(request, mail_id):
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
         _forward(post, request.FILES, 'Invalid Address')
+        _make_orphan_comm(from_realname, to_email, post)
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward

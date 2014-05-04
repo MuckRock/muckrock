@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.mail import send_mail
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404
@@ -741,6 +742,60 @@ class ListFollowing(ListBase):
         return context
 
 
+def _move_comm(request, next_):
+    """Admin moves a communication to a different FOIA"""
+    if request.user.is_staff:
+        try:
+            comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+            files = comm.files.all()
+            new_foias = FOIARequest.objects.filter(
+                pk__in=request.POST['new_foia_pk'].split(','))
+            for new_foia in new_foias:
+                # setting pk to none clones the request to a new entry in the db
+                comm.pk = None
+                comm.foia = new_foia
+                comm.save()
+                for file_ in files:
+                    file_.pk = None
+                    file_.foia = new_foia
+                    file_.comm = comm
+                    # make a copy of the file on the storage backend
+                    new_ffile = ContentFile(file_.ffile.read())
+                    new_ffile.name = file_.ffile.name
+                    file_.ffile = new_ffile
+                    file_.save()
+            comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+            comm.delete()
+            msg = 'Communication moved to the following requests:<br>'
+            href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+            msg += '<br>'.join(href(f) for f in new_foias)
+            messages.success(request, msg)
+            return redirect(next_)
+        except (KeyError, FOIACommunication.DoesNotExist):
+            return redirect(next_)
+        except FOIARequest.DoesNotExist:
+            messages.error(request, 'FOIA %s does not exist' % request.POST['new_foia_pk'])
+            return redirect(next_)
+    else:
+        return redirect(next_)
+
+def _delete_comm(request, next_):
+    """Admin deletes a communication"""
+    if request.user.is_staff:
+        try:
+            comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+            files = comm.files.all()
+            for file_ in files:
+                file_.delete()
+            comm.delete()
+            messages.success(request, 'Communication deleted')
+            return redirect(next_)
+        except (KeyError, FOIACommunication.DoesNotExist):
+            return redirect(next_)
+    else:
+        return redirect(next_)
+
+
 class Detail(DetailView):
     """Details of a single FOIA request as well as handling post actions for the request"""
 
@@ -791,7 +846,8 @@ class Detail(DetailView):
             'Get Advice': self._question,
             'Problem?': self._flag,
             'Appeal': self._appeal,
-            'move_comm': self._move_comm,
+            'move_comm': _move_comm,
+            'delete_comm': _delete_comm,
         }
 
         try:
@@ -867,44 +923,6 @@ class Detail(DetailView):
                             'Appeal succesfully sent', appeal=True)
         return redirect(foia)
 
-    def _move_comm(self, request, foia):
-        """Admin moves a communication to a different FOIA"""
-        # pylint: disable=no-self-use
-        if request.user.is_staff:
-            try:
-                comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-                files = comm.files.all()
-                new_foias = FOIARequest.objects.filter(
-                    pk__in=request.POST['new_foia_pk'].split(','))
-                for new_foia in new_foias:
-                    # setting pk to none clones the request to a new entry in the db
-                    comm.pk = None
-                    comm.foia = new_foia
-                    comm.save()
-                    for file_ in files:
-                        file_.pk = None
-                        file_.foia = new_foia
-                        file_.comm = comm
-                        # make a copy of the file on the storage backend
-                        new_ffile = ContentFile(file_.ffile.read())
-                        new_ffile.name = file_.ffile.name
-                        file_.ffile = new_ffile
-                        file_.save()
-                comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-                comm.delete()
-                msg = 'Communication moved to the following requests:<br>'
-                href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-                msg += '<br>'.join(href(f) for f in new_foias)
-                messages.success(request, msg)
-                return redirect(foia)
-            except (KeyError, FOIACommunication.DoesNotExist):
-                return redirect(foia)
-            except FOIARequest.DoesNotExist:
-                messages.error(request, 'FOIA %s does not exist' % request.POST['new_foia_pk'])
-                return redirect(foia)
-        else:
-            return redirect(foia)
-
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
@@ -923,4 +941,32 @@ def redirect_old(request, jurisdiction, slug, idx, action):
         action = 'admin_fix'
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
+
+
+@user_passes_test(lambda u: u.is_staff)
+def orphans(request):
+    """Display all orphaned communications"""
+    if request.method == 'POST':
+        actions = {
+            'move_comm': _move_comm,
+            'delete_comm': _delete_comm,
+        }
+
+        try:
+            return actions[request.POST['action']](request, 'foia-orphans')
+        except KeyError:
+            # should never happen if submitting form from web page properly
+            return redirect('foia-orphans')
+    else:
+        communications = FOIACommunication.objects.filter(foia=None)
+        paginator = Paginator(communications, 25)
+        try:
+            page = paginator.page(request.GET.get('page'))
+        except PageNotAnInteger:
+            page = paginator.page(1)
+        except EmptyPage:
+            page = paginator.page(paginator.num_pages)
+        return render_to_response('foia/orphans.html',
+                                  {'communications': page},
+                                  context_instance=RequestContext(request))
 
