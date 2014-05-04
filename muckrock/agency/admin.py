@@ -6,6 +6,7 @@ from django import forms
 from django.conf.urls import patterns, url
 from django.contrib import admin, messages
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
 from django.shortcuts import render_to_response, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
@@ -106,6 +107,16 @@ def get_jurisdiction(full_name):
     else:
         return Jurisdiction.objects.get(name=full_name).pk
 
+class EmailValidator(object):
+    """Class to validate emails"""
+    def validate(self, value):
+        # pylint: disable=no-self-use
+        """Must be blank or an email"""
+        if value == '':
+            return True
+        # validate email will throw a validation error on failure
+        validate_email(value)
+        return True
 
 class AgencyCsvModel(CsvModel):
     """CSV import model for agency"""
@@ -114,7 +125,7 @@ class AgencyCsvModel(CsvModel):
     slug = CharField()
     jurisdiction = DjangoModelField(Jurisdiction, prepare=get_jurisdiction)
     address = CharField()
-    email = CharField()
+    email = CharField(validator=EmailValidator)
     other_emails = CharField()
     contact_first_name = CharField()
     contact_last_name = CharField()
