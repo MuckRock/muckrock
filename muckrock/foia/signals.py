@@ -41,7 +41,8 @@ def foia_file_delete_s3(sender, **kwargs):
         conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
         bucket = conn.get_bucket(AWS_STORAGE_BUCKET_NAME)
         key = bucket.get_key(foia_file.ffile.name)
-        key.delete()
+        if key:
+            key.delete()
 
 
 pre_save.connect(foia_update_embargo, sender=FOIARequest,
