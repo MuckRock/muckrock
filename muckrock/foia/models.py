@@ -303,6 +303,13 @@ class FOIARequest(models.Model):
 
         return max(dates) if dates else None
 
+    def latest_response(self):
+        """How many days since the last response"""
+        # pylint: disable=no-member
+        responses = self.communications.filter(response=True).order_by('-date')
+        if responses:
+            return (date.today() - responses[0].date.date()).days
+
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=E1101

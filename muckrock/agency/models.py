@@ -134,11 +134,11 @@ class Agency(models.Model, RequestHelper):
         foias = self.foiarequest_set.get_open()
         latest_responses = []
         for foia in foias:
-            responses = foia.communications.filter(response=True).order_by('-date')
-            if responses:
-                latest_responses.append(responses[0].date.date())
+            response = foia.latest_response()
+            if response:
+                latest_responses.append(response)
         if latest_responses:
-            return (date.today() - max(latest_responses)).days
+            return max(latest_responses)
 
     class Meta:
         # pylint: disable=R0903

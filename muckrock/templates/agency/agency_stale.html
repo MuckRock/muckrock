@@ -26,7 +26,7 @@
 
 		<ul>
 			{% for foia in agency.foiarequest_set.get_open %}
-			 <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{foia.title}}</a></li>
+			 <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{foia.title}}</a> &mdash; Last response: {{foia.latest_response}} days</li>
 			{% endfor %}
 		</ul>
 
