@@ -190,6 +190,7 @@ INSTALLED_APPS = (
     'autocomplete_light',
     'reversion',
     'djangosecure',
+    'robots',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

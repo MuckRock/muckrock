@@ -67,7 +67,8 @@ urlpatterns = patterns('',
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
-    url(r'^favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
+    url(r'^robots\.txt$', include('robots.urls')),
+    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
 )
 
 
