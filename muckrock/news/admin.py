@@ -31,8 +31,8 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
     # pylint: disable=too-few-public-methods
 
-    body = forms.CharField(widget=AdminEpicEditorWidget(themes={'editor': 'epic-light-2.css',
-                                                                'preview': 'github.css'}))
+    body = forms.CharField(widget=AdminEpicEditorWidget(
+        themes={'editor': 'epic-light-2.css', 'preview': 'github.css'}))
     authors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'))
     editors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'),
                                              required=False)
@@ -40,6 +40,10 @@ class ArticleAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Article
+
+
+    class Media:
+        css = {'all': ('css/admin/epiceditor.css',)}
 
 
 class ArticleAdmin(VersionAdmin):
