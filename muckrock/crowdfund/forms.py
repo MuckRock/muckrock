@@ -21,4 +21,18 @@ class CrowdfundPayForm(PaymentForm):
     """Form to pay for crowdfunding"""
     # pylint: disable=R0901, too-few-public-methods
 
+    def __init__(self, *args, **kwargs):
+        super(CrowdfundPayForm, self).__init__(*args, **kwargs)
+
+        # don't offer to save cc's for anonymous users
+        if self.request.user.is_authenticated():
+            del self.fields['email']
+        else:
+            del self.fields['save_cc']
+
     amount = USDCurrencyField(validators=[MinValueValidator(Decimal("0.5"))])
+    email = forms.EmailField(help_text='For the receipt')
+    display_name = forms.CharField(max_length=255, required=False,
+                                  help_text='Name to display on site')
+    show = forms.BooleanField(label='Show on site', required=False,
+        help_text='Would you like your contribution to be made public?')

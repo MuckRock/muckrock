@@ -312,9 +312,14 @@ def stripe_webhook_v2(request):
 
     description = event_data.get('description')
     customer = event_data.get('customer')
+    email = None
     if description and ':' in description:
         username = description[:description.index(':')]
-        user = User.objects.get(username=username)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            user = None
+            email = username
     elif customer:
         try:
             user = Profile.objects.get(stripe_id=customer).user
@@ -353,18 +358,32 @@ def stripe_webhook_v2(request):
             url = '/foia/new/'
             subject = 'Payment received for professional account'
 
-        msg = EmailMessage(subject=subject,
-                           body=render_to_string('registration/receipt.txt',
-                               {'user': user,
-                                'id': event_data['id'],
-                                'date': datetime.fromtimestamp(event_data['created']),
-                                'amount': amount,
-                                'base_amount': base_amount,
-                                'fee_amount': fee_amount,
-                                'url': url,
-                                'type': type_}),
-                           from_email='info@muckrock.com',
-                           to=[user.email], bcc=['info@muckrock.com'])
+        if user:
+            msg = EmailMessage(subject=subject,
+                               body=render_to_string('registration/receipt.txt',
+                                   {'user': user,
+                                    'id': event_data['id'],
+                                    'date': datetime.fromtimestamp(event_data['created']),
+                                    'amount': amount,
+                                    'base_amount': base_amount,
+                                    'fee_amount': fee_amount,
+                                    'url': url,
+                                    'type': type_}),
+                               from_email='info@muckrock.com',
+                               to=[user.email], bcc=['info@muckrock.com'])
+        else:
+            msg = EmailMessage(subject=subject,
+                               body=render_to_string('registration/anon_receipt.txt',
+                                   {'id': event_data['id'],
+                                    'date': datetime.fromtimestamp(event_data['created']),
+                                    'last4': event_data.get('card', {}).get('last4'),
+                                    'amount': amount,
+                                    'base_amount': base_amount,
+                                    'fee_amount': fee_amount,
+                                    'url': url,
+                                    'type': type_}),
+                               from_email='info@muckrock.com',
+                               to=[email], bcc=['info@muckrock.com'])
         msg.send(fail_silently=False)
 
     elif event_json['type'] == 'invoice.payment_failed':

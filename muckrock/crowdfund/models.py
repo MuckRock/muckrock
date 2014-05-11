@@ -26,9 +26,11 @@ class CrowdfundABC(models.Model):
 class CrowdfundPaymentABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=R0903, model-missing-unicode
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
+    show = models.BooleanField(default=False)
 
     class Meta:
         abstract = True

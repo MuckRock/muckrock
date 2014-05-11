@@ -86,7 +86,10 @@ class UpgradeSubscForm(CreditCardForm):
         self.request = kwargs.pop('request', None)
         super(UpgradeSubscForm, self).__init__(*args, **kwargs)
 
-        card = self.request.user.get_profile().get_cc()
+        if self.request.user.is_authenticated():
+            card = self.request.user.get_profile().get_cc()
+        else:
+            card = None
         if not card:
             del self.fields['use_on_file']
         else:

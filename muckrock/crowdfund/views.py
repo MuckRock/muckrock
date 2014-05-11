@@ -3,7 +3,6 @@ Views for the crowdfund application
 """
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -32,12 +31,21 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
         if form.is_valid():
             try:
                 amount = form.cleaned_data['amount']
-                user_profile = request.user.get_profile()
-                user_profile.pay(form, int(amount * 100), 'Contribute to Crowdfunding: %s %s' %
-                                                     (crowdfund, crowdfund.pk))
+                desc = 'Contribute to Crowdfunding: %s %s' % (crowdfund, crowdfund.pk)
+                if request.user.is_authenticated():
+                    user_profile = request.user.get_profile()
+                    user_profile.pay(form, int(amount * 100), desc)
+                    user = request.user
+                else:
+                    desc = '%s: %s' % (form.cleaned_data.get('email'), desc)
+                    stripe.Charge.create(amount=int(amount * 100), currency='usd',
+                        card=form.cleaned_data.get('token'), description=desc)
+                    user = None
+                payment_model.objects.create(user=user, crowdfund=crowdfund, amount=amount,
+                    name=form.cleaned_data.get('display_name'),
+                    show=form.cleaned_data.get('show'))
                 crowdfund.payment_received += amount
                 crowdfund.save()
-                payment_model.objects.create(user=request.user, crowdfund=crowdfund, amount=amount)
                 messages.success(request, 'You have succesfully contributed $%.2f' % amount)
                 logger.info('%s has contributed to crowdfund', request.user.username)
             except stripe.CardError as exc:
@@ -47,14 +55,14 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
             return HttpResponseRedirect(redirect_url(crowdfund))
 
     else:
-        form = CrowdfundPayForm(request=request, initial={'name': request.user.get_full_name()})
+        name = request.user.get_full_name() if request.user.is_authenticated() else ''
+        form = CrowdfundPayForm(request=request, initial={'name': name, 'display_name': name})
 
     return render_to_response('registration/cc.html',
                               {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Contribute',
                                'desc': 'Contribute to a crowdfunded request.'},
                               context_instance=RequestContext(request))
 
-@login_required
 def contribute_request(request, jurisdiction, jidx, slug, idx):
     """Contribute to a crowdfunding request"""
 
@@ -74,7 +82,6 @@ def contribute_request(request, jurisdiction, jidx, slug, idx):
 
     return _contribute(request, crowdfund, CrowdfundRequestPayment, redirect_url)
 
-@login_required
 def contribute_project(request, idx):
     """Contribute to a crowdfunding project"""
 

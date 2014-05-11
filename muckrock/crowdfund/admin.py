@@ -14,7 +14,7 @@ class CrowdfundRequestPaymentAdmin(admin.TabularInline):
     """Model Admin for crowdfund request payment"""
 
     model = CrowdfundRequestPayment
-    readonly_fields = ('user', 'date', 'amount', 'crowdfund')
+    readonly_fields = ('user', 'name', 'date', 'amount', 'show')
     extra = 0
 
 
