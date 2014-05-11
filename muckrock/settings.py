@@ -175,6 +175,7 @@ INSTALLED_APPS = (
     'haystack',
     'django_assets',
     'djcelery',
+    'filer',
     'easy_thumbnails',
     'pingback',
     'taggit',
@@ -448,10 +449,24 @@ REST_FRAMEWORK = {
         ('rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',),
 }
 
+FILER_STORAGES = {
+    'public': {
+        'main': {
+            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
+        },
+    },
+    'private': {
+        'main': {
+            'UPLOAD_TO': 'filer.utils.generate_filename.by_date',
+        },
+    },
+}
+
 ALLOWED_HOSTS = ['muckrock.herokuapp.com', '.muckrock.com']
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
+    'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
 # pylint: disable=W0401

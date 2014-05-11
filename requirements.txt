@@ -57,3 +57,4 @@ django-reversion==1.7.1
 django-secure==1.0
 django-robots==1.0
 Unidecode==0.04.14
+django-filer==0.9.5
