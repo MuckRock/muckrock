@@ -13,6 +13,7 @@ from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
+from unidecode import unidecode
 import logging
 import os
 import re
@@ -426,8 +427,10 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
+        body = render_to_string('foia/request.txt', {'request': self})
+        body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMessage(subject=subject,
-                           body=render_to_string('foia/request.txt', {'request': self}),
+                           body=body,
                            from_email='%s <%s>' % (self.user.get_full_name(), from_email),
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],

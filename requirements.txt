@@ -56,3 +56,4 @@ Pillow==2.4.0
 django-reversion==1.7.1
 django-secure==1.0
 django-robots==1.0
+Unidecode==0.04.14
