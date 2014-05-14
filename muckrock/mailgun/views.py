@@ -4,6 +4,7 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
+from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
@@ -59,7 +60,8 @@ def handle_request(request, mail_id):
         if not _allowed_email(from_email, foia):
             logger.warning('Bad Sender: %s', from_)
             _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
-            _forward(post, request.FILES, 'Bad Sender')
+            _forward(post, request.FILES, 'Bad Sender',
+                extra_content='https://www.muckrock.com' + reverse('foia-orphans'))
             return HttpResponse('WARNING')
 
         comm = FOIACommunication.objects.create(
@@ -101,7 +103,8 @@ def handle_request(request, mail_id):
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
         _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
-        _forward(post, request.FILES, 'Invalid Address')
+        _forward(post, request.FILES, 'Invalid Address',
+                extra_content='https://www.muckrock.com' + reverse('foia-orphans'))
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward
@@ -171,7 +174,7 @@ def _verify(post):
                                   digestmod=hashlib.sha256).hexdigest()) \
            and int(timestamp) + 300 > time.time()
 
-def _forward(post, files, title=''):
+def _forward(post, files, title='', extra_content=''):
     """Forward an email from mailgun to admin"""
     if title:
         subject = '%s: %s' % (title, post.get('subject', ''))
@@ -179,8 +182,12 @@ def _forward(post, files, title=''):
         subject = post.get('subject', '')
     subject = subject.replace('\r', '').replace('\n', '')
 
-    email = EmailMessage(subject, post.get('body-plain'),
-                         post.get('From'), ['requests@muckrock.com'])
+    if extra_content:
+        body = '%s\n\n%s' % (extra_content, post.get('body-plain'))
+    else:
+        body = post.get('body-plain')
+
+    email = EmailMessage(subject, body, post.get('From'), ['requests@muckrock.com'])
     for file_ in files.itervalues():
         email.attach(file_.name, file_.read(), file_.content_type)
 
