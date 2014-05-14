@@ -351,13 +351,14 @@ class FOIARequest(models.Model):
         if not snail and approved_agency and (can_email or can_email_appeal):
             if appeal:
                 self.status = 'appealing'
-            elif self.communications.filter(response=True).exists():
+            elif self.has_ack():
                 self.status = 'processed'
             else:
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
         else:
+            # snail mail it
             self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
@@ -573,6 +574,11 @@ class FOIARequest(models.Model):
         if pages is None:
             return 0
         return pages
+
+    def has_ack(self):
+        """Has this request been acknowledged?"""
+        # pylint: disable=no-member
+        return self.communications.filter(response=True).exists()
 
 
     class Meta:
