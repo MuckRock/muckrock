@@ -405,7 +405,7 @@ urlparse.uses_netloc.append('mysql')
 
 DATABASES = {}
 
-url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock_dev@localhost/muckrock_dev'))
+url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
 
 # pylint: disable=E1101
 # Update with environment configuration.
