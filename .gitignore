@@ -3,7 +3,6 @@
 *.pyc
 local_settings.py
 fabfile.py
-pylint.sh
 coverage.sh
 whoosh
 .coverage
