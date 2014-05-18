@@ -6,6 +6,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ('jurisdiction', '0001_initial'),
+    )
+
     def forwards(self, orm):
         from django.template.defaultfilters import slugify
 

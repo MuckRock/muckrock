@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ('jurisdiction', '0002_auto__add_jurisdiction'),
+    )
+
     def forwards(self, orm):
         # Adding field 'Profile.website'
         db.add_column('accounts_profile', 'website',

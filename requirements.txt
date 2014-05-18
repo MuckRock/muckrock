@@ -2,7 +2,6 @@ Django==1.5.5
 django-nose==1.1
 psycopg2==2.0.14
 wsgiref==0.1.2
-pil==1.1.7
 coverage==3.3.1
 South==0.8.2
 ipython==0.10
@@ -29,7 +28,7 @@ argparse==1.2.1
 python-memcached==1.48
 raven>=1.7.3
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
-newrelic==1.10.2.38
+newrelic==1.13.1.31
 celery==3.1.10
 django-celery==3.1.10
 django-sslify==0.2
@@ -51,10 +50,11 @@ django-rest-swagger==0.1.14
 waitress==0.8.8
 -e git://github.com/alex/django-taggit.git@f478e34f8e82c20b04f5992ae5299d7cf41c2b9f#egg=django_taggit-origin
 Pillow==2.4.0
--e git://github.com/hdg700/django-dbsettings.git@a3ad89ff50d4ef55dab52a795ee8789c620e2165#egg=dbsettings-dev
 django-reversion==1.7.1
 django-secure==1.0
 django-robots==1.0
 Unidecode==0.04.14
 django-filer==0.9.5
 easy-thumbnails==2.0.1
+django-dbsettings==0.6
+django-xmlrpc==0.1.3

@@ -1,0 +1,55 @@
+
+1. Set up python environment
+	a. Ensure you are using python 2 and not python 3
+	b. Install pip through your OS
+	c. Install virtualenv
+	> pip install virtualenv
+	d. Create a virtualenv for muckrock
+	> virtualenv muckrock
+	e. Activate the virtualenv
+	> source muckrock/bin/activate
+See more: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+
+2. Check out the repository from github:
+	a. Create a github account and have us give you access to the muckrock repository
+	b. Check out the repository
+	> git clone git@github.com:MuckRock/muckrock.git
+See more: https://help.github.com/articles/set-up-git#platform-all
+http://git-scm.com/documentation
+
+3. Install the requirements
+	a. Go into the repository directory
+	> cd muckrock
+	b. Install requirements
+	> pip install -r requirements.txt
+
+4. Set up the database
+	a. Install postgresql through your OS
+	b. Configure the database for muckrock
+	> sudo su - postgres
+	> createdb muckrock
+	> createuser muckrock
+	> psql
+	>> GRANT ALL PRIVILEGES ON DATABASE muckrock TO muckrock;
+	>> ALTER USER muckrock CREATEDB;
+	ctrl+d to exit psql
+	c. Ensure the database server is running
+
+5. Set the secrets
+	a. Create a file local_settings.py, which contains sensitive information that will not be checked into the repository
+	b. We will send you the sensitive information in a secure manner
+
+6. Sync the database
+	a. Sync the db - create a superuser when it asks you to
+	> ./manage.py syncdb
+	b. Run the migrations
+	> ./manage.py migrate
+
+7. Run the test server
+	a. Run the test server
+	> ./manage.py runserver
+	b. Navigate your web browser to http://127.0.0.1:8000
+
+
+You should have a very bare MuckRock site running locally now.  Putting some documents into the database will help flesh out the site.
+
