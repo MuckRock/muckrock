@@ -478,13 +478,23 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     """Enable crowdfunding on the request"""
     # pylint: disable=W0142
 
+    def form_actions(request, foia, form):
+        """Form actions"""
+        # pylint: disable=unused-argument
+        crowdfund = CrowdfundRequest.objects.create(foia=foia,
+            payment_required=foia.price * Decimal('1.05'),
+            date_due=date.today() + timedelta(30))
+        messages.success(request, 'You have succesfully started a crowdfunding campaign')
+        send_mail('%s has launched a crowdfunding campaign' % request.user.username,
+                  render_to_string('crowdfund/notify.txt',
+                                   {'crowdfund': crowdfund, 'user': request.user}),
+                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+
     action = Action(
-        form_actions=lambda r, f, _: CrowdfundRequest.objects.create(foia=f,
-                                           payment_required=f.price * Decimal('1.05'),
-                                           date_due=date.today() + timedelta(30)),
+        form_actions=form_actions,
         msg='enabled crowdfunding for',
         tests=[(lambda f: f.is_payable(),
-                  'You may only pay for requests that require a payment')],
+                  'You may only crowdfund requests that require a payment')],
         form_class=lambda r, f: CrowdfundEnableForm,
         return_url=lambda r, f: f.get_absolute_url(),
         heading='Enable Crowdfunding for Request',

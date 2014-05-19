@@ -1,0 +1,21 @@
+{{user.get_full_name}} has launched a new crowdfunding campaign, trying to raise ${{crowdfund.payment_required|floatformat:2}} for "{{crowdfund.foia.title}}".  It will run through {{crowdfund.date_due|date}} unless modified.
+
+Please reach out to the user and schedule promotion on the calendar if applicable.
+
+The request page:
+https://www.muckrock.com{{crowdfund.foia.get_absolute_url}}
+
+The campaign admin:
+https://www.muckrock.com{% url 'admin:crowdfund_crowdfundrequest_change' crowdfund.pk %}
+
+An email you can send to the user at {{user.email}} ===============
+
+Hi,
+
+I saw you were trying to crowdfund money for this request:
+
+https://www.muckrock.com{{crowdfund.foia.get_absolute_url}}
+
+If you have some information you'd like us to include in the sidebar or as an article about the campaign, or if you'd like to modify the amount you're trying to raise (to pay for reporting on the documents, for example) please let me know.
+
+Thanks and good luck,
