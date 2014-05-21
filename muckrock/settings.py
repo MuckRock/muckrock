@@ -33,6 +33,15 @@ if not DEBUG:
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
 
+DOGSLOW = True
+DOGSLOW_LOG_TO_FILE = False
+DOGSLOW_TIMER = 25
+DOGSLOW_EMAIL_TO = 'mitch@muckrock.com'
+DOGSLOW_EMAIL_FROM = 'info@muckrock.com'
+DOGSLOW_LOGGER = 'dogslow' # can be anything, but must match `logger` below
+DOGSLOW_LOG_TO_SENTRY = True
+
+
 
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
@@ -114,6 +123,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 MIDDLEWARE_CLASSES = (
     'djangosecure.middleware.SecurityMiddleware',
+    'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -336,6 +346,10 @@ LOGGING = {
             'class': 'raven.contrib.django.handlers.SentryHandler',
             'filters': ['require_debug_false'],
         },
+        'dogslow': {
+            'level': 'WARNING',
+            'class': 'raven.contrib.django.handlers.SentryHandler',
+        },
     },
     'loggers': {
         'django': {
@@ -366,6 +380,10 @@ LOGGING = {
             'level': 'WARNING',
             'handlers': ['console'],
             'propagate': False,
+        },
+        'dogslow': {
+            'level': 'WARNING',
+            'handlers': ['dogslow'],
         },
     }
 }
