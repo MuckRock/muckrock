@@ -80,5 +80,5 @@ class TestFunctional(TestCase):
         """Test views"""
 
         get_allowed(self.client, reverse('index'))
-        get_allowed(self.client, reverse('sitemap'))
+        get_allowed(self.client, '/sitemap.xml')
         get_allowed(self.client, '/search/')
