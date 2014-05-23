@@ -9,7 +9,6 @@ from views import handler500
 # pylint: enable=W0611
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
-from django.contrib.sitemaps.views import sitemap
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import RedirectView
 
@@ -65,7 +64,9 @@ urlpatterns = patterns('',
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
-    url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
+    url(r'^sitemap-(?P<section>.+)\.xml$', 'django.contrib.sitemaps.views.sitemap',
+        {'sitemaps': sitemaps}),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
