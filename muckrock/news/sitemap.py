@@ -8,7 +8,7 @@ from muckrock.news.models import Article
 
 class LimitSitemap(Sitemap):
     """Limit Sitemap"""
-    limit = 2000
+    limit = 500
 
 class ArticleSitemap(LimitSitemap):
     """Sitemap for Articles"""
