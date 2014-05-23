@@ -6,7 +6,11 @@ from django.contrib.sitemaps import Sitemap
 
 from muckrock.foia.models import FOIARequest
 
-class FoiaSitemap(Sitemap):
+class LimitSitemap(Sitemap):
+    """Limit Sitemap"""
+    limit = 2000
+
+class FoiaSitemap(LimitSitemap):
     """Sitemap for FOIA Requests"""
 
     def items(self):

@@ -6,7 +6,11 @@ from django.contrib.sitemaps import Sitemap
 
 from muckrock.news.models import Article
 
-class ArticleSitemap(Sitemap):
+class LimitSitemap(Sitemap):
+    """Limit Sitemap"""
+    limit = 2000
+
+class ArticleSitemap(LimitSitemap):
     """Sitemap for Articles"""
 
     priority = 0.7
