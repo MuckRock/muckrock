@@ -8,7 +8,7 @@ from muckrock.foia.models import FOIARequest
 
 class LimitSitemap(Sitemap):
     """Limit Sitemap"""
-    limit = 2000
+    limit = 500
 
 class FoiaSitemap(LimitSitemap):
     """Sitemap for FOIA Requests"""
