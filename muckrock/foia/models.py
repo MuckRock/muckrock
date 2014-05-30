@@ -635,6 +635,8 @@ class FOIACommunication(models.Model):
     foia = models.ForeignKey(FOIARequest, related_name='communications', blank=True, null=True)
     from_who = models.CharField(max_length=255)
     to_who = models.CharField(max_length=255, blank=True)
+    priv_from_who = models.CharField(max_length=255, blank=True)
+    priv_to_who = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField()
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()

@@ -27,11 +27,12 @@ from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
-def _make_orphan_comm(from_realname, from_, to_email, post, files):
+def _make_orphan_comm(from_, to_, post, files):
     """Make an orphan commuication"""
+    from_realname, _ = parseaddr(from_)
     comm = FOIACommunication.objects.create(
-            from_who=from_realname[:255],
-            to_who=to_email[:255], response=True,
+            priv_from_who=from_[:255], from_who=from_realname[:255],
+            priv_to_who=to_[:255], response=True,
             date=datetime.now(), full_html=False, delivered='email',
             communication='%s\n%s' %
                 (post.get('stripped-text', ''), post.get('stripped-signature')),
@@ -49,17 +50,16 @@ def handle_request(request, mail_id):
     post = request.POST
     #if not _verify(post):
     #    return HttpResponseForbidden()
-    from_ = post.get('from')
-    to_ = post.get('to')
+    from_ = post.get('From')
+    to_ = post.get('To')
 
     try:
         from_realname, from_email = parseaddr(from_)
-        _, to_email = parseaddr(to_)
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
         if not _allowed_email(from_email, foia):
             logger.warning('Bad Sender: %s', from_)
-            _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
+            _make_orphan_comm(from_, to_, post, request.FILES)
             _forward(post, request.FILES, 'Bad Sender',
                 extra_content='https://www.muckrock.com' + reverse('foia-orphans'))
             return HttpResponse('WARNING')
@@ -102,7 +102,7 @@ def handle_request(request, mail_id):
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
-        _make_orphan_comm(from_realname, from_, to_email, post, request.FILES)
+        _make_orphan_comm(from_, to_, post, request.FILES)
         _forward(post, request.FILES, 'Invalid Address',
                 extra_content='https://www.muckrock.com' + reverse('foia-orphans'))
         return HttpResponse('WARNING')
