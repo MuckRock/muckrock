@@ -13,6 +13,14 @@
 
 		<div id="tabs-request">
 			<form action="" method="post">
+				{% csrf_token %}
+				<input type="hidden" name="action" value="" />
+				<input type="hidden" name="comm_pk" value="" />
+				<input type="submit" name="submit" value="Delete Selected" class="button" 
+							 onclick="$('input[name=action]').val('delete_selected'); return confirm('Are you sure?');" />
+				<br \>
+				<input type="checkbox" onclick="$('input[name=comm_pks]').attr('checked', this.checked)" id="toggle_all" />
+				<label for="toggle_all">Select/Unselect All</label>
 
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
@@ -64,24 +72,24 @@
         {% endfor %}
 
 				{% if request.user.is_staff %}
-				<form action="" method="post" style="display:none" id="move-{{comm.pk}}-form">
-					{% csrf_token %}
-					<input type="hidden" name="action" value="move_comm" />
-					<input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+				<span style="display:none" id="move-{{comm.pk}}-span">
 					<label for="new_foia_pk">FOIA:</label>
-					<input type="text" name="new_foia_pk" value="" />
-					<input type="submit" name="submit" value="Submit" class="button" />
-				</form>
-				<form action="" method="post" style="display:none" id="delete-{{comm.pk}}-form">
-					{% csrf_token %}
+					<input type="text" name="new_foia_pk_{{comm.pk}}" value="" />
+					<input type="submit" name="submit" value="Submit" class="button" 
+                 onclick="$('input[name=action]').val('move_comm'); $('input[name=comm_pk]').val({{comm.pk}}); return true" />
+				</span>
+				<span style="display:none" id="delete-{{comm.pk}}-span">
 					<input type="hidden" name="action" value="delete_comm" />
 					<input type="hidden" name="comm_pk" value="{{comm.pk}}" />
-					<input type="submit" name="submit" value="Delete - Are you sure?" class="button" />
-				</form>
+					<input type="submit" name="submit" value="Delete - Are you sure?" class="button"
+                 onclick="$('input[name=action]').val('delete_comm'); $('input[name=comm_pk]').val({{comm.pk}}); return true" />
+				</span>
 				<span class="smaller right">
-					<a href="#" onclick="$('#move-{{comm.pk}}-form').show(400); return false">Move</a>
+					<a href="#" onclick="$('#move-{{comm.pk}}-span').show(400); return false">Move</a>
 					|
-					<a href="#" onclick="$('#delete-{{comm.pk}}-form').show(400); return false">Delete</a>
+					<a href="#" onclick="$('#delete-{{comm.pk}}-span').show(400); return false">Delete</a>
+					|
+					<input name="comm_pks" type="checkbox" value="{{comm.pk}}" />
 				</span>
 				{% endif %}
 
@@ -90,6 +98,7 @@
 			</div>
 
 			{% endfor %}
+			</form>
 		</div>
 
 <div class="pagination">
