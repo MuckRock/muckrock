@@ -200,3 +200,15 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     model = FOIACommunication
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
+
+    class Filter(django_filters.FilterSet):
+        """API Filter for FOIA Communications"""
+        # pylint: disable=E1101
+        # pylint: disable=R0903
+        min_date = django_filters.DateFilter(name='date', lookup_type='gte')
+        max_date = django_filters.DateFilter(name='date', lookup_type='lte')
+        class Meta:
+            model = FOIACommunication
+            fields = ('max_date', 'min_date')
+
+    filter_class = Filter
