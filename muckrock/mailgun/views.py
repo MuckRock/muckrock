@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def _make_orphan_comm(from_, to_, post, files):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
-    to_ = to_[:255] if _to else _to
+    to_ = to_[:255] if to_ else to_
     comm = FOIACommunication.objects.create(
             priv_from_who=from_[:255], from_who=from_realname[:255],
             priv_to_who=to_, response=True,
