@@ -30,9 +30,10 @@ logger = logging.getLogger(__name__)
 def _make_orphan_comm(from_, to_, post, files):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
+    to_ = to_[:255] if _to else _to
     comm = FOIACommunication.objects.create(
             priv_from_who=from_[:255], from_who=from_realname[:255],
-            priv_to_who=to_[:255], response=True,
+            priv_to_who=to_, response=True,
             date=datetime.now(), full_html=False, delivered='email',
             communication='%s\n%s' %
                 (post.get('stripped-text', ''), post.get('stripped-signature')),
@@ -51,7 +52,7 @@ def handle_request(request, mail_id):
     #if not _verify(post):
     #    return HttpResponseForbidden()
     from_ = post.get('From')
-    to_ = post.get('To')
+    to_ = post.get('To') or post.get('to')
 
     try:
         from_realname, from_email = parseaddr(from_)
