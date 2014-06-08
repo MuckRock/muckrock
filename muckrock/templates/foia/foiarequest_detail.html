@@ -16,6 +16,15 @@
 	for {% if foia.agency %}the {{ foia.agency.link_display|safe }} of {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{foia.jurisdiction}}</a>
 	{% if foia.date_done %} and {% if foia.status == "rejected" %}rejected{% else %}fufilled{% endif %} on {{foia.date_done|date}}{%endif%}
 	</p>
+	{% if foia.user == request.user %}
+	<div class="info">
+	{% if foia.disable_autofollowups %}
+	Automatic follow ups are disabled for this request. You can enable automatic follow ups on the right, or follow up manually below.
+	{% else %}
+	We'll automatically send a follow up to this request on {{foia.date_followup|date}}. You can pause automatic follow ups on the right, and follow up manually below.
+	{% endif %}
+	</div>
+	{% endif %}
 	{% if foia.is_embargo and not foia.embargo_date %}
 	<p class="notice">
 	This request is embargoed and will not be visible to others until 30 days after a response is received.

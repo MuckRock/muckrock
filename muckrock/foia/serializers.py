@@ -113,4 +113,5 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
                   'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
                   'date_followup', 'embargo', 'date_embargo', 'price', 'requested_docs',
-                  'description', 'tracking_id', 'tags', 'mail_id', 'email', 'notes')
+                  'description', 'tracking_id', 'tags', 'mail_id', 'email', 'notes',
+                  'disable_autofollowups')

@@ -273,3 +273,20 @@ def follow(request, jurisdiction, jidx, slug, idx):
                                    'is updated.' % foia.title)
 
     return redirect(foia)
+
+@login_required
+def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
+    """Toggle autofollowups"""
+
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+
+    if foia.user != request.user:
+        messages.error(request, 'You must own the request to toggle auto-followups')
+        return redirect(foia)
+
+    foia.disable_autofollowups = not foia.disable_autofollowups
+    foia.save()
+    action = 'disabled' if foia.disable_autofollowups else 'enabled'
+    messages.success(request, 'Autofollowups have been %s' % action)
+    return redirect(foia)

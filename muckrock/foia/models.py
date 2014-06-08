@@ -131,6 +131,7 @@ class FOIARequest(models.Model):
     email = models.EmailField(blank=True)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
+    disable_autofollowups = models.BooleanField(default=False)
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -546,6 +547,9 @@ class FOIARequest(models.Model):
                 reverse('foia-follow', kwargs=kwargs),
                 'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
                            else 'Follow'),
+            (user.is_authenticated() and self.user == user,
+                reverse('foia-toggle-followups', kwargs=kwargs),
+                'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'),
             ]
 
         bottom_actions = [

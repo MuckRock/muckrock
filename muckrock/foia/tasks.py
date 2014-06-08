@@ -202,7 +202,8 @@ def followup_requests():
     is_weekday = datetime.today().weekday() < 5
     if options.enable_followup and (options.enable_weekend_followup or is_weekday):
         foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
-                                                   date_followup__lte=date.today())
+                                                   date_followup__lte=date.today(),
+                                                   disable_autofollowups=False)
         for foia in foia_requests:
             log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             foia.followup()
