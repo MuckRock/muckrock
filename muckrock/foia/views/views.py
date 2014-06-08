@@ -575,7 +575,7 @@ class Detail(DetailView):
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
         # pylint: disable=R0201
-        if foia.user == request.user:
+        if foia.user == request.user and foia.status != 'started':
             save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
                             'Follow up succesfully sent')
         return redirect(foia)

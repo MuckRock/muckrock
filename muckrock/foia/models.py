@@ -553,7 +553,7 @@ class FOIARequest(models.Model):
             ]
 
         bottom_actions = [
-            (self.user == user,
+            (self.user == user and self.status != 'started',
                 'Follow Up', 'Send a message directly to the agency'),
             (self.user == user,
                 'Get Advice', "Get answers to your question from Muckrock's FOIA expert community"),
