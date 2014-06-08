@@ -650,6 +650,13 @@ class FOIACommunication(models.Model):
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
 
+    def save(self, *args, **kwargs):
+        """Remove controls characters from text before saving"""
+        remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))
+        self.communication = unicode(self.communication).translate(remove_control)
+        super(FOIACommunication, self).save(*args, **kwargs)
+
+
     def anchor(self):
         """Anchor name"""
         return 'comm-%d' % self.pk

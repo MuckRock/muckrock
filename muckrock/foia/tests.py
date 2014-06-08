@@ -468,7 +468,7 @@ class TestFOIAIntegration(TestCase):
             status='submitted', jurisdiction=jurisdiction, agency=agency)
         comm = FOIACommunication.objects.create(
             foia=foia, from_who='Muckrock', to_who='Test Agency', date=datetime.datetime.now(),
-            response=False, communication='Test communication')
+            response=False, communication=u'Test communication')
         foia.submit()
 
         # check that a notification has been sent to requests
