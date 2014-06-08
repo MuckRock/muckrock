@@ -1,0 +1,25 @@
+
+{% extends "foia/base.html" %}
+
+{% block title %} Acronyms {% endblock %}
+
+{% block content %}
+	<h1>Acronyms</h1>
+
+	<p>All acronyms that are currently defined are in the table below.  A blank status means the status is not changed.</p>
+
+	<table class="data-table">
+		<tr>
+			<th>Acronym</th> <th>Name</th> <th>Status</th> <th>Description</th>
+		</tr>
+		{% for acronym, name, status, desc in codes %}
+		<tr class="{% cycle "even" "odd" %}">
+			<td>{{acronym}}</td>
+			<td>{{name}}</td>
+			<td>{{status}}</td>
+			<td>{{desc}}</td>
+		</tr>
+		{% endfor %}
+	</table>
+
+{% endblock %}

@@ -64,6 +64,7 @@ urlpatterns = patterns('',
     url(r'^%s/toggle-followups/$' % foia_url,
                                            views.toggle_autofollowups,
                                                name='foia-toggle-followups'),
+    url(r'^acronyms/$',                    views.acronyms, name='foia-acronyms'),
     url(r'^feeds/submitted/$',             LatestSubmittedRequests(), name='foia-submitted-feed'),
     url(r'^feeds/completed/$',             LatestDoneRequests(), name='foia-done-feed'),
 

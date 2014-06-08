@@ -4,7 +4,7 @@ Views for the FOIA application
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -23,6 +23,7 @@ import stripe
 
 from muckrock.agency.models import Agency
 from muckrock.accounts.forms import PaymentForm
+from muckrock.foia.codes import CODES
 from muckrock.foia.forms import FOIARequestForm, \
                                 FOIAWizardWhereForm, \
                                 FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
@@ -632,3 +633,15 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     return redirect('/foi/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
+@user_passes_test(lambda u: u.is_staff)
+def acronyms(request):
+    """A page with all the acronyms explanations"""
+
+    status_dict = dict(STATUS)
+
+    codes = [(acro, name, status_dict.get(status, ''), desc)
+             for acro, (name, status, desc) in CODES.iteritems()]
+    codes.sort()
+
+    return render_to_response('foia/acronym.html', {'codes': codes},
+                              context_instance=RequestContext(request))
