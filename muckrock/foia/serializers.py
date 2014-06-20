@@ -55,7 +55,6 @@ class FOIACommunicationSerializer(serializers.ModelSerializer):
     files = FOIAFileSerializer(many=True)
     class Meta:
         model = FOIACommunication
-        exclude = ('foia',)
 
 
 class FOIANoteSerializer(serializers.ModelSerializer):
