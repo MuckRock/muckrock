@@ -223,6 +223,8 @@ def _allowed_email(email, foia):
         return True
     if foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
         return True
+    if email in [i.lower() for i in foia.get_other_emails()]:
+        return True
     return any(email.endswith(tld) for tld in allowed_tlds)
 
 def _file_type(file_):
