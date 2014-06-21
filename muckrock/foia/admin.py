@@ -12,7 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from reversion import VersionAdmin
 
 from muckrock.agency.models import Agency
@@ -268,6 +268,8 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
             foia.save()
             last_comm = foia.last_comm()
             last_comm.status = status
+            if status in ['ack', 'processed', 'appealing']:
+                last_comm.date = datetime.now()
             last_comm.save()
             messages.success(request, 'Status set to %s' % foia.get_status_display())
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
