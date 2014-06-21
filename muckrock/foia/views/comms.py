@@ -4,6 +4,7 @@ Comm helper functions for FOIA views
 
 from django.contrib import messages
 from django.core.files.base import ContentFile
+from django.core.validators import validate_email, ValidationError
 from django.shortcuts import redirect
 
 from datetime import datetime
@@ -86,3 +87,31 @@ def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=
     foia.submit(appeal=appeal, snail=snail)
     messages.success(request, message)
 
+def resend_comm(request, next_):
+    """Resend the FOI Communication"""
+    # pylint: disable=R0913
+
+    if request.user.is_staff:
+        try:
+            comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+            comm.date = datetime.now()
+            comm.save()
+
+            foia = comm.foia
+            email = request.POST['email']
+            if email:
+                validate_email(email)
+                foia.email = email
+                foia.save()
+                snail = False
+            else:
+                snail = True
+            foia.submit(snail=snail)
+            messages.success(request, 'Communication resent')
+        except (KeyError, FOIACommunication.DoesNotExist):
+            return redirect(next_)
+        except ValidationError:
+            messages.error(request, 'Not a valid email address')
+            return redirect(next_)
+
+    return redirect(next_)

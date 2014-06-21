@@ -30,7 +30,7 @@ from muckrock.foia.forms import FOIARequestForm, \
                                 FOIAMultipleSubmitForm, AgencyConfirmForm, \
                                 FOIAMultiRequestForm, TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
-from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm
+from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
@@ -539,6 +539,7 @@ class Detail(DetailView):
             'Appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
+            'resend_comm': resend_comm,
         }
 
         try:

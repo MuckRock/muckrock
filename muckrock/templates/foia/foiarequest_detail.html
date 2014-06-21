@@ -179,6 +179,15 @@
 					<input type="text" name="new_foia_pk_{{comm.pk}}" value="" />
 					<input type="submit" name="submit" value="Submit" class="button" />
 				</form>
+				<form action="" method="post" style="display:none" id="resend-{{comm.pk}}-form">
+					{% csrf_token %}
+					<input type="hidden" name="action" value="resend_comm" />
+					<input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+					<label for="email">Email:</label>
+					<input type="text" name="email" value="{{foia.email}}" style="width:200px;" />
+					<p><em>This will become this requests new email address.  Leave blank to force a manual mailing.  For faxes, enter the 10 digit fax number with a leading 1, @fax2.faxaway.com.</em></p>
+					<input type="submit" name="submit" value="Submit" class="button" />
+				</form>
 				<form action="" method="post" style="display:none" id="delete-{{comm.pk}}-form">
 					{% csrf_token %}
 					<input type="hidden" name="action" value="delete_comm" />
@@ -187,6 +196,8 @@
 				</form>
 				<span class="smaller right">
 					<a href="#" onclick="$('#move-{{comm.pk}}-form').show(400); return false">Move</a>
+					|
+					<a href="#" onclick="$('#resend-{{comm.pk}}-form').show(400); return false">Resend</a>
 					|
 					<a href="#" onclick="$('#delete-{{comm.pk}}-form').show(400); return false">Delete</a>
 				</span>
