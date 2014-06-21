@@ -66,7 +66,7 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
-    user = serializers.RelatedField()
+    username = serializers.RelatedField(source='user')
     tags = serializers.RelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
@@ -109,8 +109,8 @@ class FOIARequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FOIARequest
-        fields = ('id', 'user', 'title', 'slug', 'status', 'communications', 'jurisdiction',
-                  'agency', 'date_submitted', 'date_done', 'date_due', 'days_until_due',
-                  'date_followup', 'embargo', 'date_embargo', 'price', 'requested_docs',
-                  'description', 'tracking_id', 'tags', 'mail_id', 'email', 'notes',
-                  'disable_autofollowups')
+        fields = ('id', 'user', 'username', 'title', 'slug', 'status', 'communications',
+                  'jurisdiction', 'agency', 'date_submitted', 'date_done', 'date_due',
+                  'days_until_due', 'date_followup', 'embargo', 'date_embargo', 'price',
+                  'requested_docs', 'description', 'tracking_id', 'tags', 'mail_id', 'email',
+                  'notes', 'disable_autofollowups')
