@@ -176,8 +176,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
                                url(r'^retry_pages/(?P<idx>\d+)/$',
                                    self.admin_site.admin_view(self.retry_pages),
                                    name='foia-admin-retry-pages'),
-                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/'
-                                   r'(?:(?P<dateord>\d+)/)?$',
+                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
                                    self.admin_site.admin_view(self.set_status),
                                    name='foia-admin-set-status'),
                                url(r'^autoimport/$',
@@ -248,7 +247,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
         messages.info(request, 'Auotimport started')
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
 
-    def set_status(self, request, idx, status, dateord=None):
+    def set_status(self, request, idx, status):
         """Set the status of the request"""
         # pylint: disable=R0201
 
@@ -260,18 +259,29 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
         if status not in [s for (s, _) in STATUS]:
             messages.error(request, '%s is not a valid status' % status)
-        else:
-            foia.status = status
-            foia.update()
-            if status in ['rejected', 'no_docs', 'done', 'abandoned'] and dateord:
-                foia.date_done = date.fromordinal(int(dateord))
-            foia.save()
-            last_comm = foia.last_comm()
-            last_comm.status = status
+            return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
+
+        foia.status = status
+        foia.update()
+        dateord = request.GET.get('dateord')
+        if status in ['rejected', 'no_docs', 'done', 'abandoned'] and dateord:
+            foia.date_done = date.fromordinal(int(dateord))
+        foia.save()
+        last_comm = foia.last_comm()
+        last_comm.status = status
+        last_comm.save()
+
+        try:
             if status in ['ack', 'processed', 'appealing']:
-                last_comm.date = datetime.now()
-            last_comm.save()
-            messages.success(request, 'Status set to %s' % foia.get_status_display())
+                comm_pk = request.GET.get('comm_pk')
+                comm = FOIACommunication.objects.get(pk=comm_pk)
+                if comm.foia == foia:
+                    comm.date = datetime.now()
+                    comm.save()
+        except FOIACommunication.DoesNotExist:
+            pass
+
+        messages.success(request, 'Status set to %s' % foia.get_status_display())
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_change', args=[foia.pk]))
 
 
