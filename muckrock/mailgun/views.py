@@ -49,8 +49,8 @@ def handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
 
     post = request.POST
-    #if not _verify(post):
-    #    return HttpResponseForbidden()
+    if not _verify(post):
+        return HttpResponseForbidden()
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
 
