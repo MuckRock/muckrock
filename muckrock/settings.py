@@ -67,7 +67,7 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-PREPEND_WWW = os.environ.get('PREPEND_WWW', False)
+PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
