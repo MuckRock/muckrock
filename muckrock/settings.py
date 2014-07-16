@@ -28,7 +28,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_FRAME_DENY = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
-if not DEBUG:
+if not DEBUG and os.environ.get('ENV') != 'staging':
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
@@ -480,7 +480,7 @@ FILER_STORAGES = {
     },
 }
 
-ALLOWED_HOSTS = ['muckrock.herokuapp.com', '.muckrock.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
