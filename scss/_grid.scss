@@ -13,13 +13,32 @@ body {
             @include span-columns(1);
             margin-top: $base-vertical-rhythm/2;
         }
+        button {
+            @extend small;
+        }
     }
     > div {
         @include fill-parent();
         @include media($large-layout) {
             @include span-columns(8);
             @include shift(1);
-        }  
+        }
+        
+        code {
+            background-color: $color-black;
+            color: $color-white;
+            padding: 1.5em;
+            margin: 0.75em 0 1.5em;
+            font-size: 0.875em;
+        }
+    }
+    > button {
+        display: none;
+        @include media($large-layout) {
+            display: block;
+            @include span-columns(2);
+        }
+        margin-top: 0.75em;
     }
 }
 

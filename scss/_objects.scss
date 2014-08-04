@@ -17,7 +17,7 @@
     border-style: solid;
     border-width: $base-border-width;
     border-radius: $base-border-radius;
-    line-height: $base-line-height;
+    line-height: $base-vertical-rhythm;
 }
     
     // Textbox -> Button
@@ -55,7 +55,7 @@
                 border-color: darken($color, 10%);
             } @else {
                 color: $color;
-                background-color: none;
+                background: none;
             }
         } 
 
@@ -77,32 +77,37 @@
 
 /* Buttons */
 
+.button, .button.default { @extend %button;
+    @include button-color($color-default);
+    @include button-hover($color-default);
+}
+
 .button.primary { @extend %button;
     @include button-color($color-primary);
-    &.button { @include button-hover($color-primary); }
+    @include button-hover($color-primary);
 }
 
 .button.success { @extend %button;
     @include button-color($color-success);
-    &.button { @include button-hover($color-success); }
+    @include button-hover($color-success);
 }
 
 .button.failure { @extend %button;
     @include button-color($color-failure);
-    &.button { @include button-hover($color-failure); }
-}
-
-.button.default { @extend %button;
-    @include button-color($color-default);
-    &.button { @include button-hover($color-default); }
+    @include button-hover($color-failure);
 }
 
 .button.disabled { @extend %button;
     @include button-color($color-disabled);
+    background: none;
 }
 
 /* Panels */
 
+
+.panel, .panel.default { @extend %panel;
+    @include panel-color($color-default);
+}
 .panel.primary { @extend %panel;
     @include panel-color($color-primary);
 }
@@ -112,9 +117,7 @@
 .panel.failure { @extend %panel;
     @include panel-color($color-failure);
 }
-.panel.default { @extend %panel;
-    @include panel-color($color-default);
-}
+
 .panel.disabled { @extend %panel;
     @include panel-color($color-disabled, true);
 }
@@ -123,7 +126,7 @@
 
 #{$all-text-inputs} { @extend %input; }
 
-input[type="submit"] { @extend .default; }
+input[type="submit"], button { @extend .default; background: none;}
 
 #{$all-button-inputs} {
     @include box-sizing(border-box);
@@ -275,7 +278,7 @@ object.progress-bar {
     border: $base-border-width solid $color-grey;
     border-radius: $base-border-radius + $base-border-width;
     margin: $base-vertical-rhythm/2 0;
-    width: 75%;
+    width: 100%;
     height: auto;
     display: block;
 

@@ -7,6 +7,9 @@
 @import                 'bourbon/bourbon';
 @import                 'neat/neat';
 
+$large-layout:          new-breakpoint(min-width 769px 12);
+$medium-layout:         new-breakpoint(min-width 321px 6);
+
 $color-white:           #FDFEFE;
 $color-black:           #162023;
 $color-grey:            #acbecc;
@@ -21,11 +24,7 @@ $base-font-weight:      400;
 $base-line-height:      28px;
 $base-border-width:     1px;
 $base-border-radius:    9px;
-
 $base-vertical-rhythm:  em($base-line-height, $base-font-size);
-
-$large-layout:          new-breakpoint(min-width 769px 12);
-$medium-layout:         new-breakpoint(min-width 321px 6);
 
 // Atomic Elements
 // Combine Foundational Elements

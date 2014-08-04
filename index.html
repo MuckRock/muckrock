@@ -15,14 +15,26 @@
 	    .picker {
 	        display: table-cell;
 	    }
+	    code {
+	        display: none;
+	    }
 	</style>
+	<script>
+        function toggleVisibility(id) {
+            var e = document.getElementById(id);
+            if(e.style.display == 'block')
+                e.style.display = 'none';
+            else
+                e.style.display = 'block';
+        }
+    </script>
 </head>
 <body>
     <div class="picker-array">
         <select name="font-picker" class="picker" id="font-picker">
             <option value="Source Sans Pro">Source Sans Pro</option>
             <option value="Helvetica Neue">Helvetica Neue</option>
-            <option vlaue="sans-serif">sans-serif</option>
+            <option value="sans-serif">sans-serif</option>
         </select>
     </div>
     
@@ -31,8 +43,45 @@
     </section>
     
     <section class="grid">
-        <aside><dfn>Typography<dfn></aside>
+        <aside>
+            <dfn>Typography<dfn>
+            
+        </aside>
         <div>
+        
+            <code id="typography">
+                <p>Paragraph</p>
+                <p>Paragraphs can have
+                    <a href="#">links,</a>
+                    <strong>strong text,</strong>
+                    <em>emphasized text,</em> and
+                    <blockquote>blockquotes</blockquote>
+                    as well as <small>small text</small>.
+                </p>
+                <ul>
+                    <li>Item 1</li>
+                    <li>Item 2</li>
+                    <li>Item 3</li>
+                </ul>
+            
+                <ol>
+                    <li>Apples</li>
+                    <li>Bananas</li>
+                    <li>Clementines</li>
+                </ol>
+                
+                <h1>Heading 1</h1>
+                <h2>Heading 2</h2>
+                <h3>Heading 3</h3>
+                <h4>Heading 4</h4>
+                <h5>Heading 5</h5>
+                <h6>Heading 6</h6>
+    
+                <hr>
+    
+                <dfn>Definition</dfn>
+            </code>
+            
             <p>
                 Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id <strong>strong</strong> id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis <b>bold</b> semper. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. <em>Emphasized</em> sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla <i>italics</i> elit libero, a pharetra augue.
             </p>
@@ -76,15 +125,25 @@
     
     <section class="grid">
         <aside>
-            <dfn>Messages</dfn>
+            <dfn>Labels</dfn>
         </aside>
         <div>
-            <p class="default">This is a default message. Messages deliver information keeping with a specific tone. I am neutral.</p>
-            <p class="primary">Hello. This is a primary message. I am important!</p>
-            <p class="success">Great job! This is a success message. I am good!</p>
-            <p class="failure">Oh no! This is a failure message. I am bad!</p>
-            <p class="disabled">Nothing to see here. This is a disabled message.</p>
+        
+            <code id="labels">
+                &lt;p class=&quot;default&quot;&gt;This is a default label.&lt;/p&gt;
+<br> &lt;p class=&quot;primary&quot;&gt;Hello. This is a primary label. I am important!&lt;/p&gt;
+<br>&lt;p class=&quot;success&quot;&gt;Great job! This is a success label. I am good!&lt;/p&gt;
+<br>&lt;p class=&quot;failure&quot;&gt;Oh no! This is a failure label. I am bad!&lt;/p&gt;
+<br>&lt;p class=&quot;disabled&quot;&gt;Nothing to see here. This is a disabled label.&lt;/p&gt;
+            </code>
+        
+            <p class="default">This is a default label. labels deliver information keeping with a specific tone. I am neutral.</p>
+            <p class="primary">Hello. This is a primary label. I am important!</p>
+            <p class="success">Great job! This is a success label. I am good!</p>
+            <p class="failure">Oh no! This is a failure label. I am bad!</p>
+            <p class="disabled">Nothing to see here. This is a disabled label.</p>
         </div>
+        <button class="button" onclick="toggleVisibility('labels');">Toggle Markup</button>
     </section>
     
     <section class="grid">
@@ -92,7 +151,21 @@
             <dfn>Panels</dfn>
         </aside>
         <div>
-            <object class="default panel">
+            
+            <code id="panels">
+                
+                &lt;object class=&quot;panel&quot;&gt;
+<br>                    &emsp;&emsp;&lt;p&gt;Just an ordinary panel.&lt;/p&gt;           
+<br>                &lt;/object&gt;
+<br>                
+<br>                &lt;object class=&quot;primary panel&quot;&gt;
+<br>                    &emsp;&emsp;&lt;p&gt;I am a primary panel. Pay attention to me!&lt;/p&gt;
+<br>                &lt;/object&gt;
+<br><br>           Available panel classes: 'primary', 'success', 'failure', 'disabled', and 'default'. A panel without a specified display class reverts to the 'defaut' style.
+                
+            </code>       
+        
+            <object class="panel">
                 <p>Check it out: I am a panel!</p>
                 <p>Want to hear a great song?</p>
                 <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/120237090&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>
@@ -112,6 +185,7 @@
                 <p>I am a disabled panel. I look like a ghost!</p>
             </object>
         </div>
+        <button class="button" onclick="toggleVisibility('panels');">Toggle Markup</button>
     </section>
     
     <section class="grid">
@@ -119,6 +193,17 @@
             <dfn>Buttons</dfn>
         </aside>
         <div>
+        
+            <code id="buttons">
+&lt;a class=&quot;button primary&quot; href=&quot;#&quot;&gt;Primary&lt;/a&gt;
+<br>                &lt;a class=&quot;button success&quot; href=&quot;#&quot;&gt;Success&lt;/a&gt;
+<br>                &lt;a class=&quot;button failure&quot; href=&quot;#&quot;&gt;Failure&lt;/a&gt;
+<br>                &lt;a class=&quot;button default&quot; href=&quot;#&quot;&gt;Default&lt;/a&gt;
+<br>                &lt;span class=&quot;button disabled&quot; href=&quot;#&quot;&gt;Disabled&lt;/span&gt;
+<br>                
+<br>                Disabled buttons are represented with spans. A button without a display class reverts to the 'default' style.
+            </code>
+        
             <!--
             ---- BUTTON CLASSES
             ---- Primary
@@ -134,6 +219,7 @@
             <a class="button default" href="#">Default</a>
             <span class="button disabled" href="#">Disabled</span>
         </div>
+        <button class="button" onclick="toggleVisibility('buttons');">Toggle Markup</button>
     </section>
     
     <section class="grid">
@@ -141,6 +227,39 @@
             <dfn>Messages</dfn>
         </aside>
         <div>
+        
+            <code id="messages">
+            
+            &lt;object class=&quot;sent message&quot;&gt;
+<br>                &emsp;&emsp;&lt;section class=&quot;meta&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/tom.jpg&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;Thomas Jefferson&lt;/small&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;07/04/1776&lt;/small&gt;
+<br>                &emsp;&emsp;&lt;/section&gt;
+<br>                &emsp;&emsp;&lt;section class=&quot;text&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
+<br>                &emsp;&emsp;&lt;/section&gt;
+<br>            &lt;/object&gt;
+<br>
+<br>
+<br>            &lt;object class=&quot;received message&quot;&gt;
+<br>                &emsp;&emsp;&lt;section class=&quot;meta&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/ben.jpg&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;Benjamin Franklin&lt;/small&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;07/14/1776&lt;/small&gt;
+<br>                &emsp;&emsp;&lt;/section&gt;
+<br>                &emsp;&emsp;&lt;section class=&quot;text&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/kite.jpg&quot;&gt;
+<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
+<br>                &emsp;&emsp;&lt;/section&gt;
+<br>            &lt;/object&gt;
+            </code> 
+        
             <object class="sent message">
                 <section class="meta">
                     <img src="images/tom.jpg">
@@ -168,6 +287,7 @@
                 </section>
             </object>
         </div>
+        <button class="button" onclick="toggleVisibility('messages');">Toggle Markup</button>
     </section>
     
     <section class="grid">
