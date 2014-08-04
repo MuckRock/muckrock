@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>MuckRock Patterns</title>
+	<link rel="stylesheet" type="text/css" href="patterns.css">
+	<!-- Lato -->
+	<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic' rel='stylesheet' type='text/css'>
+	<style>
+	    .picker-array {
+	        display: table;
+	        margin: 1.5em auto;
+	    }
+	    .picker {
+	        display: table-cell;
+	    }
+	</style>
+</head>
+<body>
+    <div class="picker-array">
+        <select name="font-picker" class="picker" id="font-picker">
+            <option value="Source Sans Pro">Source Sans Pro</option>
+            <option value="Helvetica Neue">Helvetica Neue</option>
+            <option vlaue="sans-serif">sans-serif</option>
+        </select>
+    </div>
+    
+    <section class="heading">
+        <h1>Atomic Patterns</h1>
+    </section>
+    
+    <section class="grid">
+        <aside><dfn>Typography<dfn></aside>
+        <div>
+            <p>
+                Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id <strong>strong</strong> id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis <b>bold</b> semper. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. <em>Emphasized</em> sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla <i>italics</i> elit libero, a pharetra augue.
+            </p>
+            <p>Curabitur blandit tempus porttitor: 
+                <blockquote>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla vitae elit libero, a pharetra augue.</blockquote>
+                <small>This small text could be some sort of citation!</small>
+            <p>
+                Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. <a href="#">Curabitur</a> blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla vitae elit libero, a pharetra augue.
+            </p>
+            
+            <ul>
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3</li>
+            </ul>
+            
+            <ol>
+                <li>Apples</li>
+                <li>Bananas</li>
+                <li>Clementines</li>
+            </ol>
+            
+            <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec sed odio dui. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.
+            </p>
+            
+            <hr>
+            
+            <h1>Heading 1</h1>
+            <h2>Heading 2</h2>
+            <h3>Heading 3</h3>
+            <h4>Heading 4</h4>
+            <h5>Heading 5</h5>
+            <h6>Heading 6</h6>
+    
+            <hr>
+    
+            <dfn>Definition</dfn>
+            
+        </div>
+    </section>
+    
+    <section class="grid">
+        <aside>
+            <dfn>Messages</dfn>
+        </aside>
+        <div>
+            <p class="default">This is a default message. Messages deliver information keeping with a specific tone. I am neutral.</p>
+            <p class="primary">Hello. This is a primary message. I am important!</p>
+            <p class="success">Great job! This is a success message. I am good!</p>
+            <p class="failure">Oh no! This is a failure message. I am bad!</p>
+            <p class="disabled">Nothing to see here. This is a disabled message.</p>
+        </div>
+    </section>
+    
+    <section class="grid">
+        <aside>
+            <dfn>Panels</dfn>
+        </aside>
+        <div>
+            <object class="default panel">
+                <p>Check it out: I am a panel!</p>
+                <p>Want to hear a great song?</p>
+                <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/120237090&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>
+                <p>I can contain images, embeds, iframes... any kind of HTML!</p>
+                <p>Use me when there's information you <em>need</em> someone to see.</p>
+            </object>
+            <object class="primary panel">
+                <p>I am a primary panel. Pay attention to me!</p>
+            </object>
+            <object class="success panel">
+                <p>I am a success panel. You'll be happy when I show up!</p>
+            </object>
+            <object class="failure panel">
+                <p>I am a failure panel. You're going to hate seeing me!</p>
+            </object>
+            <object class="disabled panel">
+                <p>I am a disabled panel. I look like a ghost!</p>
+            </object>
+        </div>
+    </section>
+    
+    <section class="grid">
+        <aside>
+            <dfn>Buttons</dfn>
+        </aside>
+        <div>
+            <!--
+            ---- BUTTON CLASSES
+            ---- Primary
+            ---- Success
+            ---- Warning
+            ---- failure
+            ---- Default
+            ---- Disabled
+            --->
+            <a class="button primary" href="#">Primary</a>
+            <a class="button success" href="#">Success</a>
+            <a class="button failure" href="#">Failure</a>
+            <a class="button default" href="#">Default</a>
+            <span class="button disabled" href="#">Disabled</span>
+        </div>
+    </section>
+    
+    <section class="grid">
+        <aside>
+            <dfn>Messages</dfn>
+        </aside>
+        <div>
+            <object class="sent message">
+                <section class="meta">
+                    <img src="images/tom.jpg">
+                    <br/>
+                    <small>Thomas Jefferson</small>
+                    <br/>
+                    <small>07/04/1776</small>
+                </section>
+                <section class="text">
+                    <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                </section>
+            </object>
+            <object class="received message">
+                <section class="meta">
+                    <img src="images/ben.jpg">
+                    <br/>
+                    <small>Benjamin Franklin</small>
+                    <br/>
+                    <small>07/14/1776</small>
+                </section>
+                <section class="text">
+                    <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                    <img src="images/kite.jpg">
+                    <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                </section>
+            </object>
+        </div>
+    </section>
+    
+    <section class="grid">
+        <aside>
+            <dfn>Feeds</dfn>
+        </aside>
+        <div>
+            <object class="feed-item">
+                <header>
+                    <div><a href="#">BenJaMoney</a></div>
+                    <div>7/3/76, 1:35pm</div>
+                </header>
+                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                <a class="primary button" href="#">Track</a>
+            </object>
+            
+            <object class="narrow feed">
+                <ul>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                </ul>
+            </object>
+            <object class="wide feed">
+                <ul>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                    <li>
+                        <object class="feed-item">
+                            <header>
+                                <div><a href="#">BenJaMoney</a></div>
+                                <div>7/3/76, 1:35pm</div>
+                            </header>
+                            <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                            <a class="primary button" href="#">Track</a>
+                        </object>
+                    </li>
+                </ul>
+            </object>
+        </div>
+    </section>
+    
+    
+    <section class="grid">
+        <aside>
+            <dfn>Inputs & Feedback</dfn>
+        </aside>
+        <div>
+        
+            <object class="progress-bar">
+                <span class="meter" style="width: 30%;"></span>
+            </object>
+        
+            <object class="progress-bar">
+                <span class="meter" style="width: 60%;"></span>
+            </object>
+            
+            <object class="progress-bar">
+                <span class="meter success" style="width: 100%;"></span>
+            </object>
+            
+            <fieldset class="login">
+                <fieldset>
+                    <label>Username</label>
+                    <input type="text" size="15" required>
+                </fieldset>
+                <fieldset>
+                    <label>Password</label>
+                    <input type="password" size="15" required>
+                </fieldset>
+                <fieldset>
+                    <input type="submit" class="primary button" value="Log In" />
+                    <input type="submit" class="default button" value="Sign Up" />
+                </fieldset>
+            </fieldset>
+            
+            <fieldset>
+                <label>Text</label>
+                <input type="text" size="20" placeholder="Blah blah blah" />            
+            </fieldset>
+
+            <fieldset>
+                <label>Telephone</label>
+                <input type="tel" size="14" placeholder="(123) 456–7890" />
+            </fieldset>
+            
+            <fieldset>
+                <label>Email (required)</label>
+                <input required type="email" size="25" placeholder="example@muckrock.com" />
+                <input type="submit" class="primary button" />
+            </fieldset>
+            
+            <fieldset>
+                <label>Text</label>
+                <input type="text" size="20" placeholder="This field is disabled." disabled/>            
+            </fieldset>
+            
+            <fieldset>
+                <label>Option #1</label>
+                <input name="range" type="range" min="1" max="10" value="5" step="1">       
+            </fieldset>
+            
+            <fieldset>
+                <label>Do you listen to the radio?</label>
+                <input type="checkbox">
+            </fieldset>
+            
+            <fieldset>
+                <label>Please Make a Selection</label>
+                <select>
+                    <option>Option #1</option>
+                    <option>Option #2</option>
+                    <option>Option #3</option>
+                    <option>Option #4</option>
+                </select>
+            </fieldset>
+        </div>
+    </section>
+    
+    <section class="heading">
+        <h1>Molecular Patterns</h1>
+    </section>
+    <section class="grid-objects">
+        <div>
+            <article class="post">
+                <header>
+                    <dfn>Article</dfn>
+                    <h1>San Jose Police Have Finally Found Their Drone Documents</h1>
+                    <h2>by <a href="#">Shawn Musgrave</a> on July 29, 2014 at Noon</h2>
+                </header>
+                <section>
+                    <p>Etiam porta sem malesuada magna mollis euismod. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean lacinia bibendum nulla sed consectetur.</p>
+                    <p>Nullam quis risus eget urna mollis ornare vel eu leo. Donec id elit non mi porta gravida at eget metus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed odio dui.</p>
+                    <img class="feature" src="images/state.png">
+                    <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Maecenas faucibus mollis interdum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+                    <p>Maecenas faucibus mollis interdum. Sed posuere consectetur est at lobortis. Curabitur blandit tempus porttitor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                </section>
+                <aside>
+                    <summary>&#8220;The future need for a UAV [unmanned aerial vehicle] in the southern Bay Area is upon us.&#8221;</summary>
+                    <dl>
+                    <dt>Related Requests</dt>
+                    <dd>
+                        <ul class="fois">
+                            <li><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-8149/">Drone Documents (San Jose Police Department)</a></li>
+                            <li><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-second-request-12596/">Drone Documents (San Jose Police Department -- third request)</a></li>
+                            <li><a href="/foi/san-jose-336/san-jose-ca-police-drone-documents-2303/">San Jose, CA Police Drone Documents</a></li>
+                        </ul>
+                    </dd>
+                </aside>
+            </article>
+        </div>
+        <div>
+            <article class="question">
+                <header>
+                    <dfn>Question</dfn>
+                    <h2>On June 16, 2014,
+                        <a href="#">motherboard</a> asked</h2>
+                    <h1>Question about request: Details regarding Khalid Sheikh Mohammed's vacuum cleaner designs</h1>
+                    <h2>and got 2 replies from <a href="#">george.levines</a> and <a href="#">ShawnMusgrave</a></h2>               
+                </header>
+                <section>
+                    <object class="sent message">
+                        <section class="meta">
+                            <img src="http://placehold.it/200x200">
+                            <br/>
+                            <small>motherboard</small>
+                            <br/>
+                            <small>06/16/2014</small>
+                        </section>
+                        <section class="text">
+                            <p>What's the best way to follow up here? I think an appeal would be great; they won't respond probably, but I think this is great fodder for a story about Glomar in general.</p>
+                        </section>
+                    </object>
+                    <object class="received message">
+                        <section class="meta">
+                            <img src="http://placehold.it/200x200">
+                            <br/>
+                            <small>george.levines</small>
+                            <br/>
+                            <small>06/17/2014</small>
+                        </section>
+                        <section class="text">
+                            <p>The best strategy here is to somehow prove that the agency has already acknowledged the existence of what you're looking for.</p>
+                            <p>A good resource might be the the Reporter's Committee for the Freedom of the Press and their bit on Glomar responses (http://www.rcfp.org/federal-foia-appeals-guide/waiverprior-disclosure/iv-official-acknowledgement/d-glomar-response).</p>
+                        </section>
+                    </object>
+                    <object class="sent message">
+                        <section class="meta">
+                            <img src="http://placehold.it/200x200">
+                            <br/>
+                            <small>motherboard</small>
+                            <br/>
+                            <small>06/16/2014</small>
+                        </section>
+                        <section class="text">
+                            <p>Hey George, the only confirmation of both the Romanian prison and the vacuum cleaner I can find are multiple former officials speaking with the AP. How does this sound for an appeal note?</p>
+
+                            <p>I'd like to appeal the CIA's Glomar response in this request, as the existence of Khalid Sheikh Mohammed's vacuum cleaner designs was confirmed by a former CIA official to the Associated Press, and the detention during which Mohammed produced those designs was also confirmed by multiple officials to the AP. (See: http://bigstory.ap.org/article/ap-exclusive-cia-and-secret-vacuum-cleaner) </p>
+
+                            <p>The Second Circuit Court of Appeals ruled in 2009 that an agency "loses its ability to provide a Glomar response when the existence or nonexistence of the particular records covered by the Glomar response" has been acknowledged by officials. </p>
+
+                            <p>In this case, the CIA is unable to credibly deny the existence of such records, a fact upon which I base my appeal of the Glomar decision in this request.</p>
+                        </section>
+                    </object>
+                    <object class="received message">
+                        <section class="meta">
+                            <img src="http://placehold.it/200x200">
+                            <br/>
+                            <small>ShawnMusgrave</small>
+                            <br/>
+                            <small>06/17/2014</small>
+                        </section>
+                        <section class="text">
+                            <p>Derek,</p>
+                            <p>That appeal language looks good!</p>
+                            <p>-Shawn</p>
+                        </section>
+                    </object>
+                </section>
+                <aside>
+                    <dl>
+                    <dt>Status</dt>
+                    <dd class="success">This question is closed.</dd>
+                    
+                    <dt>Related Request</dt>
+                    <dd>
+                        <ul class="fois">
+                            <li><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-8149/">Drone Documents (San Jose Police Department)</a></li>
+                        </ul>
+                    </dd>
+                    <dt>Actions</dt>
+                    <dd><a class="button default" href="#">Share</a></dd>
+                    <dd><a class="button default" href="#">Embed</a></dd>
+                    <dd><span class="button disabled">Follow this question</span></dd>
+
+                </aside>
+            </article>
+        </div>
+        <div>
+            <article class="request">
+                <header>
+                    <dfn>Request</dfn>
+                    <h2>On Jan. 26, 2011, <a href="#">morisy</a> requested
+                    <h1>Report on Jeff Perry from Barnstable County Private Investigator</h1>
+                    <h2>from the <a href="#">Barnstable County Sheriff's Office</a> of <a href="#">Barnstable County, MA</a></h2>
+                </header>
+                <section>
+                    <object class="sent message">
+                        <section class="meta">
+                            <img src="http://placehold.it/200x200">
+                            <br />
+                            <small>morisy</small>
+                            <br />
+                            <small>01/26/2011</small>
+                        </section>
+                        <section class="text">
+                            <p>To Whom It May Concern:</p>
+
+                            <p>Pursuant to the state Freedom of Information Act, G.L.M. c.4, €7,
+                            clause 26th, I hereby request the following records:</p>
+
+                            <p>The Private Investigator's report on Jeff Perry, requested by
+                            Barnstable County Sheriff's Office and as referenced by Sheriff
+                            Cummings in this article in the Boston Herald:</p>
+
+                            <p>I also request that, if appropriate, fees be waived as we believe this
+                            request is in the public interest, as suggested but not stipulated by
+                            the recommendations of the Massachusetts Supervisor of Public Records.
+                            The requested documents will be made available to the general public
+                            free of charge as part of the public information service at
+                            MuckRock.com, processed by a representative of the news media/press
+                            and is made in the process of news gathering and not for commercial
+                            usage.</p>
+
+                            <p>In the event that fees cannot be waived, I would be grateful if you
+                            would inform me of the total charges in advance of fulfilling my
+                            request. I would prefer the request filled electronically, by e-mail
+                            attachment if available or CD-ROM if not.</p>
+
+                            <p>Thank you in advance for your anticipated cooperation in this matter.
+                            I look forward to receiving your response to this request within 10
+                            business days, as the statute requires.</p>
+
+                            <p>Sincerely,</p>
+
+                            </p>Michael Morisy<br>
+                            Filed via MuckRock.com<br>
+                            E-mail (Preferred): requests@muckrock.com<br>
+                            Daytime: (617) 299-1832</p>
+
+                            <p>For mailed responses, please address:<br>MuckRock<br>185 Beacon St. #3<br>Somerville, MA 02143</p>
+                        </section>
+                    </object>
+                </section>
+                <aside>
+                    <dt>Status</dt>
+                    <dd>
+                        <object class="progress-bar">
+                            <span class="meter failure" style="width: 100%;">
+                        </object>
+                    </dd>
+                    <dd class="failure">This request was rejected.</dd>
+                    
+                    <dt>Actions</dt>
+                    <dd><a class="button primary" href="#">Report Problem</a></dd>
+                    <dd><a class="button default" href="#">Share</a></dd>
+                    <dd><a class="button default" href="#">Embed</a></dd>
+                    <dd><span class="button disabled">Follow</span></dd>
+                </aside>
+            </article>
+        </div>
+    </section>
+    
+    
+    <script src="js/jquery.min.js"></script>
+	<script src="js/jquery.fittext.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#font-picker').on('change', function(){
+                var val = $(this).val();
+                $('body').css('font-family', val);
+            }).change();
+        });
+    </script>
+</body>
+</html>

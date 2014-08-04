@@ -1,0 +1,43 @@
+// Subatomic Elements
+// Standalone Libraries & Variables
+//
+// Do not appear in compiled CSS
+
+@import                 'normalize';
+@import                 'bourbon/bourbon';
+@import                 'neat/neat';
+
+$color-white:           #FDFEFE;
+$color-black:           #162023;
+$color-grey:            #acbecc;
+$color-primary:         #0084DC;
+$color-success:         #3CD173;
+$color-failure:         #DC4A00;
+$color-default:         #50828e;
+$color-disabled:        #acbecc;
+
+$base-font-size:        18px;
+$base-font-weight:      400;
+$base-line-height:      28px;
+$base-border-width:     1px;
+$base-border-radius:    9px;
+
+$base-vertical-rhythm:  em($base-line-height, $base-font-size);
+
+$large-layout:          new-breakpoint(min-width 769px 12);
+$medium-layout:         new-breakpoint(min-width 321px 6);
+
+// Atomic Elements
+// Combine Foundational Elements
+
+@import 'typography';
+@import 'objects';
+
+// Molecular Elements
+// Combine Atomic Elements
+
+@import 'layouts';
+
+// Temporary Imports
+// Provides layout for index.html only
+@import 'grid';

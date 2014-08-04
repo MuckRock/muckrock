@@ -1,0 +1,307 @@
+/*
+** Simple Objects
+**
+** Contents
+**** Buttons
+**** Panels
+**** Inputs
+**** Messages
+**** Progress Bar
+*/
+
+// Class Prototypes
+
+// Textbox
+%textbox {
+    @include box-sizing(border-box);
+    border-style: solid;
+    border-width: $base-border-width;
+    border-radius: $base-border-radius;
+    line-height: $base-line-height;
+}
+    
+    // Textbox -> Button
+    %button { @extend %textbox;
+        display: inline-block;
+        margin: 0.25em 0.325em 0.25em 0;
+        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+        text-decoration: none;
+        text-align: center; }
+        @mixin button-color($color) {
+            color: $color;
+            border-color: $color;
+        }
+        @mixin button-hover($color) {
+            &:hover {
+                color: $color-white;
+                background-color: $color; }
+            &:focus {
+                $focus-color: lighten($color, 10%);
+                color: $focus-color;
+                border-color: $focus-color;
+            }
+        }
+        
+    // Textbox -> Panel
+    %panel { @extend %textbox;
+        display: block;
+        margin:  $base-vertical-rhythm/2 0;
+        padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+        border-color: $color-grey; }
+        @mixin panel-color($color, $disabled: false) {
+            @if not $disabled {
+                color: $color-white;
+                background-color: $color;
+                border-color: darken($color, 10%);
+            } @else {
+                color: $color;
+                background-color: none;
+            }
+        } 
+
+    // Textbox -> Input
+    %input { @extend %textbox;
+        display: inline-block;
+        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+        border-color: $color-grey;
+        &:disabled {
+            background-color: lighten($color-disabled, 25%);
+            border: 1px solid $color-disabled;
+            color: $color-disabled;
+        }
+    }
+
+       
+        
+// Implementation
+
+/* Buttons */
+
+.button.primary { @extend %button;
+    @include button-color($color-primary);
+    &.button { @include button-hover($color-primary); }
+}
+
+.button.success { @extend %button;
+    @include button-color($color-success);
+    &.button { @include button-hover($color-success); }
+}
+
+.button.failure { @extend %button;
+    @include button-color($color-failure);
+    &.button { @include button-hover($color-failure); }
+}
+
+.button.default { @extend %button;
+    @include button-color($color-default);
+    &.button { @include button-hover($color-default); }
+}
+
+.button.disabled { @extend %button;
+    @include button-color($color-disabled);
+}
+
+/* Panels */
+
+.panel.primary { @extend %panel;
+    @include panel-color($color-primary);
+}
+.panel.success { @extend %panel;
+    @include panel-color($color-success);
+}
+.panel.failure { @extend %panel;
+    @include panel-color($color-failure);
+}
+.panel.default { @extend %panel;
+    @include panel-color($color-default);
+}
+.panel.disabled { @extend %panel;
+    @include panel-color($color-disabled, true);
+}
+
+/* Inputs */
+
+#{$all-text-inputs} { @extend %input; }
+
+input[type="submit"] { @extend .default; }
+
+#{$all-button-inputs} {
+    @include box-sizing(border-box);
+    display: block;
+    background: none;
+}
+
+fieldset {
+    label { @extend dfn;
+        @include box-sizing(border-box);
+        display: block;
+        color: $color-default;
+        text-align: left;
+    }
+    
+    input + label {
+        float: left;
+        margin-right: 1.5em;
+    }
+    
+    & > fieldset, & > fieldset + fieldset { margin: 0; }
+}
+
+.login { 
+    display: inline-block;
+    margin: 1.5em 0;
+    padding: 0 1.5em;
+    border: 1px solid $color-grey;
+    border-radius: $base-border-radius;
+    fieldset {
+        display: inline-block;
+        margin: 0.5em 0.75em 1.5em 0;
+    }
+}
+
+/* Messages */
+
+object.message { @extend %panel;
+    $color-sent: $color-primary;
+    $color-received: $color-grey;
+
+    @include span-columns(12);
+    
+    & > section.meta {
+        display: block;
+        margin: $base-vertical-rhythm/4 0 $base-vertical-rhythm/2;
+        text-align: left;
+        line-height: 1em;
+        img { max-width: 100%; width: 50px; }
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(2 of 12);
+            img { max-width: 100%; width: 100%; }
+        }
+    }
+    
+    & > section.text {
+        display: block;
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(9 of 12);
+            @include shift(1 of 12);
+        } 
+    }
+
+    &.received {
+        border-color: $color-received;
+        > section.text { border-top-color: $color-received; }
+        /*@include media($large-layout) {
+            > section.meta {
+                float: right;
+                @include pad(0 0 0 default);
+            }
+        }*/
+    }
+    
+    &.sent {
+        border-color: $color-sent;
+        > section.text { border-top-color: $color-sent; }
+        /*@include media($large-layout) {
+            > section.meta {
+                text-align: right;
+            }
+        }*/
+    }
+}
+
+/* Feeds */
+
+.feed-item { @extend %panel;
+    overflow: hidden;
+    @include fill-parent();
+    > header {
+        display: block;
+        width: 100%;
+        margin-bottom: $base-vertical-rhythm/2;
+        float: left;
+        div {
+            display: block;
+            & + div { 
+                @include font-sizing(0.9, 1);
+            }
+        }
+    }
+    .button {
+        @include font-sizing(0.9, 1);
+        line-height: 1.5em;
+        float: left;
+    }
+}
+
+.feed {
+    
+    ul, ol {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .feed-item {
+        margin: 0;
+        border-top: none;
+        border-radius: 0;
+    }
+    
+    li:first-child > .feed-item {
+        border-top: $base-border-width solid $color-grey;
+        @include border-top-radius($base-border-radius);
+    }
+    
+    li:last-child > .feed-item {
+        @include border-bottom-radius($base-border-radius);
+    }
+
+    @include pad(0 0 0 0);
+    @include span-columns(12);
+    @include media($large-layout) {
+        &.narrow { @include span-columns(4); }
+        &.wide { @include span-columns(8); }
+    }
+}
+
+/* Progress Bar */
+
+object.progress-bar {
+    $progress-meter-border: $base-border-width solid darken($color-primary, 15%);
+    $progress-animation-duration: 0.7s;
+
+    background-color: $color-white;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius + $base-border-width;
+    margin: $base-vertical-rhythm/2 0;
+    width: 75%;
+    height: auto;
+    display: block;
+
+    > span.meter {
+        @include box-sizing(border-box);
+        display: block;
+        height: $base-vertical-rhythm;
+        background-color: $color-primary;
+        // background-size: 40px 40px;
+        // background-repeat: repeat-x;
+        border: $progress-meter-border;
+        border-radius: $base-border-radius;
+        @include border-right-radius(0px);
+        
+        @mixin complete($status, $color) {
+            &.#{$status} {
+                background-color: $color;
+                border: 1px solid darken($color, 15%);
+                @include border-right-radius($base-border-radius - 1px);
+            }
+        }
+        
+        @include complete(success, $color-success);
+        @include complete(failure, $color-failure);
+        @include complete(primary, $color-primary);
+        @include complete(default, $color-default);
+        @include complete(disabled, $color-disabled);
+    }
+}

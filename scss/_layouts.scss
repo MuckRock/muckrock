@@ -1,0 +1,49 @@
+// Class Prototype
+article%article {
+    @include outer-container;
+    > header {
+        @include fill-parent();
+        h1 {
+            @include font-sizing(1.875, 1.5);
+            max-width: 20em;
+            font-weight: 400;
+        }
+        h2 { @include font-sizing(1, 1); }
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    > section {
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(8);
+        }
+    }
+    > aside {
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(3);
+            @include shift(1);
+        }
+        summary { 
+            @include font-sizing(1.375, 1.25);
+            margin: $base-vertical-rhythm/2 0;
+            max-width: 25em;
+            font-weight: 300;
+        }
+    }
+}
+
+.post {
+    @extend %article;
+    p:first-of-type {
+        @include font-sizing(1.15, 1.2);
+        margin: $base-vertical-rhythm/2 0;
+    } 
+}
+
+.question {
+    @extend %article;
+}
+
+.request {
+    @extend %article;
+}
