@@ -433,7 +433,7 @@ class FOIARequest(models.Model):
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMessage(subject=subject,
                            body=body,
-                           from_email='%s <%s>' % (self.user.get_full_name(), from_email),
+                           from_email=from_email,
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)})
