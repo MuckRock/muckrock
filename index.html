@@ -4,9 +4,13 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>MuckRock Patterns</title>
-	<link rel="stylesheet" type="text/css" href="patterns.css">
+	<link rel="stylesheet"
+	      type="text/css"
+          href="style.css" />
+	
+	
 	<!-- Lato -->
-	<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Source+Code+Pro:400' rel='stylesheet' type='text/css'>
 	<style>
 	    .picker-array {
 	        display: table;
@@ -27,14 +31,23 @@
             else
                 e.style.display = 'block';
         }
+        function toggleBodyFont() {
+            var e = document.getElementById('font-picker');
+            var f = e.options[e.selectedIndex].value;
+            document.getElementsByTagName('body')[0].style.fontFamily = f;
+        }
+        function setBodyFont() {
+            var f = 'Source Sans Pro';
+            document.getElementsByTagName('body')[0].style.fontFamily = f;
+        }
     </script>
 </head>
-<body>
+<body onload="setBodyFont()" >
     <div class="picker-array">
-        <select name="font-picker" class="picker" id="font-picker">
+        <select name="font-picker" class="picker" id="font-picker" onchange="toggleBodyFont()">
             <option value="Source Sans Pro">Source Sans Pro</option>
             <option value="Helvetica Neue">Helvetica Neue</option>
-            <option value="sans-serif">sans-serif</option>
+            <option value="sans-serif">Browser Default</option>
         </select>
     </div>
     
@@ -44,7 +57,7 @@
     
     <section class="grid">
         <aside>
-            <dfn>Typography<dfn>
+            <dfn>Typography</dfn>
             
         </aside>
         <div>
@@ -92,6 +105,8 @@
                 Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. <a href="#">Curabitur</a> blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla vitae elit libero, a pharetra augue.
             </p>
             
+            <dfn>Definition</dfn>
+            
             <ul>
                 <li>Item 1</li>
                 <li>Item 2</li>
@@ -115,10 +130,6 @@
             <h4>Heading 4</h4>
             <h5>Heading 5</h5>
             <h6>Heading 6</h6>
-    
-            <hr>
-    
-            <dfn>Definition</dfn>
             
         </div>
     </section>
@@ -130,6 +141,9 @@
         <div>
         
             <code id="labels">
+            
+                <p>Paragraphs (<b>p</b>) can be assigned color classifications, turning them into labels. These labels, through the color hierarchy, carry tones and implicit messages to facilitate communication. The color categories are added through corresponding classes: <i>default, primary, success, failure,</i> and <i>disabled</i>.</p>
+                <br>
                 &lt;p class=&quot;default&quot;&gt;This is a default label.&lt;/p&gt;
 <br> &lt;p class=&quot;primary&quot;&gt;Hello. This is a primary label. I am important!&lt;/p&gt;
 <br>&lt;p class=&quot;success&quot;&gt;Great job! This is a success label. I am good!&lt;/p&gt;
@@ -154,6 +168,8 @@
             
             <code id="panels">
                 
+                <p>A panel is an <b>object</b> with the class <i>panel</i> and an optional color classifier. Without a color classifier, the panel defaults to the <i>default</i> classification. The available classifications are the previously established <i>default, primary, success, failure,</i> and <i>disabled</i>.</p><br>
+                
                 &lt;object class=&quot;panel&quot;&gt;
 <br>                    &emsp;&emsp;&lt;p&gt;Just an ordinary panel.&lt;/p&gt;           
 <br>                &lt;/object&gt;
@@ -161,16 +177,12 @@
 <br>                &lt;object class=&quot;primary panel&quot;&gt;
 <br>                    &emsp;&emsp;&lt;p&gt;I am a primary panel. Pay attention to me!&lt;/p&gt;
 <br>                &lt;/object&gt;
-<br><br>           Available panel classes: 'primary', 'success', 'failure', 'disabled', and 'default'. A panel without a specified display class reverts to the 'defaut' style.
                 
             </code>       
         
             <object class="panel">
                 <p>Check it out: I am a panel!</p>
-                <p>Want to hear a great song?</p>
-                <iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/120237090&amp;color=ff5500&amp;auto_play=false&amp;hide_related=false&amp;show_comments=true&amp;show_user=true&amp;show_reposts=false"></iframe>
-                <p>I can contain images, embeds, iframes... any kind of HTML!</p>
-                <p>Use me when there's information you <em>need</em> someone to see.</p>
+                <p>I can contain images, embeds, iframes... any kind of HTML! Use me when there's information you <em>need</em> someone to see.</p>
             </object>
             <object class="primary panel">
                 <p>I am a primary panel. Pay attention to me!</p>
@@ -195,13 +207,15 @@
         <div>
         
             <code id="buttons">
-&lt;a class=&quot;button primary&quot; href=&quot;#&quot;&gt;Primary&lt;/a&gt;
-<br>                &lt;a class=&quot;button success&quot; href=&quot;#&quot;&gt;Success&lt;/a&gt;
-<br>                &lt;a class=&quot;button failure&quot; href=&quot;#&quot;&gt;Failure&lt;/a&gt;
-<br>                &lt;a class=&quot;button default&quot; href=&quot;#&quot;&gt;Default&lt;/a&gt;
-<br>                &lt;span class=&quot;button disabled&quot; href=&quot;#&quot;&gt;Disabled&lt;/span&gt;
-<br>                
-<br>                Disabled buttons are represented with spans. A button without a display class reverts to the 'default' style.
+            
+                    <p>Buttons are <b>a</b> tags with the class <i>button</i>. A button without one of the display classes [<i>default</i>, <i>primary</i>, <i>success</i>, <i>failure</i>, <i>disabled</i>] is styled the same as a <i>default</i> button. Disabled buttons are <b>span</b> tags.</p>
+
+                    <br>&lt;a class=&quot;primary button&quot; href=&quot;#&quot;&gt;Primary&lt;/a&gt;
+                    <br>&lt;a class=&quot;success button&quot; href=&quot;#&quot;&gt;Success&lt;/a&gt;
+                    <br>&lt;a class=&quot;failure button&quot; href=&quot;#&quot;&gt;Failure&lt;/a&gt;
+                    <br>&lt;a class=&quot;default button&quot; href=&quot;#&quot;&gt;Default&lt;/a&gt;
+                    <br>&lt;span class=&quot;disabled button&quot; href=&quot;#&quot;&gt;Disabled&lt;/span&gt;
+                    
             </code>
         
             <!--
@@ -230,34 +244,32 @@
         
             <code id="messages">
             
-            &lt;object class=&quot;sent message&quot;&gt;
-<br>                &emsp;&emsp;&lt;section class=&quot;meta&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/tom.jpg&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;Thomas Jefferson&lt;/small&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;07/04/1776&lt;/small&gt;
-<br>                &emsp;&emsp;&lt;/section&gt;
-<br>                &emsp;&emsp;&lt;section class=&quot;text&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
-<br>                &emsp;&emsp;&lt;/section&gt;
-<br>            &lt;/object&gt;
-<br>
-<br>
-<br>            &lt;object class=&quot;received message&quot;&gt;
-<br>                &emsp;&emsp;&lt;section class=&quot;meta&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/ben.jpg&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;Benjamin Franklin&lt;/small&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;small&gt;07/14/1776&lt;/small&gt;
-<br>                &emsp;&emsp;&lt;/section&gt;
-<br>                &emsp;&emsp;&lt;section class=&quot;text&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;img src=&quot;images/kite.jpg&quot;&gt;
-<br>                    &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;
-<br>                &emsp;&emsp;&lt;/section&gt;
-<br>            &lt;/object&gt;
+                <p>The <b>object</b> needs both a <i>message</i> class and either a <i>sent</i> or <i>received</i> class. The message header is a <b>section</b> with the class <i>meta</i> and the message body is a <b>section</b> with the class <i>text</i>. The <i>text</i> <b>section</b> can contain any inline elements, e.g. images, that regular body text can contain.</p><br>
+            
+                &lt;object class="sent message"&gt;<br>
+                &emsp;&emsp;&lt;section class="meta"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;img src="images/tom.jpg"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;br&gt;&lt;small&gt;Thomas Jefferson&lt;/small&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;br&gt;&lt;small&gt;07/04/1776&lt;/small&gt;<br>
+                &emsp;&emsp;&lt;/section&gt;<br>
+                &emsp;&emsp;&lt;section class="text"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;<br>
+                &emsp;&emsp;&lt;/section&gt;<br>
+                &lt;/object&gt;<br>
+                <br>
+                &lt;object class="received message"&gt;<br>
+                &emsp;&emsp;&lt;section class="meta"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;img src="images/ben.jpg"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;&lt;small&gt;Benjamin Franklin&lt;/small&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;br/&gt;&lt;small&gt;07/14/1776&lt;/small&gt;<br>
+                &emsp;&emsp;&lt;/section&gt;<br>
+                &emsp;&emsp;&lt;section class="text"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;img src="images/kite.jpg"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;p&gt;Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.&lt;/p&gt;<br>
+                &emsp;&emsp;&lt;/section&gt;<br>
+                &lt;/object&gt;<br> 
+
             </code> 
         
             <object class="sent message">
@@ -295,6 +307,48 @@
             <dfn>Feeds</dfn>
         </aside>
         <div>
+            
+            <code id="feeds">
+            
+                <p>Feed items are <b>object</b>s with the class <i>feed-item</i>. Feeds are unordered listings (<b>ul</b>) of <i>feed-items</i>, and accordingly are <b>object</b>s with the class <i>feed</i>. The feed width can be optionally adjusted with the additional classes <i>narrow</i> and <i>wide</i>.</p>
+                <br>
+                &lt;object class="feed-item"&gt;<br>
+                &emsp;&emsp;&lt;header&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;div&gt;&lt;a href="#"&gt;BenJaMoney&lt;/a&gt;&lt;/div&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;div&gt;7/3/76, 1:35pm&lt;/div&gt;<br>
+                &emsp;&emsp;&lt;/header&gt;<br>
+                &emsp;&emsp;&lt;p&gt;Replied to &lt;a href="#"&gt;Thomas Jefferson&lt;/a&gt;'s question, &lt;a href="#"&gt;What is a &lt;em&gt;Declaration of Independence&lt;/em&gt; and how can I write one?&lt;/a&gt;&lt;/p&gt;<br>
+                &emsp;&emsp;&lt;a class="primary button" href="#"&gt;Track&lt;/a&gt;<br>
+                &lt;/object&gt;<br>
+                <br>
+                &lt;object class="feed"&gt;<br>
+                &emsp;&emsp;&lt;ul&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;li&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;object class="feed-item"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;header&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;div&gt;&lt;a href="#"&gt;BenJaMoney&lt;/a&gt;&lt;/div&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;div&gt;7/3/76, 1:35pm&lt;/div&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;/header&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;p&gt;Replied to &lt;a href="#"&gt;Thomas Jefferson&lt;/a&gt;'s question, &lt;a href="#"&gt;What is a &lt;em&gt;Declaration of Independence&lt;/em&gt; and how can I write one?&lt;/a&gt;&lt;/p&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;a class="primary button" href="#"&gt;Track&lt;/a&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;/object&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;/li&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;li&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;object class="feed-item"&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;header&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;div&gt;&lt;a href="#"&gt;BenJaMoney&lt;/a&gt;&lt;/div&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;div&gt;7/3/76, 1:35pm&lt;/div&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;/header&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;p&gt;Replied to &lt;a href="#"&gt;Thomas Jefferson&lt;/a&gt;'s question, &lt;a href="#"&gt;What is a &lt;em&gt;Declaration of Independence&lt;/em&gt; and how can I write one?&lt;/a&gt;&lt;/p&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;a class="primary button" href="#"&gt;Track&lt;/a&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&lt;/object&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;/li&gt;<br>
+                &emsp;&emsp;&lt;/ul&gt;<br>
+                &lt;/object&gt;
+            
+            
+            </code>
+            
             <object class="feed-item">
                 <header>
                     <div><a href="#">BenJaMoney</a></div>
@@ -373,6 +427,7 @@
                 </ul>
             </object>
         </div>
+        <button class="button" onclick="toggleVisibility('feeds');">Toggle Markup</button>
     </section>
     
     
@@ -382,16 +437,71 @@
         </aside>
         <div>
         
+            <code id="inputs">
+            
+                <p>Progress bars are <b>object</b>s with the class <i>progress-bar</i> and they contain a <b>span</b> with the class <i>meter</i>. The width of the meter is set within the HTML markup and available to manipulate with Javascript. When a meter has a width of 100%, it must have the <i>completed</i> class. The meter can optionally contain a color classifier class, like <i>success</i> or <i>failure</i>.</p>
+                <br>
+                
+                &lt;object class="progress-bar"&gt;<br>
+                &emsp;&emsp;&lt;span class="meter" style="width: 30%;"&gt;&lt;/span&gt;<br>
+                &lt;/object&gt;<br>
+        
+                &lt;object class="progress-bar"&gt;<br>
+                &emsp;&emsp;&lt;span class="failure meter" style="width: 60%;"&gt;&lt;/span&gt;<br>
+                &lt;/object&gt;<br>
+            
+                &lt;object class="progress-bar"&gt;<br>
+                &emsp;&emsp;&lt;span class="completed success meter" style="width: 100%;"&gt;&lt;/span&gt;<br>
+                &lt;/object&gt;<br>
+                
+                <br>
+                <hr>
+                <br>
+                <p>Text inputs are customized, in order to match the typographic and formal heirarchy of the rest of the design. Button inputs are left as they are. Forms should be grouped within <b>fieldset</b> tags, with a <b>label</b> preceeding the <b>input</b>. There is a special <b>fieldset</b> class, <i>login</i>, since these are the most important fieldset. Inputs can be set as <u>required</u> or <u>disabled</u>, and they can be given any of the established color classes: <i>primary, success, failure, default</i>.</p>
+                <br>
+                &lt;fieldset class="login"&gt;<br>
+                &emsp;&emsp;&lt;fieldset&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;label&gt;Username&lt;/label&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;input type="text" size="15" required&gt;<br>
+                &emsp;&emsp;&lt;/fieldset&gt;<br>
+                &emsp;&emsp;&lt;fieldset&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;label&gt;Password&lt;/label&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;input type="password" size="15" required&gt;<br>
+                &emsp;&emsp;&lt;/fieldset&gt;<br>
+                &emsp;&emsp;&lt;fieldset&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;input type="submit" class="primary button" value="Log In" /&gt;<br>
+                &emsp;&emsp;&emsp;&emsp;&lt;input type="submit" class="default button" value="Sign Up" /&gt;<br>
+                &emsp;&emsp;&lt;/fieldset&gt;<br>
+                &lt;/fieldset&gt;
+                
+                <br><br>
+                
+                &lt;fieldset&gt;<br>
+                &emsp;&emsp;&lt;label&gt;Text&lt;/label&gt;<br>
+                &emsp;&emsp;&lt;input type="text" size="20" placeholder="Blah blah blah" /&gt;<br>
+                &lt;/fieldset&gt;
+                
+                <br><br>
+                
+                &lt;fieldset&gt;<br>
+                &emsp;&emsp;&lt;label&gt;Email (Required)&lt;/label&gt;<br>
+                &emsp;&emsp;&lt;input type="email" size="20" placeholder="example@muckrock.com" required/&gt;<br>
+                &lt;/fieldset&gt;
+                
+                <br><br>
+            
+            </code>
+        
             <object class="progress-bar">
                 <span class="meter" style="width: 30%;"></span>
             </object>
         
             <object class="progress-bar">
-                <span class="meter" style="width: 60%;"></span>
+                <span class="failure meter" style="width: 60%;"></span>
             </object>
             
             <object class="progress-bar">
-                <span class="meter success" style="width: 100%;"></span>
+                <span class="completed success meter" style="width: 100%;"></span>
             </object>
             
             <fieldset class="login">
@@ -448,8 +558,15 @@
                     <option>Option #3</option>
                     <option>Option #4</option>
                 </select>
+                <select>
+                    <option>Option #5</option>
+                    <option>Option #6</option>
+                    <option>Option #7</option>
+                    <option>Option #8</option>
+                </select>
             </fieldset>
         </div>
+        <button class="button" onclick="toggleVisibility('inputs');">Toggle Markup</button>
     </section>
     
     <section class="heading">
@@ -555,7 +672,7 @@
                 <aside>
                     <dl>
                     <dt>Status</dt>
-                    <dd class="success">This question is closed.</dd>
+                    <dd class="success">This question was answered.</dd>
                     
                     <dt>Related Request</dt>
                     <dd>
@@ -566,7 +683,7 @@
                     <dt>Actions</dt>
                     <dd><a class="button default" href="#">Share</a></dd>
                     <dd><a class="button default" href="#">Embed</a></dd>
-                    <dd><span class="button disabled">Follow this question</span></dd>
+                    <dd><span class="button disabled">Follow</span></dd>
 
                 </aside>
             </article>
@@ -631,7 +748,7 @@
                     <dt>Status</dt>
                     <dd>
                         <object class="progress-bar">
-                            <span class="meter failure" style="width: 100%;">
+                            <span class="completed failure meter" style="width: 100%;">
                         </object>
                     </dd>
                     <dd class="failure">This request was rejected.</dd>
@@ -645,17 +762,5 @@
             </article>
         </div>
     </section>
-    
-    
-    <script src="js/jquery.min.js"></script>
-	<script src="js/jquery.fittext.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#font-picker').on('change', function(){
-                var val = $(this).val();
-                $('body').css('font-family', val);
-            }).change();
-        });
-    </script>
 </body>
 </html>

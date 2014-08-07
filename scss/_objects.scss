@@ -17,8 +17,10 @@
     border-style: solid;
     border-width: $base-border-width;
     border-radius: $base-border-radius;
-    line-height: $base-vertical-rhythm;
-}
+    line-height: $base-vertical-rhythm; }
+    @mixin background-gradient($color) {
+        @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+    }
     
     // Textbox -> Button
     %button { @extend %textbox;
@@ -34,11 +36,19 @@
         @mixin button-hover($color) {
             &:hover {
                 color: $color-white;
-                background-color: $color; }
+                @include background-gradient($color);
+            }
             &:focus {
                 $focus-color: lighten($color, 10%);
                 color: $focus-color;
                 border-color: $focus-color;
+                &:hover {
+                    color: $color-white;
+                }
+            }
+            &:active {
+                color: $color-white;
+                @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
             }
         }
         
@@ -46,18 +56,23 @@
     %panel { @extend %textbox;
         display: block;
         margin:  $base-vertical-rhythm/2 0;
-        padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
-        border-color: $color-grey; }
+        padding: $base-vertical-rhythm/2;
+        border-color: $color-grey;
+        @include media($large-layout) {
+            padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+        }
+    }
         @mixin panel-color($color, $disabled: false) {
             @if not $disabled {
                 color: $color-white;
-                background-color: $color;
+                @include background-gradient($color);
                 border-color: darken($color, 10%);
             } @else {
                 color: $color;
                 background: none;
             }
-        } 
+        }
+        
 
     // Textbox -> Input
     %input { @extend %textbox;
@@ -167,9 +182,8 @@ fieldset {
 object.message { @extend %panel;
     $color-sent: $color-primary;
     $color-received: $color-grey;
-
+    $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
     @include span-columns(12);
-    
     & > section.meta {
         display: block;
         margin: $base-vertical-rhythm/4 0 $base-vertical-rhythm/2;
@@ -177,7 +191,7 @@ object.message { @extend %panel;
         line-height: 1em;
         img { max-width: 100%; width: 50px; }
         @include fill-parent();
-        @include media($large-layout) {
+        @include media($message-layout) {
             @include span-columns(2 of 12);
             img { max-width: 100%; width: 100%; }
         }
@@ -186,7 +200,7 @@ object.message { @extend %panel;
     & > section.text {
         display: block;
         @include fill-parent();
-        @include media($large-layout) {
+        @include media($message-layout) {
             @include span-columns(9 of 12);
             @include shift(1 of 12);
         } 
@@ -260,12 +274,13 @@ object.message { @extend %panel;
         @include border-bottom-radius($base-border-radius);
     }
 
-    @include pad(0 0 0 0);
-    @include span-columns(12);
     @include media($large-layout) {
+        @include span-columns(6);
         &.narrow { @include span-columns(4); }
         &.wide { @include span-columns(8); }
     }
+    @include fill-parent();
+
 }
 
 /* Progress Bar */
@@ -286,25 +301,24 @@ object.progress-bar {
         @include box-sizing(border-box);
         display: block;
         height: $base-vertical-rhythm;
-        background-color: $color-primary;
+        @include background-gradient($color-default);
         // background-size: 40px 40px;
         // background-repeat: repeat-x;
         border: $progress-meter-border;
         border-radius: $base-border-radius;
         @include border-right-radius(0px);
         
-        @mixin complete($status, $color) {
+        &.completed { @include border-right-radius($base-border-radius); }
+        @mixin classifier($status, $color) {
             &.#{$status} {
-                background-color: $color;
+                @include background-gradient($color);
                 border: 1px solid darken($color, 15%);
-                @include border-right-radius($base-border-radius - 1px);
             }
         }
-        
-        @include complete(success, $color-success);
-        @include complete(failure, $color-failure);
-        @include complete(primary, $color-primary);
-        @include complete(default, $color-default);
-        @include complete(disabled, $color-disabled);
+        @include classifier(success, $color-success);
+        @include classifier(failure, $color-failure);
+        @include classifier(primary, $color-primary);
+        @include classifier(default, $color-default);
+        @include classifier(disabled, $color-disabled);
     }
 }

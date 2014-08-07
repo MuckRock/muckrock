@@ -1,6 +1,6 @@
 @mixin font-sizing($size-multiplier, $line-multiplier:2) {
-    $size: $base-font-size * $size-multiplier;
-    $line: $base-line-height * $line-multiplier;
+    $size: 1em * $size-multiplier;
+    $line: 1.5em * $line-multiplier;
     font-size: $size;
     line-height: $line / $size;
 }
@@ -10,18 +10,21 @@ body {
     background-color: $color-white;
     font-weight: $base-font-weight;
     @include font-feature-settings('liga', 'kern');
-    @include font-sizing(0.777778, 0.714285714);
+    font-size: 16px;
+    line-height: 24px;
     @include media($medium-layout) {
-        @include font-sizing(0.888888889, 0.833333333);
+        font-size: 16px;
+        line-height: 24px;
     }
     @include media($large-layout) {
-        @include font-sizing(1, 1);
+        font-size: 18px;
+        line-height: 28px;
     }
 }
 
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    font-weight: lighter;
+    font-weight: 300;
     strong, b { font-weight: $base-font-weight; }
 }
 
@@ -56,12 +59,35 @@ blockquote {
 small {
     @include font-sizing(0.8, 0.5);
     font-style: normal;
+    // font-variant: small-caps;
+}
+
+code {
+    font-family: 'Source Code Pro';
+    margin: 0.75em 0 1.5em;
+    padding: 1.5em;
+    color: $color-white;
+    background-color: $color-black;
+    
+    i {
+        font-style: normal;
+        color: $color-success;
+    }
+    b {
+        font-weight: normal;
+        color: $color-primary;
+    }
+    u {
+        text-decoration: none;
+        color: $color-failure;
+    }
+    
 }
 
 dfn, dt {
     @extend small;
     display: block;
-    margin: $base-vertical-rhythm/2 0;
+    margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
     text-transform: uppercase;
     letter-spacing: 2px;
     color: $color-grey;

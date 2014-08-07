@@ -23,14 +23,6 @@ body {
             @include span-columns(8);
             @include shift(1);
         }
-        
-        code {
-            background-color: $color-black;
-            color: $color-white;
-            padding: 1.5em;
-            margin: 0.75em 0 1.5em;
-            font-size: 0.875em;
-        }
     }
     > button {
         display: none;
@@ -54,7 +46,9 @@ body {
 
 .grid-objects {
     @include outer-container;
+    
     > div {
+        margin-top: 1.5em;
         @include fill-parent();
         @include media($large-layout) {
             margin: 0.75em 0;

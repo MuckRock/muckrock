@@ -7,8 +7,10 @@
 @import                 'bourbon/bourbon';
 @import                 'neat/neat';
 
-$large-layout:          new-breakpoint(min-width 769px 12);
-$medium-layout:         new-breakpoint(min-width 321px 6);
+$large-breakpoint:      769px;
+$medium-breakpoint:     321px;
+$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
+$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 
 $color-white:           #FDFEFE;
 $color-black:           #162023;
@@ -19,12 +21,12 @@ $color-failure:         #DC4A00;
 $color-default:         #50828e;
 $color-disabled:        #acbecc;
 
-$base-font-size:        18px;
 $base-font-weight:      400;
-$base-line-height:      28px;
 $base-border-width:     1px;
 $base-border-radius:    9px;
-$base-vertical-rhythm:  em($base-line-height, $base-font-size);
+$base-vertical-rhythm:  1.5em;
+
+$base-gradient-darken:  8%;
 
 // Atomic Elements
 // Combine Foundational Elements
