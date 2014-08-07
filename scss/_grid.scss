@@ -1,9 +1,10 @@
 body {
-    margin: 1.5em;
+    
 }
 
 .grid {
     @include outer-container;
+    margin: 1.5em;
     padding: 1em 0;
     border-top: 1px solid $color-grey;
 
@@ -32,27 +33,32 @@ body {
         }
         margin-top: 0.75em;
     }
+    
+    
 }
 
 .heading {
     @include outer-container;
+    margin: 1.5em;
     border-top: 3px solid $color-grey;
     padding: 1em 0;
     h1 {
         @include fill-parent();
         text-align: left;
     }
+    
+    &:first-of-type { border-top: none; /* margin-top: 8em; */}
 }
 
 .grid-objects {
     @include outer-container;
-    
+    margin: 1.5em;
     > div {
         margin-top: 1.5em;
         @include fill-parent();
         @include media($large-layout) {
             margin: 0.75em 0;
-            border: 1px solid $color-grey;
+            border-top: 1px solid $color-grey;
             padding: 1.5em 3em;
             &:first-of-type {
                 margin-top: 0;

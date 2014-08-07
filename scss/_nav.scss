@@ -1,0 +1,183 @@
+/* Navigation Menu */
+
+// Grey: #D8C9C6
+// Red: #D24019
+
+$color-menu: $color-white;
+$color-secondary: $color-white;
+$color-unselected: $color-default;
+$color-selected: $color-black;
+
+header.navigation {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border-bottom: 2px solid $color-unselected;
+    /*
+    position: fixed;
+    top: 0;
+    */
+    
+    ul { 
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+    
+    li {
+        display: inline-block;
+        width: auto;
+        vertical-align: middle;
+        margin-left: 1em;
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+    
+    a {
+        @include font-sizing(0.9, 1);
+        text-transform: uppercase;
+        font-weight: bold;
+        display: block;
+        line-height: 0.9em;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+    
+    .button {
+        font-weight: normal;
+        border-color: $color-unselected;
+        color: $color-unselected;
+        &:hover {
+            border-color: $color-selected;
+            background: $color-selected;
+            color: $color-menu !important;
+        }
+    }
+    
+    nav {
+        display: block;
+        overflow: hidden;
+        padding: 0.25em 2em;
+        ul.left {
+            display: block;
+            float: left;
+        }
+        ul.right {
+            display: block;
+            float: right;
+        }
+    }
+    
+    nav.primary {
+        background-color: $color-menu;
+        svg { fill: $color-selected; }
+        ul.left, ul.right { margin: 1em 0;}
+        ul.left {
+            
+            //position: relative;
+            margin-top: 1em;
+            
+            li {
+                display: inline-block;
+                vertical-align: middle;
+            }
+            
+            //.trademark { padding-top: 0.5em; }
+            .search {
+                //padding-top: 0.25em;
+                input {
+                    //position: absolute;
+                    //top: 0;
+                    width: 15em;
+                    margin: 0;
+                    padding: 0.25em 2.25em 0.25em 1em;
+                    @include font-sizing(0.8, 1);
+                    color: $color-selected;
+                    border: 1px solid $color-unselected;
+                    background-image: url('images/search.svg');
+                    background-position: 95% 45%;
+                    background-size: 15px 15px;
+                    background-repeat: no-repeat;
+                    &:focus { border-color: $color-selected; }
+                }
+            }
+        }
+        ul.right {
+            
+            li {
+                display: inline-block;
+                vertical-align: middle;
+                a {
+                    padding: 0.5em;
+                    color: $color-unselected;
+                    &:hover { color: $color-selected; }
+                }
+            }
+            .actions {
+                text-align: right;
+                padding: 0;
+                a + a {
+                    padding-top: 0;
+                }
+            }
+            .user {
+                overflow: hidden;
+                margin-left: 0.75em;
+                .notifications {
+                    display: block;
+                    float: left;
+                    height: 50px;
+                    width: 50px;
+                    text-align: center;
+                    @include font-sizing(1.25, 1);
+                    font-weight: normal;
+                    background-color: $color-unselected;
+                    color: $color-menu;
+                    &:hover {
+                        background-color: $color-selected;
+                    }
+                    &.zero {
+                        display: none;
+                    }
+                }
+                .avatar {
+                    width: 50px;
+                    height: 50px;
+                    float: left;
+                    margin: 0;
+                    margin-right: 0.75em;
+                }
+                .username {
+                    float: right;
+                    overflow: hidden;
+                    .settings, .logout {
+                        padding-top: 0;
+                        font-weight: 400;
+                        float: left;
+                    }
+                }
+            }
+        }
+    }
+    nav.secondary {
+        background-color: $color-secondary;
+        border-top: 1px solid $color-unselected;
+        ul { margin: 0 0 0.3em; }
+        a { 
+            line-height: 1em;
+            font-weight: normal;
+            text-transform: none;
+            color: $color-unselected;
+            &:hover { 
+                color: $color-selected;
+                text-decoration: none;
+            }
+        }
+    }
+}
+
+#logged-in {
+    background-color: red;
+}
