@@ -138,7 +138,7 @@ header.navigation {
                     display: block;
                     float: left;
                     height: 50px;
-                    width: 50px;
+                    width: auto;
                     @include border-left-radius($base-border-radius);
                     text-align: center;
                     @include font-sizing(1.25, 1);
