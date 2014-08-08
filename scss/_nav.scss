@@ -5,18 +5,18 @@
 
 $color-menu: $color-white;
 $color-secondary: $color-white;
-$color-unselected: $color-default;
-$color-selected: $color-black;
+$color-unselected: $color-black;
+$color-selected: $color-default;
 
 header.navigation {
     width: 100%;
     margin: 0;
     padding: 0;
     border-bottom: 2px solid $color-unselected;
-    /*
+    
     position: fixed;
     top: 0;
-    */
+    
     
     ul { 
         margin: 0;
@@ -37,6 +37,7 @@ header.navigation {
     a {
         @include font-sizing(0.9, 1);
         text-transform: uppercase;
+        letter-spacing: 1px;
         font-weight: bold;
         display: block;
         line-height: 0.9em;
@@ -72,7 +73,9 @@ header.navigation {
     
     nav.primary {
         background-color: $color-menu;
-        svg { fill: $color-selected; }
+        svg {
+            fill: $color-primary;
+        }
         ul.left, ul.right { margin: 1em 0;}
         ul.left {
             
@@ -115,6 +118,12 @@ header.navigation {
                     &:hover { color: $color-selected; }
                 }
             }
+            #sign-up a {
+                color: $color-primary;
+                &:hover {
+                    color: $color-default;
+                }
+            }
             .actions {
                 text-align: right;
                 padding: 0;
@@ -130,10 +139,11 @@ header.navigation {
                     float: left;
                     height: 50px;
                     width: 50px;
+                    @include border-left-radius($base-border-radius);
                     text-align: center;
                     @include font-sizing(1.25, 1);
                     font-weight: normal;
-                    background-color: $color-unselected;
+                    background-color: $color-primary;
                     color: $color-menu;
                     &:hover {
                         background-color: $color-selected;
@@ -146,6 +156,7 @@ header.navigation {
                     width: 50px;
                     height: 50px;
                     float: left;
+                    @include border-right-radius($base-border-radius);
                     margin: 0;
                     margin-right: 0.75em;
                 }
@@ -157,6 +168,9 @@ header.navigation {
                         font-weight: 400;
                         float: left;
                     }
+                }
+                .zero.notifications + .avatar {
+                    border-radius: $base-border-radius;
                 }
             }
         }

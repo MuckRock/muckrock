@@ -831,11 +831,9 @@ header.navigation {
   width: 100%;
   margin: 0;
   padding: 0;
-  border-bottom: 2px solid #50828e;
-  /*
+  border-bottom: 2px solid #162023;
   position: fixed;
-  top: 0;
-  */ }
+  top: 0; }
   header.navigation ul {
     margin: 0;
     padding: 0;
@@ -851,6 +849,7 @@ header.navigation {
     font-size: 0.9em;
     line-height: 1.66667;
     text-transform: uppercase;
+    letter-spacing: 1px;
     font-weight: bold;
     display: block;
     line-height: 0.9em; }
@@ -858,11 +857,11 @@ header.navigation {
       text-decoration: none; }
   header.navigation .button {
     font-weight: normal;
-    border-color: #50828e;
-    color: #50828e; }
+    border-color: #162023;
+    color: #162023; }
     header.navigation .button:hover {
-      border-color: #162023;
-      background: #162023;
+      border-color: #50828e;
+      background: #50828e;
       color: #fdfefe !important; }
   header.navigation nav {
     display: block;
@@ -877,7 +876,7 @@ header.navigation {
   header.navigation nav.primary {
     background-color: #fdfefe; }
     header.navigation nav.primary svg {
-      fill: #162023; }
+      fill: #0084dc; }
     header.navigation nav.primary ul.left, header.navigation nav.primary ul.right {
       margin: 1em 0; }
     header.navigation nav.primary ul.left {
@@ -891,22 +890,26 @@ header.navigation {
         padding: 0.25em 2.25em 0.25em 1em;
         font-size: 0.8em;
         line-height: 1.875;
-        color: #162023;
-        border: 1px solid #50828e;
+        color: #50828e;
+        border: 1px solid #162023;
         background-image: url("images/search.svg");
         background-position: 95% 45%;
         background-size: 15px 15px;
         background-repeat: no-repeat; }
         header.navigation nav.primary ul.left .search input:focus {
-          border-color: #162023; }
+          border-color: #50828e; }
     header.navigation nav.primary ul.right li {
       display: inline-block;
       vertical-align: middle; }
       header.navigation nav.primary ul.right li a {
         padding: 0.5em;
-        color: #50828e; }
+        color: #162023; }
         header.navigation nav.primary ul.right li a:hover {
-          color: #162023; }
+          color: #50828e; }
+    header.navigation nav.primary ul.right #sign-up a {
+      color: #0084dc; }
+      header.navigation nav.primary ul.right #sign-up a:hover {
+        color: #50828e; }
     header.navigation nav.primary ul.right .actions {
       text-align: right;
       padding: 0; }
@@ -920,20 +923,24 @@ header.navigation {
         float: left;
         height: 50px;
         width: 50px;
+        border-top-left-radius: 9px;
+        border-bottom-left-radius: 9px;
         text-align: center;
         font-size: 1.25em;
         line-height: 1.2;
         font-weight: normal;
-        background-color: #50828e;
+        background-color: #0084dc;
         color: #fdfefe; }
         header.navigation nav.primary ul.right .user .notifications:hover {
-          background-color: #162023; }
+          background-color: #50828e; }
         header.navigation nav.primary ul.right .user .notifications.zero {
           display: none; }
       header.navigation nav.primary ul.right .user .avatar {
         width: 50px;
         height: 50px;
         float: left;
+        border-top-right-radius: 9px;
+        border-bottom-right-radius: 9px;
         margin: 0;
         margin-right: 0.75em; }
       header.navigation nav.primary ul.right .user .username {
@@ -943,18 +950,20 @@ header.navigation {
           padding-top: 0;
           font-weight: 400;
           float: left; }
+      header.navigation nav.primary ul.right .user .zero.notifications + .avatar {
+        border-radius: 9px; }
   header.navigation nav.secondary {
     background-color: #fdfefe;
-    border-top: 1px solid #50828e; }
+    border-top: 1px solid #162023; }
     header.navigation nav.secondary ul {
       margin: 0 0 0.3em; }
     header.navigation nav.secondary a {
       line-height: 1em;
       font-weight: normal;
       text-transform: none;
-      color: #50828e; }
+      color: #162023; }
       header.navigation nav.secondary a:hover {
-        color: #162023;
+        color: #50828e;
         text-decoration: none; }
 
 #logged-in {
