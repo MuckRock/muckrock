@@ -12,13 +12,13 @@ $medium-breakpoint:     321px;
 $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
 $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 
-$color-white:           #FDFEFE;
-$color-black:           #162023;
-$color-grey:            #acbecc;
-$color-primary:         #0084DC;
-$color-success:         #3CD173;
-$color-failure:         #DC4A00;
-$color-default:         #50828e;
+$color-white:           #fbfbfa;
+$color-black:           #312c24;
+$color-grey:            #d2cbc1;
+$color-primary:         #ca2e25;
+$color-success:         #8db62c;
+$color-failure:         #e2c906;
+$color-default:         #716fc2;
 $color-disabled:        #acbecc;
 
 $base-font-weight:      400;
@@ -38,6 +38,11 @@ $base-gradient-darken:  8%;
 // Combine Atomic Elements
 
 @import 'layouts';
+
+// One Off
+// These exceptional elements exist only once
+
+@import 'nav';
 
 // Temporary Imports
 // Provides layout for index.html only

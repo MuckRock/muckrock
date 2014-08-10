@@ -37,6 +37,7 @@
             &:hover {
                 color: $color-white;
                 @include background-gradient($color);
+                text-decoration: none !important;
             }
             &:focus {
                 $focus-color: lighten($color, 10%);
@@ -122,15 +123,35 @@
 
 .panel, .panel.default { @extend %panel;
     @include panel-color($color-default);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
 }
 .panel.primary { @extend %panel;
     @include panel-color($color-primary);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
 }
 .panel.success { @extend %panel;
     @include panel-color($color-success);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
 }
 .panel.failure { @extend %panel;
     @include panel-color($color-failure);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
 }
 
 .panel.disabled { @extend %panel;
@@ -186,12 +207,22 @@ object.message { @extend %panel;
     @include span-columns(12);
     & > section.meta {
         display: block;
-        margin: $base-vertical-rhythm/4 0 $base-vertical-rhythm/2;
+        width: 100%;
         text-align: left;
-        line-height: 1em;
-        img { max-width: 100%; width: 50px; }
+        overflow: hidden;
+        img { 
+            max-width: 100%; 
+            width: 50px;
+            margin: 0;
+            border-radius: $base-border-radius;
+        }
+        small {
+            display: block;
+            line-height: 1.5em;
+        }
         @include fill-parent();
         @include media($message-layout) {
+            margin: $base-vertical-rhythm/2 0 $base-vertical-rhythm/2;
             @include span-columns(2 of 12);
             img { max-width: 100%; width: 100%; }
         }
@@ -322,5 +353,3 @@ object.progress-bar {
         @include classifier(disabled, $color-disabled);
     }
 }
-
-@import 'nav';

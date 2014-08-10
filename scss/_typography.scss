@@ -1,4 +1,4 @@
-@mixin font-sizing($size-multiplier, $line-multiplier:2) {
+@mixin font-sizing($size-multiplier, $line-multiplier:1) {
     $size: 1em * $size-multiplier;
     $line: 1.5em * $line-multiplier;
     font-size: $size;
@@ -104,6 +104,10 @@ hr {
 img, audio, video, embed, iframe {
     max-width: 100%;
     margin: $base-vertical-rhythm/2 0;
+}
+
+img + p {
+    margin-top: 0;
 }
 
 .default { color: $color-default; }

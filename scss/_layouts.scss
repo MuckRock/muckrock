@@ -21,6 +21,7 @@
 // Class Prototype
 article%article {
     @include outer-container;
+    margin: 1em;
     > header {
         margin: $base-vertical-rhythm/2 0;
         h1, h2 {
@@ -53,6 +54,7 @@ article%article {
             @include media($large-layout) { @include font-sizing(1.375, 1.25); }
         }
     }
+    @include media($large-layout) { margin: 2em; }
 }
 
 .post { @extend %article;
