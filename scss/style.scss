@@ -3,10 +3,6 @@
 //
 // Do not appear in compiled CSS
 
-@import                 'normalize';
-@import                 'bourbon/bourbon';
-@import                 'neat/neat';
-
 $large-breakpoint:      769px;
 $medium-breakpoint:     321px;
 $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
@@ -28,16 +24,20 @@ $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
 
+@import                 'normalize';
+@import                 'bourbon/bourbon';
+@import                 'neat/neat';
+
 // Atomic Elements
 // Combine Foundational Elements
 
-@import 'typography';
-@import 'objects';
+@import 'lib/typography';
+@import 'lib/objects';
 
 // Molecular Elements
 // Combine Atomic Elements
 
-@import 'layouts';
+@import 'lib/layouts';
 
 // Temporary Imports
 // Provides layout for index.html only

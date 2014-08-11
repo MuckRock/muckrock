@@ -831,9 +831,11 @@ header.navigation {
   width: 100%;
   margin: 0;
   padding: 0;
-  border-bottom: 2px solid #162023;
+  /*
   position: fixed;
-  top: 0; }
+  top: 0;
+  */
+  margin-bottom: 3em; }
   header.navigation ul {
     margin: 0;
     padding: 0;
@@ -922,7 +924,7 @@ header.navigation {
         display: block;
         float: left;
         height: 50px;
-        width: 50px;
+        width: auto;
         border-top-left-radius: 9px;
         border-bottom-left-radius: 9px;
         text-align: center;
@@ -953,8 +955,7 @@ header.navigation {
       header.navigation nav.primary ul.right .user .zero.notifications + .avatar {
         border-radius: 9px; }
   header.navigation nav.secondary {
-    background-color: #fdfefe;
-    border-top: 1px solid #162023; }
+    background-color: #fdfefe; }
     header.navigation nav.secondary ul {
       margin: 0 0 0.3em; }
     header.navigation nav.secondary a {

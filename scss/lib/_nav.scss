@@ -12,11 +12,13 @@ header.navigation {
     width: 100%;
     margin: 0;
     padding: 0;
-    border-bottom: 2px solid $color-unselected;
-    
+    // border-bottom: 1px solid $color-grey;
+    /*
     position: fixed;
     top: 0;
+    */
     
+    margin-bottom: 3em;
     
     ul { 
         margin: 0;
@@ -177,7 +179,7 @@ header.navigation {
     }
     nav.secondary {
         background-color: $color-secondary;
-        border-top: 1px solid $color-unselected;
+        // border-top: 1px solid $color-grey;
         ul { margin: 0 0 0.3em; }
         a { 
             line-height: 1em;
