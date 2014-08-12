@@ -1,0 +1,25 @@
+{% comment %}
+Message object
+---
+The message object contains:
+* a message body (in html)
+* a date
+* a sender
+* whether it is a reply or not
+{% endcomment %}
+{% if body %}
+    {% if response %}
+    <object class="received message">
+    {% else %}
+    <object class="sent message">
+    {% endif %}
+        <section class="meta">
+            <img src="http://placehold.it/100x100">
+            {% if sender %}<small>{{ sender }}</small>{% endif %}
+            {% if date %}<small>{{ date | date:"m/d/Y" }}</small>{% endif %}
+        </section>
+        <section class="text">
+        {{ body }}
+        </section>
+    </object>
+{% endif %}
