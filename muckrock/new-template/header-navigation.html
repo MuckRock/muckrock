@@ -53,20 +53,17 @@
                     <img class="avatar" src="http://placehold.it/100x100">
                 </div>
                 <div class="username">
-                    <a class="name" href="#">BenJaMoney</a>
-                    <a class="settings" href="#">Settings</a>
-                    <a class="logout" href="#" onclick="toggleMenu()">Log&nbsp;out</a>
+                    <a class="name" href="{% url 'acct-my-profile' %}">BenJaMoney</a>
+                    <a class="settings" href="{% url 'acct-my-profile' %}">Settings</a>
+                    <a class="logout" href="{% url 'acct-logout' %}" onclick="toggleMenu()">Log&nbsp;out</a>
                 </div>
             </li>
             {% else %}
             <li>
-                <a href="#">FAQ</a>
-            </li>
-            <li>
-                <a href="#" onclick="toggleMenu()">Log&nbsp;In</a>
+                <a href="{% url 'acct-login' %}">Log&nbsp;In</a>
             </li>
             <li id="sign-up">
-                <a href="#" >Sign&nbsp;Up</a>
+                <a href="{% url 'acct-register' %}" >Sign&nbsp;Up</a>
             </li>
             {% endif %}
         </ul>

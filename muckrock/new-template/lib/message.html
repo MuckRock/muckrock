@@ -19,7 +19,7 @@ The message object contains:
             {% if date %}<small>{{ date | date:"m/d/Y" }}</small>{% endif %}
         </section>
         <section class="text">
-        {{ body }}
+        {{ body|safe }}
         </section>
     </object>
 {% endif %}
