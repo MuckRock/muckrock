@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% if featured_article %}
+<article class="post">
+    <header>
+        <h1>
+            <a href="{{ featured_article.get_absolute_url }}">
+                {{ featured_article.title }}
+            </a>
+        </h1>
+        <h2>by {{ featured_article.get_authors_names }} on {{ featured_article.pub_date|date:"DATETIME_FORMAT" }}</h2>
+    </header>
+    
+    <section>
+        <p>{% autoescape off %}{{ featured_article.summary }}{% endautoescape %}</p>
+    </section>
+    
+    {% if featured_article.image or featured_article.kicker %}
+    <aside>
+        {% if featured_article.image %}
+        <a href=" {{ featured_article.get_absolute_url }}">
+            <img src="{{ featured_article.image }}" />
+        </a>
+        {% endif %}
+        {% if featured_article.kicker %}
+        <summary>{{ featured_article.kicker }}</summary>
+        {% endif %}
+    </aside>
+    {% endif %}
+</article>
+{% endif %}

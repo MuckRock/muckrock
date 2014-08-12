@@ -1,0 +1,26 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>{% block title %}Muckrock{% endblock %}</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+        <meta name="google-site-verification"
+              content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+        <!-- Load Assets -->
+        <link rel="shortcut icon" href="{{ STATICFILES_DIRS }}/favicon.ico" />
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ SITE_ROOT }}/static/css/style.css" />
+        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+        <!-- End Load Assets -->
+    </head>
+    <body>
+        {% include 'header-navigation.html' %}
+        
+        {% block content %}
+        {% endblock %}
+        
+        {% include 'footer-navigation.html' %}
+    </body>
+</html>
