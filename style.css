@@ -362,6 +362,7 @@ th {
 body {
   color: #162023;
   background-color: #fdfefe;
+  font-family: "Source Sans Pro", "Helvetica Neue", "sans-serif";
   font-weight: 400;
   -webkit-font-feature-settings: "liga", "kern";
   -moz-font-feature-settings: "liga", "kern";
@@ -969,6 +970,57 @@ header.navigation {
 
 #logged-in {
   background-color: red; }
+
+footer {
+  padding: 1.5em 0.5em;
+  background-color: #162023;
+  text-align: center; }
+  footer .footer-container {
+    max-width: 68em;
+    margin-left: auto;
+    margin-right: auto; }
+    footer .footer-container:after {
+      content: "";
+      display: table;
+      clear: both; }
+    footer .footer-container section.about {
+      width: 100%; }
+      @media screen and (min-width: 769px) {
+        footer .footer-container section.about {
+          float: left;
+          display: block;
+          margin-right: 2.35765%;
+          width: 48.82117%; }
+          footer .footer-container section.about:last-child {
+            margin-right: 0; } }
+    footer .footer-container section.sitemap, footer .footer-container section.actions, footer .footer-container section.links {
+      width: 100%; }
+      @media screen and (min-width: 321px) {
+        footer .footer-container section.sitemap, footer .footer-container section.actions, footer .footer-container section.links {
+          float: left;
+          display: block;
+          margin-right: 4.82916%;
+          width: 30.11389%; }
+          footer .footer-container section.sitemap:last-child, footer .footer-container section.actions:last-child, footer .footer-container section.links:last-child {
+            margin-right: 0; } }
+      @media screen and (min-width: 769px) {
+        footer .footer-container section.sitemap, footer .footer-container section.actions, footer .footer-container section.links {
+          float: left;
+          display: block;
+          margin-right: 2.35765%;
+          width: 14.70196%; }
+          footer .footer-container section.sitemap:last-child, footer .footer-container section.actions:last-child, footer .footer-container section.links:last-child {
+            margin-right: 0; } }
+  @media screen and (min-width: 769px) {
+    footer {
+      padding: 1.5em; }
+      footer .footer-container section.about {
+        padding-right: 3em; } }
+  footer p {
+    color: #fdfefe; }
+  @media screen and (min-width: 321px) {
+    footer {
+      text-align: left; } }
 
 article.post > aside, article.question > aside, article.request > aside {
   width: 100%; }
