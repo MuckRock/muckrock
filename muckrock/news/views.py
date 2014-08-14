@@ -18,6 +18,7 @@ from muckrock.sidebar.models import Sidebar
 class NewsDetail(DateDetailView):
     """View for news detail"""
     date_field = 'pub_date'
+    template_name = 'news_single.html'
 
     def get_queryset(self):
         """Get articles for this view"""

@@ -13,14 +13,19 @@
               type="text/css"
               href="{{ SITE_ROOT }}/static/css/style.css" />
         <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
-        <!-- End Load Assets -->
+        <!-- Facebook and Twitter Integration -->
+        <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
+        {% block facebook_open_graph %}
+        {% endblock facebook_open_graph %}
+        {% block twitter_card %}
+        {% endblock twitter_card %}
     </head>
     <body>
-        {% include 'header-navigation.html' %}
+        {% include 'lib/header-navigation.html' %}
         
         {% block content %}
         {% endblock content %}
         
-        {% include 'footer-navigation.html' %}
+        {% include 'lib/footer-navigation.html' %}
     </body>
 </html>

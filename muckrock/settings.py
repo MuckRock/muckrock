@@ -45,6 +45,7 @@ DOGSLOW_LOG_TO_SENTRY = True
 
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
+    ('Allan Lasser', 'lasser.allan+local.server@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -163,7 +164,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(SITE_ROOT, 'new-template'),
-    os.path.join(SITE_ROOT, 'templates'),
+    #os.path.join(SITE_ROOT, 'templates'),
 )
 
 INSTALLED_APPS = (

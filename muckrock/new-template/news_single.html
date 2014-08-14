@@ -1,0 +1,41 @@
+{% extends 'base_single.html' %}
+{% load markdown_deux_tags %}
+
+
+{% block title %}MuckRock &bull; {{ object.title }}{% endblock title %}
+{% block type %}post{% endblock type %}
+
+{% block header %}
+    <dfn>Article</dfn>
+    <h1>{{ object.title }}</h1>
+    <h2>by {{ object.get_authors_names }} on {{ object.pub_date | date:"F jS, Y" }}</h2>
+{% endblock header %}	
+
+{% block main %}
+    {% autoescape off %}
+    {{ object.body | markdown:"trusted" }}
+	{% endautoescape %}
+{% endblock main %}			
+
+{% block aside %}
+    {% if object.image %}
+    <img src="{{ MEDIA_URL }}{{ object.image }}" />
+    {% endif %}
+    {% if object.kicker %}
+    <summary>{{ object.kicker }}</summary>
+    {% endif %}
+    {% if object.foias.exists %}
+    <dl>
+	    <dt>Related Requests</dt>
+		<dd>
+		    <ul class="fois">
+			{% for foia in object.foias.all %}
+			    <li>
+			        <a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a>
+			    </li>
+			{% endfor %}
+		    </ul>
+		</dd>
+	</dl>
+	{% endif %}
+{% endblock aside %}
