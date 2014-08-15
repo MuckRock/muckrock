@@ -1,14 +1,12 @@
 {% extends 'base_single.html' %}
 {% load markdown_deux_tags %}
-
-
 {% block title %}MuckRock &bull; {{ object.title }}{% endblock title %}
 {% block type %}post{% endblock type %}
 
 {% block header %}
     <dfn>Article</dfn>
     <h1>{{ object.title }}</h1>
-    <h2>by {{ object.get_authors_names }} on {{ object.pub_date | date:"F jS, Y" }}</h2>
+    <h2>by {{ object.get_authors_names }} on {{ object.pub_date | date:"F j, Y" }}</h2>
 {% endblock header %}	
 
 {% block main %}

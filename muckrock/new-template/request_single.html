@@ -1,0 +1,71 @@
+{% extends 'base_single.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ foia.title }}{% endblock title %}
+{% block type %}request{% endblock type %}
+
+{% block header %}
+    <dfn>Request</dfn>
+    <h2>{% if foia.date_submitted %}On {{ foia.date_submitted | date:"F j, Y" }}, {% endif %}<a href="{% url 'acct-profile' foia.user.username %}">{{foia.user.username}}</a> requested</h2>
+    <h1>{{ foia.title }}</h1>
+    {% if foia.agency %}
+    <h2>from the {{ foia.agency.link_display|safe }} of {% if foia.jursidiction == "United States of America" %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</h2>
+    {% endif %}
+{% endblock header %}
+
+{% block main %}
+
+
+{% endblock main %}
+
+{% block aside %}
+    <dl>
+        {% if foia.is_embargo %}
+	    <dt>Embargo Notice</dt>
+            {% if foia.embargo_date %}
+            <dd>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</dd>
+            {% else %}
+            <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
+            {% endif %}
+	    {% endif %}
+	
+	    <dt>Status</dt>
+	    <dd>
+	        {% if foia.color_code == "go" %}
+	            {% include 'lib/progress-bar.html' with percentage=foia.percent_complete status="success" %}
+	        {% else %}
+	            {% if foia.color_code == "stop" %}
+	                {% include 'lib/progress-bar.html' with percentage=foia.percent_complete status="failure" %}
+	            {% else %}
+	                {% include 'lib/progress-bar.html' with percentage=foia.percent_complete %}
+	            {% endif %}
+	        {% endif %}
+	    </dd>
+	    
+	    {% if foia.has_crowdfund %}
+	        {% if foia.crowdfund.expired %}
+	    <dt>Crowdfunding Complete</dt>
+	    <dd class="default">${{ foia.crowdfund.payment_received | intcomma }} was raised of ${{ foia.crowdfund.payment_required | intcomma }} needed</dd>
+	        {% else %}
+	    <dt>Crowdfund This Request</dt>
+		<dd class="primary">${{ foia.crowdfund.payment_received | intcomma }} is raised of ${{ foia.crowdfund.payment_required | intcomma }} needed, with {{ foia.crowdfund.date_due | timeuntil }} to go.</dd>
+		<dd><a class="success button" href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Contribute</a></dd>
+		    {% endif %}
+	    {% endif %}
+	    
+	    {% if actions.side %}
+		<dt>Actions</dt>
+		    {% for action in actions.side %}
+			<dd><a class="button" href="{{action.link}}" {% if action.id %}id="{{ action.id }}"{% endif %}>{{action.label}}</a></dd>
+		    {% endfor %}
+    	{% endif %}
+    	
+    	{% get_pingback_list for foia as pingbacks %}
+	    {% if pingbacks %}
+	    <dt>News & Opinion</dt>
+	        {% for pingback in pingbacks %}
+	    <dd><a href="{{pingback.url}}">{{ pingback.title|striptags|safe }}</a></dd>
+		
+	        {% endfor %}
+	    {% endif %}
+
+{% endblock aside %}

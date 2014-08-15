@@ -1,0 +1,33 @@
+{% extends 'base_single.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ object.title }}{% endblock title %}
+{% block type %}question{% endblock type %}
+
+{% block header %}
+    <dfn>Question</dfn>
+    <h2>On {{ object.date | date:"F j, Y" }}, {{ object.user }} asked</h2>
+    <h1>{{ object.title }}</h1>
+{% endblock header %}
+
+{% block main %}
+    {% include 'lib/message.html' with body=object.question|markdown user=object.user date=object.date response=0 %}
+    {% for answer in object.answers.all %}
+        {% if answer.user == object.user %}
+            {% include 'lib/message.html' with body=answer.answer|markdown user=answer.user date=answer.date response=0 %}
+        {% else %}
+            {% include 'lib/message.html' with body=answer.answer|markdown user=answer.user date=answer.date response=1 %}
+        {% endif %}
+    {% endfor %}
+{% endblock main %}
+
+{% block aside %}
+    <dl>
+        {% if object.foia %}
+        <dt>Related Request</dt>
+        <dd><a href="{% url 'foia-detail' jurisdiction=object.foia.jurisdiction.slug jidx=object.foia.jurisdiction.pk idx=object.foia.pk slug=object.foia.slug %}">{{object.foia.title}}</a></dd>
+        {% endif %}
+        <dt>Actions</dt>
+        <dd><a class="primary button" href="{% url 'question-follow' slug=object.slug idx=object.pk %}">Follow</a></dd>
+        <dd><a class="button" href="#">Share</a></dd>
+	</dl>
+{% endblock aside %}

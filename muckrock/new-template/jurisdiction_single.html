@@ -1,0 +1,24 @@
+{% extends 'base_single.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
+{% block type %}jurisdiction{% endblock type %}
+
+{% block header %}
+    <dfn>Jurisdiction</dfn>
+	
+	<h1>{{ jurisdiction.name }}</h1>
+	{% if jurisdiction.parent %}
+	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{jurisdiction.parent.name}}</a></h2>
+    {% endif %}
+    
+    {% if jurisdiction.image %}
+		<img src="{{ MEDIA_URL }}{{ jurisdiction.image }}" />
+	{% endif %}
+{% endblock header %}
+
+{% block main %}
+    {{ jurisdiction.public_notes | markdown:"trusted" }}
+{% endblock main %}
+
+{% block aside %}
+{% endblock aside %}

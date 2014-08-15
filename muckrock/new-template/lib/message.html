@@ -15,7 +15,7 @@ The message object contains:
     {% endif %}
         <section class="meta">
             <img src="http://placehold.it/100x100">
-            {% if sender %}<small>{{ sender }}</small>{% endif %}
+            {% if user %}<small>{{ user }}</small>{% endif %}
             {% if date %}<small>{{ date | date:"m/d/Y" }}</small>{% endif %}
         </section>
         <section class="text">

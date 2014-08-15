@@ -679,7 +679,11 @@ object.message {
     width: 100%; }
     object.message > section.meta img {
       max-width: 100%;
-      width: 50px; }
+      width: 50px;
+      margin-bottom: 0; }
+    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta dt, object.message > section.meta .grid > aside button, .grid > aside object.message > section.meta button {
+      display: block;
+      margin-top: 0.5em; }
     @media screen and (min-width: 969px) {
       object.message > section.meta {
         float: left;
@@ -939,10 +943,11 @@ header > nav.secondary {
   @media screen and (min-width: 540px) {
     header > nav.secondary {
       display: block;
-      padding: 0 2em 2em; } }
+      padding: 0 2em 1em; } }
 
 footer {
-  padding: 1.5em 1em;
+  margin-top: 1.5em;
+  padding: 1.5em;
   background-color: #162023;
   text-align: left; }
   footer .footer-container {
@@ -986,7 +991,7 @@ footer {
     padding-left: 0; }
   @media screen and (min-width: 769px) {
     footer {
-      padding: 1.5em; }
+      padding: 2em; }
       footer .footer-container section.about {
         padding-right: 3em; } }
   footer p {
@@ -998,91 +1003,95 @@ footer {
   footer #footer-menu {
     border-color: #162023; }
 
-article.post > aside, article.question > aside, article.request > aside {
+article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
   width: 100%; }
   @media screen and (min-width: 321px) {
-    article.post > aside, article.question > aside, article.request > aside {
+    article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
       float: left;
       display: block;
       margin-right: 4.82916%;
       width: 30.11389%;
       padding: 0 0 0 2.35765%; }
-      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child {
+      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child, article.jurisdiction > aside:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 769px) {
-    article.post > aside, article.question > aside, article.request > aside {
+    article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 31.76157%; }
-      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child {
+      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child, article.jurisdiction > aside:last-child {
         margin-right: 0; } }
 
-article.post > section, article.question > section, article.request > section {
+article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
   width: 100%; }
   @media screen and (min-width: 321px) {
-    article.post > section, article.question > section, article.request > section {
+    article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
       float: left;
       display: block;
       margin-right: 4.82916%;
       width: 65.05695%; }
-      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child {
+      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child, article.jurisdiction > section:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 769px) {
-    article.post > section, article.question > section, article.request > section {
+    article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 65.88078%; }
-      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child {
+      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child, article.jurisdiction > section:last-child {
         margin-right: 0; } }
 
-article.post, article.question, article.request {
+article.post, article.question, article.request, article.jurisdiction {
   max-width: 68em;
   margin-left: auto;
-  margin-right: auto; }
-  article.post:after, article.question:after, article.request:after {
+  margin-right: auto;
+  margin: 0 1.5em; }
+  article.post:after, article.question:after, article.request:after, article.jurisdiction:after {
     content: "";
     display: table;
     clear: both; }
-  article.post > header, article.question > header, article.request > header {
+  @media screen and (min-width: 540px) {
+    article.post, article.question, article.request, article.jurisdiction {
+      margin: 0 2em; } }
+  article.post > header, article.question > header, article.request > header, article.jurisdiction > header {
     margin: 0.75em 0;
     width: 100%; }
-    article.post > header h1, article.question > header h1, article.request > header h1, article.post > header h2, article.question > header h2, article.request > header h2 {
+    article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1, article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
       font-weight: 400;
       margin-bottom: 0.375em; }
-    article.post > header h1, article.question > header h1, article.request > header h1 {
+    article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
       font-size: 1.25em;
       line-height: 1.2; }
-    article.post > header h2, article.question > header h2, article.request > header h2 {
+    article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
       font-size: 0.75em;
       line-height: 1.75; }
     @media screen and (min-width: 321px) {
-      article.post > header h1, article.question > header h1, article.request > header h1 {
+      article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
         font-size: 1.5em;
         line-height: 1.25; }
-      article.post > header h2, article.question > header h2, article.request > header h2 {
+      article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
         font-size: 0.875em;
         line-height: 1.71429; } }
     @media screen and (min-width: 769px) {
-      article.post > header h1, article.question > header h1, article.request > header h1 {
+      article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
         font-size: 1.875em;
         line-height: 1.2; }
-      article.post > header h2, article.question > header h2, article.request > header h2 {
+      article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
         font-size: 1em;
         line-height: 1.5; } }
-  article.post > aside summary, article.question > aside summary, article.request > aside summary {
+  article.post > aside summary, article.question > aside summary, article.request > aside summary, article.jurisdiction > aside summary {
     margin: 1.5em 0 0.75em;
     font-weight: 300;
     display: none; }
     @media screen and (min-width: 321px) {
-      article.post > aside summary, article.question > aside summary, article.request > aside summary {
+      article.post > aside summary, article.question > aside summary, article.request > aside summary, article.jurisdiction > aside summary {
         display: block;
         margin: 0.75em 0;
         font-size: 1.25em;
         line-height: 1.44; } }
     @media screen and (min-width: 769px) {
-      article.post > aside summary, article.question > aside summary, article.request > aside summary {
+      article.post > aside summary, article.question > aside summary, article.request > aside summary, article.jurisdiction > aside summary {
         font-size: 1.375em;
         line-height: 1.36364; } }
 
