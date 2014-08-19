@@ -67,7 +67,7 @@ def detail(request, fed_slug, state_slug, local_slug):
         context['sidebar'] = Sidebar.objects.get_text('jurisdiction')
     collect_stats(jurisdiction, context)
 
-    return render_to_response('jurisdiction_single.html', context,
+    return render_to_response('details/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
 def list_(request):

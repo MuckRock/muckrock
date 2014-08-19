@@ -88,8 +88,7 @@ class Jurisdiction(models.Model, RequestHelper):
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
-    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True,
-                                  resize_source={'size': (372, 233), 'crop': 'smart'})
+    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True)
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
 

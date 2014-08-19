@@ -19,9 +19,9 @@ article_date_list_args = dict(article_args, date_field='pub_date', allow_empty=T
 
 urlpatterns = patterns('',
         url(r'^$',          RedirectView.as_view(url='archives'), name='news-index'),
-        url(r'^archives/$', views.List.as_view(), name='news-archive'),
+        url(r'^archives/$', views.List.as_view(template_name='lists/news_list.html'), name='news-archive'),
         url(r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/(?P<slug>[-\w\d]+)/$',
-                            views.NewsDetail.as_view(), name='news-detail'),
+                            views.NewsDetail.as_view(template_name='details/news_detail.html'), name='news-detail'),
         url(r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/$',
                             DayArchiveView.as_view(**article_date_list_args),
                             name='news-archive-day'),

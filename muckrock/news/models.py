@@ -40,7 +40,7 @@ class Article(models.Model):
             help_text='Articles will not appear on the site until their "publish date".')
     foias = models.ManyToManyField(FOIARequest, related_name='articles', blank=True, null=True)
     image = ThumbnailerImageField(upload_to='news_images', blank=True, null=True,
-                                  resize_source={'size': (510, 233), 'crop': 'smart'})
+                                  resize_source={'size': (600, 400), 'crop': 'smart'})
 
     objects = ArticleManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)

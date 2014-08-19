@@ -25,7 +25,6 @@ from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
 class Detail(DetailView):
     """Question detail view"""
     model = Question
-    template_name = "question_single.html"
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""

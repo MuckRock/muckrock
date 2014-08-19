@@ -1,0 +1,117 @@
+{% extends 'details/base_detail.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
+{% block type %}jurisdiction{% endblock type %}
+
+{% block header %}
+    <dfn>Jurisdiction</dfn>
+	<h1>{{ jurisdiction.name }}</h1>
+	{% if jurisdiction.parent %}
+	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{jurisdiction.parent.name}}</a></h2>
+    {% endif %}
+{% endblock header %}
+
+{% block main %}
+
+
+
+    {% if jurisdiction.image %}
+    <figure><img src="{{ MEDIA_URL }}{{ jurisdiction.image }}"></figure>
+        {% if jurisdiction.image_attr_line %}
+    <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
+        {% endif %}
+    {% endif %}
+
+    <h3>Latest Requests</h3>
+    {% if foia_requests %}
+    <table>
+        <tr class="odd">
+            <th width="50%">Title</th>
+            <th width="20%">Status</th>
+            <th width="30%">Jurisdiction</th>
+        </tr>
+        {% for foia in foia_requests %}
+        <tr class="{% cycle 'even' 'odd' %}">
+            <td>
+                <a href="{% if request.user == foia.user and foia.status == "started" %}{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% else %}{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% endif %}">{{ foia.title }}</a>
+            </td>
+            <td>
+                {% if foia.color_code == "stop" %}
+                    <span class="failure">
+                {% else %}
+                    {% if foia.color_code == "go" %}
+                    <span class="success">
+                    {% else %}
+                    <span class="default">
+                    {% endif %}
+                {% endif %}
+                {{ foia.get_status_display }}</span>
+            </td>
+            <td>{{ foia.jurisdiction }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}" class="button">View All</a>
+    {% else %}
+    <h4>No requests have been filed yet.</h4>
+    {% endif %}    
+
+    {% if jurisdiction.agencies.count %}
+    <table>
+        <tr class="odd">
+            <th width="50%">Agency</th>
+            <th width="20%">Requests</th>
+            <th width="30%">Pages Released</th>
+        </tr>
+        {% for agency in jurisdiction.agencies.get_approved %}
+        <tr class="{% cycle 'even' 'odd' %}">
+            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
+            <td>{{ agency.foiarequest_set.count }}</td>
+            <td>{{ agency.total_pages }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+	
+{% endblock main %}
+
+{% block aside %}
+
+<dfn>Allowed Response Time</dfn>
+    {% with jurisdiction.get_days as days %}
+        {% if days %}
+            <p>{{days}} day{{days|pluralize}}</p>
+        {% else %}
+            <p>No limit</p>
+        {% endif %}
+    {% endwith %}
+
+    <dfn>Average Response Time</dfn>
+    <p>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</p>
+
+    <dfn>Requests</dfn>
+    {% if num_submitted %}
+    <ul>{{ num_submitted }} Filed in Total
+        {% if num_no_docs %}<li class="success">{{ num_no_docs }} No Responsive Documents</li>{% endif %}
+        {% if num_done %}<li class="success">{{ num_done }} Complete</li>{% endif %}
+        {% if num_ack %}<li class="default">{{ num_ack }} Awaiting Acknowledgement</li>{% endif %}
+        {% if num_processed %}<li class="default">{{ num_processed }} Awaiting Response</li>{% endif %}
+        {% if num_fix %}<li class="default">{{ num_fix }} Requiring Action</li>{% endif %}
+        {% if num_rejected %}<li class="failure">{{ num_rejected }} Rejected</li>{% endif %}
+        {% if num_overdue %}<li class="failure">{{ num_overdue }} Overdue</li>{% endif %}
+    </ul>
+    {% else %}
+    <p>None</p>
+    {% endif %}
+
+    <dfn>Appeals</dfn>
+    {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
+    {% if num_appealing %}<p class="default">{{num_appealing}} appeal{{ num_appealing | pluralize }} awaiting response</p>{% endif %}
+    {% if num_appeals_done %}<p class="success">{{num_appeals_done}} successful appeals</p>{% endif %}
+    {% if num_appeals_rejected %}<p class="failure">{{num_appeals_rejected}} denied appeals</p>{% endif %}
+    {% if num_appeals_response_time %}<p>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</p>{% endif %}
+    {% else %}
+    <p>None</p>
+    {% endif %}
+
+{% endblock aside %}
