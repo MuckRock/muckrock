@@ -189,7 +189,15 @@ object.message { @extend %panel;
         margin: $base-vertical-rhythm/4 0 $base-vertical-rhythm/2;
         text-align: left;
         line-height: 1em;
-        img { max-width: 100%; width: 50px; }
+        img {
+            max-width: 100%;
+            width: 50px;
+            margin-bottom: 0;
+        }
+        small {
+            display: block;
+            margin-top: 0.5em;
+        }
         @include fill-parent();
         @include media($message-layout) {
             @include span-columns(2 of 12);
@@ -321,4 +329,14 @@ object.progress-bar {
         @include classifier(default, $color-default);
         @include classifier(disabled, $color-disabled);
     }
+}
+
+table {
+    width: 100%;
+    margin: 1.5em 0;
+    border-collapse: collapse;
+    border-radius: $base-border-radius;
+    &, th, td { border: $base-border-width solid $color-grey; }
+    th, td { padding: 0.25em 0.5em; }
+    tr.odd { background-color: darken($color-white, 5%); }
 }

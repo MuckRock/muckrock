@@ -6,201 +6,307 @@
 $color-menu: $color-white;
 $color-secondary: $color-white;
 $color-unselected: $color-black;
-$color-selected: $color-default;
+$color-selected: $color-primary;
 
-header.navigation {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    // border-bottom: 1px solid $color-grey;
-    /*
-    position: fixed;
-    top: 0;
-    */
-    
-    margin-bottom: 3em;
-    
-    ul { 
-        margin: 0;
-        padding: 0;
+$small-menu-breakpoint: 540px;
+
+nav {
+    overflow: hidden;
+    @include box-sizing(border-box);
+    ul {
         list-style-type: none;
+        margin: 0;
+        padding-left: 0;
+        .left { margin-bottom: 0.75em; }
+    }
+}
+
+ul.button-group {
+    li:first-child a.button {
+        @include border-left-radius($base-border-radius);
+        border-right: none;
+    }
+    li:last-child a.button {
+        @include border-right-radius($base-border-radius);
+        border-right: $base-border-width solid $color-unselected;
+        border-left: none;
+        &:hover { border-right-color: $color-selected; }
+    }
+    li:first-child + li:last-child {
+        a.button {
+            border-left: $base-border-width solid $color-unselected;
+            &:hover { border-left-color: $color-selected; }
+        }
+    }
+}
+
+nav.primary {
+    padding: 0.75em 1.5em 0;
+    
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding-left: 0; }
+    
+    ul.left, ul.right {
+        display: table;
+        width: 100%;
+        li {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            a {
+                display: block;
+                width: 100%;
+                padding: 0.375em 1.25em;
+                border: $base-border-width solid $color-unselected;
+                border-radius: 0;
+                color: $color-unselected;
+                &:hover {
+                    text-decoration: none;
+                    color: $color-menu;
+                    background-color: $color-selected;
+                    border-color: $color-selected;
+                }
+            }
+        }
+        @extend ul.button-group;
     }
     
+    @media screen and (max-width: $small-menu-breakpoint) {
+        ul.right { display: none !important; }
+    }
+    
+    ul.left {
+        #left-menu-button {
+            @include border-right-radius($base-border-radius);
+            border-left: none;
+        }
+        .trademark + li > a {
+            @include border-left-radius($base-border-radius);
+        }
+    }
+    
+    @media screen and (min-width: $small-menu-breakpoint) {
+         padding: 2em 2em 0;
+         ul {
+            &.left, &.right { width: auto; }
+            &.left {
+                float: left;
+                #new-request {
+                    border-right: $base-border-width solid $color-unselected;
+                    border-radius: $base-border-radius;
+                    &:hover {
+                        border-right-color: $color-selected;
+                    }
+                }            
+                #left-menu-button { display: none; }
+            }
+            &.right { display: table; float: right; }
+        }
+    }
+    
+    /* Logo */
+    
+    %logo {
+        border: none;
+        padding: 0 0.5em 0 0;
+        &:hover {
+            background: none;
+            svg > g { fill: $color-selected; }
+        }
+    }
+    #muckrock-trademark { @extend %logo; display: none; }
+    #muckrock-logo { @extend %logo;
+        display: block;
+        padding-top: 0em;
+        > svg {
+            display: block;
+            height: 2em;
+            width: 2em;
+        }
+    }
+    @media screen and (min-width: 680px) {
+        #muckrock-trademark {
+            display: block;
+            padding-top: 0.375em;
+            padding-right: 1em;
+        }
+        #muckrock-logo { display: none; }
+    }
+}
+
+nav.secondary {
+    display: none;
     li {
         display: inline-block;
-        width: auto;
-        vertical-align: middle;
-        margin-left: 1em;
+        margin: 0 0.75em;
         &:first-child {
             margin-left: 0;
         }
-    }
-    
-    a {
-        @include font-sizing(0.9, 1);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: bold;
-        display: block;
-        line-height: 0.9em;
-        &:hover {
-            text-decoration: none;
-        }
-    }
-    
-    .button {
-        font-weight: normal;
-        border-color: $color-unselected;
-        color: $color-unselected;
-        &:hover {
-            border-color: $color-selected;
-            background: $color-selected;
-            color: $color-menu !important;
-        }
-    }
-    
-    nav {
-        display: block;
-        overflow: hidden;
-        padding: 0.25em 2em;
-        ul.left {
-            display: block;
-            float: left;
-        }
-        ul.right {
-            display: block;
-            float: right;
-        }
-    }
-    
-    nav.primary {
-        background-color: $color-menu;
-        svg {
-            fill: $color-primary;
-        }
-        ul.left, ul.right { margin: 1em 0;}
-        ul.left {
-            
-            //position: relative;
-            margin-top: 1em;
-            
-            li {
-                display: inline-block;
-                vertical-align: middle;
-            }
-            
-            //.trademark { padding-top: 0.5em; }
-            .search {
-                //padding-top: 0.25em;
-                input {
-                    //position: absolute;
-                    //top: 0;
-                    width: 15em;
-                    margin: 0;
-                    padding: 0.25em 2.25em 0.25em 1em;
-                    @include font-sizing(0.8, 1);
-                    color: $color-selected;
-                    border: 1px solid $color-unselected;
-                    background-image: url('images/search.svg');
-                    background-position: 95% 45%;
-                    background-size: 15px 15px;
-                    background-repeat: no-repeat;
-                    &:focus { border-color: $color-selected; }
-                }
-            }
-        }
-        ul.right {
-            
-            li {
-                display: inline-block;
-                vertical-align: middle;
-                a {
-                    padding: 0.5em;
-                    color: $color-unselected;
-                    &:hover { color: $color-selected; }
-                }
-            }
-            #sign-up a {
-                color: $color-primary;
-                &:hover {
-                    color: $color-default;
-                }
-            }
-            .actions {
-                text-align: right;
-                padding: 0;
-                a + a {
-                    padding-top: 0;
-                }
-            }
-            .user {
-                overflow: hidden;
-                margin-left: 0.75em;
-                .notifications {
-                    display: block;
-                    float: left;
-                    height: 50px;
-                    width: auto;
-                    @include border-left-radius($base-border-radius);
-                    text-align: center;
-                    @include font-sizing(1.25, 1);
-                    font-weight: normal;
-                    background-color: $color-primary;
-                    color: $color-menu;
-                    &:hover {
-                        background-color: $color-selected;
-                    }
-                    &.zero {
-                        display: none;
-                    }
-                }
-                .avatar {
-                    width: 50px;
-                    height: 50px;
-                    float: left;
-                    @include border-right-radius($base-border-radius);
-                    margin: 0;
-                    margin-right: 0.75em;
-                }
-                .username {
-                    float: right;
-                    overflow: hidden;
-                    .settings, .logout {
-                        padding-top: 0;
-                        font-weight: 400;
-                        float: left;
-                    }
-                }
-                .zero.notifications + .avatar {
-                    border-radius: $base-border-radius;
-                }
-            }
-        }
-    }
-    nav.secondary {
-        background-color: $color-secondary;
-        // border-top: 1px solid $color-grey;
-        ul { margin: 0 0 0.3em; }
-        a { 
-            line-height: 1em;
-            font-weight: normal;
-            text-transform: none;
+        a {
             color: $color-unselected;
-            &:hover { 
+            &:hover {
                 color: $color-selected;
                 text-decoration: none;
             }
         }
     }
+    padding: 0.75em 1.5em;
+    @media screen and (min-width: $small-menu-breakpoint ) {
+        display: block;
+        padding: 1em 2em;
+    }
 }
 
-#logged-in {
-    background-color: red;
-}
+nav.sidebar {
+    width: 100%;
+    padding: 2em 1em 0;
+    color: $color-white;
+    background: $color-black;
+    border-left: $base-border-width solid $color-white;
+    
+    @media screen and (min-width: 620px) { padding: 2em 1em 0; }
+    @media screen and (min-width: 1070px) { padding: 2em 1.5em 0; }
+    @media screen and (min-width: 1400px) { padding: 2em 2em 0; }
+    
+    dfn { padding-bottom: 0.75em; }
+    
+    ul {
+        display: table;
+        width: 100%;
+        margin: 0.75em 0;
+        text-align: center;
+        li {
+            display: table-cell;
+            padding: 0.5em;
+        }
+        li:first-child { padding-left: 0; }
+        li:last-child { padding-right: 0; }
+        a {
+            display: block;
+            padding: 0.75em;
+            line-height: 0;
+            border-radius: $base-border-radius;
+            background-color: darken($color-black, 4%);
+        }
+    }
+    
+    .account-links {
+        li { padding: 0.5em; padding-bottom: 0; }
+        li:first-child { padding-left: 0; }
+        li:last-child { padding-right: 0; }
+        a {
+            padding: 1.5em;
+            text-decoration: none;
+            color: $color-grey;
+            &:hover { background-color: $color-selected; color: $color-white; }
+        }
+        
+        @media screen and (max-width: 1100px) {
+            font-size: 0.9em;
+            a { padding: 2em 0.75em; }
+            li { padding: 0.25em 0.25em 0; }
+        }
+    }
+    
+    .social-links a {
+        svg {
+            height: 1em;
+            width: auto;
+            fill: $color-grey;
+        }
+        &:hover {
+            background: $color-selected;
+            svg { fill: $color-white; }
+        }
+    }
+    
+    .spotlight {
+        img { margin: 0; }
+        h1 { @extend h6; font-size: 98%; line-height: 1.2em; }
+        p { @extend small; line-height: 1.2em; }
+    }
+    
+    fieldset {
+        width: 100%;
+        margin: 0;
+        input {
+            @include border-right-radius(0);
+            margin-right: 0;
+            height: 2.5rem;
+            width: 75%;
+            float: left;
+            padding-left: 0.75em;
+            padding-right: 0.5em;
+            color: $color-white;
+            @include placeholder { color: $color-grey; }
+            font-size: 0.9em;
+            background: lighten($color-black, 8%);
+            border: none;
+            &:focus {
+                outline: none;
+                border: $base-border-width solid $color-selected;
+            }
+            & + span.input-button { 
+                @include border-right-radius($base-border-radius);
+                @include border-left-radius(0);
+                @include box-sizing(border-box);
+                cursor: pointer;
+                display: inline-block;
+                float: right;
+                width: 25%;
+                height: 2.5rem;
+                text-align: center;
+                border: $base-border-width solid darken($color-black, 3%);
+                background: darken($color-black, 3%);
+                color: $color-grey;
+                clear: right;
+                svg {
+                    display: inline-block;
+                    margin-top: 0.25em;
+                    height: 1.2em;
+                    width: auto;
+                    vertical-align: middle;
+                    fill: $color-grey;
+                }
+                &:hover {
+                    color: $color-white;
+                    border-color: $color-selected;
+                    background: $color-selected;
+                    svg { fill: $color-white; }
+                }
+            }
+            &:focus + span.input-button {
+                color: $color-selected;
+                border-color: $color-selected;
+                background-color: $color-selected;
+                svg { fill: $color-white; }
+            }
+            &#search-button { background-image: url('images/search.svg'); }
+            &#newsletter-button { background-image: url('images/email.svg'); }
+            &#search-button, &#newsletter-button {
+                background-position: center center;
+                background-repeat: no-repeat;
+                background-size: 50% 50%;
+                height: 2.5rem;
+                font-size: 0px;
+            }
 
-footer {
-    // Layout
-    .footer-container {
+        }
+    }
+    .button-group {
+        font-size: 0.8em;
+    }
+}
+    
+
+.footer-container {
+    display: inline-block;
+    width: 100%;
+    margin: 1.5em 0 -0.5em;
+    overflow: hidden;
+    footer {
         @include outer-container;
         section.about {
             @include fill-parent();
@@ -213,17 +319,28 @@ footer {
             @include media($medium-layout) { @include span-columns(2); }
             @include media($large-layout) { @include span-columns(2); }
         }
+
     }
     // Spacing
-    padding: 1.5em 0.5em;
+    padding: 1.5em;
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
     @include media($large-layout) {
-        padding: 1.5em;
-        .footer-container section.about { padding-right: 3em; }
+        padding: 2em;
+        footer section.about { padding-right: 3em; }
     }
     
     background-color: $color-black;
     p { color: $color-white; }
     
-    text-align: center;
-    @include media($medium-layout) { text-align: left; }
+    text-align: left;
+    .copyright {
+        margin-top: 2em;
+        color: $color-grey;
+    }
+    
+    #footer-menu { border-color: $color-black; }
+    // @include media($medium-layout) { #footer-menu { display: none; } }
 }
