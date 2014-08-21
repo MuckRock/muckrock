@@ -362,18 +362,14 @@ th {
 body {
   color: #162023;
   background-color: #fdfefe;
+  font-size: 16px;
   font-family: "Source Sans Pro", "Helvetica Neue", "sans-serif";
   font-weight: 400;
+  line-height: 24px;
   -webkit-font-feature-settings: "liga", "kern";
   -moz-font-feature-settings: "liga", "kern";
   -ms-font-feature-settings: "liga", "kern";
-  font-feature-settings: "liga", "kern";
-  font-size: 16px;
-  line-height: 24px; }
-  @media screen and (min-width: 321px) {
-    body {
-      font-size: 16px;
-      line-height: 24px; } }
+  font-feature-settings: "liga", "kern"; }
   @media screen and (min-width: 769px) {
     body {
       font-size: 18px;
@@ -387,27 +383,33 @@ h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
 
 h1 {
   font-size: 2em;
-  line-height: 1.5; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 h2 {
   font-size: 1.875em;
-  line-height: 1.6; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 h3 {
   font-size: 1.75em;
-  line-height: 1.71429; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 h4 {
   font-size: 1.5em;
-  line-height: 2; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 h5 {
   font-size: 1.375em;
-  line-height: 2.18182; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 h6, nav.sidebar .spotlight h1 {
   font-size: 1.25em;
-  line-height: 2.4; }
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 p {
   margin: 0.75em 0; }
@@ -429,24 +431,28 @@ blockquote {
 
 small, dfn, fieldset label, dt, figcaption, nav.sidebar .spotlight p, .grid > aside button {
   font-size: 0.8em;
-  line-height: 0.9375;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
   font-style: normal; }
 
 code {
+  font-size: 0.8em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
   font-family: 'Source Code Pro';
-  margin: 0.75em 0 1.5em;
-  padding: 1.5em;
-  color: #fdfefe;
-  background-color: #162023; }
-  code i {
+  padding: 0.25em 0.75em;
+  color: #162023;
+  background-color: #cae4e4;
+  border-radius: 4.5px; }
+  code i, code em {
     font-style: normal;
-    color: #3cd173; }
-  code b {
-    font-weight: normal;
     color: #0084dc; }
+  code b, code strong {
+    font-weight: normal;
+    color: #dc4a00; }
   code u {
     text-decoration: none;
-    color: #dc4a00; }
+    color: #3cd173; }
 
 dfn, fieldset label, dt {
   display: block;
@@ -479,7 +485,8 @@ table th {
   font-weight: 400;
   text-align: left;
   font-size: 0.9em;
-  line-height: 1.66667;
+  line-height: 1.66667em;
+  margin: 0.41667em 0;
   vertical-align: top; }
 table td {
   vertical-align: bottom; }
@@ -761,10 +768,12 @@ object.message {
       display: block; }
       .feed-item > header div + div {
         font-size: 0.9em;
-        line-height: 1.66667; }
+        line-height: 1.66667em;
+        margin: 0.41667em 0; }
   .feed-item .button {
     font-size: 0.9em;
-    line-height: 1.66667;
+    line-height: 1.66667em;
+    margin: 0.41667em 0;
     line-height: 1.5em;
     float: left; }
 
@@ -990,7 +999,7 @@ nav.secondary {
 
 nav.sidebar {
   width: 100%;
-  padding: 2em 1em 0;
+  padding: 2em 1em 1em;
   color: #fdfefe;
   background: #162023;
   border-left: 1px solid #fdfefe; }
@@ -1196,8 +1205,12 @@ nav.sidebar {
   .footer-container #footer-menu {
     border-color: #162023; }
 
+/* Allows for full-height elements with CSS */
 html, body {
   min-height: 100%; }
+
+article.post > header, article.question > header, article.request > header, article.jurisdiction > header {
+  width: 100%; }
 
 article.post, article.question, article.request, article.jurisdiction {
   max-width: 68em;
@@ -1212,31 +1225,27 @@ article.post, article.question, article.request, article.jurisdiction {
     article.post, article.question, article.request, article.jurisdiction {
       margin: 0 2em; } }
   article.post > header, article.question > header, article.request > header, article.jurisdiction > header {
-    width: 100%;
     margin: 0.75em 0; }
     article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1, article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
-      font-weight: 400;
-      margin-bottom: 0.375em; }
-    article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
-      font-size: 1.25em;
-      line-height: 1.2; }
-    article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
-      font-size: 0.75em;
-      line-height: 1.75; }
+      font-weight: 400; }
     @media screen and (min-width: 321px) {
       article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
         font-size: 1.5em;
-        line-height: 1.25; }
+        line-height: 1.53333em;
+        margin: 0.38333em 0; }
       article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
         font-size: 0.875em;
-        line-height: 1.71429; } }
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
     @media screen and (min-width: 769px) {
       article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
         font-size: 1.875em;
-        line-height: 1.2; }
+        line-height: 1.44444em;
+        margin: 0.36111em 0; }
       article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
         font-size: 1em;
-        line-height: 1.5; } }
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
   article.post summary, article.question summary, article.request summary, article.jurisdiction summary {
     margin: 1.5em 0 0.75em;
     font-weight: 300;
@@ -1246,11 +1255,13 @@ article.post, article.question, article.request, article.jurisdiction {
         display: block;
         margin: 0.75em 0;
         font-size: 1.25em;
-        line-height: 1.44; } }
+        line-height: 1.55556em;
+        margin: 0.38889em 0; } }
     @media screen and (min-width: 769px) {
       article.post summary, article.question summary, article.request summary, article.jurisdiction summary {
         font-size: 1.375em;
-        line-height: 1.36364; } }
+        line-height: 1.53333em;
+        margin: 0.38333em 0; } }
 
 article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
   width: 100%; }
@@ -1309,6 +1320,11 @@ article.post > section, article.question > section, article.request > section, a
   nav.primary ul.right {
     display: none; } }
 @media screen and (max-width: 540px) {
+  .sidebar {
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1em; }
+
   nav.primary ul.right {
     display: none; } }
 @media screen and (max-width: 1023px) {
@@ -1316,8 +1332,8 @@ article.post > section, article.question > section, article.request > section, a
     width: 100%; }
 
   #sidebar-menu {
-    width: 75%;
-    margin-right: -75%; }
+    width: 300px;
+    margin-right: -300px; }
 
   #right-menu-button {
     display: block; }
@@ -1329,7 +1345,7 @@ article.post > section, article.question > section, article.request > section, a
     margin-right: 0; }
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
-      margin-left: -75%;
+      margin-left: -300px;
       -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
@@ -1339,7 +1355,8 @@ article.post > section, article.question > section, article.request > section, a
 @media screen and (min-width: 321px) {
   .post p:first-of-type {
     font-size: 1.2em;
-    line-height: 1.5625; } }
+    line-height: 1.53333em;
+    margin: 0.38333em 0; } }
 
 .grid {
   max-width: 68em;

@@ -29,16 +29,9 @@ $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
 
-// Atomic Elements
-// Combine Foundational Elements
-
 @import 'lib/typography';
 @import 'lib/objects';
 @import 'lib/nav';
-
-// Molecular Elements
-// Combine Atomic Elements
-
 @import 'lib/layouts';
 
 // Temporary Imports

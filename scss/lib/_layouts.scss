@@ -1,4 +1,11 @@
+/* Allows for full-height elements with CSS */
 html, body { min-height: 100%; }
+
+// Class Definitions
+
+// Sizing and spacing
+
+%row { @include row(); }
 
 %full { @include fill-parent(); }
 
@@ -16,26 +23,31 @@ html, body { min-height: 100%; }
     @include media($large-layout) { @include span-columns(3); }
 }
 
+// Layouts
 %article {
     @include outer-container;
     margin: 0 1.5em;
     @media screen and (min-width: 540px) { margin: 0 2em; }
-    > header {
-        @include fill-parent();
+
+    > header { @extend %full;
         margin: $base-vertical-rhythm/2 0;
         h1, h2 {
             font-weight: 400;
-            margin-bottom: $base-vertical-rhythm/4; }
-        h1 { @include font-sizing(1.25, 1); }
-        h2 { @include font-sizing(0.75, 0.875); }
+//            margin-bottom: $base-vertical-rhythm/4;
+        }
+        //h1 { @include font-sizing(1.25, 1.5); }
+        //h2 { @include font-sizing(0.75, 0.875); }
         
         @include media($medium-layout) {
             h1 { @include font-sizing(1.5, 1.25); }
-            h2 { @include font-sizing(0.875, 1); } }
+            h2 { @include font-sizing(0.875); }
+        }
         @include media($large-layout) {
             h1 { @include font-sizing(1.875, 1.5); }
-            h2 { @include font-sizing(1, 1); } }
+            h2 { @include font-sizing(1); }
+        }
     }
+    
     summary { 
         margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
         font-weight: 300;
@@ -90,12 +102,17 @@ $sidebar-menu-width: 25%;
     nav.primary ul.right { display: none; }
 }
 
-@media screen and (max-width: 540px) { 
+@media screen and (max-width: 540px) {
+    .sidebar {
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 1em;
+    }
     nav.primary ul.right { display: none; }
 }
 
 @media screen and (max-width: 1023px) {
-    $menu-width: 75%;
+    $menu-width: 300px;
     $animation: all 0.5s $ease-out-quint;
     .container, footer { width: 100%; }
     #sidebar-menu { width: $menu-width; margin-right: -$menu-width; }
