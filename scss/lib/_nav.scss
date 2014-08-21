@@ -14,18 +14,59 @@ nav {
     overflow: hidden;
     @include box-sizing(border-box);
     ul {
-        list-style-type: none;
+        display: table;
         margin: 0;
         padding-left: 0;
-        .left { margin-bottom: 0.75em; }
+        list-style-type: none;
+        .left {
+            margin-bottom: 0.75em;
+            float: left;
+        }
+        .right { float: right; }
+        .left, .right {
+            display: table;
+            width: auto;
+        }
+        @media screen and (max-width: $small-menu-breakpoint) {
+            .left, .right {
+                width: 100%;
+                float: none;
+            }
+        }
     }
 }
 
-ul.button-group {
-    li:first-child a.button {
-        @include border-left-radius($base-border-radius);
-        border-right: none;
+nav.primary {
+    padding: 0.75em 1.5em 0;
+    
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding-left: 0;
     }
+    
+    li {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+        a {
+            display: block;
+            width: 100%;
+            padding: 0.375em 1.25em;
+            border: $base-border-width solid $color-unselected;
+            border-radius: 0;
+            color: $color-unselected;
+            &:hover {
+                text-decoration: none;
+                color: $color-menu;
+                background-color: $color-selected;
+                border-color: $color-selected;
+            }
+        }
+    }
+    li:first-child a.button {
+    @include border-left-radius($base-border-radius);
+    border-right: none;
     li:last-child a.button {
         @include border-right-radius($base-border-radius);
         border-right: $base-border-width solid $color-unselected;
@@ -38,39 +79,6 @@ ul.button-group {
             &:hover { border-left-color: $color-selected; }
         }
     }
-}
-
-nav.primary {
-    padding: 0.75em 1.5em 0;
-    
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding-left: 0; }
-    
-    ul.left, ul.right {
-        display: table;
-        width: 100%;
-        li {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            a {
-                display: block;
-                width: 100%;
-                padding: 0.375em 1.25em;
-                border: $base-border-width solid $color-unselected;
-                border-radius: 0;
-                color: $color-unselected;
-                &:hover {
-                    text-decoration: none;
-                    color: $color-menu;
-                    background-color: $color-selected;
-                    border-color: $color-selected;
-                }
-            }
-        }
-        @extend ul.button-group;
     }
     
     @media screen and (max-width: $small-menu-breakpoint) {

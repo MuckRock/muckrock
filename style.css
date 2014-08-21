@@ -456,7 +456,6 @@ code {
 
 dfn, fieldset label, dt {
   display: block;
-  margin: 1.5em 0 0.75em;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #acbecc; }
@@ -471,24 +470,22 @@ hr {
 
 img, audio, video, embed, iframe {
   max-width: 100%;
-  margin: 0.75em 0; }
+  margin: 0; }
 
 figure {
   margin: 0; }
-  figure > img, figure audio, figure video, figure embed, figure iframe {
-    margin: 0; }
-  figure + figcaption {
-    margin-top: 0;
-    margin-bottom: 1.5em; }
 
-table th {
-  font-weight: 400;
-  text-align: left;
+figcaption {
+  margin: 0 0 1.5em; }
+
+th {
   font-size: 0.9em;
   line-height: 1.66667em;
   margin: 0.41667em 0;
+  text-align: left;
   vertical-align: top; }
-table td {
+
+td {
   vertical-align: bottom; }
 
 .default, input[type="submit"], button {
@@ -818,60 +815,63 @@ object.message {
 
 /* Progress Bar */
 object.progress-bar {
-  background-color: #fdfefe;
-  border: 1px solid #acbecc;
-  border-radius: 10px;
-  margin: 0.75em 0;
+  display: block;
   width: 100%;
   height: auto;
-  display: block; }
-  object.progress-bar > span.meter {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    display: block;
-    height: 1.5em;
+  margin: 0.75em 0;
+  border: 1px solid #acbecc;
+  border-radius: 10px;
+  background-color: #fdfefe; }
+
+.meter {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+  height: 1.5em;
+  background: -webkit-linear-gradient(#50828e, #416a74);
+  background: linear-gradient(#50828e, #416a74);
+  border: 1px solid #005690;
+  border-radius: 9px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px; }
+  .meter.completed {
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px; }
+  .meter.success {
+    background: -webkit-linear-gradient(#3cd173, #2cb960);
+    background: linear-gradient(#3cd173, #2cb960);
+    border: 1px solid #259c51; }
+  .meter.failure {
+    background: -webkit-linear-gradient(#dc4a00, #b33c00);
+    background: linear-gradient(#dc4a00, #b33c00);
+    border: 1px solid #903000; }
+  .meter.primary {
+    background: -webkit-linear-gradient(#0084dc, #006cb3);
+    background: linear-gradient(#0084dc, #006cb3);
+    border: 1px solid #005690; }
+  .meter.default, input.meter[type="submit"], button.meter {
     background: -webkit-linear-gradient(#50828e, #416a74);
     background: linear-gradient(#50828e, #416a74);
-    border: 1px solid #005690;
-    border-radius: 9px;
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px; }
-    object.progress-bar > span.meter.completed {
-      border-top-right-radius: 9px;
-      border-bottom-right-radius: 9px; }
-    object.progress-bar > span.meter.success {
-      background: -webkit-linear-gradient(#3cd173, #2cb960);
-      background: linear-gradient(#3cd173, #2cb960);
-      border: 1px solid #259c51; }
-    object.progress-bar > span.meter.failure {
-      background: -webkit-linear-gradient(#dc4a00, #b33c00);
-      background: linear-gradient(#dc4a00, #b33c00);
-      border: 1px solid #903000; }
-    object.progress-bar > span.meter.primary {
-      background: -webkit-linear-gradient(#0084dc, #006cb3);
-      background: linear-gradient(#0084dc, #006cb3);
-      border: 1px solid #005690; }
-    object.progress-bar > span.meter.default {
-      background: -webkit-linear-gradient(#50828e, #416a74);
-      background: linear-gradient(#50828e, #416a74);
-      border: 1px solid #34555d; }
-    object.progress-bar > span.meter.disabled {
-      background: -webkit-linear-gradient(#acbecc, #93aabc);
-      background: linear-gradient(#acbecc, #93aabc);
-      border: 1px solid #7d99af; }
+    border: 1px solid #34555d; }
+  .meter.disabled {
+    background: -webkit-linear-gradient(#acbecc, #93aabc);
+    background: linear-gradient(#acbecc, #93aabc);
+    border: 1px solid #7d99af; }
 
+/* Table */
 table {
   width: 100%;
   margin: 1.5em 0;
   border-collapse: collapse;
   border-radius: 9px; }
-  table, table th, table td {
-    border: 1px solid #acbecc; }
   table th, table td {
     padding: 0.25em 0.5em; }
   table tr.odd {
     background-color: #ecf5f5; }
+  table, table th, table td {
+    border-top: 1px solid #acbecc;
+    border-bottom: 1px solid #acbecc; }
 
 /* Navigation Menu */
 nav {
@@ -880,27 +880,22 @@ nav {
   -moz-box-sizing: border-box;
   box-sizing: border-box; }
   nav ul {
-    list-style-type: none;
+    display: table;
     margin: 0;
-    padding-left: 0; }
+    padding-left: 0;
+    list-style-type: none; }
     nav ul .left {
-      margin-bottom: 0.75em; }
-
-ul.button-group li:first-child a.button, nav.primary ul.left li:first-child a.button, nav.primary ul.right li:first-child a.button {
-  border-top-left-radius: 9px;
-  border-bottom-left-radius: 9px;
-  border-right: none; }
-ul.button-group li:last-child a.button, nav.primary ul.left li:last-child a.button, nav.primary ul.right li:last-child a.button {
-  border-top-right-radius: 9px;
-  border-bottom-right-radius: 9px;
-  border-right: 1px solid #162023;
-  border-left: none; }
-  ul.button-group li:last-child a.button:hover, nav.primary ul.left li:last-child a.button:hover, nav.primary ul.right li:last-child a.button:hover {
-    border-right-color: #0084dc; }
-ul.button-group li:first-child + li:last-child a.button, nav.primary ul.left li:first-child + li:last-child a.button, nav.primary ul.right li:first-child + li:last-child a.button {
-  border-left: 1px solid #162023; }
-  ul.button-group li:first-child + li:last-child a.button:hover, nav.primary ul.left li:first-child + li:last-child a.button:hover, nav.primary ul.right li:first-child + li:last-child a.button:hover {
-    border-left-color: #0084dc; }
+      margin-bottom: 0.75em;
+      float: left; }
+    nav ul .right {
+      float: right; }
+    nav ul .left, nav ul .right {
+      display: table;
+      width: auto; }
+    @media screen and (max-width: 540px) {
+      nav ul .left, nav ul .right {
+        width: 100%;
+        float: none; } }
 
 nav.primary {
   padding: 0.75em 1.5em 0;
@@ -909,25 +904,37 @@ nav.primary {
     list-style-type: none;
     margin: 0;
     padding-left: 0; }
-  nav.primary ul.left, nav.primary ul.right {
-    display: table;
-    width: 100%; }
-    nav.primary ul.left li, nav.primary ul.right li {
-      display: table-cell;
-      vertical-align: middle;
-      text-align: center; }
-      nav.primary ul.left li a, nav.primary ul.right li a {
-        display: block;
-        width: 100%;
-        padding: 0.375em 1.25em;
-        border: 1px solid #162023;
-        border-radius: 0;
-        color: #162023; }
-        nav.primary ul.left li a:hover, nav.primary ul.right li a:hover {
-          text-decoration: none;
-          color: #fdfefe;
-          background-color: #0084dc;
-          border-color: #0084dc; }
+  nav.primary li {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center; }
+    nav.primary li a {
+      display: block;
+      width: 100%;
+      padding: 0.375em 1.25em;
+      border: 1px solid #162023;
+      border-radius: 0;
+      color: #162023; }
+      nav.primary li a:hover {
+        text-decoration: none;
+        color: #fdfefe;
+        background-color: #0084dc;
+        border-color: #0084dc; }
+  nav.primary li:first-child a.button {
+    border-top-left-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-right: none; }
+    nav.primary li:first-child a.button li:last-child a.button {
+      border-top-right-radius: 9px;
+      border-bottom-right-radius: 9px;
+      border-right: 1px solid #162023;
+      border-left: none; }
+      nav.primary li:first-child a.button li:last-child a.button:hover {
+        border-right-color: #0084dc; }
+    nav.primary li:first-child a.button li:first-child + li:last-child a.button {
+      border-left: 1px solid #162023; }
+      nav.primary li:first-child a.button li:first-child + li:last-child a.button:hover {
+        border-left-color: #0084dc; }
   @media screen and (max-width: 540px) {
     nav.primary ul.right {
       display: none !important; } }
@@ -1209,98 +1216,83 @@ nav.sidebar {
 html, body {
   min-height: 100%; }
 
-article.post > header, article.question > header, article.request > header, article.jurisdiction > header {
+.post aside, .question aside, .request aside, .jurisdiction aside {
+  display: block; }
+  .post aside:after, .question aside:after, .request aside:after, .jurisdiction aside:after {
+    content: "";
+    display: table;
+    clear: both; }
+
+.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .post header, .question header, .request header, .jurisdiction header, .post section, .question section, .request section, .jurisdiction section {
   width: 100%; }
 
-article.post, article.question, article.request, article.jurisdiction {
+@media screen and (min-width: 321px) {
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    float: left;
+    display: block;
+    margin-right: 4.82916%;
+    width: 30.11389%; }
+    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 769px) {
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 31.76157%; }
+    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
+      margin-right: 0; } }
+
+.post, .question, .request, .jurisdiction {
   max-width: 68em;
   margin-left: auto;
   margin-right: auto;
   margin: 0 1.5em; }
-  article.post:after, article.question:after, article.request:after, article.jurisdiction:after {
+  .post:after, .question:after, .request:after, .jurisdiction:after {
     content: "";
     display: table;
     clear: both; }
   @media screen and (min-width: 540px) {
-    article.post, article.question, article.request, article.jurisdiction {
+    .post, .question, .request, .jurisdiction {
       margin: 0 2em; } }
-  article.post > header, article.question > header, article.request > header, article.jurisdiction > header {
+  .post header, .question header, .request header, .jurisdiction header {
     margin: 0.75em 0; }
-    article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1, article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
+    .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
       font-weight: 400; }
+    .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
+      font-size: 1.25em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; }
+    .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
+      font-size: 0.75em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; }
     @media screen and (min-width: 321px) {
-      article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
+      .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
         font-size: 1.5em;
-        line-height: 1.53333em;
-        margin: 0.38333em 0; }
-      article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
+        line-height: 1.51282em;
+        margin: 0.37821em 0; }
+      .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
         font-size: 0.875em;
         line-height: 1.51282em;
         margin: 0.37821em 0; } }
-    @media screen and (min-width: 769px) {
-      article.post > header h1, article.question > header h1, article.request > header h1, article.jurisdiction > header h1 {
-        font-size: 1.875em;
-        line-height: 1.44444em;
-        margin: 0.36111em 0; }
-      article.post > header h2, article.question > header h2, article.request > header h2, article.jurisdiction > header h2 {
-        font-size: 1em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
-  article.post summary, article.question summary, article.request summary, article.jurisdiction summary {
-    margin: 1.5em 0 0.75em;
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    padding: 0 2.35765% 2.35765% 0; }
+  .post summary, .question summary, .request summary, .jurisdiction summary {
     font-weight: 300;
     display: none; }
     @media screen and (min-width: 321px) {
-      article.post summary, article.question summary, article.request summary, article.jurisdiction summary {
+      .post summary, .question summary, .request summary, .jurisdiction summary {
         display: block;
-        margin: 0.75em 0;
         font-size: 1.25em;
-        line-height: 1.55556em;
-        margin: 0.38889em 0; } }
-    @media screen and (min-width: 769px) {
-      article.post summary, article.question summary, article.request summary, article.jurisdiction summary {
-        font-size: 1.375em;
-        line-height: 1.53333em;
-        margin: 0.38333em 0; } }
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
 
-article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
-  width: 100%; }
-  @media screen and (min-width: 321px) {
-    article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
-      float: left;
-      display: block;
-      margin-right: 4.82916%;
-      width: 30.11389%;
-      padding: 0 0 0 2.35765%; }
-      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child, article.jurisdiction > aside:last-child {
-        margin-right: 0; } }
-  @media screen and (min-width: 769px) {
-    article.post > aside, article.question > aside, article.request > aside, article.jurisdiction > aside {
-      float: left;
-      display: block;
-      margin-right: 2.35765%;
-      width: 31.76157%; }
-      article.post > aside:last-child, article.question > aside:last-child, article.request > aside:last-child, article.jurisdiction > aside:last-child {
-        margin-right: 0; } }
-
-article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
-  width: 100%; }
-  @media screen and (min-width: 321px) {
-    article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
-      float: left;
-      display: block;
-      margin-right: 4.82916%;
-      width: 65.05695%; }
-      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child, article.jurisdiction > section:last-child {
-        margin-right: 0; } }
-  @media screen and (min-width: 769px) {
-    article.post > section, article.question > section, article.request > section, article.jurisdiction > section {
-      float: left;
-      display: block;
-      margin-right: 2.35765%;
-      width: 65.88078%; }
-      article.post > section:last-child, article.question > section:last-child, article.request > section:last-child, article.jurisdiction > section:last-child {
-        margin-right: 0; } }
+@media screen and (min-width: 321px) {
+  .post p:first-of-type {
+    font-size: 1.2em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; } }
 
 .container, footer {
   width: 75%;
@@ -1352,12 +1344,6 @@ article.post > section, article.question > section, article.request > section, a
 
   nav.primary ul.right {
     display: table; } }
-@media screen and (min-width: 321px) {
-  .post p:first-of-type {
-    font-size: 1.2em;
-    line-height: 1.53333em;
-    margin: 0.38333em 0; } }
-
 .grid {
   max-width: 68em;
   margin-left: auto;

@@ -293,50 +293,52 @@ object.message { @extend %panel;
 
 /* Progress Bar */
 
-object.progress-bar {
-    $progress-meter-border: $base-border-width solid darken($color-primary, 15%);
-    $progress-animation-duration: 0.7s;
+$progress-meter-border: $base-border-width solid darken($color-primary, 15%);
+$progress-animation-duration: 0.7s;
 
-    background-color: $color-white;
-    border: $base-border-width solid $color-grey;
-    border-radius: $base-border-radius + $base-border-width;
-    margin: $base-vertical-rhythm/2 0;
+object.progress-bar {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
-
-    > span.meter {
-        @include box-sizing(border-box);
-        display: block;
-        height: $base-vertical-rhythm;
-        @include background-gradient($color-default);
-        // background-size: 40px 40px;
-        // background-repeat: repeat-x;
-        border: $progress-meter-border;
-        border-radius: $base-border-radius;
-        @include border-right-radius(0px);
-        
-        &.completed { @include border-right-radius($base-border-radius); }
-        @mixin classifier($status, $color) {
-            &.#{$status} {
-                @include background-gradient($color);
-                border: 1px solid darken($color, 15%);
-            }
-        }
-        @include classifier(success, $color-success);
-        @include classifier(failure, $color-failure);
-        @include classifier(primary, $color-primary);
-        @include classifier(default, $color-default);
-        @include classifier(disabled, $color-disabled);
-    }
+    margin: $base-vertical-rhythm/2 0;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius + $base-border-width;
+    background-color: $color-white;
 }
+
+.meter {
+    @include box-sizing(border-box);
+    display: block;
+    height: $base-vertical-rhythm;
+    @include background-gradient($color-default);
+    border: $progress-meter-border;
+    border-radius: $base-border-radius;
+    @include border-right-radius(0px);
+    &.completed { @include border-right-radius($base-border-radius); }
+    @mixin classifier($status, $color) {
+        &.#{$status} {
+            @include background-gradient($color);
+            border: 1px solid darken($color, 15%);
+        }
+    }
+    @include classifier(success, $color-success);
+    @include classifier(failure, $color-failure);
+    @include classifier(primary, $color-primary);
+    @include classifier(default, $color-default);
+    @include classifier(disabled, $color-disabled);
+}
+
+/* Table */
 
 table {
     width: 100%;
     margin: 1.5em 0;
     border-collapse: collapse;
     border-radius: $base-border-radius;
-    &, th, td { border: $base-border-width solid $color-grey; }
     th, td { padding: 0.25em 0.5em; }
     tr.odd { background-color: darken($color-white, 5%); }
+    &, th, td {
+        border-top: $base-border-width solid $color-grey;
+        border-bottom: $base-border-width solid $color-grey
+    }
 }

@@ -82,7 +82,6 @@ code {
 dfn, dt {
     @extend small;
     display: block;
-    margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
     text-transform: uppercase;
     letter-spacing: 2px;
     color: $color-grey;
@@ -98,26 +97,23 @@ hr {
 
 img, audio, video, embed, iframe {
     max-width: 100%;
-    margin: $base-vertical-rhythm/2 0;
-}
-
-figure {
     margin: 0;
-    > img, audio, video, embed, iframe { margin: 0; }
-    + figcaption { margin-top: 0; margin-bottom: 1.5em; }
 }
 
-figcaption { @extend small; }
+figure { margin: 0; }
 
-table {
-    th {
-        font-weight: 400;
-        text-align: left;
-        @include font-sizing(0.9, 1);
-        vertical-align: top;
-    }
-    td { vertical-align: bottom; }
+figcaption {
+    @extend small;
+    margin: 0 0 1.5em;
 }
+
+th {
+    @include font-sizing(0.9, 1);
+    text-align: left;
+    vertical-align: top;
+}
+
+td { vertical-align: bottom; }
 
 .default { color: $color-default; }
 .primary { color: $color-primary; }

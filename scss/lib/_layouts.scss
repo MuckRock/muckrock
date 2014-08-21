@@ -24,62 +24,48 @@ html, body { min-height: 100%; }
 }
 
 // Layouts
+
 %article {
     @include outer-container;
     margin: 0 1.5em;
     @media screen and (min-width: 540px) { margin: 0 2em; }
-
-    > header { @extend %full;
+    header { @extend %full;
         margin: $base-vertical-rhythm/2 0;
-        h1, h2 {
-            font-weight: 400;
-//            margin-bottom: $base-vertical-rhythm/4;
-        }
-        //h1 { @include font-sizing(1.25, 1.5); }
-        //h2 { @include font-sizing(0.75, 0.875); }
-        
+        h1, h2 { font-weight: 400; }
+        h1 { @include font-sizing(1.25); }
+        h2 { @include font-sizing(0.75); }
         @include media($medium-layout) {
-            h1 { @include font-sizing(1.5, 1.25); }
+            h1 { @include font-sizing(1.5); }
             h2 { @include font-sizing(0.875); }
         }
-        @include media($large-layout) {
-            h1 { @include font-sizing(1.875, 1.5); }
-            h2 { @include font-sizing(1); }
+    }
+    section { @extend %full; }
+    aside {
+        @extend %row;
+        dl {
+            @extend %third;
+            @include pad(0 default default 0);
         }
     }
-    
     summary { 
-        margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
         font-weight: 300;
         display: none;
         @include media($medium-layout) {
             display: block;
-            margin: $base-vertical-rhythm/2 0;
-            @include font-sizing(1.25, 1.2);
+            @include font-sizing(1.25);
         }
-        @include media($large-layout) { @include font-sizing(1.375, 1.25); }
     }
 }
 
-// A sidebar is full width on mobile, otherwise takes up 1/3 of the parent
-%sidebar {
-    @include fill-parent();
-    @include media($medium-layout) {
-        @include span-columns(2);
-        @include pad(0 0 0 default);
-    }
-    @include media($large-layout) {
-        @include span-columns(4);
-    }
+.post {
+    @extend %article;
+    p:first-of-type {
+        @include media($medium-layout) { @include font-sizing(1.2); }
+    } 
 }
-
-// A sidebar-adjacent section is full width on mobile,
-// otherwise takes up 2/3 of parent
-%sidebar-adjacent {
-    @include fill-parent();
-    @include media($medium-layout) { @include span-columns(4); }
-    @include media($large-layout) { @include span-columns(8); }
-}
+.question { @extend %article; }
+.request { @extend %article; }
+.jurisdiction { @extend %article; }
 
 $sidebar-menu-width: 25%;
 
@@ -129,21 +115,3 @@ $sidebar-menu-width: 25%;
     nav.primary ul.right { display: table; }
 }
 
-article%fullpage-article { @extend %article;
-    > section { @include fill-parent(); }
-    > aside { @include fill-parent(); }
-}
-article%sidebar-article { @extend %article;
-    > section { @extend %sidebar-adjacent; }
-    > aside { @extend %sidebar; }
-}
-
-.post { @extend %sidebar-article;
-    p:first-of-type {
-        @include media($medium-layout) { @include font-sizing(1.2, 1.25); }
-        // @include media($large-layout) { @include font-sizing(1.3, 1.3); }
-    } 
-}
-.question { @extend %sidebar-article; }
-.request { @extend %sidebar-article; }
-.jurisdiction { @extend %sidebar-article; }
