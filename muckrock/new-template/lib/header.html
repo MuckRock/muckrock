@@ -24,16 +24,11 @@
                 </a>
             </li>
             <li><a href="{% url 'foia-create'%}" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a></li>
-            <li class="menu"><a href="#footer-menu">Menu</a></li>
+            <li><a href="#sidebar-menu" id="left-menu-button">&#9776;</a></li>
         </ul>
-        {% if user.is_authenticated %}
-        {% else %}
         <ul class="right">
-            <li><a href="#">Search</a></li>
-            <li><a href="{% url 'acct-register' %}">Sign&nbsp;Up</a></li>
-            <li><a href="{% url 'acct-login' %}">Log&nbsp;In</a></li>
+            <li><a href="#sidebar-menu">Menu</a></li>
         </ul>
-        {% endif %}
     </nav>
     <nav class="secondary">
         <ul>
