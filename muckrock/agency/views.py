@@ -41,7 +41,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         context['sidebar'] = Sidebar.objects.get_text('agency')
     collect_stats(agency, context)
 
-    return render_to_response('agency/agency_detail.html', context,
+    return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
 
 def list_(request):

@@ -1,0 +1,33 @@
+{% if foia_requests %}
+<h3>Latest Requests</h3>
+<table>
+    <tr class="odd">
+        <th width="50%">Title</th>
+        <th width="20%">Status</th>
+        <th width="30%">Jurisdiction</th>
+    </tr>
+    {% for foia in foia_requests %}
+    <tr class="{% cycle 'even' 'odd' %}">
+        <td>
+            <a href="{% if request.user == foia.user and foia.status == "started" %}{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% else %}{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% endif %}">{{ foia.title }}</a>
+        </td>
+        <td>
+        {% if foia.color_code == "stop" %}
+            <span class="failure">
+        {% else %}
+            {% if foia.color_code == "go" %}
+            <span class="success">
+            {% else %}
+            <span class="default">
+            {% endif %}
+        {% endif %}
+        {{ foia.get_status_display }}</span>
+        </td>
+        <td>{{ foia.jurisdiction }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}" class="button">View All</a>
+{% else %}
+<h3>No requests have been filed within this jurisdiction.</h3>
+{% endif %}  
