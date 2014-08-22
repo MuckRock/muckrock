@@ -1,0 +1,63 @@
+/* Allows for full-height elements with CSS */
+html, body { min-height: 100%; }
+
+// Prototypes
+
+// Sizing and spacing
+
+%row { @include row(); }
+
+%full { @include fill-parent(); }
+
+%half {
+    @extend %full;
+    @include media($large-layout) { @include span-columns(6); }
+}
+
+%third {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(2); }
+    @include media($large-layout) { @include span-columns(4); }
+}
+
+%quarter {
+    @extend %full;
+    @include media($large-layout) { @include span-columns(3); }
+}
+
+// Layouts
+
+%article {
+    @include outer-container;
+    margin: 0 1.5em;
+    @media screen and (min-width: 540px) { margin: 0 2em; }
+    header { @extend %full;
+        margin: $base-vertical-rhythm/2 0;
+        h1, h2 { font-weight: 400; }
+        h1 { @include font-sizing(1.25); }
+        h2 { @include font-sizing(0.75); }
+        @include media($medium-layout) {
+            h1 { @include font-sizing(1.5); }
+            h2 { @include font-sizing(0.875); }
+        }
+    }
+    section {
+        @extend %full;
+        max-width: 50em;
+    }
+    aside {
+        @extend %row;
+        dl {
+            @extend %third;
+            @include pad(0 default default 0);
+        }
+    }
+    summary { 
+        font-weight: 300;
+        display: none;
+        @include media($medium-layout) {
+            display: block;
+            @include font-sizing(1.25);
+        }
+    }
+}

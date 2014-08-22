@@ -41,7 +41,7 @@ body {
     @include outer-container;
     margin: 1.5em;
     border-top: 3px solid $color-grey;
-    padding: 1em 0;
+    // padding: 1em 0;
     h1 {
         @include fill-parent();
         text-align: left;

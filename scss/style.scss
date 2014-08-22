@@ -21,6 +21,7 @@ $color-failure:         #e2c906;
 $color-default:         #716fc2;
 $color-disabled:        #acbecc;
 
+$base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
 $base-font-weight:      400;
 $base-border-width:     1px;
 $base-border-radius:    9px;
@@ -28,16 +29,10 @@ $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
 
-// Atomic Elements
-// Combine Foundational Elements
-
-@import 'typography';
-@import 'objects';
-
-// Molecular Elements
-// Combine Atomic Elements
-
-@import 'layouts';
+@import 'lib/typography';
+@import 'lib/objects';
+@import 'lib/layouts';
+@import 'lib/nav';
 
 // One Off
 // These exceptional elements exist only once

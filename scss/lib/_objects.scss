@@ -1,15 +1,58 @@
-/*
-** Simple Objects
-**
-** Contents
-**** Buttons
-**** Panels
-**** Inputs
-**** Messages
-**** Progress Bar
-*/
+/* Simple Objects */
 
-// Class Prototypes
+// Table of Contents
+//
+// * Mixins
+// * Prototypes
+//     * Textbox
+//        * Button
+//        * Panel
+//        * input
+// * Implementation
+
+
+// Mixins
+
+@mixin background-gradient($color) {
+    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+}
+
+@mixin button-color($color) {
+    color: $color;
+    border-color: $color;
+}
+
+@mixin button-hover($color) {
+    &:hover {
+        color: $color-white;
+        @include background-gradient($color);
+    }
+    &:focus {
+        $focus-color: lighten($color, 10%);
+        color: $focus-color;
+        border-color: $focus-color;
+        &:hover {
+            color: $color-white;
+        }
+    }
+    &:active {
+        color: $color-white;
+        @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
+    }
+}
+
+@mixin panel-color($color, $disabled: false) {
+    @if not $disabled {
+        color: $color-white;
+        @include background-gradient($color);
+        border-color: darken($color, 10%);
+    } @else {
+        color: $color;
+        background: none;
+    }
+}
+
+// Prototypes
 
 // Textbox
 %textbox {
@@ -17,11 +60,10 @@
     border-style: solid;
     border-width: $base-border-width;
     border-radius: $base-border-radius;
-    line-height: $base-vertical-rhythm; }
-    @mixin background-gradient($color) {
-        @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
-    }
+    line-height: $base-vertical-rhythm;
+}
     
+<<<<<<< HEAD:scss/_objects.scss
     // Textbox -> Button
     %button { @extend %textbox;
         display: inline-block;
@@ -74,24 +116,43 @@
             }
         }
         
+=======
+// Textbox -> Button
+%button { @extend %textbox;
+    display: inline-block;
+    margin: 0.25em 0.325em 0.25em 0;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    text-decoration: none;
+    text-align: center;
+}
+>>>>>>> menus:scss/lib/_objects.scss
 
-    // Textbox -> Input
-    %input { @extend %textbox;
-        display: inline-block;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
-        border-color: $color-grey;
-        &:disabled {
-            background-color: lighten($color-disabled, 25%);
-            border: 1px solid $color-disabled;
-            color: $color-disabled;
-        }
+// Textbox -> Panel
+%panel { @extend %textbox;
+    display: block;
+    margin:  $base-vertical-rhythm/2 0;
+    padding: $base-vertical-rhythm/2;
+    border-color: $color-grey;
+    @include media($large-layout) {
+        padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
     }
+}
 
-       
-        
+// Textbox -> Input
+%input { @extend %textbox;
+    display: inline-block;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    border-color: $color-grey;
+    &:disabled {
+        background-color: lighten($color-disabled, 25%);
+        border: 1px solid $color-disabled;
+        color: $color-disabled;
+    }
+}
+   
 // Implementation
 
-/* Buttons */
+// Buttons
 
 .button, .button.default { @extend %button;
     @include button-color($color-default);
@@ -118,8 +179,7 @@
     background: none;
 }
 
-/* Panels */
-
+// Panels
 
 .panel, .panel.default { @extend %panel;
     @include panel-color($color-default);
@@ -158,7 +218,7 @@
     @include panel-color($color-disabled, true);
 }
 
-/* Inputs */
+// Inputs
 
 #{$all-text-inputs} { @extend %input; }
 
@@ -209,6 +269,7 @@ object.message { @extend %panel;
         display: block;
         width: 100%;
         text-align: left;
+<<<<<<< HEAD:scss/_objects.scss
         overflow: hidden;
         img { 
             max-width: 100%; 
@@ -219,6 +280,17 @@ object.message { @extend %panel;
         small {
             display: block;
             line-height: 1.5em;
+=======
+        line-height: 1em;
+        img {
+            max-width: 100%;
+            width: 50px;
+            margin-bottom: 0;
+        }
+        small {
+            display: block;
+            margin-top: 0.5em;
+>>>>>>> menus:scss/lib/_objects.scss
         }
         @include fill-parent();
         @include media($message-layout) {
@@ -316,40 +388,68 @@ object.message { @extend %panel;
 
 /* Progress Bar */
 
-object.progress-bar {
-    $progress-meter-border: $base-border-width solid darken($color-primary, 15%);
-    $progress-animation-duration: 0.7s;
+$progress-meter-border: $base-border-width solid darken($color-primary, 15%);
+$progress-animation-duration: 0.7s;
 
-    background-color: $color-white;
-    border: $base-border-width solid $color-grey;
-    border-radius: $base-border-radius + $base-border-width;
-    margin: $base-vertical-rhythm/2 0;
+object.progress-bar {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
-
-    > span.meter {
-        @include box-sizing(border-box);
-        display: block;
-        height: $base-vertical-rhythm;
-        @include background-gradient($color-default);
-        // background-size: 40px 40px;
-        // background-repeat: repeat-x;
-        border: $progress-meter-border;
-        border-radius: $base-border-radius;
-        @include border-right-radius(0px);
-        
-        &.completed { @include border-right-radius($base-border-radius); }
-        @mixin classifier($status, $color) {
-            &.#{$status} {
-                @include background-gradient($color);
-                border: 1px solid darken($color, 15%);
-            }
-        }
-        @include classifier(success, $color-success);
-        @include classifier(failure, $color-failure);
-        @include classifier(primary, $color-primary);
-        @include classifier(default, $color-default);
-        @include classifier(disabled, $color-disabled);
-    }
+    margin: $base-vertical-rhythm/2 0;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius + $base-border-width;
+    background-color: $color-white;
 }
+
+.meter {
+    @include box-sizing(border-box);
+    display: block;
+    height: $base-vertical-rhythm;
+    @include background-gradient($color-default);
+    border: $progress-meter-border;
+    border-radius: $base-border-radius;
+    @include border-right-radius(0px);
+    &.completed { @include border-right-radius($base-border-radius); }
+    @mixin classifier($status, $color) {
+        &.#{$status} {
+            @include background-gradient($color);
+            border: 1px solid darken($color, 15%);
+        }
+    }
+    @include classifier(success, $color-success);
+    @include classifier(failure, $color-failure);
+    @include classifier(primary, $color-primary);
+    @include classifier(default, $color-default);
+    @include classifier(disabled, $color-disabled);
+}
+
+/* Table */
+
+table {
+    width: 100%;
+    margin: 1.5em 0;
+    border-radius: $base-border-radius;
+    th, td { padding: 0.25em 0.5em; }
+    tr.odd { background-color: darken($color-white, 5%); }
+    &, th, td {
+        border-top: $base-border-width solid $color-grey;
+        border-bottom: $base-border-width solid $color-grey
+    }
+<<<<<<< HEAD:scss/_objects.scss
+}
+=======
+}
+
+
+/* Article */
+
+.post {
+    @extend %article;
+    p:first-of-type {
+        @include media($medium-layout) { @include font-sizing(1.2); }
+    } 
+}
+.question { @extend %article; }
+.request { @extend %article; }
+.jurisdiction { @extend %article; }
+>>>>>>> menus:scss/lib/_objects.scss
