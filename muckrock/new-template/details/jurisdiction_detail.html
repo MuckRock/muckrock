@@ -7,23 +7,13 @@
     <dfn>Jurisdiction</dfn>
 	<h1>{{ jurisdiction.name }}</h1>
 	{% if jurisdiction.parent %}
-	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{jurisdiction.parent.name}}</a></h2>
+	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent.name }}</a></h2>
     {% endif %}
 {% endblock header %}
 
 {% block main %}
-
-
-
-    {% if jurisdiction.image %}
-    <figure><img src="{{ MEDIA_URL }}{{ jurisdiction.image }}"></figure>
-        {% if jurisdiction.image_attr_line %}
-    <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
-        {% endif %}
-    {% endif %}
-
-    <h3>Latest Requests</h3>
     {% if foia_requests %}
+    <h3>Latest Requests</h3>
     <table>
         <tr class="odd">
             <th width="50%">Title</th>
@@ -53,10 +43,11 @@
     </table>
     <a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}" class="button">View All</a>
     {% else %}
-    <h4>No requests have been filed yet.</h4>
+    <h3>No requests have been filed within this jurisdiction.</h3>
     {% endif %}    
 
     {% if jurisdiction.agencies.count %}
+    <h3>Documented Agencies</h3>
     <table>
         <tr class="odd">
             <th width="50%">Agency</th>
@@ -71,47 +62,68 @@
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <h3>No agencies have been documented for this jurisdiction.</h3>
     {% endif %}
 	
 {% endblock main %}
 
 {% block aside %}
 
-<dfn>Allowed Response Time</dfn>
-    {% with jurisdiction.get_days as days %}
-        {% if days %}
-            <p>{{days}} day{{days|pluralize}}</p>
-        {% else %}
-            <p>No limit</p>
+    
+    {% if jurisdiction.image %}
+    <figure>
+        <img src="{{ MEDIA_URL }}{{ jurisdiction.image }}" alt="" />
+        {% if jurisdiction.image_attr_line %}
+        <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
         {% endif %}
-    {% endwith %}
-
-    <dfn>Average Response Time</dfn>
-    <p>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</p>
-
-    <dfn>Requests</dfn>
-    {% if num_submitted %}
-    <ul>{{ num_submitted }} Filed in Total
-        {% if num_no_docs %}<li class="success">{{ num_no_docs }} No Responsive Documents</li>{% endif %}
-        {% if num_done %}<li class="success">{{ num_done }} Complete</li>{% endif %}
-        {% if num_ack %}<li class="default">{{ num_ack }} Awaiting Acknowledgement</li>{% endif %}
-        {% if num_processed %}<li class="default">{{ num_processed }} Awaiting Response</li>{% endif %}
-        {% if num_fix %}<li class="default">{{ num_fix }} Requiring Action</li>{% endif %}
-        {% if num_rejected %}<li class="failure">{{ num_rejected }} Rejected</li>{% endif %}
-        {% if num_overdue %}<li class="failure">{{ num_overdue }} Overdue</li>{% endif %}
-    </ul>
-    {% else %}
-    <p>None</p>
+    </figure>
     {% endif %}
 
-    <dfn>Appeals</dfn>
-    {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
-    {% if num_appealing %}<p class="default">{{num_appealing}} appeal{{ num_appealing | pluralize }} awaiting response</p>{% endif %}
-    {% if num_appeals_done %}<p class="success">{{num_appeals_done}} successful appeals</p>{% endif %}
-    {% if num_appeals_rejected %}<p class="failure">{{num_appeals_rejected}} denied appeals</p>{% endif %}
-    {% if num_appeals_response_time %}<p>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</p>{% endif %}
-    {% else %}
-    <p>None</p>
-    {% endif %}
+    <div class="dl-group">
+        <dl>
+            <dt>Allowed Response Time</dt>
+            {% with jurisdiction.get_days as days %}
+                {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                {% else %}
+                    <dd>No limit</dd>
+                {% endif %}
+            {% endwith %}
+        </dl>
+
+        <dl>
+            <dt>Average Response Time</dt>
+            <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
+        </dl>
+
+        <dl>
+            <dt>Requests</dt>
+            {% if num_submitted %}
+            <dd><strong>{{ num_submitted }} Filed in Total</strong></dd>
+            {% if num_no_docs %}<dd class="success">{{ num_no_docs }} No Responsive Documents</dd>{% endif %}
+            {% if num_done %}<dd class="success">{{ num_done }} Complete</dd>{% endif %}
+            {% if num_ack %}<dd class="default">{{ num_ack }} Awaiting Acknowledgement</dd>{% endif %}
+            {% if num_processed %}<dd class="default">{{ num_processed }} Awaiting Response</dd>{% endif %}
+            {% if num_fix %}<dd class="default">{{ num_fix }} Requiring Action</dd>{% endif %}
+            {% if num_rejected %}<dd class="failure">{{ num_rejected }} Rejected</dd>{% endif %}
+            {% if num_overdue %}<dd class="failure">{{ num_overdue }} Overdue</dd>{% endif %}
+            {% else %}
+            <dd>None</dd>
+            {% endif %}
+        </dl>
+
+        <dl>
+            <dt>Appeals</dt>
+            {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
+            {% if num_appealing %}<dd class="default">{{num_appealing}} appeal{{ num_appealing | pluralize }} awaiting response</dd>{% endif %}
+            {% if num_appeals_done %}<dd class="success">{{num_appeals_done}} successful appeals</dd>{% endif %}
+            {% if num_appeals_rejected %}<dd class="failure">{{num_appeals_rejected}} denied appeals</dd>{% endif %}
+            {% if num_appeals_response_time %}<dd>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</dd>{% endif %}
+            {% else %}
+            <dd>None</dd>
+            {% endif %}
+        </dl>
+    </div>
 
 {% endblock aside %}

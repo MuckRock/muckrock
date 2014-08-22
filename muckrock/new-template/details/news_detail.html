@@ -1,37 +1,47 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
-{% block title %}MuckRock &bull; {{ object.title }}{% endblock title %}
+
+{% with object as article %}
+
+{% block title %}MuckRock &bull; {{ article.title }}{% endblock title %}
 {% block type %}post{% endblock type %}
 
-{% block header %}
-    <dfn>Article</dfn>
-    <h1>{{ object.title }}</h1>
-    <h2>by {{ object.get_authors_names }} 
-    on {{ object.pub_date | date:"F j, Y" }}</h2>
-{% endblock header %}	
-
 {% block main %}
-    {% if object.image %}
-    <img src="{{ MEDIA_URL }}{{ object.image }}" />
-    {% endif %}
     {% autoescape off %}
-    {{ object.body | markdown:"trusted" }}
+    {{ article.body | markdown:"trusted" }}
 	{% endautoescape %}
 {% endblock main %}			
 
+{% block header %}
+    <dfn>Article</dfn>
+    <h1>{{ article.title }}</h1>
+    <h2>by {{ article.get_authors_names }} 
+    on {{ article.pub_date | date:"F j, Y" }}</h2>
+{% endblock header %}	
+
 {% block aside %}
-    {% if object.kicker %}
+    {% if article.image %}
+    <figure>
+        <img src="{{ MEDIA_URL }}{{ article.image }}" alt="" />
+        {% if article.image_attr_line %}
+        <figcaption>{{ article.image_attr_line | safe }}</figcaption>
+        {% endif %}
+    </figure>
+    {% endif %}
+    {% if article.kicker %}
     <dl>
         <dt>In a Nutshell</dt>
-        <dd><summary>{{ object.kicker }}</summary></dd>
+        <dd><summary>{{ article.kicker }}</summary></dd>
     </dl>
     {% endif %}
-    {% if object.foias.exists %}
+    {% if article.foias.exists %}
     <dl>
 	    <dt>Related Requests</dt>
-	    {% for foia in object.foias.all %}
+	    {% for foia in article.foias.all %}
 		<dd><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></dd>
 		{% endfor %}
 	</dl>
 	{% endif %}
 {% endblock aside %}
+
+{% endwith %}
