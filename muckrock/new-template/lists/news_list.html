@@ -5,7 +5,9 @@
 {% block type %}news{% endblock type %}
 
 {% block list-item %}
-    <h2><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h2>
-    <h3>by {{ item.get_authors_names }}
-        on {{ item.pub_date | date:"F j, Y"}}</h3>
+    {% with item as article %}
+    <h2><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></h2>
+    <h3>by {{ article.get_authors_names }}
+        on {{ article.pub_date | date:"F j, Y"}}</h3>
+    {% endwith %}
 {% endblock list-item %}

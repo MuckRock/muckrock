@@ -6,34 +6,32 @@
 {% block header %}
     <dfn>Article</dfn>
     <h1>{{ object.title }}</h1>
-    <h2>by {{ object.get_authors_names }} on {{ object.pub_date | date:"F j, Y" }}</h2>
+    <h2>by {{ object.get_authors_names }} 
+    on {{ object.pub_date | date:"F j, Y" }}</h2>
 {% endblock header %}	
 
 {% block main %}
+    {% if object.image %}
+    <img src="{{ MEDIA_URL }}{{ object.image }}" />
+    {% endif %}
     {% autoescape off %}
     {{ object.body | markdown:"trusted" }}
 	{% endautoescape %}
 {% endblock main %}			
 
 {% block aside %}
-    {% if object.image %}
-    <img src="{{ MEDIA_URL }}{{ object.image }}" />
-    {% endif %}
     {% if object.kicker %}
-    <summary>{{ object.kicker }}</summary>
+    <dl>
+        <dt>In a Nutshell</dt>
+        <dd><summary>{{ object.kicker }}</summary></dd>
+    </dl>
     {% endif %}
     {% if object.foias.exists %}
     <dl>
 	    <dt>Related Requests</dt>
-		<dd>
-		    <ul class="fois">
-			{% for foia in object.foias.all %}
-			    <li>
-			        <a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a>
-			    </li>
-			{% endfor %}
-		    </ul>
-		</dd>
+	    {% for foia in object.foias.all %}
+		<dd><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></dd>
+		{% endfor %}
 	</dl>
 	{% endif %}
 {% endblock aside %}
