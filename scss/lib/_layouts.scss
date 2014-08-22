@@ -42,9 +42,11 @@ html, body { min-height: 100%; }
             h2 { @include font-sizing(0.875); }
         }
     }
-    section {
+    > section {
         @extend %full;
         max-width: 50em;
+        border-top: $base-border-width solid $color-grey;
+        padding-top: $base-vertical-rhythm;
     }
     aside {
         @extend %row;

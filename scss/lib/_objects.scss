@@ -372,24 +372,24 @@ table {
 
 
 /* Article */
-
+.post, .question, .request, .jurisdiction, .agency { @extend %article; }
 .post {
-    @extend %article;
     p:first-of-type {
         @include media($medium-layout) { @include font-sizing(1.2); }
     }
     aside dl { @include span-columns(2 of 6); }
+    section { border-top: 0; }
 }
-.question { @extend %article; }
-.request { @extend %article; }
 .jurisdiction {
-    @extend %article;
     h3 { font-weight: normal; }
     h3 + table { margin-top: 0; }
     h3 + h3 { margin-top: 1.5em; }
     aside dl { @extend %half; @include omega(2n); }
-    section {
-        border-top: $base-border-width solid $color-grey;
-        padding-top: $base-vertical-rhythm;
-    }
+}
+.agency {
+    figure { @extend %full; }
+    aside div.dl-group { @extend %full; @include pad(default 0 0 0);}
+    aside dl { @extend %third; @include omega(3n); }
+    //aside dd > small { text-transform: uppercase; }
+    aside dd + dt { margin-top: $base-vertical-rhythm; }
 }
