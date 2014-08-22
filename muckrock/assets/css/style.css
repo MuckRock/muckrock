@@ -942,6 +942,8 @@ html, body {
         font-size: 0.875em;
         line-height: 1.51282em;
         margin: 0.37821em 0; } }
+  .post section, .question section, .request section, .jurisdiction section {
+    max-width: 50em; }
   .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
     padding: 0 2.35765% 2.35765% 0; }
   .post summary, .question summary, .request summary, .jurisdiction summary {
@@ -1151,10 +1153,10 @@ nav.sidebar {
   background: #162023; }
   @media screen and (min-width: 620px) {
     nav.sidebar {
-      padding: 2em 1em 0; } }
+      padding: 2em 1em 1em; } }
   @media screen and (min-width: 1024px) {
     nav.sidebar {
-      padding: 2em 2em 0; } }
+      padding: 2em 2em 1em; } }
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label {
     padding-bottom: 0.75em; }
   nav.sidebar ul {
@@ -1294,7 +1296,6 @@ nav.sidebar {
   display: inline-block;
   /* prevents footer from running into .container */
   overflow: hidden;
-  height: 25em;
   bottom: 0;
   left: 0;
   width: 100%;
