@@ -58,9 +58,11 @@ small {
 }
 
 code {
+    display: block;
     @include font-sizing(0.8);
     font-family: 'Source Code Pro';
-    padding: 0.25em 0.75em;
+    margin: $base-vertical-rhythm/2 0;
+    padding: $base-vertical-rhythm/3 $base-vertical-rhythm/2;
     color: $color-black;
     background-color: darken($color-white, 15%);
     border-radius: $base-border-radius/2;

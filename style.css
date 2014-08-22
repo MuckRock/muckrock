@@ -436,11 +436,13 @@ small, dfn, fieldset label, dt, figcaption, nav.sidebar .spotlight p, .grid > as
   font-style: normal; }
 
 code {
+  display: block;
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
   font-family: 'Source Code Pro';
-  padding: 0.25em 0.75em;
+  margin: 0.75em 0;
+  padding: 0.5em 0.75em;
   color: #162023;
   background-color: #cae4e4;
   border-radius: 4.5px; }
@@ -507,16 +509,7 @@ td {
   font-weight: 300;
   font-size: 2em; }
 
-/*
-** Simple Objects
-**
-** Contents
-**** Buttons
-**** Panels
-**** Inputs
-**** Messages
-**** Progress Bar
-*/
+/* Simple Objects */
 .button, .button.default, input.button[type="submit"], button.button, .button.primary, .button.success, .button.failure, .button.disabled, .panel, .panel.default, input.panel[type="submit"], button.panel, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -551,7 +544,6 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
     border: 1px solid #acbecc;
     color: #acbecc; }
 
-/* Buttons */
 .button, .button.default, input.button[type="submit"], button.button {
   color: #50828e;
   border-color: #50828e; }
@@ -625,7 +617,6 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
   border-color: #acbecc;
   background: none; }
 
-/* Panels */
 .panel, .panel.default, input.panel[type="submit"], button.panel {
   color: #fdfefe;
   background: -webkit-linear-gradient(#50828e, #416a74);
@@ -654,7 +645,6 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
   color: #acbecc;
   background: none; }
 
-/* Inputs */
 input[type="submit"], button {
   background: none; }
 
@@ -863,7 +853,6 @@ object.progress-bar {
 table {
   width: 100%;
   margin: 1.5em 0;
-  border-collapse: collapse;
   border-radius: 9px; }
   table th, table td {
     padding: 0.25em 0.5em; }
@@ -872,6 +861,100 @@ table {
   table, table th, table td {
     border-top: 1px solid #acbecc;
     border-bottom: 1px solid #acbecc; }
+
+/* Article */
+@media screen and (min-width: 321px) {
+  .post p:first-of-type {
+    font-size: 1.2em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; } }
+
+/* Allows for full-height elements with CSS */
+html, body {
+  min-height: 100%; }
+
+.post aside, .question aside, .request aside, .jurisdiction aside {
+  display: block; }
+  .post aside:after, .question aside:after, .request aside:after, .jurisdiction aside:after {
+    content: "";
+    display: table;
+    clear: both; }
+
+.footer-container footer section.about, .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .post header, .question header, .request header, .jurisdiction header, .post section, .question section, .request section, .jurisdiction section {
+  width: 100%; }
+
+@media screen and (min-width: 769px) {
+  .footer-container footer section.about {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 48.82117%; }
+    .footer-container footer section.about:last-child {
+      margin-right: 0; } }
+
+@media screen and (min-width: 321px) {
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    float: left;
+    display: block;
+    margin-right: 4.82916%;
+    width: 30.11389%; }
+    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 769px) {
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 31.76157%; }
+    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
+      margin-right: 0; } }
+
+.post, .question, .request, .jurisdiction {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto;
+  margin: 0 1.5em; }
+  .post:after, .question:after, .request:after, .jurisdiction:after {
+    content: "";
+    display: table;
+    clear: both; }
+  @media screen and (min-width: 540px) {
+    .post, .question, .request, .jurisdiction {
+      margin: 0 2em; } }
+  .post header, .question header, .request header, .jurisdiction header {
+    margin: 0.75em 0; }
+    .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
+      font-weight: 400; }
+    .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
+      font-size: 1.25em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; }
+    .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
+      font-size: 0.75em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; }
+    @media screen and (min-width: 321px) {
+      .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
+        font-size: 1.5em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; }
+      .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
+        font-size: 0.875em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
+  .post section, .question section, .request section, .jurisdiction section {
+    max-width: 50em; }
+  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
+    padding: 0 2.35765% 2.35765% 0; }
+  .post summary, .question summary, .request summary, .jurisdiction summary {
+    font-weight: 300;
+    display: none; }
+    @media screen and (min-width: 321px) {
+      .post summary, .question summary, .request summary, .jurisdiction summary {
+        display: block;
+        font-size: 1.25em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
 
 /* Navigation Menu */
 nav {
@@ -924,17 +1007,17 @@ nav.primary {
     border-top-left-radius: 9px;
     border-bottom-left-radius: 9px;
     border-right: none; }
-    nav.primary li:first-child a.button li:last-child a.button {
-      border-top-right-radius: 9px;
-      border-bottom-right-radius: 9px;
-      border-right: 1px solid #162023;
-      border-left: none; }
-      nav.primary li:first-child a.button li:last-child a.button:hover {
-        border-right-color: #0084dc; }
-    nav.primary li:first-child a.button li:first-child + li:last-child a.button {
-      border-left: 1px solid #162023; }
-      nav.primary li:first-child a.button li:first-child + li:last-child a.button:hover {
-        border-left-color: #0084dc; }
+  nav.primary li:last-child a.button {
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-right: 1px solid #162023;
+    border-left: none; }
+    nav.primary li:last-child a.button:hover {
+      border-right-color: #0084dc; }
+  nav.primary li:first-child + li:last-child a.button {
+    border-left: 1px solid #162023; }
+    nav.primary li:first-child + li:last-child a.button:hover {
+      border-left-color: #0084dc; }
   @media screen and (max-width: 540px) {
     nav.primary ul.right {
       display: none !important; } }
@@ -1004,21 +1087,76 @@ nav.secondary {
       display: block;
       padding: 1em 2em; } }
 
+/* Global Sidebar */
+.container, .footer-container {
+  width: 75%;
+  float: left; }
+
+/*
+@media screen and (min-width: 1024px) {
+    .container {
+        border-left: 1em solid $color-black;
+        border-top: 1em solid $color-black;
+    }
+}
+*/
+#sidebar-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  width: 25%;
+  height: 100%; }
+
+@media screen and (min-width: 1024px) {
+  nav.primary ul.right {
+    display: none; } }
+@media screen and (max-width: 540px) {
+  .sidebar {
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 1em; }
+
+  nav.primary ul.right {
+    display: none; } }
+@media screen and (max-width: 1023px) {
+  .container, footer {
+    width: 100%; }
+
+  #sidebar-menu {
+    width: 300px;
+    margin-right: -300px; }
+
+  #right-menu-button {
+    display: block; }
+
+  #sidebar-menu:target {
+    -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    margin-right: 0; }
+    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
+      width: 100%;
+      margin-left: -300px;
+      -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+
+  nav.primary ul.right {
+    display: table; } }
 nav.sidebar {
+  overflow-y: auto;
+  height: 100%;
   width: 100%;
   padding: 2em 1em 1em;
   color: #fdfefe;
-  background: #162023;
-  border-left: 1px solid #fdfefe; }
+  background: #162023; }
   @media screen and (min-width: 620px) {
     nav.sidebar {
-      padding: 2em 1em 0; } }
-  @media screen and (min-width: 1070px) {
+      padding: 2em 1em 1em; } }
+  @media screen and (min-width: 1024px) {
     nav.sidebar {
-      padding: 2em 1.5em 0; } }
-  @media screen and (min-width: 1400px) {
-    nav.sidebar {
-      padding: 2em 2em 0; } }
+      padding: 2em 2em 1em; } }
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label {
     padding-bottom: 0.75em; }
   nav.sidebar ul {
@@ -1053,7 +1191,7 @@ nav.sidebar {
     nav.sidebar .account-links a:hover {
       background-color: #0084dc;
       color: #fdfefe; }
-  @media screen and (max-width: 1100px) {
+  @media screen and (max-width: 1200px) {
     nav.sidebar .account-links {
       font-size: 0.9em; }
       nav.sidebar .account-links a {
@@ -1068,13 +1206,15 @@ nav.sidebar {
     background: #0084dc; }
     nav.sidebar .social-links a:hover svg {
       fill: #fdfefe; }
-  nav.sidebar .spotlight img {
-    margin: 0; }
-  nav.sidebar .spotlight h1 {
-    font-size: 98%;
-    line-height: 1.2em; }
-  nav.sidebar .spotlight p {
-    line-height: 1.2em; }
+  nav.sidebar .spotlight {
+    margin-top: 1.5em; }
+    nav.sidebar .spotlight img {
+      margin: 0; }
+    nav.sidebar .spotlight h1 {
+      font-size: 98%;
+      line-height: 1.2em; }
+    nav.sidebar .spotlight p {
+      line-height: 1.2em; }
   nav.sidebar fieldset {
     width: 100%;
     margin: 0; }
@@ -1154,9 +1294,13 @@ nav.sidebar {
 
 .footer-container {
   display: inline-block;
+  /* prevents footer from running into .container */
+  overflow: hidden;
+  bottom: 0;
+  left: 0;
   width: 100%;
   margin: 1.5em 0 -0.5em;
-  overflow: hidden;
+  /* hides the inline descender space */
   padding: 1.5em;
   background-color: #162023;
   text-align: left; }
@@ -1168,16 +1312,6 @@ nav.sidebar {
       content: "";
       display: table;
       clear: both; }
-    .footer-container footer section.about {
-      width: 100%; }
-      @media screen and (min-width: 769px) {
-        .footer-container footer section.about {
-          float: left;
-          display: block;
-          margin-right: 2.35765%;
-          width: 48.82117%; }
-          .footer-container footer section.about:last-child {
-            margin-right: 0; } }
     .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
       width: 100%; }
       @media screen and (min-width: 321px) {
@@ -1212,138 +1346,6 @@ nav.sidebar {
   .footer-container #footer-menu {
     border-color: #162023; }
 
-/* Allows for full-height elements with CSS */
-html, body {
-  min-height: 100%; }
-
-.post aside, .question aside, .request aside, .jurisdiction aside {
-  display: block; }
-  .post aside:after, .question aside:after, .request aside:after, .jurisdiction aside:after {
-    content: "";
-    display: table;
-    clear: both; }
-
-.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .post header, .question header, .request header, .jurisdiction header, .post section, .question section, .request section, .jurisdiction section {
-  width: 100%; }
-
-@media screen and (min-width: 321px) {
-  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
-    float: left;
-    display: block;
-    margin-right: 4.82916%;
-    width: 30.11389%; }
-    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
-      margin-right: 0; } }
-@media screen and (min-width: 769px) {
-  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
-    float: left;
-    display: block;
-    margin-right: 2.35765%;
-    width: 31.76157%; }
-    .post aside dl:last-child, .question aside dl:last-child, .request aside dl:last-child, .jurisdiction aside dl:last-child {
-      margin-right: 0; } }
-
-.post, .question, .request, .jurisdiction {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto;
-  margin: 0 1.5em; }
-  .post:after, .question:after, .request:after, .jurisdiction:after {
-    content: "";
-    display: table;
-    clear: both; }
-  @media screen and (min-width: 540px) {
-    .post, .question, .request, .jurisdiction {
-      margin: 0 2em; } }
-  .post header, .question header, .request header, .jurisdiction header {
-    margin: 0.75em 0; }
-    .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
-      font-weight: 400; }
-    .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
-      font-size: 1.25em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; }
-    .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
-      font-size: 0.75em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; }
-    @media screen and (min-width: 321px) {
-      .post header h1, .question header h1, .request header h1, .jurisdiction header h1 {
-        font-size: 1.5em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; }
-      .post header h2, .question header h2, .request header h2, .jurisdiction header h2 {
-        font-size: 0.875em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
-  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl {
-    padding: 0 2.35765% 2.35765% 0; }
-  .post summary, .question summary, .request summary, .jurisdiction summary {
-    font-weight: 300;
-    display: none; }
-    @media screen and (min-width: 321px) {
-      .post summary, .question summary, .request summary, .jurisdiction summary {
-        display: block;
-        font-size: 1.25em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
-
-@media screen and (min-width: 321px) {
-  .post p:first-of-type {
-    font-size: 1.2em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; } }
-
-.container, footer {
-  width: 75%;
-  float: left; }
-
-#sidebar-menu {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 25%;
-  height: 100%; }
-  #sidebar-menu .sidebar {
-    height: 100%;
-    overflow-y: auto; }
-
-@media screen and (min-width: 1024px) {
-  nav.primary ul.right {
-    display: none; } }
-@media screen and (max-width: 540px) {
-  .sidebar {
-    overflow: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 1em; }
-
-  nav.primary ul.right {
-    display: none; } }
-@media screen and (max-width: 1023px) {
-  .container, footer {
-    width: 100%; }
-
-  #sidebar-menu {
-    width: 300px;
-    margin-right: -300px; }
-
-  #right-menu-button {
-    display: block; }
-
-  #sidebar-menu:target {
-    -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    margin-right: 0; }
-    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
-      width: 100%;
-      margin-left: -300px;
-      -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
-
-  nav.primary ul.right {
-    display: table; } }
 .grid {
   max-width: 68em;
   margin-left: auto;

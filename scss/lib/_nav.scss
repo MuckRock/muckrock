@@ -64,9 +64,12 @@ nav.primary {
             }
         }
     }
+    
+    
     li:first-child a.button {
-    @include border-left-radius($base-border-radius);
-    border-right: none;
+        @include border-left-radius($base-border-radius);
+        border-right: none;
+    }
     li:last-child a.button {
         @include border-right-radius($base-border-radius);
         border-right: $base-border-width solid $color-unselected;
@@ -78,7 +81,6 @@ nav.primary {
             border-left: $base-border-width solid $color-unselected;
             &:hover { border-left-color: $color-selected; }
         }
-    }
     }
     
     @media screen and (max-width: $small-menu-breakpoint) {
@@ -167,16 +169,71 @@ nav.secondary {
     }
 }
 
+/* Global Sidebar */
+
+$sidebar-menu-width: 25%;
+.container, .footer-container {
+    width: 100% - $sidebar-menu-width;
+    float: left; 
+}
+/*
+@media screen and (min-width: 1024px) {
+    .container {
+        border-left: 1em solid $color-black;
+        border-top: 1em solid $color-black;
+    }
+}
+*/
+
+#sidebar-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    width: $sidebar-menu-width;
+    height: 100%;
+}
+
+@media screen and (min-width: 1024px) { 
+    nav.primary ul.right { display: none; }
+}
+
+@media screen and (max-width: 540px) {
+    .sidebar {
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 1em;
+    }
+    nav.primary ul.right { display: none; }
+}
+
+@media screen and (max-width: 1023px) {
+    $menu-width: 300px;
+    $animation: all 0.5s $ease-out-quint;
+    .container, footer { width: 100%; }
+    #sidebar-menu { width: $menu-width; margin-right: -$menu-width; }
+    #right-menu-button { display: block; }
+    #sidebar-menu:target {
+        @include transition($animation);
+        margin-right: 0;
+        & ~ .container, & ~ .footer { 
+            width: 100%;
+            margin-left: -$menu-width;
+            @include transition($animation);
+        }
+    }
+    nav.primary ul.right { display: table; }
+}
+
 nav.sidebar {
+    overflow-y: auto;
+    height: 100%;
     width: 100%;
     padding: 2em 1em 1em;
+    @media screen and (min-width: 620px) { padding: 2em 1em 1em; }
+    @media screen and (min-width: 1024px) { padding: 2em 2em 1em; }
     color: $color-white;
-    background: $color-black;
-    border-left: $base-border-width solid $color-white;
-    
-    @media screen and (min-width: 620px) { padding: 2em 1em 0; }
-    @media screen and (min-width: 1070px) { padding: 2em 1.5em 0; }
-    @media screen and (min-width: 1400px) { padding: 2em 2em 0; }
+    background: $color-black;  
     
     dfn { padding-bottom: 0.75em; }
     
@@ -211,7 +268,7 @@ nav.sidebar {
             &:hover { background-color: $color-selected; color: $color-white; }
         }
         
-        @media screen and (max-width: 1100px) {
+        @media screen and (max-width: 1200px) {
             font-size: 0.9em;
             a { padding: 2em 0.75em; }
             li { padding: 0.25em 0.25em 0; }
@@ -231,6 +288,7 @@ nav.sidebar {
     }
     
     .spotlight {
+        margin-top: 1.5em;
         img { margin: 0; }
         h1 { @extend h6; font-size: 98%; line-height: 1.2em; }
         p { @extend small; line-height: 1.2em; }
@@ -308,26 +366,21 @@ nav.sidebar {
     }
 }
     
-
 .footer-container {
-    display: inline-block;
-    width: 100%;
-    margin: 1.5em 0 -0.5em;
+    display: inline-block; /* prevents footer from running into .container */
     overflow: hidden;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 1.5em 0 -0.5em; /* hides the inline descender space */ 
     footer {
         @include outer-container;
-        section.about {
-            @include fill-parent();
-            @include media($large-layout) {
-                @include span-columns(6);
-            }
-        }
+        section.about { @extend %half; }
         section.sitemap, section.actions, section.links {
             @include fill-parent();
             @include media($medium-layout) { @include span-columns(2); }
             @include media($large-layout) { @include span-columns(2); }
         }
-
     }
     // Spacing
     padding: 1.5em;

@@ -1,7 +1,7 @@
 /* Allows for full-height elements with CSS */
 html, body { min-height: 100%; }
 
-// Class Definitions
+// Prototypes
 
 // Sizing and spacing
 
@@ -9,17 +9,19 @@ html, body { min-height: 100%; }
 
 %full { @include fill-parent(); }
 
-%half { @extend %full;
-    @include media($medium-layout) { @include span-columns(3); }
+%half {
+    @extend %full;
     @include media($large-layout) { @include span-columns(6); }
 }
 
-%third { @extend %full;
+%third {
+    @extend %full;
     @include media($medium-layout) { @include span-columns(2); }
     @include media($large-layout) { @include span-columns(4); }
 }
 
-%quarter { @extend %full;
+%quarter {
+    @extend %full;
     @include media($large-layout) { @include span-columns(3); }
 }
 
@@ -39,7 +41,10 @@ html, body { min-height: 100%; }
             h2 { @include font-sizing(0.875); }
         }
     }
-    section { @extend %full; }
+    section {
+        @extend %full;
+        max-width: 50em;
+    }
     aside {
         @extend %row;
         dl {
@@ -56,62 +61,3 @@ html, body { min-height: 100%; }
         }
     }
 }
-
-.post {
-    @extend %article;
-    p:first-of-type {
-        @include media($medium-layout) { @include font-sizing(1.2); }
-    } 
-}
-.question { @extend %article; }
-.request { @extend %article; }
-.jurisdiction { @extend %article; }
-
-$sidebar-menu-width: 25%;
-
-.container, footer {
-    width: 100% - $sidebar-menu-width;
-    float: left;
-}
-#sidebar-menu {
-    // overflow: hidden;
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: $sidebar-menu-width;
-    height: 100%;   
-    .sidebar { height: 100%; overflow-y: auto; }
-    // .sidebar::-webkit-scrollbar { display: none; }
-}
-
-@media screen and (min-width: 1024px) { 
-    nav.primary ul.right { display: none; }
-}
-
-@media screen and (max-width: 540px) {
-    .sidebar {
-        overflow: hidden;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 1em;
-    }
-    nav.primary ul.right { display: none; }
-}
-
-@media screen and (max-width: 1023px) {
-    $menu-width: 300px;
-    $animation: all 0.5s $ease-out-quint;
-    .container, footer { width: 100%; }
-    #sidebar-menu { width: $menu-width; margin-right: -$menu-width; }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        @include transition($animation);
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$menu-width;
-            @include transition($animation);
-        }
-    }
-    nav.primary ul.right { display: table; }
-}
-

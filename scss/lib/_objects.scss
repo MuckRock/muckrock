@@ -1,15 +1,58 @@
-/*
-** Simple Objects
-**
-** Contents
-**** Buttons
-**** Panels
-**** Inputs
-**** Messages
-**** Progress Bar
-*/
+/* Simple Objects */
 
-// Class Prototypes
+// Table of Contents
+//
+// * Mixins
+// * Prototypes
+//     * Textbox
+//        * Button
+//        * Panel
+//        * input
+// * Implementation
+
+
+// Mixins
+
+@mixin background-gradient($color) {
+    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+}
+
+@mixin button-color($color) {
+    color: $color;
+    border-color: $color;
+}
+
+@mixin button-hover($color) {
+    &:hover {
+        color: $color-white;
+        @include background-gradient($color);
+    }
+    &:focus {
+        $focus-color: lighten($color, 10%);
+        color: $focus-color;
+        border-color: $focus-color;
+        &:hover {
+            color: $color-white;
+        }
+    }
+    &:active {
+        color: $color-white;
+        @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
+    }
+}
+
+@mixin panel-color($color, $disabled: false) {
+    @if not $disabled {
+        color: $color-white;
+        @include background-gradient($color);
+        border-color: darken($color, 10%);
+    } @else {
+        color: $color;
+        background: none;
+    }
+}
+
+// Prototypes
 
 // Textbox
 %textbox {
@@ -17,80 +60,44 @@
     border-style: solid;
     border-width: $base-border-width;
     border-radius: $base-border-radius;
-    line-height: $base-vertical-rhythm; }
-    @mixin background-gradient($color) {
-        @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
-    }
+    line-height: $base-vertical-rhythm;
+}
     
-    // Textbox -> Button
-    %button { @extend %textbox;
-        display: inline-block;
-        margin: 0.25em 0.325em 0.25em 0;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
-        text-decoration: none;
-        text-align: center; }
-        @mixin button-color($color) {
-            color: $color;
-            border-color: $color;
-        }
-        @mixin button-hover($color) {
-            &:hover {
-                color: $color-white;
-                @include background-gradient($color);
-            }
-            &:focus {
-                $focus-color: lighten($color, 10%);
-                color: $focus-color;
-                border-color: $focus-color;
-                &:hover {
-                    color: $color-white;
-                }
-            }
-            &:active {
-                color: $color-white;
-                @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
-            }
-        }
-        
-    // Textbox -> Panel
-    %panel { @extend %textbox;
-        display: block;
-        margin:  $base-vertical-rhythm/2 0;
-        padding: $base-vertical-rhythm/2;
-        border-color: $color-grey;
-        @include media($large-layout) {
-            padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
-        }
-    }
-        @mixin panel-color($color, $disabled: false) {
-            @if not $disabled {
-                color: $color-white;
-                @include background-gradient($color);
-                border-color: darken($color, 10%);
-            } @else {
-                color: $color;
-                background: none;
-            }
-        }
-        
+// Textbox -> Button
+%button { @extend %textbox;
+    display: inline-block;
+    margin: 0.25em 0.325em 0.25em 0;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    text-decoration: none;
+    text-align: center;
+}
 
-    // Textbox -> Input
-    %input { @extend %textbox;
-        display: inline-block;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
-        border-color: $color-grey;
-        &:disabled {
-            background-color: lighten($color-disabled, 25%);
-            border: 1px solid $color-disabled;
-            color: $color-disabled;
-        }
+// Textbox -> Panel
+%panel { @extend %textbox;
+    display: block;
+    margin:  $base-vertical-rhythm/2 0;
+    padding: $base-vertical-rhythm/2;
+    border-color: $color-grey;
+    @include media($large-layout) {
+        padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
     }
+}
 
-       
-        
+// Textbox -> Input
+%input { @extend %textbox;
+    display: inline-block;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    border-color: $color-grey;
+    &:disabled {
+        background-color: lighten($color-disabled, 25%);
+        border: 1px solid $color-disabled;
+        color: $color-disabled;
+    }
+}
+   
 // Implementation
 
-/* Buttons */
+// Buttons
 
 .button, .button.default { @extend %button;
     @include button-color($color-default);
@@ -117,8 +124,7 @@
     background: none;
 }
 
-/* Panels */
-
+// Panels
 
 .panel, .panel.default { @extend %panel;
     @include panel-color($color-default);
@@ -137,7 +143,7 @@
     @include panel-color($color-disabled, true);
 }
 
-/* Inputs */
+// Inputs
 
 #{$all-text-inputs} { @extend %input; }
 
@@ -333,7 +339,6 @@ object.progress-bar {
 table {
     width: 100%;
     margin: 1.5em 0;
-    border-collapse: collapse;
     border-radius: $base-border-radius;
     th, td { padding: 0.25em 0.5em; }
     tr.odd { background-color: darken($color-white, 5%); }
@@ -342,3 +347,16 @@ table {
         border-bottom: $base-border-width solid $color-grey
     }
 }
+
+
+/* Article */
+
+.post {
+    @extend %article;
+    p:first-of-type {
+        @include media($medium-layout) { @include font-sizing(1.2); }
+    } 
+}
+.question { @extend %article; }
+.request { @extend %article; }
+.jurisdiction { @extend %article; }
