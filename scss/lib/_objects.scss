@@ -62,61 +62,7 @@
     border-radius: $base-border-radius;
     line-height: $base-vertical-rhythm;
 }
-    
-<<<<<<< HEAD:scss/_objects.scss
-    // Textbox -> Button
-    %button { @extend %textbox;
-        display: inline-block;
-        margin: 0.25em 0.325em 0.25em 0;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
-        text-decoration: none;
-        text-align: center; }
-        @mixin button-color($color) {
-            color: $color;
-            border-color: $color;
-        }
-        @mixin button-hover($color) {
-            &:hover {
-                color: $color-white;
-                @include background-gradient($color);
-                text-decoration: none !important;
-            }
-            &:focus {
-                $focus-color: lighten($color, 10%);
-                color: $focus-color;
-                border-color: $focus-color;
-                &:hover {
-                    color: $color-white;
-                }
-            }
-            &:active {
-                color: $color-white;
-                @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
-            }
-        }
-        
-    // Textbox -> Panel
-    %panel { @extend %textbox;
-        display: block;
-        margin:  $base-vertical-rhythm/2 0;
-        padding: $base-vertical-rhythm/2;
-        border-color: $color-grey;
-        @include media($large-layout) {
-            padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
-        }
-    }
-        @mixin panel-color($color, $disabled: false) {
-            @if not $disabled {
-                color: $color-white;
-                @include background-gradient($color);
-                border-color: darken($color, 10%);
-            } @else {
-                color: $color;
-                background: none;
-            }
-        }
-        
-=======
+
 // Textbox -> Button
 %button { @extend %textbox;
     display: inline-block;
@@ -125,7 +71,6 @@
     text-decoration: none;
     text-align: center;
 }
->>>>>>> menus:scss/lib/_objects.scss
 
 // Textbox -> Panel
 %panel { @extend %textbox;
@@ -269,18 +214,6 @@ object.message { @extend %panel;
         display: block;
         width: 100%;
         text-align: left;
-<<<<<<< HEAD:scss/_objects.scss
-        overflow: hidden;
-        img { 
-            max-width: 100%; 
-            width: 50px;
-            margin: 0;
-            border-radius: $base-border-radius;
-        }
-        small {
-            display: block;
-            line-height: 1.5em;
-=======
         line-height: 1em;
         img {
             max-width: 100%;
@@ -290,7 +223,6 @@ object.message { @extend %panel;
         small {
             display: block;
             margin-top: 0.5em;
->>>>>>> menus:scss/lib/_objects.scss
         }
         @include fill-parent();
         @include media($message-layout) {
@@ -435,9 +367,6 @@ table {
         border-top: $base-border-width solid $color-grey;
         border-bottom: $base-border-width solid $color-grey
     }
-<<<<<<< HEAD:scss/_objects.scss
-}
-=======
 }
 
 
@@ -447,9 +376,19 @@ table {
     @extend %article;
     p:first-of-type {
         @include media($medium-layout) { @include font-sizing(1.2); }
-    } 
+    }
+    aside dl { @include span-columns(2 of 6); }
 }
 .question { @extend %article; }
 .request { @extend %article; }
-.jurisdiction { @extend %article; }
->>>>>>> menus:scss/lib/_objects.scss
+.jurisdiction {
+    @extend %article;
+    h3 { font-weight: normal; }
+    h3 + table { margin-top: 0; }
+    h3 + h3 { margin-top: 1.5em; }
+    aside dl { @extend %half; @include omega(2n); }
+    section {
+        border-top: $base-border-width solid $color-grey;
+        padding-top: $base-vertical-rhythm;
+    }
+}

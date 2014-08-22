@@ -22,6 +22,7 @@ html, body { min-height: 100%; }
 
 %quarter {
     @extend %full;
+    @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(3); }
 }
 
@@ -47,10 +48,10 @@ html, body { min-height: 100%; }
     }
     aside {
         @extend %row;
-        dl {
-            @extend %third;
-            @include pad(0 default default 0);
-        }
+        figure { @extend %half; }
+        .dl-group { @extend %half; }
+        dl { @include pad(0 default default 0); }
+        dl, dt { margin-top: 0; }
     }
     summary { 
         font-weight: 300;

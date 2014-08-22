@@ -30,14 +30,9 @@ $base-vertical-rhythm:  1.5em;
 $base-gradient-darken:  8%;
 
 @import 'lib/typography';
-@import 'lib/objects';
 @import 'lib/layouts';
+@import 'lib/objects';
 @import 'lib/nav';
-
-// One Off
-// These exceptional elements exist only once
-
-@import 'nav';
 
 // Temporary Imports
 // Provides layout for index.html only

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:scss/_typography.scss
-@mixin font-sizing($size-multiplier, $line-multiplier:1) {
-=======
 @mixin font-sizing($size-multiplier, $line-multiplier:1.3) {
->>>>>>> menus:scss/lib/_typography.scss
     $size: 1em * $size-multiplier;
     $line: 1em + (1em / ($base-vertical-rhythm * $line-multiplier));
     font-size: $size;
@@ -106,12 +102,6 @@ img, audio, video, embed, iframe {
     margin: 0;
 }
 
-<<<<<<< HEAD:scss/_typography.scss
-img + p {
-    margin-top: 0;
-}
-
-=======
 figure { margin: 0; }
 
 figcaption {
@@ -127,7 +117,6 @@ th {
 
 td { vertical-align: bottom; }
 
->>>>>>> menus:scss/lib/_typography.scss
 .default { color: $color-default; }
 .primary { color: $color-primary; }
 .success { color: $color-success; }
