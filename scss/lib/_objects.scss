@@ -14,7 +14,8 @@
 // Mixins
 
 @mixin background-gradient($color) {
-    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+    //@include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+    background: $color;
 }
 
 @mixin button-color($color) {

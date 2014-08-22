@@ -290,7 +290,12 @@ nav.sidebar {
     .spotlight {
         margin-top: 1.5em;
         img { margin: 0; }
-        h1 { @extend h6; font-size: 98%; line-height: 1.2em; }
+        h1 {
+            @extend h6;
+            font-weight: 400;
+            font-size: 98%;
+            line-height: 1.2em;
+        }
         p { @extend small; line-height: 1.2em; }
     }
     

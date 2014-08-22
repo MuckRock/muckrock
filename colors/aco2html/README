@@ -1,0 +1,17 @@
+INSTALLATION
+
+The software is written in ANSI C
+in order to compile just run 'make'
+
+USAGE
+
+  cat example.aco | ./aco2html > /tmp/converted.html
+
+The program reads from standard input the ACO file
+and outputs to standard output the generated HTML file.
+
+CREDITS
+
+The example.aco file is from http://miles.burke.id.au/blog/
+Actually I wrote aco2html in order to convert this file
+into HTML :)
