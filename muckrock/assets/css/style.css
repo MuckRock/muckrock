@@ -501,7 +501,7 @@ img, audio, video, embed, iframe {
   margin: 0; }
 
 figure {
-  margin: 1.5em 0; }
+  margin: 1.5em 0 0; }
 
 figcaption {
   margin: 0 0 1.5em; }
@@ -596,7 +596,7 @@ html, body {
     margin-right: 2.35765%;
     width: 65.88078%;
     padding: 0 2.35765% 0 0;
-    margin: 0.75em 0; }
+    margin: 0.75em 0 0; }
     .post > section.meta header:last-child, .question > section.meta header:last-child, .request > section.meta header:last-child, .jurisdiction > section.meta header:last-child, .agency > section.meta header:last-child {
       margin-right: 0; }
     .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2 {
@@ -653,6 +653,8 @@ object.collection ul {
 object.collection li {
   padding: 1.5em 1.5em;
   margin: 0; }
+  object.collection li:first-child {
+    padding-top: 0; }
   @media screen and (min-width: 540px) {
     object.collection li {
       border-radius: 9px;
@@ -1076,11 +1078,11 @@ h1.list-label {
   line-height: 1.51282em;
   margin: 0.37821em 0;
   display: block;
-  margin-top: 0; }
+  margin: 0; }
 
 nav.pagination ul {
   text-align: center;
-  margin: 0 auto; }
+  margin: 0.75em auto; }
 nav.pagination li {
   font-size: 0.95em;
   line-height: 1.51282em;
