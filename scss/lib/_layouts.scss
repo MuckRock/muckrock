@@ -27,38 +27,47 @@ html, body { min-height: 100%; }
 }
 
 %body {
+    display: block;
     @include outer-container;
-    margin: 0 1.5em;
-    @media screen and (min-width: 540px) { margin: 0 2em; }
 }
 
 // Layouts
 
 %article {
     @extend %body;
-    header { @extend %full;
-        margin: $base-vertical-rhythm/2 0;
-        h1, h2 { font-weight: 400; }
-        h1 { @include font-sizing(1.25); }
-        h2 { @include font-sizing(0.75); }
-        @include media($medium-layout) {
+    margin: 0 1.5em;
+    @media screen and (min-width: 540px) { margin: 0 2em; }
+    > section.meta {
+        @extend %row;
+        header {
+            @include span-columns(8);
+            @include pad(0 default 0 0);
+            margin: $base-vertical-rhythm/2 0 0;
+            h1, h2 { font-weight: 400; }
             h1 { @include font-sizing(1.5); }
             h2 { @include font-sizing(0.875); }
+            @include media($medium-layout) {
+                h1 { @include font-sizing(1.75); }
+                h2 { @include font-sizing(1); }
+            }
         }
+        aside {
+            @extend %third;
+            @extend %row;
+            @include pad(0 default 0 default);
+            margin: $base-vertical-rhythm/2 0;
+            .dl-group { @include outer-container(); }
+            dl { @extend %full; }
+            dl { margin-top: 0; }
+        }
+        .panel { width: 90%; } 
     }
-    > section {
+    > section.main {
         @extend %full;
         max-width: 50em;
-        border-top: $base-border-width solid $color-grey;
         padding-top: $base-vertical-rhythm;
     }
-    aside {
-        @extend %row;
-        figure { @extend %half; }
-        .dl-group { @extend %half; }
-        dl { @include pad(0 default default 0); }
-        dl, dt { margin-top: 0; }
-    }
+
     summary { 
         font-weight: 300;
         display: none;
@@ -72,12 +81,21 @@ html, body { min-height: 100%; }
 %collection {
     @extend %body;
     ul {
+        @extend %full;
         margin: 0;
         padding: 0;
         list-style-type: none;
     }
-    li { margin: $base-vertical-rhythm/2 0; }
-    li:nth-child(odd) { background-color: $color-odd-background; }
+    li {
+        padding: $base-vertical-rhythm $base-vertical-rhythm;
+        margin: 0;
+        &:first-child { padding-top: 0; }
+        @media screen and (min-width: 540px) {
+            border-radius: $base-border-radius;
+            margin: 0 2em;
+        }
+    }
+    li:nth-child(even) { background-color: $color-odd-background; }
     h2, h3 { font-weight: 400; }
     h2 { @include font-sizing(1.25); }
     h3 { @include font-sizing(1); }

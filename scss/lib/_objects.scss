@@ -383,7 +383,6 @@ table {
     h3 { font-weight: normal; }
     h3 + table { margin-top: 0; }
     h3 + h3 { margin-top: 1.5em; }
-    aside dl { @extend %half; @include omega(2n); }
 }
 .agency {
     figure { @extend %full; }
@@ -395,4 +394,60 @@ table {
 
 /* Collection */
 
+header.collection-header {
+    @include outer-container();
+    padding: 0 2rem $base-vertical-rhythm/2;
+}
+h1.list-label {
+    @extend %full;
+    font-weight: 300;
+    text-align: center;
+    @include font-sizing(3); 
+    display: block;
+    margin: 0;
+}
+nav.pagination {
+    @extend %full;
+    ul {
+        text-align: center;
+        margin: $base-vertical-rhythm/2 auto;
+    }
+    li {
+        @include font-sizing(0.95);
+        display: block;
+
+        padding: 0 $base-vertical-rhythm/4;
+        @media screen and (min-width: 680px) {
+            display: inline-block;
+        }
+    }
+    .page-ref {
+        font-weight: 300;
+        @include font-sizing(1.25);
+        padding: 0 $base-vertical-rhythm/2;
+    }
+    
+}
+
 object.collection { @extend %collection; }
+object.jurisidiction.collection, object.agency.collection {
+    h2, ul {
+        margin: 0 1.5em;
+        text-align: center;
+        @media screen and (min-width: 540px) { margin: 0 2em; }
+    }
+    
+    ul {
+        
+        width: 100%;
+        margin: 0;
+        li { padding: $base-vertical-rhythm/4; }
+        @media screen and (min-width: 540px) {
+            @include columns(3 $base-vertical-rhythm/2);
+            li:nth-child(even) { background: none; }
+        }
+    }
+    
+    
+
+}

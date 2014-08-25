@@ -24,6 +24,10 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0;
     font-weight: 300;
     strong, b { font-weight: $base-font-weight; }
+    .container > & {
+        margin: 0 1.5rem;
+        @media screen and (min-width: 540px) { margin: 0 2rem; }
+    }
 }
 
 h1 { @include font-sizing(2); }
@@ -102,7 +106,7 @@ img, audio, video, embed, iframe {
     margin: 0;
 }
 
-figure { margin: 0; }
+figure { margin: $base-vertical-rhythm 0 0; }
 
 figcaption {
     @extend small;

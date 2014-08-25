@@ -401,6 +401,11 @@ h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
   font-weight: 300; }
   h1 strong, h1 b, h2 strong, h2 b, h3 strong, h3 b, h4 strong, h4 b, h5 strong, h5 b, h6 strong, nav.sidebar .spotlight h1 strong, h6 b, nav.sidebar .spotlight h1 b {
     font-weight: 400; }
+  .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
+    margin: 0 1.5rem; }
+    @media screen and (min-width: 540px) {
+      .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
+        margin: 0 2rem; } }
 
 h1 {
   font-size: 2em;
@@ -496,7 +501,7 @@ img, audio, video, embed, iframe {
   margin: 0; }
 
 figure {
-  margin: 0; }
+  margin: 1.5em 0 0; }
 
 figcaption {
   margin: 0 0 1.5em; }
@@ -534,101 +539,127 @@ td {
 html, body {
   min-height: 100%; }
 
-.post aside, .question aside, .request aside, .jurisdiction aside, .agency aside {
+.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside {
   display: block; }
-  .post aside:after, .question aside:after, .request aside:after, .jurisdiction aside:after, .agency aside:after {
+  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after {
     content: "";
     display: table;
     clear: both; }
 
-.post aside figure, .question aside figure, .request aside figure, .jurisdiction aside figure, .agency aside figure, .post aside .dl-group, .question aside .dl-group, .request aside .dl-group, .jurisdiction aside .dl-group, .agency aside .dl-group, .jurisdiction aside dl, .footer-container footer section.about, .agency aside dl, .post header, .question header, .request header, .jurisdiction header, .agency header, .post > section, .question > section, .request > section, .jurisdiction > section, .agency > section, .agency figure, .agency aside div.dl-group {
+.footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .agency aside dl, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, object.collection ul, .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
   width: 100%; }
 
 @media screen and (min-width: 769px) {
-  .post aside figure, .question aside figure, .request aside figure, .jurisdiction aside figure, .agency aside figure, .post aside .dl-group, .question aside .dl-group, .request aside .dl-group, .jurisdiction aside .dl-group, .agency aside .dl-group, .jurisdiction aside dl, .footer-container footer section.about {
+  .footer-container footer section.about {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .post aside figure:last-child, .question aside figure:last-child, .request aside figure:last-child, .jurisdiction aside figure:last-child, .agency aside figure:last-child, .post aside .dl-group:last-child, .question aside .dl-group:last-child, .request aside .dl-group:last-child, .jurisdiction aside .dl-group:last-child, .agency aside .dl-group:last-child, .jurisdiction aside dl:last-child, .footer-container footer section.about:last-child {
+    .footer-container footer section.about:last-child {
       margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
-  .agency aside dl {
+  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .agency aside dl {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .agency aside dl:last-child {
+    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .agency aside dl {
+  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .agency aside dl {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .agency aside dl:last-child {
+    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
 
 .post, .question, .request, .jurisdiction, .agency, object.collection {
+  display: block;
   max-width: 68em;
   margin-left: auto;
-  margin-right: auto;
-  margin: 0 1.5em; }
+  margin-right: auto; }
   .post:after, .question:after, .request:after, .jurisdiction:after, .agency:after, object.collection:after {
     content: "";
     display: table;
     clear: both; }
-  @media screen and (min-width: 540px) {
-    .post, .question, .request, .jurisdiction, .agency, object.collection {
-      margin: 0 2em; } }
 
-.post header, .question header, .request header, .jurisdiction header, .agency header {
-  margin: 0.75em 0; }
-  .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
-    font-weight: 400; }
-  .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1 {
-    font-size: 1.25em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
-  .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
-    font-size: 0.75em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
-  @media screen and (min-width: 321px) {
-    .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1 {
+.post, .question, .request, .jurisdiction, .agency {
+  margin: 0 1.5em; }
+  @media screen and (min-width: 540px) {
+    .post, .question, .request, .jurisdiction, .agency {
+      margin: 0 2em; } }
+  .post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 65.88078%;
+    padding: 0 2.35765% 0 0;
+    margin: 0.75em 0 0; }
+    .post > section.meta header:last-child, .question > section.meta header:last-child, .request > section.meta header:last-child, .jurisdiction > section.meta header:last-child, .agency > section.meta header:last-child {
+      margin-right: 0; }
+    .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2 {
+      font-weight: 400; }
+    .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1 {
       font-size: 1.5em;
       line-height: 1.51282em;
       margin: 0.37821em 0; }
-    .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
+    .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2 {
       font-size: 0.875em;
       line-height: 1.51282em;
-      margin: 0.37821em 0; } }
-.post > section, .question > section, .request > section, .jurisdiction > section, .agency > section {
-  max-width: 50em;
-  border-top: 1px solid #b3becb;
-  padding-top: 1.5em; }
-.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl {
-  padding: 0 2.35765% 2.35765% 0; }
-.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl, .post aside dt, .question aside dt, .request aside dt, .jurisdiction aside dt, .agency aside dt {
-  margin-top: 0; }
-.post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
-  font-weight: 300;
-  display: none; }
-  @media screen and (min-width: 321px) {
-    .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
-      display: block;
-      font-size: 1.25em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; } }
+      margin: 0.37821em 0; }
+    @media screen and (min-width: 321px) {
+      .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1 {
+        font-size: 1.75em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; }
+      .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2 {
+        font-size: 1em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
+  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside {
+    padding: 0 2.35765% 0 2.35765%;
+    margin: 0.75em 0; }
+    .post > section.meta aside .dl-group, .question > section.meta aside .dl-group, .request > section.meta aside .dl-group, .jurisdiction > section.meta aside .dl-group, .agency > section.meta aside .dl-group {
+      max-width: 68em;
+      margin-left: auto;
+      margin-right: auto; }
+      .post > section.meta aside .dl-group:after, .question > section.meta aside .dl-group:after, .request > section.meta aside .dl-group:after, .jurisdiction > section.meta aside .dl-group:after, .agency > section.meta aside .dl-group:after {
+        content: "";
+        display: table;
+        clear: both; }
+    .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl {
+      margin-top: 0; }
+  .post > section.meta .panel, .question > section.meta .panel, .request > section.meta .panel, .jurisdiction > section.meta .panel, .agency > section.meta .panel {
+    width: 90%; }
+  .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main {
+    max-width: 50em;
+    padding-top: 1.5em; }
+  .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
+    font-weight: 300;
+    display: none; }
+    @media screen and (min-width: 321px) {
+      .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
+        display: block;
+        font-size: 1.25em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
 
 object.collection ul {
   margin: 0;
   padding: 0;
   list-style-type: none; }
 object.collection li {
-  margin: 0.75em 0; }
-object.collection li:nth-child(odd) {
+  padding: 1.5em 1.5em;
+  margin: 0; }
+  object.collection li:first-child {
+    padding-top: 0; }
+  @media screen and (min-width: 540px) {
+    object.collection li {
+      border-radius: 9px;
+      margin: 0 2em; } }
+object.collection li:nth-child(even) {
   background-color: #e7e7e7; }
 object.collection h2, object.collection h3 {
   font-weight: 400; }
@@ -1019,10 +1050,6 @@ table {
   margin-top: 0; }
 .jurisdiction h3 + h3 {
   margin-top: 1.5em; }
-.jurisdiction aside dl:nth-child(2n) {
-  margin-right: 0; }
-.jurisdiction aside dl:nth-child(2n+1) {
-  clear: left; }
 
 .agency aside div.dl-group {
   padding: 2.35765% 0 0 0; }
@@ -1034,6 +1061,63 @@ table {
   margin-top: 1.5em; }
 
 /* Collection */
+header.collection-header {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 2rem 0.75em; }
+  header.collection-header:after {
+    content: "";
+    display: table;
+    clear: both; }
+
+h1.list-label {
+  font-weight: 300;
+  text-align: center;
+  font-size: 3em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
+  display: block;
+  margin: 0; }
+
+nav.pagination ul {
+  text-align: center;
+  margin: 0.75em auto; }
+nav.pagination li {
+  font-size: 0.95em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
+  display: block;
+  padding: 0 0.375em; }
+  @media screen and (min-width: 680px) {
+    nav.pagination li {
+      display: inline-block; } }
+nav.pagination .page-ref {
+  font-weight: 300;
+  font-size: 1.25em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
+  padding: 0 0.75em; }
+
+object.jurisidiction.collection h2, object.jurisidiction.collection ul, object.agency.collection h2, object.agency.collection ul {
+  margin: 0 1.5em;
+  text-align: center; }
+  @media screen and (min-width: 540px) {
+    object.jurisidiction.collection h2, object.jurisidiction.collection ul, object.agency.collection h2, object.agency.collection ul {
+      margin: 0 2em; } }
+object.jurisidiction.collection ul, object.agency.collection ul {
+  width: 100%;
+  margin: 0; }
+  object.jurisidiction.collection ul li, object.agency.collection ul li {
+    padding: 0.375em; }
+  @media screen and (min-width: 540px) {
+    object.jurisidiction.collection ul, object.agency.collection ul {
+      -webkit-columns: 3 0.75em;
+      -moz-columns: 3 0.75em;
+      columns: 3 0.75em; }
+      object.jurisidiction.collection ul li:nth-child(even), object.agency.collection ul li:nth-child(even) {
+        background: none; } }
+
 /* Navigation Menu */
 nav {
   overflow: hidden;
@@ -1059,7 +1143,7 @@ nav {
         float: none; } }
 
 nav.primary {
-  padding: 0.75em 1.5em 0;
+  padding: 0.75em 1.5em;
   /* Logo */ }
   nav.primary ul {
     list-style-type: none;
@@ -1096,16 +1180,29 @@ nav.primary {
     border-left: 1px solid #21282c; }
     nav.primary li:first-child + li:last-child a.button:hover {
       border-left-color: #3a82ff; }
-  @media screen and (max-width: 540px) {
-    nav.primary ul.right {
-      display: none !important; } }
-  nav.primary ul.left #left-menu-button {
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-left: none; }
-  nav.primary ul.left .trademark + li > a {
-    border-top-left-radius: 9px;
-    border-bottom-left-radius: 9px; }
+  nav.primary ul.left {
+    float: left; }
+  nav.primary ul.right {
+    float: right; }
+    nav.primary ul.right #menu-text {
+      display: none; }
+    nav.primary ul.right #new-request {
+      color: #3a82ff;
+      border-color: #3a82ff;
+      border-right: none;
+      border-top-left-radius: 9px;
+      border-bottom-left-radius: 9px; }
+      nav.primary ul.right #new-request:hover {
+        color: #f4f4f4; }
+    nav.primary ul.right #menu-button {
+      border-top-right-radius: 9px;
+      border-bottom-right-radius: 9px; }
+    nav.primary ul.right li:last-child {
+      border-top-right-radius: 9px;
+      border-bottom-right-radius: 9px; }
+    @media screen and (min-width: 540px) {
+      nav.primary ul.right #menu-text {
+        display: inline; } }
   @media screen and (min-width: 540px) {
     nav.primary {
       padding: 2em 2em 0; }
@@ -1123,36 +1220,35 @@ nav.primary {
       nav.primary ul.right {
         display: table;
         float: right; } }
-  nav.primary #muckrock-trademark, nav.primary #muckrock-logo {
+  nav.primary #muckrock-text, nav.primary #muckrock-icon {
     border: none;
     padding: 0 0.5em 0 0; }
-    nav.primary #muckrock-trademark:hover, nav.primary #muckrock-logo:hover {
+    nav.primary #muckrock-text:hover, nav.primary #muckrock-icon:hover {
       background: none; }
-      nav.primary #muckrock-trademark:hover svg > g, nav.primary #muckrock-logo:hover svg > g {
+      nav.primary #muckrock-text:hover svg > g, nav.primary #muckrock-icon:hover svg > g {
         fill: #3a82ff; }
-  nav.primary #muckrock-trademark {
+  nav.primary #muckrock-text {
     display: none; }
-  nav.primary #muckrock-logo {
+  nav.primary #muckrock-icon {
     display: block;
     padding-top: 0em; }
-    nav.primary #muckrock-logo > svg {
+    nav.primary #muckrock-icon > svg {
       display: block;
-      height: 2em;
-      width: 2em; }
+      height: 2rem;
+      width: 2rem; }
   @media screen and (min-width: 680px) {
-    nav.primary #muckrock-trademark {
+    nav.primary #muckrock-text {
       display: block;
       padding-top: 0.375em;
       padding-right: 1em; }
-    nav.primary #muckrock-logo {
+    nav.primary #muckrock-icon {
       display: none; } }
 
 nav.secondary {
-  display: none;
   padding: 0.75em 1.5em; }
   nav.secondary li {
     display: inline-block;
-    margin: 0 0.75em; }
+    margin: 0 0.5em; }
     nav.secondary li:first-child {
       margin-left: 0; }
     nav.secondary li a {
@@ -1163,21 +1259,15 @@ nav.secondary {
   @media screen and (min-width: 540px) {
     nav.secondary {
       display: block;
-      padding: 1em 2em; } }
+      padding: 0.75em 2em 2em; }
+      nav.secondary li {
+        text-align: center; } }
 
 /* Global Sidebar */
 .container, .footer-container {
   width: 75%;
   float: left; }
 
-/*
-@media screen and (min-width: 1024px) {
-    .container {
-        border-left: 1em solid $color-black;
-        border-top: 1em solid $color-black;
-    }
-}
-*/
 #sidebar-menu {
   position: fixed;
   top: 0;
@@ -1219,6 +1309,8 @@ nav.secondary {
       -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
       transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+    #sidebar-menu:target #new-request {
+      display: none; }
 
   nav.primary ul.right {
     display: table; } }
@@ -1255,6 +1347,16 @@ nav.sidebar {
       line-height: 0;
       border-radius: 9px;
       background-color: #181d20; }
+  nav.sidebar #new-request {
+    display: block;
+    height: 2.5rem;
+    width: 100%;
+    margin-bottom: 1.5em;
+    background-color: #3a82ff;
+    color: #f4f4f4; }
+    @media screen and (max-width: 540px) {
+      nav.sidebar #new-request {
+        display: none; } }
   nav.sidebar .account-links li {
     padding: 0.5em;
     padding-bottom: 0; }
