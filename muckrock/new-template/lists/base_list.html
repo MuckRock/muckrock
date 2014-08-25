@@ -5,31 +5,15 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% endcomment %}
 {% block content %}
-    <h1 class="list-label">{% block list-label %}{% endblock list-label %}</h1>
     
-    {% if page_obj.has_previous or page_obj.has_next %}
-    <nav class="pagination">
-		
-		{% if page_obj.has_previous %}
-		<ul class="left">
-			<li><a class="button" href="?page=1">&#171; First page</a></li>
-			<li><a class="button"
-			       href="?page={{ page_obj.previous_page_number }}">
-			       &#171; Previous page
-            </a></li>
-		</ul>
-		{% endif %}
-		{% if page_obj.has_next %}
-		<ul class="right">
-			<li><a href="?page={{ page_obj.next_page_number }}">Next page &#187;</a></li>
-			<li><a href="?page={{ paginator.num_pages }}">Last page &#187;</a></li>
-		</ul>
-		{% endif %}
-		
-	</nav>
-	{% endif %}
+    <header class="collection-header">
+        <h1 class="list-label">{% block list-label %}{% endblock list-label %}</h1>
+    
+        {% include 'lib/pagination.html' %}
+    </header>
     
     <object class="{% block type %}item{% endblock type %} collection">
+        {% block list %}
         <ul>
             {% for item in object_list %}
             <li>
@@ -43,5 +27,9 @@ This is the parent style for a collection of objects: a collection of blog posts
             <li class="empty">Hmm&ellip; looks like there&rsquo;s nothing here.</li>
             {% endfor %}
         </ul>
+        {% endblock list %}
     </object>
+    
+    {% include 'lib/pagination.html' %}
+    
 {% endblock %}

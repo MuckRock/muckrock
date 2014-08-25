@@ -6,10 +6,7 @@
 {% block header %}
     <dfn>Agency</dfn>
     <h1>{{agency.name}}</h1>
-    <h2>of {% if agency.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ agency.jurisdiction.get_absolute_url }}">{{agency.jurisdiction}}</a></h2>
-{% endblock header %}
-
-{% block aside %}
+    <h2>of {% if agency.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
     {% if agency.image %}
     <figure>
         <img src="{{ MEDIA_URL }}{{ agency.image }}" alt="" />
@@ -18,6 +15,10 @@
         {% endif %}
     </figure>
     {% endif %}
+{% endblock header %}
+
+{% block aside %}
+    
     
     <div class="dl-group">
         <dl>
@@ -105,6 +106,9 @@
 {% endblock aside %}
 
 {% block main %}
+
+    {{agency.public_notes|markdown:"trusted"}}
+
     {% include 'lib/foia_table.html' %}
     
     {% for req in agency.interesting_requests %}

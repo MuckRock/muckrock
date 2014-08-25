@@ -29,5 +29,5 @@
 </table>
 <a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}" class="button">View All</a>
 {% else %}
-<h3>No requests have been filed within this jurisdiction.</h3>
+<h3>No requests have been filed. <small><a href="">Be the first to submit one.</a></small></h3>
 {% endif %}  

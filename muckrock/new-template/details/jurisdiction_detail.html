@@ -9,36 +9,6 @@
 	{% if jurisdiction.parent %}
 	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent.name }}</a></h2>
     {% endif %}
-{% endblock header %}
-
-{% block main %}
-    {% include 'lib/foia_table.html' %}
-    
-    {% if jurisdiction.agencies.count %}
-    <h3>Documented Agencies</h3>
-    <table>
-        <tr>
-            <th width="50%">Agency</th>
-            <th width="20%">Requests</th>
-            <th width="30%">Pages Released</th>
-        </tr>
-        {% for agency in jurisdiction.agencies.get_approved %}
-        <tr>
-            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
-            <td>{{ agency.foiarequest_set.count }}</td>
-            <td>{{ agency.total_pages }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-    <h3>No agencies have been documented for this jurisdiction.</h3>
-    {% endif %}
-	
-{% endblock main %}
-
-{% block aside %}
-
-    
     {% if jurisdiction.image %}
     <figure>
         <img src="{{ MEDIA_URL }}{{ jurisdiction.image }}" alt="" />
@@ -46,8 +16,15 @@
         <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
         {% endif %}
     </figure>
+    {% else %}
+    <object class="failure panel">
+        <p><strong>This jurisdiction is incomplete!</strong></p>
+        <p>To help us complete it, click &ldquo;Suggest a Change&rdquo; at the bottom of this page.</p>
+    </object>
     {% endif %}
+{% endblock header %}
 
+{% block aside %}
     <div class="dl-group">
         <dl>
             <dt>Allowed Response Time</dt>
@@ -93,5 +70,32 @@
             {% endif %}
         </dl>
     </div>
-
 {% endblock aside %}
+
+{% block main %}
+
+    {{agency.public_notes|markdown:"trusted"}}
+
+    {% include 'lib/foia_table.html' %}
+    
+    {% if jurisdiction.agencies.count %}
+    <h3>Documented Agencies</h3>
+    <table>
+        <tr>
+            <th width="50%">Agency</th>
+            <th width="20%">Requests</th>
+            <th width="30%">Pages Released</th>
+        </tr>
+        {% for agency in jurisdiction.agencies.get_approved %}
+        <tr>
+            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
+            <td>{{ agency.foiarequest_set.count }}</td>
+            <td>{{ agency.total_pages }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h3>No agencies have been documented for this jurisdiction.</h3>
+    {% endif %}
+	
+{% endblock main %}

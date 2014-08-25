@@ -50,7 +50,7 @@ def list_(request):
                              .order_by('-num_requests')[:10]
     context = {'agencies': agencies}
 
-    return render_to_response('agency/agency_list.html', context,
+    return render_to_response('lists/agency_list.html', context,
                               context_instance=RequestContext(request))
 
 @login_required

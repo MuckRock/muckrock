@@ -1,5 +1,6 @@
 <aside id="sidebar-menu">
     <nav class="sidebar">
+        <a href="{% url 'foia-create'%}" class="primary button" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a>
         <fieldset>
             <input type="search" placeholder="Search"></input>
             <span class="input-button" id="search-button">
@@ -54,8 +55,10 @@
         <section class="spotlight">
             <dfn>Community Spotlight</dfn>
             <img src="https://muckrock.s3.amazonaws.com/agency_images/fsg-maynard-02.jpg.510x233_q85.jpg" alt="Image">
-            <h1><a href="#">Help Crowdfund Fusion Center Transparency</a></h1>
-            <p>Evan Anderson filed with the Commonwealth Fusion Center to see what kinds of work it was outsourcing to security contractors. The agency said it likely had some documents, but it will cost $250 to search for them. <a href="#">Help make them public!</a></p> 
+            <object class="progress-bar">
+                <span class="success meter" style="width: 66%"></span>
+            </object>
+            <p>$66 raised out of $100 needed</p>
         </section>
         
     </nav>

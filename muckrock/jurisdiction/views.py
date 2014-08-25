@@ -76,7 +76,7 @@ def list_(request):
     state_jurs = Jurisdiction.objects.filter(level='s')
     context = {'fed_jurs': fed_jurs, 'state_jurs': state_jurs}
 
-    return render_to_response('jurisdiction/jurisdiction_list.html', context,
+    return render_to_response('lists/jurisdiction_list.html', context,
                               context_instance=RequestContext(request))
 
 @login_required

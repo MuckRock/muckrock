@@ -17,9 +17,6 @@
     <h1>{{ article.title }}</h1>
     <h2>by {{ article.get_authors_names }} 
     on {{ article.pub_date | date:"F j, Y" }}</h2>
-{% endblock header %}	
-
-{% block aside %}
     {% if article.image %}
     <figure>
         <img src="{{ MEDIA_URL }}{{ article.image }}" alt="" />
@@ -28,6 +25,9 @@
         {% endif %}
     </figure>
     {% endif %}
+{% endblock header %}
+
+{% block aside %}
     {% if article.kicker %}
     <dl>
         <dt>In a Nutshell</dt>
