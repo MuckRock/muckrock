@@ -42,6 +42,8 @@ $color-failure:         #fb004e;
 $color-default:         #6b6a65;
 $color-disabled:        #96959e;
 
+$color-odd-background:  darken($color-white, 5%);
+
 $base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
 $base-font-weight:      400;
 $base-border-width:     1px;

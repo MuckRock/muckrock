@@ -363,13 +363,12 @@ table {
     margin: 1.5em 0;
     border-radius: $base-border-radius;
     th, td { padding: 0.25em 0.5em; }
-    tr.odd { background-color: darken($color-white, 5%); }
+    tr:nth-child(odd) { background-color: $color-odd-background; }
     &, th, td {
         border-top: $base-border-width solid $color-grey;
         border-bottom: $base-border-width solid $color-grey
     }
 }
-
 
 /* Article */
 .post, .question, .request, .jurisdiction, .agency { @extend %article; }
@@ -393,3 +392,7 @@ table {
     //aside dd > small { text-transform: uppercase; }
     aside dd + dt { margin-top: $base-vertical-rhythm; }
 }
+
+/* Collection */
+
+object.collection { @extend %collection; }
