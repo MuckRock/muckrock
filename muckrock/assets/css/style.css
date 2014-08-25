@@ -401,6 +401,11 @@ h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
   font-weight: 300; }
   h1 strong, h1 b, h2 strong, h2 b, h3 strong, h3 b, h4 strong, h4 b, h5 strong, h5 b, h6 strong, nav.sidebar .spotlight h1 strong, h6 b, nav.sidebar .spotlight h1 b {
     font-weight: 400; }
+  .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
+    margin: 0 1.5rem; }
+    @media screen and (min-width: 540px) {
+      .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
+        margin: 0 2rem; } }
 
 h1 {
   font-size: 2em;
@@ -530,6 +535,11 @@ td {
   font-weight: 300;
   font-size: 2em; }
 
+.list-label {
+  font-weight: 300;
+  padding-bottom: 0.75em;
+  border-bottom: 1px solid #21282c; }
+
 /* Allows for full-height elements with CSS */
 html, body {
   min-height: 100%; }
@@ -541,7 +551,7 @@ html, body {
     display: table;
     clear: both; }
 
-.post aside figure, .question aside figure, .request aside figure, .jurisdiction aside figure, .agency aside figure, .post aside .dl-group, .question aside .dl-group, .request aside .dl-group, .jurisdiction aside .dl-group, .agency aside .dl-group, .jurisdiction aside dl, .footer-container footer section.about, .agency aside dl, .post header, .question header, .request header, .jurisdiction header, .agency header, .post > section, .question > section, .request > section, .jurisdiction > section, .agency > section, .agency figure, .agency aside div.dl-group {
+.post aside figure, .question aside figure, .request aside figure, .jurisdiction aside figure, .agency aside figure, .post aside .dl-group, .question aside .dl-group, .request aside .dl-group, .jurisdiction aside .dl-group, .agency aside .dl-group, .jurisdiction aside dl, .footer-container footer section.about, .agency aside dl, .post header, .question header, .request header, .jurisdiction header, .agency header, .post > section, .question > section, .request > section, .jurisdiction > section, .agency > section, object.collection ul, .agency figure, .agency aside div.dl-group {
   width: 100%; }
 
 @media screen and (min-width: 769px) {
@@ -570,56 +580,79 @@ html, body {
     .agency aside dl:last-child {
       margin-right: 0; } }
 
-.post, .question, .request, .jurisdiction, .agency {
+.post, .question, .request, .jurisdiction, .agency, object.collection {
+  display: block;
   max-width: 68em;
   margin-left: auto;
   margin-right: auto;
   margin: 0 1.5em; }
-  .post:after, .question:after, .request:after, .jurisdiction:after, .agency:after {
+  .post:after, .question:after, .request:after, .jurisdiction:after, .agency:after, object.collection:after {
     content: "";
     display: table;
     clear: both; }
   @media screen and (min-width: 540px) {
-    .post, .question, .request, .jurisdiction, .agency {
+    .post, .question, .request, .jurisdiction, .agency, object.collection {
       margin: 0 2em; } }
-  .post header, .question header, .request header, .jurisdiction header, .agency header {
-    margin: 0.75em 0; }
-    .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
-      font-weight: 400; }
+
+.post header, .question header, .request header, .jurisdiction header, .agency header {
+  margin: 0.75em 0; }
+  .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1, .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
+    font-weight: 400; }
+  .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1 {
+    font-size: 1.25em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+  .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
+    font-size: 0.75em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+  @media screen and (min-width: 321px) {
     .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1 {
-      font-size: 1.25em;
+      font-size: 1.5em;
       line-height: 1.51282em;
       margin: 0.37821em 0; }
     .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
-      font-size: 0.75em;
+      font-size: 0.875em;
       line-height: 1.51282em;
-      margin: 0.37821em 0; }
-    @media screen and (min-width: 321px) {
-      .post header h1, .question header h1, .request header h1, .jurisdiction header h1, .agency header h1 {
-        font-size: 1.5em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; }
-      .post header h2, .question header h2, .request header h2, .jurisdiction header h2, .agency header h2 {
-        font-size: 0.875em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
-  .post > section, .question > section, .request > section, .jurisdiction > section, .agency > section {
-    max-width: 50em;
-    border-top: 1px solid #b3becb;
-    padding-top: 1.5em; }
-  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl {
-    padding: 0 2.35765% 2.35765% 0; }
-  .post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl, .post aside dt, .question aside dt, .request aside dt, .jurisdiction aside dt, .agency aside dt {
-    margin-top: 0; }
-  .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
-    font-weight: 300;
-    display: none; }
-    @media screen and (min-width: 321px) {
-      .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
-        display: block;
-        font-size: 1.25em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
+      margin: 0.37821em 0; } }
+.post > section, .question > section, .request > section, .jurisdiction > section, .agency > section {
+  max-width: 50em;
+  border-top: 1px solid #b3becb;
+  padding-top: 1.5em; }
+.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl {
+  padding: 0 2.35765% 2.35765% 0; }
+.post aside dl, .question aside dl, .request aside dl, .jurisdiction aside dl, .agency aside dl, .post aside dt, .question aside dt, .request aside dt, .jurisdiction aside dt, .agency aside dt {
+  margin-top: 0; }
+.post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
+  font-weight: 300;
+  display: none; }
+  @media screen and (min-width: 321px) {
+    .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary {
+      display: block;
+      font-size: 1.25em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; } }
+
+object.collection ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none; }
+object.collection li {
+  padding: 1.5em 1.5em;
+  margin: 0;
+  border-radius: 9px; }
+object.collection li:nth-child(even) {
+  background-color: #e7e7e7; }
+object.collection h2, object.collection h3 {
+  font-weight: 400; }
+object.collection h2 {
+  font-size: 1.25em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
+object.collection h3 {
+  font-size: 1em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0; }
 
 /* Simple Objects */
 .button, .button.default, input.button[type="submit"], button.button, .button.primary, .button.success, .button.failure, .button.disabled, .panel, .panel.default, input.panel[type="submit"], button.panel, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -971,7 +1004,7 @@ table {
   border-radius: 9px; }
   table th, table td {
     padding: 0.25em 0.5em; }
-  table tr.odd {
+  table tr:nth-child(odd) {
     background-color: #e7e7e7; }
   table, table th, table td {
     border-top: 1px solid #b3becb;
@@ -1013,6 +1046,7 @@ table {
 .agency aside dd + dt {
   margin-top: 1.5em; }
 
+/* Collection */
 /* Navigation Menu */
 nav {
   overflow: hidden;

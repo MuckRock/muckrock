@@ -17,13 +17,13 @@
     {% if jurisdiction.agencies.count %}
     <h3>Documented Agencies</h3>
     <table>
-        <tr class="odd">
+        <tr>
             <th width="50%">Agency</th>
             <th width="20%">Requests</th>
             <th width="30%">Pages Released</th>
         </tr>
         {% for agency in jurisdiction.agencies.get_approved %}
-        <tr class="{% cycle 'even' 'odd' %}">
+        <tr>
             <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
             <td>{{ agency.foiarequest_set.count }}</td>
             <td>{{ agency.total_pages }}</td>

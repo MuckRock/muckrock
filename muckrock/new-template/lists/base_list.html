@@ -5,7 +5,7 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% endcomment %}
 {% block content %}
-    <h1>{% block list-label %}{% endblock list-label %}</h1>
+    <h1 class="list-label">{% block list-label %}{% endblock list-label %}</h1>
     
     {% if page_obj.has_previous or page_obj.has_next %}
     <nav class="pagination">
@@ -34,9 +34,9 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% for item in object_list %}
             <li>
                 {% block list-item %}
-                <span class="title">
+                <h2>
                     <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
-                </span>
+                </h2>
                 {% endblock list-item %}
             </li>
             {% empty %}
