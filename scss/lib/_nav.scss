@@ -315,9 +315,11 @@ nav.sidebar {
         p { @extend small; line-height: 1.2em; }
     }
     
-    fieldset {
+    form {
         width: 100%;
-        margin: 0;
+        display: block;
+        overflow: hidden;
+        margin: 0 0 $base-vertical-rhythm;
         input {
             @include border-right-radius(0);
             margin-right: 0;

@@ -1410,10 +1410,12 @@ nav.sidebar {
       line-height: 1.2em; }
     nav.sidebar .spotlight p {
       line-height: 1.2em; }
-  nav.sidebar fieldset {
+  nav.sidebar form {
     width: 100%;
-    margin: 0; }
-    nav.sidebar fieldset input {
+    display: block;
+    overflow: hidden;
+    margin: 0 0 1.5em; }
+    nav.sidebar form input {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
       margin-right: 0;
@@ -1426,18 +1428,18 @@ nav.sidebar {
       font-size: 0.9em;
       background: #323d43;
       border: none; }
-      nav.sidebar fieldset input::-webkit-input-placeholder {
+      nav.sidebar form input::-webkit-input-placeholder {
         color: #b3becb; }
-      nav.sidebar fieldset input::-moz-placeholder {
+      nav.sidebar form input::-moz-placeholder {
         color: #b3becb; }
-      nav.sidebar fieldset input:-moz-placeholder {
+      nav.sidebar form input:-moz-placeholder {
         color: #b3becb; }
-      nav.sidebar fieldset input:-ms-input-placeholder {
+      nav.sidebar form input:-ms-input-placeholder {
         color: #b3becb; }
-      nav.sidebar fieldset input:focus {
+      nav.sidebar form input:focus {
         outline: none;
         border: 1px solid #3a82ff; }
-      nav.sidebar fieldset input + span.input-button {
+      nav.sidebar form input + span.input-button {
         border-top-right-radius: 9px;
         border-bottom-right-radius: 9px;
         border-top-left-radius: 0;
@@ -1455,30 +1457,30 @@ nav.sidebar {
         background: #1a2023;
         color: #b3becb;
         clear: right; }
-        nav.sidebar fieldset input + span.input-button svg {
+        nav.sidebar form input + span.input-button svg {
           display: inline-block;
           margin-top: 0.25em;
           height: 1.2em;
           width: auto;
           vertical-align: middle;
           fill: #b3becb; }
-        nav.sidebar fieldset input + span.input-button:hover {
+        nav.sidebar form input + span.input-button:hover {
           color: #f4f4f4;
           border-color: #3a82ff;
           background: #3a82ff; }
-          nav.sidebar fieldset input + span.input-button:hover svg {
+          nav.sidebar form input + span.input-button:hover svg {
             fill: #f4f4f4; }
-      nav.sidebar fieldset input:focus + span.input-button {
+      nav.sidebar form input:focus + span.input-button {
         color: #3a82ff;
         border-color: #3a82ff;
         background-color: #3a82ff; }
-        nav.sidebar fieldset input:focus + span.input-button svg {
+        nav.sidebar form input:focus + span.input-button svg {
           fill: #f4f4f4; }
-      nav.sidebar fieldset input#search-button {
+      nav.sidebar form input#search-button {
         background-image: url("images/search.svg"); }
-      nav.sidebar fieldset input#newsletter-button {
+      nav.sidebar form input#newsletter-button {
         background-image: url("images/email.svg"); }
-      nav.sidebar fieldset input#search-button, nav.sidebar fieldset input#newsletter-button {
+      nav.sidebar form input#search-button, nav.sidebar form input#newsletter-button {
         background-position: center center;
         background-repeat: no-repeat;
         background-size: 50% 50%;
