@@ -29,7 +29,7 @@
             {% else %}
             <dd>Unknown
             {% if user.is_authenticated %}
-            &nbsp;<small><a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a></small>
+            &nbsp;<small><a href="#hidden-form">Suggest</a></small>
             {% endif %}
             </dd>
             {% endif %}
@@ -45,7 +45,7 @@
 		    {% else %}
 	        <dd>Unknown
 	            {% if user.is_authenticated %}
-                &nbsp;<small><a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a></small></dd>
+                &nbsp;<small><a href="#hidden-form">Suggest</a></small></dd>
 	            {% endif %}
 	        </dd>
 		    {% endif %}
@@ -55,7 +55,7 @@
 		    {% else %}
 	        <dd>Unknown
 	            {% if user.is_authenticated %}
-	            &nbsp;<small><a href="{% url 'agency-flag' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk slug=agency.slug idx=agency.pk %}">Suggest</a></small>
+	            &nbsp;<small><a href="#hidden-form">Suggest</a></small>
 	            {% endif %}
 	        </dd>
 		    {% endif %}
@@ -66,32 +66,11 @@
 			<dd>{{average_response_time}} day{{average_response_time|pluralize}}</dd>
 		    {% endwith %}
         </dl>
-        <dl>
-            <dt>Requests</dt>
-            {% if num_submitted %}
-            <dd><strong>{{ num_submitted }} Filed in Total</strong></dd>
-            {% if num_no_docs %}<dd class="success">{{ num_no_docs }} No Responsive Documents</dd>{% endif %}
-            {% if num_done %}<dd class="success">{{ num_done }} Complete</dd>{% endif %}
-            {% if num_ack %}<dd class="default">{{ num_ack }} Awaiting Acknowledgement</dd>{% endif %}
-            {% if num_processed %}<dd class="default">{{ num_processed }} Awaiting Response</dd>{% endif %}
-            {% if num_fix %}<dd class="default">{{ num_fix }} Requiring Action</dd>{% endif %}
-            {% if num_rejected %}<dd class="failure">{{ num_rejected }} Rejected</dd>{% endif %}
-            {% if num_overdue %}<dd class="failure">{{ num_overdue }} Overdue</dd>{% endif %}
-            {% else %}
-            <dd>None</dd>
-            {% endif %}
-        </dl>
-        <dl>
-            <dt>Appeals</dt>
-            {% if num_appealing or num_appeals_done or num_appeals_rejected or num_appeals_response_time %}
-            {% if num_appealing %}<dd class="default">{{num_appealing}} appeal{{ num_appealing | pluralize }} awaiting response</dd>{% endif %}
-            {% if num_appeals_done %}<dd class="success">{{num_appeals_done}} successful appeals</dd>{% endif %}
-            {% if num_appeals_rejected %}<dd class="failure">{{num_appeals_rejected}} denied appeals</dd>{% endif %}
-            {% if num_appeals_response_time %}<dd>{{num_appeals_response_time}} day{{ num_appeals_response_time | pluralize %} average response time</dd>{% endif %}
-            {% else %}
-            <dd>None</dd>
-            {% endif %}
-        </dl>
+        
+        {% include 'lib/request_stats.html' %}
+        
+        {% include 'lib/appeal_stats.html' %}
+        
         <dl>
             <dt>Commonly Cited Exemptions</dt>
             {% if agency.exemptions %}
@@ -108,9 +87,6 @@
 {% block main %}
 
     {{agency.public_notes|markdown:"trusted"}}
-    
-    <a href="#hidden-form" class="button">Submit a Change</a>
-    {% include 'lib/form.html' with is_hidden=1 %}
 
     {% include 'lib/foia_table.html' %}
     
@@ -122,5 +98,7 @@
     </dl>
     {% endfor %}
     
+    <a href="#hidden-form" class="button">Submit a Change</a>
+    {% include 'lib/form.html' with is_hidden=1 %}
     
 {% endblock main %}

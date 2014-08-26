@@ -31,12 +31,12 @@
 	    <dt>Status</dt>
 	    <dd>
 	        {% if foia.color_code == "go" %}
-	            {% include 'lib/progress-bar.html' with percentage=foia.percent_complete status="success" %}
+	            {% include 'lib/progress_bar.html' with percentage=foia.percent_complete status="success" %}
 	        {% else %}
 	            {% if foia.color_code == "stop" %}
-	                {% include 'lib/progress-bar.html' with percentage=foia.percent_complete status="failure" %}
+	                {% include 'lib/progress_bar.html' with percentage=foia.percent_complete status="failure" %}
 	            {% else %}
-	                {% include 'lib/progress-bar.html' with percentage=foia.percent_complete %}
+	                {% include 'lib/progress_bar.html' with percentage=foia.percent_complete %}
 	            {% endif %}
 	        {% endif %}
 	    </dd>
