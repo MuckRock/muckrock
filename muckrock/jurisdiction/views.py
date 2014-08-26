@@ -27,7 +27,7 @@ def collect_stats(obj, context):
     context['overdue_reqs'] = obj.foiarequest_set.get_public() \
                                  .get_overdue().order_by('date_due')[:5]
 
-// TODO: Move the `flag` view into the `detail` view
+# TODO: Move the `flag` view into the `detail` view
 def flag_helper(request, obj, type_):
     """Helper for flagging jurisdictions and agencies"""
 

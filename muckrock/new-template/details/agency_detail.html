@@ -108,6 +108,9 @@
 {% block main %}
 
     {{agency.public_notes|markdown:"trusted"}}
+    
+    <a href="#hidden-form" class="button">Submit a Change</a>
+    {% include 'lib/form.html' with is_hidden=1 %}
 
     {% include 'lib/foia_table.html' %}
     
@@ -118,4 +121,6 @@
         <dd>Requested by <a href="{% url 'acct-profile' req.req.user.username %}">{{ req.req.user.username }}</a> on {{ req.req.date_submitted|date }}{% if req.req.date_completed %} and completed on {{ req.req.date_completed|date }}{% endif %}.{% if req.req.total_pages %} Includes {{ req.req.total_pages }} pages.{% endif %}</dd>
     </dl>
     {% endfor %}
+    
+    
 {% endblock main %}
