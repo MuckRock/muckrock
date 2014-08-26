@@ -546,7 +546,7 @@ html, body {
     display: table;
     clear: both; }
 
-.login fieldset, .login header h1, .login header ul, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .agency aside dl, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, object.collection ul, .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
+.login fieldset, .login header h1, .login header ul, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .agency aside dl, .login input[type="submit"], .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, object.collection ul, .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
   width: 100%; }
 
 @media screen and (min-width: 769px) {
@@ -573,6 +573,23 @@ html, body {
     margin-right: 2.35765%;
     width: 31.76157%; }
     .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .agency aside dl:last-child {
+      margin-right: 0; } }
+
+@media screen and (min-width: 321px) {
+  .login input[type="submit"] {
+    float: left;
+    display: block;
+    margin-right: 4.82916%;
+    width: 47.58542%; }
+    .login input[type="submit"]:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 769px) {
+  .login input[type="submit"] {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 23.23176%; }
+    .login input[type="submit"]:last-child {
       margin-right: 0; } }
 
 .post, .question, .request, .jurisdiction, .agency, object.collection {
@@ -885,9 +902,10 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     margin-bottom: 0.75em; }
 
 .logout {
-  text-align: center;
-  border: 1px solid #b3becb;
-  border-radius: 9px; }
+  text-align: left; }
+  @media screen and (min-width: 321px) {
+    .logout {
+      text-align: center; } }
 
 /* Messages */
 object.message {
