@@ -90,7 +90,7 @@ dfn, dt {
     display: block;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: $color-grey;
+    color: darken($color-grey, 20%);
 }
 
 dd { margin-left: 0; }
