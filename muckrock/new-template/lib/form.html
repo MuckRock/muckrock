@@ -5,7 +5,7 @@ This form object takes two optional arguments:
 * is_hidden (bool)
 * button_text (string)
 
-If the form is hidden, it is revealed by the CSS :target selector. There must be at least one button on the page containing the hidden form that targets #hidden-form. There must be at most one hidden form per page.
+If the form is hidden, it is revealed by the CSS :target selector. There must be at least one button with the id `hidden-form-button` on the page containing the hidden form that targets #hidden-form. There must be at most one hidden form per page.
 {% endcomment %}
 <form action="" method="post" class="form" {% if is_hidden %}id="hidden-form"{% endif %}>
     {% csrf_token %}
@@ -25,10 +25,11 @@ If the form is hidden, it is revealed by the CSS :target selector. There must be
             {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
         </fieldset>
     {% endfor %}
+    {% if is_hidden %}<a href="#hidden-form-button" class="button">Cancel</a>{% endif %}
     {% if button_text %}
     <input type="submit" name="submit" value="{{ button_text }}" class="primary button" />
     {% else %}
     <input type="submit" name="submit" value="Submit" class="primary button" />
     {% endif %}
-    {% if is_hidden %}<a href="#" class="button">Cancel</a>{% endif %}
+    
 </object>
