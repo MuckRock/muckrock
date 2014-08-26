@@ -218,6 +218,7 @@ fieldset {
         margin-top: 0;
         // margin: 0.5em 0.75em 1.5em 0;
     }
+    input[type="submit"] { @extend %quarter; }
     header {
         @include outer-container();
         @include pad(0 0 0 5%);
@@ -245,10 +246,8 @@ fieldset {
 }
 
 .logout {
-
-    text-align: center;
-    border: $base-border-width solid $color-grey;
-    border-radius: $base-border-radius;
+    text-align: left;
+    @include media($medium-layout) { text-align: center; }
 }
 
 /* Messages */
