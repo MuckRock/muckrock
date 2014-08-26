@@ -1041,6 +1041,9 @@ table {
   #hidden-form:target {
     display: block; }
 
+#hidden-form-button:focus {
+  outline: none; }
+
 @media screen and (min-width: 321px) {
   .post p:first-of-type {
     font-size: 1.2em;

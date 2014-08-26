@@ -394,6 +394,7 @@ table {
     display: none;
     &:target { display: block; }
 }
+#hidden-form-button:focus { outline: none; }
 
 // Articles
 
