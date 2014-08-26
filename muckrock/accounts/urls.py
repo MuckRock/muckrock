@@ -11,8 +11,8 @@ import muckrock.accounts.views as views
 # pylint: disable=bad-whitespace
 
 urlpatterns = patterns('',
-    url(r'^login/$',             auth_views.login, name='acct-login'),
-    url(r'^logout/$',            auth_views.logout, name='acct-logout'),
+    url(r'^login/$',             auth_views.login, {'template_name': 'user/login.html'}, name='acct-login'),
+    url(r'^logout/$',            auth_views.logout, {'template_name': 'user/logout.html'}, name='acct-logout'),
     url(r'^profile/$',           login_required(views.profile), name='acct-my-profile'),
     url(r'^profile/(?P<user_name>[\w\d_.@ ]+)/$',
                                  views.profile, name='acct-profile'),
