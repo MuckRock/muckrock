@@ -201,15 +201,54 @@ fieldset {
 }
 
 .login { 
-    display: inline-block;
-    margin: 1.5em 0;
-    padding: 0 1.5em;
+    display: block;
+    margin: 0 $base-vertical-rhythm;
+    padding: 2em 1.5em;
     border: 1px solid $color-grey;
     border-radius: $base-border-radius;
-    fieldset {
-        display: inline-block;
-        margin: 0.5em 0.75em 1.5em 0;
+    form {
+        @include outer-container();
+        @include pad(0 0 0 5%);
     }
+    fieldset {
+        @extend %half;
+        @include omega();
+        input { width: 100%; }
+        @include pad(0 5% 0 0);
+        margin-top: 0;
+        // margin: 0.5em 0.75em 1.5em 0;
+    }
+    header {
+        @include outer-container();
+        @include pad(0 0 0 5%);
+        margin: $base-vertical-rhythm/2 0;
+        h1 {
+            @extend %half;
+            @include font-sizing(3);
+            margin-top: -1rem;
+            @include media($large-layout) {
+                margin-top: 0;
+            }
+        }
+        ul {
+            @extend %half;
+            @include media($large-layout) {
+                margin: $base-vertical-rhythm/2 0 0;
+            }
+        }
+    }
+    p {
+        padding-left: 5%;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    
+}
+
+.logout {
+
+    text-align: center;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius;
 }
 
 /* Messages */

@@ -416,15 +416,15 @@ nav.sidebar {
         footer section.about { padding-right: 3em; }
     }
     
-    background-color: $color-black;
-    p { color: $color-white; }
+    background-color: $color-white;
+    p { color: $color-black; }
     
     text-align: left;
     .copyright {
         margin-top: 2em;
-        color: $color-grey;
+        color: $color-black;
     }
     
-    #footer-menu { border-color: $color-black; }
+    // #footer-menu { border-color: $color-black; }
     // @include media($medium-layout) { #footer-menu { display: none; } }
 }
