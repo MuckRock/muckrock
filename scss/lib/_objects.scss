@@ -71,6 +71,7 @@
     padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
     text-decoration: none;
     text-align: center;
+    &:hover { text-decoration: none; }
 }
 
 // Textbox -> Panel
@@ -168,7 +169,14 @@
 
 #{$all-text-inputs} { @extend %input; }
 
-input[type="submit"], button { @extend .default; background: none;}
+input[type="submit"], button {
+    @extend .button.default;
+    .default { @extend .button.default; }
+    .primary { @extend .button.primary; }
+    .success { @extend .button.success; }
+    .failure { @extend .button.failure; }
+    .disabled { @extend .button.disabled; }
+}
 
 #{$all-button-inputs} {
     @include box-sizing(border-box);
@@ -360,7 +368,7 @@ object.progress-bar {
 
 table {
     width: 100%;
-    margin: 1.5em 0;
+    margin: $base-vertical-rhythm 0;
     border-radius: $base-border-radius;
     th, td { padding: 0.25em 0.5em; }
     tr:nth-child(odd) { background-color: $color-odd-background; }
@@ -370,7 +378,25 @@ table {
     }
 }
 
-/* Article */
+// Forms
+
+.form {
+    width: 100%;
+    overflow: hidden;
+    margin: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius;
+    a.button, input.button { float: right; }
+   
+}
+
+#hidden-form {
+    display: none;
+    &:target { display: block; }
+}
+
+// Articles
+
 .post, .question, .request, .jurisdiction, .agency { @extend %article; }
 .post {
     p:first-of-type {
@@ -392,7 +418,7 @@ table {
     aside dd + dt { margin-top: $base-vertical-rhythm; }
 }
 
-/* Collection */
+// Collections
 
 header.collection-header {
     @include outer-container();
@@ -401,7 +427,7 @@ header.collection-header {
 h1.list-label {
     @extend %full;
     font-weight: 300;
-    text-align: center;
+    text-align: left;
     @include font-sizing(3); 
     display: block;
     margin: 0;

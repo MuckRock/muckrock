@@ -516,7 +516,7 @@ th {
 td {
   vertical-align: bottom; }
 
-.default, input[type="submit"], button {
+.default {
   color: #6b6a65; }
 
 .primary {
@@ -673,7 +673,7 @@ object.collection h3 {
   margin: 0.37821em 0; }
 
 /* Simple Objects */
-.button, .button.default, input.button[type="submit"], button.button, .button.primary, .button.success, .button.failure, .button.disabled, .panel, .panel.default, input.panel[type="submit"], button.panel, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -682,20 +682,22 @@ object.collection h3 {
   border-radius: 9px;
   line-height: 1.5em; }
 
-.button, .button.default, input.button[type="submit"], button.button, .button.primary, .button.success, .button.failure, .button.disabled {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled {
   display: inline-block;
   margin: 0.25em 0.325em 0.25em 0;
   padding: 0.375em 1.5em;
   text-decoration: none;
   text-align: center; }
+  .button:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover, input[type="submit"] .primary:hover, button .primary:hover, input[type="submit"] .success:hover, button .success:hover, input[type="submit"] .failure:hover, button .failure:hover, input[type="submit"] .disabled:hover, button .disabled:hover {
+    text-decoration: none; }
 
-.panel, .panel.default, input.panel[type="submit"], button.panel, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
+.panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
   display: block;
   margin: 0.75em 0;
   padding: 0.75em;
   border-color: #b3becb; }
   @media screen and (min-width: 769px) {
-    .panel, .panel.default, input.panel[type="submit"], button.panel, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
+    .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
       padding: 0.75em 1.5em; } }
 
 input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -707,80 +709,80 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
     border: 1px solid #96959e;
     color: #96959e; }
 
-.button, .button.default, input.button[type="submit"], button.button {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default {
   color: #6b6a65;
   border-color: #6b6a65; }
-  .button:hover, .button.default:hover, input.button[type="submit"]:hover, button.button:hover {
+  .button:hover, .button.default:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover {
     color: #f4f4f4;
     background: #6b6a65; }
-  .button:focus, .button.default:focus, input.button[type="submit"]:focus, button.button:focus {
+  .button:focus, .button.default:focus, input[type="submit"]:focus, button:focus, input[type="submit"] .default:focus, button .default:focus {
     color: #85847e;
     border-color: #85847e; }
-    .button:focus:hover, .button.default:focus:hover, input.button[type="submit"]:focus:hover, button.button:focus:hover {
+    .button:focus:hover, .button.default:focus:hover, input[type="submit"]:focus:hover, button:focus:hover, input[type="submit"] .default:focus:hover, button .default:focus:hover {
       color: #f4f4f4; }
-  .button:active, .button.default:active, input.button[type="submit"]:active, button.button:active {
+  .button:active, .button.default:active, input[type="submit"]:active, button:active, input[type="submit"] .default:active, button .default:active {
     color: #f4f4f4;
     background: -webkit-radial-gradient(#6b6a65, #61605b);
     background: radial-gradient(#6b6a65, #61605b); }
 
-.button.primary {
+.button.primary, input[type="submit"] .primary, button .primary {
   color: #3a82ff;
   border-color: #3a82ff; }
-  .button.primary:hover {
+  .button.primary:hover, input[type="submit"] .primary:hover, button .primary:hover {
     color: #f4f4f4;
     background: #3a82ff; }
-  .button.primary:focus {
+  .button.primary:focus, input[type="submit"] .primary:focus, button .primary:focus {
     color: #6da2ff;
     border-color: #6da2ff; }
-    .button.primary:focus:hover {
+    .button.primary:focus:hover, input[type="submit"] .primary:focus:hover, button .primary:focus:hover {
       color: #f4f4f4; }
-  .button.primary:active {
+  .button.primary:active, input[type="submit"] .primary:active, button .primary:active {
     color: #f4f4f4;
     background: -webkit-radial-gradient(#3a82ff, #2675ff);
     background: radial-gradient(#3a82ff, #2675ff); }
 
-.button.success {
+.button.success, input[type="submit"] .success, button .success {
   color: #006330;
   border-color: #006330; }
-  .button.success:hover {
+  .button.success:hover, input[type="submit"] .success:hover, button .success:hover {
     color: #f4f4f4;
     background: #006330; }
-  .button.success:focus {
+  .button.success:focus, input[type="submit"] .success:focus, button .success:focus {
     color: #009649;
     border-color: #009649; }
-    .button.success:focus:hover {
+    .button.success:focus:hover, input[type="submit"] .success:focus:hover, button .success:focus:hover {
       color: #f4f4f4; }
-  .button.success:active {
+  .button.success:active, input[type="submit"] .success:active, button .success:active {
     color: #f4f4f4;
     background: -webkit-radial-gradient(#006330, #004f26);
     background: radial-gradient(#006330, #004f26); }
 
-.button.failure {
+.button.failure, input[type="submit"] .failure, button .failure {
   color: #fb004e;
   border-color: #fb004e; }
-  .button.failure:hover {
+  .button.failure:hover, input[type="submit"] .failure:hover, button .failure:hover {
     color: #f4f4f4;
     background: #fb004e; }
-  .button.failure:focus {
+  .button.failure:focus, input[type="submit"] .failure:focus, button .failure:focus {
     color: #ff2f70;
     border-color: #ff2f70; }
-    .button.failure:focus:hover {
+    .button.failure:focus:hover, input[type="submit"] .failure:focus:hover, button .failure:focus:hover {
       color: #f4f4f4; }
-  .button.failure:active {
+  .button.failure:active, input[type="submit"] .failure:active, button .failure:active {
     color: #f4f4f4;
     background: -webkit-radial-gradient(#fb004e, #e70048);
     background: radial-gradient(#fb004e, #e70048); }
 
-.button.disabled {
+.button.disabled, input[type="submit"] .disabled, button .disabled {
   color: #96959e;
   border-color: #96959e;
   background: none; }
 
-.panel, .panel.default, input.panel[type="submit"], button.panel {
+.panel, .panel.default {
   color: #f4f4f4;
   background: #6b6a65;
   border-color: #51504c; }
-  .panel a, .panel.default a, input.panel[type="submit"] a, button.panel a {
+  .panel a, .panel.default a {
     text-decoration: underline;
     color: #f4f4f4;
     background-color: none; }
@@ -814,9 +816,6 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
 
 .panel.disabled {
   color: #96959e;
-  background: none; }
-
-input[type="submit"], button {
   background: none; }
 
 input[type="button"], input[type="reset"], input[type="submit"] {
@@ -1008,7 +1007,7 @@ object.progress-bar {
   .meter.primary {
     background: #3a82ff;
     border: 1px solid #0056ed; }
-  .meter.default, input.meter[type="submit"], button.meter {
+  .meter.default {
     background: #6b6a65;
     border: 1px solid #444340; }
   .meter.disabled {
@@ -1028,7 +1027,20 @@ table {
     border-top: 1px solid #b3becb;
     border-bottom: 1px solid #b3becb; }
 
-/* Article */
+.form {
+  width: 100%;
+  overflow: hidden;
+  margin: 1.5em 0;
+  border: 1px solid #b3becb;
+  border-radius: 9px; }
+  .form a.button, .form input.button {
+    float: right; }
+
+#hidden-form {
+  display: none; }
+  #hidden-form:target {
+    display: block; }
+
 @media screen and (min-width: 321px) {
   .post p:first-of-type {
     font-size: 1.2em;
@@ -1060,7 +1072,6 @@ table {
 .agency aside dd + dt {
   margin-top: 1.5em; }
 
-/* Collection */
 header.collection-header {
   max-width: 68em;
   margin-left: auto;
@@ -1073,7 +1084,7 @@ header.collection-header {
 
 h1.list-label {
   font-weight: 300;
-  text-align: center;
+  text-align: left;
   font-size: 3em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
