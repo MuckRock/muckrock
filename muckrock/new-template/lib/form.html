@@ -1,0 +1,19 @@
+{% csrf_token %}
+{% if form.non_field_errors %}
+<object class="failure panel">
+{{ form.non_field_errors }}
+</object>
+{% endif %}
+<fieldset class="form">
+	{% for field in form.hidden_fields %}
+		{{ field }}
+	{% endfor %}
+	{% for field in form.visible_fields %}
+		<fieldset class="{% if field.errors %}failure {% endif %}					{% if field.field.required %}required{% endif %}">
+            <label for="{{ field.auto_id }}">{{ field.label}}</label>
+			{{ field }}
+			{% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+            {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>
+		</fieldset>
+	{% endfor %}
+</fieldset>
