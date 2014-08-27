@@ -47,7 +47,7 @@ def register_free(request):
         # pylint: disable=W0613
         user.get_profile().save_customer()
 
-    template = 'registration/register_free.html'
+    template = 'user/register_free.html'
 
     return _register_acct(request, 'community', RegisterFree, template, create_customer)
 
@@ -153,13 +153,13 @@ def manage_subsc(request):
     if user_profile.acct_type == 'admin':
         heading = 'Admin Account'
         desc = "You are an admin, you don't need a subscription"
-        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+        return render_to_response('user/subscription.html', {'desc': desc, 'heading': heading},
                                   context_instance=RequestContext(request))
     elif user_profile.acct_type == 'beta':
         heading = 'Beta Account'
         desc = 'Thank you for being a beta tester.  You will continue to get 5 ' \
                'free requests a month for helping out.'
-        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+        return render_to_response('user/subscription.html', {'desc': desc, 'heading': heading},
                                   context_instance=RequestContext(request))
 
     elif user_profile.acct_type == 'community':
@@ -171,7 +171,7 @@ def manage_subsc(request):
         heading = 'Cancel Your Subscription'
         desc = 'You will go back to a free community account.'
         form_class = CancelSubscForm
-        template = 'registration/subsc.html'
+        template = 'user/subscription.html'
 
     if request.method == 'POST':
         form = form_class(request.POST, request=request)

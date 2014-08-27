@@ -4,8 +4,10 @@
 {% block content %}
 
 <object class="update">
-    <h1>Update Your Account</h1>
-    <a href="" class="button">Change Your Password</a>
+    <header>
+        <h1>Update Your Account</h1>
+        <a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a>
+    </header>
     {% include 'lib/form.html' %}
 </object>
 
