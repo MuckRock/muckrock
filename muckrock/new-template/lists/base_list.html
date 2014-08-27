@@ -10,8 +10,9 @@ This is the parent style for a collection of objects: a collection of blog posts
         <h1 class="list-label">
             {% block list-label %}{% endblock list-label %}
         </h1>
-        {% include 'lib/pagination.html' %}
     </header>
+    
+    {% include 'lib/pagination.html' %}
     
     <object class="{% block type %}item{% endblock type %} collection">
         {% block list %}
