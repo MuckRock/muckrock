@@ -1134,6 +1134,15 @@ table {
 .agency aside dd + dt {
   margin-top: 1.5em; }
 
+.profile section.meta > header h1 {
+  font-size: 3em;
+  line-height: 1.51282em;
+  margin: 0.37821em 0;
+  margin-top: 0;
+  font-weight: 300; }
+.profile section.meta > header dl {
+  margin-top: 1.5em; }
+
 header.collection-header {
   max-width: 68em;
   margin-left: auto;
