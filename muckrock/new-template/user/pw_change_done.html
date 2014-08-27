@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Password Changed{% endblock title %}
+
+{% block content %}
+
+<object class="password-change">
+    <h1>Your Password is Changed</h1>
+    <a href="{% url 'acct-my-profile' %}" class="success button">Back to My Profile</a>
+</object>
+
+{% endblock content %}

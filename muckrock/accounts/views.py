@@ -115,7 +115,7 @@ def update(request):
                    'email': request.user.email}
         form = UserChangeForm(initial=initial, instance=user_profile)
 
-    return render_to_response('registration/update.html', {'form': form},
+    return render_to_response('user/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
