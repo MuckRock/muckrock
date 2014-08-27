@@ -668,14 +668,14 @@ object.collection ul {
   padding: 0;
   list-style-type: none; }
 object.collection li {
-  padding: 1.5em 1.5em;
+  padding: 1.5em 0.75em;
   margin: 0; }
   object.collection li:first-child {
     padding-top: 0; }
   @media screen and (min-width: 540px) {
     object.collection li {
       border-radius: 9px;
-      margin: 0 2em; } }
+      margin: 0 1.25em; } }
 object.collection li:nth-child(even) {
   background-color: #e7e7e7; }
 object.collection h2, object.collection h3 {
