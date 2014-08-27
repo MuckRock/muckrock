@@ -87,12 +87,12 @@ html, body { min-height: 100%; }
         list-style-type: none;
     }
     li {
-        padding: $base-vertical-rhythm $base-vertical-rhythm;
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
         margin: 0;
         &:first-child { padding-top: 0; }
         @media screen and (min-width: 540px) {
             border-radius: $base-border-radius;
-            margin: 0 2em;
+            margin: 0 (2em - $base-vertical-rhythm/2);
         }
     }
     li:nth-child(even) { background-color: $color-odd-background; }
