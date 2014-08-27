@@ -200,7 +200,7 @@ fieldset {
     & > fieldset, & > fieldset + fieldset { margin: 0; }
 }
 
-.login { 
+%form-object {
     display: block;
     margin: 0 $base-vertical-rhythm;
     padding: 2em 1.5em;
@@ -221,8 +221,18 @@ fieldset {
     input[type="submit"] { @extend %quarter; }
     header {
         @include outer-container();
-        @include pad(0 0 0 5%);
+        @include pad(0 5% 0 5%);
         margin: $base-vertical-rhythm/2 0;
+    }
+    
+    & > .form {
+        border: none;
+    }
+}
+
+.login {
+    @extend %form-object;
+    header {
         h1 {
             @extend %half;
             @include font-sizing(3);
@@ -248,6 +258,47 @@ fieldset {
 .logout {
     text-align: left;
     @include media($medium-layout) { text-align: center; }
+}
+
+.update {
+    @extend %form-object;
+    header {
+        h1 {
+            @extend %half;
+            // line-height: 0;
+            margin-top: -1rem;
+            @include media($large-layout) {
+                margin-top: 1rem;
+            }
+        }
+        .button {
+            @extend %half;
+            @include media($large-layout) {
+                margin-top: 1.5rem;
+            }
+        }
+    }
+}
+
+.subscription {
+    @extend %form-object;
+    form fieldset { @extend %full; }
+}
+
+.password-reset, .password-change {
+    @extend %form-object;
+    overflow: hidden;
+    h1 { margin: 0 $base-vertical-rhythm/4 $base-vertical-rhythm/2; }
+    form { @include pad(0 default 0 default); }
+    form fieldset { @extend %full; }
+}
+
+.register {
+    @extend %form-object;
+    h1 {
+        padding-left: 5%;
+        @include font-sizing(3, 3);
+    }
 }
 
 /* Messages */
@@ -418,25 +469,26 @@ table {
 
 // Forms
 
+
 .form {
-    width: 100%;
-    overflow: hidden;
-    margin: $base-vertical-rhythm 0;
-    border: $base-border-width solid $color-grey;
+    
     border-radius: $base-border-radius;
-    a.button, input.button { float: right; }
-   
 }
 
 #hidden-form {
     display: none;
     &:target { display: block; }
+    width: 100%;
+    overflow: hidden;
+    margin: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    a.button, input.button { float: right; }   
 }
 #hidden-form-button:focus { outline: none; }
 
 // Articles
 
-.post, .question, .request, .jurisdiction, .agency { @extend %article; }
+.post, .question, .request, .jurisdiction, .agency, .profile { @extend %article; }
 .post {
     p:first-of-type {
         @include media($medium-layout) { @include font-sizing(1.2); }
@@ -455,6 +507,16 @@ table {
     aside dl { @extend %third; @include omega(3n); }
     //aside dd > small { text-transform: uppercase; }
     aside dd + dt { margin-top: $base-vertical-rhythm; }
+}
+.profile {
+    section.meta > header {
+        h1 { 
+            @include font-sizing(3);
+            margin-top: 0;
+            font-weight: 300;
+        }
+        dl { margin-top: $base-vertical-rhythm; }
+    }
 }
 
 // Collections
@@ -512,7 +574,4 @@ object.jurisidiction.collection, object.agency.collection {
             li:nth-child(even) { background: none; }
         }
     }
-    
-    
-
 }
