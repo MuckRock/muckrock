@@ -1,0 +1,83 @@
+{% extends 'details/base_detail.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ user_obj.username|capfirst }}{% endblock title %}
+{% block type %}profile{% endblock type %}
+
+{% block header %}
+    {% ifequal user user_obj %}
+    <dfn>Your Profile</dfn>
+    <h1>{{user_obj.username}}</h1>
+    <h2>{{user_obj.first_name}} {{user_obj.last_name}}</h2>
+    <h3>{{user.get_profile.get_acct_type_display}} Account</h3>
+    {% else %}
+    <dfn>Profile</dfn>
+    <h1>{{user_obj.username|capfirst}}</h1>
+    {% endifequal %}
+{% endblock header %}
+
+{% block aside %}
+    {% if user == user_obj %}
+        <dl>
+            <dt>Actions</dt>
+            <dd><a href="" class="primary button">Buy Requests</a></dd>
+            {% if user.get_profile.get_acct_type_display == 'Community' %}
+            <dd><a href="" class="primary button">Upgrade to Pro</a></dd>
+            {% endif %}
+            <dd><a href="" class="button">Account Settings</a></dd>
+            <dd><a href="" class="button">Update Credit Card</a></dd>
+        </dl>
+        {% if user.get_profile.get_acct_type_display != 'Community' %}
+        <dl>
+            <dt>Monthly Requests</dt>   
+            <dd>{{user_obj.get_profile.get_monthly_requests}}</dd>
+        </dl>
+        {% endif %}
+        <dl>        
+            <dt>Requests Remaining</dt>
+            <dd>{{user_obj.get_profile.num_requests}}</dd>
+        </dl>
+    {% endif %}
+{% endblock aside %}
+
+{% block main %}
+    {% if user == user_obj %}
+        {% if user_obj.get_profile.get_cc %}
+        <dl>
+            <dt>Credit Card on File</dt>
+            <dd>{{user_obj.get_profile.get_cc.type}} ending with {{user_obj.get_profile.get_cc.last4}}</dd>
+        </dl>
+        {% endif %}
+        
+        <dl>        
+            <dt>Email Address</dt>
+            <dd>{{user_obj.email}}</dd>
+        </dl>
+        
+        <dl>
+            <dt>Address</dt>        
+            {% if user_obj.get_profile.address1 %}
+            <dd>{{ user_obj.get_profile.address1 }}</dd>
+                {% if user_obj.get_profile.address2 %}
+            <dd>{{ user_obj.get_profile.address2 }}</dd>
+                {% endif %}
+            {% endif %}
+            {% if user_obj.get_profile.city and user_obj.get_profile.state and user_obj.get_profile.zip_code %}
+            <dd>{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}</dd>
+            <dd>{{user_obj.get_profile.zip_code}}</dd>
+            {% endif %}
+            {% if not user_obj.get_profile.address1 and not user_obj.get_profile.city %}
+            <dd>No address on file</dd>
+            {% endif %}
+        </dl>
+        
+        {% if user_obj.get_profile.phone %}
+        <dl>
+            <dt>Phone Number>
+            <dd>{{user_obj.get_profile.phone}}</dd>
+        </dl>
+        {% endif %}
+    {% endif %}
+
+    {% include 'lib/foia_table.html' %}
+
+{% endblock main %}

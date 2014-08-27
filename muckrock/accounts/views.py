@@ -249,7 +249,7 @@ def profile(request, user_name=None):
     else:
         context['sidebar'] = Sidebar.objects.get_text('profile')
 
-    return render_to_response('registration/profile.html', context,
+    return render_to_response('user/profile.html', context,
                               context_instance=RequestContext(request))
 
 @csrf_exempt
