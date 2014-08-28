@@ -312,9 +312,8 @@ nav.sidebar {
             .username {
                 display: inline-block;
                 vertical-align: middle;
-                @include font-sizing(1.5);
+                @include font-sizing(1);
                 margin: 0;
-                font-weight: 300;
                 color: $color-white;
                 &:hover {
                     color: $color-selected;
