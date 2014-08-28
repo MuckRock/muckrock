@@ -122,7 +122,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-small, dfn, fieldset label, dt, figcaption, nav.sidebar .spotlight p, .grid > aside button {
+small, dfn, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
   font-size: 80%; }
 
 /**
@@ -455,7 +455,7 @@ blockquote {
   padding-left: 0.75em;
   border-left: 1px solid #b3becb; }
 
-small, dfn, fieldset label, dt, figcaption, nav.sidebar .spotlight p, .grid > aside button {
+small, dfn, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -950,7 +950,7 @@ object.message {
       max-width: 100%;
       width: 50px;
       margin-bottom: 0; }
-    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p, object.message > section.meta .grid > aside button, .grid > aside object.message > section.meta button {
+    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p, object.message > section.meta .grid > aside button, .grid > aside object.message > section.meta button {
       display: block;
       margin-top: 0.5em; }
     @media screen and (min-width: 969px) {
@@ -1291,7 +1291,7 @@ nav.primary {
     float: left; }
   nav.primary ul.right {
     float: right; }
-    nav.primary ul.right #menu-text {
+    nav.primary ul.right .menu-text {
       display: none; }
     nav.primary ul.right #new-request {
       color: #3a82ff;
@@ -1301,14 +1301,14 @@ nav.primary {
       border-bottom-left-radius: 9px; }
       nav.primary ul.right #new-request:hover {
         color: #f4f4f4; }
-    nav.primary ul.right #menu-button {
+    nav.primary ul.right #menu-button > a, nav.primary ul.right #menu-close > a {
       border-top-right-radius: 9px;
       border-bottom-right-radius: 9px; }
-    nav.primary ul.right li:last-child {
+    nav.primary ul.right li:last-child a {
       border-top-right-radius: 9px;
       border-bottom-right-radius: 9px; }
     @media screen and (min-width: 540px) {
-      nav.primary ul.right #menu-text {
+      nav.primary ul.right .menu-text {
         display: inline; } }
   @media screen and (min-width: 540px) {
     nav.primary {
@@ -1317,13 +1317,6 @@ nav.primary {
         width: auto; }
       nav.primary ul.left {
         float: left; }
-        nav.primary ul.left #new-request {
-          border-right: 1px solid #21282c;
-          border-radius: 9px; }
-          nav.primary ul.left #new-request:hover {
-            border-right-color: #3a82ff; }
-        nav.primary ul.left #left-menu-button {
-          display: none; }
       nav.primary ul.right {
         display: table;
         float: right; } }
@@ -1372,30 +1365,39 @@ nav.secondary {
 
 /* Global Sidebar */
 .container, .footer-container {
-  width: 75%;
-  float: left; }
+  width: 74%;
+  float: left;
+  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
 
 #sidebar-menu {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 2;
-  width: 25%;
-  height: 100%; }
+  width: 26%;
+  height: 100%;
+  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
 
-@media screen and (min-width: 1024px) {
-  nav.primary ul.right {
-    display: none; } }
-@media screen and (max-width: 540px) {
-  .sidebar {
-    overflow: hidden;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 1em; }
+#menu-button {
+  display: table-cell; }
 
-  nav.primary ul.right {
-    display: none; } }
-@media screen and (max-width: 1023px) {
-  .container, footer {
+#menu-close {
+  display: none; }
+
+#sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
+  display: none; }
+
+#sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
+  display: table-cell; }
+
+nav.primary ul.right {
+  display: none; }
+
+@media screen and (max-width: 1024px) and (min-width: 724px) {
+  .container, .footer-container {
     width: 100%; }
 
   #sidebar-menu {
@@ -1406,16 +1408,31 @@ nav.secondary {
     display: block; }
 
   #sidebar-menu:target {
-    -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     margin-right: 0; }
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
-      margin-left: -300px;
-      -webkit-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      -moz-transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); }
+      margin-left: -300px; }
+    #sidebar-menu:target #new-request {
+      display: none; }
+
+  nav.primary ul.right {
+    display: table; } }
+@media screen and (max-width: 724px) {
+  .container, .footer-container {
+    width: 100%; }
+
+  #sidebar-menu {
+    width: 250px;
+    margin-right: -250px; }
+
+  #right-menu-button {
+    display: block; }
+
+  #sidebar-menu:target {
+    margin-right: 0; }
+    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
+      width: 100%;
+      margin-left: -250px; }
     #sidebar-menu:target #new-request {
       display: none; }
 
@@ -1423,15 +1440,13 @@ nav.secondary {
     display: table; } }
 nav.sidebar {
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   height: 100%;
   width: 100%;
-  padding: 2em 1em 1em;
+  padding: 0.75em 1em 1em;
   color: #f4f4f4;
   background: #21282c; }
-  @media screen and (min-width: 620px) {
-    nav.sidebar {
-      padding: 2em 1em 1em; } }
-  @media screen and (min-width: 1024px) {
+  @media screen and (min-width: 540px) {
     nav.sidebar {
       padding: 2em 2em 1em; } }
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label {
@@ -1450,7 +1465,7 @@ nav.sidebar {
       padding-right: 0; }
     nav.sidebar ul a {
       display: block;
-      padding: 0.75em;
+      padding: 0.5em 0.75em;
       border: 1px solid #181d20;
       border-radius: 9px;
       color: #b3becb;
@@ -1473,6 +1488,32 @@ nav.sidebar {
     @media screen and (max-width: 540px) {
       nav.sidebar #new-request {
         display: none; } }
+  nav.sidebar .account div {
+    overflow: hidden;
+    margin-bottom: 0.75em; }
+    nav.sidebar .account div .avatar {
+      display: inline-block;
+      height: 50px;
+      width: 50px;
+      vertical-align: middle;
+      border-radius: 4.5px;
+      margin-right: 0.75em; }
+    nav.sidebar .account div .username {
+      display: inline-block;
+      vertical-align: middle;
+      font-size: 1.5em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0;
+      margin: 0;
+      font-weight: 300;
+      color: #f4f4f4; }
+      nav.sidebar .account div .username:hover {
+        color: #3a82ff;
+        text-decoration: none; }
+  nav.sidebar .account #admin-button ul {
+    margin: 0.75em 0; }
+  nav.sidebar .account #admin-button li {
+    width: 100%; }
   nav.sidebar .social-links li {
     width: 33%; }
   nav.sidebar .social-links a svg {
