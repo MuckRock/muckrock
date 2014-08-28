@@ -20,17 +20,6 @@
                 <li><a href="#">Terms of Service</a></li>
             </ul>
         </section>
-        <section class="actions">
-            <dfn>Actions</dfn>
-            <ul>
-                <li><a href="#">Search</a></li>
-                <li><a href="#">Subscribe to the Newsletter</a></li>
-                <li><a href="#">Become a Pro User</a></li>                    
-                <li><a href="#">Buy Requests</a></li>
-                <li><a href="#">Submit a Request</a></li>
-                <li><a href="#">Ask a Question</a></li>
-            </ul>
-        </section>
         <section class="links">
             <dfn>Social</dfn>
             <ul>
@@ -43,6 +32,22 @@
                 <li><a href="#">Latest Questions</a></li>
                 <li><a href="#">Recently Filed Requests</a></li>
                 <li><a href="#">Recently Completed Requests</a></li>
+            </ul>
+        </section>
+        <section class="actions">
+            <dfn>Actions</dfn>
+            <ul>
+                <li><a href="#">Submit a Request</a></li>
+                <li><a href="#">Ask a Question</a></li>
+                <li><a href="#">Search</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="#">Buy Requests</a></li>
+                <li><a href="#">Upgrade to a Pro Account</a></li>
+                {% else %}
+                <li><a href="#">Create an Account</a></li>
+                <li><a href="#">Get the Newsletter</a></li>
+                {% endif %}          
+                
             </ul>
         </section>
     </footer>
