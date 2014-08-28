@@ -1583,17 +1583,11 @@ nav.sidebar {
     font-size: 0.8em; }
 
 .footer-container {
-  display: inline-block;
-  /* prevents footer from running into .container */
-  overflow: hidden;
-  bottom: 0;
-  left: 0;
+  display: block;
   width: 100%;
-  margin: 1.5em 0 -0.5em;
-  /* hides the inline descender space */
-  padding: 1.5em;
-  background-color: #f4f4f4;
-  text-align: left; }
+  border-top: 1px solid #b3becb;
+  margin-top: 1.5em;
+  padding: 1.5em; }
   .footer-container footer {
     max-width: 68em;
     margin-left: auto;
@@ -1620,18 +1614,23 @@ nav.sidebar {
           width: 14.70196%; }
           .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
             margin-right: 0; } }
-  .footer-container ul {
-    list-style-type: none;
-    padding-left: 0; }
   @media screen and (min-width: 769px) {
     .footer-container {
       padding: 2em; }
       .footer-container footer section.about {
         padding-right: 3em; } }
+  .footer-container ul {
+    list-style-type: none;
+    padding-left: 0; }
+  .footer-container li {
+    font-size: 0.9em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    margin: 0.75em 0; }
   .footer-container p {
-    color: #21282c; }
+    margin-top: 0; }
   .footer-container .copyright {
-    margin-top: 2em;
+    margin: 1.5em 0;
     color: #21282c; }
 
 .grid {

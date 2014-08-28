@@ -390,12 +390,11 @@ nav.sidebar {
 }
     
 .footer-container {
-    display: inline-block; /* prevents footer from running into .container */
-    overflow: hidden;
-    bottom: 0;
-    left: 0;
+    display: block;
     width: 100%;
-    margin: 1.5em 0 -0.5em; /* hides the inline descender space */ 
+    border-top: $base-border-width solid $color-grey;
+    margin-top: $base-vertical-rhythm;
+    padding: $base-vertical-rhythm;
     footer {
         @include outer-container;
         section.about { @extend %half; }
@@ -405,26 +404,21 @@ nav.sidebar {
             @include media($large-layout) { @include span-columns(2); }
         }
     }
-    // Spacing
-    padding: 1.5em;
-    ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
     @include media($large-layout) {
         padding: 2em;
         footer section.about { padding-right: 3em; }
     }
-    
-    background-color: $color-white;
-    p { color: $color-black; }
-    
-    text-align: left;
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    li {
+        @include font-sizing(0.9, 3);
+        margin: $base-vertical-rhythm/2 0;
+    }
+    p { margin-top: 0; }
     .copyright {
-        margin-top: 2em;
+        margin: $base-vertical-rhythm 0;
         color: $color-black;
     }
-    
-    // #footer-menu { border-color: $color-black; }
-    // @include media($medium-layout) { #footer-menu { display: none; } }
 }
