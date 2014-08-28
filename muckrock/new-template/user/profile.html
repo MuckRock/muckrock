@@ -8,21 +8,15 @@
     <h1>{{user_obj.username}}</h1>
     <h2>{{user.get_profile.get_acct_type_display}} Account</h2>
     <dl>
+        <dt>Information on File</dt>
         {% if user_obj.first_name and user_obj.last_name %}
-        <dt>Full Name</dt>
         <dd>{{user_obj.first_name}} {{user_obj.last_name}}</dd>
         {% endif %}
-        
-        <dt>Email Address</dt>
         <dd>{{user_obj.email}}</dd>
-        
         {% if user_obj.get_profile.phone %}
-        <dt>Phone Number>
         <dd>{{user_obj.get_profile.phone}}</dd>
         {% endif %}
-
         {% if user_obj.get_profile.address1 or user_obj.get_profile.city %}
-        <dt>Address</dt>        
             {% if user_obj.get_profile.address1 %}
         <dd>{{ user_obj.get_profile.address1 }}</dd>
                 {% if user_obj.get_profile.address2 %}
