@@ -1,10 +1,35 @@
 <aside id="sidebar-menu">
     <nav class="sidebar">
         <a href="{% url 'foia-create'%}" class="primary button" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a>
+        
+        {% if user.is_authenticated %}
+        <section class="account">
+            <div>
+            <img src="http://placehold.it/100x100" class="avatar" alt="avatar" />
+            <a href="{% url 'acct-my-profile' %}" class="username">{{ user.username }}</a>
+            </div>
+            <ul class="options">
+			    <li><a href="{% url 'acct-update' %}">Settings</a></li>
+			    <li><a href="{% url 'acct-logout' %}">Log Out</a></li>
+			</ul>
+            {% if user.is_staff %}
+            <ul id="admin-button">
+                <li><a href="/admin/">Admin</a></li>
+            </ul>
+            {% endif %}
+        </section>
+            
+        {% else %}
+        <ul class="account-links">
+            <li><a href="{% url 'acct-register' %}">Sign&nbsp;Up</a></li>
+            <li><a href="{% url 'acct-login' %}">Log&nbsp;In</a></li>
+        </ul>
+        {% endif %}
+        
         <form name="search" action="/search/" method="get">
-            {% csrf_token %}
+            <!--{% csrf_token %}-->
             <input type="search" placeholder="Search"></input>
-            <input type="submit" value="Search" style="display: none;" />
+            <input type="submit" name="q" value="Search" style="display: none;" />
             <span class="input-button" id="search-button" onclick="search.submit()">
                 <svg width="25px" height="25px" viewBox="0 0 94 94" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
                     <title>Magnifying Glass Icon</title>
@@ -14,24 +39,8 @@
             </span>
         </form>
         
-        {% if user.is_authenticated %}
-        <section class="account">
-            <img src="http://placehold.it/100x100" class="avatar" alt="avatar" />
-            <a href="{% url 'acct-my-profile' %}">{{ user.username }}</a>
-            <ul class="options">
-                {% if user.is_staff %}
-                <li><a href="/admin/">Admin</a></li>
-                {% endif %}
-			    <li><a href="{% url 'acct-update' %}">Settings</a></li>
-			    <li><a href="{% url 'acct-logout' %}">Log Out</a></li>
-			</ul>
-        </section>
-            
-        {% else %}
-        <ul class="account-links">
-            <li><a href="{% url 'acct-register' %}">Sign&nbsp;Up</a></li>
-            <li><a href="{% url 'acct-login' %}">Log&nbsp;In</a></li>
-        </ul>
+        {% if not user.is_authenticated %}
+        <!--
         <ul class="social-links">
             <li><a href="https://muckrock.com/feeds">
                 <svg width="25px" height="25px" viewBox="0 0 57 57" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -55,7 +64,7 @@
                 </svg>
             </a></li>
         </ul>
-        
+        -->
         <dfn>Newsletter Signup</dfn>
         <form name="newsletter-signup" action="http://muckrock.us2.list-manage2.com/subscribe/post?u=74862d74361490eca930f4384&amp;id=20aa4a931d" method="post">
             <input type="text" for="mce-EMAIL" value="" name="EMAIL" id="mce-EMAIL" placeholder="example@email.biz"></input>
