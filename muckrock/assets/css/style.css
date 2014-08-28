@@ -1501,11 +1501,10 @@ nav.sidebar {
     nav.sidebar .account div .username {
       display: inline-block;
       vertical-align: middle;
-      font-size: 1.5em;
+      font-size: 1em;
       line-height: 1.51282em;
       margin: 0.37821em 0;
       margin: 0;
-      font-weight: 300;
       color: #f4f4f4; }
       nav.sidebar .account div .username:hover {
         color: #3a82ff;
