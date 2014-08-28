@@ -230,6 +230,16 @@ $sidebar-menu-width: 25%;
 }
 
 nav.sidebar {
+
+    $sidebar-object-height: 2.5rem;
+    $sidebar-button-background: darken($color-black, 4%);
+    @mixin active-button {
+        color: $color-white;
+        border-color: $color-selected;
+        background: $color-selected;
+        svg { fill: $color-white; }
+    }
+
     overflow-y: auto;
     height: 100%;
     width: 100%;
@@ -244,26 +254,30 @@ nav.sidebar {
     ul {
         display: table;
         width: 100%;
-        margin: 0.75em 0;
-        text-align: center;
+        margin: 0 0 $base-vertical-rhythm 0;
         li {
             display: table-cell;
-            padding: 0.5em;
+            width: 50%;
+            padding: 0 $base-vertical-rhythm/6;
         }
         li:first-child { padding-left: 0; }
         li:last-child { padding-right: 0; }
         a {
             display: block;
-            padding: 0.75em;
-            line-height: 0;
+            padding: $base-vertical-rhythm/2;
+            border: $base-border-width solid $sidebar-button-background;
             border-radius: $base-border-radius;
-            background-color: darken($color-black, 4%);
+            color: $color-grey;
+            background-color: $sidebar-button-background;
+            text-align: center;
+            text-decoration: none;
+            &:hover { @include active-button; }
         }
     }
     
     #new-request {
         display: block;
-        height: 2.5rem;
+        height: $sidebar-object-height;
         width: 100%;
         margin-bottom: $base-vertical-rhythm;
         background-color: $color-primary;
@@ -273,33 +287,19 @@ nav.sidebar {
         }
     }
     
-    .account-links {
-        li { padding: 0.5em; padding-bottom: 0; }
-        li:first-child { padding-left: 0; }
-        li:last-child { padding-right: 0; }
+    .social-links {
+        li { width: 33%; }
         a {
-            padding: 1.5em;
-            text-decoration: none;
-            color: $color-grey;
-            &:hover { background-color: $color-selected; color: $color-white; }
-        }
-        
-        @media screen and (max-width: 1200px) {
-            font-size: 0.9em;
-            a { padding: 2em 0.75em; }
-            li { padding: 0.25em 0.25em 0; }
-        }
-    }
-    
-    .social-links a {
-        svg {
-            height: 1em;
-            width: auto;
-            fill: $color-grey;
-        }
-        &:hover {
-            background: $color-selected;
-            svg { fill: $color-white; }
+            svg {
+                height: 1em;
+                width: auto;
+                margin-bottom: -0.25em;
+                fill: $color-grey;
+            }
+            &:hover {
+                background: $color-selected;
+                svg { fill: $color-white; }
+            }
         }
     }
     
@@ -316,76 +316,55 @@ nav.sidebar {
     }
     
     form {
-        width: 100%;
         display: block;
+        width: 100%;
         overflow: hidden;
+        height: $sidebar-object-height;
         margin: 0 0 $base-vertical-rhythm;
         input {
-            @include border-right-radius(0);
-            margin-right: 0;
-            height: 2.5rem;
+            @include appearance(none);
             width: 75%;
+            height: 100%;
             float: left;
-            padding-left: 0.75em;
-            padding-right: 0.5em;
-            color: $color-white;
-            @include placeholder { color: $color-grey; }
+            margin-right: 0;
             font-size: 0.9em;
+            color: $color-white;
             background: lighten($color-black, 8%);
+            @include placeholder { color: $color-grey; }
             border: none;
+            @include border-right-radius(0);
             &:focus {
                 outline: none;
                 border: $base-border-width solid $color-selected;
             }
             & + span.input-button { 
+                display: block;
+                float: right;
+                clear: right;
+                height: 100%;
+                width: 25%;
+                text-align: center;
+                color: $color-grey;
+                background: darken($color-black, 3%);
+                border: $base-border-width solid darken($color-black, 3%);
                 @include border-right-radius($base-border-radius);
                 @include border-left-radius(0);
-                @include box-sizing(border-box);
                 cursor: pointer;
-                display: inline-block;
-                float: right;
-                width: 25%;
-                height: 2.5rem;
-                text-align: center;
-                border: $base-border-width solid darken($color-black, 3%);
-                background: darken($color-black, 3%);
-                color: $color-grey;
-                clear: right;
                 svg {
                     display: inline-block;
-                    margin-top: 0.25em;
-                    height: 1.2em;
+                    height: 1.25em;
                     width: auto;
+                    margin-top: 0.3em;
+                    margin-left: -0.15em;
                     vertical-align: middle;
                     fill: $color-grey;
                 }
-                &:hover {
-                    color: $color-white;
-                    border-color: $color-selected;
-                    background: $color-selected;
-                    svg { fill: $color-white; }
-                }
+                &:hover { @include active-button; }
             }
-            &:focus + span.input-button {
-                color: $color-selected;
-                border-color: $color-selected;
-                background-color: $color-selected;
-                svg { fill: $color-white; }
+            &:focus + span.input-button, &:active + span.input-button { 
+                @include active-button;
             }
-            &#search-button { background-image: url('images/search.svg'); }
-            &#newsletter-button { background-image: url('images/email.svg'); }
-            &#search-button, &#newsletter-button {
-                background-position: center center;
-                background-repeat: no-repeat;
-                background-size: 50% 50%;
-                height: 2.5rem;
-                font-size: 0px;
-            }
-
         }
-    }
-    .button-group {
-        font-size: 0.8em;
     }
 }
     

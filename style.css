@@ -719,7 +719,7 @@ object.collection h3 {
 
 input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
   display: inline-block;
-  padding: 0.375em 1.5em;
+  padding: 0.375em 0.5em 0.375em 0.75em;
   border-color: #b3becb; }
   input[type="email"]:disabled, input[type="number"]:disabled, input[type="password"]:disabled, input[type="search"]:disabled, input[type="tel"]:disabled, input[type="text"]:disabled, input[type="url"]:disabled, input[type="color"]:disabled, input[type="date"]:disabled, input[type="datetime"]:disabled, input[type="datetime-local"]:disabled, input[type="month"]:disabled, input[type="time"]:disabled, input[type="week"]:disabled {
     background-color: #d8d8db;
@@ -1439,11 +1439,11 @@ nav.sidebar {
   nav.sidebar ul {
     display: table;
     width: 100%;
-    margin: 0.75em 0;
-    text-align: center; }
+    margin: 0 0 1.5em 0; }
     nav.sidebar ul li {
       display: table-cell;
-      padding: 0.5em; }
+      width: 50%;
+      padding: 0 0.25em; }
     nav.sidebar ul li:first-child {
       padding-left: 0; }
     nav.sidebar ul li:last-child {
@@ -1451,9 +1451,18 @@ nav.sidebar {
     nav.sidebar ul a {
       display: block;
       padding: 0.75em;
-      line-height: 0;
+      border: 1px solid #181d20;
       border-radius: 9px;
-      background-color: #181d20; }
+      color: #b3becb;
+      background-color: #181d20;
+      text-align: center;
+      text-decoration: none; }
+      nav.sidebar ul a:hover {
+        color: #f4f4f4;
+        border-color: #3a82ff;
+        background: #3a82ff; }
+        nav.sidebar ul a:hover svg {
+          fill: #f4f4f4; }
   nav.sidebar #new-request {
     display: block;
     height: 2.5rem;
@@ -1464,30 +1473,12 @@ nav.sidebar {
     @media screen and (max-width: 540px) {
       nav.sidebar #new-request {
         display: none; } }
-  nav.sidebar .account-links li {
-    padding: 0.5em;
-    padding-bottom: 0; }
-  nav.sidebar .account-links li:first-child {
-    padding-left: 0; }
-  nav.sidebar .account-links li:last-child {
-    padding-right: 0; }
-  nav.sidebar .account-links a {
-    padding: 1.5em;
-    text-decoration: none;
-    color: #b3becb; }
-    nav.sidebar .account-links a:hover {
-      background-color: #3a82ff;
-      color: #f4f4f4; }
-  @media screen and (max-width: 1200px) {
-    nav.sidebar .account-links {
-      font-size: 0.9em; }
-      nav.sidebar .account-links a {
-        padding: 2em 0.75em; }
-      nav.sidebar .account-links li {
-        padding: 0.25em 0.25em 0; } }
+  nav.sidebar .social-links li {
+    width: 33%; }
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
+    margin-bottom: -0.25em;
     fill: #b3becb; }
   nav.sidebar .social-links a:hover {
     background: #3a82ff; }
@@ -1504,23 +1495,27 @@ nav.sidebar {
     nav.sidebar .spotlight p {
       line-height: 1.2em; }
   nav.sidebar form {
-    width: 100%;
     display: block;
+    width: 100%;
     overflow: hidden;
+    height: 2.5rem;
     margin: 0 0 1.5em; }
     nav.sidebar form input {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      margin-right: 0;
-      height: 2.5rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      -ms-appearance: none;
+      -o-appearance: none;
+      appearance: none;
       width: 75%;
+      height: 100%;
       float: left;
-      padding-left: 0.75em;
-      padding-right: 0.5em;
-      color: #f4f4f4;
+      margin-right: 0;
       font-size: 0.9em;
+      color: #f4f4f4;
       background: #323d43;
-      border: none; }
+      border: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0; }
       nav.sidebar form input::-webkit-input-placeholder {
         color: #b3becb; }
       nav.sidebar form input::-moz-placeholder {
@@ -1533,28 +1528,26 @@ nav.sidebar {
         outline: none;
         border: 1px solid #3a82ff; }
       nav.sidebar form input + span.input-button {
+        display: block;
+        float: right;
+        clear: right;
+        height: 100%;
+        width: 25%;
+        text-align: center;
+        color: #b3becb;
+        background: #1a2023;
+        border: 1px solid #1a2023;
         border-top-right-radius: 9px;
         border-bottom-right-radius: 9px;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        cursor: pointer;
-        display: inline-block;
-        float: right;
-        width: 25%;
-        height: 2.5rem;
-        text-align: center;
-        border: 1px solid #1a2023;
-        background: #1a2023;
-        color: #b3becb;
-        clear: right; }
+        cursor: pointer; }
         nav.sidebar form input + span.input-button svg {
           display: inline-block;
-          margin-top: 0.25em;
-          height: 1.2em;
+          height: 1.25em;
           width: auto;
+          margin-top: 0.3em;
+          margin-left: -0.15em;
           vertical-align: middle;
           fill: #b3becb; }
         nav.sidebar form input + span.input-button:hover {
@@ -1563,24 +1556,12 @@ nav.sidebar {
           background: #3a82ff; }
           nav.sidebar form input + span.input-button:hover svg {
             fill: #f4f4f4; }
-      nav.sidebar form input:focus + span.input-button {
-        color: #3a82ff;
+      nav.sidebar form input:focus + span.input-button, nav.sidebar form input:active + span.input-button {
+        color: #f4f4f4;
         border-color: #3a82ff;
-        background-color: #3a82ff; }
-        nav.sidebar form input:focus + span.input-button svg {
+        background: #3a82ff; }
+        nav.sidebar form input:focus + span.input-button svg, nav.sidebar form input:active + span.input-button svg {
           fill: #f4f4f4; }
-      nav.sidebar form input#search-button {
-        background-image: url("images/search.svg"); }
-      nav.sidebar form input#newsletter-button {
-        background-image: url("images/email.svg"); }
-      nav.sidebar form input#search-button, nav.sidebar form input#newsletter-button {
-        background-position: center center;
-        background-repeat: no-repeat;
-        background-size: 50% 50%;
-        height: 2.5rem;
-        font-size: 0px; }
-  nav.sidebar .button-group {
-    font-size: 0.8em; }
 
 .footer-container {
   display: block;

@@ -88,7 +88,7 @@
 // Textbox -> Input
 %input { @extend %textbox;
     display: inline-block;
-    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm/3 $base-vertical-rhythm/4 $base-vertical-rhythm/2;
     border-color: $color-grey;
     &:disabled {
         background-color: lighten($color-disabled, 25%);
