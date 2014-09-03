@@ -401,11 +401,6 @@ h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
   font-weight: 300; }
   h1 strong, h1 b, h2 strong, h2 b, h3 strong, h3 b, h4 strong, h4 b, h5 strong, h5 b, h6 strong, nav.sidebar .spotlight h1 strong, h6 b, nav.sidebar .spotlight h1 b {
     font-weight: 400; }
-  .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
-    margin: 0 1.5rem; }
-    @media screen and (min-width: 540px) {
-      .container > h1, .container > h2, .container > h3, .container > h4, .container > h5, .container > h6, nav.sidebar .spotlight .container > h1 {
-        margin: 0 2rem; } }
 
 h1 {
   font-size: 2em;
@@ -546,16 +541,16 @@ html, body {
     display: table;
     clear: both; }
 
-.login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, .login header h1, .login header ul, .update header h1, .update header .button, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .agency aside dl, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, object.collection ul, .subscription form fieldset, .password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
+.login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, .login h1, .login ul, .update h1, .update .button, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .agency aside dl, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], object.search fieldset, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, object.collection ul, .subscription form fieldset, object.password-reset form fieldset, .password-change form fieldset, object.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
   width: 100%; }
 
 @media screen and (min-width: 769px) {
-  .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, .login header h1, .login header ul, .update header h1, .update header .button, .footer-container footer section.about {
+  .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, .login h1, .login ul, .update h1, .update .button, .footer-container footer section.about {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, .login header h1:last-child, .login header ul:last-child, .update header h1:last-child, .update header .button:last-child, .footer-container footer section.about:last-child {
+    .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, .login h1:last-child, .login ul:last-child, .update h1:last-child, .update .button:last-child, .footer-container footer section.about:last-child {
       margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
@@ -576,20 +571,37 @@ html, body {
       margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
-  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"] {
+  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child {
+    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child, object.search input[type="submit"]:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"] {
+  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child {
+    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child, object.search input[type="submit"]:last-child {
+      margin-right: 0; } }
+
+@media screen and (min-width: 321px) {
+  object.search fieldset {
+    float: left;
+    display: block;
+    margin-right: 4.82916%;
+    width: 100%; }
+    object.search fieldset:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 769px) {
+  object.search fieldset {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 74.41059%; }
+    object.search fieldset:last-child {
       margin-right: 0; } }
 
 .post, .question, .request, .jurisdiction, .agency, .profile, object.collection {
@@ -602,66 +614,61 @@ html, body {
     display: table;
     clear: both; }
 
-.post, .question, .request, .jurisdiction, .agency, .profile {
-  margin: 0 1.5em; }
-  @media screen and (min-width: 540px) {
-    .post, .question, .request, .jurisdiction, .agency, .profile {
-      margin: 0 2em; } }
-  .post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
-    float: left;
-    display: block;
-    margin-right: 2.35765%;
-    width: 65.88078%;
-    padding: 0 2.35765% 0 0;
-    margin: 0.75em 0 0; }
-    .post > section.meta header:last-child, .question > section.meta header:last-child, .request > section.meta header:last-child, .jurisdiction > section.meta header:last-child, .agency > section.meta header:last-child, .profile > section.meta header:last-child {
-      margin-right: 0; }
-    .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1, .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-      font-weight: 400; }
+.post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
+  float: left;
+  display: block;
+  margin-right: 2.35765%;
+  width: 65.88078%;
+  padding: 0 2.35765% 0 0;
+  margin: 0.75em 0 0; }
+  .post > section.meta header:last-child, .question > section.meta header:last-child, .request > section.meta header:last-child, .jurisdiction > section.meta header:last-child, .agency > section.meta header:last-child, .profile > section.meta header:last-child {
+    margin-right: 0; }
+  .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1, .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
+    font-weight: 400; }
+  .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
+    font-size: 1.5em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+  .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
+    font-size: 0.875em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+  @media screen and (min-width: 321px) {
     .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
-      font-size: 1.5em;
+      font-size: 1.75em;
       line-height: 1.51282em;
       margin: 0.37821em 0; }
     .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-      font-size: 0.875em;
+      font-size: 1em;
       line-height: 1.51282em;
-      margin: 0.37821em 0; }
-    @media screen and (min-width: 321px) {
-      .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
-        font-size: 1.75em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; }
-      .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-        font-size: 1em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
-  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside {
-    padding: 0 2.35765% 0 2.35765%;
-    margin: 0.75em 0; }
-    .post > section.meta aside .dl-group, .question > section.meta aside .dl-group, .request > section.meta aside .dl-group, .jurisdiction > section.meta aside .dl-group, .agency > section.meta aside .dl-group, .profile > section.meta aside .dl-group {
-      max-width: 68em;
-      margin-left: auto;
-      margin-right: auto; }
-      .post > section.meta aside .dl-group:after, .question > section.meta aside .dl-group:after, .request > section.meta aside .dl-group:after, .jurisdiction > section.meta aside .dl-group:after, .agency > section.meta aside .dl-group:after, .profile > section.meta aside .dl-group:after {
-        content: "";
-        display: table;
-        clear: both; }
-    .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl {
-      margin-top: 0; }
-  .post > section.meta .panel, .question > section.meta .panel, .request > section.meta .panel, .jurisdiction > section.meta .panel, .agency > section.meta .panel, .profile > section.meta .panel {
-    width: 90%; }
-  .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main {
-    max-width: 50em;
-    padding-top: 1.5em; }
-  .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
-    font-weight: 300;
-    display: none; }
-    @media screen and (min-width: 321px) {
-      .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
-        display: block;
-        font-size: 1.25em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
+      margin: 0.37821em 0; } }
+.post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside {
+  padding: 0 2.35765% 0 2.35765%;
+  margin: 0.75em 0; }
+  .post > section.meta aside .dl-group, .question > section.meta aside .dl-group, .request > section.meta aside .dl-group, .jurisdiction > section.meta aside .dl-group, .agency > section.meta aside .dl-group, .profile > section.meta aside .dl-group {
+    max-width: 68em;
+    margin-left: auto;
+    margin-right: auto; }
+    .post > section.meta aside .dl-group:after, .question > section.meta aside .dl-group:after, .request > section.meta aside .dl-group:after, .jurisdiction > section.meta aside .dl-group:after, .agency > section.meta aside .dl-group:after, .profile > section.meta aside .dl-group:after {
+      content: "";
+      display: table;
+      clear: both; }
+  .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl {
+    margin-top: 0; }
+.post > section.meta .panel, .question > section.meta .panel, .request > section.meta .panel, .jurisdiction > section.meta .panel, .agency > section.meta .panel, .profile > section.meta .panel {
+  width: 90%; }
+.post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main {
+  max-width: 50em;
+  padding-top: 1.5em; }
+.post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
+  font-weight: 300;
+  display: none; }
+  @media screen and (min-width: 321px) {
+    .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
+      display: block;
+      font-size: 1.25em;
+      line-height: 1.51282em;
+      margin: 0.37821em 0; } }
 
 object.collection ul {
   margin: 0;
@@ -688,6 +695,12 @@ object.collection h3 {
   font-size: 1em;
   line-height: 1.51282em;
   margin: 0.37821em 0; }
+
+.container {
+  padding: 1.5em; }
+  @media screen and (min-width: 321px) {
+    .container {
+      padding: 2em; } }
 
 /* Simple Objects */
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -858,7 +871,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 .login, .update, .subscription, .password-reset, .password-change, .register {
   display: block;
   margin: 0 1.5em;
-  padding: 2em 1.5em;
   border: 1px solid #b3becb;
   border-radius: 9px; }
   .login form, .update form, .subscription form, .password-reset form, .password-change form, .register form {
@@ -889,16 +901,16 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   .login > .form, .update > .form, .subscription > .form, .password-reset > .form, .password-change > .form, .register > .form {
     border: none; }
 
-.login header h1 {
+.login h1 {
   font-size: 3em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
   margin-top: -1rem; }
   @media screen and (min-width: 769px) {
-    .login header h1 {
+    .login h1 {
       margin-top: 0; } }
 @media screen and (min-width: 769px) {
-  .login header ul {
+  .login ul {
     margin: 0.75em 0 0; } }
 .login p {
   padding-left: 5%;
@@ -910,27 +922,58 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     .logout {
       text-align: center; } }
 
-.update header h1 {
+.update h1 {
   margin-top: -1rem; }
   @media screen and (min-width: 769px) {
-    .update header h1 {
+    .update h1 {
       margin-top: 1rem; } }
 @media screen and (min-width: 769px) {
-  .update header .button {
+  .update .button {
     margin-top: 1.5rem; } }
 
-.password-reset, .password-change {
+object.password-reset, .password-change {
   overflow: hidden; }
-  .password-reset h1, .password-change h1 {
-    margin: 0 0.375em 0.75em; }
-  .password-reset form, .password-change form {
+  object.password-reset h1, .password-change h1 {
+    margin: 0 0 0.75em; }
+  object.password-reset form, .password-change form {
     padding: 0 2.35765% 0 2.35765%; }
 
-.register h1 {
-  padding-left: 5%;
+object.register h1 {
   font-size: 3em;
   line-height: 1.22222em;
   margin: 0.30556em 0; }
+
+object.search {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+  margin: 1.5em 0;
+  padding: 1.5em;
+  border: 1px solid #b3becb;
+  border-radius: 9px; }
+  object.search form {
+    width: 100%; }
+  object.search fieldset {
+    margin: 0.75em 0 0; }
+  object.search input[type="submit"] {
+    margin-top: 0.75em; }
+  object.search ul {
+    margin: 0;
+    padding: 0; }
+  object.search li {
+    display: inline-block;
+    padding: 0 1.5em 0 0; }
+    object.search li:last-child {
+      padding-right: 0; }
+  object.search form {
+    max-width: 68em;
+    margin-left: auto;
+    margin-right: auto; }
+    object.search form:after {
+      content: "";
+      display: table;
+      clear: both; }
 
 /* Messages */
 object.message {
@@ -1101,7 +1144,7 @@ object.progress-bar {
 /* Table */
 table {
   width: 100%;
-  margin: 1.5em 0;
+  margin-top: 1.5em 0;
   border-radius: 9px; }
   table th, table td {
     padding: 0.25em 0.5em; }
@@ -1171,8 +1214,7 @@ table {
 header.collection-header {
   max-width: 68em;
   margin-left: auto;
-  margin-right: auto;
-  padding: 0 2rem 0.75em; }
+  margin-right: auto; }
   header.collection-header:after {
     content: "";
     display: table;
@@ -1185,7 +1227,8 @@ h1.list-label {
   line-height: 1.51282em;
   margin: 0.37821em 0;
   display: block;
-  margin: 0; }
+  margin-top: 0;
+  margin-bottom: 0; }
 
 nav.pagination ul {
   text-align: center;
@@ -1207,11 +1250,7 @@ nav.pagination .page-ref {
   padding: 0 0.75em; }
 
 object.jurisidiction.collection h2, object.jurisidiction.collection ul, object.agency.collection h2, object.agency.collection ul {
-  margin: 0 1.5em;
   text-align: center; }
-  @media screen and (min-width: 540px) {
-    object.jurisidiction.collection h2, object.jurisidiction.collection ul, object.agency.collection h2, object.agency.collection ul {
-      margin: 0 2em; } }
 object.jurisidiction.collection ul, object.agency.collection ul {
   width: 100%;
   margin: 0; }
@@ -1250,7 +1289,6 @@ nav {
         float: none; } }
 
 nav.primary {
-  padding: 0.75em 1.5em;
   /* Logo */ }
   nav.primary ul {
     list-style-type: none;
@@ -1311,15 +1349,13 @@ nav.primary {
       nav.primary ul.right .menu-text {
         display: inline; } }
   @media screen and (min-width: 540px) {
-    nav.primary {
-      padding: 2em 2em 0; }
-      nav.primary ul.left, nav.primary ul.right {
-        width: auto; }
-      nav.primary ul.left {
-        float: left; }
-      nav.primary ul.right {
-        display: table;
-        float: right; } }
+    nav.primary ul.left, nav.primary ul.right {
+      width: auto; }
+    nav.primary ul.left {
+      float: left; }
+    nav.primary ul.right {
+      display: table;
+      float: right; } }
   nav.primary #muckrock-text, nav.primary #muckrock-icon {
     border: none;
     padding: 0 0.5em 0 0; }
@@ -1345,7 +1381,7 @@ nav.primary {
       display: none; } }
 
 nav.secondary {
-  padding: 0.75em 1.5em; }
+  padding: 1.5em 0; }
   nav.secondary li {
     display: inline-block;
     margin: 0 0.5em; }
@@ -1358,13 +1394,61 @@ nav.secondary {
         text-decoration: none; }
   @media screen and (min-width: 540px) {
     nav.secondary {
-      display: block;
-      padding: 0.75em 2em 2em; }
+      display: block; }
       nav.secondary li {
         text-align: center; } }
 
+.footer-container {
+  display: block;
+  width: 100%;
+  border-top: 1px solid #b3becb;
+  margin-top: 1.5em; }
+  .footer-container footer {
+    max-width: 68em;
+    margin-left: auto;
+    margin-right: auto; }
+    .footer-container footer:after {
+      content: "";
+      display: table;
+      clear: both; }
+    .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+      width: 100%; }
+      @media screen and (min-width: 321px) {
+        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+          float: left;
+          display: block;
+          margin-right: 4.82916%;
+          width: 30.11389%; }
+          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
+            margin-right: 0; } }
+      @media screen and (min-width: 769px) {
+        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+          float: left;
+          display: block;
+          margin-right: 2.35765%;
+          width: 14.70196%; }
+          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
+            margin-right: 0; } }
+  @media screen and (min-width: 769px) {
+    .footer-container footer section.about {
+      padding-right: 3em; } }
+  .footer-container ul {
+    list-style-type: none;
+    padding-left: 0; }
+  .footer-container li {
+    font-size: 0.9em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    margin: 0.75em 0; }
+  .footer-container p {
+    margin-top: 0; }
+  .footer-container .copyright {
+    margin: 1.5em 0;
+    color: #21282c; }
+
 /* Global Sidebar */
 .container, .footer-container {
+  display: block;
   width: 74%;
   float: left;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -1602,57 +1686,6 @@ nav.sidebar {
         background: #3a82ff; }
         nav.sidebar form input:focus + span.input-button svg, nav.sidebar form input:active + span.input-button svg {
           fill: #f4f4f4; }
-
-.footer-container {
-  display: block;
-  width: 100%;
-  border-top: 1px solid #b3becb;
-  margin-top: 1.5em;
-  padding: 1.5em; }
-  .footer-container footer {
-    max-width: 68em;
-    margin-left: auto;
-    margin-right: auto; }
-    .footer-container footer:after {
-      content: "";
-      display: table;
-      clear: both; }
-    .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
-      width: 100%; }
-      @media screen and (min-width: 321px) {
-        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
-          float: left;
-          display: block;
-          margin-right: 4.82916%;
-          width: 30.11389%; }
-          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
-            margin-right: 0; } }
-      @media screen and (min-width: 769px) {
-        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
-          float: left;
-          display: block;
-          margin-right: 2.35765%;
-          width: 14.70196%; }
-          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
-            margin-right: 0; } }
-  @media screen and (min-width: 769px) {
-    .footer-container {
-      padding: 2em; }
-      .footer-container footer section.about {
-        padding-right: 3em; } }
-  .footer-container ul {
-    list-style-type: none;
-    padding-left: 0; }
-  .footer-container li {
-    font-size: 0.9em;
-    line-height: 1.22222em;
-    margin: 0.30556em 0;
-    margin: 0.75em 0; }
-  .footer-container p {
-    margin-top: 0; }
-  .footer-container .copyright {
-    margin: 1.5em 0;
-    color: #21282c; }
 
 .grid {
   max-width: 68em;

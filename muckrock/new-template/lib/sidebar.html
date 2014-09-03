@@ -28,8 +28,8 @@
         
         <form name="search" action="/search/" method="get">
             <!--{% csrf_token %}-->
-            <input type="search" placeholder="Search"></input>
-            <input type="submit" name="q" value="Search" style="display: none;" />
+            <input type="search" name="q" placeholder="Search">
+            <input type="submit" value="" style="display: none;">
             <span class="input-button" id="search-button" onclick="search.submit()">
                 <svg width="25px" height="25px" viewBox="0 0 94 94" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
                     <title>Magnifying Glass Icon</title>

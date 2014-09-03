@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Search{% endblock title %}
+
+{% block content %}
+    
+    <h1 class="list-label">Search</h1>
+
+    <object class="search">
+        <form method="get" action="." class="search-form">
+            <input type="search" name="q">
+            <fieldset>
+                <ul> 
+                    <li><label for="id_models_0"><input type="checkbox" name="models" value="news.article" id="id_models_0" /> News</label></li> 
+                    <li><label for="id_models_1"><input type="checkbox" name="models" value="foia.foiarequest" id="id_models_1" /> Requests</label></li>
+                    <li><label for="id_models_2"><input type="checkbox" name="models" value="qanda.question" id="id_models_2" /> Questions</label></li> 
+                </ul> 
+            </fieldset>
+            <input type="submit" value="Search" class="primary button">
+        </form>
+    </object>
+    
+    {% if query %}
+        {% if page.object_list %}
+            <h2>Results for &ldquo;{{ request.GET.q }}&rdquo;</h2>
+            {% with page as page_obj %}
+                {% include 'lib/pagination.html' %}
+            {% endwith %}
+            <table class="search collection">
+            {% for result in page.object_list %}
+                <tr>
+                    <td><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></td>
+                    {# <td><a href="{% url 'acct-profile' result.object.user.username %}">{{ result.object.user.first_name }} {{ result.object.user.last_name }}</a></td> #}
+                </tr>
+            {% endfor %}
+            </table>
+            {% with page as page_obj %}
+			    {% include 'lib/pagination.html' %}
+			{% endwith %}
+		{% else %}
+		    <h2>No results for &ldquo;{{ request.GET.q }}&rdquo;</h2>
+		{% endif %}
+	{% endif %}
+{% endblock content %}
