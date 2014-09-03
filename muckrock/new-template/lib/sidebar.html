@@ -6,7 +6,7 @@
         <section class="account">
             <div>
             <img src="http://placehold.it/100x100" class="avatar" alt="avatar" />
-            <a href="{% url 'acct-my-profile' %}" class="username">{{ user.username }}</a>
+            <a href="{% url 'acct-my-profile' %}" class="username">{{ user.first_name }} {{ user.last_name }}</a>
             </div>
             <ul class="options">
 			    <li><a href="{% url 'acct-update' %}">Settings</a></li>
