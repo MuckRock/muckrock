@@ -26,17 +26,30 @@ html, body { min-height: 100%; }
     @include media($large-layout) { @include span-columns(3); }
 }
 
+%three-quarters {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(6); }
+    @include media($large-layout) { @include span-columns(9); }
+}
+
 %body {
     display: block;
     @include outer-container;
+}
+
+@mixin horizontal-margins {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    @media screen and (min-width: 540px) {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
 }
 
 // Layouts
 
 %article {
     @extend %body;
-    margin: 0 1.5em;
-    @media screen and (min-width: 540px) { margin: 0 2em; }
     > section.meta {
         @extend %row;
         header {
@@ -99,4 +112,11 @@ html, body { min-height: 100%; }
     h2, h3 { font-weight: 400; }
     h2 { @include font-sizing(1.25); }
     h3 { @include font-sizing(1); }
+}
+
+.container {
+    padding: 1.5em;
+    @include media($medium-layout) {
+        padding: 2em;
+    }
 }

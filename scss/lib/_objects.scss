@@ -203,7 +203,6 @@ fieldset {
 %form-object {
     display: block;
     margin: 0 $base-vertical-rhythm;
-    padding: 2em 1.5em;
     border: 1px solid $color-grey;
     border-radius: $base-border-radius;
     form {
@@ -230,22 +229,23 @@ fieldset {
     }
 }
 
-.login {
+.login, .update, .subscription, .password-reset, .password-change, .register {
     @extend %form-object;
-    header {
-        h1 {
-            @extend %half;
-            @include font-sizing(3);
-            margin-top: -1rem;
-            @include media($large-layout) {
-                margin-top: 0;
-            }
+}
+
+.login {
+    h1 {
+        @extend %half;
+        @include font-sizing(3);
+        margin-top: -1rem;
+        @include media($large-layout) {
+            margin-top: 0;
         }
-        ul {
-            @extend %half;
-            @include media($large-layout) {
-                margin: $base-vertical-rhythm/2 0 0;
-            }
+    }
+    ul {
+        @extend %half;
+        @include media($large-layout) {
+            margin: $base-vertical-rhythm/2 0 0;
         }
     }
     p {
@@ -261,43 +261,57 @@ fieldset {
 }
 
 .update {
-    @extend %form-object;
-    header {
-        h1 {
-            @extend %half;
-            // line-height: 0;
-            margin-top: -1rem;
-            @include media($large-layout) {
-                margin-top: 1rem;
-            }
+    h1 {
+        @extend %half;
+        // line-height: 0;
+        margin-top: -1rem;
+        @include media($large-layout) {
+            margin-top: 1rem;
         }
-        .button {
-            @extend %half;
-            @include media($large-layout) {
-                margin-top: 1.5rem;
-            }
+    }
+    .button {
+        @extend %half;
+        @include media($large-layout) {
+            margin-top: 1.5rem;
         }
     }
 }
 
-.subscription {
-    @extend %form-object;
-    form fieldset { @extend %full; }
-}
+.subscription form fieldset { @extend %full; }
 
-.password-reset, .password-change {
-    @extend %form-object;
+object.password-reset, .password-change {
     overflow: hidden;
-    h1 { margin: 0 $base-vertical-rhythm/4 $base-vertical-rhythm/2; }
+    h1 { margin: 0 0 $base-vertical-rhythm/2; }
     form { @include pad(0 default 0 default); }
     form fieldset { @extend %full; }
 }
 
-.register {
-    @extend %form-object;
-    h1 {
-        padding-left: 5%;
-        @include font-sizing(3, 3);
+object.register h1 { @include font-sizing(3, 3); }
+
+object.search {
+    @include box-sizing(border-box); 
+    display: block;
+    margin: $base-vertical-rhythm 0;
+    padding: $base-vertical-rhythm;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius;
+    form { width: 100%; }
+    fieldset { margin: $base-vertical-rhythm/2 0 0; }
+    input[type="submit"] { margin-top: $base-vertical-rhythm/2; }
+    ul {
+        margin: 0;
+        padding: 0;
+    }
+    li {
+        display: inline-block;
+        padding: 0 $base-vertical-rhythm 0 0;
+        &:last-child { padding-right: 0; }
+    }
+    form { @include outer-container(); }
+    input[type="search"] { @extend %full; }
+    fieldset { @extend %three-quarters; }
+    input[type="submit"] {
+        @extend %quarter;
     }
 }
 
@@ -457,7 +471,7 @@ object.progress-bar {
 
 table {
     width: 100%;
-    margin: $base-vertical-rhythm 0;
+    margin-top: $base-vertical-rhythm 0;
     border-radius: $base-border-radius;
     th, td { padding: 0.25em 0.5em; }
     tr:nth-child(odd) { background-color: $color-odd-background; }
@@ -521,17 +535,15 @@ table {
 
 // Collections
 
-header.collection-header {
-    @include outer-container();
-    padding: 0 2rem $base-vertical-rhythm/2;
-}
+header.collection-header { @include outer-container(); }
 h1.list-label {
     @extend %full;
     font-weight: 300;
     text-align: left;
     @include font-sizing(3); 
     display: block;
-    margin: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 nav.pagination {
     @extend %full;
@@ -558,14 +570,8 @@ nav.pagination {
 
 object.collection { @extend %collection; }
 object.jurisidiction.collection, object.agency.collection {
-    h2, ul {
-        margin: 0 1.5em;
-        text-align: center;
-        @media screen and (min-width: 540px) { margin: 0 2em; }
-    }
-    
+    h2, ul { text-align: center; }
     ul {
-        
         width: 100%;
         margin: 0;
         li { padding: $base-vertical-rhythm/4; }

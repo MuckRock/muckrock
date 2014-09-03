@@ -38,8 +38,6 @@ nav {
 
 nav.primary {
 
-    padding: 0.75em 1.5em;
-    
     ul {
         list-style-type: none;
         margin: 0;
@@ -108,7 +106,6 @@ nav.primary {
     }
     
     @media screen and (min-width: $small-menu-breakpoint) {
-         padding: 2em 2em 0;
          ul {
             &.left, &.right { width: auto; }
             &.left { float: left; }
@@ -161,11 +158,42 @@ nav.secondary {
             }
         }
     }
-    padding: 0.75em 1.5em;
+    padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
         display: block;
-        padding: $base-vertical-rhythm/2 2em 2em;
         li { text-align: center; }
+    }
+}
+
+.footer-container {
+    display: block;
+    width: 100%;
+    border-top: $base-border-width solid $color-grey;
+    margin-top: $base-vertical-rhythm;
+    footer {
+        @include outer-container;
+        section.about { @extend %half; }
+        section.sitemap, section.actions, section.links {
+            @include fill-parent();
+            @include media($medium-layout) { @include span-columns(2); }
+            @include media($large-layout) { @include span-columns(2); }
+        }
+    }
+    @include media($large-layout) {
+        footer section.about { padding-right: 3em; }
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    li {
+        @include font-sizing(0.9, 3);
+        margin: $base-vertical-rhythm/2 0;
+    }
+    p { margin-top: 0; }
+    .copyright {
+        margin: $base-vertical-rhythm 0;
+        color: $color-black;
     }
 }
 
@@ -178,6 +206,7 @@ $desktop-menu-width: 26%;
 $menu-animation: all 0.5s $ease-out-expo;
 
 .container, .footer-container {
+    display: block;
     width: 100% - $desktop-menu-width;
     float: left;
     @include transition($menu-animation);
@@ -407,39 +436,5 @@ nav.sidebar {
                 @include active-button;
             }
         }
-    }
-}
-    
-.footer-container {
-    display: block;
-    width: 100%;
-    border-top: $base-border-width solid $color-grey;
-    margin-top: $base-vertical-rhythm;
-    padding: $base-vertical-rhythm;
-    footer {
-        @include outer-container;
-        section.about { @extend %half; }
-        section.sitemap, section.actions, section.links {
-            @include fill-parent();
-            @include media($medium-layout) { @include span-columns(2); }
-            @include media($large-layout) { @include span-columns(2); }
-        }
-    }
-    @include media($large-layout) {
-        padding: 2em;
-        footer section.about { padding-right: 3em; }
-    }
-    ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-    li {
-        @include font-sizing(0.9, 3);
-        margin: $base-vertical-rhythm/2 0;
-    }
-    p { margin-top: 0; }
-    .copyright {
-        margin: $base-vertical-rhythm 0;
-        color: $color-black;
     }
 }
