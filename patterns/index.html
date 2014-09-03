@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<title>MuckRock Patterns</title>
+	<link rel="stylesheet"
+	      type="text/css"
+          href="style.css" />
+	<link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic,700italic|Source+Code+Pro:400' rel='stylesheet' type='text/css'>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<script>
+        function toggleBodyFont() {
+            var e = document.getElementById('font-picker');
+            var f = e.options[e.selectedIndex].value;
+            document.getElementsByTagName('body')[0].style.fontFamily = f;
+        }
+        
+        function toggleMenu() {
+            var lin = document.getElementById('logged-in');
+            var out = document.getElementById('logged-out');
+            if (lin.style.display == 'none') {
+                lin.style.display = 'table';
+                out.style.display = 'none';
+            } else {
+                lin.style.display = 'none';
+                out.style.display = 'table';
+            }
+        }
+            
+        function setBodyFont() {
+            var f = 'Source Sans Pro';
+            document.getElementsByTagName('body')[0].style.fontFamily = f;
+        }
+    </script>
+</head>
+<body onload="setBodyFont()" >
+    
+    <aside id="sidebar-menu">
+        <nav class="sidebar">
+            <fieldset>
+                <input type="search" placeholder="Search"></input>
+                <span class="input-button" id="search-button">
+                    <svg viewBox="0 0 94 94" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+                        <title>Magnifying Glass Icon</title>
+                        <description>Symbolizes the search command</description>
+                        <path d="M81.6,91.8 L62.2,72.4 C55.7,77 47.7,79.4 39.7,79.4 C17.7,79.4 0,61.6 0,39.7 C0,17.8 17.8,0 39.7,0 C61.6,0 79.4,17.8 79.4,39.7 C79.4,47.7 77,55.6 72.4,62.2 L91.7,81.6 C93,82.9 93.8,84.8 93.8,86.7 C93.9,90.6 90.7,93.9 86.7,93.9 C84.8,93.9 82.9,93.1 81.6,91.8 Z M14.4,39.7 C14.4,53.7 25.7,65 39.7,65 C53.7,65 65,53.7 65,39.7 C65,25.7 53.7,14.4 39.7,14.4 C25.7,14.4 14.4,25.7 14.4,39.7 Z" id="search-icon"></path>
+                    </svg>
+                </span>
+            </fieldset>
+            
+            <ul class="account-links">
+                <li><a href="#">Sign&nbsp;Up</a></li>
+                <li><a href="#" onclick="toggleMenu()">Log&nbsp;In</a></li>
+            </ul>
+            <ul class="social-links">
+                <li><a href="#">
+                    <svg viewBox="0 0 57 57" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>RSS Icon</title>
+                        <description>Symbolizes a link to a list of RSS feeds</description>
+                        <path d="M1,0.8 C0.7,1.1 0.4,1.6 0.4,2.1 L0.4,9.3 C0.4,10.3 1.2,11.1 2.2,11.1 C25.6,11.9 44.7,31 45.6,54.5 C45.6,55.5 46.4,56.3 47.4,56.3 L54.6,56.3 C55.1,56.3 55.6,56.1 55.9,55.7 C56.3,55.4 56.5,54.9 56.4,54.4 C55.4,25.1 31.7,1.3 2.3,0.3 C1.8,0.3 1.4,0.4 1,0.8 Z M1.1,22.5 C0.8,22.8 0.5,23.3 0.5,23.8 L0.5,31 C0.5,32 1.2,32.8 2.2,32.8 C13.8,33.6 23.1,43 23.9,54.5 C23.9,55.5 24.7,56.2 25.7,56.2 L32.9,56.2 C33.4,56.2 33.9,56 34.2,55.6 C34.5,55.3 34.8,54.8 34.7,54.3 C33.8,36.8 19.9,23 2.4,22 C1.9,22 1.4,22.2 1.1,22.5 Z M0.5,49 C0.5,53 3.7,56.2 7.7,56.2 C11.7,56.2 14.9,53 14.9,49 C14.9,45 11.7,41.8 7.7,41.8 C3.7,41.8 0.5,45 0.5,49 Z" id="rss-icon"></path>
+                    </svg>
+                </a></li>
+                <li><a href="#" title="MuckRock on Facebook">
+                    <svg viewBox="0 0 59 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>Twitter Icon</title>
+                        <description>Symbolizes a link to our Twitter page</description>
+                        <path d="M56.8,1.5 C54.5,2.9 51.9,3.9 49.2,4.4 C47.1,2.1 43.9,0.7 40.6,0.7 C34.1,0.7 28.7,6 28.7,12.6 C28.7,13.5 28.7,14.5 29,15.3 C19.1,14.8 10.3,10.1 4.5,2.9 C3.5,4.7 2.8,6.8 2.8,8.9 C2.8,13 4.8,16.6 8,18.8 C6,18.8 4.1,18.2 2.3,17.3 C2.3,23.2 6.6,27.9 12.1,29 C11.1,29.3 10.3,29.5 9.2,29.5 C8.5,29.5 7.7,29.4 7,29.3 C8.5,34 12.9,37.4 18.1,37.6 C14,40.7 8.9,42.7 3.4,42.7 C2.4,42.7 1.5,42.7 0.6,42.5 C5.9,45.9 12.1,47.8 18.8,47.8 C40.6,47.8 52.6,29.7 52.6,14.1 L52.6,12.5 C54.9,10.9 56.9,8.8 58.5,6.3 C56.2,7.2 53.9,7.8 51.5,8.1 C54,6.6 55.8,4.2 56.8,1.5 Z" id="twitter-icon"></path>
+                    </svg>
+                </a></li>
+                <li><a href="#" title="MuckRock on Facebook">
+                    <svg viewBox="0 0 35 73" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>Facebook Icon</title>
+                        <description>Symbolizes a link to our Facebook page</description>
+                        <path d="M23,24.2 L23,18.1 C23,14.9 23.3,13.1 27.9,13.1 L34.1,13.1 L34.1,0.7 L24.2,0.7 C12.4,0.7 8.2,6.7 8.2,16.8 L8.2,24.2 L0.8,24.2 L0.8,36.6 L8.2,36.6 L8.2,72.5 L23,72.5 L23,36.6 L32.9,36.6 L34.2,24.2 L23,24.2 Z" id="facebook-icon"></path>
+                    </svg>
+                </a></li>
+            </ul>
+            
+            <dfn>Newsletter Signup</dfn>
+            <fieldset>
+                <input type="text" placeholder="example@email.biz"></input>
+                <span class="input-button" id="newsletter-button">
+                    <svg viewBox="0 0 102 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                        <title>Envelope Icon</title>
+                        <description>Symbolizes an email action.</description>
+                        <path d="M101.1,70.4 C101.1,75.4 97,79.4 92.1,79.4 L9,79.4 C4,79.4 0,75.3 0,70.4 L0,9 C0,4 4.1,0 9,0 L92.1,0 C97.1,0 101.1,4.1 101.1,9 L101.1,70.4 L101.1,70.4 Z M92.1,7.2 L9,7.2 C8,7.2 7.2,8 7.2,9 C7.2,15.4 10.4,21 15.5,25 C23.1,31 30.6,36.9 38.2,42.9 C41.2,45.3 46.6,50.5 50.6,50.5 L50.6,50.5 C54.6,50.5 60,45.3 63,42.9 C70.5,36.9 78.1,30.9 85.7,25 C89.4,22.1 94,15.9 94,11.1 C93.9,9.7 94.3,7.2 92.1,7.2 L92.1,7.2 L92.1,7.2 Z M93.9,27 C92.7,28.4 91.4,29.6 90,30.7 C81.9,36.9 73.8,43.2 66,49.8 C61.7,53.4 56.5,57.7 50.6,57.7 L50.6,57.7 C44.7,57.7 39.5,53.4 35.2,49.8 C27.4,43.3 19.2,36.9 11.2,30.7 C9.7,29.6 8.4,28.4 7.2,27 L7.2,70.4 C7.2,71.4 8,72.2 9,72.2 L92.1,72.2 C93.1,72.2 93.9,71.4 93.9,70.4 L93.9,27 L93.9,27 Z" id="email-icon"></path>
+                    </svg>
+                </span>
+            </fieldset>
+            
+            <section class="spotlight">
+                <dfn>Community Spotlight</dfn>
+                <img src="https://muckrock.s3.amazonaws.com/agency_images/fsg-maynard-02.jpg.510x233_q85.jpg" alt="Image">
+                <h1><a href="#">Help Crowdfund Fusion Center Transparency</a></h1>
+                <p>Evan Anderson filed with the Commonwealth Fusion Center to see what kinds of work it was outsourcing to security contractors. The agency said it likely had some documents, but it will cost $250 to search for them. <a href="#">Help make them public!</a></p> 
+            </section>
+            
+        </nav>
+    </aside>
+    
+    <div class="container">
+    
+        <header>    
+            <nav class="primary">
+                <ul class="left">
+                    <li class="trademark">
+                        <a href="#" id="muckrock-trademark">
+                            <svg width="187px" height="25px" viewBox="0 0 187 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title>MuckRock Trademark</title>
+                                <g fill-rule="evenodd" fill="#000000">
+                                    <path d="M26.25,22.86 L26.25,0.305 L18.38,0.305 L13.474,14.769 L13.346,14.769 L8.218,0.305 L0.476,0.305 L0.476,22.86 L5.605,22.86 L5.478,6.899 L5.574,6.899 L11.277,22.86 L15.1,22.86 L20.962,6.899 L21.058,6.899 L20.929,22.86 L26.25,22.86 L26.25,22.86 Z M60.958,-0.484 C66.202,-0.484 70.662,2.87 72.311,7.551 L66.621,7.551 C65.366,5.777 63.297,4.618 60.958,4.618 C57.129,4.618 54.025,7.722 54.025,11.551 C54.025,15.38 57.129,18.484 60.958,18.484 C63.296,18.484 65.365,17.326 66.621,15.551 L72.311,15.551 C70.662,20.231 66.202,23.586 60.958,23.586 C54.311,23.586 48.922,18.197 48.922,11.551 C48.922,4.904 54.311,-0.484 60.958,-0.484 L60.958,-0.484 L60.958,-0.484 Z M94.746,22.86 L84.456,10.69 L94.172,0.304 L87.355,0.304 L79.295,9.479 L79.199,9.479 L79.199,0.305 L73.847,0.305 L73.847,22.86 L79.199,22.86 L79.199,12.475 L79.263,12.475 L87.641,22.861 L94.746,22.861 L94.746,22.86 L94.746,22.86 Z M47.278,14.354 L47.278,0.305 L41.83,0.305 L41.83,13.909 C41.835,14.519 41.755,15.104 41.601,15.656 C41.447,16.214 41.203,16.707 40.869,17.142 C40.535,17.577 40.099,17.922 39.557,18.172 C39.02,18.427 38.362,18.555 37.592,18.56 C36.827,18.555 36.18,18.427 35.638,18.172 C35.102,17.922 34.661,17.577 34.327,17.142 C33.993,16.707 33.743,16.213 33.589,15.656 C33.43,15.104 33.355,14.519 33.355,13.909 L33.355,0.305 L27.94,0.305 L27.94,14.355 C27.945,15.713 28.168,16.952 28.609,18.061 C29.055,19.176 29.692,20.137 30.531,20.939 C31.365,21.746 32.374,22.368 33.558,22.803 C34.742,23.238 36.075,23.461 37.561,23.466 C39.038,23.461 40.375,23.237 41.565,22.803 C42.76,22.367 43.779,21.745 44.628,20.939 C45.483,20.137 46.136,19.176 46.587,18.061 C47.044,16.951 47.272,15.713 47.278,14.354 L47.278,14.354 L47.278,14.354 Z" id="muck"></path>
+                                    <path d="M114.943,22.86 L109.05,13.207 C110.021,12.904 110.855,12.475 111.55,11.907 C112.251,11.339 112.788,10.654 113.165,9.846 C113.536,9.039 113.727,8.131 113.732,7.122 C113.727,6.092 113.567,5.194 113.249,4.43 C112.937,3.665 112.501,3.017 111.942,2.492 C111.385,1.967 110.743,1.542 110.01,1.218 C109.277,0.894 108.496,0.66 107.662,0.517 C106.824,0.374 105.969,0.299 105.098,0.305 L96.496,0.305 L96.496,22.86 L101.849,22.86 L101.849,13.908 L103.697,13.908 L108.571,22.86 L114.943,22.86 L114.943,22.86 Z M108.35,7.218 C108.344,7.786 108.222,8.254 107.979,8.614 C107.739,8.975 107.426,9.251 107.033,9.448 C106.64,9.644 106.216,9.777 105.759,9.851 C105.298,9.925 104.846,9.962 104.4,9.957 L101.82,9.957 L101.82,4.701 L104.719,4.701 C105.132,4.696 105.547,4.727 105.972,4.797 C106.397,4.866 106.784,4.988 107.146,5.169 C107.501,5.35 107.793,5.605 108.011,5.939 C108.232,6.268 108.344,6.698 108.35,7.218 L108.35,7.218 L108.35,7.218 Z" id="r"></path>
+                                    <path d="M127.979,-0.453 C134.625,-0.453 140.014,4.935 140.014,11.582 C140.014,18.229 134.625,23.617 127.979,23.617 C121.333,23.617 115.944,18.229 115.944,11.582 C115.944,4.935 121.332,-0.453 127.979,-0.453 L127.979,-0.453 L127.979,-0.453 Z M124.266,4.498 L124.266,7.529 C123.379,7.673 122.493,7.818 121.607,7.963 L121.607,13.31 L121.607,18.654 C123.141,18.906 124.676,19.158 126.211,19.41 C127.746,19.663 129.281,19.916 130.817,20.17 L130.817,13.319 L130.817,6.465 C129.281,6.715 127.746,6.964 126.211,7.213 L125.415,7.342 L125.415,5.647 L132.354,4.647 L132.354,10.152 L132.354,12.211 C131.855,12.432 131.505,12.932 131.505,13.513 C131.505,14.298 132.142,14.935 132.928,14.935 C133.714,14.935 134.351,14.298 134.351,13.513 C134.351,12.932 134.002,12.432 133.503,12.211 L133.503,2.997 L124.266,4.498 L124.266,4.498 Z M123.823,14.854 L123.823,15.758 C124.619,15.815 125.415,15.871 126.211,15.928 C127.006,15.985 127.803,16.041 128.6,16.098 L128.6,15.071 C127.803,15.035 127.006,14.998 126.211,14.963 C125.415,14.926 124.619,14.889 123.823,14.854 L123.823,14.854 L123.823,14.854 Z M123.823,10.861 L123.823,11.766 C124.619,11.731 125.415,11.696 126.211,11.662 C127.006,11.628 127.803,11.595 128.6,11.56 L128.6,10.532 C127.803,10.587 127.006,10.641 126.211,10.696 C125.415,10.75 124.619,10.807 123.823,10.861 L123.823,10.861 L123.823,10.861 Z M123.823,12.856 L123.823,13.762 C124.619,13.773 125.415,13.784 126.211,13.794 C127.006,13.806 127.803,13.817 128.6,13.829 L128.6,12.8 C127.803,12.81 127.006,12.818 126.211,12.827 C125.415,12.838 124.619,12.848 123.823,12.856 L123.823,12.856 L123.823,12.856 Z M122.752,8.995 L122.752,13.31 L122.752,17.622 C123.904,17.768 125.059,17.918 126.211,18.066 C127.363,18.213 128.518,18.362 129.67,18.512 L129.67,13.316 L129.67,8.118 C128.518,8.264 127.363,8.41 126.211,8.555 C125.059,8.703 123.904,8.85 122.752,8.995 L122.752,8.995 L122.752,8.995 Z" id="logo"></path>
+                                    <path d="M153.092,-0.484 C158.336,-0.484 162.795,2.87 164.445,7.551 L158.755,7.551 C157.499,5.777 155.431,4.618 153.093,4.618 C149.263,4.618 146.159,7.722 146.159,11.551 C146.159,15.38 149.263,18.484 153.093,18.484 C155.431,18.484 157.499,17.326 158.755,15.551 L164.445,15.551 C162.796,20.231 158.337,23.586 153.092,23.586 C146.445,23.586 141.057,18.197 141.057,11.551 C141.057,4.904 146.444,-0.484 153.092,-0.484 L153.092,-0.484 L153.092,-0.484 Z" id="c"></path>
+                                    <path d="M186.477,22.86 L176.186,10.69 L185.902,0.305 L179.085,0.305 L171.025,9.48 L170.93,9.48 L170.93,0.305 L165.578,0.305 L165.578,22.86 L170.93,22.86 L170.93,12.475 L170.993,12.475 L179.372,22.86 L186.477,22.86 L186.477,22.86 Z" id="k"></path>
+                                </g>
+                            </svg>
+                        </a>
+                        <a href="#" id="muckrock-logo">
+                            <svg version="1.1" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <title>MuckRock Logo</title>
+                                <g fill="#000000" fill-rule="evenodd">
+                                    <path d="M34.994,0.169 C54.165,0.169 69.709,15.711 69.709,34.885 C69.709,54.059 54.165,69.602 34.994,69.602 C15.82,69.602 0.276,54.06 0.276,34.886 C0.276,15.712 15.82,0.169 34.994,0.169 L34.994,0.169 L34.994,0.169 Z M24.281,14.448 L24.281,23.19 C21.724,23.606 19.166,24.023 16.611,24.441 L16.611,39.865 L16.611,55.278 C21.039,56.006 25.467,56.733 29.895,57.46 C34.32,58.189 38.751,58.919 43.181,59.649 L43.181,39.888 L43.181,20.118 C38.751,20.838 34.32,21.556 29.895,22.276 L27.598,22.649 L27.598,17.762 L47.617,14.876 L47.617,30.755 L47.617,36.695 C46.178,37.33 45.168,38.772 45.168,40.45 C45.168,42.714 47.005,44.552 49.273,44.552 C51.54,44.552 53.377,42.714 53.377,40.45 C53.377,38.772 52.371,37.33 50.932,36.695 L50.932,10.12 L24.281,14.448 L24.281,14.448 Z M23.006,44.322 L23.006,46.928 C25.301,47.094 27.597,47.257 29.894,47.419 C32.187,47.583 34.485,47.745 36.784,47.91 L36.784,44.947 C34.485,44.842 32.188,44.734 29.894,44.633 C27.598,44.531 25.301,44.423 23.006,44.322 L23.006,44.322 L23.006,44.322 Z M23.006,32.806 L23.006,35.415 C25.301,35.315 27.597,35.214 29.894,35.115 C32.187,35.017 34.485,34.921 36.784,34.821 L36.784,31.857 C34.485,32.015 32.188,32.171 29.894,32.328 C27.598,32.486 25.301,32.648 23.006,32.806 L23.006,32.806 L23.006,32.806 Z M23.006,38.562 L23.006,41.175 C25.301,41.206 27.597,41.239 29.894,41.27 C32.187,41.302 34.485,41.336 36.784,41.37 L36.784,38.401 C34.485,38.429 32.188,38.451 29.894,38.48 C27.598,38.507 25.301,38.536 23.006,38.562 L23.006,38.562 L23.006,38.562 Z M19.915,27.422 L19.915,39.87 L19.915,52.31 C23.241,52.733 26.571,53.165 29.895,53.592 C33.218,54.018 36.547,54.445 39.873,54.878 L39.873,39.889 L39.873,24.894 C36.548,25.314 33.219,25.736 29.895,26.156 C26.57,26.578 23.24,27.002 19.915,27.422 L19.915,27.422 L19.915,27.422 Z"></path>
+                                </g>
+                            </svg>
+                        </a>
+                    </li>
+                    <li><a href="#" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a></li>
+                    <li><a href="#sidebar-menu" id="left-menu-button">&#9776;</a></li>
+                </ul>
+                <ul class="right">
+                    <li><a href="#sidebar-menu">Menu</a></li>
+                </ul>
+            </nav>
+            <nav class="secondary">
+                <ul>
+                    <li><a href="#">News</a></li>
+                    <li><a href="#">Requests</a></li>
+                    <li><a href="#">Questions</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+            </nav>
+        </header>
+    
+        <section class="heading">
+            <h1>Atomic Patterns</h1>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Typography</dfn>
+            
+            </aside>
+            <div>
+                <p>
+                    Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id <strong>strong</strong> id nibh ultricies vehicula ut id elit. Vestibulum id ligula porta felis <b>bold</b> semper. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. <em>Emphasized</em> sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla <i>italics</i> elit libero, a pharetra augue.
+                </p>
+                <p>Curabitur blandit tempus porttitor: 
+                    <blockquote>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla vitae elit libero, a pharetra augue.</blockquote>
+                    <small>This small text could be some sort of citation!</small>
+                <p>
+                    Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Maecenas faucibus mollis interdum. Nullam id dolor id nibh ultricies vehicula ut id elit. <code>Nullam id <i>dolor</i> id nibh ultricies</code> Vehicula ut id elit. Vestibulum id ligula porta felis euismod semper. <a href="#">Curabitur</a> blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis. Nulla vitae elit libero, a pharetra augue.
+                </p>
+            
+                <dfn>Definition</dfn>
+            
+                <ul>
+                    <li>Item 1</li>
+                    <li>Item 2</li>
+                    <li>Item 3</li>
+                </ul>
+            
+                <ol>
+                    <li>Apples</li>
+                    <li>Bananas</li>
+                    <li>Clementines</li>
+                </ol>
+            
+                <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec sed odio dui. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.
+                </p>
+            
+                <hr>
+            
+                <h1>Heading 1</h1>
+                <h2>Heading 2</h2>
+                <h3>Heading 3</h3>
+                <h4>Heading 4</h4>
+                <h5>Heading 5</h5>
+                <h6>Heading 6</h6>
+            
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Labels</dfn>
+            </aside>
+            <div>
+        
+<!-- Paragraph tags can be assigned color classifications, turning them into labels. These labels, through the color hierarchy, carry tones and implicit messages to facilitate communication. The color categories are added through corresponding classes: default, primary, success, failure, and disabled. -->
+        
+                <p class="default">This is a default label. labels deliver information keeping with a specific tone. I am neutral.</p>
+                <p class="primary">Hello. This is a primary label. I am important!</p>
+                <p class="success">Great job! This is a success label. I am good!</p>
+                <p class="failure">Oh no! This is a failure label. I am bad!</p>
+                <p class="disabled">Nothing to see here. This is a disabled label.</p>
+        
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Panels</dfn>
+            </aside>
+            <div>
+            
+<!-- A panel is an object with the "panel" classifier and an optional color classifier. Without a color classifier, the panel defaults to the default classification. The available classifications are the previously established default, primary, success, failure, and disabled. -->
+
+                <object class="panel">
+                    <p>Check it out: I am a panel!</p>
+                    <p>I can contain images, embeds, iframes... any kind of HTML! Use me when there's information you <em>need</em> someone to see.</p>
+                </object>
+                <object class="primary panel">
+                    <p>I am a primary panel. Pay attention to me!</p>
+                </object>
+                <object class="success panel">
+                    <p>I am a success panel. You'll be happy when I show up!</p>
+                </object>
+                <object class="failure panel">
+                    <p>I am a failure panel. You're going to hate seeing me!</p>
+                </object>
+                <object class="disabled panel">
+                    <p>I am a disabled panel. I look like a ghost!</p>
+                </object>
+            
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Buttons</dfn>
+            </aside>
+            <div>
+        
+<!-- Buttons are anchor tags with the class button. A button without one of the classifications default, primary,success, failure, or disabled is styled as a default button. Disabled buttons are span tags. -->
+        
+                <a class="button primary" href="#">Primary</a>
+                <a class="button success" href="#">Success</a>
+                <a class="button failure" href="#">Failure</a>
+                <a class="button default" href="#">Default</a>
+                <span class="button disabled">Disabled</span>
+            
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Messages</dfn>
+            </aside>
+            <div>                
+                
+<!-- The object needs both a message class and either a sent or received class. The message header is a section with the class meta and the message body is a section with the class text. The text section can contain any inline elements, e.g. images, that regular body text can contain. -->
+        
+                <object class="sent message">
+                    <section class="meta">
+                        <img src="images/tom.jpg">
+                        <small>Thomas Jefferson</small>
+                        <small>07/04/1776</small>
+                    </section>
+                    <section class="text">
+                        <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                    </section>
+                </object>
+                <object class="received message">
+                    <section class="meta">
+                        <img src="images/ben.jpg">
+                        <small>Benjamin Franklin</small>
+                        <small>07/14/1776</small>
+                    </section>
+                    <section class="text">
+                        <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                        <img src="images/kite.jpg">
+                        <p>Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Nullam id dolor id nibh ultricies vehicula ut id elit. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                    </section>
+                </object>
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Feeds</dfn>
+            </aside>
+            <div>
+            
+<!-- Feed items are objects with the classification feed-item. Feeds are unordered listings (ul) of feed-items, and accordingly are objects with the class feed. The feed width can be optionally adjusted with the additional classes narrow and wide. -->     
+            
+                <object class="feed-item">
+                    <header>
+                        <div><a href="#">BenJaMoney</a></div>
+                        <div>7/3/76, 1:35pm</div>
+                    </header>
+                    <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                    <a class="primary button" href="#">Track</a>
+                </object>
+            
+                <object class="narrow feed">
+                    <ul>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                    </ul>
+                </object>
+                <object class="wide feed">
+                    <ul>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                        <li>
+                            <object class="feed-item">
+                                <header>
+                                    <div><a href="#">BenJaMoney</a></div>
+                                    <div>7/3/76, 1:35pm</div>
+                                </header>
+                                <p>Replied to <a href="#">Thomas Jefferson</a>'s question, <a href="#">What is a <em>Declaration of Independence</em> and how can I write one?</a></p>
+                                <a class="primary button" href="#">Track</a>
+                            </object>
+                        </li>
+                    </ul>
+                </object>
+            </div>
+        </section>
+    
+        <section class="grid">
+            <aside>
+                <dfn>Inputs &amp; Feedback</dfn>
+            </aside>
+            <div>
+                
+<!-- Progress bars are objects with the class progress-bar and they contain a span with the class meter. The width of the meter is set within the HTML markup and available to manipulate with Javascript. When a meter has a widthof 100%, it must have the completed class. The meter can optionally contain a color classifier class, like success or failure. -->
+        
+                <object class="progress-bar">
+                    <span class="meter" style="width: 30%;"></span>
+                </object>
+        
+                <object class="progress-bar">
+                    <span class="failure meter" style="width: 60%;"></span>
+                </object>
+            
+                <object class="progress-bar">
+                    <span class="completed success meter" style="width: 100%;"></span>
+                </object>
+            
+<!-- Text inputs are customized, in order to match the typographic and formal heirarchy of the rest of the design. Button inputs are left as they are. Forms should be grouped within fieldset tags, with a label preceeding the input.  There is a special fieldset class, login, since these are the most important fieldset. Inputs can be set as required or disabled, and they can be given any of the established color classes: primary, success, failure, default. -->        
+        
+                <fieldset class="login">
+                    <fieldset>
+                        <label>Username</label>
+                        <input type="text" size="15" required>
+                    </fieldset>
+                    <fieldset>
+                        <label>Password</label>
+                        <input type="password" size="15" required>
+                    </fieldset>
+                    <fieldset>
+                        <input type="submit" class="primary button" value="Log In" />
+                        <input type="submit" class="default button" value="Sign Up" />
+                    </fieldset>
+                </fieldset>
+            
+                <fieldset>
+                    <label>Text</label>
+                    <input type="text" size="20" placeholder="Blah blah blah" />            
+                </fieldset>
+
+                <fieldset>
+                    <label>Telephone</label>
+                    <input type="tel" size="14" placeholder="(123) 456–7890" />
+                </fieldset>
+            
+                <fieldset>
+                    <label>Email (required)</label>
+                    <input required type="email" size="25" placeholder="example@muckrock.com" />
+                    <input type="submit" class="primary button" />
+                </fieldset>
+            
+                <fieldset>
+                    <label>Text</label>
+                    <input type="text" size="20" placeholder="This field is disabled." disabled/>            
+                </fieldset>
+            
+                <fieldset>
+                    <label>Option #1</label>
+                    <input name="range" type="range" min="1" max="10" value="5" step="1">       
+                </fieldset>
+            
+                <fieldset>
+                    <label>Do you listen to the radio?</label>
+                    <input type="checkbox">
+                </fieldset>
+            
+                <fieldset>
+                    <label>Please Make a Selection</label>
+                    <select>
+                        <option>Option #1</option>
+                        <option>Option #2</option>
+                        <option>Option #3</option>
+                        <option>Option #4</option>
+                    </select>
+                    <select>
+                        <option>Option #5</option>
+                        <option>Option #6</option>
+                        <option>Option #7</option>
+                        <option>Option #8</option>
+                    </select>
+                </fieldset>
+            </div>
+        </section>
+    
+        <section class="heading">
+            <h1>Molecular Patterns</h1>
+        </section>
+    
+        <section class="grid-objects">
+            <div>
+                <article class="post">
+                    <header>
+                        <dfn>Article</dfn>
+                        <h1>San Jose Police Have Finally Found Their Drone Documents</h1>
+                        <h2>by <a href="#">Shawn Musgrave</a> on July 29, 2014 at Noon</h2>
+                    </header>
+                    <section>
+                        <p>Etiam porta sem malesuada magna mollis euismod. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean lacinia bibendum nulla sed consectetur.</p>
+                        <p>Nullam quis risus eget urna mollis ornare vel eu leo. Donec id elit non mi porta gravida at eget metus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sed odio dui.</p>
+                        <img class="feature" src="images/state.png">
+                        <p>Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Maecenas faucibus mollis interdum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec sed odio dui. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.</p>
+                        <p>Maecenas faucibus mollis interdum. Sed posuere consectetur est at lobortis. Curabitur blandit tempus porttitor. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
+                    </section>
+                    <aside>
+                        <dl>
+                            <dt>In a Nutshell</dt>
+                            <dd><summary>&#8220;The future need for a UAV [unmanned aerial vehicle] in the southern Bay Area is upon us.&#8221;</summary></dd>
+                        </dl>
+                        <dl class="fois">
+                            <dt>Related Requests</dt>
+                            <dd><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-8149/">Drone Documents (San Jose Police Department)</a></dd>
+                            <dd><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-second-request-12596/">Drone Documents (San Jose Police Department -- third request)</a></dd>
+                            <dd><a href="/foi/san-jose-336/san-jose-ca-police-drone-documents-2303/">San Jose, CA Police Drone Documents</a></dd>
+                        </dl>
+                        <dl class="actions">
+                            <dt>Actions</dt>
+                            <dd><a class="button default" href="#">Share</a></dd>
+                            <dd><a class="button default" href="#">Embed</a></dd>
+                            <dd><span class="button disabled">Follow</span></dd>
+                        </dl>
+                    </aside>
+                </article>
+            </div>
+            <div>
+                <article class="question">
+                    <header>
+                        <dfn>Question</dfn>
+                        <h2>On June 16, 2014,
+                            <a href="#">motherboard</a> asked</h2>
+                        <h1>Question about request: Details regarding Khalid Sheikh Mohammed's vacuum cleaner designs</h1>
+                        <h2>and got 2 replies from <a href="#">george.levines</a> and <a href="#">ShawnMusgrave</a></h2>               
+                    </header>
+                    <section>
+                        <object class="sent message">
+                            <section class="meta">
+                                <img src="http://placehold.it/200x200">
+                                <br/>
+                                <small>motherboard</small>
+                                <br/>
+                                <small>06/16/2014</small>
+                            </section>
+                            <section class="text">
+                                <p>What's the best way to follow up here? I think an appeal would be great; they won't respond probably, but I think this is great fodder for a story about Glomar in general.</p>
+                            </section>
+                        </object>
+                        <object class="received message">
+                            <section class="meta">
+                                <img src="http://placehold.it/200x200">
+                                <br/>
+                                <small>george.levines</small>
+                                <br/>
+                                <small>06/17/2014</small>
+                            </section>
+                            <section class="text">
+                                <p>The best strategy here is to somehow prove that the agency has already acknowledged the existence of what you're looking for.</p>
+                                <p>A good resource might be the the Reporter's Committee for the Freedom of the Press and their bit on Glomar responses (http://www.rcfp.org/federal-foia-appeals-guide/waiverprior-disclosure/iv-official-acknowledgement/d-glomar-response).</p>
+                            </section>
+                        </object>
+                        <object class="sent message">
+                            <section class="meta">
+                                <img src="http://placehold.it/200x200">
+                                <br/>
+                                <small>motherboard</small>
+                                <br/>
+                                <small>06/16/2014</small>
+                            </section>
+                            <section class="text">
+                                <p>Hey George, the only confirmation of both the Romanian prison and the vacuum cleaner I can find are multiple former officials speaking with the AP. How does this sound for an appeal note?</p>
+
+                                <p>I'd like to appeal the CIA's Glomar response in this request, as the existence of Khalid Sheikh Mohammed's vacuum cleaner designs was confirmed by a former CIA official to the Associated Press, and the detention during which Mohammed produced those designs was also confirmed by multiple officials to the AP. (See: http://bigstory.ap.org/article/ap-exclusive-cia-and-secret-vacuum-cleaner) </p>
+
+                                <p>The Second Circuit Court of Appeals ruled in 2009 that an agency "loses its ability to provide a Glomar response when the existence or nonexistence of the particular records covered by the Glomar response" has been acknowledged by officials. </p>
+
+                                <p>In this case, the CIA is unable to credibly deny the existence of such records, a fact upon which I base my appeal of the Glomar decision in this request.</p>
+                            </section>
+                        </object>
+                        <object class="received message">
+                            <section class="meta">
+                                <img src="http://placehold.it/200x200" alt="avatar" />
+                                <br />
+                                <small>ShawnMusgrave</small>
+                                <br />
+                                <small>06/17/2014</small>
+                            </section>
+                            <section class="text">
+                                <p>Derek,</p>
+                                <p>That appeal language looks good!</p>
+                                <p>-Shawn</p>
+                            </section>
+                        </object>
+                    </section>
+                    <aside>
+                        <dl>
+                            <dt>Status</dt>
+                            <dd class="success">This question was answered.</dd>
+                        </dl>
+                        <dl>
+                            <dt>Related Request</dt>
+                            <dd><a href="/foi/san-jose-336/drone-documents-san-jose-police-department-8149/">Drone Documents (San Jose Police Department)</a></dd>
+                        </dl>
+                        <dl class="actions">
+                            <dt>Actions</dt>
+                            <dd><a class="button default" href="#">Share</a></dd>
+                            <dd><a class="button default" href="#">Embed</a></dd>
+                            <dd><span class="button disabled">Follow</span></dd>
+                        </dl>
+                    </aside>
+                </article>
+            </div>
+            <div>
+                <article class="request">
+                    <header>
+                        <dfn>Request</dfn>
+                        <h2>On Jan. 26, 2011, <a href="#">morisy</a> requested</h2>
+                        <h1>Report on Jeff Perry from Barnstable County Private Investigator</h1>
+                        <h2>from the <a href="#">Barnstable County Sheriff's Office</a> of <a href="#">Barnstable County, MA</a></h2>
+                    </header>
+                    <section>
+                        <object class="sent message">
+                            <section class="meta">
+                                <img src="http://placehold.it/200x200" alt="avatar">
+                                <br />
+                                <small>morisy</small>
+                                <br />
+                                <small>01/26/2011</small>
+                            </section>
+                            <section class="text">
+                                <p>To Whom It May Concern:</p>
+
+                                <p>Pursuant to the state Freedom of Information Act, G.L.M. c.4, €7,
+                                clause 26th, I hereby request the following records:</p>
+
+                                <p>The Private Investigator's report on Jeff Perry, requested by
+                                Barnstable County Sheriff's Office and as referenced by Sheriff
+                                Cummings in this article in the Boston Herald:</p>
+
+                                <p>I also request that, if appropriate, fees be waived as we believe this
+                                request is in the public interest, as suggested but not stipulated by
+                                the recommendations of the Massachusetts Supervisor of Public Records.
+                                The requested documents will be made available to the general public
+                                free of charge as part of the public information service at
+                                MuckRock.com, processed by a representative of the news media/press
+                                and is made in the process of news gathering and not for commercial
+                                usage.</p>
+
+                                <p>In the event that fees cannot be waived, I would be grateful if you
+                                would inform me of the total charges in advance of fulfilling my
+                                request. I would prefer the request filled electronically, by e-mail
+                                attachment if available or CD-ROM if not.</p>
+
+                                <p>Thank you in advance for your anticipated cooperation in this matter.
+                                I look forward to receiving your response to this request within 10
+                                business days, as the statute requires.</p>
+
+                                <p>Sincerely,</p>
+
+                                <p>Michael Morisy<br>
+                                Filed via MuckRock.com<br>
+                                E-mail (Preferred): requests@muckrock.com<br>
+                                Daytime: (617) 299-1832</p>
+
+                                <p>For mailed responses, please address:<br>MuckRock<br>185 Beacon St. #3<br>Somerville, MA 02143</p>
+                            </section>
+                        </object>
+                    </section>
+                    <aside>
+                        <dl>
+                            <dt>Status</dt>
+                            <dd>
+                                <object class="progress-bar">
+                                    <span class="completed failure meter" style="width: 100%;"></span>
+                                </object>
+                            </dd>
+                            <dd class="failure">This request was rejected.</dd>
+                        </dl>
+                        <dl>
+                            <dt>Actions</dt>
+                            <dd><a class="button primary" href="#">Report Problem</a></dd>
+                            <dd><a class="button default" href="#">Share</a></dd>
+                            <dd><a class="button default" href="#">Embed</a></dd>
+                            <dd><span class="button disabled">Follow</span></dd>
+                        </dl>
+                    </aside>
+                </article>
+            </div>
+        </section>
+    
+    <div class="footer-container">
+        <footer>
+            <section class="about">
+                <p>MuckRock is an open news tool powered by state and federal Freedom of Information laws and you: Requests are based on your questions, concerns and passions, and you are free to embed, share and write about any of the verified government documents hosted here. MuckRock has been funded in part by grants from the <a href="#">Sunlight Foundation</a>, the <a href="#">Freedom of the Press Foundation</a> and the <a href="#">Knight Foundation</a>.</p>
+                 <p class="copyright">&copy; 2010–2014 Muckrock</p>
+                <hr id="footer-menu" />
+            </section>
+            
+            <section class="sitemap">
+                <dfn>Sections</dfn>
+                <ul>
+                    <li><a href="#">News</a></li>
+                    <li><a href="#">Requests</a></li>
+                    <li><a href="#">Questions</a></li>
+                    <li><a href="#">About</a></li>
+                </ul>
+                <dfn>Legal</dfn>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </section>
+            <section class="actions">
+                <dfn>Actions</dfn>
+                <ul>
+                    <li><a href="#">Search</a></li>
+                    <li><a href="#">Subscribe to the Newsletter</a></li>
+                    <li><a href="#">Become a Pro User</a></li>                    
+                    <li><a href="#">Buy Requests</a></li>
+                    <li><a href="#">Submit a Request</a></li>
+                    <li><a href="#">Ask a Question</a></li>
+                </ul>
+            </section>
+            <section class="links">
+                <dfn>Social</dfn>
+                <ul>
+                    <li><a href="#">Twitter</a></li>
+                    <li><a href="#">Facebook</a></li>
+                </ul>
+                <dfn>RSS</dfn>
+                <ul>
+                    <li><a href="#">Latest News</a></li>
+                    <li><a href="#">Latest Questions</a></li>
+                    <li><a href="#">Recently Filed Requests</a></li>
+                    <li><a href="#">Recently Completed Requests</a></li>
+                </ul>
+            </section>
+           
+        </footer>
+        
+    </div>
+    
+    </div> <!-- End Container --> 
+</body>
+</html>

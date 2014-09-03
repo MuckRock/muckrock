@@ -1,0 +1,69 @@
+body {
+    
+}
+
+.grid {
+    @include outer-container;
+    margin: 1.5em;
+    padding: 1em 0;
+    border-top: 1px solid $color-grey;
+
+    > aside {
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(1);
+            margin-top: $base-vertical-rhythm/2;
+        }
+        button {
+            @extend small;
+        }
+    }
+    > div {
+        @include fill-parent();
+        @include media($large-layout) {
+            @include span-columns(8);
+            @include shift(1);
+        }
+    }
+    > button {
+        display: none;
+        @include media($large-layout) {
+            display: block;
+            @include span-columns(2);
+        }
+        margin-top: 0.75em;
+    }
+    
+    
+}
+
+.heading {
+    @include outer-container;
+    margin: 1.5em;
+    border-top: 3px solid $color-grey;
+    // padding: 1em 0;
+    h1 {
+        @include fill-parent();
+        text-align: left;
+    }
+    
+    &:first-of-type { border-top: none; /* margin-top: 8em; */}
+}
+
+.grid-objects {
+    @include outer-container;
+    margin: 1.5em;
+    > div {
+        margin-top: 1.5em;
+        @include fill-parent();
+        @include media($large-layout) {
+            margin: 0.75em 0;
+            border-top: 1px solid $color-grey;
+            padding: 1.5em 3em;
+            &:first-of-type {
+                margin-top: 0;
+            }   
+        }
+        border-top: 1px solid $color-grey;
+    }
+}

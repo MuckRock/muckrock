@@ -1,0 +1,122 @@
+/* Allows for full-height elements with CSS */
+html, body { min-height: 100%; }
+
+// Prototypes
+
+// Sizing and spacing
+
+%row { @include row(); }
+
+%full { @include fill-parent(); }
+
+%half {
+    @extend %full;
+    @include media($large-layout) { @include span-columns(6); }
+}
+
+%third {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(2); }
+    @include media($large-layout) { @include span-columns(4); }
+}
+
+%quarter {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(3); }
+    @include media($large-layout) { @include span-columns(3); }
+}
+
+%three-quarters {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(6); }
+    @include media($large-layout) { @include span-columns(9); }
+}
+
+%body {
+    display: block;
+    @include outer-container;
+}
+
+@mixin horizontal-margins {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+    @media screen and (min-width: 540px) {
+        margin-left: 2rem;
+        margin-right: 2rem;
+    }
+}
+
+// Layouts
+
+%article {
+    @extend %body;
+    > section.meta {
+        @extend %row;
+        header {
+            @include span-columns(8);
+            @include pad(0 default 0 0);
+            margin: $base-vertical-rhythm/2 0 0;
+            h1, h2 { font-weight: 400; }
+            h1 { @include font-sizing(1.5); }
+            h2 { @include font-sizing(0.875); }
+            @include media($medium-layout) {
+                h1 { @include font-sizing(1.75); }
+                h2 { @include font-sizing(1); }
+            }
+        }
+        aside {
+            @extend %third;
+            @extend %row;
+            @include pad(0 default 0 default);
+            margin: $base-vertical-rhythm/2 0;
+            .dl-group { @include outer-container(); }
+            dl { @extend %full; }
+            dl { margin-top: 0; }
+        }
+        .panel { width: 90%; } 
+    }
+    > section.main {
+        @extend %full;
+        max-width: 50em;
+        padding-top: $base-vertical-rhythm;
+    }
+
+    summary { 
+        font-weight: 300;
+        display: none;
+        @include media($medium-layout) {
+            display: block;
+            @include font-sizing(1.25);
+        }
+    }
+}
+
+%collection {
+    @extend %body;
+    ul {
+        @extend %full;
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+    li {
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
+        margin: 0;
+        &:first-child { padding-top: 0; }
+        @media screen and (min-width: 540px) {
+            border-radius: $base-border-radius;
+            margin: 0 (2em - $base-vertical-rhythm/2);
+        }
+    }
+    li:nth-child(even) { background-color: $color-odd-background; }
+    h2, h3 { font-weight: 400; }
+    h2 { @include font-sizing(1.25); }
+    h3 { @include font-sizing(1); }
+}
+
+.container {
+    padding: 1.5em;
+    @include media($medium-layout) {
+        padding: 2em;
+    }
+}

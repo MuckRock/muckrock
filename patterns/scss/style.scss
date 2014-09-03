@@ -1,0 +1,62 @@
+// Subatomic Elements
+// Standalone Libraries & Variables
+//
+// Do not appear in compiled CSS
+
+@import                 'normalize';
+@import                 'bourbon/bourbon';
+@import                 'neat/neat';
+
+$large-breakpoint:      769px;
+$medium-breakpoint:     321px;
+$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
+$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
+
+/* Color Scheme 1 - Minimal
+$color-white:           #f4f4f4;
+$color-black:           #39474e;
+$color-grey:            #e0ddcb;
+$color-primary:         #e85440;
+$color-success:         #e85440;
+$color-failure:         #9d2f06;
+$color-default:         #e0ddcb;
+$color-disabled:        #f2f1e6;
+*/
+/* Color Scheme 2 - Warm
+$color-white:           #f4f4f4;
+$color-black:           #35302d;
+$color-grey:            #acaea1;
+$color-primary:         #e85440;
+$color-success:         #75B061;
+$color-failure:         #c71000;
+$color-default:         #704331;
+$color-disabled:        #96959e;
+*/
+/* Color Scheme 3 - Cool */
+$color-white:           #f4f4f4;
+$color-black:           #21282c;
+$color-grey:            #B3BECB;
+$color-primary:         #3a82ff;
+$color-success:         #006330;
+$color-failure:         #fb004e;
+$color-default:         #6b6a65;
+$color-disabled:        #96959e;
+
+$color-odd-background:  darken($color-white, 5%);
+
+$base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
+$base-font-weight:      400;
+$base-border-width:     1px;
+$base-border-radius:    9px;
+$base-vertical-rhythm:  1.5em;
+
+$base-gradient-darken:  8%;
+
+@import 'lib/typography';
+@import 'lib/layouts';
+@import 'lib/objects';
+@import 'lib/nav';
+
+// Temporary Imports
+// Provides layout for index.html only
+@import 'grid';
