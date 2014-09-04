@@ -168,10 +168,10 @@ nav.secondary {
 .footer-container {
     display: block;
     width: 100%;
-    border-top: $base-border-width solid $color-grey;
     margin-top: $base-vertical-rhythm;
+    padding-top: $base-vertical-rhythm*2;
     footer {
-        @include outer-container;
+        @include outer-container();
         section.about { @extend %half; }
         section.sitemap, section.actions, section.links {
             @include fill-parent();
@@ -205,7 +205,7 @@ $tablet-menu-width: 300px;
 $desktop-menu-width: 26%;
 $menu-animation: all 0.5s $ease-out-expo;
 
-.container, .footer-container {
+.container {
     display: block;
     width: 100% - $desktop-menu-width;
     float: left;

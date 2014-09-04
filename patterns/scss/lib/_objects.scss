@@ -58,8 +58,7 @@
 // Textbox
 %textbox {
     @include box-sizing(border-box);
-    border-style: solid;
-    border-width: $base-border-width;
+    border: $base-border-width solid $color-grey;
     border-radius: $base-border-radius;
     line-height: $base-vertical-rhythm;
 }
@@ -200,10 +199,10 @@ fieldset {
     & > fieldset, & > fieldset + fieldset { margin: 0; }
 }
 
-%form-object {
+%form-object { @extend %textbox;
     display: block;
     margin: 0 $base-vertical-rhythm;
-    border: 1px solid $color-grey;
+
     border-radius: $base-border-radius;
     form {
         @include outer-container();

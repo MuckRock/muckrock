@@ -703,12 +703,11 @@ object.collection h3 {
       padding: 2em; } }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  border-style: solid;
-  border-width: 1px;
+  border: 1px solid #b3becb;
   border-radius: 9px;
   line-height: 1.5em; }
 
@@ -871,7 +870,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 .login, .update, .subscription, .password-reset, .password-change, .register {
   display: block;
   margin: 0 1.5em;
-  border: 1px solid #b3becb;
   border-radius: 9px; }
   .login form, .update form, .subscription form, .password-reset form, .password-change form, .register form {
     max-width: 68em;
@@ -1401,8 +1399,8 @@ nav.secondary {
 .footer-container {
   display: block;
   width: 100%;
-  border-top: 1px solid #b3becb;
-  margin-top: 1.5em; }
+  margin-top: 1.5em;
+  padding-top: 3em; }
   .footer-container footer {
     max-width: 68em;
     margin-left: auto;
@@ -1447,7 +1445,7 @@ nav.secondary {
     color: #21282c; }
 
 /* Global Sidebar */
-.container, .footer-container {
+.container {
   display: block;
   width: 74%;
   float: left;
