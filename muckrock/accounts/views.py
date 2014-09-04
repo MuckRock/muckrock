@@ -58,7 +58,7 @@ def register_pro(request):
         """Create a new CC on file"""
         user.get_profile().save_customer(form.cleaned_data['token'])
 
-    template = 'registration/cc.html'
+    template = 'user/register_pro.html'
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
 
     return _register_acct(request, 'pro', RegisterPro, template, create_cc, extra_context)

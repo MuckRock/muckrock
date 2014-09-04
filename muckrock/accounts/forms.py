@@ -47,17 +47,34 @@ class UserChangeForm(ProfileForm):
 class CreditCardForm(forms.ModelForm):
     """A form for the user's CC"""
 
-    name = forms.CharField(required=False, help_text='Name as it appears on card',
-                           widget=forms.TextInput(
-                               attrs={'class': 'card-name stripe-sensitive required'}))
-    card_number = forms.CharField(max_length=20, required=False,
-                                  widget=forms.TextInput(
-                                      attrs={'autocomplete': 'off',
-                                             'class': 'card-number stripe-sensitive required'}))
-    cvc = forms.CharField(max_length=4, required=False, label='CVC',
-                          widget=forms.TextInput(
-                              attrs={'autocomplete': 'off',
-                                     'class': 'card-cvc stripe-sensitive required'}))
+    name = forms.CharField(
+        required=False,
+        label='Name on Card',
+        widget=forms.TextInput(
+            attrs={'class': 'card-name stripe-sensitive required'}
+        )
+    )
+    card_number = forms.CharField(
+        required=False,
+        max_length=20,
+        widget=forms.TextInput(
+            attrs={
+                'autocomplete': 'off',
+                'class': 'card-number stripe-sensitive required'
+            }
+        )
+    )
+    cvc = forms.CharField(
+        required=False,
+        max_length=4,
+        label='CVC',
+        widget=forms.TextInput(
+            attrs={
+                'autocomplete': 'off',
+                'class': 'card-cvc stripe-sensitive required'
+            }
+        )
+    )
     expiration = CCExpField(required=False)
     token = forms.CharField(required=False, widget=forms.HiddenInput())
 

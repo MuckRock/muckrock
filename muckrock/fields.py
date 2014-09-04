@@ -152,7 +152,7 @@ class CCExpWidget(forms.MultiWidget):
 
     def format_output(self, rendered_widgets):
         """Join child widgets"""
-        html = u' / '.join(rendered_widgets)
+        html = u'&nbsp;'.join(rendered_widgets)
         return u'<span style="white-space: nowrap">%s</span>' % html
 
 

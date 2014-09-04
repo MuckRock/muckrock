@@ -12,18 +12,21 @@ html, body { min-height: 100%; }
 %half {
     @extend %full;
     @include media($large-layout) { @include span-columns(6); }
+    @include omega();
 }
 
 %third {
     @extend %full;
     @include media($medium-layout) { @include span-columns(2); }
     @include media($large-layout) { @include span-columns(4); }
+    @include omega(3n);
 }
 
 %quarter {
     @extend %full;
     @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(3); }
+    @include omega(4n);
 }
 
 %three-quarters {

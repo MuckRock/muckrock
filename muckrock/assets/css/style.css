@@ -544,14 +544,16 @@ html, body {
 .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .plan, .agency aside dl, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], object.search fieldset, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul, object.subscription form fieldset, object.password-reset form fieldset, object.password-change form fieldset, object.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
   width: 100%; }
 
-@media screen and (min-width: 769px) {
-  .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
-    float: left;
-    display: block;
-    margin-right: 2.35765%;
-    width: 48.82117%; }
-    .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, object.login h1:last-child, object.login ul:last-child, object.update h1:last-child, object.update .button:last-child, .footer-container footer section.about:last-child {
-      margin-right: 0; } }
+.login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
+  margin-right: 0; }
+  @media screen and (min-width: 769px) {
+    .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 48.82117%; }
+      .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, object.login h1:last-child, object.login ul:last-child, object.update h1:last-child, object.update .button:last-child, .footer-container footer section.about:last-child {
+        margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
   .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .plan, .agency aside dl {
@@ -569,6 +571,10 @@ html, body {
     width: 31.76157%; }
     .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
+.post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
+  margin-right: 0; }
+.post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
+  clear: left; }
 
 @media screen and (min-width: 321px) {
   .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"] {
@@ -586,6 +592,10 @@ html, body {
     width: 23.23176%; }
     .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child, object.search input[type="submit"]:last-child {
       margin-right: 0; } }
+.login input[type="submit"]:nth-child(4n), .update input[type="submit"]:nth-child(4n), .subscription input[type="submit"]:nth-child(4n), .password-reset input[type="submit"]:nth-child(4n), .password-change input[type="submit"]:nth-child(4n), .register input[type="submit"]:nth-child(4n), object.search input[type="submit"]:nth-child(4n) {
+  margin-right: 0; }
+.login input[type="submit"]:nth-child(4n+1), .update input[type="submit"]:nth-child(4n+1), .subscription input[type="submit"]:nth-child(4n+1), .password-reset input[type="submit"]:nth-child(4n+1), .password-change input[type="submit"]:nth-child(4n+1), .register input[type="submit"]:nth-child(4n+1), object.search input[type="submit"]:nth-child(4n+1) {
+  clear: left; }
 
 @media screen and (min-width: 321px) {
   object.search fieldset {
