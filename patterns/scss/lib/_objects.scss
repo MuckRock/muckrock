@@ -355,6 +355,12 @@ section.features {
     @extend %third;
     @extend %textbox;
     @include border-top-radius(0px);
+    margin-top: $base-vertical-rhythm/2;
+    &:hover {
+        margin-top: 0;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    @include transition(all 0.5s $ease-out-expo);
     a {
         display: block;
         padding: $base-vertical-rhythm $base-vertical-rhythm/2;
@@ -373,12 +379,12 @@ section.features {
         margin: 0;
     }
     li {
+        @include font-sizing(0.9, 3);
+        margin: 0;
         padding: $base-vertical-rhythm/2;
         border-top: $base-border-width solid $color-grey;
-        @include font-sizing(0.9, 3);
-        &:first-child {
-            border-top: none;
-        }
+        &:first-child { border-top: none; }
+        &:hover { background-color: $color-grey; }
     }
 
     .name { @include font-sizing(1.5); }

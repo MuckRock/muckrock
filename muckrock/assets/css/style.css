@@ -1022,7 +1022,14 @@ section.features {
 
 .plan {
   border-top-left-radius: 0px;
-  border-top-right-radius: 0px; }
+  border-top-right-radius: 0px;
+  margin-top: 0.75em;
+  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+  .plan:hover {
+    margin-top: 0;
+    margin-bottom: 0.75em; }
   .plan a {
     display: block;
     padding: 1.5em 0.75em;
@@ -1038,13 +1045,16 @@ section.features {
     padding-left: 0;
     margin: 0; }
   .plan li {
-    padding: 0.75em;
-    border-top: 1px solid #b3becb;
     font-size: 0.9em;
     line-height: 1.22222em;
-    margin: 0.30556em 0; }
+    margin: 0.30556em 0;
+    margin: 0;
+    padding: 0.75em;
+    border-top: 1px solid #b3becb; }
     .plan li:first-child {
       border-top: none; }
+    .plan li:hover {
+      background-color: #b3becb; }
   .plan .name {
     font-size: 1.5em;
     line-height: 1.51282em;
