@@ -21,21 +21,34 @@
     
     {% if query %}
         {% if page.object_list %}
-            <h2>Results for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-            {% with page as page_obj %}
+            <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
+            {% if page.paginator.num_pages == 1 %}
+                <h3><small>Showing all results</small></h3>
+            {% else %}
+                <h3><small>Showing results {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}</small></h3>
+            {% endif %}
+            {% with page.object_list as page_obj %}
                 {% include 'lib/pagination.html' %}
             {% endwith %}
+            
             <ul class="search collection">
             {% for result in page.object_list %}
                 <li>
+                    <h2>{{ result.object.pub_date|date:"F m, Y" }}</h2>
                     <h1><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></h1>
-                    {# <h2><a href="{% url 'acct-profile' result.object.user.username %}">{{ result.object.user.first_name }} {{ result.object.user.last_name }}</a></h2> #}
+                    {% if result.object.user %}
+                    <h2>{{ result.object.user.get_full_name }}</h2>
+                    {% else %}
+                    <h2>{{ result.object.get_authors_names }}</h2>
+                    {% endif %}
                 </li>
             {% endfor %}
             </ul>
-            {% with page as page_obj %}
-			    {% include 'lib/pagination.html' %}
-			{% endwith %}
+            
+            {% with page.object_list as page_obj %}
+                {% include 'lib/pagination.html' %}
+            {% endwith %}
+            
 		{% else %}
 		    <h2>No results for &ldquo;{{ request.GET.q }}&rdquo;</h2>
 		{% endif %}

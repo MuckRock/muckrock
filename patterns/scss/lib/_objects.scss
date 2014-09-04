@@ -201,7 +201,7 @@ fieldset {
 
 %form-object { @extend %textbox;
     display: block;
-    margin: 0 $base-vertical-rhythm;
+    padding: $base-vertical-rhythm;
 
     border-radius: $base-border-radius;
     form {
@@ -232,7 +232,7 @@ fieldset {
     @extend %form-object;
 }
 
-.login {
+object.login {
     h1 {
         @extend %half;
         @include font-sizing(3);
@@ -254,12 +254,12 @@ fieldset {
     
 }
 
-.logout {
+object.logout {
     text-align: left;
     @include media($medium-layout) { text-align: center; }
 }
 
-.update {
+object.update {
     h1 {
         @extend %half;
         // line-height: 0;
@@ -276,16 +276,19 @@ fieldset {
     }
 }
 
-.subscription form fieldset { @extend %full; }
+object.subscription form fieldset { @extend %full; }
 
-object.password-reset, .password-change {
+object.password-reset, object.password-change {
     overflow: hidden;
     h1 { margin: 0 0 $base-vertical-rhythm/2; }
     form { @include pad(0 default 0 default); }
     form fieldset { @extend %full; }
 }
 
-object.register h1 { @include font-sizing(3, 3); }
+object.register h1 {
+    @include font-sizing(3, 3);
+    padding-left: 5%;
+}
 
 object.search {
     @include box-sizing(border-box); 
@@ -312,6 +315,19 @@ object.search {
     input[type="submit"] {
         @extend %quarter;
     }
+}
+
+.search.collection { @extend %collection;
+    margin: $base-vertical-rhythm 0;
+    list-style-type: none;
+    padding-left: 0;
+    h1 {
+        @include font-sizing(1.25, 3);
+        font-weight: 400;
+        max-width: 33em;
+    }
+    h2 { @include font-sizing(1, 2); }
+    // li { @extend %third; @include omega(3n); }
 }
 
 /* Messages */

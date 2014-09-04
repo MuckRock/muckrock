@@ -101,11 +101,10 @@ html, body { min-height: 100%; }
     }
     li {
         padding: $base-vertical-rhythm $base-vertical-rhythm/2;
-        margin: 0;
+        margin: 0 $base-vertical-rhythm/2*-1;
         &:first-child { padding-top: 0; }
         @media screen and (min-width: 540px) {
             border-radius: $base-border-radius;
-            margin: 0 (2em - $base-vertical-rhythm/2);
         }
     }
     li:nth-child(even) { background-color: $color-odd-background; }
@@ -115,8 +114,8 @@ html, body { min-height: 100%; }
 }
 
 .container {
-    padding: 1.5em;
+    padding: $base-vertical-rhythm/4;
     @include media($medium-layout) {
-        padding: 2em;
+        padding: $base-vertical-rhythm;
     }
 }

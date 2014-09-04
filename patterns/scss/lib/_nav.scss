@@ -283,8 +283,8 @@ nav.sidebar {
     -webkit-overflow-scrolling: touch;
     height: 100%;
     width: 100%;
-    padding: $base-vertical-rhythm/2 1em 1em;
-    @media screen and (min-width: 540px) { padding: 2em 2em 1em; }
+    padding: $base-vertical-rhythm/4 1em 1em;
+    @media screen and (min-width: 540px) { padding: $base-vertical-rhythm $base-vertical-rhythm 1em; }
     color: $color-white;
     background: $color-black;  
     
