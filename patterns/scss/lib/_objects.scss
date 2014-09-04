@@ -216,7 +216,7 @@ fieldset {
         margin-top: 0;
         // margin: 0.5em 0.75em 1.5em 0;
     }
-    input[type="submit"] { @extend %quarter; }
+    input[type="submit"] { @include row; @extend %quarter; }
     header {
         @include outer-container();
         @include pad(0 5% 0 5%);
@@ -328,6 +328,62 @@ object.search {
     }
     h2 { @include font-sizing(1, 2); }
     // li { @extend %third; @include omega(3n); }
+}
+
+section.features {
+    margin: 0 -1*$base-vertical-rhythm $base-vertical-rhythm;
+    padding: 2*$base-vertical-rhythm $base-vertical-rhythm;
+    color: $color-white;
+    background-color: $color-primary;
+    text-align: center;
+    h1 {
+        @include font-sizing(2, 3);
+        font-weight: 300;
+        margin-bottom: $base-vertical-rhythm;
+    }
+    a {
+        color: $color-white;
+        text-decoration: none;
+        border-bottom: 1px dotted $color-white;
+        &:hover { border-bottom-style: solid; }
+    }
+}
+
+.pricing { @include row; }
+
+.plan {
+    @extend %third;
+    @extend %textbox;
+    @include border-top-radius(0px);
+    a {
+        display: block;
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
+        color: $color-white;
+        background-color: $color-black;
+        text-align: center;
+        font-weight: 300;
+        &:hover {
+            background-color: $color-primary;
+            text-decoration: none;
+        }
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    li {
+        padding: $base-vertical-rhythm/2;
+        border-top: $base-border-width solid $color-grey;
+        @include font-sizing(0.9, 3);
+        &:first-child {
+            border-top: none;
+        }
+    }
+
+    .name { @include font-sizing(1.5); }
+    .description { @include font-sizing(1); }
+    
 }
 
 /* Messages */

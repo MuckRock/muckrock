@@ -36,7 +36,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 
 def register(request):
     """Pick what kind of account you want to register for"""
-    return render_to_response('registration/register.html',
+    return render_to_response('user/register.html',
                               context_instance=RequestContext(request))
 
 def register_free(request):
