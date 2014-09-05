@@ -712,7 +712,7 @@ html, body {
       padding: 1.5em; } }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register, .plan {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -1043,6 +1043,8 @@ section.features {
   .plan a {
     display: block;
     padding: 1.5em 0.75em;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
     color: #f4f4f4;
     background-color: #21282c;
     text-align: center;
@@ -1060,11 +1062,16 @@ section.features {
     margin: 0.30556em 0;
     margin: 0;
     padding: 0.75em;
-    border-top: 1px solid #b3becb; }
+    border: 1px solid #b3becb;
+    border-bottom: none; }
     .plan li:first-child {
       border-top: none; }
+    .plan li:last-child {
+      border-bottom: 1px solid #b3becb;
+      border-bottom-left-radius: 9px;
+      border-bottom-right-radius: 9px; }
     .plan li:hover {
-      background-color: #b3becb; }
+      background-color: #e7e7e7; }
   .plan .name {
     font-size: 1.5em;
     line-height: 1.51282em;
