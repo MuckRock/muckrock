@@ -733,12 +733,14 @@ html, body {
       position: relative;
       top: 0;
       left: 0;
-      max-width: 20em;
+      max-width: 18em;
       color: #f4f4f4;
+      font-weight: 700;
       font-size: 2.5em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
-      font-weight: 700;
+      margin-left: auto;
+      margin-right: auto;
       margin-bottom: 1.5em; }
     .homepage .banner div {
       height: 100%;
@@ -774,11 +776,19 @@ html, body {
     @media all and (min-width: 450px) {
       .homepage .banner .button {
         display: inline-block; } }
-    @media all and (min-width: 500px) {
+    @media all and (min-width: 480px) {
       .homepage .banner {
         height: 35em; }
         .homepage .banner div {
           padding-top: 7.5em; } }
+    @media all and (min-width: 1200px) {
+      .homepage .banner h1 {
+        font-size: 3.5em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 1.5em; } }
   .homepage .featured-article {
     width: 100%;
     background-size: cover;
@@ -1708,7 +1718,7 @@ nav.secondary {
 /* Global Sidebar */
 .container {
   display: block;
-  width: 74%;
+  width: 100%;
   float: left;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -1718,11 +1728,14 @@ nav.secondary {
   position: fixed;
   top: 0;
   right: 0;
-  width: 26%;
+  width: 250px;
   height: 100%;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+
+nav.primary ul.right {
+  display: table; }
 
 #menu-button {
   display: table-cell; }
@@ -1736,51 +1749,28 @@ nav.secondary {
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
   display: table-cell; }
 
-nav.primary ul.right {
-  display: none; }
+.container, .footer-container {
+  width: 100%; }
 
-@media screen and (max-width: 1024px) and (min-width: 724px) {
-  .container, .footer-container {
-    width: 100%; }
+#sidebar-menu {
+  margin-right: -250px; }
 
+#right-menu-button {
+  display: block; }
+
+#sidebar-menu:target {
+  margin-right: 0; }
+  #sidebar-menu:target ~ .container {
+    margin-left: -250px; }
+  #sidebar-menu:target #new-request {
+    display: none; }
+
+@media all and (min-width: 550px) {
   #sidebar-menu {
-    width: 300px;
-    margin-right: -300px; }
-
-  #right-menu-button {
-    display: block; }
-
-  #sidebar-menu:target {
-    margin-right: 0; }
-    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
-      width: 100%;
-      margin-left: -300px; }
-    #sidebar-menu:target #new-request {
-      display: none; }
-
-  nav.primary ul.right {
-    display: table; } }
-@media screen and (max-width: 724px) {
-  .container, .footer-container {
-    width: 100%; }
-
-  #sidebar-menu {
-    width: 250px;
-    margin-right: -250px; }
-
-  #right-menu-button {
-    display: block; }
-
-  #sidebar-menu:target {
-    margin-right: 0; }
-    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
-      width: 100%;
-      margin-left: -250px; }
-    #sidebar-menu:target #new-request {
-      display: none; }
-
-  nav.primary ul.right {
-    display: table; } }
+    width: 350px;
+    margin-right: -350px; }
+    #sidebar-menu:target ~ .container {
+      margin-left: -350px; } }
 nav.sidebar {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

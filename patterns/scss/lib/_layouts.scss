@@ -143,7 +143,6 @@ html, body { min-height: 100%; }
         height: 35em;
         width: 100%;
         position: relative;
- //       width: 100%;
         background-size: cover;
         background-position: center;
         color: $color-white;
@@ -151,11 +150,12 @@ html, body { min-height: 100%; }
             position: relative;
             top: 0;
             left: 0;
-            max-width: 20em;
+            max-width: 18em;
             color: $color-white;
-            @include font-sizing(2.5, 3);
             font-weight: 700;
-            
+            @include font-sizing(2.5, 3);
+            margin-left: auto;
+            margin-right: auto;
             margin-bottom: $base-vertical-rhythm;
         }
         div {
@@ -201,9 +201,17 @@ html, body { min-height: 100%; }
         @media all and (min-width: 450px) {
             .button { display: inline-block; }
         }
-        @media all and (min-width: 500px) {
+        @media all and (min-width: 480px) {
             height: 35em;
             div { padding-top: 7.5em; }
+        }
+        @media all and (min-width: 1200px) {
+            h1 {
+                @include font-sizing(3.5, 3);
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: $base-vertical-rhythm;
+            }
         }
     }
     

@@ -208,14 +208,14 @@ nav.secondary {
 /* Global Sidebar */
 
 $menu-breakpoint: 1024px;
-$mobile-menu-width: 250px;
-$tablet-menu-width: 300px;
+$menu-width: 250px;
+$menu-width-large: 350px;
 $desktop-menu-width: 26%;
 $menu-animation: all 0.5s $ease-out-expo;
 
 .container {
     display: block;
-    width: 100% - $desktop-menu-width;
+    width: 100%;
     float: left;
     @include transition($menu-animation);
 }
@@ -224,11 +224,12 @@ $menu-animation: all 0.5s $ease-out-expo;
     position: fixed;
     top: 0;
     right: 0;
-    width: $desktop-menu-width;
+    width: $menu-width;
     height: 100%;
     @include transition($menu-animation);
 }
 
+nav.primary ul.right { display: table; }
 #menu-button { display: table-cell; }
 #menu-close { display: none; }
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
@@ -238,43 +239,26 @@ $menu-animation: all 0.5s $ease-out-expo;
     display: table-cell;
 }
 
-nav.primary ul.right { display: none; }
-
-@media screen and (max-width: $menu-breakpoint) and (min-width: $menu-breakpoint - 300px) {
-    .container, .footer-container { width: 100%; }
-    #sidebar-menu {
-        width: $tablet-menu-width;
-        margin-right: -$tablet-menu-width;
-    }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$tablet-menu-width;
-        }
-        #new-request { display: none; }
-    }
-    nav.primary ul.right { display: table; }
+.container, .footer-container { width: 100%; }
+#sidebar-menu { margin-right: -$menu-width; }
+#right-menu-button { display: block; }
+#sidebar-menu:target {
+    margin-right: 0;
+    & ~ .container { margin-left: -$menu-width; }
+    #new-request { display: none; }
 }
 
-@media screen and (max-width: $menu-breakpoint - 300px) {
-    .container, .footer-container { width: 100%; }
+@media all and (min-width: 550px) {
     #sidebar-menu {
-        width: $mobile-menu-width;
-        margin-right: -$mobile-menu-width;
+        width: $menu-width-large;
+        margin-right: -$menu-width-large;
+        &:target ~ .container { margin-left: -$menu-width-large; }
     }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-        #new-request { display: none; }
-    }
-    nav.primary ul.right { display: table; }
+    
+
 }
+
+
 
 nav.sidebar {
 
