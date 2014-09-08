@@ -153,9 +153,10 @@ html, body { min-height: 100%; }
             left: 0;
             max-width: 20em;
             color: $color-white;
-            @include font-sizing(2.5, 3);
             font-weight: 700;
-            
+            @include font-sizing(2.5, 3);
+            margin-left: auto;
+            margin-right: auto;
             margin-bottom: $base-vertical-rhythm;
         }
         div {
@@ -201,9 +202,17 @@ html, body { min-height: 100%; }
         @media all and (min-width: 450px) {
             .button { display: inline-block; }
         }
-        @media all and (min-width: 500px) {
+        @media all and (min-width: 480px) {
             height: 35em;
             div { padding-top: 7.5em; }
+        }
+        @media all and (min-width: 1200px) {
+            h1 {
+                @include font-sizing(3.5, 3);
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: $base-vertical-rhythm;
+            }
         }
     }
     

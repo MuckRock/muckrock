@@ -735,10 +735,12 @@ html, body {
       left: 0;
       max-width: 20em;
       color: #f4f4f4;
+      font-weight: 700;
       font-size: 2.5em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
-      font-weight: 700;
+      margin-left: auto;
+      margin-right: auto;
       margin-bottom: 1.5em; }
     .homepage .banner div {
       height: 100%;
@@ -774,11 +776,19 @@ html, body {
     @media all and (min-width: 450px) {
       .homepage .banner .button {
         display: inline-block; } }
-    @media all and (min-width: 500px) {
+    @media all and (min-width: 480px) {
       .homepage .banner {
         height: 35em; }
         .homepage .banner div {
           padding-top: 7.5em; } }
+    @media all and (min-width: 1200px) {
+      .homepage .banner h1 {
+        font-size: 3.5em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 1.5em; } }
   .homepage .featured-article {
     width: 100%;
     background-size: cover;
