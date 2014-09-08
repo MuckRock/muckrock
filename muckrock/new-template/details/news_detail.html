@@ -13,7 +13,6 @@
 {% endblock main %}			
 
 {% block header %}
-    <dfn>Article</dfn>
     <h1>{{ article.title }}</h1>
     <h2>by {{ article.get_authors_names }} 
     on {{ article.pub_date | date:"F j, Y" }}</h2>

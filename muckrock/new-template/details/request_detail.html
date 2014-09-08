@@ -4,7 +4,6 @@
 {% block type %}request{% endblock type %}
 
 {% block header %}
-    <dfn>Request</dfn>
     <h2>{% if foia.date_submitted %}On {{ foia.date_submitted | date:"F j, Y" }}, {% endif %}<a href="{% url 'acct-profile' foia.user.username %}">{{foia.user.username}}</a> requested</h2>
     <h1>{{ foia.title }}</h1>
     {% if foia.agency %}

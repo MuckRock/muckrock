@@ -4,7 +4,6 @@
 {% block type %}question{% endblock type %}
 
 {% block header %}
-    <dfn>Question</dfn>
     <h2>On {{ object.date | date:"F j, Y" }}, {{ object.user.get_full_name }} asked</h2>
     <h1>{{ object.title }}</h1>
     {% if not question.answers.all|length_is:"0" %}

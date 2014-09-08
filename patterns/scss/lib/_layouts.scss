@@ -208,7 +208,7 @@ html, body { min-height: 100%; }
         }
         @media all and (min-width: 1200px) {
             h1 {
-                @include font-sizing(3.5, 3);
+                @include font-sizing(2.8, 3);
                 margin-left: auto;
                 margin-right: auto;
                 margin-bottom: $base-vertical-rhythm;
