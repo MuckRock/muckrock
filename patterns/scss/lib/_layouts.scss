@@ -49,6 +49,16 @@ html, body { min-height: 100%; }
     }
 }
 
+%base-spacing {
+    padding: $base-vertical-rhythm/4;
+    @include media($medium-layout) { padding: $base-vertical-rhythm; }
+}
+
+%edge-to-edge {
+    margin: 0 -1*$base-vertical-rhythm/4;
+    @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
+}
+
 // Layouts
 
 %article {
@@ -116,9 +126,44 @@ html, body { min-height: 100%; }
     h3 { @include font-sizing(1); }
 }
 
-.container {
-    padding: $base-vertical-rhythm/4;
-    @include media($medium-layout) {
-        padding: $base-vertical-rhythm;
+.container { @extend %base-spacing; }
+
+.homepage {
+    .banner {
+        @extend %edge-to-edge;
+        display: block;
+        height: 40em;
+        position: relative;
+ //       width: 100%;
+        background-size: cover;
+        background-position: center;
+        h1 {
+            position: relative;
+            top: 0;
+            left: 0;
+            max-width: 20em;
+            color: $color-white;
+            @include font-sizing(3, 3);
+            font-weight: 400;
+        }
+        div {
+            @extend %base-spacing;
+            @include background(linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)));
+        }
+        a {
+            color: $color-white;
+            text-decoration: none;
+            border-bottom: 1px dotted $color-white;
+            &:hover {
+                border-bottom: 1px solid $color-white;
+            }
+        }
+        .image-attribution {
+            position: absolute;
+            bottom: $base-vertical-rhythm;
+            right: $base-vertical-rhythm;
+            color: $color-white;
+            
+        }
     }
 }

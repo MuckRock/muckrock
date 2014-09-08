@@ -624,6 +624,18 @@ html, body {
     display: table;
     clear: both; }
 
+.container, .homepage .banner div {
+  padding: 0.375em; }
+  @media screen and (min-width: 321px) {
+    .container, .homepage .banner div {
+      padding: 1.5em; } }
+
+.homepage .banner {
+  margin: 0 -0.375em; }
+  @media screen and (min-width: 321px) {
+    .homepage .banner {
+      margin: 0 -1.5em; } }
+
 .post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
   float: left;
   display: block;
@@ -705,11 +717,36 @@ html, body {
   line-height: 1.51282em;
   margin: 0.37821em 0; }
 
-.container {
-  padding: 0.375em; }
-  @media screen and (min-width: 321px) {
-    .container {
-      padding: 1.5em; } }
+.homepage .banner {
+  display: block;
+  height: 40em;
+  position: relative;
+  background-size: cover;
+  background-position: center; }
+  .homepage .banner h1 {
+    position: relative;
+    top: 0;
+    left: 0;
+    max-width: 20em;
+    color: #f4f4f4;
+    font-size: 3em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    font-weight: 400; }
+  .homepage .banner div {
+    background: -webkit-linear-gradient(rgba(0, 0, 0, 0.75), transparent);
+    background: linear-gradient(rgba(0, 0, 0, 0.75), transparent); }
+  .homepage .banner a {
+    color: #f4f4f4;
+    text-decoration: none;
+    border-bottom: 1px dotted #f4f4f4; }
+    .homepage .banner a:hover {
+      border-bottom: 1px solid #f4f4f4; }
+  .homepage .banner .image-attribution {
+    position: absolute;
+    bottom: 1.5em;
+    right: 1.5em;
+    color: #f4f4f4; }
 
 /* Simple Objects */
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
