@@ -151,23 +151,33 @@ nav.secondary {
     li {
         display: inline-block;
         margin: 0 0.5em;
-        padding-right: 3%;
         &:first-child {
             margin-left: 0;
         }
-        a {
-            color: $color-unselected;
-            &:hover {
-                color: $color-selected;
-                text-decoration: none;
-            }
+    }
+    a {
+        position: relative;
+        padding-right: 0.5em;
+        color: $color-unselected;
+        &:hover {
+            color: $color-selected;
+            text-decoration: none;
+            -webkit-box-shadow: 0px 2px 0px 0px $color-selected;
+            -moz-box-shadow:    0px 2px 0px 0px $color-selected;
+            box-shadow:         0px 2px 0px 0px $color-selected;
         }
+        @media all and (min-width: 400px) { padding-right: 1em; }
+        @media all and (min-width: 500px) { padding-right: 2em; }
+        @media all and (min-width: 600px) { padding-right: 4em; }
+        @media all and (min-width: 700px) { padding-right: 5.5em; }
+        
+        @include transition (all 0.25s ease-in-out);
     }
     padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
         li {
             text-align: left;
-            padding-right: 10%;
+            // padding-right: 10%;
         }
     }
 }
