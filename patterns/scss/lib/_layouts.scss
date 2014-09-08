@@ -29,6 +29,12 @@ html, body { min-height: 100%; }
     @include omega(4n);
 }
 
+%two-thirds {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(4); }
+    @include media($large-layout) { @include span-columns(8); }
+}
+
 %three-quarters {
     @extend %full;
     @include media($medium-layout) { @include span-columns(6); }
@@ -129,10 +135,13 @@ html, body { min-height: 100%; }
 .container { @extend %base-spacing; }
 
 .homepage {
+    overflow: hidden;
+    @extend %edge-to-edge;
+    .homepage-row { display: table-row; }
     .banner {
-        @extend %edge-to-edge;
         display: block;
         height: 40em;
+        width: 100%;
         position: relative;
  //       width: 100%;
         background-size: cover;
@@ -168,10 +177,11 @@ html, body { min-height: 100%; }
         .button { 
             margin-right: $base-vertical-rhythm/2;
             border: 2*$base-border-width solid $color-white;
-            background: none;
+            color: #1c0b04;
+            background: $color-white;
             &:hover {
-                color: #1c0b04;
-                background: $color-white;
+                color: $color-white;
+                background: none;
                 border: 2*$base-border-width solid $color-white;
             }
             
@@ -185,5 +195,52 @@ html, body { min-height: 100%; }
         #learn-more {
             margin-left: $base-vertical-rhythm/4;
         }
+    }
+    
+    .featured-article {
+        display: table-cell;
+        width: 60%;
+        a {
+            display: block;
+            padding: 3*$base-vertical-rhythm $base-vertical-rhythm;
+            text-decoration: none;
+            color: $color-black;
+            background-color: rgba(254, 188, 16, 0.65);
+            dfn { color: $color-black; }
+            h1 {
+                @include font-sizing(2, 3);
+                font-weight: 700;
+            }
+            h2 {
+                @include font-sizing(1.2, 3);
+                font-weight: 400;
+            }
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.65);
+            }
+        }
+        
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .stats {
+        $color-stats: #e85440;
+        display: table-cell;
+        width: 40%;
+        @extend %base-spacing;
+        color: $color-white;
+        @include background(radial-gradient($color-stats, darken($color-stats, 5%)));
+        
+        font-weight: 400;
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin: $base-vertical-rhythm/2 0; }
+        span {
+            display: block;
+            @include font-sizing(2, 3);
+            margin-bottom: 0;
+            font-weight: 300;
+        }
+        
     }
 }

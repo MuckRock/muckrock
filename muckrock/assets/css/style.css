@@ -624,16 +624,16 @@ html, body {
     display: table;
     clear: both; }
 
-.container, .homepage .banner div {
+.container, .homepage .banner div, .homepage .stats {
   padding: 0.375em; }
   @media screen and (min-width: 321px) {
-    .container, .homepage .banner div {
+    .container, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
-.homepage .banner {
+.homepage {
   margin: 0 -0.375em; }
   @media screen and (min-width: 321px) {
-    .homepage .banner {
+    .homepage {
       margin: 0 -1.5em; } }
 
 .post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
@@ -717,52 +717,102 @@ html, body {
   line-height: 1.51282em;
   margin: 0.37821em 0; }
 
-.homepage .banner {
-  display: block;
-  height: 40em;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  color: #f4f4f4; }
-  .homepage .banner h1 {
+.homepage {
+  overflow: hidden; }
+  .homepage .homepage-row {
+    display: table-row; }
+  .homepage .banner {
+    display: block;
+    height: 40em;
+    width: 100%;
     position: relative;
-    top: 0;
-    left: 0;
-    max-width: 20em;
-    color: #f4f4f4;
-    font-size: 3em;
-    line-height: 1.22222em;
-    margin: 0.30556em 0;
-    font-weight: 700;
-    margin-bottom: 1.5em; }
-  .homepage .banner div {
-    height: 100%;
-    background: -webkit-linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
-    background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
-    font-weight: 700;
-    text-align: center;
-    padding-top: 10em; }
-  .homepage .banner a {
-    color: #f4f4f4;
-    text-decoration: none;
-    border-bottom: 1px dotted #f4f4f4; }
-    .homepage .banner a:hover {
-      border-bottom: 1px solid #f4f4f4; }
-  .homepage .banner .button {
-    margin-right: 0.75em;
-    border: 2px solid #f4f4f4;
-    background: none; }
-    .homepage .banner .button:hover {
-      color: #1c0b04;
-      background: #f4f4f4;
-      border: 2px solid #f4f4f4; }
-  .homepage .banner .image-attribution {
-    position: absolute;
-    bottom: 1.5em;
-    right: 1.5em;
+    background-size: cover;
+    background-position: center;
     color: #f4f4f4; }
-  .homepage .banner #learn-more {
-    margin-left: 0.375em; }
+    .homepage .banner h1 {
+      position: relative;
+      top: 0;
+      left: 0;
+      max-width: 20em;
+      color: #f4f4f4;
+      font-size: 3em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      font-weight: 700;
+      margin-bottom: 1.5em; }
+    .homepage .banner div {
+      height: 100%;
+      background: -webkit-linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
+      background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
+      font-weight: 700;
+      text-align: center;
+      padding-top: 10em; }
+    .homepage .banner a {
+      color: #f4f4f4;
+      text-decoration: none;
+      border-bottom: 1px dotted #f4f4f4; }
+      .homepage .banner a:hover {
+        border-bottom: 1px solid #f4f4f4; }
+    .homepage .banner .button {
+      margin-right: 0.75em;
+      border: 2px solid #f4f4f4;
+      color: #1c0b04;
+      background: #f4f4f4; }
+      .homepage .banner .button:hover {
+        color: #f4f4f4;
+        background: none;
+        border: 2px solid #f4f4f4; }
+    .homepage .banner .image-attribution {
+      position: absolute;
+      bottom: 1.5em;
+      right: 1.5em;
+      color: #f4f4f4; }
+    .homepage .banner #learn-more {
+      margin-left: 0.375em; }
+  .homepage .featured-article {
+    display: table-cell;
+    width: 60%;
+    background-size: cover;
+    background-position: center; }
+    .homepage .featured-article a {
+      display: block;
+      padding: 4.5em 1.5em;
+      text-decoration: none;
+      color: #21282c;
+      background-color: rgba(254, 188, 16, 0.65); }
+      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label {
+        color: #21282c; }
+      .homepage .featured-article a h1 {
+        font-size: 2em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        font-weight: 700; }
+      .homepage .featured-article a h2 {
+        font-size: 1.2em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        font-weight: 400; }
+      .homepage .featured-article a:hover {
+        background-color: rgba(255, 255, 255, 0.65); }
+  .homepage .stats {
+    display: table-cell;
+    width: 40%;
+    color: #f4f4f4;
+    background: -webkit-radial-gradient(#e85440, #e54029);
+    background: radial-gradient(#e85440, #e54029);
+    font-weight: 400; }
+    .homepage .stats ul {
+      list-style-type: none;
+      padding-left: 0; }
+    .homepage .stats li {
+      margin: 0.75em 0; }
+    .homepage .stats span {
+      display: block;
+      font-size: 2em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      margin-bottom: 0;
+      font-weight: 300; }
 
 /* Simple Objects */
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
