@@ -723,7 +723,7 @@ html, body {
     display: table-row; }
   .homepage .banner {
     display: block;
-    height: 40em;
+    height: 35em;
     width: 100%;
     position: relative;
     background-size: cover;
@@ -735,7 +735,7 @@ html, body {
       left: 0;
       max-width: 20em;
       color: #f4f4f4;
-      font-size: 3em;
+      font-size: 2.5em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
       font-weight: 700;
@@ -746,7 +746,7 @@ html, body {
       background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
       font-weight: 700;
       text-align: center;
-      padding-top: 10em; }
+      padding-top: 2.5em; }
     .homepage .banner a {
       color: #f4f4f4;
       text-decoration: none;
@@ -754,7 +754,9 @@ html, body {
       .homepage .banner a:hover {
         border-bottom: 1px solid #f4f4f4; }
     .homepage .banner .button {
+      display: block;
       margin-right: 0.75em;
+      margin-bottom: 0.75em;
       border: 2px solid #f4f4f4;
       color: #1c0b04;
       background: #f4f4f4; }
@@ -769,9 +771,16 @@ html, body {
       color: #f4f4f4; }
     .homepage .banner #learn-more {
       margin-left: 0.375em; }
+    @media all and (min-width: 450px) {
+      .homepage .banner .button {
+        display: inline-block; } }
+    @media all and (min-width: 500px) {
+      .homepage .banner {
+        height: 35em; }
+        .homepage .banner div {
+          padding-top: 7.5em; } }
   .homepage .featured-article {
-    display: table-cell;
-    width: 60%;
+    width: 100%;
     background-size: cover;
     background-position: center; }
     .homepage .featured-article a {
@@ -794,12 +803,15 @@ html, body {
         font-weight: 400; }
       .homepage .featured-article a:hover {
         background-color: rgba(255, 255, 255, 0.65); }
+    @media all and (min-width: 600px) {
+      .homepage .featured-article {
+        display: table-cell;
+        width: 60%; } }
   .homepage .stats {
-    display: table-cell;
-    width: 40%;
+    width: 100%;
     color: #f4f4f4;
-    background: -webkit-radial-gradient(#e85440, #e54029);
-    background: radial-gradient(#e85440, #e54029);
+    background: -webkit-radial-gradient(#2b1e5e, #22184b);
+    background: radial-gradient(#2b1e5e, #22184b);
     font-weight: 400; }
     .homepage .stats ul {
       list-style-type: none;
@@ -813,6 +825,10 @@ html, body {
       margin: 0.30556em 0;
       margin-bottom: 0;
       font-weight: 300; }
+    @media all and (min-width: 600px) {
+      .homepage .stats {
+        display: table-cell;
+        width: 40%; } }
 
 /* Simple Objects */
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
@@ -1645,7 +1661,7 @@ nav.secondary {
   display: block;
   width: 100%;
   margin-top: 1.5em;
-  padding-top: 3em; }
+  padding-top: 1.5em; }
   .footer-container footer {
     max-width: 68em;
     margin-left: auto;

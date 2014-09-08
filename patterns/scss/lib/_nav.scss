@@ -176,7 +176,8 @@ nav.secondary {
     display: block;
     width: 100%;
     margin-top: $base-vertical-rhythm;
-    padding-top: $base-vertical-rhythm*2;
+    padding-top: $base-vertical-rhythm;
+    
     footer {
         @include outer-container();
         section.about { @extend %half; }

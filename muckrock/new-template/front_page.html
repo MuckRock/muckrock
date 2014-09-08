@@ -26,7 +26,7 @@
                     </div>
                 </a>
             </section>
-            <section class="stats">
+            <section class="stats" style="background-image:url('{{ SITE_ROOT }}/static/img/stat-bg.png');">
                 <ul>
                     <li><span class="stat">{{ num_requests|intcomma }}</span> request{{ num_requests|pluralize }} filed</li>
                     <li><span class="stat">{{ num_completed_requests|intcomma }}</span> request{{ num_completed_requests|pluralize }} completed  succesfully</li>
@@ -34,4 +34,5 @@
                 </ul>
             </section>
 		</div>
+	</div>
 {% endblock %}
