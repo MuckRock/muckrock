@@ -1488,9 +1488,13 @@ nav.primary {
 
 nav.secondary {
   padding: 1.5em 0; }
+  nav.secondary ul {
+    width: 100%;
+    display: block; }
   nav.secondary li {
     display: inline-block;
-    margin: 0 0.5em; }
+    margin: 0 0.5em;
+    padding-right: 3%; }
     nav.secondary li:first-child {
       margin-left: 0; }
     nav.secondary li a {
@@ -1499,10 +1503,9 @@ nav.secondary {
         color: #3a82ff;
         text-decoration: none; }
   @media screen and (min-width: 540px) {
-    nav.secondary {
-      display: block; }
-      nav.secondary li {
-        text-align: center; } }
+    nav.secondary li {
+      text-align: left;
+      padding-right: 10%; } }
 
 .footer-container {
   display: block;

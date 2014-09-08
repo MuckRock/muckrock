@@ -144,9 +144,14 @@ nav.primary {
 }
 
 nav.secondary {
+    ul {
+        width: 100%;
+        display: block;
+    }
     li {
         display: inline-block;
         margin: 0 0.5em;
+        padding-right: 3%;
         &:first-child {
             margin-left: 0;
         }
@@ -160,8 +165,10 @@ nav.secondary {
     }
     padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
-        display: block;
-        li { text-align: center; }
+        li {
+            text-align: left;
+            padding-right: 10%;
+        }
     }
 }
 
