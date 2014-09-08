@@ -14,31 +14,30 @@
 // Mixins
 
 @mixin background-gradient($color) {
-    //@include background(linear-gradient($color, darken($color, $base-gradient-darken)));
     background: $color;
+    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
 }
 
 @mixin button-color($color) {
-    color: $color;
+    color: $color-white;
     border-color: $color;
+    @include background-gradient($color);
 }
 
 @mixin button-hover($color) {
     &:hover {
         color: $color-white;
-        @include background-gradient($color);
+        background: $color;
     }
     &:focus {
         $focus-color: lighten($color, 10%);
-        color: $focus-color;
+        color: $color-white;
         border-color: $focus-color;
-        &:hover {
-            color: $color-white;
-        }
+        background: $focus-color;
     }
     &:active {
         color: $color-white;
-        @include background(radial-gradient($color, darken($color, $base-gradient-darken/2)));
+        @include background(linear-gradient(darken($color, $base-gradient-darken), $color));
     }
 }
 

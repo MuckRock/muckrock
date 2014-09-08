@@ -748,77 +748,90 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
     color: #96959e; }
 
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default {
-  color: #6b6a65;
-  border-color: #6b6a65; }
+  color: #f4f4f4;
+  border-color: #6b6a65;
+  background: #6b6a65;
+  background: -webkit-linear-gradient(#6b6a65, #565551);
+  background: linear-gradient(#6b6a65, #565551); }
   .button:hover, .button.default:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover {
     color: #f4f4f4;
     background: #6b6a65; }
   .button:focus, .button.default:focus, input[type="submit"]:focus, button:focus, input[type="submit"] .default:focus, button .default:focus {
-    color: #85847e;
-    border-color: #85847e; }
-    .button:focus:hover, .button.default:focus:hover, input[type="submit"]:focus:hover, button:focus:hover, input[type="submit"] .default:focus:hover, button .default:focus:hover {
-      color: #f4f4f4; }
+    color: #f4f4f4;
+    border-color: #85847e;
+    background: #85847e; }
   .button:active, .button.default:active, input[type="submit"]:active, button:active, input[type="submit"] .default:active, button .default:active {
     color: #f4f4f4;
-    background: -webkit-radial-gradient(#6b6a65, #61605b);
-    background: radial-gradient(#6b6a65, #61605b); }
+    background: -webkit-linear-gradient(#565551, #6b6a65);
+    background: linear-gradient(#565551, #6b6a65); }
 
 .button.primary, input[type="submit"] .primary, button .primary {
-  color: #3a82ff;
-  border-color: #3a82ff; }
+  color: #f4f4f4;
+  border-color: #3a82ff;
+  background: #3a82ff;
+  background: -webkit-linear-gradient(#3a82ff, #1168ff);
+  background: linear-gradient(#3a82ff, #1168ff); }
   .button.primary:hover, input[type="submit"] .primary:hover, button .primary:hover {
     color: #f4f4f4;
     background: #3a82ff; }
   .button.primary:focus, input[type="submit"] .primary:focus, button .primary:focus {
-    color: #6da2ff;
-    border-color: #6da2ff; }
-    .button.primary:focus:hover, input[type="submit"] .primary:focus:hover, button .primary:focus:hover {
-      color: #f4f4f4; }
+    color: #f4f4f4;
+    border-color: #6da2ff;
+    background: #6da2ff; }
   .button.primary:active, input[type="submit"] .primary:active, button .primary:active {
     color: #f4f4f4;
-    background: -webkit-radial-gradient(#3a82ff, #2675ff);
-    background: radial-gradient(#3a82ff, #2675ff); }
+    background: -webkit-linear-gradient(#1168ff, #3a82ff);
+    background: linear-gradient(#1168ff, #3a82ff); }
 
 .button.success, input[type="submit"] .success, button .success {
-  color: #006330;
-  border-color: #006330; }
+  color: #f4f4f4;
+  border-color: #006330;
+  background: #006330;
+  background: -webkit-linear-gradient(#006330, #003a1c);
+  background: linear-gradient(#006330, #003a1c); }
   .button.success:hover, input[type="submit"] .success:hover, button .success:hover {
     color: #f4f4f4;
     background: #006330; }
   .button.success:focus, input[type="submit"] .success:focus, button .success:focus {
-    color: #009649;
-    border-color: #009649; }
-    .button.success:focus:hover, input[type="submit"] .success:focus:hover, button .success:focus:hover {
-      color: #f4f4f4; }
+    color: #f4f4f4;
+    border-color: #009649;
+    background: #009649; }
   .button.success:active, input[type="submit"] .success:active, button .success:active {
     color: #f4f4f4;
-    background: -webkit-radial-gradient(#006330, #004f26);
-    background: radial-gradient(#006330, #004f26); }
+    background: -webkit-linear-gradient(#003a1c, #006330);
+    background: linear-gradient(#003a1c, #006330); }
 
 .button.failure, input[type="submit"] .failure, button .failure {
-  color: #fb004e;
-  border-color: #fb004e; }
+  color: #f4f4f4;
+  border-color: #fb004e;
+  background: #fb004e;
+  background: -webkit-linear-gradient(#fb004e, #d20041);
+  background: linear-gradient(#fb004e, #d20041); }
   .button.failure:hover, input[type="submit"] .failure:hover, button .failure:hover {
     color: #f4f4f4;
     background: #fb004e; }
   .button.failure:focus, input[type="submit"] .failure:focus, button .failure:focus {
-    color: #ff2f70;
-    border-color: #ff2f70; }
-    .button.failure:focus:hover, input[type="submit"] .failure:focus:hover, button .failure:focus:hover {
-      color: #f4f4f4; }
+    color: #f4f4f4;
+    border-color: #ff2f70;
+    background: #ff2f70; }
   .button.failure:active, input[type="submit"] .failure:active, button .failure:active {
     color: #f4f4f4;
-    background: -webkit-radial-gradient(#fb004e, #e70048);
-    background: radial-gradient(#fb004e, #e70048); }
+    background: -webkit-linear-gradient(#d20041, #fb004e);
+    background: linear-gradient(#d20041, #fb004e); }
 
 .button.disabled, input[type="submit"] .disabled, button .disabled {
-  color: #96959e;
+  color: #f4f4f4;
   border-color: #96959e;
+  background: #96959e;
+  background: -webkit-linear-gradient(#96959e, #81808b);
+  background: linear-gradient(#96959e, #81808b);
   background: none; }
 
 .panel, .panel.default {
   color: #f4f4f4;
   background: #6b6a65;
+  background: -webkit-linear-gradient(#6b6a65, #565551);
+  background: linear-gradient(#6b6a65, #565551);
   border-color: #51504c; }
   .panel a, .panel.default a {
     text-decoration: underline;
@@ -828,6 +841,8 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
 .panel.primary {
   color: #f4f4f4;
   background: #3a82ff;
+  background: -webkit-linear-gradient(#3a82ff, #1168ff);
+  background: linear-gradient(#3a82ff, #1168ff);
   border-color: #0762ff; }
   .panel.primary a {
     text-decoration: underline;
@@ -837,6 +852,8 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
 .panel.success {
   color: #f4f4f4;
   background: #006330;
+  background: -webkit-linear-gradient(#006330, #003a1c);
+  background: linear-gradient(#006330, #003a1c);
   border-color: #003017; }
   .panel.success a {
     text-decoration: underline;
@@ -846,6 +863,8 @@ input[type="email"], input[type="number"], input[type="password"], input[type="s
 .panel.failure {
   color: #f4f4f4;
   background: #fb004e;
+  background: -webkit-linear-gradient(#fb004e, #d20041);
+  background: linear-gradient(#fb004e, #d20041);
   border-color: #c8003e; }
   .panel.failure a {
     text-decoration: underline;
@@ -1224,6 +1243,8 @@ object.progress-bar {
   display: block;
   height: 1.5em;
   background: #6b6a65;
+  background: -webkit-linear-gradient(#6b6a65, #565551);
+  background: linear-gradient(#6b6a65, #565551);
   border: 1px solid #0056ed;
   border-radius: 9px;
   border-top-right-radius: 0px;
@@ -1233,18 +1254,28 @@ object.progress-bar {
     border-bottom-right-radius: 9px; }
   .meter.success {
     background: #006330;
+    background: -webkit-linear-gradient(#006330, #003a1c);
+    background: linear-gradient(#006330, #003a1c);
     border: 1px solid #00170b; }
   .meter.failure {
     background: #fb004e;
+    background: -webkit-linear-gradient(#fb004e, #d20041);
+    background: linear-gradient(#fb004e, #d20041);
     border: 1px solid #ae0036; }
   .meter.primary {
     background: #3a82ff;
+    background: -webkit-linear-gradient(#3a82ff, #1168ff);
+    background: linear-gradient(#3a82ff, #1168ff);
     border: 1px solid #0056ed; }
   .meter.default {
     background: #6b6a65;
+    background: -webkit-linear-gradient(#6b6a65, #565551);
+    background: linear-gradient(#6b6a65, #565551);
     border: 1px solid #444340; }
   .meter.disabled {
     background: #96959e;
+    background: -webkit-linear-gradient(#96959e, #81808b);
+    background: linear-gradient(#96959e, #81808b);
     border: 1px solid #6f6e78; }
 
 /* Table */
