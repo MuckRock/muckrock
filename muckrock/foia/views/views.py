@@ -26,9 +26,13 @@ from muckrock.accounts.forms import PaymentForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import FOIARequestForm, \
                                 FOIAWizardWhereForm, \
-                                FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
-                                FOIAMultipleSubmitForm, AgencyConfirmForm, \
-                                FOIAMultiRequestForm, TEMPLATES
+                                FOIAWhatLocalForm, \
+                                FOIAWhatStateForm, \
+                                FOIAWhatFederalForm, \
+                                FOIAMultipleSubmitForm, \
+                                AgencyConfirmForm, \
+                                FOIAMultiRequestForm, \
+                                TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
@@ -78,14 +82,11 @@ def _foia_form_handler(request, foia, action):
             'Submit to Multiple Agencies': 'started'
         }
         
-
         try:
             foia.status = status_dict[request.POST['submit']]
 
             form = default_form(request.POST)
-
             if form.is_valid():
-
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('combo-name')
                 new_agency = False
