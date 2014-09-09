@@ -26,6 +26,7 @@
         {% endblock twitter_card %}
     </head>
     <body>
+    {% block webpage %}
         {% include 'lib/sidebar.html' %}
         <div class="container">
             {% include 'lib/header.html' %}
@@ -33,5 +34,6 @@
             {% endblock content %}
             {% include 'lib/footer.html' %}
         </div>
+    {% endblock webpage %}
     </body>
 </html>

@@ -1716,10 +1716,9 @@ nav.secondary {
     color: #21282c; }
 
 /* Global Sidebar */
+/* Sets the basics of the layout */
 .container {
-  display: block;
-  width: 100%;
-  float: left;
+  overflow: hidden;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
@@ -1734,6 +1733,7 @@ nav.secondary {
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
 
+/* Controls visiblity of the Menu/Close button */
 nav.primary ul.right {
   display: table; }
 
@@ -1749,9 +1749,7 @@ nav.primary ul.right {
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
   display: table-cell; }
 
-.container, .footer-container {
-  width: 100%; }
-
+/* Controls the sizing and position of the sidebar */
 #sidebar-menu {
   margin-right: -250px; }
 

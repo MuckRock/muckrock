@@ -210,13 +210,12 @@ nav.secondary {
 $menu-breakpoint: 1024px;
 $menu-width: 250px;
 $menu-width-large: 350px;
-$desktop-menu-width: 26%;
 $menu-animation: all 0.5s $ease-out-expo;
 
+/* Sets the basics of the layout */
+
 .container {
-    display: block;
-    width: 100%;
-    float: left;
+    overflow: hidden;
     @include transition($menu-animation);
 }
 
@@ -229,17 +228,18 @@ $menu-animation: all 0.5s $ease-out-expo;
     @include transition($menu-animation);
 }
 
+/* Controls visiblity of the Menu/Close button */
+
 nav.primary ul.right { display: table; }
 #menu-button { display: table-cell; }
 #menu-close { display: none; }
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
-    display: none;
-}
+    display: none; }
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
-    display: table-cell;
-}
+    display: table-cell; }
 
-.container, .footer-container { width: 100%; }
+/* Controls the sizing and position of the sidebar */
+
 #sidebar-menu { margin-right: -$menu-width; }
 #right-menu-button { display: block; }
 #sidebar-menu:target {
@@ -247,18 +247,13 @@ nav.primary ul.right { display: table; }
     & ~ .container { margin-left: -$menu-width; }
     #new-request { display: none; }
 }
-
 @media all and (min-width: 550px) {
     #sidebar-menu {
         width: $menu-width-large;
         margin-right: -$menu-width-large;
         &:target ~ .container { margin-left: -$menu-width-large; }
     }
-    
-
 }
-
-
 
 nav.sidebar {
 

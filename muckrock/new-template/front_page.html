@@ -2,37 +2,43 @@
 
 {% load humanize %}
 
-{% block content %}
-    <div class="homepage">
-        <section class="banner" style="background-image: url('{{ SITE_ROOT }}/static/img/homepage.jpg');">
-            <div>
-                <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
-                <p><a href="#" class="button">Create a request</a> or <a href="#" id="learn-more">learn how it works.</a></p>
+{% block webpage %}
+
+    {% include 'lib/sidebar.html' with hidden=1 %}
+    <div class="container">
+        {% include 'lib/header.html' %}
+        <div class="homepage">
+            <section class="banner" style="background-image: url('{{ SITE_ROOT }}/static/img/homepage.jpg');">
+                <div>
+                    <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
+                    <p><a href="#" class="button">Create a request</a> or <a href="#" id="learn-more">learn how it works.</a></p>
+                </div>
+                <p class="image-attribution"><small>Image courtesy <a href="#">Shorpy</a></small></p>
+            </section>
+            <div class="homepage-row">
+                {% if featured_article.image %}
+                <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
+                {% else %}
+                <section class="featured-article">
+                {% endif %}
+                    <a href="{{ featured_article.get_absolute_url }}"><div>
+                        <dfn>Investigative Report</dfn>
+                        <h1>{{ featured_article.title }}</h1>
+                        {% if featured_article.summary %}
+                        <summary>{{ featured_article.summary }}</summary>
+                        {% endif %}
+                        </div>
+                    </a>
+                </section>
+                <section class="stats" style="background-image:url('{{ SITE_ROOT }}/static/img/stat-bg.png');">
+                    <ul>
+                        <li><span class="stat">{{ num_requests|intcomma }}</span> request{{ num_requests|pluralize }} filed</li>
+                        <li><span class="stat">{{ num_completed_requests|intcomma }}</span> request{{ num_completed_requests|pluralize }} completed  succesfully</li>
+                        <li><span class="stat">{{ num_pages|intcomma }}</span> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</li>
+                    </ul>
+                </section>
             </div>
-            <p class="image-attribution"><small>Image courtesy <a href="#">Shorpy</a></small></p>
-        </section>
-        <div class="homepage-row">
-            {% if featured_article.image %}
-            <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
-            {% else %}
-            <section class="featured-article">
-            {% endif %}
-                <a href="{{ featured_article.get_absolute_url }}"><div>
-                    <dfn>Investigative Report</dfn>
-                    <h1>{{ featured_article.title }}</h1>
-                    {% if featured_article.summary %}
-                    <summary>{{ featured_article.summary }}</summary>
-                    {% endif %}
-                    </div>
-                </a>
-            </section>
-            <section class="stats" style="background-image:url('{{ SITE_ROOT }}/static/img/stat-bg.png');">
-                <ul>
-                    <li><span class="stat">{{ num_requests|intcomma }}</span> request{{ num_requests|pluralize }} filed</li>
-                    <li><span class="stat">{{ num_completed_requests|intcomma }}</span> request{{ num_completed_requests|pluralize }} completed  succesfully</li>
-                    <li><span class="stat">{{ num_pages|intcomma }}</span> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</li>
-                </ul>
-            </section>
-		</div>
-	</div>
-{% endblock %}
+        </div>
+        {% include 'lib/footer.html' %}
+    </div>
+{% endblock webpage %}

@@ -1,7 +1,12 @@
+{% if hidden %}
+<aside class="hidden-menu" id="sidebar-menu">
+{% else %}
 <aside id="sidebar-menu">
+{% endif %}
     <nav class="sidebar">
+        {% if not hidden %}
         <a href="{% url 'foia-create'%}" class="primary button" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a>
-        
+        {% endif %}
         {% if user.is_authenticated %}
         <section class="account">
             <div>
