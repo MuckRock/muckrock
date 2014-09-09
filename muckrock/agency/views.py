@@ -18,7 +18,7 @@ from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.jurisdiction.views import collect_stats, flag_helper
+from muckrock.jurisdiction.views import collect_stats, flag
 from muckrock.sidebar.models import Sidebar
 
 def detail(request, jurisdiction, jidx, slug, idx):
