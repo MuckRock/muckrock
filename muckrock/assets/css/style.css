@@ -1718,7 +1718,7 @@ nav.secondary {
 /* Global Sidebar */
 /* Sets the basics of the layout */
 .container {
-  width: 100%;
+  width: 75%;
   overflow: hidden;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -1728,7 +1728,7 @@ nav.secondary {
   position: fixed;
   top: 0;
   right: 0;
-  width: 250px;
+  width: 350px;
   height: 100%;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -1736,7 +1736,7 @@ nav.secondary {
 
 /* Controls visiblity of the Menu/Close button */
 nav.primary ul.right {
-  display: table; }
+  display: none; }
 
 #menu-button {
   display: table-cell; }
@@ -1751,25 +1751,28 @@ nav.primary ul.right {
   display: table-cell; }
 
 /* Controls the sizing and position of the sidebar */
-#sidebar-menu {
+.hidden-menu ~ .container {
+  width: 100%; }
+.hidden-menu ~ nav.primary ul.right {
+  display: table; }
+.hidden-menu #sidebar-menu {
+  width: 250px;
   margin-right: -250px; }
-
-#right-menu-button {
+.hidden-menu #right-menu-button {
   display: block; }
-
-#sidebar-menu:target {
+.hidden-menu #sidebar-menu:target {
   margin-right: 0; }
-  #sidebar-menu:target ~ .container {
+  .hidden-menu #sidebar-menu:target ~ .container {
     margin-left: -250px; }
-  #sidebar-menu:target #new-request {
+  .hidden-menu #sidebar-menu:target #new-request {
     display: none; }
-
 @media all and (min-width: 550px) {
-  #sidebar-menu {
+  .hidden-menu #sidebar-menu {
     width: 350px;
     margin-right: -350px; }
-    #sidebar-menu:target ~ .container {
+    .hidden-menu #sidebar-menu:target ~ .container {
       margin-left: -350px; } }
+
 nav.sidebar {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

@@ -210,12 +210,13 @@ nav.secondary {
 $menu-breakpoint: 1024px;
 $menu-width: 250px;
 $menu-width-large: 350px;
+$menu-width-visible: 25%;
 $menu-animation: all 0.5s $ease-out-expo;
 
 /* Sets the basics of the layout */
 
 .container {
-    width: 100%;
+    width: 100% - $menu-width-visible;
     overflow: hidden;
     @include transition($menu-animation);
 }
@@ -224,14 +225,14 @@ $menu-animation: all 0.5s $ease-out-expo;
     position: fixed;
     top: 0;
     right: 0;
-    width: $menu-width;
+    width: $menu-width-large;
     height: 100%;
     @include transition($menu-animation);
 }
 
 /* Controls visiblity of the Menu/Close button */
 
-nav.primary ul.right { display: table; }
+nav.primary ul.right { display: none; }
 #menu-button { display: table-cell; }
 #menu-close { display: none; }
 #sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
@@ -241,18 +242,42 @@ nav.primary ul.right { display: table; }
 
 /* Controls the sizing and position of the sidebar */
 
-#sidebar-menu { margin-right: -$menu-width; }
-#right-menu-button { display: block; }
-#sidebar-menu:target {
-    margin-right: 0;
-    & ~ .container { margin-left: -$menu-width; }
-    #new-request { display: none; }
+%hidden {
+    #sidebar-menu { margin-right: -$menu-width; }
+    #right-menu-button { display: block; }
+    #sidebar-menu:target {
+        margin-right: 0;
+        & ~ .container { margin-left: -$menu-width; }
+        #new-request { display: none; }
+    }
+    @media all and (min-width: 550px) {
+        #sidebar-menu {
+            width: $menu-width-large;
+            margin-right: -$menu-width-large;
+            &:target ~ .container { margin-left: -$menu-width-large; }
+        }
+    }
 }
-@media all and (min-width: 550px) {
+
+.hidden-menu {
+    & ~ .container { width: 100%; }
+    & ~ nav.primary ul.right { display: table; }
     #sidebar-menu {
-        width: $menu-width-large;
-        margin-right: -$menu-width-large;
-        &:target ~ .container { margin-left: -$menu-width-large; }
+        width: $menu-width;
+        margin-right: -$menu-width;
+    }
+    #right-menu-button { display: block; }
+    #sidebar-menu:target {
+        margin-right: 0;
+        & ~ .container { margin-left: -$menu-width; }
+        #new-request { display: none; }
+    }
+    @media all and (min-width: 550px) {
+        & #sidebar-menu {
+            width: $menu-width-large;
+            margin-right: -$menu-width-large;
+            &:target ~ .container { margin-left: -$menu-width-large; }
+        }
     }
 }
 
