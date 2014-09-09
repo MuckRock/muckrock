@@ -1718,6 +1718,7 @@ nav.secondary {
 /* Global Sidebar */
 /* Sets the basics of the layout */
 .container {
+  width: 100%;
   overflow: hidden;
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);

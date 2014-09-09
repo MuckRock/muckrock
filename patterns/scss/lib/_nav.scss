@@ -215,6 +215,7 @@ $menu-animation: all 0.5s $ease-out-expo;
 /* Sets the basics of the layout */
 
 .container {
+    width: 100%;
     overflow: hidden;
     @include transition($menu-animation);
 }
