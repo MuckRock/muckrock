@@ -25,12 +25,17 @@
             </li>
         </ul>
         <ul class="right">
-            <li><a href="{% url 'foia-create'%}" id="new-request"><b>+</b>&nbsp;New&nbsp;Request</a></li>
-            <li id="menu-button"><a href="#sidebar-menu">
+            <li>
+                <a href="{% url 'foia-create'%}"
+                   class="primary button" 
+                   id="new-request">
+                <b>+</b>&nbsp;New&nbsp;Request</a>
+            </li>
+            <li id="menu-button"><a href="#sidebar-menu" class="button">
                 <span class="menu-icon">&#9776;</span>
                 <span class="menu-text">&ensp;Menu</span>
             </a></li>
-            <li id="menu-close"><a href="#">
+            <li id="menu-close"><a href="#" class="button">
                 <span class="menu-icon">&#10005;</span>
                 <span class="menu-text">&ensp;Close</span>
             </a></li>

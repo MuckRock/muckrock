@@ -42,75 +42,40 @@ nav.primary {
         list-style-type: none;
         margin: 0;
         padding-left: 0;
+        &.left { float: left; }
+        &.right { float: right; }
+        @media screen and (min-width: $small-menu-breakpoint) {
+            &.left, &.right { width: auto; }
+            &.left { float: left; }
+            &.right { display: table; float: right; }
+        }
     }
     
     li {
         display: table-cell;
         vertical-align: middle;
         text-align: center;
-        a {
-            display: block;
-            width: 100%;
-            padding: 0.375em 1.25em;
-            border: $base-border-width solid $color-unselected;
-            border-radius: 0;
-            color: $color-unselected;
-            &:hover {
-                text-decoration: none;
-                color: $color-menu;
-                background-color: $color-selected;
-                border-color: $color-selected;
-            }
-        }
+        a.button { margin: 0; }
     }
-    
     li:first-child a.button {
         @include border-left-radius($base-border-radius);
+        @include border-right-radius(0);
         border-right: none;
     }
     li:last-child a.button {
         @include border-right-radius($base-border-radius);
-        border-right: $base-border-width solid $color-unselected;
+        @include border-left-radius(0);
         border-left: none;
-        &:hover { border-right-color: $color-selected; }
-    }
-    li:first-child + li:last-child {
-        a.button {
-            border-left: $base-border-width solid $color-unselected;
-            &:hover { border-left-color: $color-selected; }
-        }
+    }    
+    #menu-button > .button {
+        @include border-right-radius($base-border-radius);
+        @include border-left-radius(0);
+        border-left: none;
     }
     
-    ul.left { float: left; }
-    ul.right { 
-        float: right;
-        .menu-text { display: none; }
-        #new-request {
-            color: $color-primary;
-            border-color: $color-primary;
-            border-right: none;
-            @include border-left-radius($base-border-radius);
-            &:hover {
-                color: $color-white;
-            }
-        }
-        #menu-button, #menu-close {
-            & > a { @include border-right-radius($base-border-radius); }
-        }
-        li:last-child a { @include border-right-radius($base-border-radius); }
-        @media screen and (min-width: $small-menu-breakpoint) {
-            .menu-text { display: inline; }
-        }
-        
-        
-    }
-    
+    .menu-text { display: none; }
     @media screen and (min-width: $small-menu-breakpoint) {
-         ul {
-            &.left, &.right { width: auto; }
-            &.left { float: left; }
-            &.right { display: table; float: right; }
-        }
+        .menu-text { display: inline; }
     }
     
     /* Logo */
