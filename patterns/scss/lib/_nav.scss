@@ -250,7 +250,23 @@ $menu-animation: all 0.5s $ease-out-expo;
 
 nav.primary ul.right { display: none; }
 
-@mixin hidden-menu {
+.hidden-menu ~ .container { width: 100%; }
+.hidden-menu ~ .container nav.primary ul.right { display: table; }
+#sidebar-menu.hidden-menu {
+    width: $tablet-menu-width;
+    margin-right: -$tablet-menu-width;
+    &:target {
+        margin-right: 0;
+        & ~ .container, & ~ .footer { 
+            width: 100%;
+            margin-left: -$tablet-menu-width;
+        }
+        #new-request { display: none; }
+    }
+}
+#right-menu-button.hidden-menu { display: block; }
+
+@media screen and (max-width: $menu-breakpoint) {
     .container, .footer-container { width: 100%; }
     #sidebar-menu {
         width: $tablet-menu-width;
@@ -267,8 +283,6 @@ nav.primary ul.right { display: none; }
     }
     nav.primary ul.right { display: table; }
 }
-
-@media screen and (max-width: $menu-breakpoint) { @include hidden-menu; }
 
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
