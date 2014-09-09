@@ -250,7 +250,7 @@ $menu-animation: all 0.5s $ease-out-expo;
 
 nav.primary ul.right { display: none; }
 
-@media screen and (max-width: $menu-breakpoint) and (min-width: $menu-breakpoint - 300px) {
+@mixin hidden-menu {
     .container, .footer-container { width: 100%; }
     #sidebar-menu {
         width: $tablet-menu-width;
@@ -268,26 +268,9 @@ nav.primary ul.right { display: none; }
     nav.primary ul.right { display: table; }
 }
 
-@media screen and (max-width: $menu-breakpoint - 300px) {
-    .container, .footer-container { width: 100%; }
-    #sidebar-menu {
-        width: $mobile-menu-width;
-        margin-right: -$mobile-menu-width;
-    }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-        #new-request { display: none; }
-    }
-    nav.primary ul.right { display: table; }
-}
+@media screen and (max-width: $menu-breakpoint) { @include hidden-menu; }
 
 nav.sidebar {
-
     $sidebar-object-height: 2.5rem;
     $sidebar-button-background: darken($color-black, 4%);
     @mixin active-button {

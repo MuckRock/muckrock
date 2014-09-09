@@ -1746,7 +1746,7 @@ nav.secondary {
 nav.primary ul.right {
   display: none; }
 
-@media screen and (max-width: 1024px) and (min-width: 724px) {
+@media screen and (max-width: 1024px) {
   .container, .footer-container {
     width: 100%; }
 
@@ -1762,27 +1762,6 @@ nav.primary ul.right {
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
       margin-left: -300px; }
-    #sidebar-menu:target #new-request {
-      display: none; }
-
-  nav.primary ul.right {
-    display: table; } }
-@media screen and (max-width: 724px) {
-  .container, .footer-container {
-    width: 100%; }
-
-  #sidebar-menu {
-    width: 250px;
-    margin-right: -250px; }
-
-  #right-menu-button {
-    display: block; }
-
-  #sidebar-menu:target {
-    margin-right: 0; }
-    #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
-      width: 100%;
-      margin-left: -250px; }
     #sidebar-menu:target #new-request {
       display: none; }
 
