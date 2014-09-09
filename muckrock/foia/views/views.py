@@ -637,12 +637,12 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 @user_passes_test(lambda u: u.is_staff)
 def acronyms(request):
     """A page with all the acronyms explanations"""
-
     status_dict = dict(STATUS)
-
     codes = [(acro, name, status_dict.get(status, ''), desc)
              for acro, (name, status, desc) in CODES.iteritems()]
     codes.sort()
-
-    return render_to_response('foia/acronym.html', {'codes': codes},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'foia/acronyms.html',
+        {'codes': codes},
+        context_instance=RequestContext(request)
+    )
