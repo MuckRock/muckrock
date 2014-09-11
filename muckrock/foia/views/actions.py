@@ -86,14 +86,11 @@ def _foia_action(request, foia, action):
 @login_required
 def note(request, jurisdiction, jidx, slug, idx):
     """Add a note to a request"""
-
     def form_actions(_, foia, form):
-        """Save the FOI note"""
         foia_note = form.save(commit=False)
         foia_note.foia = foia
         foia_note.date = datetime.now()
         foia_note.save()
-
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
@@ -105,125 +102,152 @@ def note(request, jurisdiction, jidx, slug, idx):
         value='Add',
         must_own=True,
         template='foia/foiarequest_action.html',
-        extra_context=lambda f: {})
+        extra_context=lambda f: {}
+    )
     return _foia_action(request, foia, action)
 
 @login_required
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
-
     def form_actions(request, foia, _):
-        """Delete the FOI request"""
         foia.delete()
         messages.info(request, 'Request succesfully deleted')
-
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='delete',
-        tests=[(lambda f: f.is_deletable(), 'You may only delete draft requests.')],
+        tests=[(
+            lambda f: f.is_deletable(),
+            'You may only delete draft requests.'
+        )],
         form_class=lambda r, f: FOIADeleteForm,
         return_url=lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
         heading='Delete FOI Request',
         value='Delete',
         must_own=True,
         template='foia/foiarequest_action.html',
-        extra_context=lambda f: {})
+        extra_context=lambda f: {}
+    )
     return _foia_action(request, foia, action)
 
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
-
     def form_actions(_, foia, form):
         """Update the embargo date"""
         foia.embargo = form.cleaned_data.get('embargo')
         foia.date_embargo = form.cleaned_data.get('date_embargo')
         foia.save()
-        logger.info('Embargo set by user for FOI Request %d %s to %s',
-                    foia.pk, foia.title, foia.embargo)
-
+        logger.info(
+            'Embargo set by user for FOI Request %d %s to %s',
+            foia.pk,
+            foia.title,
+            foia.embargo
+        )
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='embargo',
-        tests=[(lambda f: f.user.get_profile().can_embargo(),
-                  'You may not embargo requests with your account type')],
+        tests=[(
+            lambda f: f.user.get_profile().can_embargo(),
+            'You may not embargo requests with your account type'
+        )],
         form_class=lambda r, f: FOIAEmbargoDateForm if f.date_embargo \
-                                  else FOIAEmbargoForm,
+                                                    else FOIAEmbargoForm,
         return_url=lambda r, f: f.get_absolute_url(),
         heading='Update the Embargo Date',
         value='Update',
         must_own=True,
         template='foia/foiarequest_action.html',
-        extra_context=lambda f: {})
+        extra_context=lambda f: {}
+    )
     return _foia_action(request, foia, action)
 
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
-    # pylint: disable=W0142
-
     def form_actions(request, foia, form):
         """Pay for request"""
         try:
             amount = int(foia.price * 105)
-            request.user.get_profile().pay(form, amount,
-                                           'Charge for request: %s %s' % (foia.title, foia.pk))
+            request.user.get_profile().pay(
+                form,
+                amount,
+                'Charge for request: %s %s' % (foia.title, foia.pk)
+            )
             foia.status = 'processed'
             foia.save()
 
-            send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-                      render_to_string('foia/admin_payment.txt',
-                                       {'request': foia, 'amount': amount / 100.0}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-
-            logger.info('%s has paid %0.2f for request %s',
-                        request.user.username, amount/100, foia.title)
+            template = 'foia/admin_payment.txt'
+            args = { 'request': foia, 'amount': amount / 100.0 }
+            send_mail(
+                '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
+                render_to_string(template, args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
+            logger.info(
+                '%s has paid %0.2f for request %s',
+                request.user.username,
+                amount/100,
+                foia.title
+            )
             messages.success(request, 'Your payment was successful')
             return HttpResponseRedirect(reverse('acct-my-profile'))
         except stripe.CardError as exc:
             messages.error(request, 'Payment error: %s' % exc)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-            return HttpResponseRedirect(reverse('foia-pay',
-                kwargs={'jurisdiction': foia.jurisdiction.slug,
-                        'slug': foia.slug,
-                        'idx': foia.pk}))
-
+            args = {
+                'jurisdiction': foia.jurisdiction.slug,
+                'slug': foia.slug,
+                'idx': foia.pk
+            }
+            return HttpResponseRedirect(reverse('foia-pay', kwargs=args))
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='pay for',
-        tests=[(lambda f: f.is_payable(),
-                  'You may only pay for requests that require a payment')],
+        tests=[(
+            lambda f: f.is_payable(),
+            'You may only pay for requests that require a payment'
+        )],
         form_class=lambda r, f: lambda *args, **kwargs: PaymentForm(request=r, *args, **kwargs),
         return_url=lambda r, f: f.get_absolute_url(),
         heading='Pay for Request',
         value='Pay',
         must_own=True,
         template='registration/cc.html',
-        extra_context=lambda f: {'desc': 'You will be charged $%.2f for this request' %
-                                   (f.price * Decimal('1.05')),
-                                   'pub_key': STRIPE_PUB_KEY})
+        extra_context=lambda f: {
+            'desc': 'You will be charged $%.2f for this request' % (f.price * Decimal('1.05')),
+            'pub_key': STRIPE_PUB_KEY
+        }
+    )
     return _foia_action(request, foia, action)
 
 @login_required
 def crowdfund_request(request, jurisdiction, jidx, slug, idx):
-    """Enable crowdfunding on the request"""
-    # pylint: disable=W0142
-
+    """Enable crowdfunding on the request, and send an email announcing it."""
     def form_actions(request, foia, form):
         """Form actions"""
         # pylint: disable=unused-argument
-        crowdfund = CrowdfundRequest.objects.create(foia=foia,
+        crowdfund = CrowdfundRequest.objects.create(
+            foia=foia,
             payment_required=foia.price * Decimal('1.05'),
-            date_due=date.today() + timedelta(30))
-        messages.success(request, 'You have succesfully started a crowdfunding campaign')
-        send_mail('%s has launched a crowdfunding campaign' % request.user.username,
-                  render_to_string('crowdfund/notify.txt',
-                                   {'crowdfund': crowdfund, 'user': request.user}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
-
+            date_due=date.today() + timedelta(30)
+        )
+        success_msg = 'You have succesfully started a crowdfunding campaign'
+        messages.success(request, success_msg)
+        send_mail(
+            '%s has launched a crowdfunding campaign' % request.user.username,
+            render_to_string(
+                'crowdfund/notify.txt',
+                { 'crowdfund': crowdfund, 'user': request.user }
+            ),
+            'info@muckrock.com',
+            ['requests@muckrock.com'],
+            fail_silently=False
+        )
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
@@ -232,13 +256,13 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
                   'You may only crowdfund requests that require a payment')],
         form_class=lambda r, f: CrowdfundEnableForm,
         return_url=lambda r, f: f.get_absolute_url(),
-        heading='Enable Crowdfunding for Request',
+        heading='Enable Crowdfunding for Your Request',
         value='Crowdfund',
         must_own=True,
         template='foia/foiarequest_action.html',
-        extra_context=lambda f: {'desc': 'By enabling crowdfunding, others will be able to '
-                                           'contribute funds toward the money required to fufill '
-                                           'this request'}
+        extra_context=lambda f: {'desc': ('With crowdfunding, others will '     
+                                          'be able to contribute the money '
+                                          'needed to fufill this request.') }
     )
     return _foia_action(request, foia, action)
 
