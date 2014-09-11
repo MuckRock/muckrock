@@ -32,12 +32,15 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def _foia_action(request, jurisdiction, jidx, slug, idx, action):
+def get_foia(jurisdiction, jidx, slug, idx):
+    """Returns a foia object"""
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    return foia
+
+def _foia_action(request, foia, action):
     """Generic helper for FOIA actions"""
     # pylint: disable=R0913
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
     form_class = action.form_class(request, foia)
 
     if action.must_own and foia.user != request.user:
@@ -72,9 +75,7 @@ Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
 @user_passes_test(lambda u: u.is_staff)
 def admin_fix(request, jurisdiction, jidx, slug, idx):
     """Send an email from the requests auto email address"""
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
+    foia = get_foia(jurisdiction, jidx, slug, idx)
 
     if request.method == 'POST':
         form = FOIAAdminFixForm(request.POST)
@@ -111,6 +112,7 @@ def note(request, jurisdiction, jidx, slug, idx):
         foia_note.date = datetime.now()
         foia_note.save()
 
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='add notes',
@@ -122,7 +124,7 @@ def note(request, jurisdiction, jidx, slug, idx):
         must_own=True,
         template='foia/foiarequest_action.html',
         extra_context=lambda f: {})
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    return _foia_action(request, foia, action)
 
 @login_required
 def delete(request, jurisdiction, jidx, slug, idx):
@@ -133,6 +135,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
         foia.delete()
         messages.info(request, 'Request succesfully deleted')
 
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='delete',
@@ -144,7 +147,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
         must_own=True,
         template='foia/foiarequest_action.html',
         extra_context=lambda f: {})
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    return _foia_action(request, foia, action)
 
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
@@ -158,6 +161,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         logger.info('Embargo set by user for FOI Request %d %s to %s',
                     foia.pk, foia.title, foia.embargo)
 
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='embargo',
@@ -171,7 +175,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         must_own=True,
         template='foia/foiarequest_action.html',
         extra_context=lambda f: {})
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    return _foia_action(request, foia, action)
 
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
@@ -204,6 +208,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
                         'slug': foia.slug,
                         'idx': foia.pk}))
 
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='pay for',
@@ -218,7 +223,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         extra_context=lambda f: {'desc': 'You will be charged $%.2f for this request' %
                                    (f.price * Decimal('1.05')),
                                    'pub_key': STRIPE_PUB_KEY})
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    return _foia_action(request, foia, action)
 
 @login_required
 def crowdfund_request(request, jurisdiction, jidx, slug, idx):
@@ -237,6 +242,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
                                    {'crowdfund': crowdfund, 'user': request.user}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='enabled crowdfunding for',
@@ -252,41 +258,38 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
                                            'contribute funds toward the money required to fufill '
                                            'this request'}
     )
-    return _foia_action(request, jurisdiction, jidx, slug, idx, action)
+    return _foia_action(request, foia, action)
 
 @login_required
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-
-    if foia.user == request.user:
-        messages.error(request, 'You may not follow your own request')
+    foia = get_foia(jurisdiction, jidx, slug, idx)
+    if foia.user != request.user:
+        followers = foia.followed_by
+        if followers.filter(user=request.user): # If following, unfollow
+            followers.remove(request.user.get_profile())
+            msg = 'You are no longer following %s' % foia.title
+        else: # If not following, follow
+            followers.add(request.user.get_profile())
+            msg = ('You are now following %(request)s. '
+                   'You will be notified when it is updated.'
+                  ) % { 'request': foia.title }
+        messages.info(request, msg)
     else:
-        if foia.followed_by.filter(user=request.user):
-            foia.followed_by.remove(request.user.get_profile())
-            messages.info(request, 'You are no longer following %s' % foia.title)
-        else:
-            foia.followed_by.add(request.user.get_profile())
-            messages.info(request, 'You are now following %s.  You will be notified whenever it '
-                                   'is updated.' % foia.title)
-
+        messages.error(request, 'You may not follow your own request')
     return redirect(foia)
 
 @login_required
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-
-    if foia.user != request.user:
-        messages.error(request, 'You must own the request to toggle auto-followups')
-        return redirect(foia)
-
-    foia.disable_autofollowups = not foia.disable_autofollowups
-    foia.save()
-    action = 'disabled' if foia.disable_autofollowups else 'enabled'
-    messages.success(request, 'Autofollowups have been %s' % action)
+    foia = get_foia(jurisdiction, jidx, slug, idx)
+    if foia.user == request.user:
+        foia.disable_autofollowups = not foia.disable_autofollowups
+        foia.save()
+        action = 'disabled' if foia.disable_autofollowups else 'enabled'
+        msg = 'Autofollowups have been %s' % action
+        messages.success(request, msg)
+    else:
+        msg = 'You must own the request to toggle auto-followups'
+        messages.error(request, msg)
     return redirect(foia)
