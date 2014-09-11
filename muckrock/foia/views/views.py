@@ -496,7 +496,8 @@ class ListFollowing(ListBase):
 
 
 class Detail(DetailView):
-    """Details of a single FOIA request as well as handling post actions for the request"""
+    """Details of a single FOIA request as well
+    as handling post actions for the request"""
 
     model = FOIARequest
     context_object_name = 'foia'
@@ -504,18 +505,22 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=W0613
-        jmodel = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
-                                                 pk=self.kwargs['jidx'])
-        foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=self.kwargs['slug'],
-                                              pk=self.kwargs['idx'])
-
+        jmodel = get_object_or_404(
+            Jurisdiction,
+            slug=self.kwargs['jurisdiction'],
+            pk=self.kwargs['jidx']
+        )
+        foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction=jmodel,
+            slug=self.kwargs['slug'],
+            pk=self.kwargs['idx']
+        )
         if not foia.is_viewable(self.request.user):
             raise Http404()
-
         if foia.updated and foia.user == self.request.user:
             foia.updated = False
             foia.save()
-
         return foia
 
     def get_context_data(self, **kwargs):
@@ -526,18 +531,11 @@ class Detail(DetailView):
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS if self.request.user.is_staff else STATUS_NODRAFT
-        if self.request.user.is_anonymous():
-            context['sidebar'] = Sidebar.objects.get_text('anon_request')
-        else:
-            context['sidebar'] = Sidebar.objects.get_text('request')
         return context
 
     def post(self, request, **kwargs):
         """Handle form submissions"""
-        # pylint: disable=W0613
-
         foia = self.get_object()
-
         actions = {
             'status': self._status,
             'tags': self._tags,
@@ -549,80 +547,106 @@ class Detail(DetailView):
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,
         }
-
         try:
             return actions[request.POST['action']](request, foia)
-        except KeyError:
-            # should never happen if submitting form from web page properly
+        except KeyError: # if submitting form from web page improperly
             return redirect(foia)
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        # pylint: disable=R0201
         if foia.user == request.user:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
     def _status(self, request, foia):
         """Handle updating status"""
-        # pylint: disable=R0201
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or
-           (request.user.is_staff and status in [s for s, _ in STATUS])) and \
-           foia.status not in ['started', 'submitted']:
+        if foia.status not in ['started', 'submitted'] and ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
-            send_mail('%s changed the status of "%s" to %s' %
-                        (request.user.username, foia.title, foia.get_status_display()),
-                      render_to_string('foia/status_change.txt',
-                                       {'request': foia, 'old_status': old_status,
-                                        'user': request.user}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            
+            subject = '%s changed the status of "%s" to %s' % (
+                request.user.username,
+                foia.title,
+                foia.get_status_display()
+            )
+            args = {
+                'request': foia,
+                'old_status': old_status,
+                'user': request.user
+            }
+            send_mail(
+                subject,
+                render_to_string('foia/status_change.txt', args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
         return redirect(foia)
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        # pylint: disable=R0201
         if foia.user == request.user and foia.status != 'started':
-            save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
-                            'Follow up succesfully sent')
+            save_foia_comm(
+                request,
+                foia,
+                foia.user.get_full_name(),
+                request.POST.get('text'),
+                'Follow up succesfully sent'
+            )
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
-        # pylint: disable=R0201
         if foia.user == request.user:
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
-                user=request.user, title=title, slug=slugify(title), foia=foia,
-                question=request.POST.get('text'), date=datetime.now())
+                user=request.user,
+                title=title,
+                slug=slugify(title),
+                foia=foia,
+                question=request.POST.get('text'),
+                date=datetime.now()
+            )
             messages.success(request, 'Question succesfully posted')
             question.notify_new()
             return redirect(question)
         else:
+            error_msg = 'You may only ask questions about your own requests.'
+            messages.error(request, msg)
             return redirect(foia)
 
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
-        # pylint: disable=R0201
         if request.user.is_authenticated():
-            send_mail('[FLAG] Freedom of Information Request: %s' % foia.title,
-                      render_to_string('foia/flag.txt',
-                                       {'request': foia, 'user': request.user,
-                                        'reason': request.POST.get('text')}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            args = {
+                'request': foia,
+                'user': request.user,
+                'reason': request.POST.get('text')
+            }
+            send_mail(
+                '[FLAG] Freedom of Information Request: %s' % foia.title,
+                render_to_string('foia/flag.txt', args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
             messages.info(request, 'Problem succesfully reported')
         return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
-        # pylint: disable=R0201
         if foia.user == request.user and foia.is_appealable():
-            save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
-                            'Appeal succesfully sent', appeal=True)
+            save_foia_comm(
+                request,
+                foia,
+                foia.user.get_full_name(),
+                request.POST.get('text'),
+                'Appeal succesfully sent',
+                appeal=True
+            )
         return redirect(foia)
-
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
@@ -644,7 +668,7 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
 @user_passes_test(lambda u: u.is_staff)
 def acronyms(request):
-    """A page with all the acronyms explanations"""
+    """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
     codes = [(acro, name, status_dict.get(status, ''), desc)
              for acro, (name, status, desc) in CODES.iteritems()]
