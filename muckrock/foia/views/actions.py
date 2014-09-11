@@ -32,7 +32,12 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def get_foia(jurisdiction, jidx, slug, idx):
+Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
+                              'heading value must_own template extra_context')
+
+# Helper Functions
+
+def _get_foia(jurisdiction, jidx, slug, idx):
     """Returns a foia object"""
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
@@ -40,13 +45,13 @@ def get_foia(jurisdiction, jidx, slug, idx):
 
 def _foia_action(request, foia, action):
     """Generic helper for FOIA actions"""
-    # pylint: disable=R0913
     form_class = action.form_class(request, foia)
-
+    # Check that the request belongs to the user
     if action.must_own and foia.user != request.user:
-        messages.error(request, 'You may only %s your own requests' % action.msg)
+        msg = 'You may only %s your own requests' % action.msg
+        messages.error(request, msg)
         return redirect(foia)
-
+    # Check that the action is valid
     for test, msg in action.tests:
         if not test(foia):
             messages.error(request, msg)
@@ -57,49 +62,26 @@ def _foia_action(request, foia, action):
         if form.is_valid():
             action.form_actions(request, foia, form)
             return HttpResponseRedirect(action.return_url(request, foia))
-
     else:
         if isinstance(form_class, type) and issubclass(form_class, forms.ModelForm):
             form = form_class(instance=foia)
         else:
             form = form_class()
-
     context = action.extra_context(foia)
-    context.update({'form': form, 'foia': foia, 'heading': action.heading, 'action': action.value})
-    return render_to_response(action.template, context,
-                              context_instance=RequestContext(request))
+    args = {
+        'form': form,
+        'foia': foia,
+        'heading': action.heading,
+        'action': action.value
+    }
+    context.update(args)
+    return render_to_response(
+        action.template,
+        context,
+        context_instance=RequestContext(request)
+    )
 
-Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
-                              'heading value must_own template extra_context')
-
-@user_passes_test(lambda u: u.is_staff)
-def admin_fix(request, jurisdiction, jidx, slug, idx):
-    """Send an email from the requests auto email address"""
-    foia = get_foia(jurisdiction, jidx, slug, idx)
-
-    if request.method == 'POST':
-        form = FOIAAdminFixForm(request.POST)
-        formset = FOIAFileFormSet(request.POST, request.FILES)
-        if form.is_valid() and formset.is_valid():
-            if form.cleaned_data['email']:
-                foia.email = form.cleaned_data['email']
-            if form.cleaned_data['other_emails']:
-                foia.other_emails = form.cleaned_data['other_emails']
-            if form.cleaned_data['from_email']:
-                from_who = form.cleaned_data['from_email']
-            else:
-                from_who = foia.user.get_full_name()
-            save_foia_comm(request, foia, from_who, form.cleaned_data['comm'],
-                            'Admin Fix submitted', formset, snail=form.cleaned_data['snail_mail'])
-            return redirect(foia)
-    else:
-        form = FOIAAdminFixForm(instance=foia)
-        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
-
-    context = {'form': form, 'foia': foia, 'heading': 'Email from Request Address',
-               'formset': formset, 'action': 'Submit'}
-    return render_to_response('foia/foiarequest_action.html', context,
-                              context_instance=RequestContext(request))
+# User Actions
 
 @login_required
 def note(request, jurisdiction, jidx, slug, idx):
@@ -112,7 +94,7 @@ def note(request, jurisdiction, jidx, slug, idx):
         foia_note.date = datetime.now()
         foia_note.save()
 
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='add notes',
@@ -135,7 +117,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
         foia.delete()
         messages.info(request, 'Request succesfully deleted')
 
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='delete',
@@ -161,7 +143,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         logger.info('Embargo set by user for FOI Request %d %s to %s',
                     foia.pk, foia.title, foia.embargo)
 
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='embargo',
@@ -208,7 +190,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
                         'slug': foia.slug,
                         'idx': foia.pk}))
 
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='pay for',
@@ -242,7 +224,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
                                    {'crowdfund': crowdfund, 'user': request.user}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
         msg='enabled crowdfunding for',
@@ -263,7 +245,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     if foia.user != request.user:
         followers = foia.followed_by
         if followers.filter(user=request.user): # If following, unfollow
@@ -282,7 +264,7 @@ def follow(request, jurisdiction, jidx, slug, idx):
 @login_required
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
-    foia = get_foia(jurisdiction, jidx, slug, idx)
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
     if foia.user == request.user:
         foia.disable_autofollowups = not foia.disable_autofollowups
         foia.save()
@@ -293,3 +275,34 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         msg = 'You must own the request to toggle auto-followups'
         messages.error(request, msg)
     return redirect(foia)
+
+# Staff Actions
+
+@user_passes_test(lambda u: u.is_staff)
+def admin_fix(request, jurisdiction, jidx, slug, idx):
+    """Send an email from the requests auto email address"""
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
+
+    if request.method == 'POST':
+        form = FOIAAdminFixForm(request.POST)
+        formset = FOIAFileFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            if form.cleaned_data['email']:
+                foia.email = form.cleaned_data['email']
+            if form.cleaned_data['other_emails']:
+                foia.other_emails = form.cleaned_data['other_emails']
+            if form.cleaned_data['from_email']:
+                from_who = form.cleaned_data['from_email']
+            else:
+                from_who = foia.user.get_full_name()
+            save_foia_comm(request, foia, from_who, form.cleaned_data['comm'],
+                            'Admin Fix submitted', formset, snail=form.cleaned_data['snail_mail'])
+            return redirect(foia)
+    else:
+        form = FOIAAdminFixForm(instance=foia)
+        formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())
+
+    context = {'form': form, 'foia': foia, 'heading': 'Email from Request Address',
+               'formset': formset, 'action': 'Submit'}
+    return render_to_response('foia/foiarequest_action.html', context,
+                              context_instance=RequestContext(request))
