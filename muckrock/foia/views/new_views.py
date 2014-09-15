@@ -6,6 +6,7 @@ from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 
 import muckrock.foia.new_forms as forms
+from muckrock.jurisdiction.models import Jurisdiction
 
 import logging
 logger = logging.getLogger(__name__)
@@ -25,11 +26,27 @@ class RequestWizard(SessionWizardView):
         profile = user.get_profile()
         return None
         
+    def get_jurisdiction_list(self):
+        """Creates a list of all chosen jurisdictions"""
+        j_list = []
+        data = self.get_cleaned_data_for_step('jurisdiction')
+        is_state, is_local = data['is_state'], data['is_local']
+        state, local = data['state'], data['local']
+        if data.get('is_federal'):
+            j_list += Jurisdiction.objects.filter(level='f', hidden=False)
+        if is_state:
+            j_list += Jurisdiction.objects.filter(level='s', abbrev=state)
+            if is_local and not local:
+                j_list += Jurisdiction.objects.filter(level='l', parent=j.id)
+        if is_local:
+            j_list += Jurisdiction.objects.filter(level='l', full_name=local)
+        return j_list
+        
     def get_form_initial(self, step):
         initial = self.initial_dict.get(step, {})
-        if step == 2:
-            j = self.get_cleaned_data_for_step('0')['jurisdictions']
-            initial.update({'j': j})
+        if step == 'agency':
+            jurisdictions = self.get_jurisdiction_list()
+            initial.update({'jurisdictions': jurisdictions})
         return initial
 
     def done(self, form_list, **kwargs):

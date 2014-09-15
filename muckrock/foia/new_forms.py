@@ -1,17 +1,17 @@
 from django import forms
 import autocomplete_light as autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.agency.models import Agency
 
 class RequestForm(forms.Form):
     title = forms.CharField()
     request = forms.CharField(widget=forms.Textarea)
 
 class JurisdictionForm(forms.Form):
-    jurisdictions = []
     states = Jurisdiction.objects.filter(level='s', hidden=False)
     localities = Jurisdiction.objects.filter(level='l', hidden=False)
     
-    STATES_CHOICES = [(s.abbrev, s.name) for s in states]
+    STATES_CHOICES = [('', '--Pick a State--')] + [(s.abbrev, s.name) for s in states]
     
     is_federal = forms.BooleanField(required=False)
     is_state = forms.BooleanField(required=False)
@@ -25,26 +25,6 @@ class JurisdictionForm(forms.Form):
         queryset=localities.order_by('parent', 'name'),
         required=False
     )
-    
-    def get_jurisdiction_list(self):
-        """Creates a list of all chosen jurisdictions"""
-        j_list = []
-        data = self.cleaned_data
-        is_state, is_local = data.get('is_state'), data.get('is_local')
-        state, local = data.get('state'), data.get('local')
-        if data.get('is_federal'):
-            j = Jurisdiction.objects.filter(level='f', hidden=False)
-            j_list.append(j)
-        if is_state:
-            j = Jurisdiction.objects.filter(level='s', full_name=state)
-            j_list.append(j)
-            if is_local and not local:
-                k = Jurisdiction.objects.filter(level='l', parent=state)
-                j_list.append(k)
-        if is_local:
-            j = Jurisdiction.objects.filter(level='l', full_name=local)
-            j_list.append(j)
-        return j_list
     
     def clean(self):
         """Ensures conditional fields are filled in"""
@@ -61,17 +41,10 @@ class JurisdictionForm(forms.Form):
         if not is_state and is_local and not local:
             error_msg = 'No locality was selected'
             self._errors['local'] = self.error_class([error_msg])
-        self.jurisdictions = self.get_jurisdiction_list()
         return self.cleaned_data
         
 class AgencyForm(forms.Form):
 
-    AGENCY_CHOICES = []
-    agencies = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(),
-        choices=AGENCY_CHOICES
-    )
-    
     def clean(self):
         """Ensures at least one agency is chosen"""
         agencies = self.cleaned_data.get('agencies')
@@ -82,31 +55,18 @@ class AgencyForm(forms.Form):
   
     def __init__(self, *args, **kwargs):
         try:
-            jurisdictions = kwargs.pop('j')
-            for jurisdiction in jurisdictions:
-                agencies = Agency.objects.filter(jurisdiction=jurisdiction)
-                for agency in agencies:
-                    self.AGENCY_CHOICES.append((agency.name))
+            initial = kwargs.pop('initial')
+            jurisdictions = initial['jurisdictions']
         except KeyError as e:
-            print e
+            print 'KeyError: ' + e
         super(AgencyForm, self).__init__(*args, **kwargs)
-
-
-    def _get_agencies(self):
-        """Get and cache the agencies selected in the submit step"""
-        if self.jurisdictions:
-            agencies = Agency.objects.get_approved()
-            if agency_type:
-                agencies = agencies.filter(types=agency_type)
-            if jurisdiction and jurisdiction.level == 's':
-                agencies = agencies.filter(Q(jurisdiction=jurisdiction) |
-                                           Q(jurisdiction__parent=jurisdiction))
-            elif jurisdiction:
-                agencies = agencies.filter(jurisdiction=jurisdiction)
-            self.agencies = agencies
-            return agencies
-        else:
-            return None
+        
+        agencies = []      
+        for jurisdiction in jurisdictions:
+            agencies += Agency.objects.filter(jurisdiction=jurisdiction)
+        for agency in agencies:
+            identifier = agency.name
+            self.fields[identifier] = forms.BooleanField(required=False)
 
 class EmbargoForm(forms.Form):
     embargo = forms.BooleanField()
