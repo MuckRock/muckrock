@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block webpage %}
+
+    {% include 'lib/sidebar.html' with hidden=1 %}
+    <div class="container">
+        {% include 'lib/header.html' %}
+        <div class="new-request">
+        <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+            <form action="" method="post">{% csrf_token %}     
+            {{ wizard.management_form }}
+            {% if wizard.form.forms %}
+                {{ wizard.form.management_form }}
+                {% for form in wizard.form.forms %}
+                    {{ form }}
+                {% endfor %}
+            {% else %}
+                {{ wizard.form }}
+            {% endif %}
+            <input type="submit" value="Next"/>
+            </form>
+        </div>
+        {% include 'lib/footer.html' %}
+    </div>
+{% endblock webpage %}

@@ -84,7 +84,6 @@ def delete_comm(request, next_):
         messages.success(request, 'The communication was deleted.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-        continue
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -106,8 +105,7 @@ def resend_comm(request, next_):
         foia.submit(snail=snail)
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
-        continue
+        messages.error(request, 'The communication does not exist.')
     except ValidationError:
         messages.error(request, 'Not a valid email address')
-        continue
     return redirect(next_)

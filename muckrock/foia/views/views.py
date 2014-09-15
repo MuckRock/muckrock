@@ -35,7 +35,8 @@ from muckrock.foia.forms import FOIARequestForm, \
                                 TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
-from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
+from muckrock.foia.views.new_views import RequestWizard
+# from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
@@ -139,77 +140,7 @@ def _foia_form_handler(request, foia, action):
                               {'form': form, 'action': action},
                               context_instance=RequestContext(request))
 
-@login_required
-def multiple(request, **kwargs):
-    """Submit a multi agency request using the wizard"""
 
-    multi_forms = [
-        ('submit', FOIAMultipleSubmitForm),
-        ('agency', AgencyConfirmForm),
-        ('pay', PaymentForm),
-        ('nopay', forms.Form),
-        ]
-
-    def payment_req(wizard):
-        """Is a payment form required?"""
-        data = wizard.get_cleaned_data_for_step('agency')
-        if data:
-            agencies = data.get('agencies')
-        if data and agencies:
-            num_requests = agencies.count()
-            extra_context = wizard.request.user.get_profile().multiple_requests(num_requests)
-            return extra_context['extra_requests'] > 0
-        return False
-
-    condition_dict = {
-        'pay': payment_req,
-        'nopay': lambda wizard: not payment_req(wizard),
-    }
-
-    return SubmitMultipleWizard.as_view(multi_forms,
-        condition_dict=condition_dict)(request, **kwargs)
-
-@login_required
-def create(request):
-    """Create a new foia request using the wizard"""
-
-    def display_what_form(levels):
-        """Display which 'What Form'"""
-        def condition(wizard):
-            """For condition dict"""
-            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            return cleaned_data.get('level') in levels
-        return condition
-
-    def display_template_form(template):
-        """Display which 'Template Form'"""
-        def condition(wizard):
-            """For condition dict"""
-            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            level = cleaned_data.get('level', '').capitalize()
-            if level == 'Multi':
-                level = 'Local'
-            what_form = 'FOIAWhat%sForm' % level
-            cleaned_data = wizard.get_cleaned_data_for_step(what_form) or {}
-            return cleaned_data.get('template') == template
-        return condition
-
-    # collect all the forms so that the wizard can access them
-    wizard_forms = [(form.__name__, form) for form in
-        [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm]]
-    # if the form has no base fields, it requires no additional information and should not be
-    # included in the wizard ie pet data
-    wizard_forms += [(t.__name__, t) for t in TEMPLATES.values() if t.base_fields]
-
-    condition_dict = {
-        'FOIAWhatLocalForm':   display_what_form(('local', 'multi')),
-        'FOIAWhatStateForm':   display_what_form(('state',)),
-        'FOIAWhatFederalForm': display_what_form(('federal',)),
-    }
-    condition_dict.update(dict((t.__name__, display_template_form(tslug))
-                               for tslug, t in TEMPLATES.iteritems()))
-
-    return FOIAWizard.as_view(wizard_forms, condition_dict=condition_dict)(request)
 
 @login_required
 def update(request, jurisdiction, jidx, slug, idx):
