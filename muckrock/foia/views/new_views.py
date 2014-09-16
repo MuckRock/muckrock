@@ -47,6 +47,17 @@ class RequestWizard(SessionWizardView):
         if step == 'agency':
             jurisdictions = self.get_jurisdiction_list()
             initial.update({'jurisdictions': jurisdictions})
+        elif step == 'confirm':
+            request_input = self.get_cleaned_data_for_step('request')
+            agency_input = self.get_cleaned_data_for_step('agency')
+            title = request_input['title']
+            request = request_input['request']
+            agencies = []
+            for agency_choice in agency_input:
+                agency = [agency_choice] if agency_input[agency_choice] else []
+                agencies += agency
+            args = {'title': title, 'request': request, 'agencies': agencies}
+            initial.update(args)
         return initial
 
     def done(self, form_list, **kwargs):
