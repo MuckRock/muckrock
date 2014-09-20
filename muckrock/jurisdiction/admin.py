@@ -93,4 +93,4 @@ class JurisdictionCsvModel(CsvModel):
         # pylint: disable=R0903
         dbModel = Jurisdiction
         delimiter = ','
-        update = {'keys': ['name', 'parent']}
+        update = {'keys': ['slug', 'parent']}
