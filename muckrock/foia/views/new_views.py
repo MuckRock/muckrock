@@ -67,7 +67,7 @@ class RequestWizard(SessionWizardView):
         if step == 'agency':
             args = self.get_jurisdiction_list()
         if step == 'confirm':
-            args = get_summary()   
+            args = self.get_summary()   
         initial.update(args)
         return initial
 
