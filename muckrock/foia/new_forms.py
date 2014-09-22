@@ -45,12 +45,15 @@ class JurisdictionForm(forms.Form):
         
 class AgencyForm(forms.Form):
 
-    other = forms.CharField(required=False)
+    other = forms.CharField(
+        required=False,
+        help_text='Separate agency names with commas'
+    )
     
     def clean(self):
         """Ensures at least one agency is chosen"""
-        agencies = self.cleaned_data.get('agencies')
-        if not agencies or not self.other:
+        agencies = [key for key, value in self.cleaned_data.items() if key is not 'other' and value is not False]
+        if not agencies:
             error_msg = 'You must add at least one agency.'
             self._errors['agencies'] = self.error_class([error_msg])
         return self.cleaned_data
@@ -67,26 +70,30 @@ class AgencyForm(forms.Form):
         for jurisdiction in jurisdictions:
             agencies += Agency.objects.filter(jurisdiction=jurisdiction)
         for agency in agencies:
-            # identifier = agency.name
             self.fields[agency.name] = forms.BooleanField(required=False)
         
-    
-    
-
-
 class ConfirmationForm(forms.Form):
 
-    embargo = forms.BooleanField()
-    embargo_date = forms.DateField()
-    submit = forms.BooleanField()
+    embargo = forms.BooleanField(required=False)
+    embargo_expiration = forms.DateField(required=False)
+    
+    def clean(self):
+        data = self.cleaned_data
+        if data['embargo'] and not data['embargo_expiration']:
+            error_msg = 'Embargoed requests must specify an expiration date.'
+            self._errors['embargo_expiration'] = self.error_class([error_msg])
+        return self.cleaned_data
     
     def __init__(self, *args, **kwargs):
         try:
             initial = kwargs.pop('initial')
             self.user = initial['user']
             self.title = initial['title']
-            self.request = initial['document']
+            self.document = initial['document']
             self.agencies = initial['agencies']
+            self.new_agencies = initial['new_agencies']
         except KeyError as e:
-            print 'KeyError: ' + e
-        super(AgencyForm, self).__init__(*args, **kwargs)
+            print 'KeyError: ' + str(e)
+        super(ConfirmationForm, self).__init__(*args, **kwargs)
+        
+        self.agency_names = [agency.name for agency in agencies] + self.new_agencies

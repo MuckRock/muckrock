@@ -1,0 +1,29 @@
+{% extends 'foia/create/base_create.html' %}
+
+{% block form %}
+
+    <h2>Summary</h2>
+    {% if wizard.form.agency_names|length > 0 %}
+        {% if wizard.form.agency_names|length > 1 %}
+    <p>You will be requesting <em>{{ wizard.form.title }}</em> from {{ wizard.form.agency_names|length }} agencies:</p>
+    <ul>
+        {% for agency in wizard.form.agency_names %}
+        <li>{{ agency }}</li>
+        {% endfor %}
+    </ul>
+        {% else %}
+    <p>You will be requesting <em>{{ wizard.form.title }}</em> from {{ wizard.form.agency_names|first }}.</p>
+        {% endif %}
+        {% if wizard.form.new_agencies|length > 0 %}
+            {% if wizard.form.new_agencies|length > 1 %}
+            <p>
+                In addition, you will have to create
+                {% for new_agency in new_agencies %}
+                {% endfor %}
+            {% else %}
+            <p>In addition, the {{ new_agencies|first }} will have to be created. You may either do so
+    {% endif %}
+    {% if wizard.form.agency_names|length > 0 and wizard.form.agency_names|length > 1 %}
+    
+
+{% endblock form %}

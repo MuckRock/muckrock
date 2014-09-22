@@ -7,6 +7,7 @@ from django.template import RequestContext
 
 import muckrock.foia.new_forms as forms
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.agency.models import Agency
 
 import logging
 logger = logging.getLogger(__name__)
@@ -27,6 +28,9 @@ TEMPLATES = {
 }
 
 class RequestWizard(SessionWizardView):
+
+    agency_list = []
+    new_agency_list = []
 
     def _process_single(self, form_list):
         user = self.request.user
@@ -58,23 +62,29 @@ class RequestWizard(SessionWizardView):
         return args
     
     def _get_summary(self):
-        user = self.request.user
         request_input = self.get_cleaned_data_for_step('request')
         agency_input = self.get_cleaned_data_for_step('agency')
+        user = self.request.user if not self.request.user.is_anonymous() \
+                                 else False
         title = request_input['title']
         document = request_input['document']
-        agencies = []
-        for agency_choice in agency_input:
-            agency = [agency_choice] if agency_input[agency_choice] else []
-            agencies += agency
-        new_agency = agency_input['other']
+        new_agencies = agency_input['other'].split(',')
+        for i, j in enumerate(new_agencies):
+            new_agencies[i] = j.lstrip()
+        agencies = [key for key, value in agency_input.items() if key != 'other' and value != False]
+        for i, agency in enumerate(agencies):
+            agencies[i] = Agency.objects.filter(name=agency)
+        
         args = {
             'user': user,
             'title': title,
             'document': document,
             'agencies': agencies,
-            'new_agency': new_agency
+            'new_agencies': new_agencies
         }
+        self.new_agency_list = new_agencies
+        self.agency_list = agencies
+        
         return args
         
     def get_form_initial(self, step):
@@ -82,17 +92,17 @@ class RequestWizard(SessionWizardView):
         args = {}
         if step == 'agency':
             args = self._get_jurisdiction_list()
-        if step == 'confirm':
-            args = self._get_summary()   
+        elif step == 'confirm':
+            args = self._get_summary()
+            print args
         initial.update(args)
         return initial
     
     def get_template_names(self):
         return [TEMPLATES[self.steps.current], TEMPLATES['fallback']]
-
+    
     def done(self, form_list, **kwargs):
         data = self.get_all_cleaned_data()
-        agencies = data['agencies']
-        multi = len(agencies) > 1
+        multi = len(self.agency_list + self.new_agency_list) > 1
         _process_multi(form_list) if multi else _process_single(form_list)
         return HttpResponseRedirect('index')

@@ -2,7 +2,7 @@
 
 {% block form %}
 
-    <ul>
+    <ul class="agencies">
     {% for field in form %}
         {% if field.label != "Other" %}
         <li>
@@ -11,11 +11,11 @@
         </li>
         {% endif %}        
     {% endfor %}
-    
-        <li class="other">
-            <label>{{ form.other.label }}</label>
-            {{ form.other }}
-        </li>
     </ul>
+    
+    <div class="other">
+        <label>{{ form.other.label }}</label>
+        {{ form.other }}
+    </div>
 
 {% endblock form %}
