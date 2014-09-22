@@ -11,8 +11,22 @@ from muckrock.jurisdiction.models import Jurisdiction
 import logging
 logger = logging.getLogger(__name__)
 
+FORMS = [
+    ('request', forms.RequestForm),
+    ('jurisdiction', forms.JurisdictionForm),
+    ('agency', forms.AgencyForm),
+    ('confirm', forms.ConfirmationForm)
+]
+
+TEMPLATES = {
+    'request': 'foia/create/request.html',
+    'jurisdiction': 'foia/create/jurisdiction.html',
+    'agency': 'foia/create/agency.html',
+    'confirm': 'foia/create/confirm.html',
+    'fallback': 'foia/create/base_create.html'
+}
+
 class RequestWizard(SessionWizardView):
-    template_name = 'foia/new.html'
 
     def _process_single(self, form_list):
         user = self.request.user
@@ -24,7 +38,7 @@ class RequestWizard(SessionWizardView):
         profile = user.get_profile()
         return None
         
-    def get_jurisdiction_list(self):
+    def _get_jurisdiction_list(self):
         """Creates a list of all chosen jurisdictions"""
         j_list = []
         data = self.get_cleaned_data_for_step('jurisdiction')
@@ -41,7 +55,7 @@ class RequestWizard(SessionWizardView):
         args = {'jurisdictions': j_list}
         return args
     
-    def get_summary(self):
+    def _get_summary(self):
         user = self.request.user
         request_input = self.get_cleaned_data_for_step('request')
         agency_input = self.get_cleaned_data_for_step('agency')
@@ -65,11 +79,14 @@ class RequestWizard(SessionWizardView):
         initial = self.initial_dict.get(step, {})
         args = {}
         if step == 'agency':
-            args = self.get_jurisdiction_list()
+            args = self._get_jurisdiction_list()
         if step == 'confirm':
-            args = self.get_summary()   
+            args = self._get_summary()   
         initial.update(args)
         return initial
+    
+    def get_template_names(self):
+        return [TEMPLATES[self.steps.current], TEMPLATES['fallback']]
 
     def done(self, form_list, **kwargs):
         data = self.get_all_cleaned_data()
