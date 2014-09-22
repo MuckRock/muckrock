@@ -38,26 +38,37 @@ class RequestWizard(SessionWizardView):
                 j_list += Jurisdiction.objects.filter(level='l', parent=j.id)
         if is_local:
             j_list += Jurisdiction.objects.filter(level='l', full_name=local)
-        return j_list
+        args = {'jurisdictions': j_list}
+        return args
+    
+    def get_summary(self):
+        user = self.request.user
+        request_input = self.get_cleaned_data_for_step('request')
+        agency_input = self.get_cleaned_data_for_step('agency')
+        title = request_input['title']
+        document = request_input['document']
+        agencies = []
+        for agency_choice in agency_input:
+            agency = [agency_choice] if agency_input[agency_choice] else []
+            agencies += agency
+        new_agency = agency_input['other']
+        args = {
+            'user': user,
+            'title': title,
+            'document': document,
+            'agencies': agencies,
+            'new_agency': new_agency
+        }
+        return args
         
     def get_form_initial(self, step):
         initial = self.initial_dict.get(step, {})
+        args = {}
         if step == 'agency':
-            jurisdictions = self.get_jurisdiction_list()
-            initial.update({'jurisdictions': jurisdictions})
-        elif step == 'confirm':
-            request_input = self.get_cleaned_data_for_step('request')
-            agency_input = self.get_cleaned_data_for_step('agency')
-            user = self.request.user
-            title = request_input['title']
-            document = request_input['document']
-            agencies = []
-            for agency_choice in agency_input:
-                agency = [agency_choice] if agency_input[agency_choice] else []
-                agencies += agency
-            new_agency = agency_input['other']
-            args = {'user': user, 'title': title, 'document': document, 'agencies': agencies, 'new_agency': new_agency}
-            initial.update(args)
+            args = self.get_jurisdiction_list()
+        if step == 'confirm':
+            args = get_summary()   
+        initial.update(args)
         return initial
 
     def done(self, form_list, **kwargs):
