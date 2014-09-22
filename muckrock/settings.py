@@ -197,6 +197,7 @@ INSTALLED_APPS = (
     'urlauth',
     'epiceditor',
     'markdown_deux',
+    'mathfilters',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',

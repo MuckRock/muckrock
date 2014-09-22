@@ -1,0 +1,21 @@
+{% extends 'foia/create/base_create.html' %}
+
+{% block form %}
+
+    <ul>
+    {% for field in form %}
+        {% if field.label != "Other" %}
+        <li>
+            {{ field }}
+            <label>{{ field.label }}</label>
+        </li>
+        {% endif %}        
+    {% endfor %}
+    
+        <li class="other">
+            <label>{{ form.other.label }}</label>
+            {{ form.other }}
+        </li>
+    </ul>
+
+{% endblock form %}

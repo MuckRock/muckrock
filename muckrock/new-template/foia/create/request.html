@@ -1,0 +1,16 @@
+{% extends 'foia/create/base_create.html' %}
+
+{% block form %}
+
+    <section class="step-request introduction">
+        <h2>Welcome to the Request Composer</h2>
+        <p>This is the heart of MuckRock. This is where we make requesting documents as easy as cake (and the cake is not a lie!).</p>
+    </section>
+    <section class="step-request forms">
+        <label>Title</label>
+        {{ form.title }}
+        <label>Document Request</label>
+        {{ form.document }}
+    </section>
+
+{% endblock form %}

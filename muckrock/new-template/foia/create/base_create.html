@@ -1,24 +1,40 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load mathfilters %}
 
 {% block webpage %}
 
     {% include 'lib/sidebar.html' with hidden=1 %}
     <div class="container">
         {% include 'lib/header.html' %}
-        <div class="new-request">
-        <p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
-            <form action="" method="post">{% csrf_token %}     
-            {{ wizard.management_form }}
-            {% if wizard.form.forms %}
-                {{ wizard.form.management_form }}
-                {% for form in wizard.form.forms %}
-                    {{ form }}
-                {% endfor %}
-            {% else %}
-                {{ wizard.form }}
-            {% endif %}
-            <input type="submit" value="Next"/>
+        <div class="create-request">
+            <header>
+                <h1>Create a Request</h1>
+                {% with step=wizard.steps.step1 steps=wizard.steps.count %}
+                <object class="progress-bar">
+                    <span class="meter"
+                          style="width: {{ step|div:steps|mul:100 }}%;">
+                        Step {{ step }} of {{ steps }}
+                    </span>
+                </object>
+                {% endwith %}
+            </header>
+            <form action="" method="post">
+                {% csrf_token %}
+                {{ wizard.management_form }}
+                {% if wizard.form.forms %}
+                    {{ wizard.form.management_form }}
+                    {% block forms %}
+                        {% for form in wizard.form.forms %}
+                            {{ form }}
+                        {% endfor %}
+                    {% endblock forms %}
+                {% else %}
+                    {% block form %}
+                        {{ wizard.form }}
+                    {% endblock form %}
+                {% endif %}
+                <button type="submit">Next</button>
             </form>
         </div>
         {% include 'lib/footer.html' %}

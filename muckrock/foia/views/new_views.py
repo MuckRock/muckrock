@@ -47,9 +47,11 @@ class RequestWizard(SessionWizardView):
         if data.get('is_federal'):
             j_list += Jurisdiction.objects.filter(level='f', hidden=False)
         if is_state:
-            j_list += Jurisdiction.objects.filter(level='s', abbrev=state)
+            the_state = Jurisdiction.objects.filter(level='s', abbrev=state)
+            j_list += the_state
             if is_local and not local:
-                j_list += Jurisdiction.objects.filter(level='l', parent=j.id)
+                s_id = the_state[0].id
+                j_list += Jurisdiction.objects.filter(level='l', parent=s_id)
         if is_local:
             j_list += Jurisdiction.objects.filter(level='l', full_name=local)
         args = {'jurisdictions': j_list}
