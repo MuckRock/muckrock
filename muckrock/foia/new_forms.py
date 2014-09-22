@@ -5,7 +5,7 @@ from muckrock.agency.models import Agency
 
 class RequestForm(forms.Form):
     title = forms.CharField()
-    request = forms.CharField(widget=forms.Textarea)
+    document = forms.CharField(widget=forms.Textarea)
 
 class JurisdictionForm(forms.Form):
     states = Jurisdiction.objects.filter(level='s', hidden=False)
@@ -45,11 +45,13 @@ class JurisdictionForm(forms.Form):
         
 class AgencyForm(forms.Form):
 
+    other = forms.CharField(required=False)
+    
     def clean(self):
         """Ensures at least one agency is chosen"""
         agencies = self.cleaned_data.get('agencies')
-        if agencies is None or len(agencies) == 0:
-            error_msg = 'You must choose at least one agency.'
+        if not agencies or not self.other:
+            error_msg = 'You must add at least one agency.'
             self._errors['agencies'] = self.error_class([error_msg])
         return self.cleaned_data
   
@@ -65,16 +67,26 @@ class AgencyForm(forms.Form):
         for jurisdiction in jurisdictions:
             agencies += Agency.objects.filter(jurisdiction=jurisdiction)
         for agency in agencies:
-            identifier = agency.name
-            self.fields[identifier] = forms.BooleanField(required=False)
-
-class EmbargoForm(forms.Form):
-    embargo = forms.BooleanField()
-    embargo_date = forms.DateField()
+            # identifier = agency.name
+            self.fields[agency.name] = forms.BooleanField(required=False)
+        
     
-    def __init__(self, user, *args, **kwargs):
-        super(ProjectTypeForm, self).__init__(*args, **kwargs)
-        self.user = user
+    
+
 
 class ConfirmationForm(forms.Form):
+
+    embargo = forms.BooleanField()
+    embargo_date = forms.DateField()
     submit = forms.BooleanField()
+    
+    def __init__(self, *args, **kwargs):
+        try:
+            initial = kwargs.pop('initial')
+            self.user = initial['user']
+            self.title = initial['title']
+            self.request = initial['document']
+            self.agencies = initial['agencies']
+        except KeyError as e:
+            print 'KeyError: ' + e
+        super(AgencyForm, self).__init__(*args, **kwargs)

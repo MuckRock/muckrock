@@ -11,8 +11,6 @@ from muckrock.jurisdiction.models import Jurisdiction
 import logging
 logger = logging.getLogger(__name__)
 
-
-
 class RequestWizard(SessionWizardView):
     template_name = 'foia/new.html'
 
@@ -50,13 +48,15 @@ class RequestWizard(SessionWizardView):
         elif step == 'confirm':
             request_input = self.get_cleaned_data_for_step('request')
             agency_input = self.get_cleaned_data_for_step('agency')
+            user = self.request.user
             title = request_input['title']
-            request = request_input['request']
+            document = request_input['document']
             agencies = []
             for agency_choice in agency_input:
                 agency = [agency_choice] if agency_input[agency_choice] else []
                 agencies += agency
-            args = {'title': title, 'request': request, 'agencies': agencies}
+            new_agency = agency_input['other']
+            args = {'user': user, 'title': title, 'document': document, 'agencies': agencies, 'new_agency': new_agency}
             initial.update(args)
         return initial
 
