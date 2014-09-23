@@ -3,7 +3,7 @@ import autocomplete_light as autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
-class RequestForm(forms.Form):
+class DocumentForm(forms.Form):
     title = forms.CharField()
     document = forms.CharField(widget=forms.Textarea)
 
@@ -77,6 +77,42 @@ class ConfirmationForm(forms.Form):
     embargo = forms.BooleanField(required=False)
     embargo_expiration = forms.DateField(required=False)
     
+    def _compose_preview(self, document, agencies, user):
+        intro = 'This is a request under the Freedom of Information Act.'
+        waiver = ('I also request that, if appropriate, fees be waived as I '
+                  'believe this request is in the public interest. '
+                  'The requested documents  will be made available to the ' 
+                  'general public free of charge as part of the public ' 
+                  'information service at MuckRock.com, processed by a ' 
+                  'representative of the news media/press and is made in the ' 
+                  ' process of news gathering and not for commercial usage.')
+        delay = '20 business days'
+        
+        if len(self.agencies) == 1:
+            j = self.agencies[0].jurisdiction
+            if j.get_intro():
+                intro = j.get_intro()                
+            if j.get_waiver():
+                waiver = j.get_waiver()
+            if j.get_days():
+                delay = str(j.get_days())
+        
+        prepend = [intro + ' I hereby request the following records:']
+        append = [waiver,
+                 ('In the event that fees cannot be waived, I would be '
+                  'grateful if you would inform me of the total charges in '     
+                  'advance of fulfilling my request. I would prefer the '
+                  'request filled electronically, by e-mail attachment if ' 
+                  'available or CD-ROM if not.'),
+                  ('Thank you in advance for your anticipated cooperation in '
+                  'this matter. I look forward to receiving your response to ' 
+                  'this request within %s, as the statute requires.' % delay )]
+        if self.user:
+            full_name = self.user.get_full_name()
+            append.append('Sincerely,\n' + full_name)
+        
+        return prepend + [self.document] + append
+    
     def clean(self):
         data = self.cleaned_data
         if data['embargo'] and not data['embargo_expiration']:
@@ -96,4 +132,9 @@ class ConfirmationForm(forms.Form):
             print 'KeyError: ' + str(e)
         super(ConfirmationForm, self).__init__(*args, **kwargs)
         
-        self.agency_names = [agency.name for agency in agencies] + self.new_agencies
+        self.agency_names = [agency.name for agency in self.agencies] + \
+                            self.new_agencies
+        self.request_text = self._compose_preview(self.document,
+                                                  self.agencies,
+                                                  self.user)
+        print self.request_text

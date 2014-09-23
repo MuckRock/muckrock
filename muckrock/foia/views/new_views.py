@@ -13,14 +13,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 FORMS = [
-    ('request', forms.RequestForm),
+    ('document', forms.DocumentForm),
     ('jurisdiction', forms.JurisdictionForm),
     ('agency', forms.AgencyForm),
     ('confirm', forms.ConfirmationForm)
 ]
 
 TEMPLATES = {
-    'request': 'foia/create/request.html',
+    'document': 'foia/create/document.html',
     'jurisdiction': 'foia/create/jurisdiction.html',
     'agency': 'foia/create/agency.html',
     'confirm': 'foia/create/confirm.html',
@@ -62,19 +62,22 @@ class RequestWizard(SessionWizardView):
         return args
     
     def _get_summary(self):
-        request_input = self.get_cleaned_data_for_step('request')
+        doc_input = self.get_cleaned_data_for_step('document')
         agency_input = self.get_cleaned_data_for_step('agency')
         user = self.request.user if not self.request.user.is_anonymous() \
                                  else False
-        title = request_input['title']
-        document = request_input['document']
+        title = doc_input['title']
+        document = doc_input['document']
         new_agencies = agency_input['other'].split(',')
         for i, j in enumerate(new_agencies):
             new_agencies[i] = j.lstrip()
+            if not new_agencies[i]: # cleans out empty strings from array
+                new_agencies.remove(new_agencies[i])
         agencies = [key for key, value in agency_input.items() if key != 'other' and value != False]
         for i, agency in enumerate(agencies):
-            agencies[i] = Agency.objects.filter(name=agency)
-        
+            agencies[i] = (Agency.objects.filter(name=agency))[0]
+            # the .filter() function returns a QuerySet,
+            # so the first element of that set is taken as the agency
         args = {
             'user': user,
             'title': title,

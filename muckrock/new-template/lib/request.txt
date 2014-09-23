@@ -5,6 +5,7 @@ To Whom It May Concern:
 {{ jurisdiction.get_intro }}
 
 {% block content %}{% endblock %}
+
 {% if jurisdiction.get_waiver %}
 {{ jurisdiction.get_waiver }}
 {% else %}

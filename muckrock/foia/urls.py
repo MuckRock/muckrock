@@ -22,7 +22,7 @@ from muckrock.views import jurisdiction
 # pylint: disable=bad-whitespace
 
 FORMS = [
-    ('request', forms.RequestForm),
+    ('document', forms.DocumentForm),
     ('jurisdiction', forms.JurisdictionForm),
     ('agency', forms.AgencyForm),
     ('confirm', forms.ConfirmationForm)

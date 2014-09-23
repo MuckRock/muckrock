@@ -11,8 +11,16 @@
             <header>
                 <h1>Create a Request</h1>
                 {% with step=wizard.steps.step1 steps=wizard.steps.count %}
+                <nav>
+                    <ul>
+                        {% for each_step in wizard.steps.all %}
+                            <li>{{ each_step }}</li>
+                        {% endfor %}
+                    </ul>
+                </nav>
                 <object class="progress-bar">
-                    <span class="meter"
+                    <span class="meter
+                                {% if step == steps %} completed{% endif %}"
                           style="width: {{ step|div:steps|mul:100 }}%;">
                         Step {{ step }} of {{ steps }}
                     </span>
