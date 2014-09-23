@@ -95,7 +95,7 @@ class ConfirmationForm(forms.Form):
             if j.get_waiver():
                 waiver = j.get_waiver()
             if j.get_days():
-                delay = str(j.get_days())
+                delay = j.get_days()
         
         prepend = [intro + ' I hereby request the following records:']
         append = [waiver,

@@ -268,3 +268,30 @@ html, body { min-height: 100%; }
         
     }
 }
+
+.create-request {
+    @extend %edge-to-edge;
+    padding: 0 $base-vertical-rhythm $base-vertical-rhythm;
+    background-color: $color-grey;
+    header {
+        @extend %row;
+        @extend %edge-to-edge;
+        padding: $base-vertical-rhythm;
+        background-color: darken($color-grey, 10%);
+        h1 {
+            @extend %half;
+            @include font-sizing(2.5, 3);
+            margin-top: 0;
+            font-weight: 700;
+            color: $color-white;
+        }
+        .progress-bar {
+            @extend %half;
+            .meter {
+                height: 1.75em;
+                padding: 0.05em 1em 0;
+            }
+        }
+        
+    }
+}

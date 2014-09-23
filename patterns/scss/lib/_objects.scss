@@ -513,7 +513,7 @@ object.message { @extend %panel;
 
 /* Progress Bar */
 
-$progress-meter-border: $base-border-width solid darken($color-primary, 15%);
+$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
 $progress-animation-duration: 0.7s;
 
 object.progress-bar {
@@ -537,6 +537,7 @@ object.progress-bar {
     &.completed { @include border-right-radius($base-border-radius); }
     @mixin classifier($status, $color) {
         &.#{$status} {
+            color: $color-white;
             @include background-gradient($color);
             border: 1px solid darken($color, 15%);
         }

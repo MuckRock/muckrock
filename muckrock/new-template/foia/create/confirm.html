@@ -3,25 +3,29 @@
 {% block form %}
 
     <h2>Summary</h2>
-    {{ wizard.form.document }}
     
     {% if wizard.form.agency_names|length > 0 %}
+    <p>You will be sending <em>{{ wizard.form.title }}</em> to
         {% if wizard.form.agency_names|length > 1 %}
-    <p>You will be sending <em>{{ wizard.form.title }}</em> to {{ wizard.form.agency_names|length }} agencies:</p>
+    {{ wizard.form.agency_names|length }} agencies:</p>
     <ul>
-        {% for agency in wizard.form.agency_names %}
+            {% for agency in wizard.form.agency_names %}
         <li>{{ agency }}</li>
-        {% endfor %}
+            {% endfor %}
     </ul>
         {% else %}
-    <p>You will be requesting <em>{{ wizard.form.title }}</em> from {{ wizard.form.agency_names|first }}.</p>
+    {{ wizard.form.agency_names|first }}.</p>
         {% endif %}
     {% endif %}
+
     
-    <div class="request sample">
-        {% for paragraph in wizard.form.request_text %}
-        <p>{{ paragraph }}</p>
-        {% endfor %}
+    <div class="request preview">
+        <dfn>Preview</dfn>
+        <div class="body">
+            {% for paragraph in wizard.form.request_text %}
+            <p>{{ paragraph }}</p>
+            {% endfor %}
+        </div>
     </div>
 
 {% endblock form %}
