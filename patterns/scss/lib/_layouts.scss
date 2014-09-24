@@ -340,13 +340,53 @@ html, body { min-height: 100%; }
             div {
                 @extend %third;
                 @include omega(3n);
-                border: $base-border-width solid $color-black;
+                @include transition(margin 0.25s $ease-out-quad);
+                @include button-color($color-black);
+                height: 20em;
+                background-color: $color-black;
+                margin-top: $base-vertical-rhythm;
+                margin-bottom: $base-vertical-rhythm;
                 padding: $base-vertical-rhythm;
+                border-width: $base-border-width;
+                border-style: solid;
+                border-radius: $base-border-radius;
+
                 text-align: center;
-                input[type="textbox"] + input {
-                    padding-left: $base-vertical-rhythm;
+                input { color: $color-black; }
+                svg {
+                    width: auto;
+                    fill: $color-white;
+                }
+                &.federal > svg { height: 5em; }
+                &.state > svg { height: 4em; margin-top: 1em; }
+                &.local svg { height: 3em; margin-top: 2em; }
+                input[type="checkbox"] {
+                    display: block;
+                    margin: $base-vertical-rhythm auto;
+                    & + select, & + span {
+                        visibility: hidden;
+                    }
+                    &:checked + select, &:checked + span {
+                        visibility: visible;
+                    }
+                }
+                &:hover, &.active {
+                    margin-top: 0;
+                    margin-bottom: 2*$base-vertical-rhythm;
+                    @include button-color($color-primary);
+                    // h2 { color: $color-primary; }
+                    // svg { fill: $color-primary; }
                 }
             }
+        }
+        &.notices {
+            @extend %half;
+        }
+    }
+    .step-agency {
+        input + label {
+            float: left;
+            margin-top: 0;
         }
     }
 }
