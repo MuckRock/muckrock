@@ -3,7 +3,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail, send_mass_mail, EmailMessage
+from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
@@ -431,12 +431,13 @@ class FOIARequest(models.Model):
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         body = render_to_string('foia/request.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
-        msg = EmailMessage(subject=subject,
+        msg = EmailMultiAlternatives(subject=subject,
                            body=body,
                            from_email=from_email,
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)})
+        msg.attach_alternative(body, 'text/html')
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
