@@ -18,7 +18,13 @@
                 </object>
                 <noscript>It looks like you have JavaScript disabled. While we designed the submission process to work without a running a single line of JavaScript, the process is much more enjoyable if you allow us to use some scripts for presentation. If you&rsquo;re skeptical, we would encourage you to read our Privacy Policy.</noscript>
             </header>
-
+            {% if form.subject.errors %}
+                <ol>
+                {% for error in form.subject.errors %}
+                    <li><strong>{{ error|escape }}</strong></li>
+                {% endfor %}
+                </ol>
+            {% endif %}
             <form action="" method="post">
                 {% csrf_token %}
                 {{ wizard.management_form }}

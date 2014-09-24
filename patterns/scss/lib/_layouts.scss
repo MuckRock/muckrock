@@ -276,7 +276,7 @@ html, body { min-height: 100%; }
     overflow: hidden;
     padding: 0 $base-vertical-rhythm $base-vertical-rhythm;
     background-color: $color-grey;
-
+    border-bottom: $base-border-width solid darken($color-grey, 10%);
     header {
         @extend %row;
         @extend %edge-to-edge;
@@ -300,9 +300,15 @@ html, body { min-height: 100%; }
             }
         }   
     }
-    
+    form {
+        overflow: hidden;
+        position: relative;
+        padding-bottom: 2em;
+    }
     input.next {
+        display: inline-block;
         float: right;
+        vertical-align: bottom;
         margin-right: $base-vertical-rhythm;
     }
     
@@ -379,14 +385,33 @@ html, body { min-height: 100%; }
                 }
             }
         }
-        &.notices {
+        &.notices p {
             @extend %half;
+            padding-right: $base-vertical-rhythm;
         }
     }
-    .step-agency {
-        input + label {
-            float: left;
+    .agencies {
+        list-style-type: none;
+        padding-left: 0;
+        @extend %row;
+        li {
+            @extend %quarter;
+            @include omega(4n);
+        }
+        & input[type="checkbox"] + label {
+            display: inline;
             margin-top: 0;
+            margin-left: $base-vertical-rhythm/2;
         }
     }
+    .other {
+        float: left;
+        width: 75%;
+        input {
+            display: block;
+            width: 100%;
+        }
+        small { margin-top: 0; }
+    }
+        
 }
