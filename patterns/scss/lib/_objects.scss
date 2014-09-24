@@ -165,7 +165,7 @@
 
 // Inputs
 
-#{$all-text-inputs} { @extend %input; }
+textarea, #{$all-text-inputs} { @extend %input; }
 
 input[type="submit"], button {
     @extend .button.default;

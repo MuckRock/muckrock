@@ -1,28 +1,27 @@
 {% extends 'foia/create/base_create.html' %}
 
 {% block form %}
-
-    <section class="jurisdictions">
-        <div class="jurisdiction federal">
+    <section class="step-jurisdiction jurisdictions">
+        <div class="federal">
             <!-- Federal Icon -->
             <h2>Federal</h2>
             {{ form.is_federal }}
         </div>
-        <div class="jurisdiction state">
+        <div class="state">
             <!-- State Icon -->
             <h2>State</h2>
             {{ form.is_state }}
             {{ form.state }}
         </div>
-        <div class="jurisdiction local">
+        <div class="local">
             <!-- Local Icon -->
             <h2>Local</h2>
             {{ form.is_local }}
             {{ form.local }}
         </div>
     </section>
-    <section class="notices">
+    <section class="step-jurisdiction notices">
+        <p>Different levels of government record different information. We suggest submitting your request to as local a jurisdiction as is sensible.</p>
         <p>To select all local jurisdictions within a state, select the State and Local levels, but leave the Local jurisdiction blank.</p>
-    </section>    
-
+    </section>
 {% endblock form %}

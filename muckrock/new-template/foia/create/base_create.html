@@ -14,10 +14,10 @@
                     <span class="meter primary
                                 {% if step == steps %} completed{% endif %}"
                           style="width: {{ step|div:steps|mul:100 }}%;">
-                        Step {{ step }} of {{ steps }}
                     </span>
                 </object>
             </header>
+
             <form action="" method="post">
                 {% csrf_token %}
                 {{ wizard.management_form }}
@@ -33,7 +33,7 @@
                         {{ wizard.form }}
                     {% endblock form %}
                 {% endif %}
-                <button type="submit">Next</button>
+                <input class="button primary next" type="submit" value="Next" />
             </form>
         </div>
         {% include 'lib/footer.html' %}

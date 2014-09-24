@@ -101,7 +101,7 @@ strong {
 /**
  * Address styling not present in Safari and Chrome.
  */
-dfn, fieldset label {
+dfn, .create-request label, fieldset label {
   font-style: italic; }
 
 /**
@@ -122,7 +122,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-small, dfn, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
+small, dfn, .create-request label, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
   font-size: 80%; }
 
 /**
@@ -429,7 +429,7 @@ blockquote {
   padding-left: 0.75em;
   border-left: 1px solid #b3becb; }
 
-small, dfn, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
+small, dfn, .create-request label, fieldset label, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p, .grid > aside button {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -456,7 +456,7 @@ code {
     text-decoration: none;
     color: #006330; }
 
-dfn, fieldset label, dt {
+dfn, .create-request label, fieldset label, dt {
   display: block;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -513,46 +513,46 @@ td {
 html, body {
   min-height: 100%; }
 
-.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .profile > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request header {
+.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .profile > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request header, .create-request .step-jurisdiction.jurisdictions {
   display: block; }
-  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .profile > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after, .profile > section.meta aside:after, .create-request header:after {
+  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .profile > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after, .profile > section.meta aside:after, .create-request header:after, .create-request .step-jurisdiction.jurisdictions:after {
     content: "";
     display: table;
     clear: both; }
 
-.create-request header h1, .create-request header .progress-bar, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .plan, .agency aside dl, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], object.search fieldset, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul, object.subscription form fieldset, object.password-reset form fieldset, object.password-change form fieldset, object.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
+.create-request header h1, .create-request header .progress-bar, .create-request .step-document, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .plan, .agency aside dl, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], object.search fieldset, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul, object.subscription form fieldset, object.password-reset form fieldset, object.password-change form fieldset, object.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination {
   width: 100%; }
 
-.create-request header h1, .create-request header .progress-bar, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
+.create-request header h1, .create-request header .progress-bar, .create-request .step-document, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .create-request header h1, .create-request header .progress-bar, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
+    .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .footer-container footer section.about {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .create-request header h1:last-child, .create-request header .progress-bar:last-child, .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, object.login h1:last-child, object.login ul:last-child, object.update h1:last-child, object.update .button:last-child, .footer-container footer section.about:last-child {
+      .create-request header h1:last-child, .create-request header .progress-bar:last-child, .create-request .step-document:last-child, .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, object.login h1:last-child, object.login ul:last-child, object.update h1:last-child, object.update .button:last-child, .footer-container footer section.about:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
-  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .plan, .agency aside dl {
+  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .plan, .agency aside dl {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .plan:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .plan, .agency aside dl {
+  .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .plan, .agency aside dl {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .plan:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
-.post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
+.post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
   margin-right: 0; }
-.post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
+.post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
   clear: left; }
 
 @media screen and (min-width: 321px) {
@@ -595,6 +595,7 @@ html, body {
 
 .post, .question, .request, .jurisdiction, .agency, .profile, .search.collection, object.collection {
   display: block;
+  overflow: hidden;
   max-width: 68em;
   margin-left: auto;
   margin-right: auto; }
@@ -778,7 +779,7 @@ html, body {
       text-decoration: none;
       color: #21282c;
       background-color: rgba(254, 188, 16, 0.65); }
-      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label {
+      .homepage .featured-article a dfn, .homepage .featured-article a .create-request label, .create-request .homepage .featured-article a label, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label {
         color: #21282c; }
       .homepage .featured-article a h1 {
         font-size: 2em;
@@ -820,24 +821,62 @@ html, body {
         width: 40%; } }
 
 .create-request {
+  display: block;
+  overflow: hidden;
   padding: 0 1.5em 1.5em;
   background-color: #b3becb; }
   .create-request header {
     padding: 1.5em;
+    margin-bottom: 1.5em;
     background-color: #95a4b6; }
     .create-request header h1 {
       font-size: 2.5em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
-      margin-top: 0;
+      margin: 0;
       font-weight: 700;
       color: #f4f4f4; }
-    .create-request header .progress-bar .meter {
-      height: 1.75em;
-      padding: 0.05em 1em 0; }
+    .create-request header .progress-bar {
+      border-radius: 50px; }
+      .create-request header .progress-bar .meter {
+        height: 1.75em;
+        padding: 0.05em 1em 0;
+        border-radius: 50px; }
+  .create-request input.next {
+    float: right;
+    margin-right: 1.5em; }
+  .create-request label {
+    color: #21282c; }
+    .create-request label + input {
+      display: block; }
+  .create-request input + label {
+    margin-top: 3em; }
+  .create-request .step-document {
+    margin-bottom: 1.5em; }
+    .create-request .step-document:nth-child(n) {
+      margin-right: 0; }
+    .create-request .step-document.introduction p {
+      max-width: 90%;
+      margin-top: 0; }
+    .create-request .step-document input[type="text"] {
+      width: 100%; }
+    .create-request .step-document textarea {
+      width: 100%;
+      height: 5em;
+      resize: none; }
+  .create-request .step-jurisdiction.jurisdictions div {
+    border: 1px solid #21282c;
+    padding: 1.5em;
+    text-align: center; }
+    .create-request .step-jurisdiction.jurisdictions div:nth-child(3n) {
+      margin-right: 0; }
+    .create-request .step-jurisdiction.jurisdictions div:nth-child(3n+1) {
+      clear: left; }
+    .create-request .step-jurisdiction.jurisdictions div input[type="textbox"] + input {
+      padding-left: 1.5em; }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -863,11 +902,11 @@ html, body {
     .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
       padding: 0.75em 1.5em; } }
 
-input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
+textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
   display: inline-block;
   padding: 0.375em 0.5em 0.375em 0.75em;
   border-color: #b3becb; }
-  input[type="email"]:disabled, input[type="number"]:disabled, input[type="password"]:disabled, input[type="search"]:disabled, input[type="tel"]:disabled, input[type="text"]:disabled, input[type="url"]:disabled, input[type="color"]:disabled, input[type="date"]:disabled, input[type="datetime"]:disabled, input[type="datetime-local"]:disabled, input[type="month"]:disabled, input[type="time"]:disabled, input[type="week"]:disabled {
+  textarea:disabled, input[type="email"]:disabled, input[type="number"]:disabled, input[type="password"]:disabled, input[type="search"]:disabled, input[type="tel"]:disabled, input[type="text"]:disabled, input[type="url"]:disabled, input[type="color"]:disabled, input[type="date"]:disabled, input[type="datetime"]:disabled, input[type="datetime-local"]:disabled, input[type="month"]:disabled, input[type="time"]:disabled, input[type="week"]:disabled {
     background-color: #d8d8db;
     border: 1px solid #96959e;
     color: #96959e; }
@@ -1243,7 +1282,7 @@ object.message {
       max-width: 100%;
       width: 50px;
       margin-bottom: 0; }
-    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p, object.message > section.meta .grid > aside button, .grid > aside object.message > section.meta button {
+    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta .create-request label, .create-request object.message > section.meta label, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p, object.message > section.meta .grid > aside button, .grid > aside object.message > section.meta button {
       display: block;
       margin-top: 0.5em; }
     @media screen and (min-width: 969px) {
@@ -1799,7 +1838,7 @@ nav.sidebar {
   @media screen and (min-width: 540px) {
     nav.sidebar {
       padding: 1.5em 1.5em 1em; } }
-  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label {
+  nav.sidebar dfn, nav.sidebar .create-request label, .create-request nav.sidebar label, nav.sidebar fieldset label, fieldset nav.sidebar label {
     padding-bottom: 0.75em; }
   nav.sidebar ul {
     display: table;

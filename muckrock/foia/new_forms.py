@@ -5,7 +5,7 @@ from muckrock.agency.models import Agency
 
 class DocumentForm(forms.Form):
     title = forms.CharField()
-    document = forms.CharField(widget=forms.Textarea)
+    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': 'One sentence describing the specific document you are after.'}))
 
 class JurisdictionForm(forms.Form):
     states = Jurisdiction.objects.filter(level='s', hidden=False)

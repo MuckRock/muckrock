@@ -43,6 +43,7 @@ html, body { min-height: 100%; }
 
 %body {
     display: block;
+    overflow: hidden;
     @include outer-container;
 }
 
@@ -271,27 +272,81 @@ html, body { min-height: 100%; }
 
 .create-request {
     @extend %edge-to-edge;
+    display: block;
+    overflow: hidden;
     padding: 0 $base-vertical-rhythm $base-vertical-rhythm;
     background-color: $color-grey;
+
     header {
         @extend %row;
         @extend %edge-to-edge;
         padding: $base-vertical-rhythm;
+        margin-bottom: $base-vertical-rhythm;
         background-color: darken($color-grey, 10%);
         h1 {
             @extend %half;
             @include font-sizing(2.5, 3);
-            margin-top: 0;
+            margin: 0;
             font-weight: 700;
             color: $color-white;
         }
         .progress-bar {
             @extend %half;
+            border-radius: 50px;
             .meter {
                 height: 1.75em;
                 padding: 0.05em 1em 0;
+                border-radius: 50px;
+            }
+        }   
+    }
+    
+    input.next {
+        float: right;
+        margin-right: $base-vertical-rhythm;
+    }
+    
+    label {
+        @extend dfn;
+        color: $color-black;
+        & + input {
+            display: block;
+        }
+    }
+    input + label { margin-top: 2*$base-vertical-rhythm; }
+
+    .step-document {
+        @extend %half;
+        @include omega(n);
+        margin-bottom: $base-vertical-rhythm;
+        &.introduction { 
+            p {
+                max-width: 90%;
+                margin-top: 0;
             }
         }
-        
+        input[type="text"] {
+            width: 100%;
+        }
+        textarea {
+            width: 100%;
+            height: 5em;
+            resize: none;
+        }
+    }
+    .step-jurisdiction {
+        &.jurisdictions {
+            @extend %row;
+            div {
+                @extend %third;
+                @include omega(3n);
+                border: $base-border-width solid $color-black;
+                padding: $base-vertical-rhythm;
+                text-align: center;
+                input[type="textbox"] + input {
+                    padding-left: $base-vertical-rhythm;
+                }
+            }
+        }
     }
 }
