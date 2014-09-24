@@ -27,7 +27,7 @@ from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.sidebar.models import Sidebar
 
@@ -347,6 +347,12 @@ def stripe_webhook_v2(request):
             url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
                                      .get_absolute_url()
             subject = 'Payment received for request fee'
+        elif event_data.get('description') and \
+                'Charge for multi request' in event_data['description']:
+            type_ = 'doc'
+            url = FOIAMultiRequest.objects.get(id=event_data['description'].split()[-1])\
+                                          .get_absolute_url()
+            subject = 'Payment received for multi request fee'
         elif event_data.get('description') and \
                 'Contribute to Crowdfunding' in event_data['description']:
             type_ = 'crowdfunding'
