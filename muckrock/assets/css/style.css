@@ -913,7 +913,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default {
   color: #f4f4f4;
-  border-color: #6b6a65;
+  border-color: #565551;
   background: #6b6a65;
   background: -webkit-linear-gradient(#6b6a65, #565551);
   background: linear-gradient(#6b6a65, #565551); }
@@ -931,7 +931,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button.primary, input[type="submit"] .primary, button .primary {
   color: #f4f4f4;
-  border-color: #3a82ff;
+  border-color: #1168ff;
   background: #3a82ff;
   background: -webkit-linear-gradient(#3a82ff, #1168ff);
   background: linear-gradient(#3a82ff, #1168ff); }
@@ -949,7 +949,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button.success, input[type="submit"] .success, button .success {
   color: #f4f4f4;
-  border-color: #006330;
+  border-color: #003a1c;
   background: #006330;
   background: -webkit-linear-gradient(#006330, #003a1c);
   background: linear-gradient(#006330, #003a1c); }
@@ -967,7 +967,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button.failure, input[type="submit"] .failure, button .failure {
   color: #f4f4f4;
-  border-color: #fb004e;
+  border-color: #d20041;
   background: #fb004e;
   background: -webkit-linear-gradient(#fb004e, #d20041);
   background: linear-gradient(#fb004e, #d20041); }
@@ -985,7 +985,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button.disabled, input[type="submit"] .disabled, button .disabled {
   color: #f4f4f4;
-  border-color: #96959e;
+  border-color: #81808b;
   background: #96959e;
   background: -webkit-linear-gradient(#96959e, #81808b);
   background: linear-gradient(#96959e, #81808b);

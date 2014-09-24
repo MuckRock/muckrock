@@ -20,7 +20,7 @@
 
 @mixin button-color($color) {
     color: $color-white;
-    border-color: $color;
+    border-color: darken($color, $base-gradient-darken);
     @include background-gradient($color);
 }
 
