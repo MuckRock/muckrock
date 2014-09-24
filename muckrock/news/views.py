@@ -59,7 +59,7 @@ class List(ListView):
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
-    """API views for User"""
+    """API views for Article"""
     # pylint: disable=R0901
     # pylint: disable=R0904
     model = Article
@@ -71,10 +71,19 @@ class ArticleViewSet(viewsets.ModelViewSet):
         # pylint: disable=E1101
         # pylint: disable=R0903
         authors = django_filters.CharFilter(name='authors__username')
+        editors = django_filters.CharFilter(name='editors__username')
         tags = django_filters.CharFilter(name='tags__name')
+        min_date = django_filters.DateFilter(name='pub_date', lookup_type='gte')
+        max_date = django_filters.DateFilter(name='pub_date', lookup_type='lte')
 
         class Meta:
             model = Article
-            fields = ('title', 'pub_date', 'authors', 'foias', 'tags')
+            fields = ('title', 'pub_date', 'min_date', 'max_date', 'authors', 'editors',
+                      'foias', 'publish', 'tags')
 
     filter_class = Filter
+
+    def get_queryset(self):
+        if 'no_editor' in self.request.QUERY_PARAMS:
+            return self.model.objects.filter(editors=None)
+        return self.model.objects.all()
