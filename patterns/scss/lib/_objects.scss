@@ -121,11 +121,14 @@
 
 .button.disabled { @extend %button;
     @include button-color($color-disabled);
+    &:hover, &:active { @include button-color($color-disabled); }
 }
 
 // Panels
 
-.panel, .panel.default { @extend %panel;
+.panel { @extend %panel; }
+
+.panel.default { @extend %panel;
     @include panel-color($color-default);
     a {
         text-decoration: underline;
@@ -175,7 +178,9 @@ input[type="submit"], button {
     .disabled { @extend .button.disabled; }
 }
 
-input:disabled { @extend .button.disabled; }
+input:disabled, input.button:disabled { 
+    &, &:hover, &:active { @extend .button.disabled }
+}
 
 #{$all-button-inputs} {
     @include box-sizing(border-box);

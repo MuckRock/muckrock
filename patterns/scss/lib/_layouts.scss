@@ -379,6 +379,10 @@
                 }
                 input[type="checkbox"]:checked + .help { visibility: visible; }
             }
+            .panel {
+                margin-top: $base-vertical-rhythm;
+                border-color: $color-black;
+            }
         }
         &.preview {
             @extend %two-thirds;

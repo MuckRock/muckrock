@@ -634,7 +634,7 @@ td {
   font-size: 2em; }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -642,13 +642,13 @@ td {
   border-radius: 9px;
   line-height: 1.5em; }
 
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active {
   display: inline-block;
   margin: 0.25em 0.325em 0.25em 0;
   padding: 0.375em 1.5em;
   text-decoration: none;
   text-align: center; }
-  .button:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover, input[type="submit"] .primary:hover, button .primary:hover, input[type="submit"] .success:hover, button .success:hover, input[type="submit"] .failure:hover, button .failure:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled {
+  .button:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover, input[type="submit"] .primary:hover, button .primary:hover, input[type="submit"] .success:hover, button .success:hover, input[type="submit"] .failure:hover, button .failure:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled, input.button:hover:disabled {
     text-decoration: none; }
 
 .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
@@ -741,20 +741,26 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
     background: -webkit-linear-gradient(#d20041, #fb004e);
     background: linear-gradient(#d20041, #fb004e); }
 
-.button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled {
+.button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active {
   color: #f4f4f4;
   border-color: #81808b;
   background: #96959e;
   background: -webkit-linear-gradient(#96959e, #81808b);
   background: linear-gradient(#96959e, #81808b); }
+  .button.disabled:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled, input.button:hover:disabled, .button.disabled:active, input[type="submit"] .disabled:active, button .disabled:active, input:active:disabled, input.button:active:disabled {
+    color: #f4f4f4;
+    border-color: #81808b;
+    background: #96959e;
+    background: -webkit-linear-gradient(#96959e, #81808b);
+    background: linear-gradient(#96959e, #81808b); }
 
-.panel, .panel.default {
+.panel.default {
   color: #f4f4f4;
   background: #6b6a65;
   background: -webkit-linear-gradient(#6b6a65, #565551);
   background: linear-gradient(#6b6a65, #565551);
   border-color: #51504c; }
-  .panel a, .panel.default a {
+  .panel.default a {
     text-decoration: underline;
     color: #f4f4f4;
     background-color: none; }
@@ -1688,6 +1694,9 @@ object.jurisidiction.collection ul, object.agency.collection ul {
       visibility: hidden; }
     .create-request .step-confirm.overview .embargo input[type="checkbox"]:checked + .help {
       visibility: visible; }
+    .create-request .step-confirm.overview .panel {
+      margin-top: 1.5em;
+      border-color: #21282c; }
   .create-request .step-confirm.preview {
     margin-right: 0; }
     .create-request .step-confirm.preview .body {
