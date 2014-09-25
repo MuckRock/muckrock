@@ -19,39 +19,39 @@
             {{ wizard.form.agency_names|first }}.</p>
         {% endif %}
     {% endif %}
-    
+    {% if user.is_authenticated %}
+        {% if user.get_profile.can_embargo %}
+        <section class="embargo">
+            <label>
+                {{ wizard.form.embargo.label }}
+            </label>
+            <p>
+                {{ wizard.form.embargo }}
+                <small class="help">
+                    Number of days until embargo expires: {{ wizard.form.embargo_length }}
+                    <br />
+                    <em>Embargoes are limited to 30 days.</em>
+                </small>
+            </p>
+        </section>
+        {% endif %}
         <object class="panel">
-        {% if user.is_authenticated %}
-            {% if not user.get_profile.num_requests %}
+        {% if not user.get_profile.num_requests %}
             <p>You have no requests and will need to purchase some before submitting.</p>
             <a href="" class="button primary">Purchase Requests</a>
-            {% else %}
-                {% if remaining > requested %}
-                <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
-                {% else %}
-                <p>You have {{ remaining }} remaining request{{ remaining|pluralize }}, but want to submit {{ request }} new request{{ request|pluralize }}. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
-                {% endif %}
-            {% endif %}
-            {% if user.get_profile.can_embargo %}
-            <section class="embargo">
-                <label>
-                    {{ wizard.form.embargo.label }}
-                </label>
-                <p>
-                    {{ wizard.form.embargo }}
-                    <small class="help">
-                        Number of days until embargo expires: {{ wizard.form.embargo_length }}
-                        <br />
-                        <em>Embargoes are limited to 30 days.</em>
-                    </small>
-                </p>
-            </section>
-            {% endif %}
         {% else %}
+            {% if remaining > requested %}
+            <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+            {% else %}
+            <p>You have {{ remaining }} remaining request{{ remaining|pluralize }}, but want to submit {{ request }} new request{{ request|pluralize }}. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <object class="panel">
             <p>You must have a MuckRock account in order to submit this request.</p>
             <a href="" class="button primary">Sign Up</a>
-            <a href="" class="button default">Log In</a>
-        {% endif %}
+            <a href="" class="button default">Log In</a>    
+    {% endif %}
         </object>
     </section>
     
