@@ -74,8 +74,11 @@ class AgencyForm(forms.Form):
         
 class ConfirmationForm(forms.Form):
 
-    embargo = forms.BooleanField(required=False)
-    embargo_expiration = forms.DateField(required=False)
+    embargo = forms.BooleanField(required=False, help_text='(Pro Users Only)')
+    embargo_length = forms.ChoiceField(
+        required=False,
+        choices=[(i, str(i)) for i in range(1,31)],
+    )
     
     def _compose_preview(self, document, agencies, user):
         intro = 'This is a request under the Freedom of Information Act.'
@@ -109,15 +112,11 @@ class ConfirmationForm(forms.Form):
                   'this request within %s, as the statute requires.' % delay )]
         if self.user:
             full_name = self.user.get_full_name()
-            append.append('Sincerely,\n' + full_name)
+            append += ['Sincerely,', full_name]
         
         return prepend + [self.document] + append
     
     def clean(self):
-        data = self.cleaned_data
-        if data['embargo'] and not data['embargo_expiration']:
-            error_msg = 'Embargoed requests must specify an expiration date.'
-            self._errors['embargo_expiration'] = self.error_class([error_msg])
         return self.cleaned_data
     
     def __init__(self, *args, **kwargs):

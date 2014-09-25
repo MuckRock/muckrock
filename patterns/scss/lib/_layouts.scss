@@ -1,72 +1,4 @@
-/* Allows for full-height elements with CSS */
-html, body { min-height: 100%; }
-
-// Prototypes
-
-// Sizing and spacing
-
-%row { @include row(); }
-
-%full { @include fill-parent(); }
-
-%half {
-    @extend %full;
-    @include media($large-layout) { @include span-columns(6); }
-    @include omega();
-}
-
-%third {
-    @extend %full;
-    @include media($medium-layout) { @include span-columns(2); }
-    @include media($large-layout) { @include span-columns(4); }
-    @include omega(3n);
-}
-
-%quarter {
-    @extend %full;
-    @include media($medium-layout) { @include span-columns(3); }
-    @include media($large-layout) { @include span-columns(3); }
-    @include omega(4n);
-}
-
-%two-thirds {
-    @extend %full;
-    @include media($medium-layout) { @include span-columns(4); }
-    @include media($large-layout) { @include span-columns(8); }
-}
-
-%three-quarters {
-    @extend %full;
-    @include media($medium-layout) { @include span-columns(6); }
-    @include media($large-layout) { @include span-columns(9); }
-}
-
-%body {
-    display: block;
-    overflow: hidden;
-    @include outer-container;
-}
-
-@mixin horizontal-margins {
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
-    @media screen and (min-width: 540px) {
-        margin-left: 2rem;
-        margin-right: 2rem;
-    }
-}
-
-%base-spacing {
-    padding: $base-vertical-rhythm/4;
-    @include media($medium-layout) { padding: $base-vertical-rhythm; }
-}
-
-%edge-to-edge {
-    margin: 0 -1*$base-vertical-rhythm/4;
-    @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
-}
-
-// Layouts
+/* Layouts */
 
 %article {
     @extend %body;
@@ -274,7 +206,7 @@ html, body { min-height: 100%; }
     @extend %edge-to-edge;
     display: block;
     overflow: hidden;
-    padding: 0 $base-vertical-rhythm $base-vertical-rhythm;
+    padding: 0 $base-vertical-rhythm;
     background-color: $color-grey;
     border-bottom: $base-border-width solid darken($color-grey, 10%);
     header {
@@ -300,18 +232,26 @@ html, body { min-height: 100%; }
             }
         }   
     }
+    
+    dfn { color: $color-black; }
+    
     form {
         overflow: hidden;
         position: relative;
-        padding-bottom: 2em;
-    }
-    input.next {
-        display: block;
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        // float: right;
-        margin-right: $base-vertical-rhythm;
+        padding-bottom: $base-vertical-rhythm*4;
+        .controls {
+            padding: $base-vertical-rhythm 0;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            overflow: hidden;
+        }
+        .next { float: right; }
+        .prev { float: left; }
+        
+        #submit { float: right; }
+        #draft { float: right; }
+        #delete { float: left; }
     }
     
     label {
@@ -322,6 +262,11 @@ html, body { min-height: 100%; }
         }
     }
     input + label { margin-top: 2*$base-vertical-rhythm; }
+    
+    svg {
+        width: auto;
+        fill: $color-white;
+    }
 
     .step-document {
         @extend %half;
@@ -361,10 +306,6 @@ html, body { min-height: 100%; }
 
                 text-align: center;
                 input { color: $color-black; }
-                svg {
-                    width: auto;
-                    fill: $color-white;
-                }
                 &.federal > svg { height: 5em; }
                 &.state > svg { height: 4em; margin-top: 1em; }
                 &.local svg { height: 3em; margin-top: 2em; }
@@ -410,13 +351,43 @@ html, body { min-height: 100%; }
         }
     }
     .other {
-        float: left;
-        width: 75%;
+        @extend %half;
         input {
             display: block;
             width: 100%;
         }
         small { margin-top: 0; }
     }
-        
+    
+    .step-confirm {
+        &.overview {
+            @extend %third;
+            padding-right: $base-vertical-rhythm;
+            dfn {
+                padding-bottom: $base-vertical-rhythm/4;
+                border-bottom: $base-border-width solid $color-black;
+                margin-bottom: $base-vertical-rhythm;
+            }
+            .embargo {
+                label { margin: 2*$base-vertical-rhythm 0 0; }
+                input[type="checkbox"] { display: inline-block; }
+                .help {
+                    display: inline-block;
+                    vertical-align: top;
+                    padding-left: $base-vertical-rhythm/4;
+                    visibility: hidden;
+                }
+                input[type="checkbox"]:checked + .help { visibility: visible; }
+            }
+        }
+        &.preview {
+            @extend %two-thirds;
+            @include omega();
+            .body {
+                padding: $base-vertical-rhythm;
+                background: $color-white;
+                border: $base-border-width solid darken($color-grey, 10%);
+            }
+        }
+    }
 }

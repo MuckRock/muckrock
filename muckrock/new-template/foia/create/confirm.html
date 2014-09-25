@@ -1,31 +1,72 @@
 {% extends 'foia/create/base_create.html' %}
+{% load mathfilters %}
 
 {% block form %}
+    {% with remaining=user.get_profile.num_requests requested=wizard.form.agency_names|length %}
 
-    <h2>Summary</h2>
-    
-    {% if wizard.form.agency_names|length > 0 %}
-    <p>You will be sending <em>{{ wizard.form.title }}</em> to
-        {% if wizard.form.agency_names|length > 1 %}
-    {{ wizard.form.agency_names|length }} agencies:</p>
-    <ul>
+    <section class="step-confirm overview">
+        <dfn>Summary</dfn>
+    {% if requested > 0 %}
+        <p>You will be sending <em>{{ wizard.form.title }}</em> to
+        {% if requested > 1 %}
+            {{ requested }} agencies:</p>
+        <ul>
             {% for agency in wizard.form.agency_names %}
-        <li>{{ agency }}</li>
+            <li>{{ agency }}</li>
             {% endfor %}
-    </ul>
+        </ul>
         {% else %}
-    {{ wizard.form.agency_names|first }}.</p>
+            {{ wizard.form.agency_names|first }}.</p>
         {% endif %}
     {% endif %}
-
+        
+    {% if user.is_authenticated %}
+            {% if remaining > requested %}
+        <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+            {% else %}
+                {% if remaining == 0 %}
+        <p>You have not purchased any requests,
+                {% else %}
+        <p>You have {{ remaining }} remaining request{{ remaining|pluralize }},
+                {% endif %}
+        but want to submit {{ request }} new request. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
+            {% endif %}
+        {% if user.get_profile.can_embargo %}
+        <section class="embargo">
+            <label>
+                {{ wizard.form.embargo.label }}
+            </label>
+            <p>
+                {{ wizard.form.embargo }}
+                <small class="help">
+                    Number of days until embargo expires: {{ wizard.form.embargo_length }}
+                    <br />
+                    <em>Embargoes are limited to 30 days.</em>
+                </small>
+            </p>
+        </section>
+        {% endif %}
+    {% else %}
+        <p>You must have a MuckRock account in order to submit this request.</p>
+        <a href="" class="button primary">Sign Up</a>
+        <a href="" class="button default">Log In</a>
+    {% endif %}
+    </section>
     
-    <div class="request preview">
+    <section class="step-confirm preview">
         <dfn>Preview</dfn>
         <div class="body">
             {% for paragraph in wizard.form.request_text %}
             <p>{{ paragraph }}</p>
             {% endfor %}
         </div>
-    </div>
+    </section>
+    
+    <section class="controls">
+        <input type="submit" value="Submit" class="button primary" id="submit" {% if requested > remaining or not user.is_authenticated %}disabled{% endif %} />
+        <input type="submit" value="Save Draft" class="button default" id="draft" {% if not user.is_authenticated %}disabled{% endif %} />
+        <input type="submit" value="Delete" class="button failure" id="delete" />
+    </section>
+    {% endwith %}
 
 {% endblock form %}

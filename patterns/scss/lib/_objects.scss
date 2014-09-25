@@ -121,7 +121,6 @@
 
 .button.disabled { @extend %button;
     @include button-color($color-disabled);
-    background: none;
 }
 
 // Panels
@@ -176,8 +175,11 @@ input[type="submit"], button {
     .disabled { @extend .button.disabled; }
 }
 
+input:disabled { @extend .button.disabled; }
+
 #{$all-button-inputs} {
     @include box-sizing(border-box);
+    @include appearance(none);
     display: block;
     background: none;
 }

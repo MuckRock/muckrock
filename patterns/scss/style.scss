@@ -3,7 +3,7 @@
 //
 // Do not appear in compiled CSS
 
-@import                 'normalize';
+@import                 'lib/normalize';
 @import                 'bourbon/bourbon';
 @import                 'neat/neat';
 
@@ -31,11 +31,8 @@ $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
 
+@import 'lib/grid';
 @import 'lib/typography';
 @import 'lib/objects';
 @import 'lib/layouts';
 @import 'lib/nav';
-
-// Temporary Imports
-// Provides layout for index.html only
-@import 'grid';
