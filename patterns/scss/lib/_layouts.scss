@@ -306,9 +306,11 @@ html, body { min-height: 100%; }
         padding-bottom: 2em;
     }
     input.next {
-        display: inline-block;
-        float: right;
-        vertical-align: bottom;
+        display: block;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        // float: right;
         margin-right: $base-vertical-rhythm;
     }
     
@@ -398,10 +400,13 @@ html, body { min-height: 100%; }
             @extend %quarter;
             @include omega(4n);
         }
-        & input[type="checkbox"] + label {
-            display: inline;
+        & label {
+            display: inline-block;
             margin-top: 0;
-            margin-left: $base-vertical-rhythm/2;
+            margin-right: $base-vertical-rhythm/2;
+        }
+        & input[type="checkbox"] {
+            display: inline-block;
         }
     }
     .other {

@@ -6,8 +6,9 @@
     {% for field in form %}
         {% if field.label != "Other" %}
         <li>
-            {{ field }}
             <label>{{ field.label }}</label>
+            {{ field }}
+            
         </li>
         {% endif %}        
     {% endfor %}

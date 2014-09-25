@@ -1543,9 +1543,10 @@ object.subscription form fieldset, object.password-reset form fieldset, object.p
     position: relative;
     padding-bottom: 2em; }
   .create-request input.next {
-    display: inline-block;
-    float: right;
-    vertical-align: bottom;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    right: 0;
     margin-right: 1.5em; }
   .create-request label {
     color: #21282c; }
@@ -1625,10 +1626,12 @@ object.subscription form fieldset, object.password-reset form fieldset, object.p
       margin-right: 0; }
     .create-request .agencies li:nth-child(4n+1) {
       clear: left; }
-    .create-request .agencies input[type="checkbox"] + label {
-      display: inline;
+    .create-request .agencies label {
+      display: inline-block;
       margin-top: 0;
-      margin-left: 0.75em; }
+      margin-right: 0.75em; }
+    .create-request .agencies input[type="checkbox"] {
+      display: inline-block; }
   .create-request .other {
     float: left;
     width: 75%; }
