@@ -41,12 +41,14 @@
                     {% endblock form %}
                 {% endif %}
                 
+                {% block controls %}
                 <section class="controls">
                     {% if wizard.steps.prev %}
 			        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="button prev">Back</button>
 			        {% endif %}
                     <input class="button primary next" type="submit" value="Next" />
                 </section>
+                {% endblock controls %}
             </form>
         </div>
         {% include 'lib/footer.html' %}

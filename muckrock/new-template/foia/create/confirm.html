@@ -4,6 +4,7 @@
 {% block form %}
     {% with remaining=user.get_profile.num_requests requested=agency_names|length %}
 
+    {% csrf_token %}
     <section class="step-confirm overview">
         <dfn>Summary</dfn>
     {% if requested > 0 %}
@@ -20,21 +21,6 @@
         {% endif %}
     {% endif %}
     {% if user.is_authenticated %}
-        {% if user.get_profile.can_embargo %}
-        <section class="embargo">
-            <label>
-                {{ embargo.label }}
-            </label>
-            <p>
-                {{ embargo }}
-                <small class="help">
-                    Number of days until embargo expires: {{ embargo_length }}
-                    <br />
-                    <em>Embargoes are limited to 30 days.</em>
-                </small>
-            </p>
-        </section>
-        {% endif %}
         <object class="panel">
         {% if not user.get_profile.num_requests %}
             <p>You have no requests and will need to purchase some before submitting.</p>
@@ -61,14 +47,20 @@
             {% for paragraph in request_text %}
             <p>{{ paragraph }}</p>
             {% endfor %}
+            {% if user.is_authenticated %}
+            <p>Sincerely,<br />{{ user.get_full_name }}</p>
+            {% endif %}
         </div>
     </section>
     
-    <section class="controls">
-        <input type="submit" value="Submit" class="button primary" id="submit" {% if not user.get_profile.num_requests or requested > remaining or not user.is_authenticated %}disabled=disabled{% endif %} />
-        <input type="submit" value="Save Draft" class="button default" id="draft" {% if not user.is_authenticated %}disabled{% endif %} />
-        <input type="submit" value="Delete" class="button failure" id="delete" />
-    </section>
     {% endwith %}
-
 {% endblock form %}
+
+    
+{% block controls %}
+<section class="controls">
+    <input type="submit" value="Submit" class="button primary" id="submit" {% if not user.get_profile.num_requests or requested > remaining or not user.is_authenticated %}disabled=disabled{% endif %} />
+    <input type="submit" value="Save Draft" class="button default" id="draft" {% if not user.is_authenticated %}disabled{% endif %} />
+    <input type="submit" value="Delete" class="button failure" id="delete" />
+</section>
+{% endblock controls %}

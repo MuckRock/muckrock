@@ -69,7 +69,6 @@ class RequestWizard(SessionWizardView):
             # the .filter() function returns a QuerySet,
             # so the first element of that set is taken as the agency
         args = {
-            'user': user,
             'title': title,
             'document': document,
             'agencies': agencies,
@@ -97,24 +96,60 @@ class RequestWizard(SessionWizardView):
         
 def submit_request(request):
 
+    if request.method == 'POST':
+        del request.session[SESSION_NAME]
+        return redirect('index')
+        
+    def _compose_preview(document, agencies):
+        intro = 'This is a request under the Freedom of Information Act.'
+        waiver = ('I also request that, if appropriate, fees be waived as I '
+                  'believe this request is in the public interest. '
+                  'The requested documents  will be made available to the ' 
+                  'general public free of charge as part of the public ' 
+                  'information service at MuckRock.com, processed by a ' 
+                  'representative of the news media/press and is made in the ' 
+                  ' process of news gathering and not for commercial usage.')
+        delay = '20 business days'
+        
+        if len(agencies) == 1:
+            j = agencies[0].jurisdiction
+            if j.get_intro():
+                intro = j.get_intro()                
+            if j.get_waiver():
+                waiver = j.get_waiver()
+            if j.get_days():
+                delay = j.get_days()
+        
+        prepend = [intro + ' I hereby request the following records:']
+        append = [waiver,
+                 ('In the event that fees cannot be waived, I would be '
+                  'grateful if you would inform me of the total charges in '     
+                  'advance of fulfilling my request. I would prefer the '
+                  'request filled electronically, by e-mail attachment if ' 
+                  'available or CD-ROM if not.'),
+                  ('Thank you in advance for your anticipated cooperation in '
+                  'this matter. I look forward to receiving your response to ' 
+                  'this request within %s, as the statute requires.' % delay )]
+        return prepend + [document] + append
+    
     if request.session.get(SESSION_NAME, False):
         try:
-            data = pickle.loads(request.session[SESSION_NAME])
+            foia_request = pickle.loads(request.session[SESSION_NAME])
         except pickle.UnpicklingError as e:
             print e
     else:
         return redirect('index')
         
-    print data
-
-    def _process_single(self, form_list):
-        user = self.request.user
-        profile = user.get_profile()
-        return None
+    agency_names = [agency.name for agency in foia_request['agencies']] + \
+                    foia_request['new_agencies']
+    request_text = _compose_preview(foia_request['document'],
+                                    foia_request['agencies'])
     
-    def _process_multi(self, form_list):
-        user = self.request.user
-        profile = user.get_profile()
-        return None
+    context = {
+        'title': foia_request['title'],
+        'agency_names': agency_names,
+        'request_text': request_text
+    }
 
-    return render_to_response('foia/create/confirm.html', data)
+    return render_to_response('foia/create/confirm.html', context, 
+                              context_instance=RequestContext(request))
