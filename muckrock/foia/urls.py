@@ -25,7 +25,6 @@ FORMS = [
     ('document', forms.DocumentForm),
     ('jurisdiction', forms.JurisdictionForm),
     ('agency', forms.AgencyForm),
-    ('confirm', forms.ConfirmationForm)
 ]
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -85,6 +84,8 @@ urlpatterns = patterns('',
     # Create Views
     url(r'^new/$',
         new_views.RequestWizard.as_view(FORMS), name='foia-create'),
+    url(r'^submit/$',
+        new_views.submit_request, name='foia-submit'),
     url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/$',
         new_views.RequestWizard.as_view(FORMS), name='foia-multi'),
     url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/update/$',

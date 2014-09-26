@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect
 from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 
@@ -9,39 +10,28 @@ import muckrock.foia.new_forms as forms
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
+import pickle
+
 import logging
 logger = logging.getLogger(__name__)
 
 FORMS = [
     ('document', forms.DocumentForm),
     ('jurisdiction', forms.JurisdictionForm),
-    ('agency', forms.AgencyForm),
-    ('confirm', forms.ConfirmationForm)
+    ('agency', forms.AgencyForm)
 ]
 
 TEMPLATES = {
     'document': 'foia/create/document.html',
     'jurisdiction': 'foia/create/jurisdiction.html',
     'agency': 'foia/create/agency.html',
-    'confirm': 'foia/create/confirm.html',
     'fallback': 'foia/create/base_create.html'
 }
 
+SESSION_NAME = 'foia_request'
+
 class RequestWizard(SessionWizardView):
-
-    agency_list = []
-    new_agency_list = []
-
-    def _process_single(self, form_list):
-        user = self.request.user
-        profile = user.get_profile()
-        return None
     
-    def _process_multi(self, form_list):
-        user = self.request.user
-        profile = user.get_profile()
-        return None
-        
     def _get_jurisdiction_list(self):
         """Creates a list of all chosen jurisdictions"""
         j_list = []
@@ -61,7 +51,7 @@ class RequestWizard(SessionWizardView):
         args = {'jurisdictions': j_list}
         return args
     
-    def _get_summary(self):
+    def _save_summary(self):
         doc_input = self.get_cleaned_data_for_step('document')
         agency_input = self.get_cleaned_data_for_step('agency')
         user = self.request.user if not self.request.user.is_anonymous() \
@@ -85,19 +75,13 @@ class RequestWizard(SessionWizardView):
             'agencies': agencies,
             'new_agencies': new_agencies
         }
-        self.new_agency_list = new_agencies
-        self.agency_list = agencies
-        
-        return args
+        self.request.session[SESSION_NAME] = pickle.dumps(args)
         
     def get_form_initial(self, step):
         initial = self.initial_dict.get(step, {})
         args = {}
         if step == 'agency':
             args = self._get_jurisdiction_list()
-        elif step == 'confirm':
-            args = self._get_summary()
-            print args
         initial.update(args)
         return initial
     
@@ -105,7 +89,32 @@ class RequestWizard(SessionWizardView):
         return [TEMPLATES[self.steps.current], TEMPLATES['fallback']]
     
     def done(self, form_list, **kwargs):
-        data = self.get_all_cleaned_data()
-        multi = len(self.agency_list + self.new_agency_list) > 1
-        _process_multi(form_list) if multi else _process_single(form_list)
-        return HttpResponseRedirect('index')
+        try:
+            self._save_summary()
+        except pickle.PicklingError as e:
+            print e
+        return redirect('foia-submit')
+        
+def submit_request(request):
+
+    if request.session.get(SESSION_NAME, False):
+        try:
+            data = pickle.loads(request.session[SESSION_NAME])
+        except pickle.UnpicklingError as e:
+            print e
+    else:
+        return redirect('index')
+        
+    print data
+
+    def _process_single(self, form_list):
+        user = self.request.user
+        profile = user.get_profile()
+        return None
+    
+    def _process_multi(self, form_list):
+        user = self.request.user
+        profile = user.get_profile()
+        return None
+
+    return render_to_response('foia/create/confirm.html', data)

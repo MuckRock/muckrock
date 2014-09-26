@@ -2,33 +2,33 @@
 {% load mathfilters %}
 
 {% block form %}
-    {% with remaining=user.get_profile.num_requests requested=wizard.form.agency_names|length %}
+    {% with remaining=user.get_profile.num_requests requested=agency_names|length %}
 
     <section class="step-confirm overview">
         <dfn>Summary</dfn>
     {% if requested > 0 %}
-        <p>You will be sending <em>{{ wizard.form.title }}</em> to
+        <p>You will be sending <em>{{ title }}</em> to
         {% if requested > 1 %}
             {{ requested }} agencies:</p>
         <ul>
-            {% for agency in wizard.form.agency_names %}
+            {% for agency in agency_names %}
             <li>{{ agency }}</li>
             {% endfor %}
         </ul>
         {% else %}
-            {{ wizard.form.agency_names|first }}.</p>
+            {{ agency_names|first }}.</p>
         {% endif %}
     {% endif %}
     {% if user.is_authenticated %}
         {% if user.get_profile.can_embargo %}
         <section class="embargo">
             <label>
-                {{ wizard.form.embargo.label }}
+                {{ embargo.label }}
             </label>
             <p>
-                {{ wizard.form.embargo }}
+                {{ embargo }}
                 <small class="help">
-                    Number of days until embargo expires: {{ wizard.form.embargo_length }}
+                    Number of days until embargo expires: {{ embargo_length }}
                     <br />
                     <em>Embargoes are limited to 30 days.</em>
                 </small>
@@ -58,7 +58,7 @@
     <section class="step-confirm preview">
         <dfn>Preview</dfn>
         <div class="body">
-            {% for paragraph in wizard.form.request_text %}
+            {% for paragraph in request_text %}
             <p>{{ paragraph }}</p>
             {% endfor %}
         </div>
