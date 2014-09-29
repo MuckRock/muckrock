@@ -35,8 +35,8 @@
     {% else %}
         <object class="panel">
             <p>You must have a MuckRock account in order to submit this request.</p>
-            <a href="" class="button primary">Sign Up</a>
-            <a href="" class="button default">Log In</a>    
+            <a href="{% url 'acct-register-free'%}?next={% url 'foia-submit' %}" class="button primary">Sign Up</a>
+            <a href="{% url 'acct-login' %}?next={% url 'foia-submit' %}" class="button default">Log In</a>    
     {% endif %}
         </object>
     </section>
