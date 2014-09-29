@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<object class="subscription">
+<section class="subscription form">
     <header>
         <h1>{{heading}}</h1>
         {% if desc %}
@@ -13,7 +13,7 @@
     {% if form %}
     {% include 'lib/form.html' %}
     {% endif %}
-</object>
+</section>
 
 {% endblock content %}
 

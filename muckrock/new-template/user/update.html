@@ -3,12 +3,12 @@
 
 {% block content %}
 
-<object class="update">
+<section class="update form">
     <header>
         <h1>Update Your Account</h1>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a>
     </header>
     {% include 'lib/form.html' %}
-</object>
+</section>
 
 {% endblock content %}

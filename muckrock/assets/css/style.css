@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview, .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], .create-request .agencies li, .create-request .step-confirm.preview, object.search fieldset, object.subscription form fieldset, object.password-reset form fieldset, object.password-change form fieldset, object.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview, .form input[type="submit"], .form.search input[type="submit"], .create-request .agencies li, .create-request .step-confirm.preview, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul {
   width: 100%; }
 
-.login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset, object.login h1, object.login ul, object.update h1, object.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about {
+    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .login fieldset:last-child, .update fieldset:last-child, .subscription fieldset:last-child, .password-reset fieldset:last-child, .password-change fieldset:last-child, .register fieldset:last-child, object.login h1:last-child, object.login ul:last-child, object.update h1:last-child, object.update .button:last-child, .create-request header h1:last-child, .create-request header .progress-bar:last-child, .create-request .step-document:last-child, .create-request .step-jurisdiction.notices p:last-child, .create-request .other:last-child, .footer-container footer section.about:last-child {
+      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update .button:last-child, .create-request header h1:last-child, .create-request header .progress-bar:last-child, .create-request .step-document:last-child, .create-request .step-jurisdiction.notices p:last-child, .create-request .other:last-child, .footer-container footer section.about:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
@@ -406,24 +406,24 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 321px) {
-  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], .create-request .agencies li {
+  .form input[type="submit"], .form.search input[type="submit"], .create-request .agencies li {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child, object.search input[type="submit"]:last-child, .create-request .agencies li:last-child {
+    .form input[type="submit"]:last-child, .create-request .agencies li:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"], object.search input[type="submit"], .create-request .agencies li {
+  .form input[type="submit"], .form.search input[type="submit"], .create-request .agencies li {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .login input[type="submit"]:last-child, .update input[type="submit"]:last-child, .subscription input[type="submit"]:last-child, .password-reset input[type="submit"]:last-child, .password-change input[type="submit"]:last-child, .register input[type="submit"]:last-child, object.search input[type="submit"]:last-child, .create-request .agencies li:last-child {
+    .form input[type="submit"]:last-child, .create-request .agencies li:last-child {
       margin-right: 0; } }
-.login input[type="submit"]:nth-child(4n), .update input[type="submit"]:nth-child(4n), .subscription input[type="submit"]:nth-child(4n), .password-reset input[type="submit"]:nth-child(4n), .password-change input[type="submit"]:nth-child(4n), .register input[type="submit"]:nth-child(4n), object.search input[type="submit"]:nth-child(4n), .create-request .agencies li:nth-child(4n) {
+.form input[type="submit"]:nth-child(4n), .create-request .agencies li:nth-child(4n) {
   margin-right: 0; }
-.login input[type="submit"]:nth-child(4n+1), .update input[type="submit"]:nth-child(4n+1), .subscription input[type="submit"]:nth-child(4n+1), .password-reset input[type="submit"]:nth-child(4n+1), .password-change input[type="submit"]:nth-child(4n+1), .register input[type="submit"]:nth-child(4n+1), object.search input[type="submit"]:nth-child(4n+1), .create-request .agencies li:nth-child(4n+1) {
+.form input[type="submit"]:nth-child(4n+1), .create-request .agencies li:nth-child(4n+1) {
   clear: left; }
 
 @media screen and (min-width: 321px) {
@@ -444,20 +444,20 @@ html, body {
       margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
-  object.search fieldset {
+  .form.search fieldset {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 100%; }
-    object.search fieldset:last-child {
+    .form.search fieldset:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  object.search fieldset {
+  .form.search fieldset {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 74.41059%; }
-    object.search fieldset:last-child {
+    .form.search fieldset:last-child {
       margin-right: 0; } }
 
 .post, .question, .request, .jurisdiction, .agency, .profile, .search.collection, object.collection {
@@ -634,7 +634,7 @@ td {
   font-size: 2em; }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .login, .update, .subscription, .password-reset, .password-change, .register {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -827,88 +827,88 @@ fieldset input + label {
 fieldset > fieldset, fieldset > fieldset + fieldset {
   margin: 0; }
 
-.login, .update, .subscription, .password-reset, .password-change, .register {
+.form {
   display: block;
   padding: 1.5em;
   border-radius: 9px; }
-  .login form, .update form, .subscription form, .password-reset form, .password-change form, .register form {
+  .form form {
     max-width: 68em;
     margin-left: auto;
     margin-right: auto;
-    padding: 0 0 0 5%; }
-    .login form:after, .update form:after, .subscription form:after, .password-reset form:after, .password-change form:after, .register form:after {
+    padding: 0 0 0 5%;
+    border: none; }
+    .form form:after {
       content: "";
       display: table;
       clear: both; }
-  .login fieldset, .update fieldset, .subscription fieldset, .password-reset fieldset, .password-change fieldset, .register fieldset {
+  .form fieldset {
     margin-right: 0;
     padding: 0 5% 0 0;
     margin-top: 0; }
-    .login fieldset input, .update fieldset input, .subscription fieldset input, .password-reset fieldset input, .password-change fieldset input, .register fieldset input {
+    .form fieldset input {
       width: 100%; }
-  .login input[type="submit"], .update input[type="submit"], .subscription input[type="submit"], .password-reset input[type="submit"], .password-change input[type="submit"], .register input[type="submit"] {
+  .form .buttons {
     display: block; }
-    .login input[type="submit"]:after, .update input[type="submit"]:after, .subscription input[type="submit"]:after, .password-reset input[type="submit"]:after, .password-change input[type="submit"]:after, .register input[type="submit"]:after {
+    .form .buttons:after {
       content: "";
       display: table;
       clear: both; }
-  .login header, .update header, .subscription header, .password-reset header, .password-change header, .register header {
+  .form header {
     max-width: 68em;
     margin-left: auto;
     margin-right: auto;
     padding: 0 5% 0 5%;
     margin: 0.75em 0; }
-    .login header:after, .update header:after, .subscription header:after, .password-reset header:after, .password-change header:after, .register header:after {
+    .form header:after {
       content: "";
       display: table;
       clear: both; }
-  .login > .form, .update > .form, .subscription > .form, .password-reset > .form, .password-change > .form, .register > .form {
-    border: none; }
 
-object.login h1 {
+.form.login h1 {
   font-size: 3em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
   margin-top: -1rem; }
   @media screen and (min-width: 769px) {
-    object.login h1 {
+    .form.login h1 {
       margin-top: 0; } }
 @media screen and (min-width: 769px) {
-  object.login ul {
+  .form.login ul {
     margin: 0.75em 0 0; } }
-object.login p {
+.form.login p {
   padding-left: 5%;
   margin-bottom: 0.75em; }
 
-object.logout {
-  text-align: left; }
+.form.logout {
+  text-align: left;
+  border: none; }
   @media screen and (min-width: 321px) {
-    object.logout {
+    .form.logout {
       text-align: center; } }
 
-object.update h1 {
+.form.update h1 {
   margin-top: -1rem; }
   @media screen and (min-width: 769px) {
-    object.update h1 {
+    .form.update h1 {
       margin-top: 1rem; } }
 @media screen and (min-width: 769px) {
-  object.update .button {
+  .form.update .button {
     margin-top: 1.5rem; } }
 
-object.password-reset, object.password-change {
+.form.password-reset, object.password-change {
   overflow: hidden; }
-  object.password-reset h1, object.password-change h1 {
+  .form.password-reset h1, object.password-change h1 {
     margin: 0 0 0.75em; }
-  object.password-reset form, object.password-change form {
+  .form.password-reset form, object.password-change form {
     padding: 0 2.35765% 0 2.35765%; }
 
-object.register h1 {
+.form.register h1 {
   font-size: 3em;
   line-height: 1.22222em;
   margin: 0.30556em 0;
   padding-left: 5%; }
 
-object.search {
+.form.search {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -917,25 +917,25 @@ object.search {
   padding: 1.5em;
   border: 1px solid #b3becb;
   border-radius: 9px; }
-  object.search form {
+  .form.search form {
     width: 100%; }
-  object.search fieldset {
+  .form.search fieldset {
     margin: 0.75em 0 0; }
-  object.search input[type="submit"] {
+  .form.search input[type="submit"] {
     margin-top: 0.75em; }
-  object.search ul {
+  .form.search ul {
     margin: 0;
     padding: 0; }
-  object.search li {
+  .form.search li {
     display: inline-block;
     padding: 0 1.5em 0 0; }
-    object.search li:last-child {
+    .form.search li:last-child {
       padding-right: 0; }
-  object.search form {
+  .form.search form {
     max-width: 68em;
     margin-left: auto;
     margin-right: auto; }
-    object.search form:after {
+    .form.search form:after {
       content: "";
       display: table;
       clear: both; }

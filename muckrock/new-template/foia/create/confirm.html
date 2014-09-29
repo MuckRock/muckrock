@@ -24,7 +24,7 @@
         <object class="panel">
         {% if not user.get_profile.num_requests %}
             <p>You have no requests and will need to purchase some before submitting.</p>
-            <a href="" class="button primary">Purchase Requests</a>
+            <a href="{% url 'acct-buy-requests' %}?next={% url 'foia-submit' %}" class="button primary">Purchase Requests</a>
         {% else %}
             {% if remaining > requested %}
             <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
