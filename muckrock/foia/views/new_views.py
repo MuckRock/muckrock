@@ -32,7 +32,7 @@ SESSION_NAME = 'foia_request'
 
 class RequestWizard(SessionWizardView):
     
-   jurisdiction = [] 
+    jurisdiction = [] 
     
     def _get_jurisdiction_list(self):
         """Creates a list of all chosen jurisdictions"""
@@ -74,7 +74,7 @@ class RequestWizard(SessionWizardView):
         args = {
             'title': title,
             'document': document,
-            'jurisdiction': self.jurisdiction
+            'jurisdiction': self.jurisdiction,
             'agencies': agencies,
             'new_agencies': new_agencies
         }
@@ -133,7 +133,53 @@ def submit_request(request):
         return prepend + [document] + append
         
     def _create_request(foia):
-        
+        slug = slugify(foia['title']) or 'untitled'
+        jurisdiction = foia['jurisdiction'][0]
+        if foia['agencies']:
+            agency = foia['agencies'][0]
+            is_new_agency = False
+        else:
+            new_agency = foia['new_agencies'][0]
+            agency = Agency.objects.create(
+                name=new_agency[:255],
+                slug=(slugify(new_agency[:255]) or 'untitled'),
+                jurisdiction=jurisdiction,
+                user=request.user,
+                approved=False
+            )
+            send_mail(
+                '[AGENCY] %s' % foia.agency.name,
+                render_to_string(
+                    'foia/admin_agency.txt',
+                    {'agency': foia.agency}
+                ),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
+            is_new_agency = True
+        foia = FOIARequest.objects.create(
+            user=self.request.user,
+            status='started',
+            title=foia['title'],
+            jurisdiction=jurisdiction,
+            slug=slug,
+            agency=agency,
+            requested_docs=foia['documents'],
+            description=foia['documents']
+        )
+        FOIACommunication.objects.create(
+            foia=foia,
+            from_who=self.request.user.get_full_name(),             
+            to_who=foia.get_to_who(),
+            date=datetime.now(),
+            response=False,
+            full_html=False,
+            communication=request_text
+        )
+        foia_comm = foia.communications.all()[0]
+        foia_comm.date = datetime.now()
+        return foia, foia_comm, is_new_agency
     
     if request.session.get(SESSION_NAME, False):
         try:
@@ -152,58 +198,9 @@ def submit_request(request):
         command = request.POST.get('submit', False)
         if command:
             if command == 'Submit' or command == 'Save Draft':
-            
-                slug = slugify(foia_request['title']) or 'untitled'
-                jurisdiction = foia_request['jurisdiction'][0]
-                
-                if foia_request['agencies']:
-                    agency = foia_request['agencies'][0]
-                else:
-                    new_agency = foia_request['new_agencies'][0]
-                    agency = Agency.objects.create(
-                        name=new_agency[:255],
-                        slug=(slugify(new_agency[:255]) or 'untitled'),
-                        jurisdiction=jurisdiction,
-                        user=request.user,
-                        approved=False
-                    )
-                    send_mail(
-                        '[AGENCY] %s' % foia.agency.name,
-                        render_to_string(
-                            'foia/admin_agency.txt',
-                            {'agency': foia.agency}
-                        ),
-                        'info@muckrock.com',
-                        ['requests@muckrock.com'],
-                        fail_silently=False
-                    )
-            
-                foia = FOIARequest.objects.create(
-                    user=self.request.user,
-                    status='started',
-                    title=foia_request['title'],
-                    jurisdiction=jurisdiction,
-                    slug=slug,
-                    agency=agency,
-                    requested_docs=foia_request['documents'],
-                    description=foia_request['documents']
-                )
-                FOIACommunication.objects.create(
-                    foia=foia,
-                    from_who=self.request.user.get_full_name(),             
-                    to_who=foia.get_to_who(),
-                    date=datetime.now(),
-                    response=False,
-                    full_html=False,
-                    communication=request_text
-                )
-                foia_comm = foia.communications.all()[0]
-                foia_comm.date = datetime.now()
-                
-                
+                foia, foia_comm, new_agency = _create_request(foia_request)
                 if command == 'Submit':
                     foia.status = 'submitted'
-                
                 if request.user.get_profile().make_request():
                     foia.submit()
                     messages.success(request, 'Request succesfully submitted.')
@@ -212,9 +209,10 @@ def submit_request(request):
                     error_msg = ('You are out of requests for this month. '
                                  'Your request has been saved as a draft.')
                     messages.error(request, error_msg)
-                
                 foia_comm.save()
                 foia.save()
+
+                del request.session[SESSION_NAME]
 
                 if new_agency:
                     args = {
@@ -226,11 +224,11 @@ def submit_request(request):
                     return redirect('agency-update', foia=foia.pk, kwargs=args)
                 else:
                     return redirect(foia)
-                
-            del request.session[SESSION_NAME]
-            if command == 'Start Over':
-                return redirect('foia-create')
-            return redirect('index')
+            else:    
+                del request.session[SESSION_NAME]
+                if command == 'Start Over':
+                    return redirect('foia-create')
+                return redirect('index')
     
     context = {
         'title': foia_request['title'],
