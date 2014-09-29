@@ -48,7 +48,7 @@ def register_free(request):
         user.get_profile().save_customer()
 
     template = 'user/register_free.html'
-    url_redirect = request.GET.get('next')
+    url_redirect = request.GET.get('next', None)
     
     return _register_acct(request, 'community', RegisterFree, template, create_customer, url_redirect)
 
@@ -60,9 +60,10 @@ def register_pro(request):
         user.get_profile().save_customer(form.cleaned_data['token'])
 
     template = 'user/register_pro.html'
+    url_redirect = request.GET.get('next', None)
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
 
-    return _register_acct(request, 'pro', RegisterPro, template, create_cc, extra_context)
+    return _register_acct(request, 'pro', RegisterPro, template, create_cc, url_redirect, extra_context)
 
 def _register_acct(request, acct_type, form_class, template, post_hook, url_redirect=None, extra_context=None):
     """Register for an account"""
