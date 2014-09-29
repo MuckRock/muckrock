@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -48,8 +48,9 @@ def register_free(request):
         user.get_profile().save_customer()
 
     template = 'user/register_free.html'
-
-    return _register_acct(request, 'community', RegisterFree, template, create_customer)
+    url_redirect = request.GET.get('next')
+    
+    return _register_acct(request, 'community', RegisterFree, template, create_customer, url_redirect)
 
 def register_pro(request):
     """Register for a pro account"""
@@ -63,7 +64,7 @@ def register_pro(request):
 
     return _register_acct(request, 'pro', RegisterPro, template, create_cc, extra_context)
 
-def _register_acct(request, acct_type, form_class, template, post_hook, extra_context=None):
+def _register_acct(request, acct_type, form_class, template, post_hook, url_redirect=None, extra_context=None):
     """Register for an account"""
     # pylint: disable=R0913
     if request.method == 'POST':
@@ -79,8 +80,10 @@ def _register_acct(request, acct_type, form_class, template, post_hook, extra_co
                                    date_update=datetime.now())
 
             post_hook(form=form, user=new_user)
-
-            return HttpResponseRedirect(reverse('acct-my-profile'))
+            if url_redirect:
+                return redirect(url_redirect)
+            else:
+                return redirect('acct-my-profile')
     else:
         form = form_class(initial={'expiration': date.today()})
 
