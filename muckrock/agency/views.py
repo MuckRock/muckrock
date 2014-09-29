@@ -54,7 +54,7 @@ def list_(request):
                               context_instance=RequestContext(request))
 
 @login_required
-def update(request, jurisdiction, jidx, slug, idx):
+def update(request, foia_pk, jurisdiction, jidx, slug, idx):
     """Allow the user to fill in some information about new agencies they create"""
 
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
@@ -70,7 +70,6 @@ def update(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             form.save()
             messages.success(request, 'Agency information saved.')
-            foia_pk = request.GET.get('foia')
             foia = FOIARequest.objects.filter(pk=foia_pk)
             if foia:
                 return redirect(foia[0])
