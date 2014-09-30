@@ -7,6 +7,7 @@ from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
+from django.template.defaultfilters import escape, linebreaks
 from django.template.loader import render_to_string
 
 from datetime import datetime, date, timedelta
@@ -437,7 +438,7 @@ class FOIARequest(models.Model):
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],
                            headers={'Cc': ','.join(cc_addrs)})
-        msg.attach_alternative(body, 'text/html')
+        msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
