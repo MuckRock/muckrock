@@ -23,11 +23,30 @@
         {% endif %}
         {{ foia.get_status_display }}</span>
         </td>
-        <td>{{ foia.jurisdiction }}</td>
+        <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
     </tr>
     {% endfor %}
 </table>
-<a href="{% url 'foia-list-jurisdiction' jurisdiction=jurisdiction.slug idx=jurisdiction.pk %}" class="button">View All</a>
+    {% with foia=foia_requests|first %}
+    <a href="
+    {% if context %}
+        {% if context == 'user' %}
+            {% url 'foia-list-user' user_name=foia.user.username %}
+        {% endif %}
+        {% if context == 'active_user' %}
+            {% url 'foia-mylist-all' %}
+        {% endif %}
+        {% if context == 'agency' %}
+            {% url 'foia-list-agency' agency=foia.agency.slug %}
+        {% endif %}
+        {% if context == 'jurisdiction' %}
+            {% url 'foia-list-jurisdiction' agency=foia.jurisdiction.slug %}
+        {% endif %}
+    {% else %}
+        {% url 'foia-list' %}
+    {% endif %}
+    " class="button">View All Requests</a>
+    {% endwith %}
 {% else %}
 <h3>No requests have been filed. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
 {% endif %}  

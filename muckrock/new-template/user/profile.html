@@ -76,7 +76,9 @@
 {% endblock aside %}
 
 {% block main %}
-
-    {% include 'lib/foia_table.html' %}
-
+    {% if user == user_obj %}
+        {% include 'lib/foia_table.html' with context='active_user' %}
+    {% else %}
+        {% include 'lib/foia_table.html' with context='user' %}
+    {% endif %}
 {% endblock main %}
