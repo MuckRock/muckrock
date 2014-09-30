@@ -186,16 +186,14 @@
 
 ### Question Object
 
-    * /Avatar/
-    * QUESTION AUTHOR
-    * QUESTION DATE
-    * QUESTION BODY
+* /Avatar/
+* QUESTION AUTHOR
+* QUESTION DATE
+* QUESTION BODY
 
 ### Answer Object
 
-    * /Avatar/
-    * ANSWER AUTHOR
-    * ANSWER DATE
-    * ANSWER BODY
-
-# 
+* /Avatar/
+* ANSWER AUTHOR
+* ANSWER DATE
+* ANSWER BODY
