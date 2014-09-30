@@ -3,15 +3,17 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, redirect
+from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 
-import muckrock.foia.new_forms as forms
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
+import muckrock.foia.new_forms as forms
+from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.jurisdiction.models import Jurisdiction
 
 import pickle
-
+from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
 
@@ -159,18 +161,18 @@ def submit_request(request):
             )
             is_new_agency = True
         foia = FOIARequest.objects.create(
-            user=self.request.user,
+            user=request.user,
             status='started',
             title=foia['title'],
             jurisdiction=jurisdiction,
             slug=slug,
             agency=agency,
-            requested_docs=foia['documents'],
-            description=foia['documents']
+            requested_docs=foia['document'],
+            description=foia['document']
         )
         FOIACommunication.objects.create(
             foia=foia,
-            from_who=self.request.user.get_full_name(),             
+            from_who=request.user.get_full_name(),             
             to_who=foia.get_to_who(),
             date=datetime.now(),
             response=False,
@@ -202,7 +204,7 @@ def submit_request(request):
                 if command == 'Submit':
                     foia.status = 'submitted'
                 if request.user.get_profile().make_request():
-                    foia.submit()
+                    # foia.submit() # DEBUG! Connection refused on local server
                     messages.success(request, 'Request succesfully submitted.')
                 else:
                     foia.status = 'started'
@@ -210,7 +212,9 @@ def submit_request(request):
                                  'Your request has been saved as a draft.')
                     messages.error(request, error_msg)
                 foia_comm.save()
+                print 'comm saved' # DEBUG
                 foia.save()
+                print 'foia saved' # DEBUG
 
                 del request.session[SESSION_NAME]
 

@@ -59,8 +59,8 @@
     
 {% block controls %}
 <section class="controls">
-    <input type="submit" value="Submit" class="button primary" id="submit" {% if not user.get_profile.num_requests or requested > remaining or not user.is_authenticated %}disabled=disabled{% endif %} />
-    <input type="submit" value="Save Draft" class="button default" id="draft" {% if not user.is_authenticated %}disabled{% endif %} />
-    <input type="submit" value="Delete" class="button failure" id="delete" />
+    <input type="submit" name="submit" value="Submit" class="button primary" id="submit" {% if not user.get_profile.num_requests or requested > remaining or not user.is_authenticated %}disabled=disabled{% endif %} />
+    <input type="submit" name="submit" value="Save Draft" class="button default" id="draft" {% if not user.is_authenticated %}disabled{% endif %} />
+    <input type="submit" name="submit" value="Delete" class="button failure" id="delete" />
 </section>
 {% endblock controls %}
