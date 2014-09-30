@@ -363,14 +363,14 @@ th {
 html, body {
   min-height: 100%; }
 
-.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .profile > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request header, .create-request .step-jurisdiction.jurisdictions, .create-request .agencies {
+.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .profile > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header, object.collection header, .create-request header, .create-request .step-jurisdiction.jurisdictions, .create-request .agencies {
   display: block; }
-  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .profile > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after, .profile > section.meta aside:after, .create-request header:after, .create-request .step-jurisdiction.jurisdictions:after, .create-request .agencies:after {
+  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .profile > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after, .profile > section.meta aside:after, .search.collection header:after, object.collection header:after, .create-request header:after, .create-request .step-jurisdiction.jurisdictions:after, .create-request .agencies:after {
     content: "";
     display: table;
     clear: both; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview, .form input[type="submit"], .form.search input[type="submit"], .create-request .agencies li, .create-request .step-confirm.preview, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul, object.collection ul {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview, .form input[type="submit"], .form.search input[type="submit"], .create-request .agencies li, .search.collection header h1, object.collection header h1, .create-request .step-confirm.preview, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
   width: 100%; }
 
 .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .create-request header h1, .create-request header .progress-bar, .create-request .step-document, .create-request .step-jurisdiction.notices p, .create-request .other, .footer-container footer section.about {
@@ -385,24 +385,24 @@ html, body {
         margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
-  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview {
+  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .create-request .step-confirm.overview:last-child {
+    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .create-request .step-confirm.overview:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview {
+  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .create-request .step-jurisdiction.jurisdictions div, .create-request .step-confirm.overview {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .create-request .step-confirm.overview:last-child {
+    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child, .create-request .step-jurisdiction.jurisdictions div:last-child, .create-request .step-confirm.overview:last-child {
       margin-right: 0; } }
-.plan:nth-child(3n), .agency aside dl:nth-child(3n), .post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n), .create-request .step-confirm.overview:nth-child(3n) {
+.plan:nth-child(3n), .agency aside dl:nth-child(3n), .post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .search.collection header .commands:nth-child(3n), object.collection header .commands:nth-child(3n), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n), .create-request .step-confirm.overview:nth-child(3n) {
   margin-right: 0; }
-.plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n+1), .create-request .step-confirm.overview:nth-child(3n+1) {
+.plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .search.collection header .commands:nth-child(3n+1), object.collection header .commands:nth-child(3n+1), .create-request .step-jurisdiction.jurisdictions div:nth-child(3n+1), .create-request .step-confirm.overview:nth-child(3n+1) {
   clear: left; }
 
 @media screen and (min-width: 321px) {
@@ -427,20 +427,20 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 321px) {
-  .create-request .step-confirm.preview {
+  .search.collection header h1, object.collection header h1, .create-request .step-confirm.preview {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
-    .create-request .step-confirm.preview:last-child {
+    .search.collection header h1:last-child, object.collection header h1:last-child, .create-request .step-confirm.preview:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .create-request .step-confirm.preview {
+  .search.collection header h1, object.collection header h1, .create-request .step-confirm.preview {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
-    .create-request .step-confirm.preview:last-child {
+    .search.collection header h1:last-child, object.collection header h1:last-child, .create-request .step-confirm.preview:last-child {
       margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
@@ -477,10 +477,10 @@ html, body {
     .container, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
-.homepage, .create-request, .create-request header {
+.search.collection, object.collection, .homepage, .create-request, .create-request header {
   margin: 0 -0.375em; }
   @media screen and (min-width: 321px) {
-    .homepage, .create-request, .create-request header {
+    .search.collection, object.collection, .homepage, .create-request, .create-request header {
       margin: 0 -1.5em; } }
 
 body {
@@ -1395,30 +1395,69 @@ object.jurisidiction.collection ul, object.agency.collection ul {
       line-height: 1.51282em;
       margin: 0.37821em 0; } }
 
-.search.collection ul, object.collection ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none; }
-.search.collection li, object.collection li {
-  padding: 1.5em 0.75em;
-  margin: 0 -0.75em; }
-  .search.collection li:first-child, object.collection li:first-child {
-    padding-top: 0; }
-  @media screen and (min-width: 540px) {
-    .search.collection li, object.collection li {
-      border-radius: 9px; } }
-.search.collection li:nth-child(even), object.collection li:nth-child(even) {
-  background-color: #e7e7e7; }
-.search.collection h2, object.collection h2, .search.collection h3, object.collection h3 {
-  font-weight: 400; }
-.search.collection h2, object.collection h2 {
-  font-size: 1.25em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
-.search.collection h3, object.collection h3 {
-  font-size: 1em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+.search.collection, object.collection {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  .search.collection:after, object.collection:after {
+    content: "";
+    display: table;
+    clear: both; }
+  .search.collection header h1, object.collection header h1 {
+    font-size: 3em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    margin-top: 0; }
+  .search.collection header .commands, object.collection header .commands {
+    overflow: hidden; }
+    .search.collection header .commands .button, object.collection header .commands .button {
+      display: block;
+      margin-top: 1em; }
+      @media screen and (min-width: 321px) {
+        .search.collection header .commands .button, object.collection header .commands .button {
+          display: inline-block;
+          float: right; } }
+  .search.collection .list-types ul, object.collection .list-types ul {
+    padding-left: 0; }
+  .search.collection .list-types li, object.collection .list-types li {
+    display: inline-block; }
+    .search.collection .list-types li a, object.collection .list-types li a {
+      padding: 0.375em 0.75em;
+      margin: 0;
+      border-radius: 9px;
+      text-decoration: none; }
+      .search.collection .list-types li a:hover, object.collection .list-types li a:hover, .search.collection .list-types li a.current-tab, object.collection .list-types li a.current-tab {
+        color: #f4f4f4;
+        background-color: #3a82ff; }
+      .search.collection .list-types li a:active, object.collection .list-types li a:active, .search.collection .list-types li a.current-tab:hover, object.collection .list-types li a.current-tab:hover {
+        background-color: #6da2ff; }
+      .search.collection .list-types li a.current-tab, object.collection .list-types li a.current-tab {
+        cursor: default; }
+  .search.collection ul.object-list, object.collection ul.object-list {
+    margin: 1.5em 0 0;
+    padding: 1.5em 0 0;
+    border-top: 1px solid #b3becb;
+    list-style-type: none; }
+    .search.collection ul.object-list li, object.collection ul.object-list li {
+      padding: 1.5em 1.5em;
+      margin: 0; }
+      .search.collection ul.object-list li:first-child, object.collection ul.object-list li:first-child {
+        padding-top: 0; }
+      .search.collection ul.object-list li:nth-child(even), object.collection ul.object-list li:nth-child(even) {
+        background-color: #e7e7e7; }
+      @media screen and (min-width: 540px) {
+        .search.collection ul.object-list li, object.collection ul.object-list li {
+          border-radius: 9px; } }
+  .search.collection h2, object.collection h2, .search.collection h3, object.collection h3 {
+    font-weight: 400; }
+  .search.collection h2, object.collection h2 {
+    font-size: 1.25em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+  .search.collection h3, object.collection h3 {
+    font-size: 1em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
 
 .homepage {
   overflow: hidden; }

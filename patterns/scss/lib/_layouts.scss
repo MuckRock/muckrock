@@ -45,21 +45,69 @@
 
 %collection {
     @extend %body;
-    ul {
-        @extend %full;
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-    }
-    li {
-        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
-        margin: 0 $base-vertical-rhythm/2*-1;
-        &:first-child { padding-top: 0; }
-        @media screen and (min-width: 540px) {
-            border-radius: $base-border-radius;
+    @extend %edge-to-edge;
+    @include outer-container;
+    header {
+        @extend %row;
+        h1 {
+            @extend %two-thirds;
+            @include font-sizing(3,3);
+            margin-top: 0;
+        }
+        .commands {
+            @extend %third;
+            overflow: hidden;
+            .button {
+                display: block;
+                margin-top: $base-vertical-rhythm/1.5;
+                @include media($medium-layout) {
+                    display: inline-block;
+                    float: right;
+                }
+            }
         }
     }
-    li:nth-child(even) { background-color: $color-odd-background; }
+    .list-types {
+        
+        ul {
+            padding-left: 0;
+        }
+        li {
+            display: inline-block;
+            a {
+                padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+                margin: 0;
+                border-radius: $base-border-radius;
+                text-decoration: none;
+                &:hover, &.current-tab {
+                    color: $color-white;
+                    background-color: $color-primary;
+                }
+                &:active, &.current-tab:hover {
+                    background-color: lighten($color-primary, 10%);
+                }
+                &.current-tab {
+                    cursor: default;
+                }
+            }
+        }
+    }
+    ul.object-list {
+        @extend %full;
+        margin: $base-vertical-rhythm 0 0;
+        padding: $base-vertical-rhythm 0 0;
+        border-top: 1px solid $color-grey;
+        list-style-type: none;
+        li { 
+            padding: $base-vertical-rhythm $base-vertical-rhythm;
+            margin: 0;
+            &:first-child { padding-top: 0; }
+            &:nth-child(even) { background-color: $color-odd-background; }
+            @media screen and (min-width: 540px) {
+                border-radius: $base-border-radius;
+            }
+        }
+    }
     h2, h3 { font-weight: 400; }
     h2 { @include font-sizing(1.25); }
     h3 { @include font-sizing(1); }

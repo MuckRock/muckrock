@@ -1,4 +1,5 @@
 {% extends 'lists/base_list.html' %}
+{% load tags %}
 
 {% block title %}MuckRock &bull; Questions{% endblock title %}
 {% block list-label %}Questions&ensp;&amp;&ensp;Answers{% endblock list-label %}
@@ -29,3 +30,16 @@
     {% endif %}
     {% endwith %}
 {% endblock list-item %}
+
+{% block commands %}
+<a href="{% url 'question-create' %}" class="primary button">Ask a Question</a>
+{% endblock commands %}
+
+{% block list-types %}
+<ul>
+    <li><a href="{% url 'question-index' %}" class="{% active request "^/questions/$" %}">All</a></li>
+    <li><a href="{% url 'question-unanswered' %}" class="{% active request "^/questions/unanswered/$" %}">Unanswered</a></li>
+    <li><a href="{% url 'question-recent' %}" class="{% active request "^/questions/recent/$" %}">Recently Answered</a></li>
+</ul>
+
+{% endblock list-types %}

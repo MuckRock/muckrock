@@ -6,17 +6,25 @@ This is the parent style for a collection of objects: a collection of blog posts
 {% endcomment %}
 {% block content %}
     
-    <header class="collection-header">
-        <h1 class="list-label">
-            {% block list-label %}{% endblock list-label %}
-        </h1>
-    </header>
-    
-    {% include 'lib/pagination.html' %}
-    
     <object class="{% block type %}item{% endblock type %} collection">
+
+        <header class="collection-header">
+            <h1 class="list-label">
+                {% block list-label %}{% endblock list-label %}
+            </h1>
+            <section class="commands">
+            {% block commands %}
+            {% endblock commands %}
+            </section>
+        </header>
+        <section class="list-types">
+            {% block list-types %}
+            {% endblock list-types %}
+        </section>
+        {% include 'lib/pagination.html' %}
+        
         {% block list %}
-        <ul>
+        <ul class="object-list">
             {% for item in object_list %}
             <li>
                 {% block list-item %}
