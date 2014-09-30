@@ -1,0 +1,20 @@
+{% extends 'lists/base_list.html' %}
+{% load tags %}
+
+{% block title %}MuckRock &bull; Requests{% endblock title %}
+{% block list-label %}Requests{% endblock list-label %}
+{% block type %}request{% endblock type %}
+
+{% block list-item %}
+    {% with item as foia %}
+        <h3>On {% if foia.date_submitted %}{{ foia.date_submitted | date:"F j, Y"}}{% else %}{{ foia.communications.all.0.date | date:"F j, Y" }}{% endif %}, {{ foia.user.get_full_name }} {% if foia.status == 'submitted' %}sent{% else %}drafted{% endif %}</h3>
+        <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+        {% if foia.status == 'submitted' %}<h3>to the {{ foia.agency }} in {{ foia.jurisdiction }}.</h3>{% endif %}
+    {% endwith %}
+{% endblock list-item %}
+
+{% block commands %}
+{% endblock commands %}
+
+{% block list-types %}
+{% endblock list-types %}

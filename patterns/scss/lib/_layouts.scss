@@ -99,7 +99,7 @@
         border-top: 1px solid $color-grey;
         list-style-type: none;
         li { 
-            padding: $base-vertical-rhythm $base-vertical-rhythm;
+            padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
             margin: 0;
             &:first-child { padding-top: 0; }
             &:nth-child(even) { background-color: $color-odd-background; }

@@ -32,6 +32,8 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
+list_template = 'lists/request_list.html'
+
 urlpatterns = patterns('',
     # Redirects
     url(r'^$',
@@ -41,11 +43,12 @@ urlpatterns = patterns('',
 
     # List Views
     url(r'^list/$',
-        views.List.as_view(), name='foia-list'),
+        views.List.as_view(template_name=list_template),
+        name='foia-list'),
     url(r'^list/user-(?P<user_name>[\w\d_.@ -]+)/$',
-        views.ListByUser.as_view(), name='foia-list-user'),
+        views.List.as_view(template_name=list_template), name='foia-list-user'),
     url(r'^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
-        views.ListByAgency.as_view(), name='foia-list-agency'),
+        views.List.as_view(template_name=list_template), name='foia-list-agency'),
     url(r'^list/place-(?P<jurisdiction>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
         views.ListByJurisdiction.as_view(), name='foia-list-jurisdiction'),
     url(r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
