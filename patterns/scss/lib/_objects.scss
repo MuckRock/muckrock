@@ -1,57 +1,5 @@
 /* Simple Objects */
 
-// Table of Contents
-//
-// * Mixins
-// * Prototypes
-//     * Textbox
-//        * Button
-//        * Panel
-//        * input
-// * Implementation
-
-
-// Mixins
-
-@mixin background-gradient($color) {
-    background: $color;
-    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
-}
-
-@mixin button-color($color) {
-    color: $color-white;
-    border-color: darken($color, $base-gradient-darken);
-    @include background-gradient($color);
-}
-
-@mixin button-hover($color) {
-    &:hover {
-        color: $color-white;
-        background: $color;
-    }
-    &:focus {
-        $focus-color: lighten($color, 10%);
-        color: $color-white;
-        border-color: $focus-color;
-        background: $focus-color;
-    }
-    &:active {
-        color: $color-white;
-        @include background(linear-gradient(darken($color, $base-gradient-darken), $color));
-    }
-}
-
-@mixin panel-color($color, $disabled: false) {
-    @if not $disabled {
-        color: $color-white;
-        @include background-gradient($color);
-        border-color: darken($color, 10%);
-    } @else {
-        color: $color;
-        background: none;
-    }
-}
-
 // Prototypes
 
 // Textbox
@@ -537,13 +485,7 @@ object.progress-bar {
     border-radius: $base-border-radius;
     @include border-right-radius(0px);
     &.completed { @include border-right-radius($base-border-radius); }
-    @mixin classifier($status, $color) {
-        &.#{$status} {
-            color: $color-white;
-            @include background-gradient($color);
-            border: 1px solid darken($color, 15%);
-        }
-    }
+
     @include classifier(success, $color-success);
     @include classifier(failure, $color-failure);
     @include classifier(primary, $color-primary);

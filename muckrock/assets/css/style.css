@@ -1431,22 +1431,7 @@ object.jurisidiction.collection ul, object.agency.collection ul {
     position: relative;
     background-size: cover;
     background-position: center;
-    color: #f4f4f4;
-    /*
-    .button { 
-        display: block;
-        margin-right: $base-vertical-rhythm/2;
-        margin-bottom: $base-vertical-rhythm/2;
-        border: 2*$base-border-width solid $color-white;
-        color: #1c0b04;
-        background: $color-white;
-        &:hover {
-            color: $color-white;
-            background: none;
-            border: 2*$base-border-width solid $color-white;
-        }
-        
-    }*/ }
+    color: #f4f4f4; }
     .homepage .banner h1 {
       position: relative;
       top: 0;
@@ -1473,6 +1458,8 @@ object.jurisidiction.collection ul, object.agency.collection ul {
       border-bottom: 1px dotted #f4f4f4; }
       .homepage .banner a.dotted:hover {
         border-bottom: 1px solid #f4f4f4; }
+    .homepage .banner .button {
+      display: block; }
     .homepage .banner .image-attribution {
       position: absolute;
       bottom: 1.5em;
@@ -1817,9 +1804,9 @@ nav.secondary {
     position: relative;
     padding-right: 0.5em;
     color: #21282c;
-    -webkit-transition: padding 0.25s ease-in-out;
-    -moz-transition: padding 0.25s ease-in-out;
-    transition: padding 0.25s ease-in-out; }
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; }
     nav.secondary a:hover {
       color: #3a82ff;
       text-decoration: none;
@@ -1936,17 +1923,30 @@ nav.primary ul.right {
   display: table; }
 
 #sidebar-menu.hidden-menu {
-  width: 300px;
-  margin-right: -300px; }
+  width: 250px;
+  margin-right: -250px; }
+  #sidebar-menu.hidden-menu #new-request {
+    display: none; }
   #sidebar-menu.hidden-menu:target {
     margin-right: 0; }
     #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
       width: 100%;
-      margin-left: -300px; }
-    #sidebar-menu.hidden-menu:target #new-request {
-      display: none; }
+      margin-left: -250px; }
     #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
-      margin-left: 300px; }
+      margin-left: 250px; }
+  @media screen and (min-width: 321px) {
+    #sidebar-menu.hidden-menu {
+      width: 300px;
+      margin-right: -300px; }
+      #sidebar-menu.hidden-menu #new-request {
+        display: none; }
+      #sidebar-menu.hidden-menu:target {
+        margin-right: 0; }
+        #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
+          width: 100%;
+          margin-left: -300px; }
+        #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
+          margin-left: 300px; } }
 
 #right-menu-button.hidden-menu {
   display: block; }
@@ -1956,8 +1956,8 @@ nav.primary ul.right {
     width: 100%; }
 
   #sidebar-menu {
-    width: 300px;
-    margin-right: -300px; }
+    width: 250px;
+    margin-right: -250px; }
 
   #right-menu-button {
     display: block; }
@@ -1966,7 +1966,7 @@ nav.primary ul.right {
     margin-right: 0; }
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
-      margin-left: -300px; }
+      margin-left: -250px; }
     #sidebar-menu:target #new-request {
       display: none; }
 

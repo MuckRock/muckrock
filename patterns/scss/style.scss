@@ -31,6 +31,7 @@ $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
 
+@import 'lib/mixins';
 @import 'lib/grid';
 @import 'lib/typography';
 @import 'lib/objects';

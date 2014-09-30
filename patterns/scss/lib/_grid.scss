@@ -47,15 +47,6 @@ html, body { min-height: 100%; }
     @include outer-container;
 }
 
-@mixin horizontal-margins {
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
-    @media screen and (min-width: 540px) {
-        margin-left: 2rem;
-        margin-right: 2rem;
-    }
-}
-
 %base-spacing {
     padding: $base-vertical-rhythm/4;
     @include media($medium-layout) { padding: $base-vertical-rhythm; }

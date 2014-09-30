@@ -136,7 +136,7 @@ nav.secondary {
         @media all and (min-width: 600px) { padding-right: 4em; }
         @media all and (min-width: 700px) { padding-right: 5.5em; }
         
-        @include transition (padding 0.25s ease-in-out);
+        @include transition (all 0.2s ease-in-out);
     }
     padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
@@ -220,17 +220,34 @@ nav.primary ul.right { display: none; }
 .hidden-menu ~ .container { width: 100%; }
 .hidden-menu ~ .container nav.primary ul.right { display: table; }
 #sidebar-menu.hidden-menu {
-    width: $tablet-menu-width;
-    margin-right: -$tablet-menu-width;
+    width: $mobile-menu-width;
+    margin-right: -$mobile-menu-width;
+    #new-request { display: none; }
     &:target {
         margin-right: 0;
         & ~ .container, & ~ .footer { 
             width: 100%;
-            margin-left: -$tablet-menu-width;
+            margin-left: -$mobile-menu-width;
         }
-        #new-request { display: none; }
+        
         & ~ .container header .primary #muckrock-text {
-            margin-left: $tablet-menu-width;
+            margin-left: $mobile-menu-width;
+        }
+    }
+    @include media($medium-layout) {
+        width: $tablet-menu-width;
+        margin-right: -$tablet-menu-width;
+        #new-request { display: none; }
+        &:target {
+            margin-right: 0;
+            & ~ .container, & ~ .footer { 
+                width: 100%;
+                margin-left: -$tablet-menu-width;
+            }
+        
+            & ~ .container header .primary #muckrock-text {
+                margin-left: $tablet-menu-width;
+            }
         }
     }
 }
@@ -239,15 +256,15 @@ nav.primary ul.right { display: none; }
 @media screen and (max-width: $menu-breakpoint) {
     .container, .footer-container { width: 100%; }
     #sidebar-menu {
-        width: $tablet-menu-width;
-        margin-right: -$tablet-menu-width;
+        width: $mobile-menu-width;
+        margin-right: -$mobile-menu-width;
     }
     #right-menu-button { display: block; }
     #sidebar-menu:target {
         margin-right: 0;
         & ~ .container, & ~ .footer { 
             width: 100%;
-            margin-left: -$tablet-menu-width;
+            margin-left: -$mobile-menu-width;
         }
         #new-request { display: none; }
     }
@@ -257,13 +274,6 @@ nav.primary ul.right { display: none; }
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
     $sidebar-button-background: darken($color-black, 4%);
-    @mixin active-button {
-        color: $color-white;
-        border-color: $color-selected;
-        background: $color-selected;
-        svg { fill: $color-white; }
-    }
-
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     height: 100%;

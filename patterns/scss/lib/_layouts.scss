@@ -107,21 +107,9 @@
                 border-bottom: 1px solid $color-white;
             }
         }
-        /*
-        .button { 
+        .button {
             display: block;
-            margin-right: $base-vertical-rhythm/2;
-            margin-bottom: $base-vertical-rhythm/2;
-            border: 2*$base-border-width solid $color-white;
-            color: #1c0b04;
-            background: $color-white;
-            &:hover {
-                color: $color-white;
-                background: none;
-                border: 2*$base-border-width solid $color-white;
-            }
-            
-        }*/
+        }
         .image-attribution {
             position: absolute;
             bottom: $base-vertical-rhythm;
