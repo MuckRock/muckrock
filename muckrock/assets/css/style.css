@@ -1431,7 +1431,22 @@ object.jurisidiction.collection ul, object.agency.collection ul {
     position: relative;
     background-size: cover;
     background-position: center;
-    color: #f4f4f4; }
+    color: #f4f4f4;
+    /*
+    .button { 
+        display: block;
+        margin-right: $base-vertical-rhythm/2;
+        margin-bottom: $base-vertical-rhythm/2;
+        border: 2*$base-border-width solid $color-white;
+        color: #1c0b04;
+        background: $color-white;
+        &:hover {
+            color: $color-white;
+            background: none;
+            border: 2*$base-border-width solid $color-white;
+        }
+        
+    }*/ }
     .homepage .banner h1 {
       position: relative;
       top: 0;
@@ -1452,23 +1467,12 @@ object.jurisidiction.collection ul, object.agency.collection ul {
       font-weight: 700;
       text-align: center;
       padding-top: 2.5em; }
-    .homepage .banner a {
+    .homepage .banner a.dotted {
       color: #f4f4f4;
       text-decoration: none;
       border-bottom: 1px dotted #f4f4f4; }
-      .homepage .banner a:hover {
+      .homepage .banner a.dotted:hover {
         border-bottom: 1px solid #f4f4f4; }
-    .homepage .banner .button {
-      display: block;
-      margin-right: 0.75em;
-      margin-bottom: 0.75em;
-      border: 2px solid #f4f4f4;
-      color: #1c0b04;
-      background: #f4f4f4; }
-      .homepage .banner .button:hover {
-        color: #f4f4f4;
-        background: none;
-        border: 2px solid #f4f4f4; }
     .homepage .banner .image-attribution {
       position: absolute;
       bottom: 1.5em;
@@ -1780,7 +1784,7 @@ nav.primary {
     padding: 0 0.5em 0 0; }
     nav.primary #muckrock-text:hover, nav.primary #muckrock-icon:hover {
       background: none; }
-      nav.primary #muckrock-text:hover svg > g, nav.primary #muckrock-icon:hover svg > g {
+      nav.primary #muckrock-text:hover svg > path, nav.primary #muckrock-icon:hover svg > path, nav.primary #muckrock-text:hover svg > g, nav.primary #muckrock-icon:hover svg > g {
         fill: #3a82ff; }
   nav.primary #muckrock-text {
     display: none; }
@@ -1813,9 +1817,9 @@ nav.secondary {
     position: relative;
     padding-right: 0.5em;
     color: #21282c;
-    -webkit-transition: all 0.25s ease-in-out;
-    -moz-transition: all 0.25s ease-in-out;
-    transition: all 0.25s ease-in-out; }
+    -webkit-transition: padding 0.25s ease-in-out;
+    -moz-transition: padding 0.25s ease-in-out;
+    transition: padding 0.25s ease-in-out; }
     nav.secondary a:hover {
       color: #3a82ff;
       text-decoration: none;
@@ -1891,9 +1895,9 @@ nav.secondary {
   display: block;
   width: 74%;
   float: left;
-  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease; }
 
 #sidebar-menu {
   position: fixed;
@@ -1901,9 +1905,14 @@ nav.secondary {
   right: 0;
   width: 26%;
   height: 100%;
-  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease; }
+
+#muckrock-text {
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease; }
 
 #menu-button {
   display: table-cell; }
@@ -1936,6 +1945,8 @@ nav.primary ul.right {
       margin-left: -300px; }
     #sidebar-menu.hidden-menu:target #new-request {
       display: none; }
+    #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
+      margin-left: 300px; }
 
 #right-menu-button.hidden-menu {
   display: block; }

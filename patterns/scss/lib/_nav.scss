@@ -85,7 +85,7 @@ nav.primary {
         padding: 0 0.5em 0 0;
         &:hover {
             background: none;
-            svg > g { fill: $color-selected; }
+            svg > path, svg > g { fill: $color-selected; }
         }
     }
     #muckrock-text { @extend %logo; display: none; }
@@ -136,7 +136,7 @@ nav.secondary {
         @media all and (min-width: 600px) { padding-right: 4em; }
         @media all and (min-width: 700px) { padding-right: 5.5em; }
         
-        @include transition (all 0.25s ease-in-out);
+        @include transition (padding 0.25s ease-in-out);
     }
     padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
@@ -186,7 +186,7 @@ $menu-breakpoint: 1024px;
 $mobile-menu-width: 250px;
 $tablet-menu-width: 300px;
 $desktop-menu-width: 26%;
-$menu-animation: all 0.5s $ease-out-expo;
+$menu-animation: all 0.25s ease;
 
 .container {
     display: block;
@@ -203,6 +203,8 @@ $menu-animation: all 0.5s $ease-out-expo;
     height: 100%;
     @include transition($menu-animation);
 }
+
+#muckrock-text { @include transition($menu-animation); }
 
 #menu-button { display: table-cell; }
 #menu-close { display: none; }
@@ -227,6 +229,9 @@ nav.primary ul.right { display: none; }
             margin-left: -$tablet-menu-width;
         }
         #new-request { display: none; }
+        & ~ .container header .primary #muckrock-text {
+            margin-left: $tablet-menu-width;
+        }
     }
 }
 #right-menu-button.hidden-menu { display: block; }

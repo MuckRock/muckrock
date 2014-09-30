@@ -99,7 +99,7 @@
             text-align: center;
             padding-top: 2.5em;
         }
-        a {
+        a.dotted {
             color: $color-white;
             text-decoration: none;
             border-bottom: 1px dotted $color-white;
@@ -107,6 +107,7 @@
                 border-bottom: 1px solid $color-white;
             }
         }
+        /*
         .button { 
             display: block;
             margin-right: $base-vertical-rhythm/2;
@@ -120,7 +121,7 @@
                 border: 2*$base-border-width solid $color-white;
             }
             
-        }
+        }*/
         .image-attribution {
             position: absolute;
             bottom: $base-vertical-rhythm;
