@@ -4,7 +4,6 @@
 {% block type %}agency{% endblock type %}
 
 {% block header %}
-    <dfn>Agency</dfn>
     <h1>{{agency.name}}</h1>
     <h2>of {% if agency.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ agency.jurisdiction.get_absolute_url }}">{{ agency.jurisdiction }}</a></h2>
     {% if agency.image %}
@@ -98,7 +97,8 @@
     </dl>
     {% endfor %}
     
+    {% if user.is_authenticated %}
     <a href="#hidden-form" class="button" id='hidden-form-button'>Submit a Change</a>
-    {% include 'lib/form.html' with is_hidden=1 %}
-    
+        {% include 'lib/form.html' with is_hidden=1 %}
+    {% endif %}
 {% endblock main %}
