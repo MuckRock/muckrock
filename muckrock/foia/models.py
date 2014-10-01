@@ -428,6 +428,9 @@ class FOIARequest(models.Model):
         else:
             subject = 'Freedom of Information Request: %s' % self.title
 
+        # get last comm to set delivered and raw_email
+        comm = self.communications.reverse()[0]
+
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         body = render_to_string('foia/request.txt', {'request': self})
@@ -437,15 +440,16 @@ class FOIARequest(models.Model):
                            from_email=from_email,
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],
-                           headers={'Cc': ','.join(cc_addrs)})
-        msg.attach_alternative(linebreaks(escape(body)), 'text/html')
+                           headers={'Cc': ','.join(cc_addrs),
+                                    'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk})
+        if from_addr != 'fax':
+            msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
-        # get last comm to set delivered and raw_email
-        comm = self.communications.reverse()[0]
+        # update communication
         comm.raw_email = msg.message()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
