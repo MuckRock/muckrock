@@ -4,7 +4,6 @@
 {% block type %}jurisdiction{% endblock type %}
 
 {% block header %}
-    <dfn>Jurisdiction</dfn>
 	<h1>{{ jurisdiction.name }}</h1>
 	{% if jurisdiction.parent %}
 	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent.name }}</a></h2>
@@ -53,11 +52,11 @@
 
     {{agency.public_notes|markdown:"trusted"}}
 
-    {% include 'lib/foia_table.html' %}
+    {% include 'lib/foia_table.html' with context='jurisdiction' %}
     
     {% if jurisdiction.agencies.count %}
     <h3>Documented Agencies</h3>
-    <table>
+    <table class="agency">
         <tr>
             <th width="50%">Agency</th>
             <th width="20%">Requests</th>
@@ -75,7 +74,9 @@
     <h3>No agencies have been documented for this jurisdiction.</h3>
     {% endif %}
     
+    {% if user.is_authenticated %}
     <a href="#hidden-form" class="button" id='hidden-form-button'>Submit a Change</a>
-    {% include 'lib/form.html' with is_hidden=1 %}
+        {% include 'lib/form.html' with is_hidden=1 %}
+    {% endif %}
 	
 {% endblock main %}

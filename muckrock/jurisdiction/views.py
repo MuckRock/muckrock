@@ -27,32 +27,6 @@ def collect_stats(obj, context):
     context['overdue_reqs'] = obj.foiarequest_set.get_public() \
                                  .get_overdue().order_by('date_due')[:5]
 
-# TODO: Move the `flag` view into the `detail` view
-@login_required
-def flag(request, obj, type_):
-    """Helper for flagging jurisdictions and agencies"""
-    if request.method == 'POST':
-        form = FlagForm(request.POST)
-        if form.is_valid():
-            send_mail(
-                '[FLAG] %s: %s' % (type_, obj.name),
-                render_to_string(
-                    'jurisdiction/flag.txt',
-                    { 'obj': obj,
-                      'user': request.user,
-                      'type': type_,
-                      'reason': form.cleaned_data.get('reason')
-                    }
-                ),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
-            messages.info(request, 'Agency correction succesfully submitted')
-            return redirect(obj)
-    else:
-        form = FlagForm()
-    return form
 
 def detail(request, fed_slug, state_slug, local_slug):
     """Details for a jurisdiction"""
@@ -67,7 +41,30 @@ def detail(request, fed_slug, state_slug, local_slug):
                                        .filter(jurisdiction=jurisdiction)\
                                        .order_by('-date_submitted')[:5]
                                        
-    form = flag(request, jurisdiction, 'jurisdiction')
+    if request.method == 'POST':
+        form = FlagForm(request.POST)
+        if form.is_valid():
+            # DEBUG: Cannot send mail while running on localhost
+            '''
+            send_mail(
+                '[FLAG] %s: %s' % (type_, jurisdiction.name),
+                render_to_string(
+                    'jurisdiction/flag.txt',
+                    { 'obj': jurisdiction,
+                      'user': request.user,
+                      'type': 'jurisdiction',
+                      'reason': form.cleaned_data.get('reason')
+                    }
+                ),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
+            '''
+            messages.info(request, 'Agency correction succesfully submitted')
+            return redirect(jurisdiction)
+    else:
+        form = FlagForm()
 
     context = {
         'jurisdiction': jurisdiction,
