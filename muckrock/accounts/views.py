@@ -161,7 +161,12 @@ def manage_subsc(request):
                'free requests a month for helping out.'
         return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
                                   context_instance=RequestContext(request))
-
+    elif user_profile.acct_type == 'proxy':
+        heading = 'Proxy Account'
+        desc = 'Thank you for being a proxy user.  You will continue to get 20 ' \
+               'free requests a month for helping out.'
+        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+                                  context_instance=RequestContext(request))
     elif user_profile.acct_type == 'community':
         heading = 'Upgrade to a Pro Account'
         desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'

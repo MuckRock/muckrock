@@ -36,6 +36,7 @@ class Profile(models.Model):
         ('beta', 'Beta'),
         ('community', 'Community'),
         ('pro', 'Professional'),
+        ('proxy', 'Proxy'),
     )
 
     email_prefs = (
@@ -140,7 +141,7 @@ class Profile(models.Model):
     def can_embargo(self):
         """Is this user allowed to embargo?"""
 
-        return self.acct_type in ['admin', 'beta', 'pro']
+        return self.acct_type in ['admin', 'beta', 'pro', 'proxy']
 
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""

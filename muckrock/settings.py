@@ -288,6 +288,7 @@ MONTHLY_REQUESTS = {
     'beta': 5,
     'community': 0,
     'pro': 20,
+    'proxy': 20,
 }
 
 MARKDOWN_DEUX_STYLES = {
