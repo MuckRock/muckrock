@@ -1,0 +1,56 @@
+<!-- Pricing Table -->
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Sign Up{% endblock title %}
+
+{% block content %}
+<section class="features">
+    <h1>For MuckRock users, requesting public records is a breeze.</h1>
+    <p>File requests to any federal, state, or local agency in all 50 states plus Washington D.C.</p>
+    <p>We are paper-free, scanning responses and making them searchable.</p>
+    <p>Tightly integrated with Spot.us to crowdfund expensive request fees.</p>
+    <p>30-day money-back guarantee</p>
+    <p>Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></p>
+</section>
+
+<section class="pricing">
+    <object class="personal plan">
+        <a href="{% url 'acct-register-free' %}">
+            <div class="name">Personal</div>
+            <div class="description">For bloggers, upstanding citizens, and individuals.</div>
+        </a>
+        <ul class="features">
+            <li>Free to sign up, no credit card required.</li>
+            <li>Purchase five requests for $20.</li>
+            <li>Earn free requests by participating in site assignments.</li>
+            <li>Join our growing community of government watchdogs.</li>
+        </ul>
+    </object>
+
+    <object class="professional plan">
+        <a href="{% url 'acct-register-pro' %}">
+            <div class="name">Professional</div>
+            <div class="description">For journalists, researchers, and professionals.</div>
+        </a>
+        <ul class="features">
+            <li>Each month, file up to 20 requests for $40.</li>
+            <li>Purchase additional requests at a reduced rate.</li>
+            <li>Private Requests</li>
+            <li>Document Conversion</li>
+            <li>Priority Support</li>
+            <li>Access to a growing directory of 250 government agencies, including contact information, historical response data, and more.</li>
+        </ul>
+    </object>
+
+    <object class="organization plan">
+        <a href="mailto:info@muckrock.com">
+            <div class="name">Organization</div>
+            <div class="description">A custom-built plan to meet the needs of newsrooms, law firms, and other organizations.</div>
+        </a>
+        <ul class="features">
+            <li>Used by reporters at the Boston Globe, Talking Points Memo, Gannett and more.</li>
+            <li>Hands-on training and advice for filing FOI requests.</li>
+            <li>E-mail us for a quote.</li>
+        </ul>
+    </object>
+</section>
+{% endblock content %}

@@ -1,0 +1,17 @@
+{% extends 'foia/create/base_create.html' %}
+
+{% block form %}
+
+    <section class="step-document introduction">
+        <p>Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Curabitur blandit tempus porttitor. Donec ullamcorper nulla non metus auctor fringilla. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Cras mattis consectetur purus sit amet fermentum.</p>
+        <p>Aenean lacinia bibendum nulla sed consectetur. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec id elit non mi porta gravida at eget metus. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.</p>
+    </section>
+    <section class="step-document forms">
+        <label>Title</label>
+        {{ form.title }}
+        <label>Document Request</label>
+        <p class="context">This is a request under the Freedom of Information Act. I hereby request the following records:</p>
+        {{ form.document }}
+    </section>
+
+{% endblock form %}

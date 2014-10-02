@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Update Account{% endblock title %}
+
+{% block content %}
+
+<section class="update form">
+    <header>
+        <h1>Update Your Account</h1>
+        <a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a>
+    </header>
+    {% include 'lib/form.html' %}
+</section>
+
+{% endblock content %}

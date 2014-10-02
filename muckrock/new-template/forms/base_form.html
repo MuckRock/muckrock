@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="{% block form-type %}{%endblock form-type %} form">
+    {% block head %}
+    <header>
+        <h1>{% block form-title %}{% endblock form-title %}</h1>
+    </header>
+    {% endblock head %}
+    {% block form %}
+        {% include 'lib/form.html' %}
+    {% endblock form %}
+</section>
+{% endblock content %}

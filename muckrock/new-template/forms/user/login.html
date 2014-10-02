@@ -1,0 +1,29 @@
+{% extends 'forms/base_form.html' %}
+{% block title %}MuckRock &bull; Log In {% endblock title %}
+{% block form-type %}login{% endblock %}
+
+{% block head %}
+    <h1>Log In</h1>
+    <ul>
+        <li>Don&rsquo;t have an account? <a href="{% url 'acct-register' %}">Sign&nbsp;up&nbsp;today.</a></li>
+        <li>Forgot your password? <a href="{% url 'acct-reset-pw' %}">Reset&nbsp;it.</a></li>
+    </ul>
+{% endblock head %}
+
+{% block form %}
+    {% if form.errors %}
+    <p class="failure">Sorry, that's not a valid username or password.</p>
+    {% endif %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <fieldset>
+            <label for="username">Username</label>
+            <input type="text" name="username" value="" id="username" />
+        </fieldset>
+        <fieldset>
+            <label for="password">Password</label>
+            <input type="password" name="password" value="" id="password" />
+        </fieldset>
+        <input type="submit" value="Log in" class="primary button" />
+    </form>
+{% endblock form %}
