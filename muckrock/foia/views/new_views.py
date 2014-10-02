@@ -37,9 +37,8 @@ def create_request(request):
     initial_data = {}
     clone = False
     if request.session.get(SESSION_NAME, False):
-        clone = True
         session_data = request.session[SESSION_NAME]
-        
+        clone = session_data['is_clone']
         initial_data = {
             'title': session_data['title'],
             'document': session_data['document'],
