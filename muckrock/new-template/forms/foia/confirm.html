@@ -2,24 +2,12 @@
 {% load mathfilters %}
 
 {% block form %}
-    {% with remaining=user.get_profile.num_requests requested=agency_names|length %}
+    {% with remaining=user.get_profile.num_requests requested=1 %}
 
     {% csrf_token %}
     <section class="step-confirm overview">
         <dfn>Summary</dfn>
-    {% if requested > 0 %}
-        <p>You will be sending <em>{{ title }}</em> to
-        {% if requested > 1 %}
-            {{ requested }} agencies:</p>
-        <ul>
-            {% for agency in agency_names %}
-            <li>{{ agency }}</li>
-            {% endfor %}
-        </ul>
-        {% else %}
-            {{ agency_names|first }}.</p>
-        {% endif %}
-    {% endif %}
+        <p>You will be sending <em>{{ title }}</em> to {{ agency.name }}.</p>
     {% if user.is_authenticated %}
         <object class="panel">
         {% if not user.get_profile.num_requests %}
@@ -44,7 +32,7 @@
     <section class="step-confirm preview">
         <dfn>Preview</dfn>
         <div class="body">
-            {% for paragraph in request_text %}
+            {% for paragraph in comm %}
             <p>{{ paragraph }}</p>
             {% endfor %}
             {% if user.is_authenticated %}
