@@ -25,13 +25,16 @@ class RequestForm(forms.Form):
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
         required=False
     )
+    '''
     agency = forms.ModelChoiceField(
         label='Agency',
+        queryset=None,
         required=False,
         widget=forms.Select(attrs={'class': 'combobox'}),
         help_text=('Select one of the agencies for the jurisdiction you '
                    'have chosen, or write in the correct agency if known.')
     )
+    '''
     
     def clean(self):
         if jurisdiction == 's' and not state:

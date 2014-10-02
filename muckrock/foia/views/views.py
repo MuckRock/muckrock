@@ -35,8 +35,6 @@ from muckrock.foia.forms import FOIARequestForm, \
                                 TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
-from muckrock.foia.views.new_views import RequestWizard
-# from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag

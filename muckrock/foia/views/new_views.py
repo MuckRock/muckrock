@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.formtools.wizard.views import SessionWizardView
-from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, redirect
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render_to_response, redirect, get_object_or_404
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
@@ -20,17 +20,17 @@ logger = logging.getLogger(__name__)
 
 SESSION_NAME = 'foia_request'
 
-def clone_request(request):
+def clone_request(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     request.session[SESSION_NAME] = {
-        'title': foia['title'],
-        'document': foia['requested_docs'],
-        'jurisdiction': foia['jurisdiction'],
-        'agency': foia['agency'],
+        'title': foia.title,
+        'document': foia.requested_docs,
+        'jurisdiction': foia.jurisdiction,
+        'agency': foia.agency,
         'is_new_agency': False,
         'is_clone': True
-    )
+    }
     return redirect('foia-create')
 
 def create_request(request):
@@ -41,7 +41,7 @@ def create_request(request):
         print request.session[SESSION_NAME]
 
         # TODO drop session data into initial_data
-        
+    '''
     if request.method == 'GET':
         results = []
         if request.GET.has_key(u'jID'):
@@ -49,8 +49,9 @@ def create_request(request):
             agencies = Agency.objects.filter(jurisdiction=jID).order_by('name')
             results += [agency.name for agency in agencies]
         json = simplejson.dumps(results)
-        return HttpResponse(json, mimetype='application/json')
-    elif request.method == 'POST':
+        # return HttpResponse(json, mimetype='application/json')
+    '''
+    if request.method == 'POST':
         form = RequestForm(request.POST)
         # drop the data into SESSION_NAME
         if form.is_valid():
@@ -81,11 +82,10 @@ def create_request(request):
         else:
             form = RequestForm()
     
-    def render_to_response(
-        'forms/foia/create.html',
-        {'form': form, 'clone': clone},
-        context_instance=RequestContext(request)
-    )
+    context = { 'form': form, 'clone': clone }
+    
+    return render_to_response('forms/foia/create.html', context, 
+                              context_instance=RequestContext(request))
     
         
 def submit_request(request):

@@ -12,7 +12,6 @@ import muckrock.foia.signals
 # pylint: enable=W0611
 from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
-import muckrock.foia.new_forms as forms
 from muckrock.foia.views import new_views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from muckrock.foia.pingbacks import pingback_foia_handler
@@ -20,12 +19,6 @@ from muckrock.views import jurisdiction
 
 # pylint: disable=E1120
 # pylint: disable=bad-whitespace
-
-FORMS = [
-    ('document', forms.DocumentForm),
-    ('jurisdiction', forms.JurisdictionForm),
-    ('agency', forms.AgencyForm),
-]
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
@@ -63,7 +56,7 @@ urlpatterns = patterns('',
     # Detail View
     url(r'^%s/$' % foia_url,
         views.Detail.as_view(), name='foia-detail'),
-    url(r'^%s/clone/%' % foia_url,
+    url(r'^%s/clone/$' % foia_url,
         new_views.clone_request, name='foia-clone'),
     url(r'^%s/update/$' % foia_url,
         views.update, name='foia-update'),
@@ -91,10 +84,6 @@ urlpatterns = patterns('',
         new_views.create_request, name='foia-create'),
     url(r'^submit/$',
         new_views.submit_request, name='foia-submit'),
-    url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/$',
-        new_views.RequestWizard.as_view(FORMS), name='foia-multi'),
-    url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/update/$',
-        views.multirequest_update, name='foia-multi-update'),
         
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
