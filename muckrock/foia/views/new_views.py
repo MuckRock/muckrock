@@ -20,6 +20,19 @@ logger = logging.getLogger(__name__)
 
 SESSION_NAME = 'foia_request'
 
+def clone_request(request):
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    request.session[SESSION_NAME] = {
+        'title': foia['title'],
+        'document': foia['requested_docs'],
+        'jurisdiction': foia['jurisdiction'],
+        'agency': foia['agency'],
+        'is_new_agency': False,
+        'is_clone': True
+    )
+    return redirect('foia-create')
+
 def create_request(request):
     initial_data = {}
     clone = False
