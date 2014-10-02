@@ -2,13 +2,15 @@
 
 {% block content %}
 <section class="{% block form-type %}{%endblock form-type %} form">
-    {% block head %}
+    {% block form-head %}
     <header>
         <h1>{% block form-title %}{% endblock form-title %}</h1>
     </header>
-    {% endblock head %}
-    {% block form %}
-        {% include 'lib/form.html' %}
-    {% endblock form %}
+    {% endblock form-head %}
+    {% block form-form %}
+        {% if form %}
+            {% include 'lib/form.html' %}
+        {% endif %}
+    {% endblock form-form %}
 </section>
 {% endblock content %}

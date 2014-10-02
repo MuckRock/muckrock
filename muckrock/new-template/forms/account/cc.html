@@ -2,7 +2,7 @@
 {% block title %}MuckRock &bull; Payment{% endblock title %}
 {% block form-type %}credit-card{% endblock %}
 
-{% block head %}
+{% block form-head %}
     <h1>{{ heading }}</h1>
     {% if foia %}
     <h2>{{ foia.title }}</h2>
@@ -10,7 +10,7 @@
     {% if desc %}
     <p>{{desc}}</p>
     {% endif %}
-{% endblock head %}
+{% endblock form-head %}
 
 {% block scripts %}
     <script type="text/javascript"

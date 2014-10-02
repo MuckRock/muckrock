@@ -47,7 +47,7 @@ def register_free(request):
         # pylint: disable=W0613
         user.get_profile().save_customer()
 
-    template = 'user/register_free.html'
+    template = 'forms/account/register_free.html'
     url_redirect = request.GET.get('next', None)
     
     return _register_acct(request, 'community', RegisterFree, template, create_customer, url_redirect)
@@ -59,7 +59,7 @@ def register_pro(request):
         """Create a new CC on file"""
         user.get_profile().save_customer(form.cleaned_data['token'])
 
-    template = 'user/register_pro.html'
+    template = 'forms/account/register_pro.html'
     url_redirect = request.GET.get('next', None)
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
 
@@ -119,7 +119,7 @@ def update(request):
                    'email': request.user.email}
         form = UserChangeForm(initial=initial, instance=user_profile)
 
-    return render_to_response('user/update.html', {'form': form},
+    return render_to_response('forms/account/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
@@ -141,7 +141,7 @@ def update_cc(request):
         'desc': desc,
         'heading': 'Update Credit Card'
     }
-    return render_to_response('user/cc.html', context, context_instance=RequestContext(request))
+    return render_to_response('forms/account/cc.html', context, context_instance=RequestContext(request))
 
 @login_required
 def manage_subsc(request):
@@ -160,7 +160,7 @@ def manage_subsc(request):
         heading = 'Upgrade to a Pro Account'
         desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'
         form_class = UpgradeSubscForm
-        template = 'user/cc.html'
+        template = 'forms/account/cc.html'
     elif user_profile.acct_type == 'pro':
         heading = 'Cancel Your Subscription'
         desc = 'You will go back to a free community account.'
@@ -247,7 +247,7 @@ def profile(request, user_name=None):
 
     context = {'user_obj': user_obj, 'foia_requests': foia_requests}
     return render_to_response(
-        'user/profile.html',
+        'details/account_detail.html',
         context,
         context_instance=RequestContext(request)
     )
