@@ -38,9 +38,20 @@ def create_request(request):
     clone = False
     if request.session.get(SESSION_NAME, False):
         clone = True
-        print request.session[SESSION_NAME]
-
-        # TODO drop session data into initial_data
+        session_data = request.session[SESSION_NAME]
+        
+        initial_data = {
+            'title': session_data['title'],
+            'document': session_data['document'],
+            'agency': session_data['agency']
+        }
+        jurisdiction = session_data['jurisdiction']
+        level = jurisdiction.level
+        if level == 's':
+            initial_data['state'] = jurisdiction
+        elif level == 'l':
+            initial_data['locality'] = jurisdiction
+        initial_data['jurisdiction'] = level
     '''
     if request.method == 'GET':
         results = []
@@ -63,7 +74,7 @@ def create_request(request):
                 jurisdiction = form.state
             else:
                 jurisdiction = form.locality
-            agency = Agency.objects.filter(name=form.agency)
+            agency = None
             is_new_agency = False
             if not agency:
                 agency = form.agency
