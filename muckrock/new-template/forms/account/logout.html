@@ -1,11 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'forms/base_form.html' %}
 {% block title %}MuckRock &bull; Logged Out{% endblock title %}
-
-{% block content %}
-
-<section class="logout form">
+{% block form-type %}logout{% endblock %}
+{% block form-head %}
     <h1>You have been successfully logged out.</h1>
     <h2>See you later!</h2>
-</section>
-
-{% endblock content %}
+{% endblock form-head %}
+{% block form-form %}{% endblock %}

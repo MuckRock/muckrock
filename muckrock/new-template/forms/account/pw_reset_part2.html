@@ -1,11 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'forms/base_form.html' %}
 {% block title %}MuckRock &bull; Password Reset{% endblock title %}
-
-{% block content %}
-
-<section class="password-reset form">
-    <h1>Choose a New Password</h1>
-    {% include 'lib/form.html' %}
-</section>
-
-{% endblock content %}
+{% block form-type %}password-reset{% endblock %}
+{% block form-title %}Choose a New Password{% endblock %}

@@ -1,19 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'forms/base_form.html' %}
 {% block title %}MuckRock &bull; Subscription{% endblock title %}
-
-{% block content %}
-
-<section class="subscription form">
-    <header>
-        <h1>{{heading}}</h1>
-        {% if desc %}
-        <p>{{desc}}</p>
-        {% endif %}
-    </header>
-    {% if form %}
-    {% include 'lib/form.html' %}
+{% block form-type %}subscription{% endblock %}
+{% block form-head %}
+    <h1>{{heading}}</h1>
+    {% if desc %}
+    <p>{{desc}}</p>
     {% endif %}
-</section>
-
-{% endblock content %}
-
+{% endblock form-head %}
