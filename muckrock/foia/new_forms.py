@@ -25,6 +25,7 @@ class RequestForm(forms.Form):
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
         required=False
     )
+    agency = forms.CharField()
     '''
     agency = forms.ModelChoiceField(
         label='Agency',
@@ -37,10 +38,11 @@ class RequestForm(forms.Form):
     '''
     
     def clean(self):
+        jurisdiction = self.cleaned_data.get('jurisdiction')
         if jurisdiction == 's' and not state:
             error_msg = 'No state was selected'
             self._errors['state'] = self.error_class([error_msg])
         if jurisdiction == 'l' and not local:
             error_msg = 'No locality was selected'
             self._errors['local'] = self.error_class([error_msg])
-        
+        return self.cleaned_data

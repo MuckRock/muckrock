@@ -23,21 +23,21 @@ SESSION_NAME = 'foia_request'
 def clone_request(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-    request.session[SESSION_NAME] = {
+    request.session[SESSION_NAME] = pickle.dumps({
         'title': foia.title,
         'document': foia.requested_docs,
         'jurisdiction': foia.jurisdiction,
         'agency': foia.agency,
         'is_new_agency': False,
         'is_clone': True
-    }
+    })
     return redirect('foia-create')
 
 def create_request(request):
     initial_data = {}
     clone = False
     if request.session.get(SESSION_NAME, False):
-        session_data = request.session[SESSION_NAME]
+        session_data = pickle.loads(request.session[SESSION_NAME])
         clone = session_data['is_clone']
         initial_data = {
             'title': session_data['title'],
@@ -65,27 +65,32 @@ def create_request(request):
         form = RequestForm(request.POST)
         # drop the data into SESSION_NAME
         if form.is_valid():
-            title = form.title
-            document = form.document
-            if form.jurisdiction == 'f':
-                jurisdiction = Jurisdiction.objects.filter(level='f')
-            elif form.jurisdiction == 's':
-                jurisdiction = form.state
+            data = form.cleaned_data
+            title = data['title']
+            document = data['document']
+            level = data['jurisdiction']
+            if level == 'f':
+                jurisdiction = Jurisdiction.objects.filter(level='f')[0]
+            elif level == 's':
+                jurisdiction = data['state']
             else:
-                jurisdiction = form.locality
-            agency = None
+                jurisdiction = data['locality']
+            agency = Agency.objects.filter(name=data['agency'])[0]
             is_new_agency = False
             if not agency:
-                agency = form.agency
+                agency = data['agency']
                 is_new_agency = True
-            request.session[SESSION_ID] = {
+            
+            request.session[SESSION_NAME] = pickle.dumps({
                 'title': title,
                 'document': document,
                 'jurisdiction': jurisdiction,
                 'agency': agency,
                 'is_new_agency': is_new_agency,
                 'is_clone': clone
-            }
+            })
+            
+            return redirect('foia-submit')
     else:
         if clone:
             form = RequestForm(initial=initial_data)
@@ -182,6 +187,7 @@ def submit_request(request):
     if request.session.get(SESSION_NAME, False):
         try:
             foia_request = pickle.loads(request.session[SESSION_NAME])
+            print foia_request
         except pickle.UnpicklingError as e:
             print e
             return redirect('index')
