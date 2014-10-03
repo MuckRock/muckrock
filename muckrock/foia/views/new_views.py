@@ -14,12 +14,9 @@ from muckrock.foia.new_forms import RequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 
-import pickle
 from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
-
-SESSION_NAME = 'foia_request'
 
 def _compose_comm(document, jurisdiction):
         intro = 'This is a request under the Freedom of Information Act.'
