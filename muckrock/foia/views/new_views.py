@@ -105,29 +105,21 @@ def _make_request(request, foia):
 def clone_request(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-    request.session[SESSION_NAME] = pickle.dumps({
-        'title': foia.title,
-        'document': foia.requested_docs,
-        'jurisdiction': foia.jurisdiction,
-        'agency': foia.agency,
-        'is_new_agency': False,
-        'is_clone': True
-    })
-    return redirect('foia-create')
+    return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
     initial_data = {}
     clone = False
-    if request.session.get(SESSION_NAME, False):
-        session_data = pickle.loads(request.session[SESSION_NAME])
-        del request.session[SESSION_NAME]
-        clone = session_data['is_clone']
+    if request.GET.get('clone', False):
+        foia_pk = request.GET['clone']
+        foia = get_object_or_404(FOIARequest, pk=foia_pk)
+        clone = True
         initial_data = {
-            'title': session_data['title'],
-            'document': session_data['document'],
-            'agency': session_data['agency']
+            'title': foia.title,
+            'document': foia.requested_docs,
+            'agency': foia.agency
         }
-        jurisdiction = session_data['jurisdiction']
+        jurisdiction = foia.jurisdiction
         level = jurisdiction.level
         if level == 's':
             initial_data['state'] = jurisdiction
