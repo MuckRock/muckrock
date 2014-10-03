@@ -14,6 +14,8 @@ from muckrock.foia.new_forms import RequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 
+from random import random
+import pickle
 from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
@@ -105,6 +107,7 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
+    session_id = int(random()*10000000)
     initial_data = {}
     clone = False
     if request.GET.get('clone', False):
@@ -123,7 +126,24 @@ def create_request(request):
         elif level == 'l':
             initial_data['locality'] = jurisdiction
         initial_data['jurisdiction'] = level
-        
+    if request.GET.get('s', False):
+        sk = 'session-%s' % request.GET['s']
+        if request.session.get(sk, False):
+            session_data = pickle.loads(request.session[sk])
+            del request.session[sk]
+            initial_data = {
+                'title': session_data.get('title', None),
+                'document': session_data.get('document', None),
+                'agency': session_data.get('agency', None)
+            }
+            jurisdiction = session_data.get('jurisdiction', None)
+            if jurisdiction:
+                level = jurisdiction.level
+                if level == 's':
+                    initial_data['state'] = jurisdiction
+                elif level == 'l':
+                    initial_data['locality'] = jurisdiction
+                initial_data['jurisdiction'] = level
         
     ''' TODO: DYNAMIC AGENCY GENERATION
     if request.method == 'GET':
@@ -135,7 +155,6 @@ def create_request(request):
         json = simplejson.dumps(results)
         # return HttpResponse(json, mimetype='application/json')
     '''
-    
     
     if request.method == 'POST':
         form = RequestForm(request.POST)
@@ -157,7 +176,27 @@ def create_request(request):
             else:
                 agency = data['agency']
                 is_new_agency = True
-            
+        
+            if request.POST.get('login', False) or \
+               request.POST.get('signup', False):
+                args = {
+                    'title': title,
+                    'document': document,
+                    'agency': agency,
+                    'jurisdiction': jurisdiction
+                }
+                request.session['session-%s' % session_id] = pickle.dumps(args)
+                if request.POST.get('login', False):
+                    return HttpResponseRedirect(
+                        reverse('acct-login') + \
+                        '?next=/foi/create/?s=%s' % session_id
+                    )
+                else:
+                    return HttpResponseRedirect(
+                        reverse('acct-register-free') + \
+                        '?next=/foi/create/?s=%s' % session_id
+                    )
+    
             foia_request = {
                 'title': title,
                 'document': document,
@@ -166,11 +205,11 @@ def create_request(request):
                 'is_new_agency': is_new_agency,
                 'is_clone': clone
             }
-            
+    
             foia, foia_comm, is_new_agency = _make_request(request, foia_request)
             foia_comm.save()
             foia.save()
-            
+    
             if is_new_agency:
                 args = {
                     'jurisdiction': foia.agency.jurisdiction.slug,
@@ -179,14 +218,15 @@ def create_request(request):
                     'idx': foia.agency.pk
                 }
                 return HttpResponseRedirect(
-                    reverse('agency-update', kwargs=args) + '?foia=%s' % foia.pk
+                    reverse('agency-update', kwargs=args) + \
+                    '?foia=%s' % foia.pk
                 )
             else:
                 return redirect(foia)
-            
+    
             return redirect('foia-submit')
     else:
-        if clone:
+        if clone or request.GET.get('s', False):
             form = RequestForm(initial=initial_data)
         else:
             form = RequestForm()
