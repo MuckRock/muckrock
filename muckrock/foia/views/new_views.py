@@ -46,7 +46,7 @@ def _compose_comm(document, jurisdiction):
                   ('Thank you in advance for your anticipated cooperation in '
                   'this matter. I look forward to receiving your response to ' 
                   'this request within %s, as the statute requires.' % delay )]
-        return prepend + [document] + append
+        return '\n\n'.join(prepend + [document] + append)
 
 def _make_request(request, foia):
         title = foia['title']
