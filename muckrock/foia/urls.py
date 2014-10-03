@@ -55,7 +55,8 @@ urlpatterns = patterns('',
         
     # Detail View
     url(r'^%s/$' % foia_url,
-        views.Detail.as_view(), name='foia-detail'),
+        views.Detail.as_view(), 
+        name='foia-detail'),
     url(r'^%s/clone/$' % foia_url,
         new_views.clone_request, name='foia-clone'),
     url(r'^%s/update/$' % foia_url,
@@ -82,8 +83,6 @@ urlpatterns = patterns('',
     # Create Views
     url(r'^create/$',
         new_views.create_request, name='foia-create'),
-    url(r'^submit/$',
-        new_views.submit_request, name='foia-submit'),
         
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
