@@ -20,9 +20,11 @@
             {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
         </fieldset>
     {% endfor %}
+    
     <div class="buttons">
         <input type="submit" name="submit" value="Submit" class="primary button"  {% if not user.is_authenticated %}disabled{% endif %} />
         {% if not user.is_authenticated %}
+        <p><small>You must have an account and be logged in before you can submit.</small></p>
         <input type="submit" name="login" value="Log In" class="default button" />
         <input type="submit" name="signup" value="Sign Up" class="primary button" />
         {% endif %}
