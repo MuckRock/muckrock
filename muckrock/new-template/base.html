@@ -1,0 +1,43 @@
+<!doctype html>
+
+<html>
+    <head>
+        <title>{% block title %}Muckrock{% endblock title %}</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+        <meta name="google-site-verification"
+              content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+        <!-- Load Assets -->
+        <link rel="shortcut icon" href="{{ SITE_ROOT }}/static/favicon.ico" />
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ SITE_ROOT }}/static/css/style.css" />
+        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+        <!-- Preloading and Prerendering -->
+        {% block preload %}
+        {% endblock preload %}
+        {% block prerender %}
+        {% endblock prerender %}
+        <!-- Facebook and Twitter Integration -->
+        <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
+        {% block facebook_open_graph %}
+        {% endblock facebook_open_graph %}
+        {% block twitter_card %}
+        {% endblock twitter_card %}
+    </head>
+    <body>
+    {% block webpage %}
+        {% include 'lib/sidebar.html' %}
+        <div class="container">
+            {% include 'lib/header.html' %}
+            {% block content %}
+            {% endblock content %}
+            {% include 'lib/footer.html' %}
+        </div>
+    {% endblock webpage %}
+        <script type="text/javascript" 
+                src="{{ SITE_ROOT }}/static/js/jquery.min.js"></script>
+    {% block scripts %}
+    {% endblock scripts %}
+    </body>
+</html>

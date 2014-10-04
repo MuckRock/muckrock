@@ -1,0 +1,58 @@
+/* Allows for full-height elements with CSS */
+html, body { min-height: 100%; }
+
+// Prototypes
+
+// Sizing and spacing
+
+%row { @include row(); }
+
+%full { @include fill-parent(); }
+
+%half {
+    @extend %full;
+    @include media($large-layout) { @include span-columns(6); }
+    @include omega();
+}
+
+%third {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(2); }
+    @include media($large-layout) { @include span-columns(4); }
+    @include omega(3n);
+}
+
+%quarter {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(3); }
+    @include media($large-layout) { @include span-columns(3); }
+    @include omega(4n);
+}
+
+%two-thirds {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(4); }
+    @include media($large-layout) { @include span-columns(8); }
+}
+
+%three-quarters {
+    @extend %full;
+    @include media($medium-layout) { @include span-columns(6); }
+    @include media($large-layout) { @include span-columns(9); }
+}
+
+%body {
+    display: block;
+    overflow: hidden;
+    @include outer-container;
+}
+
+%base-spacing {
+    padding: $base-vertical-rhythm/4;
+    @include media($medium-layout) { padding: $base-vertical-rhythm; }
+}
+
+%edge-to-edge {
+    margin: 0 -1*$base-vertical-rhythm/4;
+    @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
+}

@@ -1,0 +1,142 @@
+<script type="text/javascript" src="https://js.stripe.com/v1/"></script>
+<script type="text/javascript">
+	Stripe.setPublishableKey('{{pub_key}}');
+		$(document).ready(function() {
+			function addInputNames() {
+                /* Not ideal, but jQuery's validate plugin requires fields to have names so we add them at the last possible minute, in case any javascript exceptions have caused other parts of the script to fail. */
+                $(".card-name").attr("name", "card-name");
+                $(".card-number").attr("name", "card-number");
+                $(".card-cvc").attr("name", "card-cvc");
+                $(".card-expiry-year").attr("name", "card-expiry-year");
+                $(".card-expiry-month").attr("name", "card-expiry-month");
+			}
+
+            function removeInputNames() {
+                $(".card-name").removeAttr("name");
+                $(".card-number").removeAttr("name");
+                $(".card-cvc").removeAttr("name");
+                $(".card-expiry-year").removeAttr("name");
+                $(".card-expiry-month").removeAttr("name");
+            }
+
+            function disableCC() {
+                $(".card-name").attr("disabled", "disabled");
+                $(".card-number").attr("disabled", "disabled");
+                $(".card-cvc").attr("disabled", "disabled");
+                $(".card-expiry-month").attr("disabled", "disabled");
+                $(".card-expiry-year").attr("disabled", "disabled");
+                $("input[id$=save_cc]").attr("disabled", "disabled");
+            }
+
+            function enableCC() {
+                $(".card-name").removeAttr("disabled");
+                $(".card-number").removeAttr("disabled");
+                $(".card-cvc").removeAttr("disabled");
+                $(".card-expiry-month").removeAttr("disabled");
+                $(".card-expiry-year").removeAttr("disabled");
+                $("input[id$=save_cc]").removeAttr("disabled");
+            }
+
+            $('input[id$=use_on_file]').change(function() {
+                if(this.checked) {
+                    disableCC();
+                } else {
+                    enableCC();
+                }
+            });
+            if ($('input[id$=use_on_file]').is(":checked")) {
+                disableCC();
+            }
+
+			function submit(form) {
+			    /* 
+			    ** Remove the input field names for security.
+			    ** We do this *before* anything else which
+			    ** might throw an exception.
+			    */
+				removeInputNames(); // THIS IS IMPORTANT!
+				// Given a valid form, submit the payment details to stripe
+				$(form['submit-button']).attr("disabled", "disabled");
+				if ($('input[id$=use_on_file]').is(":checked")) {
+				    form.submit();
+					return false;
+				}
+                Stripe.createToken({
+                        name: $('.card-name').val(),
+                        number: $('.card-number').val(),
+                        cvc: $('.card-cvc').val(),
+                        exp_month: $('.card-expiry-month').val(),
+                        exp_year: $('.card-expiry-year').val()
+                }, function(status, response) {
+                    if (response.error) {
+                        // re-enable the submit button
+                        $(form['submit-button']).removeAttr("disabled");
+                        // show the error
+						$(".payment-errors").html(response.error.message);
+						$(".payment-errors").addClass('error');
+						// Add these names back in so we can revalidate properly
+						    addInputNames();
+					} else { // insert the stripe token and submit
+                        var token = response['id'];
+                        $("input[id$=token]").val(token);
+                        form.submit();
+                    }
+				});
+				return false;
+			}
+            
+            removeInputNames();
+
+			// add custom rules for credit card validating
+			jQuery.validator.addMethod(
+			    "cardNumber",
+			    Stripe.validateCardNumber,
+			    "Please enter a valid card number"
+			);
+			jQuery.validator.addMethod(
+			    "cardCVC",
+			    Stripe.validateCVC,
+			    "Please enter a valid security code"
+			);
+			jQuery.validator.addMethod(
+			    "cardExpiry",
+			    function() {
+				    return Stripe.validateExpiry(
+				        $(".card-expiry-month").val(),
+                        $(".card-expiry-year").val()
+                    );
+				},
+				"Please enter a valid expiration"
+			);
+
+			// We use the jQuery validate plugin to validate required params on submit
+			$("#stripe-form").validate({
+                submitHandler: submit,
+                rules: {
+                    "card-cvc" : {
+                        cardCVC: true,
+                        required: true
+                    },
+                    "card-number" : {
+                        cardNumber: true,
+                        required: true
+                    },
+                    // we don't validate month separately
+                    "card-expiry-year" : "cardExpiry"
+                },
+				highlight: function(element, errorClass) {
+				    $(element).parent('td').parent('tr').addClass(errorClass);		$(element).parent('label').parent('li').parent('ul').parent('td').parent('tr').addClass(errorClass);
+				},
+				unhighlight: function(element, errorClass) {
+				   $(element).parent('td').parent('tr').removeClass(errorClass);
+$(element).parent('label').parent('li').parent('ul').parent('td').parent('tr').removeClass(errorClass);
+				}
+			});
+
+			/*
+			** Adding the input field names is the last step, 
+			** in case an earlier step errors.
+			*/
+			addInputNames();
+        });
+</script>

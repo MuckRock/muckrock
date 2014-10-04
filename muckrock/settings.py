@@ -45,6 +45,7 @@ DOGSLOW_LOG_TO_SENTRY = True
 
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
+    ('Allan Lasser', 'lasser.allan+local.server@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -162,6 +163,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(SITE_ROOT, 'new-template'),
     os.path.join(SITE_ROOT, 'templates'),
 )
 
@@ -195,6 +197,7 @@ INSTALLED_APPS = (
     'urlauth',
     'epiceditor',
     'markdown_deux',
+    'mathfilters',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Create an Account{% endblock title %}
+
+{% block content %}
+<section class="register form">
+    <h1>Create a Free Account</h1>
+    {% include 'lib/form.html' with button_text='Create Account' %}
+</section>
+{% endblock %}

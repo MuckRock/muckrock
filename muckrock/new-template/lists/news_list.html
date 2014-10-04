@@ -1,0 +1,19 @@
+{% extends 'lists/base_list.html' %}
+
+{% block title %}MuckRock &bull; News{% endblock title %}
+{% block list-label %}Articles{% endblock list-label %}
+{% block type %}news{% endblock type %}
+
+{% block list-item %}
+    {% with item as article %}
+    <h2><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></h2>
+    <h3>by {{ article.get_authors_names }}
+        on {{ article.pub_date | date:"F j, Y"}}</h3>
+    {% endwith %}
+{% endblock list-item %}
+
+{% block commands %}
+    {% if user.is_staff %}
+    <a href="#" class="primary button">Compose Article</a>
+    {% endif %}
+{% endblock commands %}

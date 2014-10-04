@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Menu Sandbox</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="menus.css">
+        <script>
+            function toggleState() {
+                var button = document.getElementById('logger');
+                var loggedInMenus = document.getElementsByClassName('logged-in');
+                var loggedOutMenus = document.getElementsByClassName('logged-out');
+                var loggedIn = false;
+                if (button.value == 'Log Out') { loggedIn = true; }
+
+                if (loggedIn) { // log out
+                    button.value = 'Log In';
+                    for (i = 0; i < loggedInMenus.length; i++) {
+                        loggedInMenus[i].style.display = 'none';
+                    }
+                    for (i = 0; i < loggedOutMenus.length; i++) {
+                        loggedOutMenus[i].style.display = 'block';
+                    }
+                } else { // log in
+                    button.value = 'Log Out';
+                    for (i = 0; i < loggedInMenus.length; i++) {
+                        loggedInMenus[i].style.display = 'block';
+                    }
+                    for (i = 0; i < loggedOutMenus.length; i++) {
+                        loggedOutMenus[i].style.display = 'none';
+                    }
+                }
+            }
+            
+            function toggleMenu() {
+                var picker = document.getElementById('menu-picker');
+                var menuNumber = picker.options[picker.selectedIndex].value;
+                var menuId = 'menu-' + menuNumber;
+                var menus = document.getElementsByClassName('menu');
+                for (i = 0; i < menus.length; i++) {
+                    menus[i].style.display = 'none';
+                }
+                document.getElementById(menuId).style.display = 'block';
+                
+            }
+        </script>
+    </head>
+    <body onload="toggleState(); toggleState(); toggleMenu()">
+        <div class="menu" id="menu-1">
+            <nav class="logged-out">
+                <ul class="global">
+                    <li class="logo">Muckrock</li>
+                    <li><input type="search" placeholder="Search"><input type="submit"></li>
+                </ul>
+                <ul class="toolbar">
+                    <li>Log In</li>
+                    <li>Sign Up</li>
+                </ul>
+                <ul class="sections">
+                    <li>Requests</li>
+                    <li>Questions</li>
+                    <li>News</li>
+                    <li>About</li>
+                </ul>
+            </nav>
+        
+            <nav class="logged-in">
+                <ul class="global">
+                    <li class="logo">Muckrock</li>
+                    <li><input type="search" placeholder="Search"><input type="submit"></li>
+                </ul>
+                <ul class="toolbar">
+                    <li>File a Request</li>
+                    <li>Ask a Question</li>
+                    <li>Inbox</li>
+                    <li>Settings</li>
+                </ul>
+                <ul class="sections">
+                    <li>Requests</li>
+                    <li>Questions</li>
+                    <li>News</li>
+                    <li>About</li>
+                </ul>
+            </nav>
+        </div>
+        
+        
+        <div class="menu" id="menu-2">
+            <nav class="logged-out">
+                <ul class="global">
+                    <li class="logo">Muckrock</li>
+                    <li><input type="search" placeholder="Search"><input type="submit"></li>
+                </ul>
+                <ul class="toolbar">
+                    <li>Log In</li>
+                    <li>Sign Up</li>
+                    <li><input type="button" value="Menu"></li>
+                </ul>
+            </nav>
+        
+            <nav class="logged-in">
+                <ul class="global">
+                    <li class="logo">Muckrock</li>
+                    <li><input type="search" placeholder="Search"><input type="submit"></li>
+                    
+                </ul>
+                <ul class="toolbar">
+                    <li>File a Request</li>
+                    <li>Ask a Question</li>
+                </ul>
+                <ul class="toolbar">
+                    <li>Inbox</li>
+                    <li>Settings</li>
+                    <li><input type="button" value="Menu"></li>
+                </ul>
+            </nav>
+        </div>
+        
+        
+        <!--
+        ---- These control which menu is
+        ---- presented and which state it displays.
+        -->
+         <div class="controls">
+            <input type="button" id="logger" value="Log In" onclick="toggleState()" />
+            <select id="menu-picker" onchange="toggleMenu()">
+                <option value="1">Menu 1</option>
+                <option value="2">Menu 2</option>
+            </select>
+        </div>
+    </body>
+</html>
+        

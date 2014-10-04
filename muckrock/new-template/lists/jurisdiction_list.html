@@ -1,0 +1,16 @@
+{% extends 'lists/base_list.html' %}
+
+{% block title %}MuckRock &bull; Jurisdictions{% endblock title %}
+{% block list-label %}Jurisdictions{% endblock list-label %}
+{% block type %}jurisidiction{% endblock type %}
+
+{% block list %}
+    {% for jur in fed_jurs %}
+    <h2><a href="{{ jur.get_absolute_url }}">{{ jur.name }}</a></h2>
+    {% endfor %}
+    <ul>
+        {% for jur in state_jurs %}
+        <li><a href="{{ jur.get_absolute_url }}">{{ jur.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock list %}

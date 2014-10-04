@@ -26,12 +26,15 @@ from muckrock.accounts.forms import PaymentForm
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import FOIARequestForm, \
                                 FOIAWizardWhereForm, \
-                                FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm, \
-                                FOIAMultipleSubmitForm, AgencyConfirmForm, \
-                                FOIAMultiRequestForm, TEMPLATES
+                                FOIAWhatLocalForm, \
+                                FOIAWhatStateForm, \
+                                FOIAWhatFederalForm, \
+                                FOIAMultipleSubmitForm, \
+                                AgencyConfirmForm, \
+                                FOIAMultiRequestForm, \
+                                TEMPLATES
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
-from muckrock.foia.wizards import SubmitMultipleWizard, FOIAWizard
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
@@ -51,35 +54,38 @@ def _foia_form_handler(request, foia, action):
 
     def default_form(data=None):
         """Make a default form to update a FOIA request"""
-        if data:
-            form = FOIARequestForm(data, instance=foia, request=request)
-        else:
-            form = FOIARequestForm(initial={'request': foia.first_request()},
-                                   instance=foia, request=request)
         agency_pk = foia.agency and foia.agency.pk
-        form.fields['agency'].queryset = \
-            Agency.objects.filter(Q(jurisdiction=foia.jurisdiction, approved=True) |
-                                  Q(jurisdiction=foia.jurisdiction, user=request.user) |
-                                  Q(pk=agency_pk)) \
-                          .order_by('name')
+        if not data:
+            data = initial={'request': foia.first_request()}
+        form = FOIARequestForm(data, instance=foia, request=request)
+        
+        form.fields['agency'].queryset = Agency.objects.filter(
+            Q(jurisdiction=foia.jurisdiction, approved=True) |
+            Q(jurisdiction=foia.jurisdiction, user=request.user) |
+            Q(pk=agency_pk)
+        ).order_by('name')
         return form
 
     if request.method == 'POST':
-        status_dict = {'Submit Request': 'submitted', 'Save as Draft': 'started',
-                       'Submit to Multiple Agencies': 'started'}
-
+        
         if request.POST.get('submit') == 'Delete':
             foia.delete()
             messages.info(request, 'Request succesfully deleted')
-            return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
-
+            return HttpResponseRedirect(
+                reverse('foia-mylist', kwargs={'view': 'all'})
+            )
+        
+        status_dict = {
+            'Submit Request': 'submitted',
+            'Save as Draft': 'started',
+            'Submit to Multiple Agencies': 'started'
+        }
+        
         try:
             foia.status = status_dict[request.POST['submit']]
 
             form = default_form(request.POST)
-
             if form.is_valid():
-
                 foia = form.save(commit=False)
                 agency_name = request.POST.get('combo-name')
                 new_agency = False
@@ -132,77 +138,7 @@ def _foia_form_handler(request, foia, action):
                               {'form': form, 'action': action},
                               context_instance=RequestContext(request))
 
-@login_required
-def multiple(request, **kwargs):
-    """Submit a multi agency request using the wizard"""
 
-    multi_forms = [
-        ('submit', FOIAMultipleSubmitForm),
-        ('agency', AgencyConfirmForm),
-        ('pay', PaymentForm),
-        ('nopay', forms.Form),
-        ]
-
-    def payment_req(wizard):
-        """Is a payment form required?"""
-        data = wizard.get_cleaned_data_for_step('agency')
-        if data:
-            agencies = data.get('agencies')
-        if data and agencies:
-            num_requests = agencies.count()
-            extra_context = wizard.request.user.get_profile().multiple_requests(num_requests)
-            return extra_context['extra_requests'] > 0
-        return False
-
-    condition_dict = {
-        'pay': payment_req,
-        'nopay': lambda wizard: not payment_req(wizard),
-    }
-
-    return SubmitMultipleWizard.as_view(multi_forms,
-        condition_dict=condition_dict)(request, **kwargs)
-
-@login_required
-def create(request):
-    """Create a new foia request using the wizard"""
-
-    def display_what_form(levels):
-        """Display which 'What Form'"""
-        def condition(wizard):
-            """For condition dict"""
-            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            return cleaned_data.get('level') in levels
-        return condition
-
-    def display_template_form(template):
-        """Display which 'Template Form'"""
-        def condition(wizard):
-            """For condition dict"""
-            cleaned_data = wizard.get_cleaned_data_for_step('FOIAWizardWhereForm') or {}
-            level = cleaned_data.get('level', '').capitalize()
-            if level == 'Multi':
-                level = 'Local'
-            what_form = 'FOIAWhat%sForm' % level
-            cleaned_data = wizard.get_cleaned_data_for_step(what_form) or {}
-            return cleaned_data.get('template') == template
-        return condition
-
-    # collect all the forms so that the wizard can access them
-    wizard_forms = [(form.__name__, form) for form in
-        [FOIAWizardWhereForm, FOIAWhatLocalForm, FOIAWhatStateForm, FOIAWhatFederalForm]]
-    # if the form has no base fields, it requires no additional information and should not be
-    # included in the wizard ie pet data
-    wizard_forms += [(t.__name__, t) for t in TEMPLATES.values() if t.base_fields]
-
-    condition_dict = {
-        'FOIAWhatLocalForm':   display_what_form(('local', 'multi')),
-        'FOIAWhatStateForm':   display_what_form(('state',)),
-        'FOIAWhatFederalForm': display_what_form(('federal',)),
-    }
-    condition_dict.update(dict((t.__name__, display_template_form(tslug))
-                               for tslug, t in TEMPLATES.iteritems()))
-
-    return FOIAWizard.as_view(wizard_forms, condition_dict=condition_dict)(request)
 
 @login_required
 def update(request, jurisdiction, jidx, slug, idx):
@@ -268,9 +204,7 @@ class ListBase(ListView):
 
     def sort_requests(self, foia_requests, update_top=False):
         """Sorts the FOIA requests"""
-
         get = self.request.GET
-
         order = get.get('order', 'desc')
         field = get.get('field', 'date_submitted')
 
@@ -305,71 +239,74 @@ class ListBase(ListView):
 
 class List(ListBase):
     """List all viewable FOIA Requests"""
-
     def get_queryset(self):
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user))
-
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query)
 
 class ListByUser(ListBase):
     """List of all FOIA requests by a given user"""
-
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs['user_name'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(user=user))
-
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query.filter(user=user))
     def get_context_data(self, **kwargs):
         context = super(ListByUser, self).get_context_data(**kwargs)
         context['subtitle'] = 'by %s' % self.kwargs['user_name']
         return context
 
-
 class ListByAgency(ListBase):
     """List of all FOIA requests by a given agency"""
-
+    def get_agency(self):
+        agency = get_object_or_404(
+            Agency,
+            slug=self.kwargs['agency'],
+            pk=self.kwargs['idx']
+        )
+        return agency
     def get_queryset(self):
-        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(agency=agency))
-
+        agency = get_agency(self)
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query.filter(agency=agency))
     def get_context_data(self, **kwargs):
+        agency = get_agency(self)
         context = super(ListByAgency, self).get_context_data(**kwargs)
-        agency = get_object_or_404(Agency, slug=self.kwargs['agency'], pk=self.kwargs['idx'])
         context['subtitle'] = 'for %s' % agency.name
         return context
 
-
 class ListByJurisdiction(ListBase):
     """List of all FOIA requests by a given jurisdiction"""
-
+    def get_jurisdiction(self):
+        agency = get_object_or_404(
+            Jurisdiction,
+            slug=self.kwargs['jurisdiction'],
+            pk=self.kwargs['idx']
+        )
     def get_queryset(self):
-        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
-                                         pk=self.kwargs['idx'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(jurisdiction=jurisdiction))
-
+        jurisdiction = get_jurisdiction(self)
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query.filter(jurisdiction=jurisdiction))
     def get_context_data(self, **kwargs):
+        jurisdiction = get_jurisdiction(self)
         context = super(ListByJurisdiction, self).get_context_data(**kwargs)
-        jurisdiction = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
-                                         pk=self.kwargs['idx'])
         context['subtitle'] = 'for %s' % jurisdiction.name
         return context
 
-
 class ListByTag(ListBase):
     """List of all FOIA requests by a given tag"""
-
+    def get_tag(self):
+        tag = get_object_or_404(
+            Tag,
+            slug=self.kwargs['tag_slug'],
+        )
     def get_queryset(self):
-        tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
-        return self.sort_requests(FOIARequest.objects.get_viewable(self.request.user)
-                                                     .filter(tags=tag))
-
+        tag = get_tag(self)
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query.filter(tags=tag))
     def get_context_data(self, **kwargs):
+        tag = get_tag(self)
         context = super(ListByTag, self).get_context_data(**kwargs)
-        tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
         context['subtitle'] = 'Tagged with %s' % tag.name
         return context
-
 
 @class_view_decorator(login_required)
 class MyList(ListBase):
@@ -488,7 +425,8 @@ class ListFollowing(ListBase):
 
 
 class Detail(DetailView):
-    """Details of a single FOIA request as well as handling post actions for the request"""
+    """Details of a single FOIA request as well
+    as handling post actions for the request"""
 
     model = FOIARequest
     context_object_name = 'foia'
@@ -496,18 +434,22 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=W0613
-        jmodel = get_object_or_404(Jurisdiction, slug=self.kwargs['jurisdiction'],
-                                                 pk=self.kwargs['jidx'])
-        foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=self.kwargs['slug'],
-                                              pk=self.kwargs['idx'])
-
+        jmodel = get_object_or_404(
+            Jurisdiction,
+            slug=self.kwargs['jurisdiction'],
+            pk=self.kwargs['jidx']
+        )
+        foia = get_object_or_404(
+            FOIARequest,
+            jurisdiction=jmodel,
+            slug=self.kwargs['slug'],
+            pk=self.kwargs['idx']
+        )
         if not foia.is_viewable(self.request.user):
             raise Http404()
-
         if foia.updated and foia.user == self.request.user:
             foia.updated = False
             foia.save()
-
         return foia
 
     def get_context_data(self, **kwargs):
@@ -518,18 +460,11 @@ class Detail(DetailView):
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS if self.request.user.is_staff else STATUS_NODRAFT
-        if self.request.user.is_anonymous():
-            context['sidebar'] = Sidebar.objects.get_text('anon_request')
-        else:
-            context['sidebar'] = Sidebar.objects.get_text('request')
         return context
 
     def post(self, request, **kwargs):
         """Handle form submissions"""
-        # pylint: disable=W0613
-
         foia = self.get_object()
-
         actions = {
             'status': self._status,
             'tags': self._tags,
@@ -541,80 +476,106 @@ class Detail(DetailView):
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,
         }
-
         try:
             return actions[request.POST['action']](request, foia)
-        except KeyError:
-            # should never happen if submitting form from web page properly
+        except KeyError: # if submitting form from web page improperly
             return redirect(foia)
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        # pylint: disable=R0201
         if foia.user == request.user:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
     def _status(self, request, foia):
         """Handle updating status"""
-        # pylint: disable=R0201
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or
-           (request.user.is_staff and status in [s for s, _ in STATUS])) and \
-           foia.status not in ['started', 'submitted']:
+        if foia.status not in ['started', 'submitted'] and ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
-            send_mail('%s changed the status of "%s" to %s' %
-                        (request.user.username, foia.title, foia.get_status_display()),
-                      render_to_string('foia/status_change.txt',
-                                       {'request': foia, 'old_status': old_status,
-                                        'user': request.user}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            
+            subject = '%s changed the status of "%s" to %s' % (
+                request.user.username,
+                foia.title,
+                foia.get_status_display()
+            )
+            args = {
+                'request': foia,
+                'old_status': old_status,
+                'user': request.user
+            }
+            send_mail(
+                subject,
+                render_to_string('foia/status_change.txt', args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
         return redirect(foia)
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        # pylint: disable=R0201
         if foia.user == request.user and foia.status != 'started':
-            save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
-                            'Follow up succesfully sent')
+            save_foia_comm(
+                request,
+                foia,
+                foia.user.get_full_name(),
+                request.POST.get('text'),
+                'Follow up succesfully sent'
+            )
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
-        # pylint: disable=R0201
         if foia.user == request.user:
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
-                user=request.user, title=title, slug=slugify(title), foia=foia,
-                question=request.POST.get('text'), date=datetime.now())
+                user=request.user,
+                title=title,
+                slug=slugify(title),
+                foia=foia,
+                question=request.POST.get('text'),
+                date=datetime.now()
+            )
             messages.success(request, 'Question succesfully posted')
             question.notify_new()
             return redirect(question)
         else:
+            error_msg = 'You may only ask questions about your own requests.'
+            messages.error(request, msg)
             return redirect(foia)
 
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
-        # pylint: disable=R0201
         if request.user.is_authenticated():
-            send_mail('[FLAG] Freedom of Information Request: %s' % foia.title,
-                      render_to_string('foia/flag.txt',
-                                       {'request': foia, 'user': request.user,
-                                        'reason': request.POST.get('text')}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            args = {
+                'request': foia,
+                'user': request.user,
+                'reason': request.POST.get('text')
+            }
+            send_mail(
+                '[FLAG] Freedom of Information Request: %s' % foia.title,
+                render_to_string('foia/flag.txt', args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
             messages.info(request, 'Problem succesfully reported')
         return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
-        # pylint: disable=R0201
         if foia.user == request.user and foia.is_appealable():
-            save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
-                            'Appeal succesfully sent', appeal=True)
+            save_foia_comm(
+                request,
+                foia,
+                foia.user.get_full_name(),
+                request.POST.get('text'),
+                'Appeal succesfully sent',
+                appeal=True
+            )
         return redirect(foia)
-
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
@@ -636,13 +597,13 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
 @user_passes_test(lambda u: u.is_staff)
 def acronyms(request):
-    """A page with all the acronyms explanations"""
-
+    """A page with all the acronyms explained"""
     status_dict = dict(STATUS)
-
     codes = [(acro, name, status_dict.get(status, ''), desc)
              for acro, (name, status, desc) in CODES.iteritems()]
     codes.sort()
-
-    return render_to_response('foia/acronym.html', {'codes': codes},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'foia/acronyms.html',
+        {'codes': codes},
+        context_instance=RequestContext(request)
+    )

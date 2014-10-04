@@ -11,3 +11,4 @@ static
 gitfix
 apache
 .webassets-cache
+.sass-cache

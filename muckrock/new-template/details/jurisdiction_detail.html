@@ -1,0 +1,82 @@
+{% extends 'details/base_detail.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
+{% block type %}jurisdiction{% endblock type %}
+
+{% block header %}
+	<h1>{{ jurisdiction.name }}</h1>
+	{% if jurisdiction.parent %}
+	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent.name }}</a></h2>
+    {% endif %}
+    {% if jurisdiction.image %}
+    <figure>
+        <img src="{{ MEDIA_URL }}{{ jurisdiction.image }}" alt="" />
+        {% if jurisdiction.image_attr_line %}
+        <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
+        {% endif %}
+    </figure>
+    {% else %}
+    <object class="failure panel">
+        <p><strong>This jurisdiction is incomplete!</strong></p>
+        <p>To help us complete it, click &ldquo;Suggest a Change&rdquo; at the bottom of this page.</p>
+    </object>
+    {% endif %}
+{% endblock header %}
+
+{% block aside %}
+    <div class="dl-group">
+        <dl>
+            <dt>Allowed Response Time</dt>
+            {% with jurisdiction.get_days as days %}
+                {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                {% else %}
+                    <dd>No limit</dd>
+                {% endif %}
+            {% endwith %}
+        </dl>
+
+        <dl>
+            <dt>Average Response Time</dt>
+            <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
+        </dl>
+
+        {% include 'lib/request_stats.html' %}
+        
+        {% include 'lib/appeal_stats.html' %}
+        
+    </div>
+{% endblock aside %}
+
+{% block main %}
+
+    {{agency.public_notes|markdown:"trusted"}}
+
+    {% include 'lib/foia_table.html' with context='jurisdiction' %}
+    
+    {% if jurisdiction.agencies.count %}
+    <h3>Documented Agencies</h3>
+    <table class="agency">
+        <tr>
+            <th width="50%">Agency</th>
+            <th width="20%">Requests</th>
+            <th width="30%">Pages Released</th>
+        </tr>
+        {% for agency in jurisdiction.agencies.get_approved %}
+        <tr>
+            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
+            <td>{{ agency.foiarequest_set.count }}</td>
+            <td>{{ agency.total_pages }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h3>No agencies have been documented for this jurisdiction.</h3>
+    {% endif %}
+    
+    {% if user.is_authenticated %}
+    <a href="#hidden-form" class="button" id='hidden-form-button'>Submit a Change</a>
+        {% include 'lib/form.html' with is_hidden=1 %}
+    {% endif %}
+	
+{% endblock main %}

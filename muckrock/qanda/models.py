@@ -14,6 +14,8 @@ from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
+from sets import Set
+
 class Question(models.Model):
     """A question to which the community can respond"""
 
@@ -25,6 +27,7 @@ class Question(models.Model):
     date = models.DateTimeField()
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    answer_authors = Set()
 
     def __unicode__(self):
         return self.title
@@ -56,6 +59,13 @@ class Question(models.Model):
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
 
+    def get_answer_users(self):
+        users = []
+        for answer in self.answers.all():
+            if answer.user not in users and answer.user != self.user:
+                users.append(answer.user)
+        return users
+
     class Meta:
         # pylint: disable=R0903
         ordering = ['-date']
@@ -78,6 +88,7 @@ class Answer(models.Model):
         super(Answer, self).save(*args, **kwargs)
         question = self.question
         question.answer_date = self.date
+        question.answer_authors.update(self.user)
         question.save()
 
     class Meta:

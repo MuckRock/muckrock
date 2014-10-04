@@ -3,6 +3,7 @@ URL mappings for the Agency application
 """
 
 from django.conf.urls import patterns, url
+from django.views.generic.base import RedirectView
 
 from muckrock.agency import views
 from muckrock.views import jurisdiction
@@ -16,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^$',                        views.list_, name='agency-list'),
     url(r'^%s/$' % agency_url,        views.detail, name='agency-detail'),
     url(r'^%s/update/$' % agency_url, views.update, name='agency-update'),
-    url(r'^%s/flag/$' % agency_url,   views.flag, name='agency-flag'),
+    url(r'^%s/flag/$' % agency_url,   RedirectView.as_view(url='/%(agency_url)s/'), name='agency-flag'),
     url(r'^stale/$',                  views.stale, name='agency-stale'),
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
                                       jurisdiction, name='agency-jurisdiction'),

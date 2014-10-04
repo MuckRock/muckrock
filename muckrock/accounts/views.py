@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -36,7 +36,7 @@ stripe.api_key = STRIPE_SECRET_KEY
 
 def register(request):
     """Pick what kind of account you want to register for"""
-    return render_to_response('registration/register.html',
+    return render_to_response('user/register.html',
                               context_instance=RequestContext(request))
 
 def register_free(request):
@@ -47,9 +47,10 @@ def register_free(request):
         # pylint: disable=W0613
         user.get_profile().save_customer()
 
-    template = 'registration/register_free.html'
-
-    return _register_acct(request, 'community', RegisterFree, template, create_customer)
+    template = 'forms/account/register_free.html'
+    url_redirect = request.GET.get('next', None)
+    
+    return _register_acct(request, 'community', RegisterFree, template, create_customer, url_redirect)
 
 def register_pro(request):
     """Register for a pro account"""
@@ -58,12 +59,13 @@ def register_pro(request):
         """Create a new CC on file"""
         user.get_profile().save_customer(form.cleaned_data['token'])
 
-    template = 'registration/cc.html'
+    template = 'forms/account/register_pro.html'
+    url_redirect = request.GET.get('next', None)
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
 
-    return _register_acct(request, 'pro', RegisterPro, template, create_cc, extra_context)
+    return _register_acct(request, 'pro', RegisterPro, template, create_cc, url_redirect, extra_context)
 
-def _register_acct(request, acct_type, form_class, template, post_hook, extra_context=None):
+def _register_acct(request, acct_type, form_class, template, post_hook, url_redirect=None, extra_context=None):
     """Register for an account"""
     # pylint: disable=R0913
     if request.method == 'POST':
@@ -79,8 +81,10 @@ def _register_acct(request, acct_type, form_class, template, post_hook, extra_co
                                    date_update=datetime.now())
 
             post_hook(form=form, user=new_user)
-
-            return HttpResponseRedirect(reverse('acct-my-profile'))
+            if url_redirect:
+                return redirect(url_redirect)
+            else:
+                return redirect('acct-my-profile')
     else:
         form = form_class(initial={'expiration': date.today()})
 
@@ -108,53 +112,45 @@ def update(request):
 
             user_profile = form.save()
 
-            return HttpResponseRedirect(reverse('acct-my-profile'))
+            return redirect('acct-my-profile')
     else:
         user_profile = request.user.get_profile()
         initial = {'first_name': request.user.first_name, 'last_name': request.user.last_name,
                    'email': request.user.email}
         form = UserChangeForm(initial=initial, instance=user_profile)
 
-    return render_to_response('registration/update.html', {'form': form},
+    return render_to_response('forms/account/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
 def update_cc(request):
     """Update a user's CC"""
-
     if request.method == 'POST':
         form = CreditCardForm(request.POST)
-
         if form.is_valid():
             request.user.get_profile().save_cc(form.cleaned_data['token'])
             messages.success(request, 'Your credit card has been saved.')
-            return HttpResponseRedirect(reverse('acct-my-profile'))
-
+            return redirect('acct-my-profile')
     else:
         form = CreditCardForm(initial={'name': request.user.get_full_name()})
-
     card = request.user.get_profile().get_cc()
-    if card:
-        desc = 'Current card on file: %s ending in %s' % (card.type, card.last4)
-    else:
-        desc = 'No card currently on file'
-
-    return render_to_response('registration/cc.html',
-                              {'form': form, 'pub_key': STRIPE_PUB_KEY, 'desc': desc,
-                               'heading': 'Update Credit Card'},
-                              context_instance=RequestContext(request))
+    desc = 'Current card on file: %s ending in %s' % (card.type, card.last4) if card else 'No card currently on file'
+    context = {
+        'form': form,
+        'pub_key': STRIPE_PUB_KEY,
+        'desc': desc,
+        'heading': 'Update Credit Card'
+    }
+    return render_to_response('forms/account/cc.html', context, context_instance=RequestContext(request))
 
 @login_required
 def manage_subsc(request):
     """Subscribe or unsubscribe from a pro account"""
-
     user_profile = request.user.get_profile()
-
+    template = 'user/subscription.html'
     if user_profile.acct_type == 'admin':
         heading = 'Admin Account'
-        desc = "You are an admin, you don't need a subscription"
-        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
-                                  context_instance=RequestContext(request))
+        desc = 'You are an admin, you don\'t need a subscription'
     elif user_profile.acct_type == 'beta':
         heading = 'Beta Account'
         desc = 'Thank you for being a beta tester.  You will continue to get 5 ' \
@@ -171,16 +167,14 @@ def manage_subsc(request):
         heading = 'Upgrade to a Pro Account'
         desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'
         form_class = UpgradeSubscForm
-        template = 'registration/cc.html'
+        template = 'forms/account/cc.html'
     elif user_profile.acct_type == 'pro':
         heading = 'Cancel Your Subscription'
         desc = 'You will go back to a free community account.'
         form_class = CancelSubscForm
-        template = 'registration/subsc.html'
-
+    
     if request.method == 'POST':
         form = form_class(request.POST, request=request)
-
         if user_profile.acct_type == 'community' and form.is_valid():
             if not form.cleaned_data.get('use_on_file'):
                 user_profile.save_cc(form.cleaned_data['token'])
@@ -191,30 +185,36 @@ def manage_subsc(request):
             user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
             messages.success(request, 'You have been succesfully upgraded to a Pro Account!')
-            return HttpResponseRedirect(reverse('acct-my-profile'))
         elif user_profile.acct_type == 'pro' and form.is_valid():
             customer = user_profile.get_customer()
             customer.cancel_subscription()
             user_profile.acct_type = 'community'
             user_profile.save()
             messages.info(request, 'Your professional account subscription has been cancelled')
-            return HttpResponseRedirect(reverse('acct-my-profile'))
-
+        return redirect('acct-my-profile')
     else:
-        form = form_class(request=request, initial={'name': request.user.get_full_name()})
-
-    return render_to_response(template,
-                              {'form': form, 'heading': heading, 'desc': desc,
-                               'pub_key': STRIPE_PUB_KEY},
-                              context_instance=RequestContext(request))
+        form = form_class(
+            request=request,
+            initial={ 'name': request.user.get_full_name() }
+        )
+    
+    context = {
+        'heading': heading,
+        'desc': desc,
+        'pub_key': STRIPE_PUB_KEY
+    }
+    if form_class:
+        context.update({'form': form_class})
+    return render_to_response(template, context, context_instance=RequestContext(request))
 
 @login_required
 def buy_requests(request):
     """Buy more requests"""
 
+    url_redirect = request.GET.get('next', None)
+
     if request.method == 'POST':
         form = PaymentForm(request.POST, request=request)
-
         if form.is_valid():
             try:
                 user_profile = request.user.get_profile()
@@ -222,40 +222,42 @@ def buy_requests(request):
                 user_profile.num_requests += 5
                 user_profile.save()
                 logger.info('%s has purchased requests', request.user.username)
-                return HttpResponseRedirect(reverse('acct-my-profile'))
+                return redirect('acct-my-profile')
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
                 logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-                return HttpResponseRedirect(reverse('acct-buy-requests'))
-
+                if url_redirect:
+                    return redirect(url_redirect)
+                else:
+                    return redirect('acct-buy-requests')
     else:
-        form = PaymentForm(request=request, initial={'name': request.user.get_full_name()})
-
-    return render_to_response('registration/cc.html',
-                              {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Buy Requests',
-                               'desc': 'Buy 5 requests for $20.  They may be used at any time.'},
-                              context_instance=RequestContext(request))
+        form = PaymentForm(
+            request=request,
+            initial={'name': request.user.get_full_name()}
+        )
+        
+    context = {
+        'form': form,
+        'pub_key': STRIPE_PUB_KEY,
+        'heading': 'Buy Requests',
+        'desc': 'Buy 5 requests for $20.  They may be used at any time.'
+    }
+    
+    return render_to_response('user/cc.html', context, context_instance=RequestContext(request))
 
 def profile(request, user_name=None):
     """View a user's profile"""
-
-    if user_name:
-        user_obj = get_object_or_404(User, username=user_name)
-    else:
-        user_obj = request.user
-
+    user_obj = get_object_or_404(User, username=user_name) if user_name else request.user
     foia_requests = FOIARequest.objects.get_viewable(request.user)\
                                        .filter(user=user_obj)\
                                        .order_by('-date_submitted')[:5]
 
     context = {'user_obj': user_obj, 'foia_requests': foia_requests}
-    if request.user.is_anonymous():
-        context['sidebar'] = Sidebar.objects.get_text('anon_profile')
-    else:
-        context['sidebar'] = Sidebar.objects.get_text('profile')
-
-    return render_to_response('registration/profile.html', context,
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'details/account_detail.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -267,8 +269,14 @@ def stripe_webhook(request):
     event = message.get('event')
     del message['event']
 
-    events = ['recurring_payment_failed', 'invoice_ready', 'recurring_payment_succeeded',
-              'subscription_trial_ending', 'subscription_final_payment_attempt_failed', 'ping']
+    events = [
+        'recurring_payment_failed',
+        'invoice_ready',
+        'recurring_payment_succeeded',
+        'subscription_trial_ending',
+        'subscription_final_payment_attempt_failed',
+        'ping'
+    ]
 
     if event not in events:
         raise Http404

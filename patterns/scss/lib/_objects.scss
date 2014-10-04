@@ -1,0 +1,609 @@
+/* Simple Objects */
+
+// Prototypes
+
+// Textbox
+%textbox {
+    @include box-sizing(border-box);
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius;
+    line-height: $base-vertical-rhythm;
+}
+
+// Textbox -> Button
+%button { @extend %textbox;
+    display: inline-block;
+    margin: 0.25em 0.325em 0.25em 0;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    text-decoration: none;
+    text-align: center;
+    &:hover { text-decoration: none; }
+}
+
+// Textbox -> Panel
+%panel { @extend %textbox;
+    display: block;
+    margin:  $base-vertical-rhythm/2 0;
+    padding: $base-vertical-rhythm/2;
+    border-color: $color-grey;
+    @include media($large-layout) {
+        padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+    }
+}
+
+// Textbox -> Input
+%input { @extend %textbox;
+    display: inline-block;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm/3 $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+    border-color: $color-grey;
+    &:disabled {
+        background-color: lighten($color-disabled, 25%);
+        border: 1px solid $color-disabled;
+        color: $color-disabled;
+    }
+}
+   
+// Implementation
+
+// Buttons
+
+.button, .button.default { @extend %button;
+    @include button-color($color-default);
+    @include button-hover($color-default);
+}
+
+.button.primary { @extend %button;
+    @include button-color($color-primary);
+    @include button-hover($color-primary);
+}
+
+.button.success { @extend %button;
+    @include button-color($color-success);
+    @include button-hover($color-success);
+}
+
+.button.failure { @extend %button;
+    @include button-color($color-failure);
+    @include button-hover($color-failure);
+}
+
+.button.disabled { @extend %button;
+    @include button-color($color-disabled);
+    &:hover, &:active { @include button-color($color-disabled); }
+}
+
+// Panels
+
+.panel { @extend %panel; }
+
+.panel.default { @extend %panel;
+    @include panel-color($color-default);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.primary { @extend %panel;
+    @include panel-color($color-primary);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.success { @extend %panel;
+    @include panel-color($color-success);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+.panel.failure { @extend %panel;
+    @include panel-color($color-failure);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+
+.panel.disabled { @extend %panel;
+    @include panel-color($color-disabled, true);
+}
+
+// Inputs
+
+textarea, #{$all-text-inputs} { @extend %input; }
+
+input[type="submit"], button {
+    @extend .button.default;
+    .default { @extend .button.default; }
+    .primary { @extend .button.primary; }
+    .success { @extend .button.success; }
+    .failure { @extend .button.failure; }
+    .disabled { @extend .button.disabled; }
+}
+
+input:disabled, input.button:disabled { 
+    &, &:hover, &:active { @extend .button.disabled }
+}
+
+#{$all-button-inputs} {
+    @include box-sizing(border-box);
+    @include appearance(none);
+    display: block;
+    background: none;
+}
+
+fieldset {
+    label { @extend dfn;
+        @include box-sizing(border-box);
+        display: block;
+        color: $color-default;
+        text-align: left;
+    }
+    
+    input + label {
+        float: left;
+        margin-right: 1.5em;
+    }
+    
+    & > fieldset, & > fieldset + fieldset { margin: 0; }
+}
+
+.form { @extend %textbox;
+    display: block;
+    padding: $base-vertical-rhythm;
+
+    border-radius: $base-border-radius;
+    form {
+        @include outer-container();
+        @include pad(0 0 0 5%);
+        border: none;
+    }
+    fieldset {
+        @extend %half;
+        @include omega();
+        input { width: 100%; }
+        @include pad(0 5% 0 0);
+        margin-top: 0;
+        // margin: 0.5em 0.75em 1.5em 0;
+    }
+    .buttons { @include row; }
+    input[type="submit"] { @extend %quarter; }
+    header {
+        @include outer-container();
+        @include pad(0 5% 0 5%);
+        margin: $base-vertical-rhythm/2 0;
+    }
+}
+
+.form.login {
+    h1 {
+        @extend %half;
+        @include font-sizing(3);
+        margin-top: -1rem;
+        @include media($large-layout) {
+            margin-top: 0;
+        }
+    }
+    ul {
+        @extend %half;
+        @include media($large-layout) {
+            margin: $base-vertical-rhythm/2 0 0;
+        }
+    }
+    p {
+        padding-left: 5%;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    
+}
+
+.form.logout {
+    text-align: left;
+    border: none;
+    @include media($medium-layout) { text-align: center; }
+}
+
+.form.update {
+    h1 {
+        @extend %half;
+        // line-height: 0;
+        margin-top: -1rem;
+        @include media($large-layout) {
+            margin-top: 1rem;
+        }
+    }
+    .button {
+        @extend %half;
+        @include media($large-layout) {
+            margin-top: 1.5rem;
+        }
+    }
+}
+
+.form.subscription form fieldset { @extend %full; }
+
+.form.password-reset, object.password-change {
+    overflow: hidden;
+    h1 { margin: 0 0 $base-vertical-rhythm/2; }
+    form { @include pad(0 default 0 default); }
+    form fieldset { @extend %full; }
+}
+
+.form.register h1 {
+    @include font-sizing(3, 3);
+    padding-left: 5%;
+}
+
+.form.search {
+    @include box-sizing(border-box); 
+    display: block;
+    margin: $base-vertical-rhythm 0;
+    padding: $base-vertical-rhythm;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius;
+    form { width: 100%; }
+    fieldset { margin: $base-vertical-rhythm/2 0 0; }
+    input[type="submit"] { margin-top: $base-vertical-rhythm/2; }
+    ul {
+        margin: 0;
+        padding: 0;
+    }
+    li {
+        display: inline-block;
+        padding: 0 $base-vertical-rhythm 0 0;
+        &:last-child { padding-right: 0; }
+    }
+    form { @include outer-container(); }
+    input[type="search"] { @extend %full; }
+    fieldset { @extend %three-quarters; }
+    input[type="submit"] {
+        @extend %quarter;
+    }
+}
+
+.search.collection { @extend %collection;
+    margin: $base-vertical-rhythm 0;
+    list-style-type: none;
+    padding-left: 0;
+    h1 {
+        @include font-sizing(1.25, 3);
+        font-weight: 400;
+        max-width: 33em;
+    }
+    h2 { @include font-sizing(1, 2); }
+    // li { @extend %third; @include omega(3n); }
+}
+
+section.features {
+    margin: 0 -1*$base-vertical-rhythm $base-vertical-rhythm;
+    padding: 2*$base-vertical-rhythm $base-vertical-rhythm;
+    color: $color-white;
+    background-color: $color-primary;
+    text-align: center;
+    h1 {
+        @include font-sizing(2, 3);
+        font-weight: 300;
+        margin-bottom: $base-vertical-rhythm;
+    }
+    a {
+        color: $color-white;
+        text-decoration: none;
+        border-bottom: 1px dotted $color-white;
+        &:hover { border-bottom-style: solid; }
+    }
+}
+
+.pricing { @include row; }
+
+.plan {
+    @extend %third;
+    @include border-top-radius(0px);
+    margin-top: $base-vertical-rhythm/2;
+    &:hover {
+        margin-top: 0;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    @include transition(all 0.5s $ease-out-expo);
+    a {
+        display: block;
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
+        @include border-top-radius($base-border-radius);
+        color: $color-white;
+        background-color: $color-black;
+        text-align: center;
+        font-weight: 300;
+        &:hover {
+            background-color: $color-primary;
+            text-decoration: none;
+        }
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    li {
+        @include font-sizing(0.9, 3);
+        margin: 0;
+        padding: $base-vertical-rhythm/2;
+        border: $base-border-width solid $color-grey;
+        border-bottom: none;
+        &:first-child { border-top: none; }
+        &:last-child {
+            border-bottom: $base-border-width solid $color-grey;
+            @include border-bottom-radius($base-border-radius);
+        }
+        &:hover { background-color: darken($color-white, 5%); }
+    }
+
+    .name { @include font-sizing(1.5); }
+    .description { @include font-sizing(1); }
+    
+}
+
+/* Messages */
+
+object.message { @extend %panel;
+    $color-sent: $color-primary;
+    $color-received: $color-grey;
+    $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
+    @include span-columns(12);
+    & > section.meta {
+        display: block;
+        width: 100%;
+        text-align: left;
+        line-height: 1em;
+        img {
+            max-width: 100%;
+            width: 50px;
+            margin-bottom: 0;
+        }
+        small {
+            display: block;
+            margin-top: 0.5em;
+        }
+        @include fill-parent();
+        @include media($message-layout) {
+            margin: $base-vertical-rhythm/2 0 $base-vertical-rhythm/2;
+            @include span-columns(2 of 12);
+            img { max-width: 100%; width: 100%; }
+        }
+    }
+    
+    & > section.text {
+        display: block;
+        @include fill-parent();
+        @include media($message-layout) {
+            @include span-columns(9 of 12);
+            @include shift(1 of 12);
+        } 
+    }
+
+    &.received {
+        border-color: $color-received;
+        > section.text { border-top-color: $color-received; }
+        /*@include media($large-layout) {
+            > section.meta {
+                float: right;
+                @include pad(0 0 0 default);
+            }
+        }*/
+    }
+    
+    &.sent {
+        border-color: $color-sent;
+        > section.text { border-top-color: $color-sent; }
+        /*@include media($large-layout) {
+            > section.meta {
+                text-align: right;
+            }
+        }*/
+    }
+}
+
+/* Feeds */
+
+.feed-item { @extend %panel;
+    overflow: hidden;
+    @include fill-parent();
+    > header {
+        display: block;
+        width: 100%;
+        margin-bottom: $base-vertical-rhythm/2;
+        float: left;
+        div {
+            display: block;
+            & + div { 
+                @include font-sizing(0.9, 1);
+            }
+        }
+    }
+    .button {
+        @include font-sizing(0.9, 1);
+        line-height: 1.5em;
+        float: left;
+    }
+}
+
+.feed {
+    
+    ul, ol {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .feed-item {
+        margin: 0;
+        border-top: none;
+        border-radius: 0;
+    }
+    
+    li:first-child > .feed-item {
+        border-top: $base-border-width solid $color-grey;
+        @include border-top-radius($base-border-radius);
+    }
+    
+    li:last-child > .feed-item {
+        @include border-bottom-radius($base-border-radius);
+    }
+
+    @include media($large-layout) {
+        @include span-columns(6);
+        &.narrow { @include span-columns(4); }
+        &.wide { @include span-columns(8); }
+    }
+    @include fill-parent();
+
+}
+
+/* Progress Bar */
+
+$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
+$progress-animation-duration: 0.7s;
+
+object.progress-bar {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: $base-vertical-rhythm/2 0;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius + $base-border-width;
+    background-color: $color-white;
+}
+
+.meter {
+    @include box-sizing(border-box);
+    display: block;
+    height: $base-vertical-rhythm;
+    @include background-gradient($color-default);
+    border: $progress-meter-border;
+    border-radius: $base-border-radius;
+    @include border-right-radius(0px);
+    &.completed { @include border-right-radius($base-border-radius); }
+
+    @include classifier(success, $color-success);
+    @include classifier(failure, $color-failure);
+    @include classifier(primary, $color-primary);
+    @include classifier(default, $color-default);
+    @include classifier(disabled, $color-disabled);
+}
+
+/* Table */
+
+table {
+    width: 100%;
+    margin-top: $base-vertical-rhythm 0;
+    border-radius: $base-border-radius;
+    th, td { padding: 0.25em 0.5em; }
+    tr:nth-child(odd) { background-color: $color-odd-background; }
+    &, th, td {
+        border-top: $base-border-width solid $color-grey;
+        border-bottom: $base-border-width solid $color-grey
+    }
+}
+
+// Forms
+
+
+.form {
+    
+    border-radius: $base-border-radius;
+}
+
+#hidden-form {
+    display: none;
+    &:target { display: block; }
+    width: 100%;
+    overflow: hidden;
+    margin: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    a.button, input.button { float: right; }   
+}
+#hidden-form-button:focus { outline: none; }
+
+// Articles
+
+.post, .question, .request, .jurisdiction, .agency, .profile { @extend %article; }
+.post {
+    p:first-of-type {
+        @include media($medium-layout) { @include font-sizing(1.2); }
+    }
+    aside dl { @include span-columns(2 of 6); }
+    section { border-top: 0; }
+}
+.jurisdiction {
+    h3 { font-weight: normal; }
+    h3 + table { margin-top: 0; }
+    h3 + h3 { margin-top: 1.5em; }
+}
+.agency {
+    figure { @extend %full; }
+    aside div.dl-group { @extend %full; @include pad(default 0 0 0);}
+    aside dl { @extend %third; @include omega(3n); }
+    //aside dd > small { text-transform: uppercase; }
+    aside dd + dt { margin-top: $base-vertical-rhythm; }
+}
+.profile {
+    section.meta > header {
+        h1 { 
+            @include font-sizing(3);
+            margin-top: 0;
+            font-weight: 300;
+        }
+        dl { margin-top: $base-vertical-rhythm; }
+    }
+}
+
+// Collections
+
+header.collection-header { @include outer-container(); }
+h1.list-label {
+    @extend %full;
+    font-weight: 300;
+    text-align: left;
+    @include font-sizing(3); 
+    display: block;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+nav.pagination {
+    @extend %full;
+    ul {
+        text-align: center;
+        margin: $base-vertical-rhythm/2 auto;
+    }
+    li {
+        @include font-sizing(0.95);
+        display: block;
+
+        padding: 0 $base-vertical-rhythm/4;
+        @media screen and (min-width: 680px) {
+            display: inline-block;
+        }
+    }
+    .page-ref {
+        font-weight: 300;
+        @include font-sizing(1.25);
+        padding: 0 $base-vertical-rhythm/2;
+    }
+    
+}
+
+object.collection { @extend %collection; }
+object.jurisidiction.collection, object.agency.collection {
+    h2, ul { text-align: center; }
+    ul {
+        width: 100%;
+        margin: 0;
+        li { padding: $base-vertical-rhythm/4; }
+        @media screen and (min-width: 540px) {
+            @include columns(3 $base-vertical-rhythm/2);
+            li:nth-child(even) { background: none; }
+        }
+    }
+}

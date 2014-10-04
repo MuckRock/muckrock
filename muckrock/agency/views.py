@@ -17,8 +17,9 @@ from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
+from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.jurisdiction.views import collect_stats, flag_helper
+from muckrock.jurisdiction.views import collect_stats
 from muckrock.sidebar.models import Sidebar
 
 def detail(request, jurisdiction, jidx, slug, idx):
@@ -34,14 +35,36 @@ def detail(request, jurisdiction, jidx, slug, idx):
                                        .filter(agency=agency)\
                                        .order_by('-date_submitted')[:5]
 
-    context = {'agency': agency, 'foia_requests': foia_requests}
-    if request.user.is_anonymous():
-        context['sidebar'] = Sidebar.objects.get_text('anon_agency')
+    if request.method == 'POST':
+        form = FlagForm(request.POST)
+        if form.is_valid():
+            # DEBUG: Cannot send mail while running on localhost
+            '''
+            send_mail(
+                '[FLAG] %s: %s' % (type_, agency.name),
+                render_to_string(
+                    'jurisdiction/flag.txt',
+                    { 'obj': agency,
+                      'user': request.user,
+                      'type': 'agency',
+                      'reason': form.cleaned_data.get('reason')
+                    }
+                ),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
+            '''
+            messages.info(request, 'Agency correction succesfully submitted')
+            return redirect(agency)
     else:
-        context['sidebar'] = Sidebar.objects.get_text('agency')
+        form = FlagForm()
+    
+    context = {'agency': agency, 'foia_requests': foia_requests, 'form': form }
+    
     collect_stats(agency, context)
 
-    return render_to_response('agency/agency_detail.html', context,
+    return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
 
 def list_(request):
@@ -50,7 +73,7 @@ def list_(request):
                              .order_by('-num_requests')[:10]
     context = {'agencies': agencies}
 
-    return render_to_response('agency/agency_list.html', context,
+    return render_to_response('lists/agency_list.html', context,
                               context_instance=RequestContext(request))
 
 @login_required
@@ -70,10 +93,10 @@ def update(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             form.save()
             messages.success(request, 'Agency information saved.')
-            foia_pk = request.GET.get('foia')
-            foia = FOIARequest.objects.filter(pk=foia_pk)
-            if foia:
-                return redirect(foia[0])
+            if request.GET.get('foia', False):
+                foia = FOIARequest.objects.filter(pk=request.GET['foia'])
+                if foia:
+                    return redirect(foia[0])
             else:
                 return redirect('foia-mylist', view='all')
     else:
@@ -81,15 +104,6 @@ def update(request, jurisdiction, jidx, slug, idx):
 
     return render_to_response('agency/agency_form.html', {'form': form},
                               context_instance=RequestContext(request))
-
-@login_required
-def flag(request, jurisdiction, jidx, slug, idx):
-    """Flag a correction for an agency's information"""
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
-
-    return flag_helper(request, agency, 'agency')
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""

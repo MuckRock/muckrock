@@ -8,6 +8,7 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
+from easy_thumbnails.fields import ThumbnailerImageField
 from datetime import datetime
 from itertools import groupby
 from urlauth.models import AuthKey
@@ -67,6 +68,12 @@ class Profile(models.Model):
     linkedin = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
+    
+    avatar = ThumbnailerImageField(
+        upload_to='account_images',
+        blank=True, null=True,
+        resize_source={'size': (200, 200), 'crop': 'smart'}
+    )
 
     # prefrences
     email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily',

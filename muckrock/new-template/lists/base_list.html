@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% comment %}
+
+This is the parent style for a collection of objects: a collection of blog posts, FOI requests, questions, agencies, jurisdictions, users, etc.
+
+{% endcomment %}
+{% block content %}
+    
+    <object class="{% block type %}item{% endblock type %} collection">
+
+        <header class="collection-header">
+            <h1 class="list-label">
+                {% block list-label %}{% endblock list-label %}
+            </h1>
+            <section class="commands">
+            {% block commands %}
+            {% endblock commands %}
+            </section>
+        </header>
+        <section class="list-types">
+            {% block list-types %}
+            {% endblock list-types %}
+        </section>
+        {% include 'lib/pagination.html' %}
+        
+        {% block list %}
+        <ul class="object-list">
+            {% for item in object_list %}
+            <li>
+                {% block list-item %}
+                <h2>
+                    <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+                </h2>
+                {% endblock list-item %}
+            </li>
+            {% empty %}
+            <li class="empty">Hmm&ellip; looks like there&rsquo;s nothing here.</li>
+            {% endfor %}
+        </ul>
+        {% endblock list %}
+    </object>
+    
+    {% include 'lib/pagination.html' %}
+    
+{% endblock %}

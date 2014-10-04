@@ -1,0 +1,434 @@
+/* Layouts */
+
+%article {
+    @extend %body;
+    > section.meta {
+        @extend %row;
+        header {
+            @include span-columns(8);
+            @include pad(0 default 0 0);
+            margin: $base-vertical-rhythm/2 0 0;
+            h1, h2 { font-weight: 400; }
+            h1 { @include font-sizing(1.5); }
+            h2 { @include font-sizing(0.875); }
+            @include media($medium-layout) {
+                h1 { @include font-sizing(1.75); }
+                h2 { @include font-sizing(1); }
+            }
+        }
+        aside {
+            @extend %third;
+            @extend %row;
+            @include pad(0 default 0 default);
+            margin: $base-vertical-rhythm/2 0;
+            .dl-group { @include outer-container(); }
+            dl { @extend %full; }
+            dl { margin-top: 0; }
+        }
+        .panel { width: 90%; } 
+    }
+    > section.main {
+        @extend %full;
+        max-width: 50em;
+        padding-top: $base-vertical-rhythm;
+    }
+
+    summary { 
+        font-weight: 300;
+        display: none;
+        @include media($medium-layout) {
+            display: block;
+            @include font-sizing(1.25);
+        }
+    }
+}
+
+%collection {
+    @extend %body;
+    @extend %edge-to-edge;
+    @include outer-container;
+    header {
+        @extend %row;
+        h1 {
+            @extend %two-thirds;
+            @include font-sizing(3,3);
+            margin-top: 0;
+        }
+        .commands {
+            @extend %third;
+            overflow: hidden;
+            .button {
+                display: block;
+                margin-top: $base-vertical-rhythm/1.5;
+                @include media($medium-layout) {
+                    display: inline-block;
+                    float: right;
+                }
+            }
+        }
+    }
+    .list-types {
+        
+        ul {
+            padding-left: 0;
+        }
+        li {
+            display: inline-block;
+            a {
+                padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+                margin: 0;
+                border-radius: $base-border-radius;
+                text-decoration: none;
+                &:hover, &.current-tab {
+                    color: $color-white;
+                    background-color: $color-primary;
+                }
+                &:active, &.current-tab:hover {
+                    background-color: lighten($color-primary, 10%);
+                }
+                &.current-tab {
+                    cursor: default;
+                }
+            }
+        }
+    }
+    ul.object-list {
+        @extend %full;
+        margin: $base-vertical-rhythm 0 0;
+        padding: $base-vertical-rhythm 0 0;
+        border-top: 1px solid $color-grey;
+        list-style-type: none;
+        li { 
+            padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+            margin: 0;
+            &:first-child { padding-top: 0; }
+            &:nth-child(even) { background-color: $color-odd-background; }
+            @media screen and (min-width: 540px) {
+                border-radius: $base-border-radius;
+            }
+        }
+    }
+    h2, h3 { font-weight: 400; }
+    h2 { @include font-sizing(1.25); }
+    h3 { @include font-sizing(1); }
+}
+
+.container { @extend %base-spacing; }
+
+.homepage {
+    overflow: hidden;
+    @extend %edge-to-edge;
+    .homepage-row { display: table-row; }
+    .banner {
+        display: block;
+        height: 35em;
+        width: 100%;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        color: $color-white;
+        h1 {
+            position: relative;
+            top: 0;
+            left: 0;
+            max-width: 18em;
+            color: $color-white;
+            font-weight: 700;
+            @include font-sizing(2.5, 3);
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: $base-vertical-rhythm;
+        }
+        div {
+            height: 100%;
+            @extend %base-spacing;
+            @include background(linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)));
+            font-weight: 700;
+            text-align: center;
+            padding-top: 2.5em;
+        }
+        a.dotted {
+            color: $color-white;
+            text-decoration: none;
+            border-bottom: 1px dotted $color-white;
+            &:hover {
+                border-bottom: 1px solid $color-white;
+            }
+        }
+        .button {
+            display: block;
+        }
+        .image-attribution {
+            position: absolute;
+            bottom: $base-vertical-rhythm;
+            right: $base-vertical-rhythm;
+            color: $color-white;   
+        }
+        #learn-more {
+            margin-left: $base-vertical-rhythm/4;
+        }
+        
+        @media all and (min-width: 450px) {
+            .button { display: inline-block; }
+        }
+        @media all and (min-width: 480px) {
+            height: 35em;
+            div { padding-top: 7.5em; }
+        }
+        @media all and (min-width: 1200px) {
+            h1 {
+                @include font-sizing(2.8, 3);
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: $base-vertical-rhythm;
+            }
+        }
+    }
+    
+    .featured-article {
+        width: 100%;
+        a {
+            display: block;
+            padding: 3*$base-vertical-rhythm $base-vertical-rhythm;
+            text-decoration: none;
+            color: $color-black;
+            background-color: rgba(254, 188, 16, 0.65);
+            dfn { color: $color-black; }
+            h1 {
+                @include font-sizing(2, 3);
+                font-weight: 700;
+            }
+            h2 {
+                @include font-sizing(1.2, 3);
+                font-weight: 400;
+            }
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.65);
+            }
+        }
+        
+        background-size: cover;
+        background-position: center;
+        
+        @media all and (min-width: 600px) {
+            display: table-cell;
+            width: 60%;
+        }
+    }
+    
+    .stats {
+        $color-stats: #2B1E5E;
+        width: 100%;
+        @extend %base-spacing;
+        color: $color-white;
+        @include background(radial-gradient($color-stats, darken($color-stats, 5%)));
+        font-weight: 400;
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin: $base-vertical-rhythm/2 0; }
+        span {
+            display: block;
+            @include font-sizing(2, 3);
+            margin-bottom: 0;
+            font-weight: 300;
+        }  
+        @media all and (min-width: 600px) {
+            display: table-cell;
+            width: 40%;
+        }
+        
+    }
+}
+
+.create-request {
+    @extend %edge-to-edge;
+    display: block;
+    overflow: hidden;
+    padding: 0 $base-vertical-rhythm;
+    background-color: $color-grey;
+    border-bottom: $base-border-width solid darken($color-grey, 10%);
+    header {
+        @extend %row;
+        @extend %edge-to-edge;
+        padding: $base-vertical-rhythm;
+        margin-bottom: $base-vertical-rhythm;
+        background-color: darken($color-grey, 10%);
+        h1 {
+            @extend %half;
+            @include font-sizing(2.5, 3);
+            margin: 0;
+            font-weight: 700;
+            color: $color-white;
+        }
+        .progress-bar {
+            @extend %half;
+            border-radius: 50px;
+            .meter {
+                height: 1.75em;
+                padding: 0.05em 1em 0;
+                border-radius: 50px;
+            }
+        }   
+    }
+    
+    dfn { color: $color-black; }
+    
+    form {
+        overflow: hidden;
+        position: relative;
+        padding-bottom: $base-vertical-rhythm*4;
+        .controls {
+            padding: $base-vertical-rhythm 0;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            overflow: hidden;
+        }
+        .next { float: right; }
+        .prev { float: left; }
+        
+        #submit { float: right; }
+        #draft { float: right; }
+        #delete { float: left; }
+    }
+    
+    label {
+        @extend dfn;
+        color: $color-black;
+        & + input {
+            display: block;
+        }
+    }
+    input + label { margin-top: 2*$base-vertical-rhythm; }
+    
+    svg {
+        width: auto;
+        fill: $color-white;
+    }
+
+    .step-document {
+        @extend %half;
+        @include omega(n);
+        margin-bottom: $base-vertical-rhythm;
+        &.introduction { 
+            p {
+                max-width: 90%;
+                margin-top: 0;
+            }
+        }
+        input[type="text"] {
+            width: 100%;
+        }
+        textarea {
+            width: 100%;
+            height: 5em;
+            resize: none;
+        }
+    }
+    .step-jurisdiction {
+        &.jurisdictions {
+            @extend %row;
+            div {
+                @extend %third;
+                @include omega(3n);
+                @include transition(margin 0.25s $ease-out-quad);
+                @include button-color($color-black);
+                height: 20em;
+                background-color: $color-black;
+                margin-top: $base-vertical-rhythm;
+                margin-bottom: $base-vertical-rhythm;
+                padding: $base-vertical-rhythm;
+                border-width: $base-border-width;
+                border-style: solid;
+                border-radius: $base-border-radius;
+
+                text-align: center;
+                input { color: $color-black; }
+                &.federal > svg { height: 5em; }
+                &.state > svg { height: 4em; margin-top: 1em; }
+                &.local svg { height: 3em; margin-top: 2em; }
+                input[type="checkbox"] {
+                    display: block;
+                    margin: $base-vertical-rhythm auto;
+                    & + select, & + span {
+                        visibility: hidden;
+                    }
+                    &:checked + select, &:checked + span {
+                        visibility: visible;
+                    }
+                }
+                &:hover, &.active {
+                    margin-top: 0;
+                    margin-bottom: 2*$base-vertical-rhythm;
+                    @include button-color($color-primary);
+                    // h2 { color: $color-primary; }
+                    // svg { fill: $color-primary; }
+                }
+            }
+        }
+        &.notices p {
+            @extend %half;
+            padding-right: $base-vertical-rhythm;
+        }
+    }
+    .agencies {
+        list-style-type: none;
+        padding-left: 0;
+        @extend %row;
+        li {
+            @extend %quarter;
+            @include omega(4n);
+        }
+        & label {
+            display: inline-block;
+            margin-top: 0;
+            margin-right: $base-vertical-rhythm/2;
+        }
+        & input[type="checkbox"] {
+            display: inline-block;
+        }
+    }
+    .other {
+        @extend %half;
+        input {
+            display: block;
+            width: 100%;
+        }
+        small { margin-top: 0; }
+    }
+    
+    .step-confirm {
+        &.overview {
+            @extend %third;
+            padding-right: $base-vertical-rhythm;
+            dfn {
+                padding-bottom: $base-vertical-rhythm/4;
+                border-bottom: $base-border-width solid $color-black;
+                margin-bottom: $base-vertical-rhythm;
+            }
+            .embargo {
+                label { margin: 2*$base-vertical-rhythm 0 0; }
+                input[type="checkbox"] { display: inline-block; }
+                .help {
+                    display: inline-block;
+                    vertical-align: top;
+                    padding-left: $base-vertical-rhythm/4;
+                    visibility: hidden;
+                }
+                input[type="checkbox"]:checked + .help { visibility: visible; }
+            }
+            .panel {
+                margin-top: $base-vertical-rhythm;
+                border-color: $color-black;
+            }
+        }
+        &.preview {
+            @extend %two-thirds;
+            @include omega();
+            .body {
+                padding: $base-vertical-rhythm;
+                background: $color-white;
+                border: $base-border-width solid darken($color-grey, 10%);
+            }
+        }
+    }
+}
