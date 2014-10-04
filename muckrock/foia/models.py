@@ -654,6 +654,7 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+    opened = models.BooleanField()
 
     raw_email = models.TextField(blank=True)
 

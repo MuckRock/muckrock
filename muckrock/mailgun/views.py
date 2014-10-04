@@ -165,6 +165,22 @@ def bounces(request):
 
     return HttpResponse('OK')
 
+@csrf_exempt
+def opened(request):
+    """Notify when an email has been opened"""
+
+    if not _verify(request.POST):
+        return HttpResponseForbidden()
+
+    logger.warning('Opened: %s', ','.join(request.POST.keys()))
+    comm_id = request.POST.get('comm_id')
+    if comm_id:
+        comm = FOIACommunication.objects.get(pk=comm_id)
+        comm.opened = True
+        comm.save()
+
+    return HttpResponse('OK')
+
 def _verify(post):
     """Verify that the message is from mailgun"""
     token = post.get('token')
