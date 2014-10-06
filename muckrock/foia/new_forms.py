@@ -1,5 +1,4 @@
 from django import forms
-import autocomplete_light as autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
@@ -12,30 +11,30 @@ class RequestForm(forms.Form):
     ]
 
     # form fields
-    title = forms.CharField()
+    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Choose a Short Title'}))
     document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': 'One sentence describing the specific document you are after.'}))
-    jurisdiction = forms.ChoiceField(choices=JURISDICTION_CHOICES)
-    state = autocomplete.ModelChoiceField(
-        'StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False), 
-        required=False
+    jurisdiction = forms.ChoiceField(
+        choices=JURISDICTION_CHOICES,
+        widget=forms.RadioSelect
     )
-    local = autocomplete.ModelChoiceField(
-        'LocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
-        required=False
+    state = forms.ModelChoiceField(
+        label='State',
+        required=False,
+        queryset=Jurisdiction.objects.filter(level='s').order_by('name'),
+        widget=forms.Select(),
     )
-    agency = forms.CharField()
-    '''
+    local = forms.ModelChoiceField(
+        label='Local',
+        required=False,
+        queryset=Jurisdiction.objects.filter(level='l').order_by('parent', 'name'),
+        widget=forms.Select(),
+    )
     agency = forms.ModelChoiceField(
         label='Agency',
-        queryset=None,
         required=False,
-        widget=forms.Select(attrs={'class': 'combobox'}),
-        help_text=('Select one of the agencies for the jurisdiction you '
-                   'have chosen, or write in the correct agency if known.')
-    )
-    '''
+        queryset=Agency.objects.order_by('jurisdiction', 'name'),
+        widget=forms.Select(),
+    ) 
     
     def clean(self):
         jurisdiction = self.cleaned_data.get('jurisdiction')

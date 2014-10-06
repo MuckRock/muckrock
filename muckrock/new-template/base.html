@@ -12,6 +12,9 @@
         <link rel="stylesheet"
               type="text/css"
               href="{{ SITE_ROOT }}/static/css/style.css" />
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ SITE_ROOT }}/static/css/jquery-ui-1.8.4.custom.css" />
         <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
         <!-- Preloading and Prerendering -->
         {% block preload %}
@@ -37,6 +40,8 @@
     {% endblock webpage %}
         <script type="text/javascript" 
                 src="{{ SITE_ROOT }}/static/js/jquery.min.js"></script>
+        <script type="text/javascript"
+                src="{{ SITE_ROOT }}/static/js/jquery.ui.min.js"></script>
     {% block scripts %}
     {% endblock scripts %}
     </body>

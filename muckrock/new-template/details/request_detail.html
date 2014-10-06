@@ -2,6 +2,7 @@
 {% load tags %}
 {% load markdown_deux_tags %}
 {% load humanize %}
+{% load mathfilters %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock title %}
 {% block type %}request{% endblock type %}
@@ -41,8 +42,8 @@
         <section class="control-panel">
             <ul>
                 {% if foia.status == 'started' %}
-                <li><input type="submit" name="submit" value="Submit" class="success button" /></li>
-                <li><input type="submit" name="delete" value="Delete" class="primary button" /></li>
+                <li><input type="submit" name="submit" value="Submit" class="primary button" /></li>
+                <li><input type="submit" name="delete" value="Delete" class="failure button" /></li>
                 {% endif %}
             </ul>
         </section>
@@ -61,6 +62,18 @@
                 <p>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</p>
                 {% endif %}
             {% endif %}
+            {% with remaining=user.get_profile.num_requests requested=1 %}
+                {% if not remaining %}
+                    <p>You have no requests and will need to purchase some before submitting.</p>
+                    <a href="{% url 'acct-buy-requests' %}?next={% url 'foia-detail' %}" class="button primary">Purchase Requests</a>
+                {% else %}
+                    {% if remaining > requested %}
+                    <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+                    {% else %}
+                    <p>You have {{ remaining }} remaining request{{ remaining|pluralize }}, but want to submit {{ request }} new request{{ request|pluralize }}. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
+                    {% endif %}
+                {% endif %}
+            {% endwith %}
         {% endif %}
     </object>
     {% endif %}
