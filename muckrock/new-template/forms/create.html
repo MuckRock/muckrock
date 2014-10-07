@@ -98,35 +98,77 @@
 $(document).ready(function(){
     var localField = $('fieldset.local');
     var stateField = $('fieldset.state');
+    var localRadio = $('li.local input:radio');
+    var stateRadio = $('li.state input:radio');
+    var federalRadio = $('li.federal input:radio')
+    var localChecked = $('li.local input:checked');
+    var stateChecked = $('li.state input:checked');
+    var federalChecked = $('li.federal input:checked');
+    var localInput = $('li.local .autocomplete-light-widget input');
+    var localSelect = $('.autocomplete-light-widget select[name="local"]');
+    var stateSelect = $('.autocomplete-light-widget select[name="state"]');
     var agencyField = $('fieldset.agency');
+    var agencySelect = $('fieldset.agency select');
     localField.hide();
     stateField.hide();
+    
     agencyField.attr('disabled', true);
     
-    // if ($('li.local > input:radio:checked')) { localField.show(); }
-    if ($('li.state input:radio:checked')) {
-        stateField.show();
-        if ($('.autocomplete-light-widget select[name="state"]').val) {
+    if (localChecked.length > 0) {
+        localField.show();
+        if (localSelect.val) {
             agencyField.attr('disabled', false);
         } else {
             agencyField.attr('disabled', true);
         }
     }
     
-    $('li.local input:radio').change(function() {
-        localField.show();
-        stateField.hide();
-        agencyField.attr('disabled', true);
-    });
-    $('li.state input:radio').change(function() {
-        localField.hide();
+    if (stateChecked.length > 0) {
         stateField.show();
-        agencyField.attr('disabled', true);
-    });
-    $('li.federal input:radio').change(function() {
+        if (stateSelect.val) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+    }
+    
+    if (federalChecked.length > 0) {
         localField.hide();
         stateField.hide();
         agencyField.attr('disabled', false);
+    }
+    
+    localRadio.change(function() {
+        localField.show();
+        stateField.hide();
+        if (localSelect.val() != null) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+        if ($('#id_agency-deck').children().length) {
+            $('#id_agency-deck').children('.hilight').remove();
+            $('#id_agency-autocomplete').css('display', 'block');
+        }
+    });
+    
+    stateRadio.change(function() {
+        localField.hide();
+        stateField.show();
+        if (stateSelect.val() != null) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+        if ($('#id_agency-deck').children().length) {
+            $('#id_agency-deck').children('.hilight').remove();
+            $('#id_agency-autocomplete').css('display', 'block');
+        }
+    });
+    
+    federalRadio.change(function() {
+        localField.hide();
+        stateField.hide();
     });
     
     function agencyByJurisdiction(jurisdictionSelectElement) {
@@ -141,17 +183,23 @@ $(document).ready(function(){
         } else { widget.yourlabsWidget().autocomplete.data = {} }
     }
     
-    $('.autocomplete-light-widget select[name="local"]').change(function(){
+    localSelect.change(function(){
         agencyByJurisdiction($(this));
-        if ($(this).val) {
+        if ($(this).val()) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+           
+        }
+    });
+    
+    stateSelect.change(function(){ 
+        agencyByJurisdiction($(this));
+        if ($(this).val()) {
             agencyField.attr('disabled', false);
         } else {
             agencyField.attr('disabled', true);
         }
-    });
-    
-    $('.autocomplete-light-widget select[name="state"]').change(function(){ 
-        agencyByJurisdiction($(this));
     });
 });
 </script>
