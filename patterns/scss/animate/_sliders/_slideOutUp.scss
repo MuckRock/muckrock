@@ -1,0 +1,13 @@
+@include keyframes(slideOutUp) {
+	0% {transform: translateY(0);}
+	100% {opacity: 0; transform: translateY(-2000px);}
+}
+
+@mixin slideOutUp($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+	@include animation-name(slideOutUp);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}

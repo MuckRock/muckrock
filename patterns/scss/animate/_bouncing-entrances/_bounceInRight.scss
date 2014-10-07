@@ -1,0 +1,15 @@
+@include keyframes(bounceInRight) {
+  0% {opacity: 0; -webkit-transform: translateX(2000px);}
+  60% {opacity: 1; -webkit-transform: translateX(-30px);}
+  80% {-webkit-transform: translateX(10px);}
+  100% {-webkit-transform: translateX(0);}
+}
+
+@mixin bounceInRight($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+  @include animation-name(bounceInRight);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}
