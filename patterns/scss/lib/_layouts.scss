@@ -240,13 +240,13 @@
 }
 
 .new-request {
-    @extend %edge-to-edge;
+    // @extend %edge-to-edge;
     display: block;
     overflow: hidden;
-    border-bottom: $base-border-width solid darken($color-grey, 10%);
+    // border: $base-border-width solid darken($color-grey, 10%);
     header {
         @extend %row;
-        padding: 0 $base-vertical-rhythm;
+        // padding: 0 $base-vertical-rhythm;
         margin-bottom: $base-vertical-rhythm;
         h1 {
             @extend %half;
@@ -254,15 +254,10 @@
             margin: 0;
             font-weight: 300;
         }
-        .progress-bar {
+        summary {
             @extend %half;
-            border-radius: 50px;
-            .meter {
-                height: 1.75em;
-                padding: 0.05em 1em 0;
-                border-radius: 50px;
-            }
-        }   
+            @extend small;
+        }
     }
     
     fieldset {
@@ -271,8 +266,9 @@
     }
     
     $color-title: #F26C5A;
-    $color-jurisdiction: blue;
+    $color-jurisdiction: #5A90F2;
     .title {
+        @include border-top-radius($base-border-radius);
         background-color: $color-title;
         label { display: none; }
         input {
@@ -304,7 +300,7 @@
     .jurisdiction {
         padding: $base-vertical-rhythm 0;
         color: $color-white;
-        background-color: lighten(blue, 25%);
+        background-color: $color-jurisdiction;
         width: 100%;
         h2 { margin: 0; }
         ul {
@@ -364,8 +360,10 @@
     dfn { color: $color-black; }
     
     footer {
+        @include border-bottom-radius($base-border-radius);
         overflow: hidden;
         padding: $base-vertical-rhythm;
+        background-color: $color-grey;
         width: 100%;
         overflow: hidden;
         input { float: left; }
