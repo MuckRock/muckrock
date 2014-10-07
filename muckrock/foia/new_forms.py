@@ -34,7 +34,10 @@ class RequestForm(forms.Form):
     ) 
     
     def clean(self):
-        jurisdiction = self.cleaned_data.get('jurisdiction')
+        data = self.cleaned_data
+        jurisdiction = data.get('jurisdiction')
+        state = data.get('state')
+        local = data.get('local')
         if jurisdiction == 's' and not state:
             error_msg = 'No state was selected'
             self._errors['state'] = self.error_class([error_msg])
