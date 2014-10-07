@@ -265,6 +265,8 @@
         padding: $base-vertical-rhythm;
     }
     
+    
+    
     $color-title: #F26C5A;
     $color-jurisdiction: #5A90F2;
     .title {
@@ -272,6 +274,7 @@
         background-color: $color-title;
         label { display: none; }
         input {
+            width: 100%;
             background-color: $color-title;
             padding: 0;
             border: none;
@@ -337,27 +340,77 @@
         width: 100%;
         background-color: $color-jurisdiction-picker;
         label { display: none; }
-        input { width: 100%; }
+        input {
+            display: block;
+            width: 100%;
+        }
         &.hidden { visibility: hidden; }
         &.visible { visibility: visible; }
     }
     
+    $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
         overflow: hidden;
-        padding: 0;
         margin: 0;
+        width: 100%;
+        color: $color-white;
+        background-color: $color-agency;
+        &:disabled {
+            background-color: $color-disabled;
+            color: darken($color-white, 2%);
+        }
         label { display: none; }
         input {
             width: 100%;
-            background-color: white;
+            // padding: $base-vertical-rhythm 0;
+            background-color: $color-agency;
             border: none;
+            padding-left: 0;
             border-radius: 0;
             @include font-sizing(2, 3);
             margin: 0;
+            @include placeholder { color: $color-jurisdiction; }
+            &:focus { width: 100%; }
+            &:disabled {
+                @include placeholder { color: darken($color-white, 2%); }
+                background: $color-disabled;
+                text-align: left;
+                padding-left: 0;
+                &:hover { padding-left: 0; }
+            }
+        }
+            
+    }
+    
+    .autocomplete-light-widget {
+        display: block;
+        width: 100%;
+        span.deck > span.hilight {
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
+            margin: 0;
+            &:before {
+                display: block;
+                @extend dfn;
+                color: $color-white;
+                margin: 0;
+                font-weight: 300;
+                font-size: 1rem;
+            }
+            span.remove {
+                float: right;
+            }
         }
     }
     
-    dfn { color: $color-black; }
+    
+    
+    fieldset.state, fieldset.local {
+        span.deck > span.hilight:before { content: "Jurisdiction"; }
+    }
+    fieldset.agency span.deck > span.hilight:before { content: "Agency"; }
     
     footer {
         @include border-bottom-radius($base-border-radius);

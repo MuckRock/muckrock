@@ -124,7 +124,7 @@ def create_request(request):
         if level == 's':
             initial_data['state'] = jurisdiction
         elif level == 'l':
-            initial_data['locality'] = jurisdiction
+            initial_data['local'] = jurisdiction
         initial_data['jurisdiction'] = level
     if request.GET.get('s', False):
         sk = 'session-%s' % request.GET['s']
@@ -142,7 +142,7 @@ def create_request(request):
                 if level == 's':
                     initial_data['state'] = jurisdiction
                 elif level == 'l':
-                    initial_data['locality'] = jurisdiction
+                    initial_data['local'] = jurisdiction
                 initial_data['jurisdiction'] = level
         
     ''' TODO: DYNAMIC AGENCY GENERATION '''
@@ -165,7 +165,7 @@ def create_request(request):
             elif level == 's':
                 jurisdiction = data['state']
             else:
-                jurisdiction = data['locality']
+                jurisdiction = data['local']
             agency_query = Agency.objects.filter(name=data['agency'])
             if agency_query:
                 agency = agency_query[0]

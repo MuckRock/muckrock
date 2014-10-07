@@ -20,7 +20,7 @@ $color-primary:         #3a82ff;
 $color-success:         #006330;
 $color-failure:         #fb004e;
 $color-default:         #6b6a65;
-$color-disabled:        #96959e;
+$color-disabled:        lighten($color-grey, 10%);
 
 $color-odd-background:  darken($color-white, 5%);
 
