@@ -1,4 +1,5 @@
 from django import forms
+import autocomplete_light as autocomplete
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
@@ -17,23 +18,19 @@ class RequestForm(forms.Form):
         choices=JURISDICTION_CHOICES,
         widget=forms.RadioSelect
     )
-    state = forms.ModelChoiceField(
-        label='State',
-        required=False,
-        queryset=Jurisdiction.objects.filter(level='s').order_by('name'),
-        widget=forms.Select(),
+    state = autocomplete.ModelChoiceField(
+        'StateAutocomplete',
+        queryset=Jurisdiction.objects.filter(level='s', hidden=False), 
+        required=False
     )
-    local = forms.ModelChoiceField(
-        label='Local',
-        required=False,
-        queryset=Jurisdiction.objects.filter(level='l').order_by('parent', 'name'),
-        widget=forms.Select(),
+    local = autocomplete.ModelChoiceField(
+        'LocalAutocomplete',
+        queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
+        required=False
     )
-    agency = forms.ModelChoiceField(
-        label='Agency',
-        required=False,
-        queryset=Agency.objects.order_by('jurisdiction', 'name'),
-        widget=forms.Select(),
+    agency = autocomplete.ModelChoiceField(
+        'AgencyAutocomplete',
+        queryset=Agency.objects.all()
     ) 
     
     def clean(self):
