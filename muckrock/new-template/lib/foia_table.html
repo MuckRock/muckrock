@@ -37,10 +37,10 @@
             {% url 'foia-mylist-all' %}
         {% endif %}
         {% if context == 'agency' %}
-            {% url 'foia-list-agency' agency=foia.agency.slug %}
+            {% url 'foia-list-agency' agency=foia.agency.slug idx=foia.agency.pk %}
         {% endif %}
         {% if context == 'jurisdiction' %}
-            {% url 'foia-list-jurisdiction' agency=foia.jurisdiction.slug %}
+            {% url 'foia-list-jurisdiction' jurisdiction=foia.jurisdiction.slug idx=foia.jurisdiction.pk %}
         {% endif %}
     {% else %}
         {% url 'foia-list' %}
