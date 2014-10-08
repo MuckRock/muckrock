@@ -96,6 +96,7 @@
 <script type="text/javascript"
 <script>
 $(document).ready(function(){
+    
     var localField = $('fieldset.local');
     var stateField = $('fieldset.state');
     var localRadio = $('li.local input:radio');
@@ -107,8 +108,10 @@ $(document).ready(function(){
     var localInput = $('li.local .autocomplete-light-widget input');
     var localSelect = $('.autocomplete-light-widget select[name="local"]');
     var stateSelect = $('.autocomplete-light-widget select[name="state"]');
+    
     var agencyField = $('fieldset.agency');
-    var agencySelect = $('fieldset.agency select');
+    var agencyInput = agencyField.children('input');
+    
     localField.hide();
     stateField.hide();
     
@@ -116,7 +119,7 @@ $(document).ready(function(){
     
     if (localChecked.length > 0) {
         localField.show();
-        if (localSelect.val) {
+        if (localSelect.val()) {
             agencyField.attr('disabled', false);
         } else {
             agencyField.attr('disabled', true);
@@ -125,7 +128,7 @@ $(document).ready(function(){
     
     if (stateChecked.length > 0) {
         stateField.show();
-        if (stateSelect.val) {
+        if (stateSelect.val()) {
             agencyField.attr('disabled', false);
         } else {
             agencyField.attr('disabled', true);
@@ -146,10 +149,7 @@ $(document).ready(function(){
         } else {
             agencyField.attr('disabled', true);
         }
-        if ($('#id_agency-deck').children().length) {
-            $('#id_agency-deck').children('.hilight').remove();
-            $('#id_agency-autocomplete').css('display', 'block');
-        }
+        agencyInput.val('');
     });
     
     stateRadio.change(function() {
@@ -160,32 +160,36 @@ $(document).ready(function(){
         } else {
             agencyField.attr('disabled', true);
         }
-        if ($('#id_agency-deck').children().length) {
-            $('#id_agency-deck').children('.hilight').remove();
-            $('#id_agency-autocomplete').css('display', 'block');
-        }
+        agencyInput.val('');
     });
     
     federalRadio.change(function() {
         localField.hide();
         stateField.hide();
         agencyField.attr('disabled', false);
-        if ($('#id_agency-deck').children().length) {
-            $('#id_agency-deck').children('.hilight').remove();
-            $('#id_agency-autocomplete').css('display', 'block');
-        }
+        agencyInput.val('');
+        agencyByJurisdiction(federalRadio);
     });
     
     function agencyByJurisdiction(jurisdictionSelectElement) {
         var select = $('fieldset.agency select');
-        var widget = select.parents('.autocomplete-light-widget');
         // When the jurisdiction select changes
-        value = jurisdictionSelectElement.val();
-        if (value) {
-            widget.yourlabsWidget().autocomplete.data = {
-                'jurisdiction_id': value[0],
-            };
-        } else { widget.yourlabsWidget().autocomplete.data = {} }
+        val = jurisdictionSelectElement.val();
+        if (val) {
+            $.getJSON(
+                "{% url 'foia-create' %}",
+                {j_id: val},
+                function(data) {
+                    var options = []
+                    $.each(data, function(i) {
+                        options.push(data[i]);
+                    });
+                    $('input#id_agency').autocomplete({
+                        source: options
+                    });
+                }
+            );
+        }
     }
     
     localSelect.change(function(){
@@ -193,9 +197,9 @@ $(document).ready(function(){
         if ($(this).val()) {
             agencyField.attr('disabled', false);
         } else {
-            agencyField.attr('disabled', true);
-           
+            agencyField.attr('disabled', true);  
         }
+        agencyInput.val('');
     });
     
     stateSelect.change(function(){ 
@@ -205,6 +209,7 @@ $(document).ready(function(){
         } else {
             agencyField.attr('disabled', true);
         }
+        agencyInput.val('');
     });
 });
 </script>

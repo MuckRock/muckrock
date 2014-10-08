@@ -28,9 +28,9 @@ class RequestForm(forms.Form):
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
         required=False
     )
-    agency = autocomplete.ModelChoiceField(
-        'AgencyAutocomplete',
-        queryset=Agency.objects.all()
+    agency = forms.CharField(
+        label='Agency',
+        widget=forms.TextInput(attrs = {'placeholder': 'Name the Agency'})
     ) 
     
     def clean(self):

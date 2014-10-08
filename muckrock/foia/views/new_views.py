@@ -117,7 +117,7 @@ def create_request(request):
         initial_data = {
             'title': foia.title,
             'document': foia.requested_docs,
-            'agency': foia.agency
+            'agency': foia.agency.name
         }
         jurisdiction = foia.jurisdiction
         level = jurisdiction.level
@@ -148,6 +148,8 @@ def create_request(request):
     ''' TODO: DYNAMIC AGENCY GENERATION '''
     if request.GET.get('j_id', False):
         j_id = request.GET['j_id']
+        if j_id == 'f':
+            j_id = Jurisdiction.objects.filter(level=j_id)[0].id
         agencies = Agency.objects.filter(jurisdiction=j_id).order_by('name')
         results  = [agency.name for agency in agencies]
         json = simplejson.dumps(results)
