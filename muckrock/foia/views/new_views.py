@@ -222,8 +222,8 @@ def create_request(request):
                 )
             else:
                 return redirect(foia)
-    
-            return redirect('foia-submit')
+            # TODO: message about something going wrong
+            return redirect('foia-create')
     else:
         if clone or request.GET.get('s', False):
             form = RequestForm(initial=initial_data)

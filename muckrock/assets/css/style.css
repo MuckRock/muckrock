@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .new-request header h1, .new-request header summary, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .search.collection header h1, object.collection header h1, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .new-request header h1, .new-request header summary, .footer-container footer section.about, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .request .control-panel li, .search.collection header h1, object.collection header h1, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
   width: 100%; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .new-request header h1, .new-request header summary, .footer-container footer section.about {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .new-request header h1, .new-request header summary, .footer-container footer section.about {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update .button, .new-request header h1, .new-request header summary, .footer-container footer section.about {
+    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .new-request header h1, .new-request header summary, .footer-container footer section.about {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update .button:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .footer-container footer section.about:last-child {
+      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update header.button:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .footer-container footer section.about:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
@@ -406,25 +406,33 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 321px) {
-  .form input[type="submit"], .form.search input[type="submit"] {
+  .form input[type="submit"], .form.search input[type="submit"], .request .control-panel li {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form input[type="submit"]:last-child {
-      margin-right: 0; } }
+    .form input[type="submit"]:last-child, .request .control-panel li:last-child {
+      margin-right: 0; }
+    .form input[type="submit"]:nth-child(2n), .request .control-panel li:nth-child(2n) {
+      margin-right: 0; }
+    .form input[type="submit"]:nth-child(2n+1), .request .control-panel li:nth-child(2n+1) {
+      clear: left; } }
 @media screen and (min-width: 769px) {
-  .form input[type="submit"], .form.search input[type="submit"] {
+  .form input[type="submit"], .form.search input[type="submit"], .request .control-panel li {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .form input[type="submit"]:last-child {
-      margin-right: 0; } }
-.form input[type="submit"]:nth-child(4n) {
-  margin-right: 0; }
-.form input[type="submit"]:nth-child(4n+1) {
-  clear: left; }
+    .form input[type="submit"]:nth-child(2n), .request .control-panel li:nth-child(2n) {
+      margin-right: 2.35765%; }
+    .form input[type="submit"]:nth-child(2n+1), .request .control-panel li:nth-child(2n+1) {
+      clear: none; }
+    .form input[type="submit"]:last-child, .request .control-panel li:last-child {
+      margin-right: 0; }
+    .form input[type="submit"]:nth-child(4n), .request .control-panel li:nth-child(4n) {
+      margin-right: 0; }
+    .form input[type="submit"]:nth-child(4n+1), .request .control-panel li:nth-child(4n+1) {
+      clear: left; } }
 
 @media screen and (min-width: 321px) {
   .search.collection header h1, object.collection header h1 {
@@ -831,6 +839,16 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   display: block;
   padding: 1.5em;
   border-radius: 9px; }
+  .form header {
+    max-width: 68em;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 5% 0 5%;
+    margin: 0.75em 0; }
+    .form header:after {
+      content: "";
+      display: table;
+      clear: both; }
   .form form {
     max-width: 68em;
     margin-left: auto;
@@ -853,16 +871,20 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       content: "";
       display: table;
       clear: both; }
-  .form header {
-    max-width: 68em;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 5% 0 5%;
-    margin: 0.75em 0; }
-    .form header:after {
-      content: "";
-      display: table;
-      clear: both; }
+
+#hidden-form {
+  display: none;
+  width: 100%;
+  overflow: hidden;
+  margin: 1.5em 0;
+  border: 1px solid #b3becb; }
+  #hidden-form:target {
+    display: block; }
+  #hidden-form a.button, #hidden-form input.button {
+    float: right; }
+
+#hidden-form-button:focus {
+  outline: none; }
 
 .form.login h1 {
   font-size: 3em;
@@ -891,9 +913,8 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   @media screen and (min-width: 769px) {
     .form.update h1 {
       margin-top: 1rem; } }
-@media screen and (min-width: 769px) {
-  .form.update .button {
-    margin-top: 1.5rem; } }
+.form.update header.button {
+  margin-top: 1.5rem; }
 
 .form.password-reset, object.password-change {
   overflow: hidden; }
@@ -1228,23 +1249,6 @@ table {
     border-top: 1px solid #b3becb;
     border-bottom: 1px solid #b3becb; }
 
-.form {
-  border-radius: 9px; }
-
-#hidden-form {
-  display: none;
-  width: 100%;
-  overflow: hidden;
-  margin: 1.5em 0;
-  border: 1px solid #b3becb; }
-  #hidden-form:target {
-    display: block; }
-  #hidden-form a.button, #hidden-form input.button {
-    float: right; }
-
-#hidden-form-button:focus {
-  outline: none; }
-
 @media screen and (min-width: 321px) {
   .post p:first-of-type {
     font-size: 1.2em;
@@ -1284,6 +1288,28 @@ table {
   font-weight: 300; }
 .profile section.meta > header dl {
   margin-top: 1.5em; }
+
+.request .control-panel {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  .request .control-panel:after {
+    content: "";
+    display: table;
+    clear: both; }
+  .request .control-panel ul {
+    list-style-type: none;
+    padding-left: 0;
+    display: block; }
+    .request .control-panel ul:after {
+      content: "";
+      display: table;
+      clear: both; }
+  .request .control-panel li {
+    vertical-align: middle; }
+    .request .control-panel li .button {
+      display: block;
+      width: 100%; }
 
 header.collection-header {
   max-width: 68em;

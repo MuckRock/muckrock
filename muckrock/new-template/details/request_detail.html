@@ -43,10 +43,19 @@
             <ul>
                 {% if foia.status == 'started' %}
                 <li><input type="submit" name="submit" value="Submit" class="primary button" /></li>
+                {% endif %}
+                {% if foia.is_editable %}
+                <li><a href="update" class="default button">Edit</a></li>
+                {% endif %}
+                <li><a href="clone"  class="default button">Clone</a></li>
+                {% if foia.status == 'started' %}
                 <li><input type="submit" name="delete" value="Delete" class="failure button" /></li>
                 {% endif %}
             </ul>
         </section>
+        {% if foia.is_editable %}
+            <p>While this request is a draft, you may make any edits to its title, agency, or message before submitting it.</p>
+        {% endif %}
         {% if foia.is_embargo %}
             {% if foia.embargo_date %}
 	        <p>This request is embargoed and will not be visible to others until 30 days after a response is received.</p>
@@ -68,7 +77,7 @@
                     <a href="{% url 'acct-buy-requests' %}?next={% url 'foia-detail' %}" class="button primary">Purchase Requests</a>
                 {% else %}
                     {% if remaining > requested %}
-                    <p>This request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+                    <p>Submitting this request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
                     {% else %}
                     <p>You have {{ remaining }} remaining request{{ remaining|pluralize }}, but want to submit {{ request }} new request{{ request|pluralize }}. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
                     {% endif %}

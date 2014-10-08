@@ -134,7 +134,7 @@ def _foia_form_handler(request, foia, action):
     else:
         form = default_form()
 
-    return render_to_response('foia/foiarequest_form.html',
+    return render_to_response('forms/foia.html',
                               {'form': form, 'action': action},
                               context_instance=RequestContext(request))
 

@@ -27,6 +27,7 @@
         }
         .panel { width: 90%; } 
     }
+    
     > section.main {
         @extend %full;
         max-width: 50em;

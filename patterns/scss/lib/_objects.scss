@@ -153,11 +153,22 @@ fieldset {
     & > fieldset, & > fieldset + fieldset { margin: 0; }
 }
 
-.form { @extend %textbox;
+// Forms
+
+// Forms
+
+
+
+.form {
+    @extend %textbox;
     display: block;
     padding: $base-vertical-rhythm;
-
     border-radius: $base-border-radius;
+    header {
+        @include outer-container();
+        @include pad(0 5% 0 5%);
+        margin: $base-vertical-rhythm/2 0;
+    }
     form {
         @include outer-container();
         @include pad(0 0 0 5%);
@@ -173,12 +184,18 @@ fieldset {
     }
     .buttons { @include row; }
     input[type="submit"] { @extend %quarter; }
-    header {
-        @include outer-container();
-        @include pad(0 5% 0 5%);
-        margin: $base-vertical-rhythm/2 0;
-    }
 }
+
+#hidden-form {
+    display: none;
+    &:target { display: block; }
+    width: 100%;
+    overflow: hidden;
+    margin: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    a.button, input.button { float: right; }   
+}
+#hidden-form-button:focus { outline: none; }
 
 .form.login {
     h1 {
@@ -198,8 +215,7 @@ fieldset {
     p {
         padding-left: 5%;
         margin-bottom: $base-vertical-rhythm/2;
-    }
-    
+    }   
 }
 
 .form.logout {
@@ -217,11 +233,9 @@ fieldset {
             margin-top: 1rem;
         }
     }
-    .button {
+    header.button {
         @extend %half;
-        @include media($large-layout) {
-            margin-top: 1.5rem;
-        }
+        margin-top: 1.5rem;
     }
 }
 
@@ -507,25 +521,6 @@ table {
     }
 }
 
-// Forms
-
-
-.form {
-    
-    border-radius: $base-border-radius;
-}
-
-#hidden-form {
-    display: none;
-    &:target { display: block; }
-    width: 100%;
-    overflow: hidden;
-    margin: $base-vertical-rhythm 0;
-    border: $base-border-width solid $color-grey;
-    a.button, input.button { float: right; }   
-}
-#hidden-form-button:focus { outline: none; }
-
 // Articles
 
 .post, .question, .request, .jurisdiction, .agency, .profile { @extend %article; }
@@ -556,6 +551,25 @@ table {
             font-weight: 300;
         }
         dl { margin-top: $base-vertical-rhythm; }
+    }
+}
+.request {
+    .control-panel {
+        @include outer-container;
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+            @include row;
+        }
+        li {
+            @extend %quarter;
+            vertical-align: middle;
+            // padding: 0 $base-vertical-rhythm/4;
+            .button {
+                display: block;
+                width: 100%;
+            }
+        }
     }
 }
 
