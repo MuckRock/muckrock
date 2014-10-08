@@ -169,6 +169,11 @@ $(document).ready(function(){
     federalRadio.change(function() {
         localField.hide();
         stateField.hide();
+        agencyField.attr('disabled', false);
+        if ($('#id_agency-deck').children().length) {
+            $('#id_agency-deck').children('.hilight').remove();
+            $('#id_agency-autocomplete').css('display', 'block');
+        }
     });
     
     function agencyByJurisdiction(jurisdictionSelectElement) {
