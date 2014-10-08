@@ -14,7 +14,7 @@ from datetime import date, timedelta
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 
@@ -62,6 +62,9 @@ def store_statstics():
         daily_requests_beta=FOIARequest.objects.filter(user__profile__acct_type='beta',
                                                       date_submitted=yesterday).count(),
         daily_articles=Article.objects.filter(pub_date=yesterday).count(),
+        orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
+        stale_agencies=Agency.objects.filter(stale=True).count(),
+        unapproved_agencies=Agency.objects.filter(approved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
