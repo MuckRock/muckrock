@@ -1,0 +1,13 @@
+@include keyframes(rotateInUpRight) {
+  0% {transform-origin: right bottom; transform: rotate(-90deg); opacity: 0;}
+  100% {transform-origin: right bottom; transform: rotate(0); opacity: 1;}
+}
+
+@mixin rotateInUpRight($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+  @include animation-name(rotateInUpRight);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}

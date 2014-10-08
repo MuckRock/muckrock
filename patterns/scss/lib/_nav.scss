@@ -258,6 +258,7 @@ nav.primary ul.right { display: none; }
     #sidebar-menu {
         width: $mobile-menu-width;
         margin-right: -$mobile-menu-width;
+        #new-request { display: none; }
     }
     #right-menu-button { display: block; }
     #sidebar-menu:target {
@@ -266,7 +267,7 @@ nav.primary ul.right { display: none; }
             width: 100%;
             margin-left: -$mobile-menu-width;
         }
-        #new-request { display: none; }
+        
     }
     nav.primary ul.right { display: table; }
 }
@@ -316,9 +317,6 @@ nav.sidebar {
         margin-bottom: $base-vertical-rhythm;
         background-color: $color-primary;
         color: $color-white;
-        @media screen and (max-width: $small-menu-breakpoint) {
-            display: none;
-        }
     }
     
     .account {

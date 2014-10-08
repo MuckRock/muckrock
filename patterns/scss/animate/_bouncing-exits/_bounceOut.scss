@@ -1,0 +1,15 @@
+@include keyframes(bounceOut) {
+  0% {-webkit-transform: scale(1);}
+  25% {-webkit-transform: scale(.95);}
+  50% {opacity: 1; -webkit-transform: scale(1.1);}
+  100% {opacity: 0; -webkit-transform: scale(.3);}
+}
+
+@mixin bounceOut($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+  @include animation-name(bounceOut);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}

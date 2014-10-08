@@ -1,0 +1,14 @@
+@include keyframes(bounceOutRight) {
+  0% {-webkit-transform: translateX(0);}
+  20% {opacity: 1; -webkit-transform: translateX(-20px);}
+  100% {opacity: 0; -webkit-transform: translateX(2000px);}
+}
+
+@mixin bounceOutRight($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+  @include animation-name(bounceOutRight);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}

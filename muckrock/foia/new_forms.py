@@ -12,9 +12,12 @@ class RequestForm(forms.Form):
     ]
 
     # form fields
-    title = forms.CharField()
+    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Choose a Short Title'}))
     document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': 'One sentence describing the specific document you are after.'}))
-    jurisdiction = forms.ChoiceField(choices=JURISDICTION_CHOICES)
+    jurisdiction = forms.ChoiceField(
+        choices=JURISDICTION_CHOICES,
+        widget=forms.RadioSelect
+    )
     state = autocomplete.ModelChoiceField(
         'StateAutocomplete',
         queryset=Jurisdiction.objects.filter(level='s', hidden=False), 
@@ -25,20 +28,16 @@ class RequestForm(forms.Form):
         queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
         required=False
     )
-    agency = forms.CharField()
-    '''
-    agency = forms.ModelChoiceField(
-        label='Agency',
-        queryset=None,
-        required=False,
-        widget=forms.Select(attrs={'class': 'combobox'}),
-        help_text=('Select one of the agencies for the jurisdiction you '
-                   'have chosen, or write in the correct agency if known.')
-    )
-    '''
+    agency = autocomplete.ModelChoiceField(
+        'AgencyAutocomplete',
+        queryset=Agency.objects.all()
+    ) 
     
     def clean(self):
-        jurisdiction = self.cleaned_data.get('jurisdiction')
+        data = self.cleaned_data
+        jurisdiction = data.get('jurisdiction')
+        state = data.get('state')
+        local = data.get('local')
         if jurisdiction == 's' and not state:
             error_msg = 'No state was selected'
             self._errors['state'] = self.error_class([error_msg])

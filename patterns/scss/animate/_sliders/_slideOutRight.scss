@@ -1,0 +1,13 @@
+@include keyframes(slideOutRight) {
+	0% {transform: translateX(0);}
+	100% {opacity: 0; transform: translateX(2000px);}
+}
+
+@mixin slideOutRight($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+	@include animation-name(slideOutRight);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}

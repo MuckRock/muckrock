@@ -239,196 +239,134 @@
     }
 }
 
-.create-request {
-    @extend %edge-to-edge;
+.new-request {
+    // @extend %edge-to-edge;
     display: block;
     overflow: hidden;
-    padding: 0 $base-vertical-rhythm;
-    background-color: $color-grey;
-    border-bottom: $base-border-width solid darken($color-grey, 10%);
+    // border: $base-border-width solid darken($color-grey, 10%);
     header {
         @extend %row;
-        @extend %edge-to-edge;
-        padding: $base-vertical-rhythm;
+        // padding: 0 $base-vertical-rhythm;
         margin-bottom: $base-vertical-rhythm;
-        background-color: darken($color-grey, 10%);
         h1 {
             @extend %half;
             @include font-sizing(2.5, 3);
             margin: 0;
-            font-weight: 700;
-            color: $color-white;
+            font-weight: 300;
         }
-        .progress-bar {
+        summary {
             @extend %half;
-            border-radius: 50px;
-            .meter {
-                height: 1.75em;
-                padding: 0.05em 1em 0;
-                border-radius: 50px;
+            @extend small;
+        }
+    }
+    
+    fieldset {
+        margin: 0;
+        padding: $base-vertical-rhythm;
+    }
+    
+    $color-title: #F26C5A;
+    $color-jurisdiction: #5A90F2;
+    .title {
+        @include border-top-radius($base-border-radius);
+        background-color: $color-title;
+        label { display: none; }
+        input {
+            background-color: $color-title;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            border-bottom: 2*$base-border-width dotted lighten($color-title, 20%);
+            @include font-sizing(2,3);
+            @include placeholder { color: lighten($color-title, 15%); }
+            color: $color-white; // darken($color-title, 45%);
+        }
+    }
+    
+    .document {
+        padding: 0;
+        label { display: none; }
+        textarea {
+            display: block;
+            width: 100%;
+            height: 10em;
+            padding: $base-vertical-rhythm;
+            resize: none;
+            border: none;
+            border-radius: 0; 
+        }
+    }
+    
+    .jurisdiction {
+        padding: $base-vertical-rhythm 0;
+        color: $color-white;
+        background-color: $color-jurisdiction;
+        width: 100%;
+        h2 { margin: 0; }
+        ul {
+            display: table;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: table-cell;
+            text-align: center;
+            width: 33%;
+            padding: $base-vertical-rhythm/2;
+            border-right: $base-border-width solid lighten($color-jurisdiction, 50%);
+            &:last-child { border-right: none; }
+            svg {
+                fill: $color-white;
+                width: auto;
+                &#icon-federal { height: 3em; }
+                &#icon-state { height: 2.75em; margin-top: 0.25em; }
+                &#icon-local { height: 2.5em; margin-top: 0.5em; }
             }
-        }   
+        }
+        label {
+            color: $color-white;
+            @include font-sizing(1);
+            font-weight: 700;
+            text-align: center;
+        }
+    }
+    
+    $color-jurisdiction-picker: darken($color-jurisdiction, 10%); 
+    fieldset.state, fieldset.local {
+        width: 100%;
+        background-color: $color-jurisdiction-picker;
+        label { display: none; }
+        input { width: 100%; }
+        &.hidden { visibility: hidden; }
+        &.visible { visibility: visible; }
+    }
+    
+    .agency {
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        label { display: none; }
+        input {
+            width: 100%;
+            background-color: white;
+            border: none;
+            border-radius: 0;
+            @include font-sizing(2, 3);
+            margin: 0;
+        }
     }
     
     dfn { color: $color-black; }
     
-    form {
+    footer {
+        @include border-bottom-radius($base-border-radius);
         overflow: hidden;
-        position: relative;
-        padding-bottom: $base-vertical-rhythm*4;
-        .controls {
-            padding: $base-vertical-rhythm 0;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            overflow: hidden;
-        }
-        .next { float: right; }
-        .prev { float: left; }
-        
-        #submit { float: right; }
-        #draft { float: right; }
-        #delete { float: left; }
+        padding: $base-vertical-rhythm;
+        background-color: $color-grey;
+        width: 100%;
+        overflow: hidden;
+        input { float: left; }
     }
     
-    label {
-        @extend dfn;
-        color: $color-black;
-        & + input {
-            display: block;
-        }
-    }
-    input + label { margin-top: 2*$base-vertical-rhythm; }
-    
-    svg {
-        width: auto;
-        fill: $color-white;
-    }
-
-    .step-document {
-        @extend %half;
-        @include omega(n);
-        margin-bottom: $base-vertical-rhythm;
-        &.introduction { 
-            p {
-                max-width: 90%;
-                margin-top: 0;
-            }
-        }
-        input[type="text"] {
-            width: 100%;
-        }
-        textarea {
-            width: 100%;
-            height: 5em;
-            resize: none;
-        }
-    }
-    .step-jurisdiction {
-        &.jurisdictions {
-            @extend %row;
-            div {
-                @extend %third;
-                @include omega(3n);
-                @include transition(margin 0.25s $ease-out-quad);
-                @include button-color($color-black);
-                height: 20em;
-                background-color: $color-black;
-                margin-top: $base-vertical-rhythm;
-                margin-bottom: $base-vertical-rhythm;
-                padding: $base-vertical-rhythm;
-                border-width: $base-border-width;
-                border-style: solid;
-                border-radius: $base-border-radius;
-
-                text-align: center;
-                input { color: $color-black; }
-                &.federal > svg { height: 5em; }
-                &.state > svg { height: 4em; margin-top: 1em; }
-                &.local svg { height: 3em; margin-top: 2em; }
-                input[type="checkbox"] {
-                    display: block;
-                    margin: $base-vertical-rhythm auto;
-                    & + select, & + span {
-                        visibility: hidden;
-                    }
-                    &:checked + select, &:checked + span {
-                        visibility: visible;
-                    }
-                }
-                &:hover, &.active {
-                    margin-top: 0;
-                    margin-bottom: 2*$base-vertical-rhythm;
-                    @include button-color($color-primary);
-                    // h2 { color: $color-primary; }
-                    // svg { fill: $color-primary; }
-                }
-            }
-        }
-        &.notices p {
-            @extend %half;
-            padding-right: $base-vertical-rhythm;
-        }
-    }
-    .agencies {
-        list-style-type: none;
-        padding-left: 0;
-        @extend %row;
-        li {
-            @extend %quarter;
-            @include omega(4n);
-        }
-        & label {
-            display: inline-block;
-            margin-top: 0;
-            margin-right: $base-vertical-rhythm/2;
-        }
-        & input[type="checkbox"] {
-            display: inline-block;
-        }
-    }
-    .other {
-        @extend %half;
-        input {
-            display: block;
-            width: 100%;
-        }
-        small { margin-top: 0; }
-    }
-    
-    .step-confirm {
-        &.overview {
-            @extend %third;
-            padding-right: $base-vertical-rhythm;
-            dfn {
-                padding-bottom: $base-vertical-rhythm/4;
-                border-bottom: $base-border-width solid $color-black;
-                margin-bottom: $base-vertical-rhythm;
-            }
-            .embargo {
-                label { margin: 2*$base-vertical-rhythm 0 0; }
-                input[type="checkbox"] { display: inline-block; }
-                .help {
-                    display: inline-block;
-                    vertical-align: top;
-                    padding-left: $base-vertical-rhythm/4;
-                    visibility: hidden;
-                }
-                input[type="checkbox"]:checked + .help { visibility: visible; }
-            }
-            .panel {
-                margin-top: $base-vertical-rhythm;
-                border-color: $color-black;
-            }
-        }
-        &.preview {
-            @extend %two-thirds;
-            @include omega();
-            .body {
-                padding: $base-vertical-rhythm;
-                background: $color-white;
-                border: $base-border-width solid darken($color-grey, 10%);
-            }
-        }
-    }
 }

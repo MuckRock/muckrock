@@ -145,16 +145,13 @@ def create_request(request):
                     initial_data['locality'] = jurisdiction
                 initial_data['jurisdiction'] = level
         
-    ''' TODO: DYNAMIC AGENCY GENERATION
-    if request.method == 'GET':
-        results = []
-        if request.GET.has_key(u'jID'):
-            j_id = request.GET[u'jID']
-            agencies = Agency.objects.filter(jurisdiction=jID).order_by('name')
-            results += [agency.name for agency in agencies]
+    ''' TODO: DYNAMIC AGENCY GENERATION '''
+    if request.GET.get('j_id', False):
+        j_id = request.GET['j_id']
+        agencies = Agency.objects.filter(jurisdiction=j_id).order_by('name')
+        results  = [agency.name for agency in agencies]
         json = simplejson.dumps(results)
-        # return HttpResponse(json, mimetype='application/json')
-    '''
+        return HttpResponse(json, mimetype='application/json')
     
     if request.method == 'POST':
         form = RequestForm(request.POST)
@@ -233,5 +230,5 @@ def create_request(request):
     
     context = { 'form': form, 'clone': clone }
     
-    return render_to_response('forms/foia/create.html', context, 
+    return render_to_response('forms/create.html', context, 
                               context_instance=RequestContext(request))

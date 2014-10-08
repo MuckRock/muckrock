@@ -1,0 +1,15 @@
+@include keyframes(bounceIn) {
+  0% {opacity: 0; -webkit-transform: scale(.3);}
+  50% {opacity: 1; -webkit-transform: scale(1.05);}
+  70% {-webkit-transform: scale(.9);}
+  100% {-webkit-transform: scale(1);}
+}
+
+@mixin bounceIn($duration: $durationDefault, $delay: $delayDefault, $function: $functionDefault, $fill: $fillDefault, $visibility: $visibilityDefault) {
+  @include animation-name(bounceIn);
+  @include duration($duration);
+  @include delay($delay);
+  @include function($function);
+  @include fill-mode($fill);
+  @include visibility($visibility);
+}
