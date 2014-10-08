@@ -323,7 +323,8 @@ class FOIARequest(models.Model):
         self.save()
 
         for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
-            profile.notify(self)
+            if self.is_viewable(profile.user):
+                profile.notify(self)
 
         self.update_dates()
 
