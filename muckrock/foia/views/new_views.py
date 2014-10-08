@@ -10,7 +10,7 @@ from django.template import RequestContext
 from django.utils import simplejson
 
 from muckrock.agency.models import Agency
-from muckrock.foia.new_forms import RequestForm
+from muckrock.foia.new_forms import RequestForm, RequestUpdateForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -101,6 +101,92 @@ def _make_request(request, foia):
         foia_comm.date = datetime.now()
         return foia, foia_comm, is_new_agency
 
+@login_required
+def update_request(request, jurisdiction, jidx, slug, idx):
+    """Update a started FOIA Request"""
+    
+    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
+    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
+    
+    if not foia.is_editable():
+        messages.error(request, 'You may only edit non-submitted requests.')
+        return redirect(foia)
+    if foia.user != request.user:
+        messages.error(request, 'You may only edit your own requests.')
+        return redirect(foia)
+    
+    initial_data = {
+        'title': foia.title,
+        'request': foia.first_request(),
+        'agency': foia.agency.name,
+        'embargo': foia.embargo
+    }
+    
+    if request.method == 'POST':
+        form = RequestUpdateForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            foia.title = data['title']
+            foia.slug = slugify(foia.title) or 'untitled'
+            foia.embargo = data['embargo']
+            foia_comm = foia.communications.all()[0]
+            foia_comm.date = datetime.now()
+            foia_comm.communication = data['request']
+            foia_comm.save()
+            agency_query = Agency.objects.filter(name=data['agency'])
+            if agency_query:
+                agency = agency_query[0]
+                foia.agency = agency
+                is_new_agency = False
+            else:
+                agency = data['agency']
+                foia.agency = Agency.objects.create(
+                    name=agency[:255],
+                    slug=(slugify(agency[:255]) or 'untitled'),
+                    jurisdiction=jurisdiction,
+                    user=request.user,
+                    approved=False
+                )
+                '''
+                send_mail(
+                    '[AGENCY] %s' % foia.agency.name,
+                    render_to_string(
+                        'foia/admin_agency.txt',
+                        {'agency': foia.agency}
+                    ),
+                    'info@muckrock.com',
+                    ['requests@muckrock.com'],
+                    fail_silently=False
+                )
+                '''
+                is_new_agency = True
+            
+            foia.save
+            if is_new_agency:
+                a = foia.agency
+                args = {
+                    'jurisdiction': a.jurisdiction.slug,
+                    'jidx': a.jurisdiction.pk,
+                    'slug': a.slug,
+                    'idx': a.pk
+                }
+                return HttpResponseRedirect(
+                    reverse('agency-update', kwargs=args) + \
+                    '?foia=%s' % foia.pk
+                )
+            else:
+                return redirect(foia)
+        else:
+            return redirect(foia)
+    else:
+        form = RequestUpdateForm(initial=initial_data)
+    
+    return render_to_response(
+        'forms/foia.html',
+        {'form': form, 'action': 'Update'},
+        context_instance=RequestContext(request)
+    )
+
 def clone_request(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
@@ -144,8 +230,6 @@ def create_request(request):
                 elif level == 'l':
                     initial_data['local'] = jurisdiction
                 initial_data['jurisdiction'] = level
-        
-    ''' TODO: DYNAMIC AGENCY GENERATION '''
     if request.GET.get('j_id', False):
         j_id = request.GET['j_id']
         if j_id == 'f':

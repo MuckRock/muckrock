@@ -1,5 +1,6 @@
 from django import forms
 import autocomplete_light as autocomplete
+from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
@@ -44,4 +45,19 @@ class RequestForm(forms.Form):
         if jurisdiction == 'l' and not local:
             error_msg = 'No locality was selected'
             self._errors['local'] = self.error_class([error_msg])
+        return self.cleaned_data
+
+class RequestUpdateForm(forms.Form):
+    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
+    request = forms.CharField(widget=forms.Textarea())
+    agency = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Name an Agency' }))
+    embargo = forms.BooleanField(required=False)
+    
+    def clean(self):
+        data = self.cleaned_data
+        embargo = data.get('embargo')
+        if embargo and not self.request.user.can_embargo():
+            error_msg = 'No state was selected'
+            messages.error(request, error_msg)
+            self._errors['embargo'] = self.error_class([error_msg])
         return self.cleaned_data
