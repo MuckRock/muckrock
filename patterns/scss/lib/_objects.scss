@@ -554,12 +554,15 @@ table {
     }
 }
 .request {
-    .draft {
-        @include outer-container;
+    %control-panel {
         @extend %base-spacing;
         border: $base-border-width solid $color-grey;
         border-radius: $base-border-radius;
         background-color: darken($color-white, 10%);
+    }
+    .draft {
+        @include outer-container;
+        @extend %control-panel;
         
         div {
             @extend %two-thirds;
@@ -570,6 +573,16 @@ table {
             @extend %row;
             .primary { display: block; @extend %full; }
             .default, .failure { display: block; @extend %half; }
+        }
+    }
+    .actions {
+        @extend %control-panel;
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            display: inline-block;
         }
     }
 }

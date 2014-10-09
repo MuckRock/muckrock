@@ -479,10 +479,10 @@ html, body {
     display: table;
     clear: both; }
 
-.request .draft, .container, .homepage .banner div, .homepage .stats {
+.request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
   padding: 0.375em; }
   @media screen and (min-width: 321px) {
-    .request .draft, .container, .homepage .banner div, .homepage .stats {
+    .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
 .search.collection, object.collection, .homepage {
@@ -1289,13 +1289,14 @@ table {
 .profile section.meta > header dl {
   margin-top: 1.5em; }
 
-.request .draft {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto;
+.request .draft, .request .actions {
   border: 1px solid #b3becb;
   border-radius: 9px;
   background-color: #dbdbdb; }
+.request .draft {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
   .request .draft:after {
     content: "";
     display: table;
@@ -1306,6 +1307,11 @@ table {
     display: block; }
   .request .draft form .default, .request .draft form .failure {
     display: block; }
+.request .actions ul {
+  list-style-type: none;
+  padding-left: 0; }
+.request .actions li {
+  display: inline-block; }
 
 header.collection-header {
   max-width: 68em;

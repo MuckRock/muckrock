@@ -95,9 +95,6 @@
 		            {% empty %}
 			        <dd>None</dd>
 		            {% endfor %}
-                    <dt>Actions</dt>
-                    <dd><a href="clone" class="default button">Clone</a></dd>
-                    <dd><a href="" class="default button">Follow</a></dd>
                 </dl>
                 {% else %}
                 <object class="panel">
@@ -108,6 +105,22 @@
             </aside>
         </section>
         <section class="main">
+            <ul class="actions">
+            
+                {% if foia.user == request.user %}
+                    {% if foia.status == "ack" or foia.status == "processed" %}
+                <li><a href="toggle-followups" class="default button">{% if foia.disable_autofollowups %}Enable{% else %}Disable{% endif %} followups</a><li>
+                    {% endif %}
+                <li><a href="" class="default button">Get Help</a></li>
+                <li><a href="" class="default button">Ask a Question</a></li>
+                <li><a href="" class="default button">Add a Note</a></li> 
+                <li><a href="" class="default button">Follow Up</a></li>
+                <li><a href="" class="default button">Appeal</a></li>
+                {% else %}
+                <li><a href="" class="primary button">Follow</a></li>
+                {% endif %}
+                <li><a href="clone" class="default button">Clone</a></li>
+            </ul>
             {% if foia.has_crowdfund %}
                 <object class="panel">
                 {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
