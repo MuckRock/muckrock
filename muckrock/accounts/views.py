@@ -4,7 +4,7 @@ Views for the accounts application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
@@ -33,6 +33,11 @@ from muckrock.sidebar.models import Sidebar
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
+
+def account_logout(request):
+    logout(request)
+    messages.success(request, 'You have successfully logged out.')
+    return redirect('index')
 
 def register(request):
     """Pick what kind of account you want to register for"""
