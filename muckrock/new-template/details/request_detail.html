@@ -1,103 +1,109 @@
-{% extends 'details/base_detail.html' %}
+{% extends 'base.html' %}
 {% load tags %}
 {% load markdown_deux_tags %}
 {% load humanize %}
 {% load mathfilters %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock title %}
-{% block type %}request{% endblock type %}
 
-{% block header %}
-    
-    <h1>{{ foia.title }}</h1>
-    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
-    
-{% endblock header %}
-
-{% block aside %}
-    <dt>Status</dt>
-    {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
-    <dd class="{{ foia.color_code }}">{{foia.get_status_display}}<dd>
-    {% if foia.date_due and foia.status == "processed" %}
-		{% if past_due %}
-			<dd><small>Past due by {{ foia.date_due|timesince }}.</small></dd>
-		{% else %}
-			<dd><small>Due in {{ foia.date_due|timeuntil }}.</small></dd>
-		{% endif %}
-	{% endif %}
-	{% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
-		{% if foia.days_until_due >= 0 %}
-			<dd><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
-		{% else %}
-			<dd><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
-		{% endif %}
-			from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></dd>
-		{% endif %}
-    </dd>
-{% endblock aside %}
-
-{% block main %}
-    {% if foia.user == request.user or request.user.is_staff %}
-    <object class="panel">
-        <section class="control-panel">
-            <form>
-                <ul>
-                    {% csrf_token %}
-                    {% if foia.status == 'started' %}
-                    <li><input type="submit" name="submit" value="Submit" class="primary button" /></li>
-                    {% endif %}
-                    {% if foia.is_editable %}
-                    <li><a href="update" class="default button">Edit</a></li>
-                    {% endif %}
-                    <li><a href="clone"  class="default button">Clone</a></li>
-                    {% if foia.status == 'started' %}
-                    <li><input type="submit" name="delete" value="Delete" class="failure button" /></li>
-                    {% endif %}
-                </ul>
-            </form>
-        </section>
-        {% if foia.is_editable %}
-            <p>While this request is a draft, you may make any edits to its title, agency, or message before submitting it.</p>
-        {% endif %}
-        {% if foia.is_embargo %}
-            {% if foia.embargo_date %}
-	        <p>This request is embargoed and will not be visible to others until 30 days after a response is received.</p>
-	        {% else %}
-	        <p>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</p>
-	        {% endif %}
-	    {% endif %}
-        {% if foia.user == request.user %}
-            {% if foia.status == "ack" or foia.status == "processed" %}
-                {% if foia.disable_autofollowups %}
-                <p>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</p>
-                {% else %}
-                <p>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</p>
-                {% endif %}
-            {% endif %}
+{% block content %}
+    <article class="request">
+        {% if foia.status == 'started' %}
+        <section class="draft">
             {% with remaining=user.get_profile.num_requests requested=1 %}
+            <div>
+                {% if foia.is_editable %}
+                <p>While this request is a draft, you may make any edits to its title, agency, or message before submitting it.</p>
+                {% endif %}
                 {% if not remaining %}
-                    <p>You have no requests and will need to purchase some before submitting.</p>
-                    <a href="{% url 'acct-buy-requests' %}?next={% url 'foia-detail' %}" class="button primary">Purchase Requests</a>
+                <p>You have no requests and will need to purchase some before submitting.</p>
                 {% else %}
-                    {% if remaining > requested %}
-                    <p>Submitting this request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+                <p>Submitting this request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
+                {% endif %}
+            </div>
+            <form>
+                {% csrf_token %}
+                {% if remaining %}
+                <input type="submit"
+                       name="submit"
+                       value="Submit"
+                       class="primary button"
+                />
+                {% else %}
+                <a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>
+                {% endif %}
+                {% if foia.is_editable %}
+                <a href="update" class="default button">Edit</a>
+                {% endif %}
+                <input type="submit"
+                       name="delete"
+                       value="Delete"
+                       class="failure button"
+                />
+            </form>
+            {% endwith %}
+        </section>
+        {% endif %}
+        <section class="meta">
+            <header>
+                <h1>{{ foia.title }}</h1>
+    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
+            </header>
+            <aside>
+                <dt>Status</dt>
+                {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
+                <dd class="{{ foia.color_code }}">{{foia.get_status_display}}<dd>
+                {% if foia.date_due and foia.status == "processed" %}
+                    {% if past_due %}
+                        <dd><small>Past due by {{ foia.date_due|timesince }}.</small></dd>
                     {% else %}
-                    <p>You have {{ remaining }} remaining request{{ remaining|pluralize }}, but want to submit {{ request }} new request{{ request|pluralize }}. You will have to purchase {{ requested|sub:remaining|div:5 }} more bundle{{ requested|sub:remaining|div:5|pluralize }} before submitting.</p>
+                        <dd><small>Due in {{ foia.date_due|timeuntil }}.</small></dd>
                     {% endif %}
                 {% endif %}
-            {% endwith %}
-        {% endif %}
-    </object>
-    {% endif %}
+                {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
+                    {% if foia.days_until_due >= 0 %}
+                        <dd><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
+                    {% else %}
+                        <dd><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
+                    {% endif %}
+                        from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></dd>
+                    {% endif %}
+                </dd>
+            </aside>
+        </section>
+        <section class="main">
+            {% if foia.user == request.user or request.user.is_staff %}
+            <object class="panel">
+                
+                {% if foia.is_embargo %}
+                    {% if foia.embargo_date %}
+                    <p>This request is embargoed and will not be visible to others until 30 days after a response is received.</p>
+                    {% else %}
+                    <p>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</p>
+                    {% endif %}
+                {% endif %}
+                {% if foia.user == request.user %}
+                    {% if foia.status == "ack" or foia.status == "processed" %}
+                        {% if foia.disable_autofollowups %}
+                        <p>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</p>
+                        {% else %}
+                        <p>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</p>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            </object>
+            {% endif %}
     
-	
-    <section class="communications">
-        {% for comm in foia.communications.all %}
-                {% if comm.full_html %}
-                    {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
-				{% else %}
-				    {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
-				{% endif %}
-        {% endfor %}
-    </section>
-{% endblock main %}
+    
+            <section class="communications">
+                {% for comm in foia.communications.all %}
+                        {% if comm.full_html %}
+                            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
+                        {% else %}
+                            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+                        {% endif %}
+                {% endfor %}
+            </section>
+        </section>
+    </article>
+{% endblock %}
