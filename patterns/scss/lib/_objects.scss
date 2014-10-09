@@ -554,21 +554,22 @@ table {
     }
 }
 .request {
-    .control-panel {
+    .draft {
         @include outer-container;
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-            @include row;
+        @extend %base-spacing;
+        border: $base-border-width solid $color-grey;
+        border-radius: $base-border-radius;
+        background-color: darken($color-white, 10%);
+        
+        div {
+            @extend %two-thirds;
+            p { margin-top: 0; }
         }
-        li {
-            @extend %quarter;
-            vertical-align: middle;
-            // padding: 0 $base-vertical-rhythm/4;
-            .button {
-                display: block;
-                width: 100%;
-            }
+        form {
+            @extend %third;
+            @extend %row;
+            .primary { display: block; @extend %full; }
+            .default, .failure { display: block; @extend %half; }
         }
     }
 }

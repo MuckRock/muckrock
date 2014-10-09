@@ -10,15 +10,13 @@
     <article class="request">
         {% if foia.status == 'started' %}
         <section class="draft">
-            {% with remaining=user.get_profile.num_requests requested=1 %}
+            {% with remaining=user.get_profile.num_requests %}
             <div>
                 {% if foia.is_editable %}
-                <p>While this request is a draft, you may make any edits to its title, agency, or message before submitting it.</p>
+                <p>While this request is a draft, you may make edits to it.</p>
                 {% endif %}
                 {% if not remaining %}
                 <p>You have no requests and will need to purchase some before submitting.</p>
-                {% else %}
-                <p>Submitting this request will use {{ requested }} of your {{ remaining }} remaining request{{ remaining|pluralize }}. After submitting, you will be left with a balance of {{ remaining|sub:requested }} request{{ remaining|sub:requested|pluralize }}.</p>
                 {% endif %}
             </div>
             <form>
@@ -47,54 +45,85 @@
         <section class="meta">
             <header>
                 <h1>{{ foia.title }}</h1>
-    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
-            </header>
-            <aside>
-                <dt>Status</dt>
-                {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
-                <dd class="{{ foia.color_code }}">{{foia.get_status_display}}<dd>
-                {% if foia.date_due and foia.status == "processed" %}
-                    {% if past_due %}
-                        <dd><small>Past due by {{ foia.date_due|timesince }}.</small></dd>
-                    {% else %}
-                        <dd><small>Due in {{ foia.date_due|timeuntil }}.</small></dd>
+                <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
+                <dl>
+                    <dt>Status</dt>
+                    {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
+                    <dd class="{{ foia.color_code }}">{{foia.get_status_display}}</dd>
+                    {% if foia.date_due and foia.status == "processed" %}
+                        {% if past_due %}
+                    <dd><small>Past due by {{ foia.date_due|timesince }}.</small></dd>
+                        {% else %}
+                    <dd><small>Due in {{ foia.date_due|timeuntil }}.</small></dd>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-                {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
-                    {% if foia.days_until_due >= 0 %}
-                        <dd><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
-                    {% else %}
-                        <dd><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
-                    {% endif %}
+                    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
+                        {% if foia.days_until_due >= 0 %}
+                    <dd><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
+                        {% else %}
+                    <dd><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
+                        {% endif %}
                         from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></dd>
                     {% endif %}
-                </dd>
-            </aside>
-        </section>
-        <section class="main">
-            {% if foia.user == request.user or request.user.is_staff %}
-            <object class="panel">
-                
-                {% if foia.is_embargo %}
-                    {% if foia.embargo_date %}
-                    <p>This request is embargoed and will not be visible to others until 30 days after a response is received.</p>
-                    {% else %}
-                    <p>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</p>
-                    {% endif %}
-                {% endif %}
-                {% if foia.user == request.user %}
-                    {% if foia.status == "ack" or foia.status == "processed" %}
-                        {% if foia.disable_autofollowups %}
-                        <p>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</p>
+                    
+                </dl>
+                {% if foia.user == request.user or request.user.is_staff %}
+                    {% if foia.is_embargo %}
+                        {% if foia.embargo_date %}
+                        <p>This request is embargoed and will not be visible to others until 30 days after a response is received.</p>
                         {% else %}
-                        <p>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</p>
+                        <p>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</p>
+                        {% endif %}
+                    {% endif %}
+                    {% if foia.user == request.user %}
+                        {% if foia.status == "ack" or foia.status == "processed" %}
+                            {% if foia.disable_autofollowups %}
+                            <p>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</p>
+                            {% else %}
+                            <p>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</p>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
-            </object>
-            {% endif %}
-    
-    
+            </header>
+            <aside>
+                {% if user.is_authenticated %}
+                <dl>
+                    <dt>Tags</dt>
+                    {% for tag in foia.tags.all %}
+			        <dd><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
+		            {% empty %}
+			        <dd>None</dd>
+		            {% endfor %}
+                    <dt>Actions</dt>
+                    <dd><a href="clone" class="default button">Clone</a></dd>
+                    <dd><a href="" class="default button">Follow</a></dd>
+                </dl>
+                {% else %}
+                <object class="panel">
+                    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
+                    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+                </object>
+                {% endif %}
+            </aside>
+        </section>
+        <section class="main">
+            {% if foia.has_crowdfund %}
+                <object class="panel">
+                {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
+                {% if foia.crowdfund.expired %}
+                    <h1>Crowdfunding Completed</h1>
+		            <h2>${{ received }} raised out of ${{ required }}</h2>
+                {% else %}
+		            <h1>Help fund this request</h1>
+		            <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
+		            <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
+		            <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
+	            {% endif %}
+	            </object>
+	            {% endwith %}
+	        {% endif %}
+		
             <section class="communications">
                 {% for comm in foia.communications.all %}
                         {% if comm.full_html %}
