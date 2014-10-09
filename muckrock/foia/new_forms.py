@@ -14,7 +14,7 @@ class RequestForm(forms.Form):
 
     # form fields
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
-    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': 'Write one sentence describing the specific document you are after.'}))
+    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': u'Write one sentence that describing what you\'re looking for. The more specific you can be, the better.'}))
     jurisdiction = forms.ChoiceField(
         choices=JURISDICTION_CHOICES,
         widget=forms.RadioSelect

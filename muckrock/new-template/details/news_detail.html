@@ -28,10 +28,7 @@
 
 {% block aside %}
     {% if article.kicker %}
-    <dl>
-        <dt>In a Nutshell</dt>
-        <dd><summary>{{ article.kicker }}</summary></dd>
-    </dl>
+    <summary>{{ article.kicker }}</summary>
     {% endif %}
     {% if article.foias.exists %}
     <dl>

@@ -122,7 +122,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .new-request header summary, nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p {
   font-size: 80%; }
 
 /**
@@ -561,7 +561,7 @@ blockquote {
   padding-left: 0.75em;
   border-left: 1px solid #b3becb; }
 
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .new-request header summary, nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -1071,7 +1071,7 @@ object.message {
       max-width: 100%;
       width: 50px;
       margin-bottom: 0; }
-    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta .new-request .agency label, .new-request .agency object.message > section.meta label, object.message > section.meta .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget object.message > section.meta span.deck > span:before, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta .new-request header summary, .new-request header object.message > section.meta summary, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p {
+    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta .new-request .agency label, .new-request .agency object.message > section.meta label, object.message > section.meta .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget object.message > section.meta span.deck > span:before, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p {
       display: block;
       margin-top: 0.5em; }
     @media screen and (min-width: 969px) {

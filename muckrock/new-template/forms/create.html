@@ -6,11 +6,11 @@
     <header>
         {% if clone %}
         <h1>Clone a Request</h1>
-        <summary>Make any edits to the information in the request you are cloning, then submit.</summary>
+        <summary>Make any changes to the request, then clone it.</summary>
         {% else %}
         <h1>Create a Request</h1>
         <summary>
-            Select a title, detail the documents you are requesting, then pick the relevant agency and jurisdiction to submit the request to.
+            Not sure where to start? <a href="#">We can help.</a>
             <noscript>It looks like you have JavaScript turned off. Unfortunately, this page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
         {% endif %}
@@ -84,7 +84,11 @@
             <input type="submit" name="login" value="Log In" class="default button" />
             <input type="submit" name="signup" value="Sign Up" class="primary button" />
             {% else %}
-            <input type="submit" name="submit" value="Submit" class="primary button"  />
+                {% if clone %}
+            <input type="submit" name="submit" value="Clone" class="primary button"  />
+                {% else %}
+            <input type="submit" name="submit" value="Create" class="primary button"  />
+                {% endif %}
             {% endif %}
         </footer>
 

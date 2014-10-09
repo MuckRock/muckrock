@@ -13,7 +13,7 @@
             {% with remaining=user.get_profile.num_requests %}
             <div>
                 {% if foia.is_editable %}
-                <p>While this request is a draft, you may make edits to it.</p>
+                <p>Before submitting, you may edit your request.</p>
                 {% endif %}
                 {% if not remaining %}
                 <p>You have no requests and will need to purchase some before submitting.</p>
