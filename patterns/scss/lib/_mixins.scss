@@ -37,15 +37,6 @@
     }
 }
 
-@mixin horizontal-margins {
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
-    @media screen and (min-width: 540px) {
-        margin-left: 2rem;
-        margin-right: 2rem;
-    }
-}
-
 @mixin active-button {
     color: $color-white;
     border-color: $color-selected;
@@ -67,4 +58,9 @@
     font-size: $size;
     line-height: $line;
     margin: $line/4 0;
+}
+
+@mixin omega-reset($nth) {
+  &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
+  &:nth-child(#{$nth}+1) { clear: none }
 }

@@ -3,8 +3,6 @@ html, body { min-height: 100%; }
 
 // Prototypes
 
-// Sizing and spacing
-
 %row { @include row(); }
 
 %full { @include fill-parent(); }
