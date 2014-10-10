@@ -189,7 +189,10 @@ $(document).ready(function(){
                         options.push(data[i]);
                     });
                     $('input#id_agency').autocomplete({
-                        source: options
+                        source: options,
+                        minLength: 0
+                    }).focus(function(){
+                        $(this).autocomplete('search', '');
                     });
                 }
             );
@@ -215,6 +218,7 @@ $(document).ready(function(){
         }
         agencyInput.val('');
     });
+    
 });
 </script>
 {% endblock scripts %}
