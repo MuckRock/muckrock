@@ -33,6 +33,7 @@
     {% block webpage %}
         {% include 'lib/sidebar.html' %}
         <div class="container">
+            {% include 'lib/notification.html' %}
             {% include 'lib/header.html' %}
             {% block content %}
             {% endblock content %}
