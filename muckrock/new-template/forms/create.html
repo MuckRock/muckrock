@@ -100,7 +100,28 @@
 <script type="text/javascript"
 <script>
 $(document).ready(function(){
+
+    function agencyByJurisdiction(jurisdictionSelectElement) {
+        // When the jurisdiction select changes
+        val = jurisdictionSelectElement.val();
+        if (val) {
+            $.getJSON("{% url 'foia-create' %}", {j_id: val}, function(data) {
+                var options = []
+                $.each(data, function(i) {
+                    options.push(data[i]);
+                });
+                $('input#id_agency').autocomplete({
+                    source: options,
+                    minLength: 0
+                }).focus(function(){
+                    $(this).autocomplete('search', '');
+                });
+            });
+        }
+    }
     
+    $('input#id_agency')
+        
     var localField = $('fieldset.local');
     var stateField = $('fieldset.state');
     var localRadio = $('li.local input:radio');
@@ -174,30 +195,6 @@ $(document).ready(function(){
         agencyInput.val('');
         agencyByJurisdiction(federalRadio);
     });
-    
-    function agencyByJurisdiction(jurisdictionSelectElement) {
-        var select = $('fieldset.agency select');
-        // When the jurisdiction select changes
-        val = jurisdictionSelectElement.val();
-        if (val) {
-            $.getJSON(
-                "{% url 'foia-create' %}",
-                {j_id: val},
-                function(data) {
-                    var options = []
-                    $.each(data, function(i) {
-                        options.push(data[i]);
-                    });
-                    $('input#id_agency').autocomplete({
-                        source: options,
-                        minLength: 0
-                    }).focus(function(){
-                        $(this).autocomplete('search', '');
-                    });
-                }
-            );
-        }
-    }
     
     localSelect.change(function(){
         agencyByJurisdiction($(this));

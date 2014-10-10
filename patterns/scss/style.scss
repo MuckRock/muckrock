@@ -16,8 +16,9 @@ $color-white:           #f4f4f4;
 $color-black:           #21282c;
 $color-grey:            #B3BECB;
 $color-primary:         #3a82ff;
-$color-success:         #006330;
-$color-failure:         #fb004e;
+$color-success:         #02CF6B;
+$color-failure:         #E35336;
+$color-warning:         #D9C227;
 $color-default:         #6b6a65;
 $color-disabled:        lighten($color-grey, 10%);
 
@@ -30,6 +31,12 @@ $base-border-radius:    9px;
 $base-vertical-rhythm:  1.5em;
 
 $base-gradient-darken:  8%;
+
+$menu-breakpoint: 1024px;
+$mobile-menu-width: 250px;
+$tablet-menu-width: 300px;
+$desktop-menu-width: 26%;
+$menu-animation: all 0.25s ease;
 
 @import 'lib/mixins';
 @import 'lib/grid';

@@ -182,12 +182,6 @@ nav.secondary {
 
 /* Global Sidebar */
 
-$menu-breakpoint: 1024px;
-$mobile-menu-width: 250px;
-$tablet-menu-width: 300px;
-$desktop-menu-width: 26%;
-$menu-animation: all 0.25s ease;
-
 .container {
     display: block;
     width: 100% - $desktop-menu-width;

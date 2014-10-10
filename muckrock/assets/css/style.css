@@ -485,10 +485,10 @@ html, body {
     .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
-.search.collection, object.collection, .homepage {
+ul.notifications, .search.collection, object.collection, .homepage {
   margin: 0 -0.375em; }
   @media screen and (min-width: 321px) {
-    .search.collection, object.collection, .homepage {
+    ul.notifications, .search.collection, object.collection, .homepage {
       margin: 0 -1.5em; } }
 
 body {
@@ -583,10 +583,10 @@ code {
     color: #3a82ff; }
   code b, code strong {
     font-weight: normal;
-    color: #fb004e; }
+    color: #e35336; }
   code u {
     text-decoration: none;
-    color: #006330; }
+    color: #02cf6b; }
 
 dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt {
   display: block;
@@ -629,10 +629,10 @@ td {
   color: #3a82ff; }
 
 .success {
-  color: #006330; }
+  color: #02cf6b; }
 
 .failure {
-  color: #fb004e; }
+  color: #e35336; }
 
 .disabled {
   color: #d1d8e0; }
@@ -715,39 +715,39 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .button.success, input[type="submit"] .success, button .success {
   color: #f4f4f4;
-  border-color: #003a1c;
-  background: #006330;
-  background: -webkit-linear-gradient(#006330, #003a1c);
-  background: linear-gradient(#006330, #003a1c); }
+  border-color: #02a756;
+  background: #02cf6b;
+  background: -webkit-linear-gradient(#02cf6b, #02a756);
+  background: linear-gradient(#02cf6b, #02a756); }
   .button.success:hover, input[type="submit"] .success:hover, button .success:hover {
     color: #f4f4f4;
-    background: #006330; }
+    background: #02cf6b; }
   .button.success:focus, input[type="submit"] .success:focus, button .success:focus {
     color: #f4f4f4;
-    border-color: #009649;
-    background: #009649; }
+    border-color: #07fd85;
+    background: #07fd85; }
   .button.success:active, input[type="submit"] .success:active, button .success:active {
     color: #f4f4f4;
-    background: -webkit-linear-gradient(#003a1c, #006330);
-    background: linear-gradient(#003a1c, #006330); }
+    background: -webkit-linear-gradient(#02a756, #02cf6b);
+    background: linear-gradient(#02a756, #02cf6b); }
 
 .button.failure, input[type="submit"] .failure, button .failure {
   color: #f4f4f4;
-  border-color: #d20041;
-  background: #fb004e;
-  background: -webkit-linear-gradient(#fb004e, #d20041);
-  background: linear-gradient(#fb004e, #d20041); }
+  border-color: #d33c1d;
+  background: #e35336;
+  background: -webkit-linear-gradient(#e35336, #d33c1d);
+  background: linear-gradient(#e35336, #d33c1d); }
   .button.failure:hover, input[type="submit"] .failure:hover, button .failure:hover {
     color: #f4f4f4;
-    background: #fb004e; }
+    background: #e35336; }
   .button.failure:focus, input[type="submit"] .failure:focus, button .failure:focus {
     color: #f4f4f4;
-    border-color: #ff2f70;
-    background: #ff2f70; }
+    border-color: #e97963;
+    background: #e97963; }
   .button.failure:active, input[type="submit"] .failure:active, button .failure:active {
     color: #f4f4f4;
-    background: -webkit-linear-gradient(#d20041, #fb004e);
-    background: linear-gradient(#d20041, #fb004e); }
+    background: -webkit-linear-gradient(#d33c1d, #e35336);
+    background: linear-gradient(#d33c1d, #e35336); }
 
 .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active {
   color: #f4f4f4;
@@ -786,10 +786,10 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .panel.success {
   color: #f4f4f4;
-  background: #006330;
-  background: -webkit-linear-gradient(#006330, #003a1c);
-  background: linear-gradient(#006330, #003a1c);
-  border-color: #003017; }
+  background: #02cf6b;
+  background: -webkit-linear-gradient(#02cf6b, #02a756);
+  background: linear-gradient(#02cf6b, #02a756);
+  border-color: #029c51; }
   .panel.success a {
     text-decoration: underline;
     color: #f4f4f4;
@@ -797,10 +797,10 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 .panel.failure {
   color: #f4f4f4;
-  background: #fb004e;
-  background: -webkit-linear-gradient(#fb004e, #d20041);
-  background: linear-gradient(#fb004e, #d20041);
-  border-color: #c8003e; }
+  background: #e35336;
+  background: -webkit-linear-gradient(#e35336, #d33c1d);
+  background: linear-gradient(#e35336, #d33c1d);
+  border-color: #ca391c; }
   .panel.failure a {
     text-decoration: underline;
     color: #f4f4f4;
@@ -1207,16 +1207,16 @@ object.progress-bar {
     border-bottom-right-radius: 9px; }
   .meter.success {
     color: #f4f4f4;
-    background: #006330;
-    background: -webkit-linear-gradient(#006330, #003a1c);
-    background: linear-gradient(#006330, #003a1c);
-    border: 1px solid #00170b; }
+    background: #02cf6b;
+    background: -webkit-linear-gradient(#02cf6b, #02a756);
+    background: linear-gradient(#02cf6b, #02a756);
+    border: 1px solid #018344; }
   .meter.failure {
     color: #f4f4f4;
-    background: #fb004e;
-    background: -webkit-linear-gradient(#fb004e, #d20041);
-    background: linear-gradient(#fb004e, #d20041);
-    border: 1px solid #ae0036; }
+    background: #e35336;
+    background: -webkit-linear-gradient(#e35336, #d33c1d);
+    background: linear-gradient(#e35336, #d33c1d);
+    border: 1px solid #b33319; }
   .meter.primary {
     color: #f4f4f4;
     background: #3a82ff;
@@ -1365,6 +1365,116 @@ object.jurisidiction.collection ul, object.agency.collection ul {
       columns: 3 0.75em; }
       object.jurisidiction.collection ul li:nth-child(even), object.agency.collection ul li:nth-child(even) {
         background: none; } }
+
+/* Notifications */
+ul.notifications {
+  display: block;
+  padding: 0;
+  list-style-type: none;
+  -webkit-transition: all 0.25s ease;
+  -moz-transition: all 0.25s ease;
+  transition: all 0.25s ease; }
+  ul.notifications li.notification {
+    display: table;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #21282c; }
+    ul.notifications li.notification span {
+      display: table-cell; }
+      ul.notifications li.notification span.symbol {
+        /*
+        width: 30%;
+        @include media($medium-layout) { width: 15%; }
+        @include media($large-layout) { width: 10%; }
+        */
+        height: 100%;
+        width: auto;
+        color: #f4f4f4;
+        text-align: center; }
+        ul.notifications li.notification span.symbol .svg-icon {
+          display: inline-block;
+          width: auto;
+          height: 2rem;
+          vertical-align: middle;
+          margin: 0 0.5em; }
+        ul.notifications li.notification span.symbol .svg-icon path,
+        ul.notifications li.notification span.symbol .svg-icon polygon,
+        ul.notifications li.notification span.symbol .svg-icon rect {
+          fill: #f4f4f4; }
+        ul.notifications li.notification span.symbol .svg-icon circle {
+          stroke: #f4f4f4;
+          stroke-width: 1; }
+      ul.notifications li.notification span.text {
+        /*
+        width: 70%;
+        @include media($medium-layout) { width: 85%; }
+        @include media($large-layout) { width: 90%; }
+        */
+        padding: 1.5em;
+        color: #f4f4f4;
+        background-color: #b3becb; }
+        ul.notifications li.notification span.text p {
+          display: inline-block;
+          vertical-align: middle;
+          font-size: 1.1em;
+          color: #21282c; }
+        ul.notifications li.notification span.text button.close {
+          display: none;
+          color: #f4f4f4;
+          background: #21282c;
+          float: right;
+          border: none;
+          opacity: 0.7;
+          font-size: 0.8em;
+          margin-top: 0.75em;
+          padding: 0.375em 0.75em;
+          border-radius: 9px; }
+          ul.notifications li.notification span.text button.close:hover {
+            opacity: 0.9; }
+          @media screen and (min-width: 321px) {
+            ul.notifications li.notification span.text button.close {
+              display: inline-block; } }
+    ul.notifications li.notification.success span.text {
+      background-color: #02cf6b; }
+    ul.notifications li.notification.success span.symbol {
+      color: #02cf6b; }
+      ul.notifications li.notification.success span.symbol .svg-icon path,
+      ul.notifications li.notification.success span.symbol .svg-icon polygon,
+      ul.notifications li.notification.success span.symbol .svg-icon rect {
+        fill: #02cf6b; }
+      ul.notifications li.notification.success span.symbol .svg-icon circle {
+        stroke: #02cf6b; }
+    ul.notifications li.notification.error span.text {
+      background-color: #e35336; }
+    ul.notifications li.notification.error span.symbol {
+      color: #e35336; }
+      ul.notifications li.notification.error span.symbol .svg-icon path,
+      ul.notifications li.notification.error span.symbol .svg-icon polygon,
+      ul.notifications li.notification.error span.symbol .svg-icon rect {
+        fill: #e35336; }
+      ul.notifications li.notification.error span.symbol .svg-icon circle {
+        stroke: #e35336; }
+    ul.notifications li.notification.info span.text {
+      background-color: #3a82ff; }
+    ul.notifications li.notification.info span.symbol {
+      color: #3a82ff; }
+      ul.notifications li.notification.info span.symbol .svg-icon path,
+      ul.notifications li.notification.info span.symbol .svg-icon polygon,
+      ul.notifications li.notification.info span.symbol .svg-icon rect {
+        fill: #3a82ff; }
+      ul.notifications li.notification.info span.symbol .svg-icon circle {
+        stroke: #3a82ff; }
+    ul.notifications li.notification.warning span.text {
+      background-color: #d9c227; }
+    ul.notifications li.notification.warning span.symbol {
+      color: #d9c227; }
+      ul.notifications li.notification.warning span.symbol .svg-icon path,
+      ul.notifications li.notification.warning span.symbol .svg-icon polygon,
+      ul.notifications li.notification.warning span.symbol .svg-icon rect {
+        fill: #d9c227; }
+      ul.notifications li.notification.warning span.symbol .svg-icon circle {
+        stroke: #d9c227; }
 
 /* Layouts */
 .post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
