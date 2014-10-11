@@ -479,10 +479,10 @@ html, body {
     display: table;
     clear: both; }
 
-.request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
+.request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats, .homepage .footer-container {
   padding: 0.375em; }
   @media screen and (min-width: 321px) {
-    .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
+    .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats, .homepage .footer-container {
       padding: 1.5em; } }
 
 ul.notifications, .search.collection, object.collection, .homepage {
@@ -504,8 +504,8 @@ body {
   font-feature-settings: "liga", "kern"; }
   @media screen and (min-width: 769px) {
     body {
-      font-size: 18px;
-      line-height: 28px; } }
+      font-size: 16px;
+      line-height: 24px; } }
 
 h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
   margin: 0;
@@ -649,6 +649,9 @@ td {
   border: 1px solid #b3becb;
   border-radius: 9px;
   line-height: 1.5em; }
+  .button ul, .button.default ul, input[type="submit"] ul, button ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input.button:disabled:hover ul, input.button:disabled:active ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, object.message ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul, .form ul {
+    list-style-type: none;
+    padding-left: 0; }
 
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active {
   display: inline-block;
@@ -1999,7 +2002,7 @@ nav.secondary {
     display: block; }
   nav.secondary li {
     display: inline-block;
-    margin: 0 0.5em; }
+    margin: 0 0.25em; }
     nav.secondary li:first-child {
       margin-left: 0; }
   nav.secondary a {
@@ -2082,7 +2085,7 @@ nav.secondary {
 /* Global Sidebar */
 .container {
   display: block;
-  width: 74%;
+  width: 77%;
   float: left;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
@@ -2092,7 +2095,7 @@ nav.secondary {
   position: fixed;
   top: 0;
   right: 0;
-  width: 26%;
+  width: 23%;
   height: 100%;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;

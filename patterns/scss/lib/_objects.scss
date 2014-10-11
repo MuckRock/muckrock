@@ -8,6 +8,10 @@
     border: $base-border-width solid $color-grey;
     border-radius: $base-border-radius;
     line-height: $base-vertical-rhythm;
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
 }
 
 // Textbox -> Button

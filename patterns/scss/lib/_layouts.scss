@@ -242,6 +242,8 @@
         }
         
     }
+    
+    .footer-container { @extend %base-spacing; }
 }
 
 .new-request {
