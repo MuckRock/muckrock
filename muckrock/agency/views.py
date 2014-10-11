@@ -63,7 +63,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     context = {'agency': agency, 'foia_requests': foia_requests, 'form': form }
     
     collect_stats(agency, context)
-
+    
     return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
 
@@ -76,6 +76,7 @@ def list_(request):
     return render_to_response('lists/agency_list.html', context,
                               context_instance=RequestContext(request))
 
+# TODO: CUT THIS OUT
 @login_required
 def update(request, jurisdiction, jidx, slug, idx):
     """Allow the user to fill in some information about new agencies they create"""

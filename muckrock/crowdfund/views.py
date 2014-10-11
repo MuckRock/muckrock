@@ -46,7 +46,7 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                     show=form.cleaned_data.get('show'))
                 crowdfund.payment_received += amount
                 crowdfund.save()
-                messages.success(request, 'You have succesfully contributed $%.2f' % amount)
+                messages.success(request, 'You contributed $%.2f. Thanks!' % amount)
                 logger.info('%s has contributed to crowdfund', request.user.username)
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)
@@ -58,10 +58,17 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
         name = request.user.get_full_name() if request.user.is_authenticated() else ''
         form = CrowdfundPayForm(request=request, initial={'name': name, 'display_name': name})
 
-    return render_to_response('registration/cc.html',
-                              {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Contribute',
-                               'desc': 'Contribute to a crowdfunded request.'},
-                              context_instance=RequestContext(request))
+    context = {
+        'form': form,
+        'pub_key': STRIPE_PUB_KEY,
+        'heading': 'Contribute',
+        'desc': 'Contribute to a crowdfunded request.'
+    }
+    return render_to_response(
+        'forms/account/cc.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 def contribute_request(request, jurisdiction, jidx, slug, idx):
     """Contribute to a crowdfunding request"""
@@ -100,5 +107,8 @@ def project_detail(request, slug, idx):
 
     project = get_object_or_404(CrowdfundProject, slug=slug, pk=idx)
 
-    return render_to_response('crowdfund/project_detail.html', {'project': project},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'crowdfund/project_detail.html',
+        { 'project': project },
+        context_instance=RequestContext(request)
+    )
