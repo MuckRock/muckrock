@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .footer-container footer section.about, .plan, .agency aside dl, .request .draft form, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .request .draft div, .search.collection header h1, object.collection header h1, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .plan, .agency aside dl, .request .draft form, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .request .draft div, .search.collection header h1, object.collection header h1, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
   width: 100%; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .footer-container footer section.about {
+.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .footer-container footer section.about {
+    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update header.button:last-child, .request .draft form .default:last-child, .request .draft form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .footer-container footer section.about:last-child {
+      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update header.button:last-child, .request .draft form .default:last-child, .request .draft form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 321px) {
@@ -1974,6 +1974,8 @@ nav.primary {
   nav.primary #muckrock-text, nav.primary #muckrock-icon {
     border: none;
     padding: 0 0.5em 0 0; }
+    nav.primary #muckrock-text svg > path, nav.primary #muckrock-icon svg > path, nav.primary #muckrock-text svg > g, nav.primary #muckrock-icon svg > g {
+      fill: #21282c; }
     nav.primary #muckrock-text:hover, nav.primary #muckrock-icon:hover {
       background: none; }
       nav.primary #muckrock-text:hover svg > path, nav.primary #muckrock-icon:hover svg > path, nav.primary #muckrock-text:hover svg > g, nav.primary #muckrock-icon:hover svg > g {
@@ -2039,6 +2041,13 @@ nav.secondary {
   width: 100%;
   margin-top: 1.5em;
   padding-top: 1.5em; }
+  .footer-container .logo {
+    display: inline-block;
+    margin-bottom: 1.5em; }
+    .footer-container .logo svg > path, .footer-container .logo svg > g {
+      fill: #21282c; }
+    .footer-container .logo:hover svg > path, .footer-container .logo:hover svg > g {
+      fill: #3a82ff; }
   .footer-container footer {
     max-width: 68em;
     margin-left: auto;
@@ -2047,24 +2056,37 @@ nav.secondary {
       content: "";
       display: table;
       clear: both; }
-    .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+    .footer-container footer .brand {
+      width: 100%; }
+      @media screen and (min-width: 769px) {
+        .footer-container footer .brand {
+          float: left;
+          display: block;
+          margin-right: 2.35765%;
+          width: 31.76157%; }
+          .footer-container footer .brand:last-child {
+            margin-right: 0; } }
+    .footer-container footer .sitemap, .footer-container footer .about, .footer-container footer .actions, .footer-container footer .feeds {
       width: 100%; }
       @media screen and (min-width: 321px) {
-        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+        .footer-container footer .sitemap, .footer-container footer .about, .footer-container footer .actions, .footer-container footer .feeds {
           float: left;
           display: block;
           margin-right: 4.82916%;
           width: 30.11389%; }
-          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
+          .footer-container footer .sitemap:last-child, .footer-container footer .about:last-child, .footer-container footer .actions:last-child, .footer-container footer .feeds:last-child {
             margin-right: 0; } }
       @media screen and (min-width: 769px) {
-        .footer-container footer section.sitemap, .footer-container footer section.actions, .footer-container footer section.links {
+        .footer-container footer .sitemap, .footer-container footer .about, .footer-container footer .actions, .footer-container footer .feeds {
           float: left;
           display: block;
           margin-right: 2.35765%;
           width: 14.70196%; }
-          .footer-container footer section.sitemap:last-child, .footer-container footer section.actions:last-child, .footer-container footer section.links:last-child {
+          .footer-container footer .sitemap:last-child, .footer-container footer .about:last-child, .footer-container footer .actions:last-child, .footer-container footer .feeds:last-child {
             margin-right: 0; } }
+    @media screen and (min-width: 769px) {
+      .footer-container footer .sitemap {
+        margin-left: 17.05961%; } }
   @media screen and (min-width: 769px) {
     .footer-container footer section.about {
       padding-right: 3em; } }
@@ -2189,11 +2211,11 @@ nav.sidebar {
     nav.sidebar {
       padding: 1.5em 1.5em 1em; } }
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
-    padding-bottom: 0.75em; }
+    padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
     display: table;
     width: 100%;
-    margin: 0 0 1.5em 0; }
+    margin: 0 0 0.75em 0; }
     nav.sidebar ul li {
       display: table-cell;
       width: 50%;
@@ -2254,7 +2276,7 @@ nav.sidebar {
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
-    margin-bottom: -0.25em;
+    margin-bottom: -0.1em;
     fill: #b3becb; }
   nav.sidebar .social-links a:hover {
     background: #3a82ff; }
@@ -2275,7 +2297,7 @@ nav.sidebar {
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
-    margin: 0 0 1.5em; }
+    margin: 0 0 0.75em; }
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -2289,7 +2311,7 @@ nav.sidebar {
       font-size: 0.9em;
       color: #f4f4f4;
       background: #323d43;
-      border: none;
+      border: 1px solid #323d43;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0; }
       nav.sidebar form input::-webkit-input-placeholder {
@@ -2300,9 +2322,9 @@ nav.sidebar {
         color: #b3becb; }
       nav.sidebar form input:-ms-input-placeholder {
         color: #b3becb; }
-      nav.sidebar form input:focus {
+      nav.sidebar form input:focus, nav.sidebar form input:hover {
         outline: none;
-        border: 1px solid #3a82ff; }
+        border-color: #3a82ff; }
       nav.sidebar form input + span.input-button {
         display: block;
         float: right;
