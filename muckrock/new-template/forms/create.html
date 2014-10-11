@@ -31,6 +31,7 @@
                     <ul>
                     {% for radio in field reversed %}
                         <li class="{{ radio.choice_label|lower }}">
+                            <label for="j_{{ forloop.counter }}">
                         {% if radio.choice_label|lower == 'federal' %}
                             <svg viewBox="0 0 479 377" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="icon-federal">
                                 <title>Federal</title>
@@ -64,8 +65,8 @@
                                 </g>
                             </svg>
                         {% endif %}
-                            <label>{{ radio.choice_label }}</label>
-                            {{ radio.tag }}
+                            {{ radio.choice_label }}</label>
+                            <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value={{ radio.choice_value }}>
                         </li>
                     {% endfor %}
                     </ul>

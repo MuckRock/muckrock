@@ -243,7 +243,7 @@
         
     }
     
-    .footer-container { @extend %base-spacing; }
+    .footer-container { padding: 0 $base-vertical-rhythm; }
 }
 
 .new-request {
@@ -307,7 +307,7 @@
     }
     
     .jurisdiction {
-        padding: $base-vertical-rhythm 0;
+        padding: 0;
         color: $color-white;
         background-color: $color-jurisdiction;
         width: 100%;
@@ -323,14 +323,16 @@
             text-align: center;
             width: 33%;
             padding: $base-vertical-rhythm/2;
-            border-right: $base-border-width solid lighten($color-jurisdiction, 50%);
+            border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
             &:last-child { border-right: none; }
             svg {
+                display: block;
+                margin: 0 auto;
                 fill: $color-white;
                 width: auto;
                 &#icon-federal { height: 3em; }
-                &#icon-state { height: 2.75em; margin-top: 0.25em; }
-                &#icon-local { height: 2.5em; margin-top: 0.5em; }
+                &#icon-state { height: 2.5em; margin-top: 0.5em; }
+                &#icon-local { height: 2.25em; margin-top: 0.75em; }
             }
         }
         label {
@@ -338,6 +340,7 @@
             @include font-sizing(1);
             font-weight: 700;
             text-align: center;
+            cursor: pointer;
         }
     }
     

@@ -479,10 +479,10 @@ html, body {
     display: table;
     clear: both; }
 
-.request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats, .homepage .footer-container {
+.request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
   padding: 0.375em; }
   @media screen and (min-width: 321px) {
-    .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats, .homepage .footer-container {
+    .request .draft, .request .actions, .container, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
 ul.notifications, .search.collection, object.collection, .homepage {
@@ -1713,6 +1713,8 @@ ul.notifications {
       .homepage .stats {
         display: table-cell;
         width: 40%; } }
+  .homepage .footer-container {
+    padding: 0 1.5em; }
 
 .new-request {
   display: block;
@@ -1766,7 +1768,7 @@ ul.notifications {
       border: none;
       border-radius: 0; }
   .new-request .jurisdiction {
-    padding: 1.5em 0;
+    padding: 0;
     color: #f4f4f4;
     background-color: #5a90f2;
     width: 100%; }
@@ -1782,27 +1784,30 @@ ul.notifications {
       text-align: center;
       width: 33%;
       padding: 0.75em;
-      border-right: 1px solid white; }
+      border-right: 1px solid #89b0f6; }
       .new-request .jurisdiction li:last-child {
         border-right: none; }
       .new-request .jurisdiction li svg {
+        display: block;
+        margin: 0 auto;
         fill: #f4f4f4;
         width: auto; }
         .new-request .jurisdiction li svg#icon-federal {
           height: 3em; }
         .new-request .jurisdiction li svg#icon-state {
-          height: 2.75em;
-          margin-top: 0.25em; }
-        .new-request .jurisdiction li svg#icon-local {
           height: 2.5em;
           margin-top: 0.5em; }
+        .new-request .jurisdiction li svg#icon-local {
+          height: 2.25em;
+          margin-top: 0.75em; }
     .new-request .jurisdiction label {
       color: #f4f4f4;
       font-size: 1em;
       line-height: 1.51282em;
       margin: 0.37821em 0;
       font-weight: 700;
-      text-align: center; }
+      text-align: center;
+      cursor: pointer; }
   .new-request fieldset.state, .new-request fieldset.local {
     width: 100%;
     background-color: #2b70ee; }
