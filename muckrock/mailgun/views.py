@@ -172,7 +172,6 @@ def opened(request):
     if not _verify(request.POST):
         return HttpResponseForbidden()
 
-    logger.warning('Opened: %s', ','.join(request.POST.keys()))
     comm_id = request.POST.get('comm_id')
     if comm_id:
         comm = FOIACommunication.objects.get(pk=comm_id)
