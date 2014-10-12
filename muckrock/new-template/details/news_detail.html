@@ -4,13 +4,7 @@
 {% with object as article %}
 
 {% block title %}MuckRock &bull; {{ article.title }}{% endblock title %}
-{% block type %}post{% endblock type %}
-
-{% block main %}
-    {% autoescape off %}
-    {{ article.body | markdown:"trusted" }}
-	{% endautoescape %}
-{% endblock main %}			
+{% block type %}post{% endblock type %}		
 
 {% block header %}
     <h1>{{ article.title }}</h1>
@@ -39,5 +33,11 @@
 	</dl>
 	{% endif %}
 {% endblock aside %}
+
+{% block main %}
+    {% autoescape off %}
+    {{ article.body | markdown:"trusted" }}
+	{% endautoescape %}
+{% endblock main %}	
 
 {% endwith %}

@@ -558,36 +558,15 @@ table {
     }
 }
 .request {
-    %control-panel {
-        @extend %base-spacing;
+    .draft form {
+        width: 100%;
+        padding: $base-vertical-rhythm/2;
         border: $base-border-width solid $color-grey;
         border-radius: $base-border-radius;
         background-color: darken($color-white, 10%);
-    }
-    .draft {
         @include outer-container;
-        @extend %control-panel;
-        
-        div {
-            @extend %two-thirds;
-            p { margin-top: 0; }
-        }
-        form {
-            @extend %third;
-            @extend %row;
-            .primary { display: block; @extend %full; }
-            .default, .failure { display: block; @extend %half; }
-        }
-    }
-    .actions {
-        @extend %control-panel;
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        li {
-            display: inline-block;
-        }
+        .primary { display: block; @extend %full; }
+        .default, .failure { display: block; @extend %half; }
     }
 }
 

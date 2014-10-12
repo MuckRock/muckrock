@@ -28,9 +28,19 @@
         .panel { width: 90%; } 
     }
     
+    > section.actions {
+        ul {
+            list-style-type: none;
+            padding: $base-vertical-rhythm/2;
+            border: $base-border-width solid $color-grey;
+            border-radius: $base-border-radius;
+            background-color: darken($color-white, 10%);
+        }
+        li { display: inline-block; }
+    }
+    
     > section.main {
         @extend %full;
-        max-width: 50em;
         padding-top: $base-vertical-rhythm;
     }
 
