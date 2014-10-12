@@ -22,31 +22,30 @@
         <section class="sitemap">
             <dfn>Sections</dfn>
             <ul>
-                <li><a href="#">Requests</a></li>
-                <li><a href="#">Agencies</a></li>
-                <li><a href="#">Jurisdictions</a></li>
-                <li><a href="#">Questions</a></li>
-                <li><a href="#">Reporting</a></li>
-                <li><a href="/about/">About</a></li>
+                <li><a href="{% url 'foia-list'%}">Requests</a></li>
+                <li><a href="/agency/">Agencies</a></li>
+                <li><a href="/place/">Jurisdictions</a></li>
+                <li><a href="{% url 'question-index'%}">Questions</a></li>
+                <li><a href="{% url 'news-index'%}">Reporting</a></li>
             </ul>
         </section>
         <section class="about">
             <dfn>About</dfn>
             <ul>
-                <li><a href="#">About Us</a></li>
-                <li><a href="#">Masthead</a></li>
-                <li><a href="#">FAQ</a></li>
-                <li><a href="#">Privacy Policy</a></li>
-                <li><a href="#">Terms of Service</a></li>
+                <li><a href="/about/">About Us</a></li>
+                <li><a href="/staff/">Masthead</a></li>
+                <li><a href="/faq/">FAQ</a></li>
+                <li><a href="/privacy-policy/">Privacy Policy</a></li>
+                <li><a href="/tos/">Terms of Service</a></li>
             </ul>
         </section>
         <section class="feeds">
             <dfn>Feeds</dfn>
             <ul>
-                <li><a href="#">Latest Reporting</a></li>
-                <li><a href="#">Latest Questions</a></li>
-                <li><a href="#">Recently Filed Requests</a></li>
-                <li><a href="#">Recently Completed Requests</a></li>
+                <li><a href="{% url 'news-feed' %}">Latest Reporting</a></li>
+                <li><a href="{% url 'question-feed' %}">Latest Questions</a></li>
+                <li><a href="{% url 'foia-submitted-feed' %}">Recently Filed Requests</a></li>
+                <li><a href="{% url 'foia-done-feed' %}">Recently Completed Requests</a></li>
             </ul>
         </section>
         <!--
