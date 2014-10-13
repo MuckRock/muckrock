@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .search.collection header h1, object.collection header h1, .form.search fieldset, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
+.form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .search.collection header h1, object.collection header h1, .form.search fieldset, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
   width: 100%; }
 
-.form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
+.form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .form fieldset, .form.login h1, .form.login ul, .form.update h1, .form.update header.button, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
+    .form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update header.button:last-child, .request .draft form .default:last-child, .request .draft form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .draft form .default:last-child, .request .draft form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
@@ -656,7 +656,7 @@ td {
 .button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active {
   display: inline-block;
   margin: 0.25em 0.325em 0.25em 0;
-  padding: 0.375em 1.5em;
+  padding: 0.375em 1em;
   text-decoration: none;
   text-align: center; }
   .button:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover, input[type="submit"] .primary:hover, button .primary:hover, input[type="submit"] .success:hover, button .success:hover, input[type="submit"] .failure:hover, button .failure:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled, input.button:hover:disabled {
@@ -852,6 +852,11 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       content: "";
       display: table;
       clear: both; }
+  .form h1 {
+    font-size: 3em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0;
+    margin-top: 0; }
   .form form {
     max-width: 68em;
     margin-left: auto;
@@ -866,8 +871,12 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     margin-right: 0;
     padding: 0 5% 0 0;
     margin-top: 0; }
-    .form fieldset input {
-      width: 100%; }
+  .form input {
+    width: 100%; }
+  .form textarea {
+    width: 100%;
+    height: 10em;
+    resize: vertical; }
   .form .buttons {
     display: block; }
     .form .buttons:after {
@@ -889,14 +898,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 #hidden-form-button:focus {
   outline: none; }
 
-.form.login h1 {
-  font-size: 3em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
-  margin-top: -1rem; }
-  @media screen and (min-width: 769px) {
-    .form.login h1 {
-      margin-top: 0; } }
 @media screen and (min-width: 769px) {
   .form.login ul {
     margin: 0.75em 0 0; } }
@@ -904,33 +905,12 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   padding-left: 5%;
   margin-bottom: 0.75em; }
 
-.form.logout {
-  text-align: left;
-  border: none; }
-  @media screen and (min-width: 500px) {
-    .form.logout {
-      text-align: center; } }
-
-.form.update h1 {
-  margin-top: -1rem; }
-  @media screen and (min-width: 769px) {
-    .form.update h1 {
-      margin-top: 1rem; } }
-.form.update header.button {
-  margin-top: 1.5rem; }
-
 .form.password-reset, object.password-change {
   overflow: hidden; }
   .form.password-reset h1, object.password-change h1 {
     margin: 0 0 0.75em; }
   .form.password-reset form, object.password-change form {
     padding: 0 2.35765% 0 2.35765%; }
-
-.form.register h1 {
-  font-size: 3em;
-  line-height: 1.22222em;
-  margin: 0.30556em 0;
-  padding-left: 5%; }
 
 .form.search {
   -webkit-box-sizing: border-box;

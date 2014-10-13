@@ -18,7 +18,7 @@
 %button { @extend %textbox;
     display: inline-block;
     margin: 0.25em 0.325em 0.25em 0;
-    padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm/1.5;
     text-decoration: none;
     text-align: center;
     &:hover { text-decoration: none; }
@@ -173,6 +173,11 @@ fieldset {
         @include pad(0 5% 0 5%);
         margin: $base-vertical-rhythm/2 0;
     }
+    h1 {
+        @extend %half;
+        @include font-sizing(3);
+        margin-top: 0;
+    }    
     form {
         @include outer-container();
         @include pad(0 0 0 5%);
@@ -181,10 +186,16 @@ fieldset {
     fieldset {
         @extend %half;
         @include omega();
-        input { width: 100%; }
         @include pad(0 5% 0 0);
         margin-top: 0;
         // margin: 0.5em 0.75em 1.5em 0;
+        &.question, &.answer { @extend %full; }
+    }
+    input { width: 100%; }
+    textarea {
+        width: 100%;
+        height: 10em;
+        resize: vertical;
     }
     .buttons { @include row; }
     input[type="submit"] { @extend %quarter; }
@@ -202,14 +213,6 @@ fieldset {
 #hidden-form-button:focus { outline: none; }
 
 .form.login {
-    h1 {
-        @extend %half;
-        @include font-sizing(3);
-        margin-top: -1rem;
-        @include media($large-layout) {
-            margin-top: 0;
-        }
-    }
     ul {
         @extend %half;
         @include media($large-layout) {
@@ -222,25 +225,8 @@ fieldset {
     }   
 }
 
-.form.logout {
-    text-align: left;
-    border: none;
-    @include media($medium-layout) { text-align: center; }
-}
-
-.form.update {
-    h1 {
-        @extend %half;
-        // line-height: 0;
-        margin-top: -1rem;
-        @include media($large-layout) {
-            margin-top: 1rem;
-        }
-    }
-    header.button {
-        @extend %half;
-        margin-top: 1.5rem;
-    }
+.form.register {
+    h1 { @extend %full; }
 }
 
 .form.subscription form fieldset { @extend %full; }
@@ -250,11 +236,6 @@ fieldset {
     h1 { margin: 0 0 $base-vertical-rhythm/2; }
     form { @include pad(0 default 0 default); }
     form fieldset { @extend %full; }
-}
-
-.form.register h1 {
-    @include font-sizing(3, 3);
-    padding-left: 5%;
 }
 
 .form.search {
