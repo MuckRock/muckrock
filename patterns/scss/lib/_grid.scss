@@ -52,11 +52,11 @@ html, body { min-height: 100%; }
 }
 
 %base-spacing {
-    padding: $base-vertical-rhythm/4;
+    padding: $base-vertical-rhythm/2;
     @include media($medium-layout) { padding: $base-vertical-rhythm; }
 }
 
 %edge-to-edge {
-    margin: 0 -1*$base-vertical-rhythm/4;
+    margin: 0 -1*$base-vertical-rhythm/2;
     @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
 }

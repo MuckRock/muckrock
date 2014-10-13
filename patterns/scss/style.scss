@@ -8,7 +8,7 @@
 @import                 'neat/neat';
 
 $large-breakpoint:      769px;
-$medium-breakpoint:     321px;
+$medium-breakpoint:     500px;
 $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
 $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 

@@ -292,7 +292,7 @@ nav.sidebar {
     -webkit-overflow-scrolling: touch;
     height: 100%;
     width: 100%;
-    padding: $base-vertical-rhythm/4 1em 1em;
+    @extend %base-spacing;
     @media screen and (min-width: 540px) { padding: $base-vertical-rhythm $base-vertical-rhythm 1em; }
     color: $color-white;
     background: $color-black;  
@@ -397,7 +397,7 @@ nav.sidebar {
         width: 100%;
         overflow: hidden;
         height: $sidebar-object-height;
-        margin: 0 0 $base-vertical-rhythm/2;
+        margin: 0 0 $base-vertical-rhythm;
         input {
             @include appearance(none);
             width: 75%;

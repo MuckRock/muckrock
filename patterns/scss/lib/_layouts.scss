@@ -132,35 +132,44 @@
     .homepage-row { display: table-row; }
     .banner {
         display: block;
-        height: 35em;
+        height: 23em;
         width: 100%;
         position: relative;
         background-size: cover;
         background-position: center;
         color: $color-white;
+        @include media($medium-layout) {
+            height: 35em;
+        }
         h1 {
-            position: relative;
-            top: 0;
-            left: 0;
-            max-width: 18em;
+            max-width: 12em;
             color: $color-white;
             font-weight: 700;
-            @include font-sizing(2.5, 3);
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: $base-vertical-rhythm;
+            @include font-sizing(1.75, 3);
+            margin: 0 auto $base-vertical-rhythm;
+            @include media($medium-layout) {
+                max-width: 18em;
+                @include font-sizing(2.5, 3);
+                margin: 0 auto $base-vertical-rhythm;
+            }
+            @include media($large-layout) {
+                @include font-sizing(3, 3);
+                margin: 0 auto 1.5*$base-vertical-rhythm;
+            }
         }
         div {
             height: 100%;
             @extend %base-spacing;
             @include background(
-                linear-gradient(rgba(0, 0, 0, 0.75),
-                rgba(0, 0, 0, 0.25)
-                )
-            );
+                linear-gradient(
+                    rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)
+            ));
             font-weight: 700;
             text-align: center;
-            padding-top: 2.5em;
+            padding-top: 3.5em;
+            @include media($medium-layout) {
+                padding-top: 7.5em;
+            }
         }
         a.dotted {
             color: $color-white;
@@ -172,6 +181,14 @@
         }
         .button {
             display: block;
+            margin: 0 auto $base-vertical-rhythm/4;
+            width: 65%;
+            clear: both;
+            @include media($medium-layout) {
+                display: inline-block;
+                width: auto;
+                margin: 0 $base-vertical-rhythm/4 0 0;
+            }
         }
         .image-attribution {
             position: absolute;
@@ -181,22 +198,6 @@
         }
         #learn-more {
             margin-left: $base-vertical-rhythm/4;
-        }
-        
-        @media all and (min-width: 450px) {
-            .button { display: inline-block; }
-        }
-        @media all and (min-width: 480px) {
-            height: 35em;
-            div { padding-top: 7.5em; }
-        }
-        @media all and (min-width: 1200px) {
-            h1 {
-                @include font-sizing(2.8, 3);
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: $base-vertical-rhythm;
-            }
         }
     }
     

@@ -384,7 +384,7 @@ html, body {
       .form fieldset:last-child, .form.login h1:last-child, .form.login ul:last-child, .form.update h1:last-child, .form.update header.button:last-child, .request .draft form .default:last-child, .request .draft form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
-@media screen and (min-width: 321px) {
+@media screen and (min-width: 500px) {
   .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands {
     float: left;
     display: block;
@@ -405,7 +405,7 @@ html, body {
 .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .search.collection header .commands:nth-child(3n+1), object.collection header .commands:nth-child(3n+1) {
   clear: left; }
 
-@media screen and (min-width: 321px) {
+@media screen and (min-width: 500px) {
   .form input[type="submit"], .form.search input[type="submit"] {
     float: left;
     display: block;
@@ -434,7 +434,7 @@ html, body {
     .form input[type="submit"]:nth-child(4n+1) {
       clear: left; } }
 
-@media screen and (min-width: 321px) {
+@media screen and (min-width: 500px) {
   .search.collection header h1, object.collection header h1 {
     float: left;
     display: block;
@@ -451,7 +451,7 @@ html, body {
     .search.collection header h1:last-child, object.collection header h1:last-child {
       margin-right: 0; } }
 
-@media screen and (min-width: 321px) {
+@media screen and (min-width: 500px) {
   .form.search fieldset {
     float: left;
     display: block;
@@ -479,15 +479,15 @@ html, body {
     display: table;
     clear: both; }
 
-.container, .homepage .banner div, .homepage .stats {
-  padding: 0.375em; }
-  @media screen and (min-width: 321px) {
-    .container, .homepage .banner div, .homepage .stats {
+.container, .homepage .banner div, .homepage .stats, nav.sidebar {
+  padding: 0.75em; }
+  @media screen and (min-width: 500px) {
+    .container, .homepage .banner div, .homepage .stats, nav.sidebar {
       padding: 1.5em; } }
 
 ul.notifications, .search.collection, object.collection, .homepage {
-  margin: 0 -0.375em; }
-  @media screen and (min-width: 321px) {
+  margin: 0 -0.75em; }
+  @media screen and (min-width: 500px) {
     ul.notifications, .search.collection, object.collection, .homepage {
       margin: 0 -1.5em; } }
 
@@ -907,7 +907,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 .form.logout {
   text-align: left;
   border: none; }
-  @media screen and (min-width: 321px) {
+  @media screen and (min-width: 500px) {
     .form.logout {
       text-align: center; } }
 
@@ -1252,7 +1252,7 @@ table {
     border-top: 1px solid #b3becb;
     border-bottom: 1px solid #b3becb; }
 
-@media screen and (min-width: 321px) {
+@media screen and (min-width: 500px) {
   .post p:first-of-type {
     font-size: 1.2em;
     line-height: 1.51282em;
@@ -1429,7 +1429,7 @@ ul.notifications {
           border-radius: 9px; }
           ul.notifications li.notification span.text button.close:hover {
             opacity: 0.9; }
-          @media screen and (min-width: 321px) {
+          @media screen and (min-width: 500px) {
             ul.notifications li.notification span.text button.close {
               display: inline-block; } }
     ul.notifications li.notification.success span.text {
@@ -1493,7 +1493,7 @@ ul.notifications {
     font-size: 0.875em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  @media screen and (min-width: 321px) {
+  @media screen and (min-width: 500px) {
     .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
       font-size: 1.75em;
       line-height: 1.51282em;
@@ -1530,7 +1530,7 @@ ul.notifications {
 .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
   font-weight: 300;
   display: none; }
-  @media screen and (min-width: 321px) {
+  @media screen and (min-width: 500px) {
     .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
       display: block;
       font-size: 1.25em;
@@ -1555,7 +1555,7 @@ ul.notifications {
     .search.collection header .commands .button, object.collection header .commands .button {
       display: block;
       margin-top: 1em; }
-      @media screen and (min-width: 321px) {
+      @media screen and (min-width: 500px) {
         .search.collection header .commands .button, object.collection header .commands .button {
           display: inline-block;
           float: right; } }
@@ -1607,32 +1607,46 @@ ul.notifications {
     display: table-row; }
   .homepage .banner {
     display: block;
-    height: 35em;
+    height: 23em;
     width: 100%;
     position: relative;
     background-size: cover;
     background-position: center;
     color: #f4f4f4; }
+    @media screen and (min-width: 500px) {
+      .homepage .banner {
+        height: 35em; } }
     .homepage .banner h1 {
-      position: relative;
-      top: 0;
-      left: 0;
-      max-width: 18em;
+      max-width: 12em;
       color: #f4f4f4;
       font-weight: 700;
-      font-size: 2.5em;
+      font-size: 1.75em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
-      margin-left: auto;
-      margin-right: auto;
-      margin-bottom: 1.5em; }
+      margin: 0 auto 1.5em; }
+      @media screen and (min-width: 500px) {
+        .homepage .banner h1 {
+          max-width: 18em;
+          font-size: 2.5em;
+          line-height: 1.22222em;
+          margin: 0.30556em 0;
+          margin: 0 auto 1.5em; } }
+      @media screen and (min-width: 769px) {
+        .homepage .banner h1 {
+          font-size: 3em;
+          line-height: 1.22222em;
+          margin: 0.30556em 0;
+          margin: 0 auto 2.25em; } }
     .homepage .banner div {
       height: 100%;
       background: -webkit-linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
       background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
       font-weight: 700;
       text-align: center;
-      padding-top: 2.5em; }
+      padding-top: 3.5em; }
+      @media screen and (min-width: 500px) {
+        .homepage .banner div {
+          padding-top: 7.5em; } }
     .homepage .banner a.dotted {
       color: #f4f4f4;
       text-decoration: none;
@@ -1640,7 +1654,15 @@ ul.notifications {
       .homepage .banner a.dotted:hover {
         border-bottom: 1px solid #f4f4f4; }
     .homepage .banner .button {
-      display: block; }
+      display: block;
+      margin: 0 auto 0.375em;
+      width: 65%;
+      clear: both; }
+      @media screen and (min-width: 500px) {
+        .homepage .banner .button {
+          display: inline-block;
+          width: auto;
+          margin: 0 0.375em 0 0; } }
     .homepage .banner .image-attribution {
       position: absolute;
       bottom: 1.5em;
@@ -1648,22 +1670,6 @@ ul.notifications {
       color: #f4f4f4; }
     .homepage .banner #learn-more {
       margin-left: 0.375em; }
-    @media all and (min-width: 450px) {
-      .homepage .banner .button {
-        display: inline-block; } }
-    @media all and (min-width: 480px) {
-      .homepage .banner {
-        height: 35em; }
-        .homepage .banner div {
-          padding-top: 7.5em; } }
-    @media all and (min-width: 1200px) {
-      .homepage .banner h1 {
-        font-size: 2.8em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 1.5em; } }
   .homepage .featured-article {
     width: 100%;
     background-size: cover;
@@ -2074,7 +2080,7 @@ nav.secondary {
             margin-right: 0; } }
     .footer-container footer .sitemap, .footer-container footer .about, .footer-container footer .actions, .footer-container footer .feeds {
       width: 100%; }
-      @media screen and (min-width: 321px) {
+      @media screen and (min-width: 500px) {
         .footer-container footer .sitemap, .footer-container footer .about, .footer-container footer .actions, .footer-container footer .feeds {
           float: left;
           display: block;
@@ -2167,7 +2173,7 @@ nav.primary ul.right {
       margin-left: -250px; }
     #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
       margin-left: 250px; }
-  @media screen and (min-width: 321px) {
+  @media screen and (min-width: 500px) {
     #sidebar-menu.hidden-menu {
       width: 300px;
       margin-right: -300px; }
@@ -2210,7 +2216,6 @@ nav.sidebar {
   -webkit-overflow-scrolling: touch;
   height: 100%;
   width: 100%;
-  padding: 0.375em 1em 1em;
   color: #f4f4f4;
   background: #21282c; }
   @media screen and (min-width: 540px) {
@@ -2303,7 +2308,7 @@ nav.sidebar {
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
-    margin: 0 0 0.75em; }
+    margin: 0 0 1.5em; }
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;
