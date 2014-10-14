@@ -5,11 +5,11 @@ $(document).ready(function() {
     $(document).bind('keydown', 'shift+m', toggleSidebar());
     $(document).bind('keydown', 'left', toggleSidebar());
     $(document).bind('keydown', 'right', toggleSidebarOff());
-    $(document).bind('keydown', 'esc', toggleSidebarOff()); */
+    $(document).bind('keydown', 'esc', toggleSidebarOff());
     // swipe left to toggle sidebar on
     // swipe right to toggle sidebar off
 
-    /* Sidebar Interactions
+    // Sidebar Interactions
     //
     // if sidebar is open
     //      on clicking or tapping div.container or div.footer-container:
@@ -23,10 +23,8 @@ $(document).ready(function() {
     //          a.menu-button content changes
     */
     
-    /* Notifications */
-    $('ul.messages li').each(function() {
-        var hideAmount = $(this).css('top');
-        $(this).css('top', 0).delay(2000).css('top', hideAmount);
-    });   
-
+    $('.notification button.close').click(function() {
+        console.log('cleeek');
+        $(this).parent().parent().hide();
+    });
 });

@@ -92,7 +92,7 @@ def create_question(request):
     else:
         form = QuestionForm()
 
-    return render_to_response('foia/question.html', {'form': form},
+    return render_to_response('forms/question.html', {'form': form},
                               context_instance=RequestContext(request))
 
 @login_required
@@ -130,8 +130,11 @@ def create_answer(request, slug, idx):
     else:
         form = AnswerForm()
 
-    return render_to_response('qanda/answer_form.html', {'form': form, 'question': question},
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'forms/answer.html',
+        {'form': form, 'question': question},
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 def subscribe(request):

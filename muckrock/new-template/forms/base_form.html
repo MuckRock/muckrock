@@ -3,9 +3,10 @@
 {% block content %}
 <section class="{% block form-type %}{%endblock form-type %} form">
     <header>
-        {% block form-head %}
+    {% block form-head %}
         <h1>{% block form-title %}{% endblock form-title %}</h1>
-        {% endblock form-head %}
+        {% block form-info %}{% endblock form-info %}
+    {% endblock form-head %}
     </header>
     {% block form-form %}
         {% if form %}

@@ -12,7 +12,7 @@ import muckrock.accounts.views as views
 
 urlpatterns = patterns('',
     url(r'^login/$',             auth_views.login, {'template_name': 'forms/account/login.html'}, name='acct-login'),
-    url(r'^logout/$',            auth_views.logout, {'template_name': 'forms/account/logout.html'}, name='acct-logout'),
+    url(r'^logout/$',            views.account_logout, name='acct-logout'),
     url(r'^profile/$',           login_required(views.profile), name='acct-my-profile'),
     url(r'^profile/(?P<user_name>[\w\d_.@ ]+)/$',
                                  views.profile, name='acct-profile'),

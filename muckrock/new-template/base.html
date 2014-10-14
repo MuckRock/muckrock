@@ -1,21 +1,23 @@
+{% load static from staticfiles %}
 <!doctype html>
 
 <html>
     <head>
-        <title>{% block title %}Muckrock{% endblock title %}</title>
+        <title>{% block title %}MuckRock{% endblock title %}</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" /> 
         <meta name="google-site-verification"
               content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
-        <link rel="shortcut icon" href="{{ SITE_ROOT }}/static/favicon.ico" />
+        <link rel="shortcut icon" href="{% static '/favicon.ico' %}" />
         <link rel="stylesheet"
               type="text/css"
-              href="{{ SITE_ROOT }}/static/css/style.css" />
+              href="{% static 'css/style.css' %}" />
         <link rel="stylesheet"
               type="text/css"
-              href="{{ SITE_ROOT }}/static/css/jquery-ui-1.8.4.custom.css" />
+              href="{% static 'css/jquery-ui-1.8.4.custom.css' %}" />
         <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+        
         <!-- Preloading and Prerendering -->
         {% block preload %}
         {% endblock preload %}
@@ -29,19 +31,22 @@
         {% endblock twitter_card %}
     </head>
     <body>
-    {% block webpage %}
         {% include 'lib/sidebar.html' %}
         <div class="container">
             {% include 'lib/header.html' %}
+            {% include 'lib/notification.html' %}
             {% block content %}
             {% endblock content %}
             {% include 'lib/footer.html' %}
         </div>
-    {% endblock webpage %}
         <script type="text/javascript" 
-                src="{{ SITE_ROOT }}/static/js/jquery.min.js"></script>
+                src="{% static 'js/jquery.min.js' %}"></script>
         <script type="text/javascript"
-                src="{{ SITE_ROOT }}/static/js/jquery.ui.min.js"></script>
+                src="{% static 'js/jquery.ui.min.js' %}"></script>
+        <script type="text/javascript" 
+                src="{% static 'js/jquery.hotkeys.js' %}"></script>
+        <script type="text/javascript" 
+                src="{% static 'js/app.js' %}"></script>
         {% include 'autocomplete_light/static.html' %}
     {% block scripts %}
     {% endblock scripts %}

@@ -83,6 +83,7 @@ nav.primary {
     %logo {
         border: none;
         padding: 0 0.5em 0 0;
+        svg > path, svg > g { fill: $color-black; }
         &:hover {
             background: none;
             svg > path, svg > g { fill: $color-selected; }
@@ -115,7 +116,7 @@ nav.secondary {
     }
     li {
         display: inline-block;
-        margin: 0 0.5em;
+        margin: 0 0.25em;
         &:first-child {
             margin-left: 0;
         }
@@ -153,13 +154,31 @@ nav.secondary {
     margin-top: $base-vertical-rhythm;
     padding-top: $base-vertical-rhythm;
     
+    .logo {
+        display: inline-block;
+        margin-bottom: $base-vertical-rhythm;
+        svg > path, svg > g { fill: $color-black; }
+        &:hover {
+            svg > path, svg > g { fill: $color-primary; }
+        }
+
+    }
+    
     footer {
         @include outer-container();
-        section.about { @extend %half; }
-        section.sitemap, section.actions, section.links {
+        .brand {
+            @include fill-parent();
+            @include media($large-layout) { @include span-columns(4); }
+        }
+        .sitemap, .about, .actions, .feeds {
             @include fill-parent();
             @include media($medium-layout) { @include span-columns(2); }
             @include media($large-layout) { @include span-columns(2); }
+        }
+        .sitemap {
+            @include media($large-layout) {
+                @include shift(2);
+            }
         }
     }
     @include media($large-layout) {
@@ -181,12 +200,6 @@ nav.secondary {
 }
 
 /* Global Sidebar */
-
-$menu-breakpoint: 1024px;
-$mobile-menu-width: 250px;
-$tablet-menu-width: 300px;
-$desktop-menu-width: 26%;
-$menu-animation: all 0.25s ease;
 
 .container {
     display: block;
@@ -279,17 +292,17 @@ nav.sidebar {
     -webkit-overflow-scrolling: touch;
     height: 100%;
     width: 100%;
-    padding: $base-vertical-rhythm/4 1em 1em;
+    @extend %base-spacing;
     @media screen and (min-width: 540px) { padding: $base-vertical-rhythm $base-vertical-rhythm 1em; }
     color: $color-white;
     background: $color-black;  
     
-    dfn { padding-bottom: 0.75em; }
+    dfn { padding: 1.5em 0 0.5em 0; }
     
     ul {
         display: table;
         width: 100%;
-        margin: 0 0 $base-vertical-rhythm 0;
+        margin: 0 0 $base-vertical-rhythm/2 0;
         li {
             display: table-cell;
             width: 50%;
@@ -357,7 +370,7 @@ nav.sidebar {
             svg {
                 height: 1em;
                 width: auto;
-                margin-bottom: -0.25em;
+                margin-bottom: -0.1em;
                 fill: $color-grey;
             }
             &:hover {
@@ -395,11 +408,11 @@ nav.sidebar {
             color: $color-white;
             background: lighten($color-black, 8%);
             @include placeholder { color: $color-grey; }
-            border: none;
+            border: $base-border-width solid lighten($color-black, 8%);
             @include border-right-radius(0);
-            &:focus {
+            &:focus, &:hover {
                 outline: none;
-                border: $base-border-width solid $color-selected;
+                border-color: $color-selected;
             }
             & + span.input-button { 
                 display: block;

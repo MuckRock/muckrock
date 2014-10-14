@@ -6,11 +6,11 @@
     <header>
         {% if clone %}
         <h1>Clone a Request</h1>
-        <summary>Make any edits to the information in the request you are cloning, then submit.</summary>
+        <summary>Make any changes to the request, then clone it.</summary>
         {% else %}
         <h1>Create a Request</h1>
         <summary>
-            Select a title, detail the documents you are requesting, then pick the relevant agency and jurisdiction to submit the request to.
+            Not sure where to start? <a href="#">We can help.</a>
             <noscript>It looks like you have JavaScript turned off. Unfortunately, this page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
         {% endif %}
@@ -31,6 +31,7 @@
                     <ul>
                     {% for radio in field reversed %}
                         <li class="{{ radio.choice_label|lower }}">
+                            <label for="j_{{ forloop.counter }}">
                         {% if radio.choice_label|lower == 'federal' %}
                             <svg viewBox="0 0 479 377" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="icon-federal">
                                 <title>Federal</title>
@@ -64,8 +65,8 @@
                                 </g>
                             </svg>
                         {% endif %}
-                            <label>{{ radio.choice_label }}</label>
-                            {{ radio.tag }}
+                            {{ radio.choice_label }}</label>
+                            <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value={{ radio.choice_value }}>
                         </li>
                     {% endfor %}
                     </ul>
@@ -84,7 +85,11 @@
             <input type="submit" name="login" value="Log In" class="default button" />
             <input type="submit" name="signup" value="Sign Up" class="primary button" />
             {% else %}
-            <input type="submit" name="submit" value="Submit" class="primary button"  />
+                {% if clone %}
+            <input type="submit" name="submit" value="Clone" class="primary button"  />
+                {% else %}
+            <input type="submit" name="submit" value="Create" class="primary button"  />
+                {% endif %}
             {% endif %}
         </footer>
 
@@ -96,43 +101,122 @@
 <script type="text/javascript"
 <script>
 $(document).ready(function(){
-    var localField = $('fieldset.local');
-    var stateField = $('fieldset.state');
-    var agencyField = $('fieldset.agency');
-    localField.hide();
-    stateField.hide();
-    $('li.local input:radio').change(function() {
-        localField.show();
-        stateField.hide();
-    });
-    $('li.state input:radio').change(function() {
-        localField.hide();
-        stateField.show();
-    });
-    $('li.federal input:radio').change(function() {
-        localField.hide();
-        stateField.hide();
-    });
-    
+
     function agencyByJurisdiction(jurisdictionSelectElement) {
-        var select = $('fieldset.agency select');
-        var widget = select.parents('.autocomplete-light-widget');
         // When the jurisdiction select changes
-        value = jurisdictionSelectElement.val();
-        if (value) {
-            widget.yourlabsWidget().autocomplete.data = {
-                'jurisdiction_id': value[0],
-            };
-        } else { widget.yourlabsWidget().autocomplete.data = {} }
+        val = jurisdictionSelectElement.val();
+        if (val) {
+            $.getJSON("{% url 'foia-create' %}", {j_id: val}, function(data) {
+                var options = []
+                $.each(data, function(i) {
+                    options.push(data[i]);
+                });
+                $('input#id_agency').autocomplete({
+                    source: options,
+                    minLength: 0
+                }).focus(function(){
+                    $(this).autocomplete('search', '');
+                });
+            });
+        }
     }
     
-    $('.autocomplete-light-widget select[name="local"]').change(function(){
-        agencyByJurisdiction($(this));
+    $('input#id_agency')
+        
+    var localField = $('fieldset.local');
+    var stateField = $('fieldset.state');
+    var localRadio = $('li.local input:radio');
+    var stateRadio = $('li.state input:radio');
+    var federalRadio = $('li.federal input:radio')
+    var localChecked = $('li.local input:checked');
+    var stateChecked = $('li.state input:checked');
+    var federalChecked = $('li.federal input:checked');
+    var localInput = $('li.local .autocomplete-light-widget input');
+    var localSelect = $('.autocomplete-light-widget select[name="local"]');
+    var stateSelect = $('.autocomplete-light-widget select[name="state"]');
+    
+    var agencyField = $('fieldset.agency');
+    var agencyInput = agencyField.children('input');
+    
+    localField.hide();
+    stateField.hide();
+    
+    agencyField.attr('disabled', true);
+    
+    if (localChecked.length > 0) {
+        localField.show();
+        if (localSelect.val()) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+    }
+    
+    if (stateChecked.length > 0) {
+        stateField.show();
+        if (stateSelect.val()) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+    }
+    
+    if (federalChecked.length > 0) {
+        localField.hide();
+        stateField.hide();
+        agencyField.attr('disabled', false);
+    }
+    
+    localRadio.change(function() {
+        localField.show();
+        stateField.hide();
+        if (localSelect.val() != null) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+        agencyInput.val('');
     });
     
-    $('.autocomplete-light-widget select[name="state"]').change(function(){ 
-        agencyByJurisdiction($(this)); 
+    stateRadio.change(function() {
+        localField.hide();
+        stateField.show();
+        if (stateSelect.val() != null) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+        agencyInput.val('');
     });
+    
+    federalRadio.change(function() {
+        localField.hide();
+        stateField.hide();
+        agencyField.attr('disabled', false);
+        agencyInput.val('');
+        agencyByJurisdiction(federalRadio);
+    });
+    
+    localSelect.change(function(){
+        agencyByJurisdiction($(this));
+        if ($(this).val()) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);  
+        }
+        agencyInput.val('');
+    });
+    
+    stateSelect.change(function(){ 
+        agencyByJurisdiction($(this));
+        if ($(this).val()) {
+            agencyField.attr('disabled', false);
+        } else {
+            agencyField.attr('disabled', true);
+        }
+        agencyInput.val('');
+    });
+    
 });
 </script>
 {% endblock scripts %}

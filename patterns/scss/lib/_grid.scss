@@ -3,8 +3,6 @@ html, body { min-height: 100%; }
 
 // Prototypes
 
-// Sizing and spacing
-
 %row { @include row(); }
 
 %full { @include fill-parent(); }
@@ -24,9 +22,15 @@ html, body { min-height: 100%; }
 
 %quarter {
     @extend %full;
-    @include media($medium-layout) { @include span-columns(3); }
-    @include media($large-layout) { @include span-columns(3); }
-    @include omega(4n);
+    @include media($medium-layout) {
+        @include span-columns(3);
+        @include omega(2n);
+    }
+    @include media($large-layout) {
+        @include omega-reset(2n);
+        @include span-columns(3);
+        @include omega(4n);
+    }
 }
 
 %two-thirds {
@@ -48,11 +52,11 @@ html, body { min-height: 100%; }
 }
 
 %base-spacing {
-    padding: $base-vertical-rhythm/4;
+    padding: $base-vertical-rhythm/2;
     @include media($medium-layout) { padding: $base-vertical-rhythm; }
 }
 
 %edge-to-edge {
-    margin: 0 -1*$base-vertical-rhythm/4;
+    margin: 0 -1*$base-vertical-rhythm/2;
     @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
 }

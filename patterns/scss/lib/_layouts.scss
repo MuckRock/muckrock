@@ -10,10 +10,10 @@
             margin: $base-vertical-rhythm/2 0 0;
             h1, h2 { font-weight: 400; }
             h1 { @include font-sizing(1.5); }
-            h2 { @include font-sizing(0.875); }
+            h2 { @include font-sizing(1); }
             @include media($medium-layout) {
                 h1 { @include font-sizing(1.75); }
-                h2 { @include font-sizing(1); }
+                h2 { @include font-sizing(1.25); }
             }
         }
         aside {
@@ -27,9 +27,19 @@
         }
         .panel { width: 90%; } 
     }
+    
+    > section.actions {
+        form {
+            list-style-type: none;
+            padding: $base-vertical-rhythm/2;
+            border: $base-border-width solid $color-grey;
+            border-radius: $base-border-radius;
+            background-color: darken($color-white, 10%);
+        }
+    }
+    
     > section.main {
         @extend %full;
-        max-width: 50em;
         padding-top: $base-vertical-rhythm;
     }
 
@@ -121,31 +131,44 @@
     .homepage-row { display: table-row; }
     .banner {
         display: block;
-        height: 35em;
+        height: 23em;
         width: 100%;
         position: relative;
         background-size: cover;
         background-position: center;
         color: $color-white;
+        @include media($medium-layout) {
+            height: 35em;
+        }
         h1 {
-            position: relative;
-            top: 0;
-            left: 0;
-            max-width: 18em;
+            max-width: 12em;
             color: $color-white;
             font-weight: 700;
-            @include font-sizing(2.5, 3);
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: $base-vertical-rhythm;
+            @include font-sizing(1.75, 3);
+            margin: 0 auto $base-vertical-rhythm;
+            @include media($medium-layout) {
+                max-width: 18em;
+                @include font-sizing(2.5, 3);
+                margin: 0 auto $base-vertical-rhythm;
+            }
+            @include media($large-layout) {
+                @include font-sizing(3, 3);
+                margin: 0 auto 1.5*$base-vertical-rhythm;
+            }
         }
         div {
             height: 100%;
             @extend %base-spacing;
-            @include background(linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)));
+            @include background(
+                linear-gradient(
+                    rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)
+            ));
             font-weight: 700;
             text-align: center;
-            padding-top: 2.5em;
+            padding-top: 3.5em;
+            @include media($medium-layout) {
+                padding-top: 7.5em;
+            }
         }
         a.dotted {
             color: $color-white;
@@ -157,6 +180,14 @@
         }
         .button {
             display: block;
+            margin: 0 auto $base-vertical-rhythm/4;
+            width: 65%;
+            clear: both;
+            @include media($medium-layout) {
+                display: inline-block;
+                width: auto;
+                margin: 0 $base-vertical-rhythm/4 0 0;
+            }
         }
         .image-attribution {
             position: absolute;
@@ -166,22 +197,6 @@
         }
         #learn-more {
             margin-left: $base-vertical-rhythm/4;
-        }
-        
-        @media all and (min-width: 450px) {
-            .button { display: inline-block; }
-        }
-        @media all and (min-width: 480px) {
-            height: 35em;
-            div { padding-top: 7.5em; }
-        }
-        @media all and (min-width: 1200px) {
-            h1 {
-                @include font-sizing(2.8, 3);
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: $base-vertical-rhythm;
-            }
         }
     }
     
@@ -237,6 +252,8 @@
         }
         
     }
+    
+    .footer-container { padding: 0 $base-vertical-rhythm; }
 }
 
 .new-request {
@@ -256,7 +273,6 @@
         }
         summary {
             @extend %half;
-            @extend small;
         }
     }
     
@@ -265,6 +281,8 @@
         padding: $base-vertical-rhythm;
     }
     
+    
+    
     $color-title: #F26C5A;
     $color-jurisdiction: #5A90F2;
     .title {
@@ -272,6 +290,7 @@
         background-color: $color-title;
         label { display: none; }
         input {
+            width: 100%;
             background-color: $color-title;
             padding: 0;
             border: none;
@@ -298,7 +317,7 @@
     }
     
     .jurisdiction {
-        padding: $base-vertical-rhythm 0;
+        padding: 0;
         color: $color-white;
         background-color: $color-jurisdiction;
         width: 100%;
@@ -314,14 +333,16 @@
             text-align: center;
             width: 33%;
             padding: $base-vertical-rhythm/2;
-            border-right: $base-border-width solid lighten($color-jurisdiction, 50%);
+            border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
             &:last-child { border-right: none; }
             svg {
+                display: block;
+                margin: 0 auto;
                 fill: $color-white;
                 width: auto;
                 &#icon-federal { height: 3em; }
-                &#icon-state { height: 2.75em; margin-top: 0.25em; }
-                &#icon-local { height: 2.5em; margin-top: 0.5em; }
+                &#icon-state { height: 2.5em; margin-top: 0.5em; }
+                &#icon-local { height: 2.25em; margin-top: 0.75em; }
             }
         }
         label {
@@ -329,6 +350,7 @@
             @include font-sizing(1);
             font-weight: 700;
             text-align: center;
+            cursor: pointer;
         }
     }
     
@@ -337,28 +359,83 @@
         width: 100%;
         background-color: $color-jurisdiction-picker;
         label { display: none; }
-        input { width: 100%; }
+        input {
+            display: block;
+            width: 100%;
+        }
         &.hidden { visibility: hidden; }
         &.visible { visibility: visible; }
     }
     
+    $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
         overflow: hidden;
-        padding: 0;
         margin: 0;
-        label { display: none; }
+        width: 100%;
+        color: $color-white;
+        background-color: $color-agency;
+        &:disabled {
+            background-color: $color-disabled;
+            color: darken($color-white, 2%);
+            label { display: none; }
+        }
+        label {
+            display: block;
+            @extend dfn;
+            color: $color-white;
+            margin: 0;
+            font-weight: 300;
+            font-size: 1rem;
+        }
         input {
             width: 100%;
-            background-color: white;
+            background-color: $color-agency;
             border: none;
+            border-bottom: 2*$base-border-width dotted lighten($color-agency, 20%);
+            padding-left: 0;
             border-radius: 0;
-            @include font-sizing(2, 3);
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
             margin: 0;
+            @include placeholder { color: $color-jurisdiction; }
+            &:disabled {
+                @include placeholder { color: darken($color-white, 2%); }
+                background: $color-disabled;
+                border-bottom: none;
+                text-align: left;
+                padding-left: 0;
+                &:hover { padding-left: 0; }
+            }
         }
+            
     }
     
-    dfn { color: $color-black; }
-    
+    .autocomplete-light-widget {
+        display: block;
+        width: 100%;
+        span.deck > span {
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
+            margin: 0;
+            &:before {
+                content: "Jurisdiction";
+                display: block;
+                @extend dfn;
+                color: $color-white;
+                margin: 0;
+                font-weight: 300;
+                font-size: 1rem;
+            }
+            span.remove {
+                float: right;
+            }
+        }
+    }
+   
     footer {
         @include border-bottom-radius($base-border-radius);
         overflow: hidden;

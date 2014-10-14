@@ -4,7 +4,7 @@ Views for the accounts application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
@@ -33,6 +33,11 @@ from muckrock.sidebar.models import Sidebar
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
+
+def account_logout(request):
+    logout(request)
+    messages.success(request, 'You have successfully logged out.')
+    return redirect('index')
 
 def register(request):
     """Pick what kind of account you want to register for"""
@@ -84,6 +89,7 @@ def _register_acct(request, acct_type, form_class, template, post_hook, url_redi
             if url_redirect:
                 return redirect(url_redirect)
             else:
+                messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
                 return redirect('acct-my-profile')
     else:
         form = form_class(initial={'expiration': date.today()})
@@ -112,11 +118,15 @@ def update(request):
 
             user_profile = form.save()
 
+            messages.success(request, 'Your account has been updated.') 
             return redirect('acct-my-profile')
     else:
         user_profile = request.user.get_profile()
-        initial = {'first_name': request.user.first_name, 'last_name': request.user.last_name,
-                   'email': request.user.email}
+        initial = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email
+        }
         form = UserChangeForm(initial=initial, instance=user_profile)
 
     return render_to_response('forms/account/update.html', {'form': form},
@@ -184,13 +194,13 @@ def manage_subsc(request):
             user_profile.date_update = datetime.now()
             user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
-            messages.success(request, 'You have been succesfully upgraded to a Pro Account!')
+            messages.success(request, 'You are now subscribed as a pro user.')
         elif user_profile.acct_type == 'pro' and form.is_valid():
             customer = user_profile.get_customer()
             customer.cancel_subscription()
             user_profile.acct_type = 'community'
             user_profile.save()
-            messages.info(request, 'Your professional account subscription has been cancelled')
+            messages.info(request, 'Your professional subscription has been cancelled.')
         return redirect('acct-my-profile')
     else:
         form = form_class(
@@ -222,6 +232,7 @@ def buy_requests(request):
                 user_profile.num_requests += 5
                 user_profile.save()
                 logger.info('%s has purchased requests', request.user.username)
+                messages.success(request, 'Your account has been credited 5 requests.')
                 return redirect('acct-my-profile')
             except stripe.CardError as exc:
                 messages.error(request, 'Payment error: %s' % exc)

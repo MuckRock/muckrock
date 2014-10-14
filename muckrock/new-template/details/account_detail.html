@@ -52,6 +52,7 @@
             <dd><a href="{% url 'acct-manage-subsc' %}" class="button">Subscription Settings</a></dd>
             {% endif %}
             <dd><a href="{% url 'acct-update' %}" class="button">Account Settings</a></dd>
+            <dd><a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a></dd>
             <dd><a href="{% url 'acct-update-cc' %}" class="button">Update Credit Card</a></dd>
         </dl>
         {% if user.get_profile.get_acct_type_display != 'Community' %}
