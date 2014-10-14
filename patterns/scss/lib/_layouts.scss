@@ -10,10 +10,10 @@
             margin: $base-vertical-rhythm/2 0 0;
             h1, h2 { font-weight: 400; }
             h1 { @include font-sizing(1.5); }
-            h2 { @include font-sizing(0.875); }
+            h2 { @include font-sizing(1); }
             @include media($medium-layout) {
                 h1 { @include font-sizing(1.75); }
-                h2 { @include font-sizing(1); }
+                h2 { @include font-sizing(1.25); }
             }
         }
         aside {
@@ -29,14 +29,13 @@
     }
     
     > section.actions {
-        ul {
+        form {
             list-style-type: none;
             padding: $base-vertical-rhythm/2;
             border: $base-border-width solid $color-grey;
             border-radius: $base-border-radius;
             background-color: darken($color-white, 10%);
         }
-        li { display: inline-block; }
     }
     
     > section.main {

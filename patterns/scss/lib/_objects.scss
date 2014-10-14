@@ -347,7 +347,7 @@ section.features {
 
 /* Messages */
 
-object.message { @extend %panel;
+.message { @extend %panel;
     $color-sent: $color-primary;
     $color-received: $color-grey;
     $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
@@ -548,6 +548,50 @@ table {
         @include outer-container;
         .primary { display: block; @extend %full; }
         .default, .failure { display: block; @extend %half; }
+    }
+    .edit {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+        line-height: 1rem;
+        color: $color-primary;
+        &:hover {
+            color: darken($color-primary, 10%);
+        }
+    }
+    .tabs {
+        list-style-type: none;
+        overflow: hidden;
+        padding-left: $base-vertical-rhythm;
+        input[type="radio"] { display: none; }
+        label {
+            display: block;
+            float: left;
+            margin: 0 0 2*-$base-border-width;
+            padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+            border: $base-border-width solid $color-grey;
+            border-left: none;
+            border-bottom: none;
+            &:first-of-type {
+                border-top-left-radius: $base-border-radius;
+                border-left: $base-border-width solid $color-grey;
+            }
+            &:last-of-type {
+                border-top-right-radius: $base-border-radius;
+            }
+            &.active {
+                color: white;
+                background-color: $color-grey;
+            }
+        }
+
+    }
+    .tab-section {
+        display: none;
+        border-top: $base-border-width solid $color-grey;
+        &.active { display: block; }
     }
 }
 

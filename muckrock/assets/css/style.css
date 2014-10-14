@@ -642,14 +642,14 @@ td {
   font-size: 2em; }
 
 /* Simple Objects */
-.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form {
+.button, .button.default, input[type="submit"], button, input[type="submit"] .default, button .default, .button.primary, input[type="submit"] .primary, button .primary, .button.success, input[type="submit"] .success, button .success, .button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input.button:disabled:hover, input.button:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   border: 1px solid #b3becb;
   border-radius: 9px;
   line-height: 1.5em; }
-  .button ul, .button.default ul, input[type="submit"] ul, button ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input.button:disabled:hover ul, input.button:disabled:active ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, object.message ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul, .form ul {
+  .button ul, .button.default ul, input[type="submit"] ul, button ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input.button:disabled:hover ul, input.button:disabled:active ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, .message ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul, .form ul {
     list-style-type: none;
     padding-left: 0; }
 
@@ -662,13 +662,13 @@ td {
   .button:hover, input[type="submit"]:hover, button:hover, input[type="submit"] .default:hover, button .default:hover, input[type="submit"] .primary:hover, button .primary:hover, input[type="submit"] .success:hover, button .success:hover, input[type="submit"] .failure:hover, button .failure:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled, input.button:hover:disabled {
     text-decoration: none; }
 
-.panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
+.panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item {
   display: block;
   margin: 0.75em 0;
   padding: 0.75em;
   border-color: #b3becb; }
   @media screen and (min-width: 769px) {
-    .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, object.message, .feed-item {
+    .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item {
       padding: 0.75em 1.5em; } }
 
 textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -1037,51 +1037,51 @@ section.features {
     margin: 0.37821em 0; }
 
 /* Messages */
-object.message {
+.message {
   float: left;
   display: block;
   margin-right: 2.35765%;
   width: 100%; }
-  object.message:last-child {
+  .message:last-child {
     margin-right: 0; }
-  object.message > section.meta {
+  .message > section.meta {
     display: block;
     width: 100%;
     text-align: left;
     line-height: 1em;
     width: 100%; }
-    object.message > section.meta img {
+    .message > section.meta img {
       max-width: 100%;
       width: 50px;
       margin-bottom: 0; }
-    object.message > section.meta small, object.message > section.meta dfn, object.message > section.meta fieldset label, fieldset object.message > section.meta label, object.message > section.meta .new-request .agency label, .new-request .agency object.message > section.meta label, object.message > section.meta .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget object.message > section.meta span.deck > span:before, object.message > section.meta dt, object.message > section.meta figcaption, object.message > section.meta nav.sidebar .account li, nav.sidebar .account object.message > section.meta li, object.message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight object.message > section.meta p {
+    .message > section.meta small, .message > section.meta dfn, .message > section.meta fieldset label, fieldset .message > section.meta label, .message > section.meta .new-request .agency label, .new-request .agency .message > section.meta label, .message > section.meta .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .message > section.meta span.deck > span:before, .message > section.meta dt, .message > section.meta figcaption, .message > section.meta nav.sidebar .account li, nav.sidebar .account .message > section.meta li, .message > section.meta nav.sidebar .spotlight p, nav.sidebar .spotlight .message > section.meta p {
       display: block;
       margin-top: 0.5em; }
     @media screen and (min-width: 969px) {
-      object.message > section.meta {
+      .message > section.meta {
         margin: 0.75em 0 0.75em;
         float: left;
         display: block;
         margin-right: 2.35765%;
         width: 14.70196%; }
-        object.message > section.meta:last-child {
+        .message > section.meta:last-child {
           margin-right: 0; }
-        object.message > section.meta img {
+        .message > section.meta img {
           max-width: 100%;
           width: 100%; } }
-  object.message > section.text {
+  .message > section.text {
     display: block;
     width: 100%; }
     @media screen and (min-width: 969px) {
-      object.message > section.text {
+      .message > section.text {
         float: left;
         display: block;
         margin-right: 2.35765%;
         width: 74.41059%;
         margin-left: 8.5298%; }
-        object.message > section.text:last-child {
+        .message > section.text:last-child {
           margin-right: 0; } }
-  object.message.received {
+  .message.received {
     border-color: #b3becb;
     /*@include media($large-layout) {
         > section.meta {
@@ -1089,16 +1089,16 @@ object.message {
             @include pad(0 0 0 default);
         }
     }*/ }
-    object.message.received > section.text {
+    .message.received > section.text {
       border-top-color: #b3becb; }
-  object.message.sent {
+  .message.sent {
     border-color: #3a82ff;
     /*@include media($large-layout) {
         > section.meta {
             text-align: right;
         }
     }*/ }
-    object.message.sent > section.text {
+    .message.sent > section.text {
       border-top-color: #3a82ff; }
 
 /* Feeds */
@@ -1289,6 +1289,43 @@ table {
     display: block; }
   .request .draft form .default, .request .draft form .failure {
     display: block; }
+.request .edit {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1rem;
+  color: #3a82ff; }
+  .request .edit:hover {
+    color: #0762ff; }
+.request .tabs {
+  list-style-type: none;
+  overflow: hidden;
+  padding-left: 1.5em; }
+  .request .tabs input[type="radio"] {
+    display: none; }
+  .request .tabs label {
+    display: block;
+    float: left;
+    margin: 0 0 -2px;
+    padding: 0.375em 0.75em;
+    border: 1px solid #b3becb;
+    border-left: none;
+    border-bottom: none; }
+    .request .tabs label:first-of-type {
+      border-top-left-radius: 9px;
+      border-left: 1px solid #b3becb; }
+    .request .tabs label:last-of-type {
+      border-top-right-radius: 9px; }
+    .request .tabs label.active {
+      color: white;
+      background-color: #b3becb; }
+.request .tab-section {
+  display: none;
+  border-top: 1px solid #b3becb; }
+  .request .tab-section.active {
+    display: block; }
 
 header.collection-header {
   max-width: 68em;
@@ -1470,7 +1507,7 @@ ul.notifications {
     line-height: 1.51282em;
     margin: 0.37821em 0; }
   .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-    font-size: 0.875em;
+    font-size: 1em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
   @media screen and (min-width: 500px) {
@@ -1479,7 +1516,7 @@ ul.notifications {
       line-height: 1.51282em;
       margin: 0.37821em 0; }
     .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-      font-size: 1em;
+      font-size: 1.25em;
       line-height: 1.51282em;
       margin: 0.37821em 0; } }
 .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside {
@@ -1497,14 +1534,12 @@ ul.notifications {
     margin-top: 0; }
 .post > section.meta .panel, .question > section.meta .panel, .request > section.meta .panel, .jurisdiction > section.meta .panel, .agency > section.meta .panel, .profile > section.meta .panel {
   width: 90%; }
-.post > section.actions ul, .question > section.actions ul, .request > section.actions ul, .jurisdiction > section.actions ul, .agency > section.actions ul, .profile > section.actions ul {
+.post > section.actions form, .question > section.actions form, .request > section.actions form, .jurisdiction > section.actions form, .agency > section.actions form, .profile > section.actions form {
   list-style-type: none;
   padding: 0.75em;
   border: 1px solid #b3becb;
   border-radius: 9px;
   background-color: #dbdbdb; }
-.post > section.actions li, .question > section.actions li, .request > section.actions li, .jurisdiction > section.actions li, .agency > section.actions li, .profile > section.actions li {
-  display: inline-block; }
 .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main {
   padding-top: 1.5em; }
 .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
