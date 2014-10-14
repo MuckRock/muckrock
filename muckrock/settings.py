@@ -484,10 +484,7 @@ FILER_STORAGES = {
     },
 }
 
-print 'ALLOWED_HOSTS test'
-print os.environ.get('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-print ALLOWED_HOSTS
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
