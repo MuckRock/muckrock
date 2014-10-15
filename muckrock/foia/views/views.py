@@ -61,7 +61,7 @@ def multirequest_update(request, slug, idx):
     if request.method == 'POST':
         if request.POST.get('submit') == 'Delete':
             foia.delete()
-            messages.info(request, 'Request succesfully deleted')
+            messages.success(request, 'The request was deleted.')
             return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
 
         try:
@@ -78,7 +78,7 @@ def multirequest_update(request, slug, idx):
                     return HttpResponseRedirect(reverse('foia-multi',
                                                         kwargs={'idx': foia.pk, 'slug': foia.slug}))
 
-                messages.success(request, 'Request has been saved')
+                messages.success(request, 'Updates to this request were saved.')
                 return redirect(foia)
 
         except KeyError:
@@ -306,15 +306,14 @@ class ListFollowing(ListBase):
 
     def get_queryset(self):
         """Get FOIAs for this view"""
-        return self.sort_requests(
-            FOIARequest.objects.get_viewable(self.request.user)
-                               .filter(followed_by=self.request.user.get_profile()))
+        profile = self.request.user.get_profile()
+        requests = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(requests.filter(followed_by=profile))
 
     def get_context_data(self, **kwargs):
         context = super(ListFollowing, self).get_context_data(**kwargs)
         context['subtitle'] = 'Following'
         return context
-
 
 class Detail(DetailView):
     """Details of a single FOIA request as well
@@ -414,7 +413,7 @@ class Detail(DetailView):
                 foia,
                 foia.user.get_full_name(),
                 request.POST.get('text'),
-                'Follow up succesfully sent'
+                'Your follow up has been sent.'
             )
         return redirect(foia)
 
@@ -430,7 +429,7 @@ class Detail(DetailView):
                 question=request.POST.get('text'),
                 date=datetime.now()
             )
-            messages.success(request, 'Question succesfully posted')
+            messages.success(request, 'Your question has been posted.')
             question.notify_new()
             return redirect(question)
         else:

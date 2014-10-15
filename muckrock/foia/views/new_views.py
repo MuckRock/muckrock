@@ -162,20 +162,9 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                 is_new_agency = True
             
             foia.save
-            if is_new_agency:
-                a = foia.agency
-                args = {
-                    'jurisdiction': a.jurisdiction.slug,
-                    'jidx': a.jurisdiction.pk,
-                    'slug': a.slug,
-                    'idx': a.pk
-                }
-                return HttpResponseRedirect(
-                    reverse('agency-update', kwargs=args) + \
-                    '?foia=%s' % foia.pk
-                )
-            else:
-                return redirect(foia)
+            
+            messages.success(request, 'The request has been updated.')
+            return redirect(foia)
         else:
             return redirect(foia)
     else:
@@ -292,7 +281,7 @@ def create_request(request):
             foia, foia_comm, is_new_agency = _make_request(request, foia_request)
             foia_comm.save()
             foia.save()
-    
+            '''
             if is_new_agency:
                 args = {
                     'jurisdiction': foia.agency.jurisdiction.slug,
@@ -306,8 +295,10 @@ def create_request(request):
                 )
             else:
                 return redirect(foia)
-            # TODO: message about something going wrong
-            return redirect('foia-create')
+            messages.error(request, 'Sorry, something went wrong. We have top men on it.')
+            '''
+            messages.success(request, 'Your request has been created.')
+            return redirect(foia)
     else:
         if clone or request.GET.get('s', False):
             form = RequestForm(initial=initial_data)
