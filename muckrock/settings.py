@@ -23,12 +23,12 @@ SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_HSTS_SECONDS = 31536000 #one year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_FRAME_DENY = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-if not DEBUG:
+if not DEBUG and os.environ.get('ENV') != 'staging':
+    SECURE_HSTS_SECONDS = 31536000 #one year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_FRAME_DENY = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
     SECURE_SSL_REDIRECT = True
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
@@ -68,7 +68,7 @@ SITE_ID = 1
 # to load the internationalization machinery.
 USE_I18N = True
 
-PREPEND_WWW = os.environ.get('PREPEND_WWW', False)
+PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -293,6 +293,7 @@ MONTHLY_REQUESTS = {
     'beta': 5,
     'community': 0,
     'pro': 20,
+    'proxy': 20,
 }
 
 MARKDOWN_DEUX_STYLES = {
@@ -485,7 +486,7 @@ FILER_STORAGES = {
     },
 }
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',

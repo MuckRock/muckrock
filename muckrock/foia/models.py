@@ -3,10 +3,11 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail, send_mass_mail, EmailMessage
+from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
+from django.template.defaultfilters import escape, linebreaks
 from django.template.loader import render_to_string
 
 from datetime import datetime, date, timedelta
@@ -431,23 +432,28 @@ class FOIARequest(models.Model):
         else:
             subject = 'Freedom of Information Request: %s' % self.title
 
+        # get last comm to set delivered and raw_email
+        comm = self.communications.reverse()[0]
+
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         body = render_to_string('foia/request.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
-        msg = EmailMessage(subject=subject,
+        msg = EmailMultiAlternatives(subject=subject,
                            body=body,
-                           from_email='%s <%s>' % (self.user.get_full_name(), from_email),
+                           from_email=from_email,
                            to=[self.email],
                            bcc=cc_addrs + ['diagnostics@muckrock.com'],
-                           headers={'Cc': ','.join(cc_addrs)})
+                           headers={'Cc': ','.join(cc_addrs),
+                                    'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk})
+        if from_addr != 'fax':
+            msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
         for file_ in self.communications.reverse()[0].files.all():
             msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
-        # get last comm to set delivered and raw_email
-        comm = self.communications.reverse()[0]
+        # update communication
         comm.raw_email = msg.message()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()

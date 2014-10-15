@@ -27,7 +27,7 @@ from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 from muckrock.sidebar.models import Sidebar
 
@@ -163,9 +163,16 @@ def manage_subsc(request):
         desc = 'You are an admin, you don\'t need a subscription'
     elif user_profile.acct_type == 'beta':
         heading = 'Beta Account'
-        desc = ('Thank you for being a beta tester. '
-                'You will continue to get 5 free '
-                'requests a month for helping out.')
+        desc = 'Thank you for being a beta tester.  You will continue to get 5 ' \
+               'free requests a month for helping out.'
+        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+                                  context_instance=RequestContext(request))
+    elif user_profile.acct_type == 'proxy':
+        heading = 'Proxy Account'
+        desc = 'Thank you for being a proxy user.  You will continue to get 20 ' \
+               'free requests a month for helping out.'
+        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
+                                  context_instance=RequestContext(request))
     elif user_profile.acct_type == 'community':
         heading = 'Upgrade to a Pro Account'
         desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'
@@ -364,6 +371,12 @@ def stripe_webhook_v2(request):
             url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
                                      .get_absolute_url()
             subject = 'Payment received for request fee'
+        elif event_data.get('description') and \
+                'Charge for multi request' in event_data['description']:
+            type_ = 'doc'
+            url = FOIAMultiRequest.objects.get(id=event_data['description'].split()[-1])\
+                                          .get_absolute_url()
+            subject = 'Payment received for multi request fee'
         elif event_data.get('description') and \
                 'Contribute to Crowdfunding' in event_data['description']:
             type_ = 'crowdfunding'
