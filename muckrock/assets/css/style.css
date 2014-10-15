@@ -1299,6 +1299,11 @@ table {
   color: #3a82ff; }
   .request .edit:hover {
     color: #0762ff; }
+.request .tag {
+  display: inline-block;
+  padding: 0 0.375em; }
+  .request .tag:first-of-type {
+    padding-left: 0; }
 .request .tabs {
   list-style-type: none;
   overflow: hidden;

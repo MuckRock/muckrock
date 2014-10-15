@@ -561,6 +561,11 @@ table {
             color: darken($color-primary, 10%);
         }
     }
+    .tag {
+        display: inline-block;
+        padding: 0 $base-vertical-rhythm/4;
+        &:first-of-type { padding-left: 0; }
+    }
     .tabs {
         list-style-type: none;
         overflow: hidden;

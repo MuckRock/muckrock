@@ -11,9 +11,9 @@
     <h1>{{ foia.title }}</h1>
     <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
     <dl>
-        <dt>Tags <span class="edit" id="edit-tags">Edit</span></dt>
+        <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
     {% for tag in foia.tags.all %}
-		<dd><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
+		<dd class="tag"><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
 	{% empty %}
 		<dd>None</dd>
 	{% endfor %}
@@ -40,7 +40,7 @@
 {% endblock header %}
 
 {% block aside %}
-    <h3 class="{{ foia.color_code }}">{{foia.get_status_display}} <span class="edit" id="edit-status">Edit</span></h3>
+    <h3 class="{{ foia.color_code }}">{{foia.get_status_display}}{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-status">Change</span>{% endif %}</h3>
     {% if foia.date_due and foia.status == "processed" %}
             {% if past_due %}
         <h4><small>Past due by {{ foia.date_due|timesince }}.</small></h4>
@@ -56,6 +56,9 @@
             {% endif %}
             from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
         {% endif %}
+    {% if foia.status != 'started' %}
+    {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
+    {% endif %}
     {% if user.is_authenticated %}
         {% if foia.status == 'started' %}
     <section class="draft">
@@ -98,31 +101,31 @@
             </object>
             {% endwith %}
         {% endif %}
-    {% else %}
-    <section class="panel">
-        <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
-        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
-    </section>
     {% endif %}
 {% endblock aside %}
 
 {% block actions %}
-    <dfn>Progress</dfn>
-    {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
+    {% if user.is_authenticated %}
     <dfn>Actions</dfn>
     <form action="" method="post">
         {% csrf_token %}
-    {% for action in actions %}
-        {% if not action.link %}
+        {% for action in actions %}
+            {% if not action.link %}
         <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
-        {% else %}
+            {% else %}
         <a href="{{ action.link }}"
            class="button{% if action.class %} {{ action.class }}{% endif %}"
            {% if action.title %}title="{{ action.title }}"{% endif %}>
         {{ action.label }}</a>
-        {% endif %}
-    {% endfor %}
-    </form>           
+            {% endif %}
+        {% endfor %}
+    </form>    
+    {% else %} 
+    <section class="panel">
+        <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
+        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+    </section> 
+    {% endif %}    
 {% endblock actions %}
 
 {% block main %}
@@ -171,7 +174,7 @@
             }
 
             function doc_load() {
-                var default_doc_id = "{{foia.public_documents.0.doc_id}}"
+                var default_doc_id = "{{foia.public_documents.0.doc_id}}";
                 if (!doc_load.loaded) {
                     doc_load.loaded = true;
                     display_doc(default_doc_id);
@@ -180,8 +183,8 @@
 
             $(function() {
                 var hash = window.location.hash.substring(1);
-                var default_doc_id = "{{foia.public_documents.0.doc_id}}"
-                var documents = [ {%for doc in foia.public_documents%}"{{doc.doc_id}}", {%endfor%} ]
+                var default_doc_id = "{{foia.public_documents.0.doc_id}}";
+                var documents = [ {% for doc in foia.public_documents %}"{{doc.doc_id}}", {% endfor %} ];
 
                 if (!hash || ($.inArray(hash, documents) == -1)) {
                     doc_id = default_doc_id;

@@ -186,16 +186,16 @@ class ListByJurisdiction(ListBase):
 class ListByTag(ListBase):
     """List of all FOIA requests by a given tag"""
     def get_tag(self):
-        tag = get_object_or_404(
-            Tag,
-            slug=self.kwargs['tag_slug'],
-        )
+        tag = get_object_or_404(Tag, slug=self.kwargs['tag_slug'])
+        return tag
+        
     def get_queryset(self):
-        tag = get_tag(self)
+        tag = self.get_tag()
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.sort_requests(query.filter(tags=tag))
+        
     def get_context_data(self, **kwargs):
-        tag = get_tag(self)
+        tag = self.get_tag()
         context = super(ListByTag, self).get_context_data(**kwargs)
         context['subtitle'] = 'Tagged with %s' % tag.name
         return context
