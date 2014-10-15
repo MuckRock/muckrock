@@ -588,11 +588,11 @@ body {
       line-height: 24px; } }
 
 /* line 15, ../../../patterns/scss/lib/_typography.scss */
-h1, h2, h3, h4, h5, h6, nav.sidebar .spotlight h1 {
+h1, h2, h3, h4, h5, nav.sidebar .account .username, h6, nav.sidebar .spotlight h1 {
   margin: 0;
   font-weight: 300; }
   /* line 18, ../../../patterns/scss/lib/_typography.scss */
-  h1 strong, h1 b, h2 strong, h2 b, h3 strong, h3 b, h4 strong, h4 b, h5 strong, h5 b, h6 strong, nav.sidebar .spotlight h1 strong, h6 b, nav.sidebar .spotlight h1 b {
+  h1 strong, h1 b, h2 strong, h2 b, h3 strong, h3 b, h4 strong, h4 b, h5 strong, nav.sidebar .account .username strong, h5 b, nav.sidebar .account .username b, h6 strong, nav.sidebar .spotlight h1 strong, h6 b, nav.sidebar .spotlight h1 b {
     font-weight: 400; }
 
 /* line 21, ../../../patterns/scss/lib/_typography.scss */
@@ -620,7 +620,7 @@ h4 {
   margin: 0.37821em 0; }
 
 /* line 25, ../../../patterns/scss/lib/_typography.scss */
-h5 {
+h5, nav.sidebar .account .username {
   font-size: 1.375em;
   line-height: 1.51282em;
   margin: 0.37821em 0; }
@@ -2790,73 +2790,53 @@ nav.sidebar {
     background-color: #3a82ff;
     color: #f4f4f4; }
   /* line 336, ../../../patterns/scss/lib/_nav.scss */
-  nav.sidebar .account div {
-    overflow: hidden;
-    margin-bottom: 0.75em; }
-    /* line 339, ../../../patterns/scss/lib/_nav.scss */
-    nav.sidebar .account div .avatar {
-      display: inline-block;
-      height: 50px;
-      width: 50px;
-      vertical-align: middle;
-      border-radius: 4.5px;
-      margin-right: 0.75em; }
-    /* line 347, ../../../patterns/scss/lib/_nav.scss */
-    nav.sidebar .account div .username {
-      display: inline-block;
-      vertical-align: middle;
-      font-size: 1em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0;
-      margin: 0;
-      color: #f4f4f4; }
-      /* line 353, ../../../patterns/scss/lib/_nav.scss */
-      nav.sidebar .account div .username:hover {
-        color: #3a82ff;
-        text-decoration: none; }
-  /* line 362, ../../../patterns/scss/lib/_nav.scss */
+  nav.sidebar .account .username {
+    display: block;
+    margin-bottom: 0.75em;
+    color: #f4f4f4; }
+  /* line 346, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .account #admin-button ul {
     margin: 0.75em 0; }
-  /* line 363, ../../../patterns/scss/lib/_nav.scss */
+  /* line 347, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .account #admin-button li {
     width: 100%; }
-  /* line 368, ../../../patterns/scss/lib/_nav.scss */
+  /* line 352, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links li {
     width: 33%; }
-  /* line 370, ../../../patterns/scss/lib/_nav.scss */
+  /* line 354, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
     margin-bottom: -0.1em;
     fill: #b3becb; }
-  /* line 376, ../../../patterns/scss/lib/_nav.scss */
+  /* line 360, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links a:hover {
     background: #3a82ff; }
-    /* line 378, ../../../patterns/scss/lib/_nav.scss */
+    /* line 362, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .social-links a:hover svg {
       fill: #f4f4f4; }
-  /* line 383, ../../../patterns/scss/lib/_nav.scss */
+  /* line 367, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .spotlight {
     margin-top: 1.5em; }
-    /* line 385, ../../../patterns/scss/lib/_nav.scss */
+    /* line 369, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight img {
       margin: 0; }
-    /* line 386, ../../../patterns/scss/lib/_nav.scss */
+    /* line 370, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight h1 {
       font-weight: 400;
       font-size: 98%;
       line-height: 1.2em; }
-    /* line 392, ../../../patterns/scss/lib/_nav.scss */
+    /* line 376, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight p {
       line-height: 1.2em; }
-  /* line 395, ../../../patterns/scss/lib/_nav.scss */
+  /* line 379, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar form {
     display: block;
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
     margin: 0 0 1.5em; }
-    /* line 401, ../../../patterns/scss/lib/_nav.scss */
+    /* line 385, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -2885,11 +2865,11 @@ nav.sidebar {
       /* line 4, ../../../patterns/scss/bourbon/css3/_placeholder.scss */
       nav.sidebar form input:-ms-input-placeholder {
         color: #b3becb; }
-      /* line 413, ../../../patterns/scss/lib/_nav.scss */
+      /* line 397, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input:focus, nav.sidebar form input:hover {
         outline: none;
         border-color: #3a82ff; }
-      /* line 417, ../../../patterns/scss/lib/_nav.scss */
+      /* line 401, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input + span.input-button {
         display: block;
         float: right;
@@ -2905,7 +2885,7 @@ nav.sidebar {
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
         cursor: pointer; }
-        /* line 430, ../../../patterns/scss/lib/_nav.scss */
+        /* line 414, ../../../patterns/scss/lib/_nav.scss */
         nav.sidebar form input + span.input-button svg {
           display: inline-block;
           height: 1.25em;
@@ -2914,7 +2894,7 @@ nav.sidebar {
           margin-left: -0.15em;
           vertical-align: middle;
           fill: #b3becb; }
-        /* line 439, ../../../patterns/scss/lib/_nav.scss */
+        /* line 423, ../../../patterns/scss/lib/_nav.scss */
         nav.sidebar form input + span.input-button:hover {
           color: #f4f4f4;
           border-color: #3a82ff;
@@ -2922,7 +2902,7 @@ nav.sidebar {
           /* line 44, ../../../patterns/scss/lib/_mixins.scss */
           nav.sidebar form input + span.input-button:hover svg {
             fill: #f4f4f4; }
-      /* line 441, ../../../patterns/scss/lib/_nav.scss */
+      /* line 425, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input:focus + span.input-button, nav.sidebar form input:active + span.input-button {
         color: #f4f4f4;
         border-color: #3a82ff;
