@@ -347,61 +347,74 @@ section.features {
 
 /* Messages */
 
-.message { @extend %panel;
-    $color-sent: $color-primary;
-    $color-received: $color-grey;
+.message {  @extend %panel;
+    padding: 0;
+    $color-sent: lighten($color-primary, 5%);
+    $color-received: lighten($color-grey, 5%);
     $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
     @include span-columns(12);
-    & > section.meta {
+    .meta {
         display: block;
         width: 100%;
-        text-align: left;
+        padding: $base-vertical-rhythm/4;
+        @include border-top-radius($base-border-radius - 1);
         line-height: 1em;
+        text-align: left;
+        overflow: hidden;
         img {
-            max-width: 100%;
-            width: 50px;
+            display: none;
+            width: 25px;
             margin-bottom: 0;
         }
-        small {
-            display: block;
-            margin-top: 0.5em;
+        span {
+            display: inline-block;
+            padding: $base-vertical-rhythm/2;
+            &.name {
+                font-weight: bold;
+                // padding-left: 0;
+                float: left;
+            }
+            &.date {
+                // padding-right: 0;
+                float: right;
+            }
         }
         @include fill-parent();
-        @include media($message-layout) {
-            margin: $base-vertical-rhythm/2 0 $base-vertical-rhythm/2;
-            @include span-columns(2 of 12);
-            img { max-width: 100%; width: 100%; }
-        }
     }
     
-    & > section.text {
+    .body {
         display: block;
         @include fill-parent();
-        @include media($message-layout) {
-            @include span-columns(9 of 12);
-            @include shift(1 of 12);
-        } 
+        @extend %base-spacing;
+    }
+    
+    .attachments {
+        display: block;
+        width: 100%;
+        margin: $base-vertical-rhythm;
+        @extend %panel;
     }
 
     &.received {
         border-color: $color-received;
-        > section.text { border-top-color: $color-received; }
-        /*@include media($large-layout) {
-            > section.meta {
-                float: right;
-                @include pad(0 0 0 default);
-            }
-        }*/
+        .meta { background-color: $color-received; }
+        .attachments { @include panel-color($color-received); }
+        @include media($medium-layout) {
+            @include span-columns(10);
+            @include shift(2);
+        }
     }
     
     &.sent {
         border-color: $color-sent;
-        > section.text { border-top-color: $color-sent; }
-        /*@include media($large-layout) {
-            > section.meta {
-                text-align: right;
-            }
-        }*/
+        .meta {
+            color: $color-white;
+            background-color: $color-sent;
+        }
+        .attachments { @include panel-color($color-sent); }
+        @include media($medium-layout) {
+            @include span-columns(10 of 12);
+        }
     }
 }
 
