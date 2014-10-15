@@ -150,55 +150,6 @@
     {% if foia.public_documents %}
     <section class="tab-section documents" id="docs">
         <div id="viewer"></div>
-        <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
-        <script type="text/javascript">
-            function display_doc(doc_id) {
-                $("#tabs").tabs("select", "tabs-documents");
-                DV.load('https://www.documentcloud.org/documents/' + doc_id + '.js', {
-                    width: 627,
-                    height: 600,
-                    sidebar: false,
-                    container: "#viewer"
-                });
-                var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
-                var embed_code1 = '<a href="https://www.muckrock.com{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
-                $('textarea#embed0').val(embed_code0);
-                $('textarea#embed1').val(embed_code1);
-            }
-
-            function get_thumbnail(doc_id) {
-                var idx = doc_id.indexOf('-');
-                var num = doc_id.slice(0, idx);
-                var name = doc_id.slice(idx + 1);
-                return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
-            }
-
-            function doc_load() {
-                var default_doc_id = "{{foia.public_documents.0.doc_id}}";
-                if (!doc_load.loaded) {
-                    doc_load.loaded = true;
-                    display_doc(default_doc_id);
-                }
-            }
-
-            $(function() {
-                var hash = window.location.hash.substring(1);
-                var default_doc_id = "{{foia.public_documents.0.doc_id}}";
-                var documents = [ {% for doc in foia.public_documents %}"{{doc.doc_id}}", {% endfor %} ];
-
-                if (!hash || ($.inArray(hash, documents) == -1)) {
-                    doc_id = default_doc_id;
-                } else {
-                    doc_id = hash;
-                }
-                if (hash && hash.substring(0,4) != "tabs") {
-                    $("#tabs").tabs("select", "#tabs-documents");
-                    display_doc(doc_id);
-                    doc_load.loaded = true;
-                }
-            });
-        </script>
-        
         {% if foia.public_documents|length > 1 %}
         <div class="dc-thumbnails">
             <ul class="dc-thumbnails">
@@ -231,8 +182,11 @@
 {% endblock main %}
 
 {% block scripts %}
+<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
+    
+        /* Tab Bar */
     
         function hideAllExcept(visible) {
             $('.tab-section').removeClass( 'active' );
@@ -255,6 +209,55 @@
         $('#notes-radio').change(function() {
             hideAllExcept($('#notes'));
         });
+        
+        /* Documents */
+        
+        function display_doc(doc_id) {
+            $("#tabs").tabs("select", "tabs-documents");
+            DV.load('https://www.documentcloud.org/documents/' + doc_id + '.js', {
+                width: 627,
+                height: 600,
+                sidebar: false,
+                container: "#viewer"
+            });
+            var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
+            var embed_code1 = '<a href="https://www.muckrock.com{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+            $('textarea#embed0').val(embed_code0);
+            $('textarea#embed1').val(embed_code1);
+        }
+
+        function get_thumbnail(doc_id) {
+            var idx = doc_id.indexOf('-');
+            var num = doc_id.slice(0, idx);
+            var name = doc_id.slice(idx + 1);
+            return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+        }
+
+        function doc_load() {
+            var default_doc_id = "{{foia.public_documents.0.doc_id}}";
+            if (!doc_load.loaded) {
+                doc_load.loaded = true;
+                display_doc(default_doc_id);
+            }
+        }
+
+        $(function() {
+            var hash = window.location.hash.substring(1);
+            var default_doc_id = "{{ foia.public_documents.0.doc_id }}";
+            var documents = [ {% for doc in foia.public_documents %}"{{ doc.doc_id }}", {% endfor %} ];
+
+            if (!hash || ($.inArray(hash, documents) == -1)) {
+                doc_id = default_doc_id;
+            } else {
+                doc_id = hash;
+            }
+            if (hash && hash.substring(0,4) != "tabs") {
+                $("#tabs").tabs("select", "#tabs-documents");
+                display_doc(doc_id);
+                doc_load.loaded = true;
+            }
+        });
+        
     });
 </script>
 {% endblock scripts %}

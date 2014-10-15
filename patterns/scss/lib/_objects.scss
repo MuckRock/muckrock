@@ -231,7 +231,7 @@ fieldset {
 
 .form.subscription form fieldset { @extend %full; }
 
-.form.password-reset, object.password-change {
+.form.password-reset, .password-change {
     overflow: hidden;
     h1 { margin: 0 0 $base-vertical-rhythm/2; }
     form { @include pad(0 default 0 default); }
@@ -465,7 +465,7 @@ section.features {
 $progress-meter-border: $base-border-width solid darken($color-grey, 15%);
 $progress-animation-duration: 0.7s;
 
-object.progress-bar {
+.progress-bar {
     display: block;
     width: 100%;
     height: auto;
@@ -508,19 +508,22 @@ table {
 
 // Articles
 
-.post, .question, .request, .jurisdiction, .agency, .profile { @extend %article; }
+.post, .question, .request, .jurisdiction, .agency, .profile {
+    @extend %article;
+}
+
 .post {
     p:first-of-type {
         @include media($medium-layout) { @include font-sizing(1.2); }
     }
-    aside dl { @include span-columns(2 of 6); }
-    section { border-top: 0; }
 }
+
 .jurisdiction {
     h3 { font-weight: normal; }
     h3 + table { margin-top: 0; }
     h3 + h3 { margin-top: 1.5em; }
 }
+
 .agency {
     figure { @extend %full; }
     aside div.dl-group { @extend %full; @include pad(default 0 0 0);}
@@ -603,6 +606,7 @@ table {
 // Collections
 
 header.collection-header { @include outer-container(); }
+
 h1.list-label {
     @extend %full;
     font-weight: 300;
@@ -612,6 +616,7 @@ h1.list-label {
     margin-top: 0;
     margin-bottom: 0;
 }
+
 nav.pagination {
     @extend %full;
     ul {
@@ -635,16 +640,18 @@ nav.pagination {
     
 }
 
-object.collection { @extend %collection; }
-object.jurisidiction.collection, object.agency.collection {
-    h2, ul { text-align: center; }
-    ul {
-        width: 100%;
-        margin: 0;
-        li { padding: $base-vertical-rhythm/4; }
-        @media screen and (min-width: 540px) {
-            @include columns(3 $base-vertical-rhythm/2);
-            li:nth-child(even) { background: none; }
+.collection {
+    @extend %collection;
+    &.jurisdiction, &.agency {
+        h2, ul { text-align: center; }
+        ul {
+            width: 100%;
+            margin: 0;
+            li { padding: $base-vertical-rhythm/4; }
+            @media screen and (min-width: 540px) {
+                @include columns(3 $base-vertical-rhythm/2);
+                li:nth-child(even) { background: none; }
+            }
         }
     }
 }
@@ -657,9 +664,6 @@ ul.notifications {
     list-style-type: none;
     @extend %edge-to-edge;
     @include transition($menu-animation);
-    
-    
-    
     
     li.notification {
         display: table;
@@ -730,8 +734,6 @@ ul.notifications {
                 }
             }
         }
-        
-        
         
         @mixin colorize($color) {
             span.text { background-color: $color; }
