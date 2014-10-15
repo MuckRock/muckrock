@@ -485,7 +485,7 @@ FILER_STORAGES = {
     },
 }
 
-ALLOWED_HOSTS = ['muckrock.herokuapp.com', '.muckrock.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS')
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
