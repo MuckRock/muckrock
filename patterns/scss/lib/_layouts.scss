@@ -2,33 +2,29 @@
 
 %article {
     @extend %body;
-    > section.meta {
+    > .meta {
         @extend %row;
         header {
-            @include span-columns(8);
-            @include pad(0 default 0 0);
+            @extend %two-thirds;
             margin: $base-vertical-rhythm/2 0 0;
             h1, h2 { font-weight: 400; }
             h1 { @include font-sizing(1.5); }
             h2 { @include font-sizing(1); }
             @include media($medium-layout) {
+                padding-right: $base-vertical-rhythm;
                 h1 { @include font-sizing(1.75); }
                 h2 { @include font-sizing(1.25); }
             }
         }
         aside {
             @extend %third;
-            @extend %row;
-            @include pad(0 default 0 default);
             margin: $base-vertical-rhythm/2 0;
-            .dl-group { @include outer-container(); }
-            dl { @extend %full; }
             dl { margin-top: 0; }
         }
         .panel { width: 90%; } 
     }
     
-    > section.actions {
+    > .actions {
         form {
             list-style-type: none;
             padding: $base-vertical-rhythm/2;
@@ -38,14 +34,13 @@
         }
     }
     
-    > section.main {
+    > .main {
         @extend %full;
         padding-top: $base-vertical-rhythm;
     }
 
     summary { 
         font-weight: 300;
-        display: none;
         @include media($medium-layout) {
             display: block;
             @include font-sizing(1.25);
@@ -218,7 +213,7 @@
                 font-weight: 400;
             }
             &:hover {
-                background-color: rgba(255, 255, 255, 0.65);
+                background-color: rgba(254, 188, 16, 0.85);
             }
         }
         

@@ -363,14 +363,14 @@ th {
 html, body {
   min-height: 100%; }
 
-.post > section.meta, .question > section.meta, .request > section.meta, .jurisdiction > section.meta, .agency > section.meta, .profile > section.meta, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header, object.collection header, .new-request header {
+.post > .meta, .question > .meta, .request > .meta, .jurisdiction > .meta, .agency > .meta, .profile > .meta, .search.collection header, object.collection header, .new-request header {
   display: block; }
-  .post > section.meta:after, .question > section.meta:after, .request > section.meta:after, .jurisdiction > section.meta:after, .agency > section.meta:after, .profile > section.meta:after, .post > section.meta aside:after, .question > section.meta aside:after, .request > section.meta aside:after, .jurisdiction > section.meta aside:after, .agency > section.meta aside:after, .profile > section.meta aside:after, .search.collection header:after, object.collection header:after, .new-request header:after {
+  .post > .meta:after, .question > .meta:after, .request > .meta:after, .jurisdiction > .meta:after, .agency > .meta:after, .profile > .meta:after, .search.collection header:after, object.collection header:after, .new-request header:after {
     content: "";
     display: table;
     clear: both; }
 
-.form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .search.collection header h1, object.collection header h1, .form.search fieldset, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl, .post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main, .search.collection ul.object-list, object.collection ul.object-list {
+.form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary, .plan, .agency aside dl, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .search.collection header .commands, object.collection header .commands, .form input[type="submit"], .form.search input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .search.collection header h1, object.collection header h1, .form.search fieldset, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, object.password-change form fieldset, .form.search input[type="search"], .agency figure, .agency aside div.dl-group, .request .draft form .primary, h1.list-label, nav.pagination, .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .search.collection ul.object-list, object.collection ul.object-list {
   width: 100%; }
 
 .form h1, .form fieldset, .form.login ul, .request .draft form .default, .request .draft form .failure, .new-request header h1, .new-request header summary {
@@ -385,24 +385,24 @@ html, body {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
-  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands {
+  .plan, .agency aside dl, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .search.collection header .commands, object.collection header .commands {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child {
+    .plan:last-child, .agency aside dl:last-child, .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .plan, .agency aside dl, .post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside, .search.collection header .commands, object.collection header .commands {
+  .plan, .agency aside dl, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .search.collection header .commands, object.collection header .commands {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .plan:last-child, .agency aside dl:last-child, .post > section.meta aside:last-child, .question > section.meta aside:last-child, .request > section.meta aside:last-child, .jurisdiction > section.meta aside:last-child, .agency > section.meta aside:last-child, .profile > section.meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child {
+    .plan:last-child, .agency aside dl:last-child, .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .search.collection header .commands:last-child, object.collection header .commands:last-child {
       margin-right: 0; } }
-.plan:nth-child(3n), .agency aside dl:nth-child(3n), .post > section.meta aside:nth-child(3n), .question > section.meta aside:nth-child(3n), .request > section.meta aside:nth-child(3n), .jurisdiction > section.meta aside:nth-child(3n), .agency > section.meta aside:nth-child(3n), .profile > section.meta aside:nth-child(3n), .search.collection header .commands:nth-child(3n), object.collection header .commands:nth-child(3n) {
+.plan:nth-child(3n), .agency aside dl:nth-child(3n), .post > .meta aside:nth-child(3n), .question > .meta aside:nth-child(3n), .request > .meta aside:nth-child(3n), .jurisdiction > .meta aside:nth-child(3n), .agency > .meta aside:nth-child(3n), .profile > .meta aside:nth-child(3n), .search.collection header .commands:nth-child(3n), object.collection header .commands:nth-child(3n) {
   margin-right: 0; }
-.plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .post > section.meta aside:nth-child(3n+1), .question > section.meta aside:nth-child(3n+1), .request > section.meta aside:nth-child(3n+1), .jurisdiction > section.meta aside:nth-child(3n+1), .agency > section.meta aside:nth-child(3n+1), .profile > section.meta aside:nth-child(3n+1), .search.collection header .commands:nth-child(3n+1), object.collection header .commands:nth-child(3n+1) {
+.plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .post > .meta aside:nth-child(3n+1), .question > .meta aside:nth-child(3n+1), .request > .meta aside:nth-child(3n+1), .jurisdiction > .meta aside:nth-child(3n+1), .agency > .meta aside:nth-child(3n+1), .profile > .meta aside:nth-child(3n+1), .search.collection header .commands:nth-child(3n+1), object.collection header .commands:nth-child(3n+1) {
   clear: left; }
 
 @media screen and (min-width: 500px) {
@@ -435,20 +435,20 @@ html, body {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
-  .search.collection header h1, object.collection header h1 {
+  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .search.collection header h1, object.collection header h1 {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
-    .search.collection header h1:last-child, object.collection header h1:last-child {
+    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .search.collection header h1:last-child, object.collection header h1:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .search.collection header h1, object.collection header h1 {
+  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .search.collection header h1, object.collection header h1 {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
-    .search.collection header h1:last-child, object.collection header h1:last-child {
+    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .search.collection header h1:last-child, object.collection header h1:last-child {
       margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
@@ -1491,60 +1491,45 @@ ul.notifications {
         stroke: #d9c227; }
 
 /* Layouts */
-.post > section.meta header, .question > section.meta header, .request > section.meta header, .jurisdiction > section.meta header, .agency > section.meta header, .profile > section.meta header {
-  float: left;
-  display: block;
-  margin-right: 2.35765%;
-  width: 65.88078%;
-  padding: 0 2.35765% 0 0;
+.post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header {
   margin: 0.75em 0 0; }
-  .post > section.meta header:last-child, .question > section.meta header:last-child, .request > section.meta header:last-child, .jurisdiction > section.meta header:last-child, .agency > section.meta header:last-child, .profile > section.meta header:last-child {
-    margin-right: 0; }
-  .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1, .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
+  .post > .meta header h1, .question > .meta header h1, .request > .meta header h1, .jurisdiction > .meta header h1, .agency > .meta header h1, .profile > .meta header h1, .post > .meta header h2, .question > .meta header h2, .request > .meta header h2, .jurisdiction > .meta header h2, .agency > .meta header h2, .profile > .meta header h2 {
     font-weight: 400; }
-  .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
+  .post > .meta header h1, .question > .meta header h1, .request > .meta header h1, .jurisdiction > .meta header h1, .agency > .meta header h1, .profile > .meta header h1 {
     font-size: 1.5em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
+  .post > .meta header h2, .question > .meta header h2, .request > .meta header h2, .jurisdiction > .meta header h2, .agency > .meta header h2, .profile > .meta header h2 {
     font-size: 1em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
   @media screen and (min-width: 500px) {
-    .post > section.meta header h1, .question > section.meta header h1, .request > section.meta header h1, .jurisdiction > section.meta header h1, .agency > section.meta header h1, .profile > section.meta header h1 {
-      font-size: 1.75em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; }
-    .post > section.meta header h2, .question > section.meta header h2, .request > section.meta header h2, .jurisdiction > section.meta header h2, .agency > section.meta header h2, .profile > section.meta header h2 {
-      font-size: 1.25em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; } }
-.post > section.meta aside, .question > section.meta aside, .request > section.meta aside, .jurisdiction > section.meta aside, .agency > section.meta aside, .profile > section.meta aside {
-  padding: 0 2.35765% 0 2.35765%;
+    .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header {
+      padding-right: 1.5em; }
+      .post > .meta header h1, .question > .meta header h1, .request > .meta header h1, .jurisdiction > .meta header h1, .agency > .meta header h1, .profile > .meta header h1 {
+        font-size: 1.75em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; }
+      .post > .meta header h2, .question > .meta header h2, .request > .meta header h2, .jurisdiction > .meta header h2, .agency > .meta header h2, .profile > .meta header h2 {
+        font-size: 1.25em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
+.post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside {
   margin: 0.75em 0; }
-  .post > section.meta aside .dl-group, .question > section.meta aside .dl-group, .request > section.meta aside .dl-group, .jurisdiction > section.meta aside .dl-group, .agency > section.meta aside .dl-group, .profile > section.meta aside .dl-group {
-    max-width: 68em;
-    margin-left: auto;
-    margin-right: auto; }
-    .post > section.meta aside .dl-group:after, .question > section.meta aside .dl-group:after, .request > section.meta aside .dl-group:after, .jurisdiction > section.meta aside .dl-group:after, .agency > section.meta aside .dl-group:after, .profile > section.meta aside .dl-group:after {
-      content: "";
-      display: table;
-      clear: both; }
-  .post > section.meta aside dl, .question > section.meta aside dl, .request > section.meta aside dl, .jurisdiction > section.meta aside dl, .agency > section.meta aside dl, .profile > section.meta aside dl {
+  .post > .meta aside dl, .question > .meta aside dl, .request > .meta aside dl, .jurisdiction > .meta aside dl, .agency > .meta aside dl, .profile > .meta aside dl {
     margin-top: 0; }
-.post > section.meta .panel, .question > section.meta .panel, .request > section.meta .panel, .jurisdiction > section.meta .panel, .agency > section.meta .panel, .profile > section.meta .panel {
+.post > .meta .panel, .question > .meta .panel, .request > .meta .panel, .jurisdiction > .meta .panel, .agency > .meta .panel, .profile > .meta .panel {
   width: 90%; }
-.post > section.actions form, .question > section.actions form, .request > section.actions form, .jurisdiction > section.actions form, .agency > section.actions form, .profile > section.actions form {
+.post > .actions form, .question > .actions form, .request > .actions form, .jurisdiction > .actions form, .agency > .actions form, .profile > .actions form {
   list-style-type: none;
   padding: 0.75em;
   border: 1px solid #b3becb;
   border-radius: 9px;
   background-color: #dbdbdb; }
-.post > section.main, .question > section.main, .request > section.main, .jurisdiction > section.main, .agency > section.main, .profile > section.main {
+.post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main {
   padding-top: 1.5em; }
 .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
-  font-weight: 300;
-  display: none; }
+  font-weight: 300; }
   @media screen and (min-width: 500px) {
     .post summary, .question summary, .request summary, .jurisdiction summary, .agency summary, .profile summary {
       display: block;
@@ -1708,7 +1693,7 @@ ul.notifications {
         margin: 0.30556em 0;
         font-weight: 400; }
       .homepage .featured-article a:hover {
-        background-color: rgba(255, 255, 255, 0.65); }
+        background-color: rgba(254, 188, 16, 0.85); }
     @media all and (min-width: 600px) {
       .homepage .featured-article {
         display: table-cell;

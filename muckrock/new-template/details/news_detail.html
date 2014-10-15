@@ -28,7 +28,7 @@
     <dl>
 	    <dt>Related Requests</dt>
 	    {% for foia in article.foias.all %}
-		<dd><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></dd>
+		<dd>&bull;&nbsp;<a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></dd>
 		{% endfor %}
 	</dl>
 	{% endif %}

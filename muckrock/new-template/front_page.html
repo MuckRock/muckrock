@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
 {% load humanize %}
+{% load static from staticfiles %}
 
 {% block content %}
 <div class="homepage">
-    <section class="banner" style="background-image: url('{{ SITE_ROOT }}/static/img/homepage.jpg');">
+    <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
         <div>
             <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
             <p><a href="{% url 'foia-create' %}" class="primary button">Create a request</a> or <a href="#" class="dotted" id="learn-more">learn how we work.</a></p>
@@ -26,7 +27,7 @@
                 </div>
             </a>
         </section>
-        <section class="stats" style="background-image:url('{{ SITE_ROOT }}/static/img/stat-bg.png');">
+        <section class="stats" style="background-image:url('{% static 'img/stat-bg.png' %}');">
             <ul>
                 <li><span class="stat">{{ num_requests|intcomma }}</span> request{{ num_requests|pluralize }} filed</li>
                 <li><span class="stat">{{ num_completed_requests|intcomma }}</span> request{{ num_completed_requests|pluralize }} completed  succesfully</li>

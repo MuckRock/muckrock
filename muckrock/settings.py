@@ -88,8 +88,8 @@ if not DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
-    STATIC_URL = 'https://muckrock.s3.amazonaws.com/'
-    MEDIA_URL = 'https://muckrock.s3.amazonaws.com/media/'
+    STATIC_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'
+    MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
