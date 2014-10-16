@@ -1,0 +1,96 @@
+/* Details */
+
+.post, .question, .request, .jurisdiction, .agency, .profile {
+    @extend %article;
+}
+
+.post {
+    p:first-of-type {
+        @include media($medium-layout) { @include font-sizing(1.2); }
+    }
+}
+
+.jurisdiction {
+    h3 { font-weight: normal; }
+    h3 + table { margin-top: 0; }
+    h3 + h3 { margin-top: 1.5em; }
+}
+
+.agency {
+    figure { @extend %full; }
+    aside div.dl-group { @extend %full; @include pad(default 0 0 0);}
+    aside dl { @extend %third; @include omega(3n); }
+    //aside dd > small { text-transform: uppercase; }
+    aside dd + dt { margin-top: $base-vertical-rhythm; }
+}
+.profile {
+    section.meta > header {
+        h1 { 
+            @include font-sizing(3);
+            margin-top: 0;
+            font-weight: 300;
+        }
+        dl { margin-top: $base-vertical-rhythm; }
+    }
+}
+.request {
+    .draft form {
+        width: 100%;
+        padding: $base-vertical-rhythm/2;
+        border: $base-border-width solid $color-grey;
+        border-radius: $base-border-radius;
+        background-color: darken($color-white, 10%);
+        @include outer-container;
+        .primary { display: block; @extend %full; }
+        .default, .failure { display: block; @extend %half; }
+    }
+    .edit {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 400;
+        text-transform: none;
+        letter-spacing: 0;
+        line-height: 1rem;
+        color: $color-primary;
+        &:hover {
+            color: darken($color-primary, 10%);
+        }
+    }
+    .tag {
+        display: inline-block;
+        padding: 0 $base-vertical-rhythm/4;
+        &:first-of-type { padding-left: 0; }
+    }
+    .tabs {
+        list-style-type: none;
+        overflow: hidden;
+        padding-left: $base-vertical-rhythm;
+        input[type="radio"] { display: none; }
+        label {
+            display: block;
+            float: left;
+            margin: 0 0 2*-$base-border-width;
+            padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+            border: $base-border-width solid $color-grey;
+            border-left: none;
+            border-bottom: none;
+            &:first-of-type {
+                border-top-left-radius: $base-border-radius;
+                border-left: $base-border-width solid $color-grey;
+            }
+            &:last-of-type {
+                border-top-right-radius: $base-border-radius;
+            }
+            &.active {
+                color: white;
+                background-color: $color-grey;
+            }
+        }
+
+    }
+    .tab-section {
+        display: none;
+        border-top: $base-border-width solid $color-grey;
+        &.active { display: block; }
+    }
+}

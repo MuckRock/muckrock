@@ -1,0 +1,130 @@
+.homepage {
+    overflow: hidden;
+    @extend %edge-to-edge;
+    .homepage-row { display: table-row; }
+    .banner {
+        display: block;
+        height: 23em;
+        width: 100%;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        color: $color-white;
+        @include media($medium-layout) {
+            height: 35em;
+        }
+        h1 {
+            max-width: 12em;
+            color: $color-white;
+            font-weight: 700;
+            @include font-sizing(1.75, 3);
+            margin: 0 auto $base-vertical-rhythm;
+            @include media($medium-layout) {
+                max-width: 18em;
+                @include font-sizing(2.5, 3);
+                margin: 0 auto $base-vertical-rhythm;
+            }
+            @include media($large-layout) {
+                @include font-sizing(3, 3);
+                margin: 0 auto 1.5*$base-vertical-rhythm;
+            }
+        }
+        div {
+            height: 100%;
+            @extend %base-spacing;
+            @include background(
+                linear-gradient(
+                    rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)
+            ));
+            font-weight: 700;
+            text-align: center;
+            padding-top: 3.5em;
+            @include media($medium-layout) {
+                padding-top: 7.5em;
+            }
+        }
+        a.dotted {
+            color: $color-white;
+            text-decoration: none;
+            border-bottom: 1px dotted $color-white;
+            &:hover {
+                border-bottom: 1px solid $color-white;
+            }
+        }
+        .button {
+            display: block;
+            margin: 0 auto $base-vertical-rhythm/4;
+            width: 65%;
+            clear: both;
+            @include media($medium-layout) {
+                display: inline-block;
+                width: auto;
+                margin: 0 $base-vertical-rhythm/4 0 0;
+            }
+        }
+        .image-attribution {
+            position: absolute;
+            bottom: $base-vertical-rhythm;
+            right: $base-vertical-rhythm;
+            color: $color-white;   
+        }
+        #learn-more {
+            margin-left: $base-vertical-rhythm/4;
+        }
+    }
+    
+    .featured-article {
+        width: 100%;
+        a {
+            display: block;
+            padding: 3*$base-vertical-rhythm $base-vertical-rhythm;
+            text-decoration: none;
+            color: $color-black;
+            background-color: rgba(254, 188, 16, 0.65);
+            dfn { color: $color-black; }
+            h1 {
+                @include font-sizing(2, 3);
+                font-weight: 700;
+            }
+            h2 {
+                @include font-sizing(1.2, 3);
+                font-weight: 400;
+            }
+            &:hover {
+                background-color: rgba(254, 188, 16, 0.85);
+            }
+        }
+        
+        background-size: cover;
+        background-position: center;
+        
+        @media all and (min-width: 600px) {
+            display: table-cell;
+            width: 60%;
+        }
+    }
+    
+    .stats {
+        $color-stats: #2B1E5E;
+        width: 100%;
+        @extend %base-spacing;
+        color: $color-white;
+        @include background(radial-gradient($color-stats, darken($color-stats, 5%)));
+        font-weight: 400;
+        ul { list-style-type: none; padding-left: 0; }
+        li { margin: $base-vertical-rhythm/2 0; }
+        span {
+            display: block;
+            @include font-sizing(2, 3);
+            margin-bottom: 0;
+            font-weight: 300;
+        }  
+        @media all and (min-width: 600px) {
+            display: table-cell;
+            width: 40%;
+        }
+        
+    }
+    
+    .footer-container { padding: 0 $base-vertical-rhythm; }
+}

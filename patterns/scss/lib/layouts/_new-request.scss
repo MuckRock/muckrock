@@ -1,0 +1,191 @@
+.new-request {
+    // @extend %edge-to-edge;
+    display: block;
+    overflow: hidden;
+    // border: $base-border-width solid darken($color-grey, 10%);
+    header {
+        @extend %row;
+        // padding: 0 $base-vertical-rhythm;
+        margin-bottom: $base-vertical-rhythm;
+        h1 {
+            @extend %half;
+            @include font-sizing(2.5, 3);
+            margin: 0;
+            font-weight: 300;
+        }
+        summary {
+            @extend %half;
+        }
+    }
+    
+    fieldset {
+        margin: 0;
+        padding: $base-vertical-rhythm;
+    }
+    
+    
+    
+    $color-title: #F26C5A;
+    $color-jurisdiction: #5A90F2;
+    .title {
+        @include border-top-radius($base-border-radius);
+        background-color: $color-title;
+        label { display: none; }
+        input {
+            width: 100%;
+            background-color: $color-title;
+            padding: 0;
+            border: none;
+            border-radius: 0;
+            border-bottom: 2*$base-border-width dotted lighten($color-title, 20%);
+            @include font-sizing(2,3);
+            @include placeholder { color: lighten($color-title, 15%); }
+            color: $color-white; // darken($color-title, 45%);
+        }
+    }
+    
+    .document {
+        padding: 0;
+        label { display: none; }
+        textarea {
+            display: block;
+            width: 100%;
+            height: 10em;
+            padding: $base-vertical-rhythm;
+            resize: none;
+            border: none;
+            border-radius: 0; 
+        }
+    }
+    
+    .jurisdiction {
+        padding: 0;
+        color: $color-white;
+        background-color: $color-jurisdiction;
+        width: 100%;
+        h2 { margin: 0; }
+        ul {
+            display: table;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            display: table-cell;
+            text-align: center;
+            width: 33%;
+            padding: $base-vertical-rhythm/2;
+            border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
+            &:last-child { border-right: none; }
+            svg {
+                display: block;
+                margin: 0 auto;
+                fill: $color-white;
+                width: auto;
+                &#icon-federal { height: 3em; }
+                &#icon-state { height: 2.5em; margin-top: 0.5em; }
+                &#icon-local { height: 2.25em; margin-top: 0.75em; }
+            }
+        }
+        label {
+            color: $color-white;
+            @include font-sizing(1);
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+        }
+    }
+    
+    $color-jurisdiction-picker: darken($color-jurisdiction, 10%); 
+    fieldset.state, fieldset.local {
+        width: 100%;
+        background-color: $color-jurisdiction-picker;
+        label { display: none; }
+        input {
+            display: block;
+            width: 100%;
+        }
+        &.hidden { visibility: hidden; }
+        &.visible { visibility: visible; }
+    }
+    
+    $color-agency: darken($color-jurisdiction-picker, 10%);
+    .agency {
+        overflow: hidden;
+        margin: 0;
+        width: 100%;
+        color: $color-white;
+        background-color: $color-agency;
+        &:disabled {
+            background-color: $color-disabled;
+            color: darken($color-white, 2%);
+            label { display: none; }
+        }
+        label {
+            display: block;
+            @extend dfn;
+            color: $color-white;
+            margin: 0;
+            font-weight: 300;
+            font-size: 1rem;
+        }
+        input {
+            width: 100%;
+            background-color: $color-agency;
+            border: none;
+            border-bottom: 2*$base-border-width dotted lighten($color-agency, 20%);
+            padding-left: 0;
+            border-radius: 0;
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
+            margin: 0;
+            @include placeholder { color: $color-jurisdiction; }
+            &:disabled {
+                @include placeholder { color: darken($color-white, 2%); }
+                background: $color-disabled;
+                border-bottom: none;
+                text-align: left;
+                padding-left: 0;
+                &:hover { padding-left: 0; }
+            }
+        }
+            
+    }
+    
+    .autocomplete-light-widget {
+        display: block;
+        width: 100%;
+        span.deck > span {
+            @include font-sizing(1.25, 3);
+            color: $color-white;
+            display: block;
+            width: 100%;
+            margin: 0;
+            &:before {
+                content: "Jurisdiction";
+                display: block;
+                @extend dfn;
+                color: $color-white;
+                margin: 0;
+                font-weight: 300;
+                font-size: 1rem;
+            }
+            span.remove {
+                float: right;
+            }
+        }
+    }
+   
+    footer {
+        @include border-bottom-radius($base-border-radius);
+        overflow: hidden;
+        padding: $base-vertical-rhythm;
+        background-color: $color-grey;
+        width: 100%;
+        overflow: hidden;
+        input { float: left; }
+    }
+    
+}

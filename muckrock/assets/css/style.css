@@ -1116,7 +1116,21 @@ td {
   /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
   .message:last-child {
     margin-right: 0; }
+<<<<<<< HEAD
+  @media screen and (min-width: 500px) {
+    /* line 3, ../../../patterns/scss/lib/objects/_messages.scss */
+    .message {
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 82.94039%; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .message:last-child {
+        margin-right: 0; } }
+  /* line 10, ../../../patterns/scss/lib/objects/_messages.scss */
+=======
   /* line 9, ../../../patterns/scss/lib/objects/_messages.scss */
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
   .message .meta {
     display: block;
     width: 100%;
@@ -1127,11 +1141,33 @@ td {
     text-align: left;
     overflow: hidden;
     width: 100%; }
+<<<<<<< HEAD
+    /* line 18, ../../../patterns/scss/lib/objects/_messages.scss */
+=======
     /* line 17, ../../../patterns/scss/lib/objects/_messages.scss */
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
     .message .meta img {
       display: none;
       width: 25px;
       margin-bottom: 0; }
+<<<<<<< HEAD
+    /* line 23, ../../../patterns/scss/lib/objects/_messages.scss */
+    .message .meta span {
+      display: inline-block;
+      padding: 0.75em; }
+      /* line 26, ../../../patterns/scss/lib/objects/_messages.scss */
+      .message .meta span.name {
+        font-weight: bold;
+        float: left; }
+      /* line 31, ../../../patterns/scss/lib/objects/_messages.scss */
+      .message .meta span.date {
+        float: right; }
+  /* line 39, ../../../patterns/scss/lib/objects/_messages.scss */
+  .message .body {
+    display: block;
+    width: 100%; }
+  /* line 45, ../../../patterns/scss/lib/objects/_messages.scss */
+=======
     /* line 22, ../../../patterns/scss/lib/objects/_messages.scss */
     .message .meta span {
       display: inline-block;
@@ -1148,10 +1184,20 @@ td {
     display: block;
     width: 100%; }
   /* line 44, ../../../patterns/scss/lib/objects/_messages.scss */
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
   .message .attachments {
     display: block;
     width: 100%;
     margin: 1.5em; }
+<<<<<<< HEAD
+  /* line 52, ../../../patterns/scss/lib/objects/_messages.scss */
+  .message.received {
+    border-color: #c2cbd5; }
+    /* line 54, ../../../patterns/scss/lib/objects/_messages.scss */
+    .message.received .meta {
+      background-color: #c2cbd5; }
+    /* line 55, ../../../patterns/scss/lib/objects/_messages.scss */
+=======
   /* line 51, ../../../patterns/scss/lib/objects/_messages.scss */
   .message.received {
     border-color: #c2cbd5; }
@@ -1159,6 +1205,7 @@ td {
     .message.received .meta {
       background-color: #c2cbd5; }
     /* line 54, ../../../patterns/scss/lib/objects/_messages.scss */
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
     .message.received .attachments {
       color: #f4f4f4;
       background: #c2cbd5;
@@ -1166,6 +1213,19 @@ td {
       background: linear-gradient(#c2cbd5, #aab6c5);
       border-color: #a4b1c1; }
     @media screen and (min-width: 500px) {
+<<<<<<< HEAD
+      /* line 52, ../../../patterns/scss/lib/objects/_messages.scss */
+      .message.received {
+        margin-left: 17.05961%; } }
+  /* line 59, ../../../patterns/scss/lib/objects/_messages.scss */
+  .message.sent {
+    border-color: #5492ff; }
+    /* line 61, ../../../patterns/scss/lib/objects/_messages.scss */
+    .message.sent .meta {
+      color: #f4f4f4;
+      background-color: #5492ff; }
+    /* line 65, ../../../patterns/scss/lib/objects/_messages.scss */
+=======
       /* line 51, ../../../patterns/scss/lib/objects/_messages.scss */
       .message.received {
         float: left;
@@ -1184,12 +1244,15 @@ td {
       color: #f4f4f4;
       background-color: #5492ff; }
     /* line 67, ../../../patterns/scss/lib/objects/_messages.scss */
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
     .message.sent .attachments {
       color: #f4f4f4;
       background: #5492ff;
       background: -webkit-linear-gradient(#5492ff, #2b78ff);
       background: linear-gradient(#5492ff, #2b78ff);
       border-color: #2172ff; }
+<<<<<<< HEAD
+=======
     @media screen and (min-width: 500px) {
       /* line 61, ../../../patterns/scss/lib/objects/_messages.scss */
       .message.sent {
@@ -1200,6 +1263,7 @@ td {
         /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
         .message.sent:last-child {
           margin-right: 0; } }
+>>>>>>> 247606fcf1e69327b26beee9c7bf40ade521e1e9
 
 /* Notifications */
 /* line 3, ../../../patterns/scss/lib/objects/_notifications.scss */
