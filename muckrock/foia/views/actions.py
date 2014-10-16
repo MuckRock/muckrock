@@ -48,7 +48,7 @@ def _foia_action(request, foia, action):
     form_class = action.form_class(request, foia)
     # Check that the request belongs to the user
     if action.must_own and foia.user != request.user:
-        msg = 'You may only %s your own requests' % action.msg
+        msg = 'You may only %s your own requests.' % action.msg
         messages.error(request, msg)
         return redirect(foia)
     # Check that the action is valid
@@ -111,7 +111,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
     def form_actions(request, foia, _):
         foia.delete()
-        messages.info(request, 'Request succesfully deleted')
+        messages.info(request, 'Request succesfully deleted.')
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,

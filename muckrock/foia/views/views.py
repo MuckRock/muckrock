@@ -359,18 +359,30 @@ class Detail(DetailView):
         actions = {
             'status': self._status,
             'tags': self._tags,
+            'Submit': self._submit,
             'Follow Up': self._follow_up,
             'Get Advice': self._question,
             'Problem?': self._flag,
             'Appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
-            'resend_comm': resend_comm,
+            'resend_comm': resend_comm
         }
         try:
+            print request.POST['action']
             return actions[request.POST['action']](request, foia)
         except KeyError: # if submitting form from web page improperly
             return redirect(foia)
+    
+    def _submit(self, request, foia):
+        """Submit request for user"""
+        if foia.user == request.user:
+            foia.status = 'submitted'
+            foia.save()
+            messages.success(request, 'Your request was submitted.')
+        else:
+            messages.error(request, 'Only a request\'s owner may submit it.')
+        return redirect(foia)
 
     def _tags(self, request, foia):
         """Handle updating tags"""

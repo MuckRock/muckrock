@@ -538,6 +538,10 @@ class FOIARequest(models.Model):
                   'idx': self.pk, 'slug': self.slug}
 
         linked_actions = [
+            (user.is_authenticated,
+            reverse('foia-clone', kwargs=kwargs),
+            'Clone'
+            ),
             (user.is_staff,
             reverse('admin:foia_foiarequest_change', args=(self.pk,)),
             'Admin'
@@ -584,10 +588,6 @@ class FOIARequest(models.Model):
             (self.user == user and self.is_appealable(),
             'Appeal',
             'Submit an appeal'
-            ),
-            (self.public_documents(),
-            'Embed',
-            'Embed this Document'
             ),
         ]
                               

@@ -147,7 +147,6 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                     user=request.user,
                     approved=False
                 )
-                '''
                 send_mail(
                     '[AGENCY] %s' % foia.agency.name,
                     render_to_string(
@@ -158,7 +157,6 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                     ['requests@muckrock.com'],
                     fail_silently=False
                 )
-                '''
                 is_new_agency = True
             
             foia.save

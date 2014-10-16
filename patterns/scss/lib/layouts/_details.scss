@@ -34,15 +34,16 @@
     }
 }
 .request {
-    .draft form {
+    aside form {
         width: 100%;
         padding: $base-vertical-rhythm/2;
+        margin-top: $base-vertical-rhythm/2;
         border: $base-border-width solid $color-grey;
         border-radius: $base-border-radius;
         background-color: darken($color-white, 10%);
         @include outer-container;
         .primary { display: block; @extend %full; }
-        .default, .failure { display: block; @extend %half; }
+        button, .default, .failure { display: block; @extend %half; }
     }
     .edit {
         display: inline-block;
@@ -92,5 +93,24 @@
         display: none;
         border-top: $base-border-width solid $color-grey;
         &.active { display: block; }
+    }
+    .documents {
+        .dc-thumbnails {
+            list-style-type: 0;
+            padding-left: 0;
+            li { @extend %quarter; }
+            a {
+                display: block;
+                overflow: hidden;
+                padding: $base-vertical-rhythm/2;
+                border: $base-border-width solid $color-primary;
+                border-radius: $base-border-radius;
+                img {
+                    display: block;
+                    float: left;
+                    margin: 0 $base-vertical-rhythm 0 0;
+                }
+            }
+        }
     }
 }
