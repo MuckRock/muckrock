@@ -2,48 +2,43 @@
 {% block title %}MuckRock &bull; Search{% endblock title %}
 
 {% block content %}
-    
-    <h1 class="list-label">Search</h1>
 
-    <object class="search">
-        <form method="get" action="." class="search-form">
-            <input type="search" name="q">
-            <fieldset>
-                <ul> 
-                    <li><label for="id_models_0"><input type="checkbox" name="models" value="news.article" id="id_models_0" /> News</label></li> 
-                    <li><label for="id_models_1"><input type="checkbox" name="models" value="foia.foiarequest" id="id_models_1" /> Requests</label></li>
-                    <li><label for="id_models_2"><input type="checkbox" name="models" value="qanda.question" id="id_models_2" /> Questions</label></li> 
-                </ul> 
-            </fieldset>
-            <input type="submit" value="Search" class="primary button">
-        </form>
-    </object>
+    <form method="get" action="." class="search form">
+        <div class="top">
+            <input type="search" name="q" value="{{query}}" />
+            <input type="submit" value="Search" class="primary button" />
+        </div>
+        <!--
+        <dfn>Filter</dfn>
+        <ul> 
+            <li><input type="checkbox" name="models" value="news.article" id="id_models_0" /><label for="id_models_0">News</label></li> 
+            <li><input type="checkbox" name="models" value="foia.foiarequest" id="id_models_1" /><label for="id_models_1">Requests</label></li>
+            <li><input type="checkbox" name="models" value="qanda.question" id="id_models_2" /><label for="id_models_2">Questions</label></li> 
+        </ul>
+        -->
+    </form>
     
     {% if query %}
         {% if page.object_list %}
-            <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-            {% if page.paginator.num_pages == 1 %}
-                <h3><small>Showing all results</small></h3>
-            {% else %}
-                <h3><small>Showing results {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}</small></h3>
-            {% endif %}
-            {% with page.object_list as page_obj %}
-                {% include 'lib/pagination.html' %}
-            {% endwith %}
-            
-            <ul class="search collection">
+    <header class="search meta">
+        <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
+        {% with page.object_list as page_obj %}
+            {% include 'lib/pagination.html' %}
+        {% endwith %}
+    </header>
+    <ul class="search collection">
             {% for result in page.object_list %}
-                <li>
-                    <h2>{{ result.object.pub_date|date:"F m, Y" }}</h2>
-                    <h1><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></h1>
-                    {% if result.object.user %}
-                    <h2>{{ result.object.user.get_full_name }}</h2>
-                    {% else %}
-                    <h2>{{ result.object.get_authors_names }}</h2>
-                    {% endif %}
-                </li>
-            {% endfor %}
-            </ul>
+        <li>
+            <h2>{{ result.object.pub_date|date:"F m, Y" }}</h2>
+            <h1><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></h1>
+            {% if result.object.user %}
+            <h2>{{ result.object.user.get_full_name }}</h2>
+            {% else %}
+            <h2>{{ result.object.get_authors_names }}</h2>
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
             
             {% with page.object_list as page_obj %}
                 {% include 'lib/pagination.html' %}

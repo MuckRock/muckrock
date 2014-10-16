@@ -238,44 +238,67 @@ fieldset {
     form fieldset { @extend %full; }
 }
 
-.form.search {
-    @include box-sizing(border-box); 
+.search {
     display: block;
-    margin: $base-vertical-rhythm 0;
-    padding: $base-vertical-rhythm;
-    border: $base-border-width solid $color-grey;
-    border-radius: $base-border-radius;
-    form { width: 100%; }
-    fieldset { margin: $base-vertical-rhythm/2 0 0; }
-    input[type="submit"] { margin-top: $base-vertical-rhythm/2; }
-    ul {
-        margin: 0;
-        padding: 0;
+    width: 100%;
+    &.form {
+        @extend %body;
+        
+        .top { @extend %row; }
+        
+        input[type="search"] {
+            @extend %three-quarters;
+        }
+        input[type="submit"] {
+            @extend %quarter;
+            display: block;
+            margin: $base-vertical-rhythm 0;
+            @include media($large-layout) {
+                margin: 0;
+            }
+        }
+        
+        dfn {
+            margin-top: $base-vertical-rhythm;
+            padding-left: $base-vertical-rhythm/2;
+        }
+        ul { @extend %row; }
+        li { display: inline-block; }
+                
+        label {
+            padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+            border-radius: $base-border-radius;
+            &:hover {
+                background-color: lighten($color-primary, 30%);
+            }
+        }
+        
+        input[type="checkbox"] {
+            display: none;
+            &:checked + label {
+                color: $color-white;
+                background-color: $color-primary;
+            }
+        }
     }
-    li {
-        display: inline-block;
-        padding: 0 $base-vertical-rhythm 0 0;
-        &:last-child { padding-right: 0; }
+    
+    &.meta { 
+        @extend %body;
+        h2 { @extend %full; }
     }
-    form { @include outer-container(); }
-    input[type="search"] { @extend %full; }
-    fieldset { @extend %three-quarters; }
-    input[type="submit"] {
-        @extend %quarter;
+    
+    &.collection {
+        @extend %collection;
+        margin: 0 0 $base-vertical-rhythm 0;
+        list-style-type: none;
+        padding-left: 0;
+        h1 {
+            @include font-sizing(1.25, 3);
+            font-weight: 400;
+            max-width: 33em;
+        }
+        h2 { @include font-sizing(1, 2); }
     }
-}
-
-.search.collection { @extend %collection;
-    margin: $base-vertical-rhythm 0;
-    list-style-type: none;
-    padding-left: 0;
-    h1 {
-        @include font-sizing(1.25, 3);
-        font-weight: 400;
-        max-width: 33em;
-    }
-    h2 { @include font-sizing(1, 2); }
-    // li { @extend %third; @include omega(3n); }
 }
 
 section.features {
