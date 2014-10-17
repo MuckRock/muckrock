@@ -299,7 +299,6 @@ def create_request(request):
                 return redirect(foia)
             messages.error(request, 'Sorry, something went wrong. We have top men on it.')
             '''
-            messages.success(request, 'Your request has been created.')
             return redirect(foia)
     else:
         if clone or request.GET.get('s', False):
