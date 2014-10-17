@@ -11,7 +11,7 @@ autocomplete_light.register(
     choices=Jurisdiction.objects.filter(level='l', hidden=False),
     attrs={
         'placeholder': 'City name?',
-        'data-autocomplete-minimum-characters': 1
+        'data-autocomplete-minimum-characters': 3
     }
 )
 
@@ -22,5 +22,15 @@ autocomplete_light.register(
     attrs={
         'placeholder': 'State name?',
         'data-autocomplete-minimum-characters': 1
+    }
+)
+
+autocomplete_light.register(
+    Jurisdiction,
+    name='JurisdictionAutocomplete',
+    choices=Jurisdiction.objects.filter(hidden=False),
+    attrs={
+        'placeholder': 'Jurisdiction',
+        'data-autocomplete-minimum-characters': 3
     }
 )
