@@ -72,7 +72,6 @@ def _make_request(request, foia):
                 user=request.user,
                 approved=False
             )
-            '''
             send_mail(
                 '[AGENCY] %s' % foia.agency.name,
                 render_to_string(
@@ -83,7 +82,6 @@ def _make_request(request, foia):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            '''
         foia = FOIARequest.objects.create(
             user=request.user,
             status='started',

@@ -33,6 +33,7 @@ from muckrock.foia.forms import FOIARequestForm, \
                                 AgencyConfirmForm, \
                                 FOIAMultiRequestForm, \
                                 TEMPLATES
+from muckrock.foia.new_forms import ListFilterForm
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
@@ -126,14 +127,26 @@ class ListBase(ListView):
     def get_context_data(self, **kwargs):
         context = super(ListBase, self).get_context_data(**kwargs)
         context['title'] = 'FOI Requests'
+        context['filters'] = ListFilterForm()
         return context
-
+    
+    def post(self, request, **kwargs):
+        form = ListFilterForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            status = data.get('status', False)
+            if status:
+                print 'filter is yes'
+                return HttpResponseRedirect(
+                    reverse('foia-list-status', kwargs={'status': status})
+                )
 
 class List(ListBase):
     """List all viewable FOIA Requests"""
     def get_queryset(self):
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.sort_requests(query)
+        
 
 class ListByUser(ListBase):
     """List of all FOIA requests by a given user"""
@@ -144,6 +157,17 @@ class ListByUser(ListBase):
     def get_context_data(self, **kwargs):
         context = super(ListByUser, self).get_context_data(**kwargs)
         context['subtitle'] = 'by %s' % self.kwargs['user_name']
+        return context
+
+class ListByStatus(ListBase):
+    """List of all FOIA requests by a status"""
+    def get_queryset(self):
+        query = FOIARequest.objects.get_viewable(self.request.user)
+        return self.sort_requests(query.filter(status=self.kwargs['status']))
+    def get_context_data(self, **kwargs):
+        context = super(ListByStatus, self).get_context_data(**kwargs)
+        if self.kwargs['status'] in STATUS:
+            context['subtitle'] = STATUS[self.kwargs['status']]
         return context
 
 class ListByAgency(ListBase):
@@ -356,6 +380,7 @@ class Detail(DetailView):
     def post(self, request, **kwargs):
         """Handle form submissions"""
         foia = self.get_object()
+        
         actions = {
             'status': self._status,
             'tags': self._tags,
@@ -369,7 +394,6 @@ class Detail(DetailView):
             'resend_comm': resend_comm
         }
         try:
-            print request.POST['action']
             return actions[request.POST['action']](request, foia)
         except KeyError: # if submitting form from web page improperly
             return redirect(foia)

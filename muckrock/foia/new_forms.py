@@ -1,6 +1,6 @@
 from django import forms
 import autocomplete_light as autocomplete
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.agency.models import Agency
 
@@ -61,3 +61,9 @@ class RequestUpdateForm(forms.Form):
             messages.error(request, error_msg)
             self._errors['embargo'] = self.error_class([error_msg])
         return self.cleaned_data
+
+class ListFilterForm(forms.Form):
+    status = forms.ChoiceField(
+        choices=STATUS,
+        required=False
+    )
