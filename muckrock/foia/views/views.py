@@ -374,13 +374,12 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
-        context['choices'] = STATUS if self.request.user.is_staff else STATUS_NODRAFT
+        context['choices'] = STATUS if self.request.user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         return context
 
     def post(self, request, **kwargs):
         """Handle form submissions"""
         foia = self.get_object()
-        
         actions = {
             'status': self._status,
             'tags': self._tags,

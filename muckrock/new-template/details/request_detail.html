@@ -11,12 +11,22 @@
     <h1>{{ foia.title }}</h1>
     <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
     <dl>
+    {% if foia.tags.all or foia.user == request.user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
-    {% for tag in foia.tags.all %}
+        {% if foia.user == request.user or user.is_staff %}
+        <form action="" method="post" class="tag-form" id="tag-form">
+            {% csrf_token %}
+            <input type="text" name="tags" value="{% for tag in foia.tags.all %}{% if forloop.first %}{{ tag }}{% else %}, {{ tag }}{% endif %}{% endfor %}" />
+            <button type="submit" name="action" value="tags" class="primary button">Save</button>
+            <p><small>Separate tags with commas</small></p>
+        </form>
+        {% endif %}
+        {% for tag in foia.tags.all %}
 		<dd class="tag"><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
-	{% empty %}
+	    {% empty %}
 		<dd>None</dd>
-	{% endfor %}
+	    {% endfor %}
+	{% endif %}
     {% if foia.user == request.user or request.user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
@@ -40,7 +50,20 @@
 {% endblock header %}
 
 {% block aside %}
-    <h3 class="{{ foia.color_code }}">{{foia.get_status_display}}{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-status">Change</span>{% endif %}</h3>
+    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
+        <form action="" method="post" class="status-form" id="status-form">
+            {% csrf_token %}
+            <select name="status">
+            {% for choice in choices %}
+                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+            {% endfor %}
+            </select>
+            <button type="submit" name="action" value="status" class="primary button">Save</button>
+        </form>
+        {% endif %}
+    {% else %}
+    </h3>
+    {% endif %}
     {% if foia.date_due and foia.status == "processed" %}
             {% if past_due %}
         <h4><small>Past due by {{ foia.date_due|timesince }}.</small></h4>
@@ -80,7 +103,7 @@
         </form>
             {% endwith %}
         {% else %}
-    <form action="" method="post">
+    <form action="" method="post" class="controls">
         {% csrf_token %}
         {% for action in actions %}
             {% if not action.link %}
@@ -202,6 +225,19 @@
         });
         $('#notes-radio').change(function() {
             hideAllExcept($('#notes'));
+        });
+        
+        /* Tag Editor */
+        
+        $('#edit-tags').click(function() {
+            $('#tag-form').show();
+            $(this).hide();
+        });
+        
+        $('#edit-status').click(function() {
+            $('#status-form').show();
+            $('#request-status').hide();
+            $(this).hide();
         });
         
         /* Documents */

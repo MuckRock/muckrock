@@ -34,7 +34,7 @@
     }
 }
 .request {
-    aside form {
+    aside .draft, .controls {
         width: 100%;
         padding: $base-vertical-rhythm/2;
         margin-top: $base-vertical-rhythm/2;
@@ -67,6 +67,15 @@
         display: inline-block;
         padding: 0 $base-vertical-rhythm/4;
         &:first-of-type { padding-left: 0; }
+    }
+    #edit-tags { cursor: pointer; }
+    .tag-form, .status-form {
+        display: none;
+        font-size: 0.85em;
+        background: none;
+        border: none;
+        button { margin-left: $base-vertical-rhythm/4; }
+        p { margin-top: 0; }
     }
     .tabs {
         list-style-type: none;
