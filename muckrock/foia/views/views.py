@@ -400,12 +400,12 @@ class Detail(DetailView):
     
     def _submit(self, request, foia):
         """Submit request for user"""
-        if foia.user == request.user:
-            foia.status = 'submitted'
-            foia.save()
-            messages.success(request, 'Your request was submitted.')
-        else:
+        if not foia.user == request.user:
             messages.error(request, 'Only a request\'s owner may submit it.')
+        if not request.user.get_profile().make_request():
+            messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
+        foia.submit()
+        messages.success(request, 'Your request was submitted.')
         return redirect(foia)
 
     def _tags(self, request, foia):
