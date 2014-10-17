@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .default, .request aside form .failure, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.object-list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside form .primary, h1.list-label, nav.pagination, .search.meta h2 {
+.form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .button, .request aside form input[type="submit"], .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.object-list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside form .button.primary, .request aside form input.primary[type="submit"], .request aside form button.primary, .request aside form input[type="submit"] .primary, input[type="submit"] .request aside form .primary, .request aside form button .primary, button .request aside form .primary, h1.list-label, nav.pagination, .search.meta h2 {
   width: 100%; }
 
-.form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .default, .request aside form .failure, .new-request header h1, .new-request header summary {
+.form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .button, .request aside form input[type="submit"], .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .default, .request aside form .failure, .new-request header h1, .new-request header summary {
+    .form h1, .form fieldset, .form.login ul, .request aside form button, .request aside form .button, .request aside form input[type="submit"], .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside form button:last-child, .request aside form .default:last-child, .request aside form .failure:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside form button:last-child, .request aside form .button:last-child, .request aside form input[type="submit"]:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
@@ -1439,16 +1439,14 @@ table {
   border: 1px solid #b3becb;
   border-radius: 9px;
   background-color: #dbdbdb;
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto; }
+  display: block; }
   .request aside form:after {
     content: "";
     display: table;
     clear: both; }
-  .request aside form .primary {
+  .request aside form button, .request aside form .button, .request aside form input[type="submit"], .request aside form button {
     display: block; }
-  .request aside form button, .request aside form .default, .request aside form .failure {
+  .request aside form .button.primary, .request aside form input.primary[type="submit"], .request aside form button.primary, .request aside form input[type="submit"] .primary, input[type="submit"] .request aside form .primary, .request aside form button .primary, button .request aside form .primary {
     display: block; }
 .request .edit {
   display: inline-block;

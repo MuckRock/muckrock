@@ -41,9 +41,15 @@
         border: $base-border-width solid $color-grey;
         border-radius: $base-border-radius;
         background-color: darken($color-white, 10%);
-        @include outer-container;
-        .primary { display: block; @extend %full; }
-        button, .default, .failure { display: block; @extend %half; }
+        @include row();
+        button, .button {
+            display: block;
+            @extend %half;
+        }
+        .button.primary {
+            display: block;
+            @extend %full;
+        }
     }
     .edit {
         display: inline-block;
