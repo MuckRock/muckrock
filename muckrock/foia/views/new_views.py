@@ -20,7 +20,7 @@ from datetime import datetime
 import logging
 logger = logging.getLogger(__name__)
 
-def _compose_comm(document, jurisdiction):
+def _compose_comm(user, document, jurisdiction):
         intro = 'This is a request under the Freedom of Information Act.'
         waiver = ('I also request that, if appropriate, fees be waived as I '
                   'believe this request is in the public interest. '
@@ -38,16 +38,22 @@ def _compose_comm(document, jurisdiction):
         if jurisdiction.get_days():
             delay = jurisdiction.get_days()
         
-        prepend = [intro + ' I hereby request the following records:']
-        append = [waiver,
-                 ('In the event that fees cannot be waived, I would be '
-                  'grateful if you would inform me of the total charges in '     
-                  'advance of fulfilling my request. I would prefer the '
-                  'request filled electronically, by e-mail attachment if ' 
-                  'available or CD-ROM if not.'),
-                  ('Thank you in advance for your anticipated cooperation in '
-                  'this matter. I look forward to receiving your response to ' 
-                  'this request within %s, as the statute requires.' % delay )]
+        prepend = [
+            'To Whom it May Concern:',
+            intro + ' I hereby request the following records:'
+        ]
+        append = [
+            waiver,
+            ('In the event that fees cannot be waived, I would be '
+            'grateful if you would inform me of the total charges in '     
+            'advance of fulfilling my request. I would prefer the '
+            'request filled electronically, by e-mail attachment if ' 
+            'available or CD-ROM if not.'),
+            ('Thank you in advance for your anticipated cooperation in '
+            'this matter. I look forward to receiving your response to ' 
+            'this request within %s, as the statute requires.' % delay ),
+            'Sincerely, ' + user.get_full_name()
+        ]
         return '\n\n'.join(prepend + [document] + append)
 
 def _make_request(request, foia):
@@ -95,7 +101,7 @@ def _make_request(request, foia):
             date=datetime.now(),
             response=False,
             full_html=False,
-            communication=_compose_comm(document, jurisdiction)
+            communication=_compose_comm(request.user, document, jurisdiction)
         )
         foia_comm = foia.communications.all()[0]
         foia_comm.date = datetime.now()
