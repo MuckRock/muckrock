@@ -2,7 +2,7 @@
 {% load tags %}
 
 {% block title %}MuckRock &bull; Questions{% endblock title %}
-{% block list-label %}Questions&ensp;&amp;&ensp;Answers{% endblock list-label %}
+{% block list-title %}<h1>Questions&ensp;&amp;&ensp;Answers</h1>{% endblock list-title %}
 {% block type %}question{% endblock type %}
 
 {% block list-item %}
@@ -31,15 +31,15 @@
     {% endwith %}
 {% endblock list-item %}
 
-{% block commands %}
+{% block actions %}
 <a href="{% url 'question-create' %}" class="primary button">Ask a Question</a>
-{% endblock commands %}
+{% endblock actions %}
 
-{% block list-types %}
+{% block filters %}
 <ul>
     <li><a href="{% url 'question-index' %}" class="{% active request "^/questions/$" %}">All</a></li>
     <li><a href="{% url 'question-unanswered' %}" class="{% active request "^/questions/unanswered/$" %}">Unanswered</a></li>
     <li><a href="{% url 'question-recent' %}" class="{% active request "^/questions/recent/$" %}">Recently Answered</a></li>
 </ul>
 
-{% endblock list-types %}
+{% endblock filters %}

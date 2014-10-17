@@ -2,7 +2,8 @@
 {% load tags %}
 
 {% block title %}MuckRock &bull; Requests{% endblock title %}
-{% block list-label %}Requests{% endblock list-label %}
+{% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
+{% block list-subtitle %}<h2>{{ subtitle }}</h2>{% endblock list-subtitle %}
 {% block type %}request{% endblock type %}
 
 {% block list-item %}
@@ -13,8 +14,16 @@
     {% endwith %}
 {% endblock list-item %}
 
-{% block commands %}
-{% endblock commands %}
+{% block actions %}
+{% endblock actions %}
 
-{% block list-types %}
-{% endblock list-types %}
+{% block filters %}
+
+
+
+<form action="" method="post" name="request-filters">
+    {% csrf_token %}
+    {{ filters }}
+    <input type="submit" value="Filter" class="button" />
+</form>
+{% endblock filters %}

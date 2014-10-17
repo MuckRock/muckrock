@@ -24,3 +24,16 @@
     @include button-color($color-disabled);
     &:hover, &:active { @include button-color($color-disabled); }
 }
+
+input[type="submit"], button {
+    @extend .button;
+    .default { @extend .button.default; }
+    .primary { @extend .button.primary; }
+    .success { @extend .button.success; }
+    .failure { @extend .button.failure; }
+    .disabled { @extend .button.disabled; }
+}
+
+input:disabled, input.button:disabled { 
+    &, &:hover, &:active { @extend .button.disabled }
+}

@@ -9,17 +9,16 @@ This is the parent style for a collection of objects: a collection of blog posts
     <object class="{% block type %}item{% endblock type %} collection">
 
         <header class="collection-header">
-            <h1 class="list-label">
-                {% block list-label %}{% endblock list-label %}
-            </h1>
-            <section class="commands">
-            {% block commands %}
-            {% endblock commands %}
-            </section>
+            {% block list-title %}{% endblock list-title %}
+            {% block list-subtitle %}{% endblock list-subtitle %}
         </header>
+        <aside class="actions">
+            {% block actions %}
+            {% endblock actions %}
+        </aside>
         <section class="list-types">
-            {% block list-types %}
-            {% endblock list-types %}
+            {% block filters %}
+            {% endblock filters %}
         </section>
         {% include 'lib/pagination.html' %}
         
