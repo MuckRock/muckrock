@@ -4,14 +4,15 @@ Feeds for the FOIA application
 
 # pylint: disable=E0611
 from django.contrib.syndication.views import Feed
+from django.template.defaultfilters import escape, linebreaks
 
 from muckrock.foia.models import FOIARequest
 
 class LatestSubmittedRequests(Feed):
     """An RSS Feed for submitted FOIA requests"""
-    title = 'Latest Submitted Requests'
+    title = 'Muckrock Submitted Requests'
     link = '/foi/'
-    description = 'Updates on changes and additions to submitted FOIA Requests on MuckRock.com'
+    description = 'Recently submitted FOI requests on MuckRock'
 
     def items(self):
         """Return the items for the rss feed"""
@@ -21,13 +22,13 @@ class LatestSubmittedRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return item.first_request()
+        return linebreaks(escape(item.first_request()))
 
 class LatestDoneRequests(Feed):
     """An RSS Feed for completed FOIA requests"""
-    title = 'Latest Completed Requests'
+    title = 'Muckrock Completed Requests'
     link = '/foi/'
-    description = 'Updates on changes and additions to completed FOIA Requests on MuckRock.com'
+    description = 'Recently completed FOI requests on MuckRock'
 
     def items(self):
         """Return the items for the rss feed"""
@@ -37,4 +38,4 @@ class LatestDoneRequests(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return item.first_request()
+        return linebreaks(escape(item.first_request()))

@@ -4,14 +4,15 @@ Feeds for the QandA application
 
 # pylint: disable=E0611
 from django.contrib.syndication.views import Feed
+from django.template.defaultfilters import escape, linebreaks
 
 from muckrock.qanda.models import Question
 
 class LatestQuestions(Feed):
     """An RSS Feed for Questions"""
-    title = 'Latest FOIA Questions'
+    title = 'MuckRock Questions'
     link = '/questions/'
-    description = 'Latest questions about FOI topics on MuckRock.com'
+    description = 'Latest community questions about FOI topics on MuckRock'
 
     def items(self):
         """Return the items for the rss feed"""
@@ -21,5 +22,5 @@ class LatestQuestions(Feed):
 
     def item_description(self, item):
         """The description of each rss item"""
-        return item.question
+        return linebreaks(escape(item.question))
 

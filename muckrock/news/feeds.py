@@ -4,14 +4,15 @@ Feeds for the News application
 
 # pylint: disable=E0611
 from django.contrib.syndication.views import Feed
+from django.template.defaultfilters import escape, linebreaks
 
 from muckrock.news.models import Article
 
 class LatestEntries(Feed):
     """An RSS Feed for news articles"""
-    title = 'Latest News'
+    title = 'Muckrock News'
     link = '/news/'
-    description = 'Updates on changes and additions to News on MuckRock.com'
+    description = 'The latest news from MuckRock'
 
     def items(self):
         """Return the items for the rss feed"""
@@ -21,5 +22,5 @@ class LatestEntries(Feed):
     def item_description(self, item):
         """The description of each rss item"""
         # pylint: disable=R0201
-        return item.summary
+        return linebreaks(escape(item.summary))
 
