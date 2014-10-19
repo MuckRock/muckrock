@@ -6,7 +6,6 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User
 
-from epiceditor.widgets import AdminEpicEditorWidget
 from reversion import VersionAdmin
 
 from muckrock.news.models import Article, Photo
@@ -31,8 +30,6 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
     # pylint: disable=too-few-public-methods
 
-    body = forms.CharField(widget=AdminEpicEditorWidget(
-        themes={'editor': 'epic-light-2.css', 'preview': 'github.css'}))
     authors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'))
     editors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'),
                                              required=False)
