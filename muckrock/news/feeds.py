@@ -17,7 +17,7 @@ class LatestEntries(Feed):
     def items(self):
         """Return the items for the rss feed"""
         # pylint: disable=R0201
-        return Article.objects.get_published().order_by('-pub_date')[:5]
+        return Article.objects.get_published().order_by('-pub_date')[:25]
 
     def item_description(self, item):
         """The description of each rss item"""

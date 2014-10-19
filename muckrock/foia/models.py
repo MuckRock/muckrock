@@ -662,6 +662,11 @@ class FOIACommunication(models.Model):
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
 
+    def get_absolute_url(self):
+        """The url for this object"""
+        # pylint: disable=E1101
+        return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
+
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""
         remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))

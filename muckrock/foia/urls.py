@@ -12,7 +12,7 @@ import muckrock.foia.signals
 # pylint: enable=W0611
 from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
-from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests
+from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed
 from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
@@ -67,6 +67,7 @@ urlpatterns = patterns('',
     url(r'^acronyms/$',                    views.acronyms, name='foia-acronyms'),
     url(r'^feeds/submitted/$',             LatestSubmittedRequests(), name='foia-submitted-feed'),
     url(r'^feeds/completed/$',             LatestDoneRequests(), name='foia-done-feed'),
+    url(r'^feeds/(?P<idx>\d+)/$',          FOIAFeed(), name='foia-feed'),
 
     # old patterns for redirects
     url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
