@@ -64,12 +64,23 @@ nav.pagination {
         }
         .filters {
             form { @include row; }
-            .input { @extend %quarter; }
-            select { width: 100%; }
+            .input {
+                @include fill-parent();
+                @include media($large-layout) {
+                    @include span-columns(3);
+                }
+            }
+            select {
+                width: 100%;
+                margin-top: $base-vertical-rhythm/3;
+            }
             input[type="text"] {
                 @extend small;
                 display: block;
                 width: 100%;
+            }
+            input[type="submit"] {
+                @extend small;
             }
             #title-value { display: none; }
         }
