@@ -44,8 +44,7 @@
     {% csrf_token %}
     {% for field in form %}
         <div class="input">
-        {{ field.label_tag }}
-        {{ field }}
+            {{ field }}
         </div>
     {% endfor %}
     <div class="input">
@@ -57,7 +56,7 @@
 {% block scripts %}
 <script>
     $(document).ready(function() {
-        $("#id_status").prop("selectedIndex", -1);
+        $("#id_status").append('<option disabled selected id="title-value">Status</option>');
     });
 </script>
 {% endblock scripts %}

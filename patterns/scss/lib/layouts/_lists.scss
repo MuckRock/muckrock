@@ -71,6 +71,7 @@ nav.pagination {
                 display: block;
                 width: 100%;
             }
+            #title-value { display: none; }
         }
         .list li { @include row; }
     }

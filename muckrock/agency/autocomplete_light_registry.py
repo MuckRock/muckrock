@@ -10,7 +10,7 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     
     search_fields = ['^name']
     attrs = { 
-        'placeholder': 'Name an Agency',
+        'placeholder': 'Agency',
         'data-autocomplete-minimum-characters': 2
     }
 

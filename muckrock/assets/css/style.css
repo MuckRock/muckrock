@@ -1594,6 +1594,8 @@ nav.pagination .page-ref {
 .collection.request .filters input[type="text"] {
   display: block;
   width: 100%; }
+.collection.request .filters #title-value {
+  display: none; }
 .collection.request .list li {
   display: block; }
   .collection.request .list li:after {
