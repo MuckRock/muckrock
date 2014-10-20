@@ -127,19 +127,32 @@ class ListBase(ListView):
     def get_context_data(self, **kwargs):
         context = super(ListBase, self).get_context_data(**kwargs)
         context['title'] = 'FOI Requests'
-        context['filters'] = ListFilterForm()
+        context['form'] = ListFilterForm()
         return context
     
     def post(self, request, **kwargs):
         form = ListFilterForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+            print data
             status = data.get('status', False)
+            agency = data.get('agency', False)
+            jurisdiction = data.get('jurisdiction', False)
             if status:
                 print 'filter is yes'
                 return HttpResponseRedirect(
                     reverse('foia-list-status', kwargs={'status': status})
                 )
+            if agency:
+                agency = get_object_or_404(Agency, name=agency)
+                return HttpResponseRedirect(
+                    reverse('foia-list-agency', kwargs={'agency': agency.slug, 'idx': agency.id})
+                )
+            if jurisdiction:
+                jurisdiction = get_object_or_404(Jurisdiction, name=jurisdiction)
+                return HttpResponseRedirect(
+                    reverse('foia-list-jurisdiction', kwargs={'jurisdiction': jurisdiction.slug, 'idx': jurisdiction.id}))
+        return redirect('foia-list')
 
 class List(ListBase):
     """List all viewable FOIA Requests"""
@@ -180,11 +193,11 @@ class ListByAgency(ListBase):
         )
         return agency
     def get_queryset(self):
-        agency = get_agency(self)
+        agency = self.get_agency()
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.sort_requests(query.filter(agency=agency))
     def get_context_data(self, **kwargs):
-        agency = get_agency(self)
+        agency = self.get_agency()
         context = super(ListByAgency, self).get_context_data(**kwargs)
         context['subtitle'] = 'for %s' % agency.name
         return context
@@ -192,17 +205,18 @@ class ListByAgency(ListBase):
 class ListByJurisdiction(ListBase):
     """List of all FOIA requests by a given jurisdiction"""
     def get_jurisdiction(self):
-        agency = get_object_or_404(
+        jurisdiction = get_object_or_404(
             Jurisdiction,
             slug=self.kwargs['jurisdiction'],
             pk=self.kwargs['idx']
         )
+        return jurisdiction
     def get_queryset(self):
-        jurisdiction = get_jurisdiction(self)
+        jurisdiction = self.get_jurisdiction()
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.sort_requests(query.filter(jurisdiction=jurisdiction))
     def get_context_data(self, **kwargs):
-        jurisdiction = get_jurisdiction(self)
+        jurisdiction = self.get_jurisdiction()
         context = super(ListByJurisdiction, self).get_context_data(**kwargs)
         context['subtitle'] = 'for %s' % jurisdiction.name
         return context
@@ -336,7 +350,6 @@ class ListFollowing(ListBase):
 
     def get_context_data(self, **kwargs):
         context = super(ListFollowing, self).get_context_data(**kwargs)
-        context['subtitle'] = 'Following'
         return context
 
 class Detail(DetailView):

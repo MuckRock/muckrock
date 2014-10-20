@@ -6,9 +6,9 @@ This is the parent style for a collection of objects: a collection of blog posts
 {% endcomment %}
 {% block content %}
     
-    <object class="{% block type %}item{% endblock type %} collection">
+    <section class="{% block type %}item{% endblock type %} collection">
 
-        <header class="collection-header">
+        <header>
             {% block list-title %}{% endblock list-title %}
             {% block list-subtitle %}{% endblock list-subtitle %}
         </header>
@@ -16,14 +16,14 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% block actions %}
             {% endblock actions %}
         </aside>
-        <section class="list-types">
+        <section class="filters">
             {% block filters %}
             {% endblock filters %}
         </section>
         {% include 'lib/pagination.html' %}
         
         {% block list %}
-        <ul class="object-list">
+        <ul class="list">
             {% for item in object_list %}
             <li>
                 {% block list-item %}
@@ -37,7 +37,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% endfor %}
         </ul>
         {% endblock list %}
-    </object>
+    </section>
     
     {% include 'lib/pagination.html' %}
     

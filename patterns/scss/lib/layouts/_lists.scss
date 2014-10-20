@@ -52,7 +52,6 @@ nav.pagination {
     
     &.request {
         h2 { @include font-sizing(1.5, 3); }
-        li { @include outer-container; }
         dt { margin-bottom: 0; }
         dd + dt { margin-top: 0.5em; }
         dt + dd { line-height: 1em; }
@@ -63,5 +62,16 @@ nav.pagination {
                 margin-top: 0;
             }
         }
+        .filters {
+            form { @include row; }
+            .input { @extend %quarter; }
+            select { width: 100%; }
+            input[type="text"] {
+                @extend small;
+                display: block;
+                width: 100%;
+            }
+        }
+        .list li { @include row; }
     }
 }

@@ -101,7 +101,7 @@ strong {
 /**
  * Address styling not present in Safari and Chrome.
  */
-dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before {
+dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before {
   font-style: italic; }
 
 /**
@@ -122,7 +122,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], nav.sidebar .account li, nav.sidebar .spotlight p {
   font-size: 80%; }
 
 /**
@@ -370,7 +370,7 @@ html, body {
     display: table;
     clear: both; }
 
-.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.object-list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, nav.pagination, .search.meta h2 {
+.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .collection.request .filters .input, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, nav.pagination, .search.meta h2 {
   width: 100%; }
 
 .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary {
@@ -406,32 +406,32 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 500px) {
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .collection.request .filters .input, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child, .collection.request .filters .input:last-child {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n), .collection.request .filters .input:nth-child(2n) {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1) {
       clear: left; } }
 @media screen and (min-width: 769px) {
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .collection.request .filters .input, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n), .collection.request .filters .input:nth-child(2n) {
       margin-right: 2.35765%; }
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1) {
       clear: none; }
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child, .collection.request .filters .input:last-child {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n), .collection.request .foia-info:nth-child(4n) {
+    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n), .collection.request .foia-info:nth-child(4n), .collection.request .filters .input:nth-child(4n) {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1), .collection.request .foia-info:nth-child(4n+1) {
+    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1), .collection.request .foia-info:nth-child(4n+1), .collection.request .filters .input:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
@@ -595,36 +595,38 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
         .collection header .commands .button, .collection header .commands input[type="submit"], .collection header .commands button {
           display: inline-block;
           float: right; } }
-  .collection .list-types ul {
+  .collection .filters ul {
     padding-left: 0; }
-  .collection .list-types li {
+  .collection .filters li {
     display: inline-block; }
-    .collection .list-types li a {
+    .collection .filters li a {
       padding: 0.375em 0.75em;
       margin: 0;
       border-radius: 9px;
       text-decoration: none; }
-      .collection .list-types li a:hover, .collection .list-types li a.current-tab {
+      .collection .filters li a:hover, .collection .filters li a.current-tab {
         color: #f4f4f4;
         background-color: #3a82ff; }
-      .collection .list-types li a:active, .collection .list-types li a.current-tab:hover {
+      .collection .filters li a:active, .collection .filters li a.current-tab:hover {
         background-color: #6da2ff; }
-      .collection .list-types li a.current-tab {
+      .collection .filters li a.current-tab {
         cursor: default; }
-  .collection ul.object-list {
+  .collection .filters form fieldset {
+    display: inline-block; }
+  .collection ul.list {
     margin: 1.5em 0 0;
     padding: 1.5em 0 0;
     border-top: 1px solid #b3becb;
     list-style-type: none; }
-    .collection ul.object-list li {
+    .collection ul.list li {
       padding: 0.375em 1.5em;
       margin: 0; }
-      .collection ul.object-list li:first-child {
+      .collection ul.list li:first-child {
         padding-top: 0; }
-      .collection ul.object-list li:nth-child(even) {
+      .collection ul.list li:nth-child(even) {
         background-color: #e7e7e7; }
       @media screen and (min-width: 540px) {
-        .collection ul.object-list li {
+        .collection ul.list li {
           border-radius: 9px; } }
   .collection h2, .search.collection h2, .collection h3, .search.collection h3 {
     font-weight: 400; }
@@ -707,7 +709,7 @@ blockquote {
   padding-left: 0.75em;
   border-left: 1px solid #b3becb; }
 
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], nav.sidebar .account li, nav.sidebar .spotlight p {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -734,7 +736,7 @@ code {
     text-decoration: none;
     color: #02cf6b; }
 
-dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt {
+dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt {
   display: block;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -1572,14 +1574,6 @@ nav.pagination .page-ref {
   font-size: 1.5em;
   line-height: 1.22222em;
   margin: 0.30556em 0; }
-.collection.request li {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto; }
-  .collection.request li:after {
-    content: "";
-    display: table;
-    clear: both; }
 .collection.request dt {
   margin-bottom: 0; }
 .collection.request dd + dt {
@@ -1589,6 +1583,23 @@ nav.pagination .page-ref {
 @media screen and (min-width: 500px) {
   .collection.request .foia-info {
     margin-top: 0; } }
+.collection.request .filters form {
+  display: block; }
+  .collection.request .filters form:after {
+    content: "";
+    display: table;
+    clear: both; }
+.collection.request .filters select {
+  width: 100%; }
+.collection.request .filters input[type="text"] {
+  display: block;
+  width: 100%; }
+.collection.request .list li {
+  display: block; }
+  .collection.request .list li:after {
+    content: "";
+    display: table;
+    clear: both; }
 
 .homepage {
   overflow: hidden; }
@@ -1669,7 +1680,7 @@ nav.pagination .page-ref {
       text-decoration: none;
       color: #21282c;
       background-color: rgba(254, 188, 16, 0.65); }
-      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
+      .homepage .featured-article a dfn, .homepage .featured-article a .collection .filters form label, .collection .filters form .homepage .featured-article a label, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
         color: #21282c; }
       .homepage .featured-article a h1 {
         font-size: 2em;
@@ -1910,7 +1921,7 @@ nav.pagination .page-ref {
     @media screen and (min-width: 769px) {
       .search.form input[type="submit"] {
         margin: 0; } }
-  .search.form dfn, .search.form fieldset label, fieldset .search.form label, .search.form .new-request .agency label, .new-request .agency .search.form label, .search.form .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .search.form span.deck > span:before {
+  .search.form dfn, .search.form .collection .filters form label, .collection .filters form .search.form label, .search.form fieldset label, fieldset .search.form label, .search.form .new-request .agency label, .new-request .agency .search.form label, .search.form .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .search.form span.deck > span:before {
     margin-top: 1.5em;
     padding-left: 0.75em; }
   .search.form li {
@@ -2249,7 +2260,7 @@ nav.sidebar {
   @media screen and (min-width: 540px) {
     nav.sidebar {
       padding: 1.5em 1.5em 1em; } }
-  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
+  nav.sidebar dfn, nav.sidebar .collection .filters form label, .collection .filters form nav.sidebar label, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
     padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
     display: table;

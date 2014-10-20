@@ -116,7 +116,7 @@
             }
         }
     }
-    .list-types {
+    .filters {
         
         ul {
             padding-left: 0;
@@ -140,8 +140,13 @@
                 }
             }
         }
+        
+        form {
+            fieldset { display: inline-block; }
+            label { @extend dfn; }
+        }
     }
-    ul.object-list {
+    ul.list {
         @extend %full;
         margin: $base-vertical-rhythm 0 0;
         padding: $base-vertical-rhythm 0 0;

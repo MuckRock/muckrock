@@ -68,6 +68,8 @@ class ListFilterForm(forms.Form):
         required=False
     )
     agency = forms.CharField(
+        required=False,
         widget=autocomplete.TextWidget('AgencyAutocomplete'))
     jurisdiction = forms.CharField(
+        required=False,
         widget=autocomplete.TextWidget('JurisdictionAutocomplete'))
