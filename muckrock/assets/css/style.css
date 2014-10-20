@@ -1580,6 +1580,25 @@ nav.pagination .page-ref {
   margin-top: 0.5em; }
 .collection.request dt + dd {
   line-height: 1em; }
+.collection.request ul.heading {
+  display: block;
+  display: none;
+  border: none; }
+  .collection.request ul.heading:after {
+    content: "";
+    display: table;
+    clear: both; }
+  @media screen and (min-width: 769px) {
+    .collection.request ul.heading {
+      display: block; } }
+  .collection.request ul.heading li {
+    padding: 0; }
+  .collection.request ul.heading li:first-child {
+    padding-left: 1.5em; }
+  .collection.request ul.heading li:nth-child(2n) {
+    background: none; }
+.collection.request ul.list {
+  margin-top: 0; }
 @media screen and (min-width: 500px) {
   .collection.request .foia-info {
     margin-top: 0; } }

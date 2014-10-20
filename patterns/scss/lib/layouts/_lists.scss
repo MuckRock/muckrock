@@ -55,6 +55,21 @@ nav.pagination {
         dt { margin-bottom: 0; }
         dd + dt { margin-top: 0.5em; }
         dt + dd { line-height: 1em; }
+        
+        ul.heading {
+            @include row;
+            display: none;
+            @include media($large-layout) {
+                display: block;
+            }
+            border: none; 
+            li { padding: 0; }
+            li:first-child { padding-left: $base-vertical-rhythm; }
+            li:nth-child(2n) { background: none; }
+        }
+        
+        ul.list { margin-top: 0; }
+        
         .foia-info {
             @extend %quarter;
             &:first-child { @extend %half; }

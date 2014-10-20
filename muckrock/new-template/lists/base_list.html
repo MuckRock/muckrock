@@ -5,7 +5,6 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% endcomment %}
 {% block content %}
-    
     <section class="{% block type %}item{% endblock type %} collection">
 
         <header>
@@ -16,11 +15,14 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% block actions %}
             {% endblock actions %}
         </aside>
+        
+        {% include 'lib/pagination.html' %}
+        
         <section class="filters">
             {% block filters %}
             {% endblock filters %}
         </section>
-        {% include 'lib/pagination.html' %}
+        
         
         {% block list %}
         <ul class="list">
@@ -33,12 +35,12 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% endblock list-item %}
             </li>
             {% empty %}
-            <li class="empty">Hmm&ellip; looks like there&rsquo;s nothing here.</li>
+            <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
             {% endfor %}
         </ul>
         {% endblock list %}
+        
+        {% include 'lib/pagination.html' %}
+        
     </section>
-    
-    {% include 'lib/pagination.html' %}
-    
 {% endblock %}
