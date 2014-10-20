@@ -8,19 +8,29 @@
 
 {% block list-item %}
     {% with item as foia %}
-        <h3>On {% if foia.date_submitted %}{{ foia.date_submitted | date:"F j, Y"}}{% else %}{{ foia.communications.all.0.date | date:"F j, Y" }}{% endif %}, {{ foia.user.get_full_name }} {% if foia.status == 'submitted' %}sent{% else %}drafted{% endif %}</h3>
-        <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
-        {% if foia.status == 'submitted' %}<h3>to the {{ foia.agency }} in {{ foia.jurisdiction }}.</h3>{% endif %}
-    {% endwith %}
+        <div class="foia-info">
+            <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
+            <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+        </div>
+        <dl class="foia-info">
+            <dt>From</dt>
+            <dd><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></dd>
+            <dt>To</dt>
+            <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
+        </dl>
+        <dl class="foia-info">
+            <dt>First Submitted</dt>
+            <dd>{{ foia.communications.all.0.date|date:"m/d/Y" }}</dd>
+            <dt>Last Updated</dt>
+            <dd>{{ foia.last_comm_date|date:"m/d/Y" }}</dd>
+            {% endwith %}
+        </dl>
 {% endblock list-item %}
 
 {% block actions %}
 {% endblock actions %}
 
 {% block filters %}
-
-
-
 <form action="" method="post" name="request-filters">
     {% csrf_token %}
     {{ filters }}

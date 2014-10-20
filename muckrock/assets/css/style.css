@@ -370,18 +370,18 @@ html, body {
     display: table;
     clear: both; }
 
-.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.object-list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, nav.pagination, .search.meta h2 {
+.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.object-list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, nav.pagination, .search.meta h2 {
   width: 100%; }
 
-.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
+.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
-    .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
+    .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
-      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .collection.request .foia-info:last-child:first-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
@@ -406,32 +406,32 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 500px) {
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
       clear: left; } }
 @media screen and (min-width: 769px) {
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
       margin-right: 2.35765%; }
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
       clear: none; }
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n) {
+    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n), .collection.request .foia-info:nth-child(4n) {
       margin-right: 0; }
-    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1) {
+    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1), .collection.request .foia-info:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
@@ -1568,6 +1568,27 @@ nav.pagination .page-ref {
       columns: 3 0.75em; }
       .collection.jurisdiction ul li:nth-child(even), .collection.agency ul li:nth-child(even) {
         background: none; } }
+.collection.request h2 {
+  font-size: 1.5em;
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
+.collection.request li {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  .collection.request li:after {
+    content: "";
+    display: table;
+    clear: both; }
+.collection.request dt {
+  margin-bottom: 0; }
+.collection.request dd + dt {
+  margin-top: 0.5em; }
+.collection.request dt + dd {
+  line-height: 1em; }
+@media screen and (min-width: 500px) {
+  .collection.request .foia-info {
+    margin-top: 0; } }
 
 .homepage {
   overflow: hidden; }

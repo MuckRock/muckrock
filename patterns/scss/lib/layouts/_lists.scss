@@ -49,4 +49,19 @@ nav.pagination {
             }
         }
     }
+    
+    &.request {
+        h2 { @include font-sizing(1.5, 3); }
+        li { @include outer-container; }
+        dt { margin-bottom: 0; }
+        dd + dt { margin-top: 0.5em; }
+        dt + dd { line-height: 1em; }
+        .foia-info {
+            @extend %quarter;
+            &:first-child { @extend %half; }
+            @include media($medium-layout) {
+                margin-top: 0;
+            }
+        }
+    }
 }
