@@ -31,6 +31,6 @@ autocomplete_light.register(
     choices=Jurisdiction.objects.filter(hidden=False),
     attrs={
         'placeholder': 'Jurisdiction',
-        'data-autocomplete-minimum-characters': 3
+        'data-autocomplete-minimum-characters': 2
     }
 )

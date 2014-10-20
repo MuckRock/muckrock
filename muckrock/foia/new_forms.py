@@ -67,3 +67,7 @@ class ListFilterForm(forms.Form):
         choices=STATUS,
         required=False
     )
+    agency = forms.CharField(
+        widget=autocomplete.TextWidget('AgencyAutocomplete'))
+    jurisdiction = forms.CharField(
+        widget=autocomplete.TextWidget('JurisdictionAutocomplete'))
