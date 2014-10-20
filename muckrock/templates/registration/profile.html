@@ -97,5 +97,14 @@
 
 	{% if user == user_obj %}
 		<p class="largest"><strong><a href="{% url 'acct-buy-requests' %}">Buy more requests!</a></strong></p>
+		<div class="content-separator"></div>
 	{% endif %}
+
+	<div>
+		<a href="{% url 'foia-user-submitted-feed' username=user_obj.username %}" class="feed">Subscribe to this user's new requests</a>
+		<a href="{% url 'foia-user-done-feed' username=user_obj.username %}" class="feed">Subscribe to this user's completed requests</a>
+		<a href="{% url 'foia-user-feed' username=user_obj.username %}" class="feed">Subscribe to all updates to this user's requests</a>
+	</div>
+	<div class="content-separator"></div>
+
 {% endblock %}

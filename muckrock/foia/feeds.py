@@ -3,6 +3,7 @@ Feeds for the FOIA application
 """
 
 # pylint: disable=E0611
+from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
@@ -71,3 +72,102 @@ class FOIAFeed(Feed):
     def item_description(self, item):
         """The description of each rss item"""
         return linebreaks(escape(item.communication))
+
+
+class UserSubmittedFeed(Feed):
+    """Feed for a user's new submitted requests"""
+    # pylint: disable=no-self-use
+
+    def get_object(self, request, username):
+        """Get the user for this feed"""
+        # pylint: disable=arguments-differ
+        return get_object_or_404(User, username=username)
+
+    def title(self, obj):
+        """The title of this feed"""
+        return 'MuckRock user %s\'s submitted requests' % obj.username
+
+    def link(self, obj):
+        """The link for this feed"""
+        return obj.get_profile().get_absolute_url()
+
+    def description(self, obj):
+        """The description of this feed"""
+        return 'Newly submitted requests by %s' % obj.username
+
+    def items(self, obj):
+        """The communications are the items for this feed"""
+        return FOIARequest.objects.get_submitted().get_public().filter(user=obj)\
+                                  .order_by('-date_submitted')[:25]
+
+    def item_description(self, item):
+        """The description of each rss item"""
+        return linebreaks(escape(item.first_request()))
+
+
+class UserDoneFeed(Feed):
+    """Feed for a user's completed requests"""
+    # pylint: disable=no-self-use
+
+    def get_object(self, request, username):
+        """Get the user for this feed"""
+        # pylint: disable=arguments-differ
+        return get_object_or_404(User, username=username)
+
+    def title(self, obj):
+        """The title of this feed"""
+        return 'MuckRock user %s\'s completed requests' % obj.username
+
+    def link(self, obj):
+        """The link for this feed"""
+        return obj.get_profile().get_absolute_url()
+
+    def description(self, obj):
+        """The description of this feed"""
+        return 'Completed requests by %s' % obj.username
+
+    def items(self, obj):
+        """The communications are the items for this feed"""
+        return FOIARequest.objects.get_done().get_public().filter(user=obj)\
+                                  .order_by('-date_submitted')[:25]
+
+    def item_description(self, item):
+        """The description of each rss item"""
+        return linebreaks(escape(item.first_request()))
+
+
+class UserUpdateFeed(Feed):
+    """Feed for updates to all of user's requests"""
+    # pylint: disable=no-self-use
+
+    def get_object(self, request, username):
+        """Get the user for this feed"""
+        # pylint: disable=arguments-differ
+        return get_object_or_404(User, username=username)
+
+    def title(self, obj):
+        """The title of this feed"""
+        return 'MuckRock user %s\'s request updates' % obj.username
+
+    def link(self, obj):
+        """The link for this feed"""
+        return obj.get_profile().get_absolute_url()
+
+    def description(self, obj):
+        """The description of this feed"""
+        return 'All request updates by %s' % obj.username
+
+    def items(self, obj):
+        """The communications are the items for this feed"""
+        foias = FOIARequest.objects.get_public().filter(user=obj).select_related('communications')
+        communications = []
+        for foia in foias:
+            communications.extend(foia.communications.all())
+        communications.sort(key=lambda f: f.date, reverse=True)
+        return communications[:25]
+
+
+    def item_description(self, item):
+        """The description of each rss item"""
+        return linebreaks(escape(item.communication))
+
