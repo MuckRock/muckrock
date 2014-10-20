@@ -15,8 +15,10 @@
         <dl class="foia-info">
             <dt>From</dt>
             <dd><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></dd>
+            {% if foia.agency %}
             <dt>To</dt>
             <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
+            {% endif %}
         </dl>
         <dl class="foia-info">
             <dt>First Submitted</dt>

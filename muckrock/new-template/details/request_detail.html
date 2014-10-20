@@ -8,8 +8,37 @@
 {% block type %}request{% endblock %}
 
 {% block header %}
+    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
+        <form action="" method="post" class="status-form" id="status-form">
+            {% csrf_token %}
+            <select name="status">
+            {% for choice in choices %}
+                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+            {% endfor %}
+            </select>
+            <button type="submit" name="action" value="status" class="primary button">Save</button>
+        </form>
+        {% endif %}
+    {% else %}
+    </h3>
+    {% endif %}
+    {% if foia.date_due and foia.status == "processed" %}
+        {% if past_due %}
+    <h4><small>Past due by {{ foia.date_due|timesince }}.</small></h4>
+        {% else %}
+    <h4><small>Due in {{ foia.date_due|timeuntil }}.</small></h4>
+        {% endif %}
+    {% endif %}
+    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
+        {% if foia.days_until_due >= 0 %}
+    <h4><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
+        {% else %}
+    <h4><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
+        {% endif %}
+        from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
+    {% endif %}
     <h1>{{ foia.title }}</h1>
-    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.</h2>
+    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.{% endif %}</h2>
     <dl>
     {% if foia.tags.all or foia.user == request.user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
@@ -50,38 +79,6 @@
 {% endblock header %}
 
 {% block aside %}
-    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
-        <form action="" method="post" class="status-form" id="status-form">
-            {% csrf_token %}
-            <select name="status">
-            {% for choice in choices %}
-                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
-            {% endfor %}
-            </select>
-            <button type="submit" name="action" value="status" class="primary button">Save</button>
-        </form>
-        {% endif %}
-    {% else %}
-    </h3>
-    {% endif %}
-    {% if foia.date_due and foia.status == "processed" %}
-            {% if past_due %}
-        <h4><small>Past due by {{ foia.date_due|timesince }}.</small></h4>
-            {% else %}
-        <h4><small>Due in {{ foia.date_due|timeuntil }}.</small></h4>
-            {% endif %}
-        {% endif %}
-        {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
-            {% if foia.days_until_due >= 0 %}
-        <h4><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
-            {% else %}
-        <h4><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
-            {% endif %}
-            from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
-        {% endif %}
-    {% if foia.status != 'started' %}
-    {% include 'lib/progress_bar.html' with percentage=foia.percent_complete state=foia.color_code %}
-    {% endif %}
     {% if user.is_authenticated %}
         {% if foia.status == 'started' and foia.user == request.user %}
             {% with remaining=user.get_profile.num_requests %}
@@ -117,32 +114,30 @@
         {% endfor %}
     </form> 
         {% endif %}
-    {% endif %}
-{% endblock aside %}
-
-{% block actions %}
-    {% if user.is_authenticated %}
-        {% if foia.has_crowdfund %}
-            <section class="panel">
-            {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
-            {% if foia.crowdfund.expired %}
-                <h1>Crowdfunding Completed</h1>
-                <h2>${{ received }} raised out of ${{ required }}</h2>
-            {% else %}
-                <h1>Help fund this request</h1>
-                <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
-                <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
-                <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
-            {% endif %}
-            </section>
-            {% endwith %}
-        {% endif %}   
     {% else %} 
     <section class="panel">
         <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
         <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
     </section> 
-    {% endif %}    
+    {% endif %}  
+{% endblock aside %}
+
+{% block actions %}
+    {% if foia.has_crowdfund %}
+        <section class="panel">
+        {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
+        {% if foia.crowdfund.expired %}
+            <h1>Crowdfunding Completed</h1>
+            <h2>${{ received }} raised out of ${{ required }}</h2>
+        {% else %}
+            <h1>Help fund this request</h1>
+            <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
+            <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
+            <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
+        {% endif %}
+        </section>
+        {% endwith %}
+    {% endif %}   
 {% endblock actions %}
 
 {% block main %}

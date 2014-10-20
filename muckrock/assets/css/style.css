@@ -556,8 +556,6 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
   margin: 0.75em 0; }
   .post > .meta aside dl, .question > .meta aside dl, .request > .meta aside dl, .jurisdiction > .meta aside dl, .agency > .meta aside dl, .profile > .meta aside dl {
     margin-top: 0; }
-.post > .meta .panel, .question > .meta .panel, .request > .meta .panel, .jurisdiction > .meta .panel, .agency > .meta .panel, .profile > .meta .panel {
-  width: 90%; }
 .post > .actions form, .question > .actions form, .request > .actions form, .jurisdiction > .actions form, .agency > .actions form, .profile > .actions form {
   list-style-type: none;
   padding: 0.75em;
@@ -1432,6 +1430,8 @@ table {
 .profile section.meta > header dl {
   margin-top: 1.5em; }
 
+.request h3 {
+  font-size: 1.25em; }
 .request aside .draft, .request .controls {
   width: 100%;
   padding: 0.75em;
