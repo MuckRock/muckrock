@@ -73,3 +73,13 @@ class ListFilterForm(forms.Form):
     jurisdiction = forms.CharField(
         required=False,
         widget=autocomplete.TextWidget('JurisdictionAutocomplete'))
+    order = forms.ChoiceField(
+        choices=(('asc', 'Ascending'), ('desc', 'Descending'))
+    )
+    sort = forms.ChoiceField(
+        choices=(
+            ('title', 'Title'),
+            ('date_submitted', 'Date'),
+            ('times_viewed', 'Popularity')
+        )
+    )
