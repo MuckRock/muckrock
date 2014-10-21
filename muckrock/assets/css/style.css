@@ -729,31 +729,30 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
   .collection ul.list {
     margin: 1.5em 0 0;
     padding: 1.5em 0 0;
-    border-top: 1px solid #b3becb;
     list-style-type: none; }
-    /* line 155, ../../../patterns/scss/lib/_prototypes.scss */
+    /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
     .collection ul.list li {
       padding: 0.375em 1.5em;
       margin: 0; }
-      /* line 158, ../../../patterns/scss/lib/_prototypes.scss */
+      /* line 157, ../../../patterns/scss/lib/_prototypes.scss */
       .collection ul.list li:first-child {
         padding-top: 0; }
-      /* line 159, ../../../patterns/scss/lib/_prototypes.scss */
+      /* line 158, ../../../patterns/scss/lib/_prototypes.scss */
       .collection ul.list li:nth-child(even) {
         background-color: #e7e7e7; }
       @media screen and (min-width: 540px) {
-        /* line 155, ../../../patterns/scss/lib/_prototypes.scss */
+        /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
         .collection ul.list li {
           border-radius: 9px; } }
-  /* line 165, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 164, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h2, .search.collection h2, .collection h3, .search.collection h3 {
     font-weight: 400; }
-  /* line 166, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 165, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h2, .search.collection h2 {
     font-size: 1.25em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  /* line 167, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 166, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h3, .search.collection h3 {
     font-size: 1em;
     line-height: 1.51282em;

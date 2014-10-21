@@ -15,14 +15,12 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% block actions %}
             {% endblock actions %}
         </aside>
-        
-        {% include 'lib/pagination.html' %}
-        
         <section class="filters">
             {% block filters %}
             {% endblock filters %}
         </section>
         
+        {% include 'lib/pagination.html' %}
         
         {% block list %}
         <ul class="list">
