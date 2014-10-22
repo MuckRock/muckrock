@@ -110,14 +110,15 @@ class List(ListView):
         # TODO: handle a list of tags
         for key, value in filter.iteritems():
             if value:
+                print value
                 if key == 'status':
                     foia_requests = foia_requests.filter(status=value)
                 elif key == 'agency': 
-                    a = get_object_or_404(Agency, name=value)
+                    a = get_object_or_404(Agency, id=value)
                     foia_requests = foia_requests.filter(agency=a)
                 elif key == 'jurisdiction':
                     value = value.split(',')
-                    j = get_object_or_404(Jurisdiction, name=value[0])
+                    j = get_object_or_404(Jurisdiction, id=value[0])
                     foia_requests = foia_requests.filter(jurisdiction=j)
                 elif key == 'user':
                     u = get_object_or_404(User, name=value)

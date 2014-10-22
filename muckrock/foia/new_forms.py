@@ -67,16 +67,20 @@ class ListFilterForm(forms.Form):
         choices=STATUS,
         required=False
     )
-    agency = forms.CharField(
+    agency = forms.ModelChoiceField(
         required=False,
-        widget=autocomplete.TextWidget('AgencyAutocomplete'))
-    jurisdiction = forms.CharField(
+        queryset=Agency.objects.all(),
+        widget=autocomplete.ChoiceWidget('AgencyAutocomplete'))
+    jurisdiction = forms.ModelChoiceField(
         required=False,
-        widget=autocomplete.TextWidget('JurisdictionAutocomplete'))
+        queryset=Jurisdiction.objects.all(),
+        widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete'))
     order = forms.ChoiceField(
+        required=False,
         choices=(('asc', 'Ascending'), ('desc', 'Descending'))
     )
     sort = forms.ChoiceField(
+        required=False,
         choices=(
             ('title', 'Title'),
             ('date_submitted', 'Date'),
