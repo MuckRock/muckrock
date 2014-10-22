@@ -70,6 +70,7 @@ nav.pagination {
         }
         
         ul.list { margin-top: 0; }
+        li.unread { background-color: lighten($color-primary, 30%) !important; }
         
         .foia-info {
             @extend %quarter;

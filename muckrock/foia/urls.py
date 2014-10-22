@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url(r'^list/following/$',
         views.ListFollowing.as_view(template_name=list_template), name='foia-list-following'),
     url(r'^mylist/$',
-        views.MyList.as_view(template_name=list_template), name='foia-mylist-all'),
+        views.MyList.as_view(), name='foia-mylist-all'),
     url(r'^mylist/(?P<view>\w+)/$',
         views.MyList.as_view(template_name=list_template), name='foia-mylist'),
         

@@ -33,7 +33,7 @@ from muckrock.foia.forms import FOIARequestForm, \
                                 AgencyConfirmForm, \
                                 FOIAMultiRequestForm, \
                                 TEMPLATES
-from muckrock.foia.new_forms import ListFilterForm
+from muckrock.foia.new_forms import ListFilterForm, MyListFilterForm
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
@@ -181,7 +181,7 @@ class List(ListView):
 @class_view_decorator(login_required)
 class MyList(List):
     """View requests owned by current user"""
-    template_name = 'foia/foiarequest_mylist.html'
+    template_name = 'lists/request_my_list.html'
 
     def set_read_status(self, foia_pks, status):
         """Mark requests as read or unread"""
@@ -190,22 +190,19 @@ class MyList(List):
             foia.updated = status
             foia.save()
 
-    def post(self, request, view='all'):
+    def post(self, request):
         """Handle updating tags"""
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
-            # Allow multi requests to have tags
-            _ = post.getlist('multi')
+            print foia_pks
             if post.get('submit') == 'Mark as Read':
                 self.set_read_status(foia_pks, False)
             elif post.get('submit') == 'Mark as Unread':
                 self.set_read_status(foia_pks, True)
-        except (FOIARequest.DoesNotExist, Tag.DoesNotExist):
-            # bad foia or tag value passed in, just ignore
+        except (FOIARequest.DoesNotExist):
             pass
-
-        return redirect('foia-mylist', view=view)
+        return redirect('foia-mylist-all')
 
     def merge_requests(self, foia_requests, multi_requests):
         """Merges the sorted FOIA requests with the multi requests"""
@@ -237,32 +234,30 @@ class MyList(List):
         """Get FOIAs for this view"""
         unsorted = FOIARequest.objects.filter(user=self.request.user)
         multis = FOIAMultiRequest.objects.filter(user=self.request.user)
-        view = self.kwargs.get('view', 'all')
-        if view == 'drafts':
-            unsorted = unsorted.get_editable()
-        elif view == 'action':
-            unsorted = unsorted.filter(status__in=['fix', 'payment'])
-        elif view == 'waiting':
-            unsorted = unsorted.filter(status__in=['ack', 'processed'])
-        elif view == 'completed':
-            unsorted = unsorted.filter(status__in=['rejected', 'no_docs', 'done', 'partial'])
-        elif view != 'all':
-            raise Http404()
-
-        tag = self.request.GET.get('tag')
-        if tag:
-            unsorted = unsorted.filter(tags__slug=tag)
-            multis = multis.filter(tags__slug=tag)
-
         sorted_requests = self.filter_sort_requests(unsorted, update_top=True)
-        if view in ['drafts', 'all']:
-            sorted_requests = self.merge_requests(sorted_requests, multis)
+        sorted_requests = self.merge_requests(sorted_requests, multis)
         return sorted_requests
 
     def get_context_data(self, **kwargs):
         context = super(MyList, self).get_context_data(**kwargs)
-        context['tags'] = Tag.objects.filter(foiarequest__user=self.request.user).distinct()
-        context['all_tags'] = Tag.objects.all()
+
+        get = self.request.GET
+        form_fields = {
+            'order': get.get('order', False),
+            'sort': get.get('field', False),
+            'status': get.get('status', False),
+            'agency': get.get('agency', False),
+            'jurisdiction': get.get('jurisdiction', False),
+            'user': get.get('user', False),
+            'tags': get.get('tags', False)
+        }
+        form_initials = {}
+        for key, value in form_fields.iteritems():
+            if value:
+                form_initials.update({key: value})
+        
+        context['title'] = 'My FOI Requests'
+        context['form'] = MyListFilterForm(initial=form_initials)
         return context
 
 

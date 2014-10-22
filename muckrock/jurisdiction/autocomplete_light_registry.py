@@ -26,7 +26,6 @@ autocomplete_light.register(
 )   
 
 class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
-    
     choices = Jurisdiction.objects.filter(hidden=False)
     search_fields = ['^name']
     attrs = { 

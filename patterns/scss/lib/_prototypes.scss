@@ -155,7 +155,7 @@
             padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
             margin: 0;
             &:first-child { padding-top: 0; }
-            &:nth-child(even) { background-color: $color-odd-background; }
+            &:nth-of-type(even) { background-color: $color-odd-background; }
             @media screen and (min-width: 540px) {
                 border-radius: $base-border-radius;
             }

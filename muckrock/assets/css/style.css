@@ -738,7 +738,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .collection ul.list li:first-child {
         padding-top: 0; }
       /* line 158, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection ul.list li:nth-child(even) {
+      .collection ul.list li:nth-of-type(even) {
         background-color: #e7e7e7; }
       @media screen and (min-width: 540px) {
         /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
@@ -1953,11 +1953,14 @@ nav.pagination .page-ref {
 /* line 72, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request ul.list {
   margin-top: 0; }
+/* line 73, ../../../patterns/scss/lib/layouts/_lists.scss */
+.collection.request li.unread {
+  background-color: #d3e3ff !important; }
 @media screen and (min-width: 500px) {
-  /* line 74, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 75, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request .foia-info {
     margin-top: 0; } }
-/* line 82, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 83, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters form {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -1965,11 +1968,11 @@ nav.pagination .page-ref {
     content: "";
     display: table;
     clear: both; }
-/* line 83, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .input {
   width: 100%; }
   @media screen and (min-width: 769px) {
-    /* line 83, ../../../patterns/scss/lib/layouts/_lists.scss */
+    /* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
     .collection.request .filters .input {
       float: left;
       display: block;
@@ -1978,18 +1981,18 @@ nav.pagination .page-ref {
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
       .collection.request .filters .input:last-child {
         margin-right: 0; } }
-/* line 89, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 90, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters select {
   width: 100%;
   margin-top: 0.5em; }
-/* line 93, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 94, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters input[type="text"] {
   display: block;
   width: 100%; }
-/* line 101, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 102, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .title-option {
   display: none; }
-/* line 103, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 104, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .list li {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */

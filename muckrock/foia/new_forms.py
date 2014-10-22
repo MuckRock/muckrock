@@ -87,3 +87,14 @@ class ListFilterForm(forms.Form):
             ('times_viewed', 'Popularity')
         )
     )
+
+class MyListFilterForm(ListFilterForm):
+    sort = forms.ChoiceField(
+        required=False,
+        choices=(
+            ('title', 'Title'),
+            ('date_submitted', 'Date'),
+            ('times_viewed', 'Popularity'),
+            ('read_status', 'Read Status')
+        )
+    )
