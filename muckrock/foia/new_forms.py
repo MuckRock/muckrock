@@ -33,6 +33,15 @@ class RequestForm(forms.Form):
         label='Agency',
         widget=forms.TextInput(attrs = {'placeholder': 'Name the Agency'})
     ) 
+    full_name = forms.CharField()
+    email = forms.EmailField()
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RequestForm, self).__init__(*args, **kwargs)
+        if self.request and self.request.user.is_authenticated():
+            del self.fields['full_name']
+            del self.fields['email']
     
     def clean(self):
         data = self.cleaned_data

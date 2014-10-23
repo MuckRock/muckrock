@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import User
 from django.contrib.formtools.wizard.views import SessionWizardView
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
@@ -9,15 +11,18 @@ from django.template.loader import render_to_string, get_template
 from django.template import RequestContext
 from django.utils import simplejson
 
+from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.new_forms import RequestForm, RequestUpdateForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.settings import MONTHLY_REQUESTS
 
-from random import random
-import pickle
 from datetime import datetime
+from random import random, randint, choice
 import logging
+import string
+
 logger = logging.getLogger(__name__)
 
 def _compose_comm(document, jurisdiction):
@@ -101,6 +106,25 @@ def _make_request(request, foia):
         foia_comm.date = datetime.now()
         return foia, foia_comm, is_new_agency
 
+def _make_user(request, data):
+    """Helper function to create a new user"""
+    username = 'MuckRocker%d' % randint(1, 10000)
+    # XXX verify this is unique
+    password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
+    user = User.objects.create_user(username, data['email'], password)
+    # XXX email the user their account details
+    if ' ' in data['full_name']:
+        user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
+    else:
+        user.first_name = data['full_name']
+    user.save()
+    user = authenticate(username=username, password=password)
+    Profile.objects.create(user=user,
+                           acct_type='community',
+                           monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+                           date_update=datetime.now())
+    login(request, user)
+    
 @login_required
 def update_request(request, jurisdiction, jidx, slug, idx):
     """Update a started FOIA Request"""
@@ -193,7 +217,6 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
-    session_id = int(random()*10000000)
     initial_data = {}
     clone = False
     if request.GET.get('clone', False):
@@ -212,24 +235,7 @@ def create_request(request):
         elif level == 'l':
             initial_data['local'] = jurisdiction
         initial_data['jurisdiction'] = level
-    if request.GET.get('s', False):
-        sk = 'session-%s' % request.GET['s']
-        if request.session.get(sk, False):
-            session_data = pickle.loads(request.session[sk])
-            del request.session[sk]
-            initial_data = {
-                'title': session_data.get('title', None),
-                'document': session_data.get('document', None),
-                'agency': session_data.get('agency', None)
-            }
-            jurisdiction = session_data.get('jurisdiction', None)
-            if jurisdiction:
-                level = jurisdiction.level
-                if level == 's':
-                    initial_data['state'] = jurisdiction
-                elif level == 'l':
-                    initial_data['local'] = jurisdiction
-                initial_data['jurisdiction'] = level
+
     if request.GET.get('j_id', False):
         j_id = request.GET['j_id']
         if j_id == 'f':
@@ -240,7 +246,7 @@ def create_request(request):
         return HttpResponse(json, mimetype='application/json')
     
     if request.method == 'POST':
-        form = RequestForm(request.POST)
+        form = RequestForm(request.POST, request=request)
         if form.is_valid():
             data = form.cleaned_data
             title = data['title']
@@ -259,27 +265,10 @@ def create_request(request):
             else:
                 agency = data['agency']
                 is_new_agency = True
+
+            if request.user.is_anonymous():
+                _make_user(request, data)
         
-            if request.POST.get('login', False) or \
-               request.POST.get('signup', False):
-                args = {
-                    'title': title,
-                    'document': document,
-                    'agency': agency,
-                    'jurisdiction': jurisdiction
-                }
-                request.session['session-%s' % session_id] = pickle.dumps(args)
-                if request.POST.get('login', False):
-                    return HttpResponseRedirect(
-                        reverse('acct-login') + \
-                        '?next=/foi/create/?s=%s' % session_id
-                    )
-                else:
-                    return HttpResponseRedirect(
-                        reverse('acct-register-free') + \
-                        '?next=/foi/create/?s=%s' % session_id
-                    )
-    
             foia_request = {
                 'title': title,
                 'document': document,
@@ -309,10 +298,10 @@ def create_request(request):
             # TODO: message about something going wrong
             return redirect('foia-create')
     else:
-        if clone or request.GET.get('s', False):
-            form = RequestForm(initial=initial_data)
+        if clone:
+            form = RequestForm(initial=initial_data, request=request)
         else:
-            form = RequestForm()
+            form = RequestForm(request=request)
     
     context = { 'form': form, 'clone': clone }
     
