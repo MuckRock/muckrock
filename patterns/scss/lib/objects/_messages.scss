@@ -1,0 +1,57 @@
+/* Messages */
+
+.message {  @extend %panel;
+    padding: 0;
+    $color-sent: lighten($color-primary, 5%);
+    $color-received: lighten($color-black, 5%);
+    $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
+    @include span-columns(12);
+    @include media($medium-layout) { @include span-columns(11 of 12); }
+    .meta {
+        display: block;
+        width: 100%;
+        padding: $base-vertical-rhythm/4;
+        @include border-top-radius($base-border-radius - 1);
+        line-height: 1em;
+        color: $color-white;
+        text-align: left;
+        overflow: hidden;
+        img {
+            display: none;
+            width: 25px;
+            margin-bottom: 0;
+        }
+        span {
+            display: inline-block;
+            padding: $base-vertical-rhythm/2;
+            &.name { float: left; }
+            &.date { float: right; }
+        }
+        @include fill-parent();
+    }
+    
+    .body {
+        display: block;
+        padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2+$base-vertical-rhythm/4;
+    }
+    
+    .attachments {
+        display: block;
+        width: 100%;
+        margin: $base-vertical-rhythm;
+        @extend %panel;
+    }
+
+    &.received {
+        border-color: $color-received;
+        .meta { background-color: $color-received; }
+        .attachments { @include panel-color($color-received); }
+    }
+    
+    &.sent {
+        border-color: $color-sent;
+        .meta { background-color: $color-sent; }
+        .attachments { @include panel-color($color-sent); }
+        @include media($medium-layout) { @include shift(1); }
+    }
+}

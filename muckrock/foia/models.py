@@ -537,49 +537,73 @@ class FOIARequest(models.Model):
         kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
                   'idx': self.pk, 'slug': self.slug}
 
-        side_actions = [
+        linked_actions = [
+            (user.is_authenticated,
+            reverse('foia-clone', kwargs=kwargs),
+            'Clone'
+            ),
             (user.is_staff,
-                reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
-            (self.user == user and self.is_editable(),
-                reverse('foia-update', kwargs=kwargs), 'Update'),
+            reverse('admin:foia_foiarequest_change', args=(self.pk,)),
+            'Admin'
+            ),
             (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
-                reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
-            (self.user == user and self.is_deletable(),
-                reverse('foia-delete', kwargs=kwargs), 'Delete'),
+            reverse('foia-embargo', kwargs=kwargs), 
+            'Update Embargo'
+            ),
             (user.is_staff,
-                reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
+            reverse('foia-admin-fix', kwargs=kwargs),
+            'Admin Fix'
+            ),
             (self.user == user and self.is_payable(),
-                reverse('foia-pay', kwargs=kwargs), 'Pay'),
+            reverse('foia-pay', kwargs=kwargs),
+            'Pay'
+            ),
             (self.user == user and self.is_payable(),
-                reverse('foia-crowdfund', kwargs=kwargs), 'Crowdfund'),
-            (self.public_documents(), '#', 'Embed this Document'),
+            reverse('foia-crowdfund', kwargs=kwargs),
+            'Crowdfund'
+            ),
             (user.is_authenticated() and self.user != user,
-                reverse('foia-follow', kwargs=kwargs),
-                'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
-                           else 'Follow'),
+            reverse('foia-follow', kwargs=kwargs),
+            'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow'
+            ),
             (user.is_authenticated() and self.user == user,
-                reverse('foia-toggle-followups', kwargs=kwargs),
-                'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'),
-            ]
+            reverse('foia-toggle-followups', kwargs=kwargs),
+            'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'
+            ),
+        ]
 
-        bottom_actions = [
+        unlinked_actions = [
             (self.user == user and self.status != 'started',
-                'Follow Up', 'Send a message directly to the agency'),
+            'Follow Up',
+            'Send a message directly to the agency'
+            ),
             (self.user == user,
-                'Get Advice', "Get answers to your question from Muckrock's FOIA expert community"),
+            'Get Advice',
+            "Get answers to your question from Muckrock's FOIA expert community"
+            ),
             (user.is_authenticated(),
-                'Problem?', "Something broken, buggy, or off?  Let us know and we'll fix it"),
+            'Problem?',
+            "Something broken, buggy, or off?  Let us know and we'll fix it"
+            ),
             (self.user == user and self.is_appealable(),
-                'Appeal', 'Submit an appeal'),
-            ]
+            'Appeal',
+            'Submit an appeal'
+            ),
+        ]
+                              
+        actions = [{
+            'title': '',
+            'link': link,
+            'label': label,
+            'class': ''
+        } for bool, link, label in linked_actions if bool] + [{
+            'title': title,
+            'link': '',
+            'label': label,
+            'class': 'modal'
+        } for bool, label, title in unlinked_actions if bool]
 
-        side_action_links = [{'link': link, 'label': label,
-                              'id': 'opener' if label == 'Embed this Document' else ''}
-                             for pred, link, label in side_actions if pred]
-        bottom_action_links = [{'label': label, 'title': title}
-                               for pred, label, title in bottom_actions if pred]
-
-        return {'side': side_action_links, 'bottom': bottom_action_links}
+        return actions
 
     def total_pages(self):
         """Get the total number of pages for this request"""

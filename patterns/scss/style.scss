@@ -3,7 +3,7 @@
 //
 // Do not appear in compiled CSS
 
-@import                 'lib/normalize';
+@import                 'normalize';
 @import                 'bourbon/bourbon';
 @import                 'neat/neat';
 
@@ -39,8 +39,8 @@ $desktop-menu-width: 23%;
 $menu-animation: all 0.25s ease;
 
 @import 'lib/mixins';
-@import 'lib/grid';
+@import 'lib/prototypes';
 @import 'lib/typography';
-@import 'lib/objects';
-@import 'lib/layouts';
+@import 'lib/objects/objects';
+@import 'lib/layouts/layouts';
 @import 'lib/nav';

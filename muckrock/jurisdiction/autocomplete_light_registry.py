@@ -11,7 +11,7 @@ autocomplete_light.register(
     choices=Jurisdiction.objects.filter(level='l', hidden=False),
     attrs={
         'placeholder': 'City name?',
-        'data-autocomplete-minimum-characters': 1
+        'data-autocomplete-minimum-characters': 3
     }
 )
 
@@ -23,4 +23,14 @@ autocomplete_light.register(
         'placeholder': 'State name?',
         'data-autocomplete-minimum-characters': 1
     }
-)
+)   
+
+class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
+    choices = Jurisdiction.objects.filter(hidden=False)
+    search_fields = ['^name']
+    attrs = { 
+        'placeholder': 'Jurisdiction',
+        'data-autocomplete-minimum-characters': 2
+    }
+    
+autocomplete_light.register(Jurisdiction, JurisdictionAutocomplete)

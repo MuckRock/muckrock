@@ -1,0 +1,19 @@
+{% autoescape off %}
+
+{{question.user.get_full_name}} asked a question on MuckRock:
+
+{{question.question}}
+
+Have an answer? Let them know:
+
+https://www.muckrock.com{% url 'question-detail' pk=question.pk slug=question.slug %}
+
+Check out other questions:
+
+https://www.muckrock.com{% url 'question-index' %}
+
+Unsubscribe from question notifications:
+
+https://www.muckrock.com{{ link }}
+
+{% endautoescape %}

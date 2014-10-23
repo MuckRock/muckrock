@@ -31,16 +31,16 @@
     <a href="
     {% if context %}
         {% if context == 'user' %}
-            {% url 'foia-list-user' user_name=foia.user.username %}
+            {% url 'foia-list' user_name=foia.user.username %}
         {% endif %}
         {% if context == 'active_user' %}
             {% url 'foia-mylist-all' %}
         {% endif %}
         {% if context == 'agency' %}
-            {% url 'foia-list-agency' agency=foia.agency.slug idx=foia.agency.pk %}
+            {% url 'foia-list' agency=foia.agency.slug %}
         {% endif %}
         {% if context == 'jurisdiction' %}
-            {% url 'foia-list-jurisdiction' jurisdiction=foia.jurisdiction.slug idx=foia.jurisdiction.pk %}
+            {% url 'foia-list' jurisdiction=foia.jurisdiction.slug  %}
         {% endif %}
     {% else %}
         {% url 'foia-list' %}

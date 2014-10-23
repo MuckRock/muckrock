@@ -85,11 +85,13 @@ STATICFILES_DIRS = (
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 if not DEBUG:
+    DEFAULT_BUCKET_NAME = 'muckrock'
+    BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
-    STATIC_URL = 'https://muckrock.s3.amazonaws.com/'
-    MEDIA_URL = 'https://muckrock.s3.amazonaws.com/media/'
+    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

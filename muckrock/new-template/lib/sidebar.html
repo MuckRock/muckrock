@@ -19,12 +19,9 @@
         </form>
         {% if user.is_authenticated %}
         <section class="account">
-            <div>
-            <img src="http://placehold.it/100x100" class="avatar" alt="avatar" />
-            <a href="{% url 'acct-my-profile' %}" class="username">{{ user.first_name }} {{ user.last_name }}</a>
-            </div>
+            <p class="username">{{ user.first_name }} {{ user.last_name }}</p>
             <ul class="options">
-			    <li><a href="{% url 'acct-update' %}">Settings</a></li>
+			    <li><a href="{% url 'acct-my-profile' %}">Profile</a></li>
 			    <li><a href="{% url 'acct-logout' %}">Log Out</a></li>
 			</ul>
             {% if user.is_staff %}

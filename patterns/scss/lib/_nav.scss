@@ -333,28 +333,12 @@ nav.sidebar {
     }
     
     .account {
-        & div {
-            overflow: hidden;
+        .username {
+            display: block;
+            @extend h5;
+            // margin: 0;
             margin-bottom: $base-vertical-rhythm/2;
-            .avatar {
-                display: inline-block;
-                height: 50px;
-                width: 50px;
-                vertical-align: middle;
-                border-radius: $base-border-radius/2;
-                margin-right: $base-vertical-rhythm/2;
-            }
-            .username {
-                display: inline-block;
-                vertical-align: middle;
-                @include font-sizing(1);
-                margin: 0;
-                color: $color-white;
-                &:hover {
-                    color: $color-selected;
-                    text-decoration: none;
-                }
-            }
+            color: $color-white;
         }
         li { @extend small; }
         

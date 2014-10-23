@@ -5,26 +5,25 @@ This is the parent style for a collection of objects: a collection of blog posts
 
 {% endcomment %}
 {% block content %}
-    
-    <object class="{% block type %}item{% endblock type %} collection">
+    <section class="{% block type %}item{% endblock type %} collection">
 
-        <header class="collection-header">
-            <h1 class="list-label">
-                {% block list-label %}{% endblock list-label %}
-            </h1>
-            <section class="commands">
-            {% block commands %}
-            {% endblock commands %}
-            </section>
+        <header>
+            {% block list-title %}{% endblock list-title %}
+            {% block list-subtitle %}{% endblock list-subtitle %}
         </header>
-        <section class="list-types">
-            {% block list-types %}
-            {% endblock list-types %}
+        <aside class="actions">
+            {% block actions %}
+            {% endblock actions %}
+        </aside>
+        <section class="filters">
+            {% block filters %}
+            {% endblock filters %}
         </section>
+        
         {% include 'lib/pagination.html' %}
         
         {% block list %}
-        <ul class="object-list">
+        <ul class="list">
             {% for item in object_list %}
             <li>
                 {% block list-item %}
@@ -34,12 +33,12 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% endblock list-item %}
             </li>
             {% empty %}
-            <li class="empty">Hmm&ellip; looks like there&rsquo;s nothing here.</li>
+            <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
             {% endfor %}
         </ul>
         {% endblock list %}
-    </object>
-    
-    {% include 'lib/pagination.html' %}
-    
+        
+        {% include 'lib/pagination.html' %}
+        
+    </section>
 {% endblock %}

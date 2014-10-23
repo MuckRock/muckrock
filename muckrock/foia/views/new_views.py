@@ -25,7 +25,7 @@ import string
 
 logger = logging.getLogger(__name__)
 
-def _compose_comm(document, jurisdiction):
+def _compose_comm(user, document, jurisdiction):
         intro = 'This is a request under the Freedom of Information Act.'
         waiver = ('I also request that, if appropriate, fees be waived as I '
                   'believe this request is in the public interest. '
@@ -43,16 +43,22 @@ def _compose_comm(document, jurisdiction):
         if jurisdiction.get_days():
             delay = jurisdiction.get_days()
         
-        prepend = [intro + ' I hereby request the following records:']
-        append = [waiver,
-                 ('In the event that fees cannot be waived, I would be '
-                  'grateful if you would inform me of the total charges in '     
-                  'advance of fulfilling my request. I would prefer the '
-                  'request filled electronically, by e-mail attachment if ' 
-                  'available or CD-ROM if not.'),
-                  ('Thank you in advance for your anticipated cooperation in '
-                  'this matter. I look forward to receiving your response to ' 
-                  'this request within %s, as the statute requires.' % delay )]
+        prepend = [
+            'To Whom it May Concern:',
+            intro + ' I hereby request the following records:'
+        ]
+        append = [
+            waiver,
+            ('In the event that fees cannot be waived, I would be '
+            'grateful if you would inform me of the total charges in '     
+            'advance of fulfilling my request. I would prefer the '
+            'request filled electronically, by e-mail attachment if ' 
+            'available or CD-ROM if not.'),
+            ('Thank you in advance for your anticipated cooperation in '
+            'this matter. I look forward to receiving your response to ' 
+            'this request within %s, as the statute requires.' % delay ),
+            'Sincerely, ' + user.get_full_name()
+        ]
         return '\n\n'.join(prepend + [document] + append)
 
 def _make_request(request, foia):
@@ -71,7 +77,6 @@ def _make_request(request, foia):
                 user=request.user,
                 approved=False
             )
-            '''
             send_mail(
                 '[AGENCY] %s' % foia.agency.name,
                 render_to_string(
@@ -82,7 +87,6 @@ def _make_request(request, foia):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            '''
         foia = FOIARequest.objects.create(
             user=request.user,
             status='started',
@@ -100,7 +104,7 @@ def _make_request(request, foia):
             date=datetime.now(),
             response=False,
             full_html=False,
-            communication=_compose_comm(document, jurisdiction)
+            communication=_compose_comm(request.user, document, jurisdiction)
         )
         foia_comm = foia.communications.all()[0]
         foia_comm.date = datetime.now()
@@ -171,7 +175,6 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                     user=request.user,
                     approved=False
                 )
-                '''
                 send_mail(
                     '[AGENCY] %s' % foia.agency.name,
                     render_to_string(
@@ -182,24 +185,12 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                     ['requests@muckrock.com'],
                     fail_silently=False
                 )
-                '''
                 is_new_agency = True
             
             foia.save
-            if is_new_agency:
-                a = foia.agency
-                args = {
-                    'jurisdiction': a.jurisdiction.slug,
-                    'jidx': a.jurisdiction.pk,
-                    'slug': a.slug,
-                    'idx': a.pk
-                }
-                return HttpResponseRedirect(
-                    reverse('agency-update', kwargs=args) + \
-                    '?foia=%s' % foia.pk
-                )
-            else:
-                return redirect(foia)
+            
+            messages.success(request, 'The request has been updated.')
+            return redirect(foia)
         else:
             return redirect(foia)
     else:
@@ -281,7 +272,7 @@ def create_request(request):
             foia, foia_comm, is_new_agency = _make_request(request, foia_request)
             foia_comm.save()
             foia.save()
-    
+            '''
             if is_new_agency:
                 args = {
                     'jurisdiction': foia.agency.jurisdiction.slug,
@@ -295,8 +286,9 @@ def create_request(request):
                 )
             else:
                 return redirect(foia)
-            # TODO: message about something going wrong
-            return redirect('foia-create')
+            messages.error(request, 'Sorry, something went wrong. We have top men on it.')
+            '''
+            return redirect(foia)
     else:
         if clone:
             form = RequestForm(initial=initial_data, request=request)

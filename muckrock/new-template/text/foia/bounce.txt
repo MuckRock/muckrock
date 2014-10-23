@@ -1,0 +1,20 @@
+{% autoescape off %}
+The email address {{recipient}} has bounced with the following error: {{error}}
+
+It was sent for the following request:
+{% if foia %}
+FOIA Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}
+{% else %}
+Could not be determined
+{% endif %}
+
+It is also the email for the following requests:
+{% for foia in foias %}
+FOIA Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}
+{% endfor %}
+
+It is the email address (Or in the CC) for the following agencies:
+{% for agency in agencies %}
+Agency Admin: http://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}
+{% endfor %}
+{% endautoescape %}

@@ -1,7 +1,7 @@
 {% extends 'lists/base_list.html' %}
 
 {% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-label %}Articles{% endblock list-label %}
+{% block list-title %}<h1>Articles</h1>{% endblock list-title %}
 {% block type %}news{% endblock type %}
 
 {% block list-item %}
@@ -12,8 +12,8 @@
     {% endwith %}
 {% endblock list-item %}
 
-{% block commands %}
+{% block actions %}
     {% if user.is_staff %}
     <a href="#" class="primary button">Compose Article</a>
     {% endif %}
-{% endblock commands %}
+{% endblock actions %}

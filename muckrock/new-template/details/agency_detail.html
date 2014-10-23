@@ -87,7 +87,7 @@
 
     {{agency.public_notes|markdown:"trusted"}}
 
-    {% include 'lib/foia_table.html' %}
+    {% include 'lib/foia_table.html' with context='agency' %}
     
     {% for req in agency.interesting_requests %}
     <dl>
