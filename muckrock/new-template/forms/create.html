@@ -78,19 +78,16 @@
                 {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
             </fieldset>
         {% endfor %}
+		{% if not user.is_authenticated %}
+		<p>This will create an account for you.  You must have an account to submit a request.  Please do not continue if you would not like an account.</p>
+		{% endif %}
 
         <footer class="buttons">
-            {% if not user.is_authenticated %}
-            <p><small>You must have an account before you can create a request. If you do not have an account, you can create one for free and in under a minute.</small></p>
-            <input type="submit" name="login" value="Log In" class="default button" />
-            <input type="submit" name="signup" value="Sign Up" class="primary button" />
-            {% else %}
                 {% if clone %}
             <input type="submit" name="submit" value="Clone" class="primary button"  />
                 {% else %}
             <input type="submit" name="submit" value="Create" class="primary button"  />
                 {% endif %}
-            {% endif %}
         </footer>
 
     </form>
