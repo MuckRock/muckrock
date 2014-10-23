@@ -1,17 +1,20 @@
-{% if page_obj.has_previous or page_obj.has_next %}
-    <nav class="pagination">
-        <ul>
+<section class="pagination">
+{% with request.GET.per_page as per_page %}
+    
+    <nav class="page-nav">    
+        <div class="page-ref">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</div>
+        {% if is_paginated %}    
+        <ul class="page-set">
             {% if page_obj.has_previous %}
-            <li><a href="?page=1">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page_obj.previous_page_number }}">&#171;&nbsp;Previous&nbsp;page</a>
+            <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page_obj.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">&#171;&nbsp;Previous&nbsp;page</a>
             </li>
             {% else %}
             <li>
                 <span class="disabled">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</span>&emsp;<span class="disabled">&#171;&nbsp;Previous&nbsp;page</a></span>
             </li>
             {% endif %}
-            <li class="page-ref">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</li>
             {% if page_obj.has_next %}
-            <li><a href="?page={{ page_obj.next_page_number }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
+            <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
             {% else %}
             <li>
                 <span class="disabled">Next&nbsp;page&nbsp;&#187;</span>
@@ -19,5 +22,21 @@
             </li>
             {% endif %}
         </ul>
+        {% endif %} 
     </nav>
-{% endif %}
+    <nav class="pp-nav">    
+        <div class="pp-ref">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</div>
+        <div class="pp-set">Per page:
+                {% if per_page == "10" or not per_page %}10,{% else %}
+                <a href="?page=1&amp;per_page=10{{ filter_url }}">10</a>,
+                {% endif %}
+                {% if per_page == "25" %}25,{% else %}
+                <a href="?page=1&amp;per_page=25{{ filter_url }}">25</a>,
+                {% endif %}
+                {% if per_page == "50" %}50{% else %}
+                <a href="?page=1&amp;per_page=50{{ filter_url }}">50</a>
+                {% endif %}
+        </div>
+    </nav>
+{% endwith %}
+</section>

@@ -98,7 +98,7 @@ class List(ListView):
         """Sorts the FOIA requests"""
         get = self.request.GET
         order = get.get('order', 'desc')
-        sort = get.get('field', 'date_submitted')
+        sort = get.get('sort', 'date_submitted')
         filter = {
             'status': get.get('status', False),
             'agency': get.get('agency', False),
@@ -152,7 +152,7 @@ class List(ListView):
         get = self.request.GET
         form_fields = {
             'order': get.get('order', False),
-            'sort': get.get('field', False),
+            'sort': get.get('sort', False),
             'status': get.get('status', False),
             'agency': get.get('agency', False),
             'jurisdiction': get.get('jurisdiction', False),
@@ -160,12 +160,16 @@ class List(ListView):
             'tags': get.get('tags', False)
         }
         form_initials = {}
+        filter_url = ''
         for key, value in form_fields.iteritems():
             if value:
                 form_initials.update({key: value})
+                filter_query = '&' + str(key) + '=' + str(value)
+                filter_url += filter_query
         
         context['title'] = 'FOI Requests'
         context['form'] = ListFilterForm(initial=form_initials)
+        context['filter_url'] = filter_url
         return context
     
     def get_queryset(self):
