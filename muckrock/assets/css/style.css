@@ -415,21 +415,21 @@ html, body {
     clear: both; }
 
 /* line 8, ../../../patterns/scss/lib/_grid.scss */
-.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, nav.pagination, .search.meta h2 {
+.pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .pagination, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, .search.meta h2 {
   width: 100%; }
 
 /* line 10, ../../../patterns/scss/lib/_grid.scss */
-.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary {
+.pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
     /* line 10, ../../../patterns/scss/lib/_grid.scss */
-    .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .collection.request .foia-info:first-child, .new-request header h1, .new-request header summary {
+    .pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .collection.request .foia-info:last-child:first-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      .pagination nav:last-child, .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
@@ -461,41 +461,41 @@ html, body {
 
 @media screen and (min-width: 500px) {
   /* line 23, ../../../patterns/scss/lib/_grid.scss */
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
       margin-right: 0; }
     /* line 52, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
       margin-right: 0; }
     /* line 57, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
       clear: left; } }
 @media screen and (min-width: 769px) {
   /* line 23, ../../../patterns/scss/lib/_grid.scss */
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .foia-info, .search.form input[type="submit"] {
+  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
     /* line 64, ../../../patterns/scss/lib/_mixins.scss */
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .foia-info:nth-child(2n) {
+    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
       margin-right: 2.35765%; }
     /* line 65, ../../../patterns/scss/lib/_mixins.scss */
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .foia-info:nth-child(2n+1) {
+    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
       clear: none; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .foia-info:last-child {
+    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
       margin-right: 0; }
     /* line 52, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n), .collection.request .foia-info:nth-child(4n) {
+    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n) {
       margin-right: 0; }
     /* line 57, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1), .collection.request .foia-info:nth-child(4n+1) {
+    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
@@ -728,7 +728,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
   /* line 149, ../../../patterns/scss/lib/_prototypes.scss */
   .collection ul.list {
     margin: 1.5em 0 0;
-    padding: 1.5em 0 0;
+    padding: 0;
     list-style-type: none; }
     /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
     .collection ul.list li {
@@ -757,6 +757,50 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
     font-size: 1em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
+  /* line 168, ../../../patterns/scss/lib/_prototypes.scss */
+  .collection .controls {
+    width: 100%;
+    padding: 0.75em;
+    margin: 0 0 0.75em 0;
+    border: 1px solid #b3becb;
+    border-radius: 9px;
+    background-color: #dbdbdb;
+    display: block; }
+    /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
+    .collection .controls:after {
+      content: "";
+      display: table;
+      clear: both; }
+    /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
+      display: block;
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 48.82117%; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .collection .controls button:last-child, .collection .controls .button:last-child, .collection .controls input[type="submit"]:last-child, .collection .controls button:last-child {
+        margin-right: 0; }
+      @media screen and (min-width: 500px) {
+        /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+        .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
+          float: left;
+          display: block;
+          margin-right: 4.82916%;
+          width: 30.11389%; }
+          /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+          .collection .controls button:last-child, .collection .controls .button:last-child, .collection .controls input[type="submit"]:last-child, .collection .controls button:last-child {
+            margin-right: 0; } }
+      @media screen and (min-width: 769px) {
+        /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+        .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
+          float: left;
+          display: block;
+          margin-right: 2.35765%;
+          width: 23.23176%; }
+          /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+          .collection .controls button:last-child, .collection .controls .button:last-child, .collection .controls input[type="submit"]:last-child, .collection .controls button:last-child {
+            margin-right: 0; } }
 
 /* line 1, ../../../patterns/scss/lib/_typography.scss */
 body {
@@ -1330,7 +1374,40 @@ ul.notifications {
       ul.notifications li.notification.warning span.symbol .svg-icon circle {
         stroke: #d9c227; }
 
-/* line 11, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 1, ../../../patterns/scss/lib/objects/_pagination.scss */
+.pagination {
+  display: block;
+  margin: 1.5em 0 0.75em; }
+  /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
+  .pagination:after {
+    content: "";
+    display: table;
+    clear: both; }
+  /* line 5, ../../../patterns/scss/lib/objects/_pagination.scss */
+  .pagination nav {
+    text-align: center; }
+  /* line 9, ../../../patterns/scss/lib/objects/_pagination.scss */
+  .pagination ul {
+    text-align: center;
+    margin: 0 auto; }
+  /* line 13, ../../../patterns/scss/lib/objects/_pagination.scss */
+  .pagination li, .pagination .pp-set {
+    font-weight: 300;
+    display: block;
+    padding: 0 0.375em; }
+  /* line 19, ../../../patterns/scss/lib/objects/_pagination.scss */
+  .pagination .pp-set {
+    font-weight: 300; }
+  /* line 22, ../../../patterns/scss/lib/objects/_pagination.scss */
+  .pagination .page-ref, .pagination .pp-ref {
+    font-weight: 300;
+    font-size: 1.25em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0;
+    padding: 0 0.75em;
+    margin: 0; }
+
+/* line 12, ../../../patterns/scss/lib/objects/_objects.scss */
 fieldset label {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -1338,20 +1415,20 @@ fieldset label {
   display: block;
   color: #6b6a65;
   text-align: left; }
-/* line 19, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 20, ../../../patterns/scss/lib/objects/_objects.scss */
 fieldset input + label {
   float: left;
   margin-right: 1.5em; }
-/* line 24, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 25, ../../../patterns/scss/lib/objects/_objects.scss */
 fieldset > fieldset, fieldset > fieldset + fieldset {
   margin: 0; }
 
-/* line 27, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 28, ../../../patterns/scss/lib/objects/_objects.scss */
 .form {
   display: block;
   padding: 1.5em;
   border-radius: 9px; }
-  /* line 32, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 33, ../../../patterns/scss/lib/objects/_objects.scss */
   .form header {
     max-width: 68em;
     margin-left: auto;
@@ -1363,13 +1440,13 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       content: "";
       display: table;
       clear: both; }
-  /* line 37, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 38, ../../../patterns/scss/lib/objects/_objects.scss */
   .form h1 {
     font-size: 3em;
     line-height: 1.51282em;
     margin: 0.37821em 0;
     margin-top: 0; }
-  /* line 42, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 43, ../../../patterns/scss/lib/objects/_objects.scss */
   .form form {
     max-width: 68em;
     margin-left: auto;
@@ -1381,20 +1458,20 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       content: "";
       display: table;
       clear: both; }
-  /* line 47, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 48, ../../../patterns/scss/lib/objects/_objects.scss */
   .form fieldset {
     margin-right: 0;
     padding: 0 5% 0 0;
     margin-top: 0; }
-  /* line 55, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 56, ../../../patterns/scss/lib/objects/_objects.scss */
   .form input {
     width: 100%; }
-  /* line 56, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 57, ../../../patterns/scss/lib/objects/_objects.scss */
   .form textarea {
     width: 100%;
     height: 10em;
     resize: vertical; }
-  /* line 61, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 62, ../../../patterns/scss/lib/objects/_objects.scss */
   .form .buttons {
     display: block; }
     /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -1403,67 +1480,67 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       display: table;
       clear: both; }
 
-/* line 65, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 66, ../../../patterns/scss/lib/objects/_objects.scss */
 #hidden-form {
   display: none;
   width: 100%;
   overflow: hidden;
   margin: 1.5em 0;
   border: 1px solid #b3becb; }
-  /* line 67, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 68, ../../../patterns/scss/lib/objects/_objects.scss */
   #hidden-form:target {
     display: block; }
-  /* line 72, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 73, ../../../patterns/scss/lib/objects/_objects.scss */
   #hidden-form a.button, #hidden-form input.button, #hidden-form input[type="submit"] {
     float: right; }
 
-/* line 74, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 75, ../../../patterns/scss/lib/objects/_objects.scss */
 #hidden-form-button:focus {
   outline: none; }
 
 @media screen and (min-width: 769px) {
-  /* line 77, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 78, ../../../patterns/scss/lib/objects/_objects.scss */
   .form.login ul {
     margin: 0.75em 0 0; } }
-/* line 83, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 84, ../../../patterns/scss/lib/objects/_objects.scss */
 .form.login p {
   padding-left: 5%;
   margin-bottom: 0.75em; }
 
-/* line 95, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 96, ../../../patterns/scss/lib/objects/_objects.scss */
 .form.password-reset, .password-change {
   overflow: hidden; }
-  /* line 97, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 98, ../../../patterns/scss/lib/objects/_objects.scss */
   .form.password-reset h1, .password-change h1 {
     margin: 0 0 0.75em; }
-  /* line 98, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 99, ../../../patterns/scss/lib/objects/_objects.scss */
   .form.password-reset form, .password-change form {
     padding: 0 2.35765% 0 2.35765%; }
 
-/* line 102, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 103, ../../../patterns/scss/lib/objects/_objects.scss */
 .features {
   margin: 0 -1.5em 1.5em;
   padding: 3em 1.5em;
   color: #f4f4f4;
   background-color: #3a82ff;
   text-align: center; }
-  /* line 108, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 109, ../../../patterns/scss/lib/objects/_objects.scss */
   .features h1 {
     font-size: 2em;
     line-height: 1.22222em;
     margin: 0.30556em 0;
     font-weight: 300;
     margin-bottom: 1.5em; }
-  /* line 113, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 114, ../../../patterns/scss/lib/objects/_objects.scss */
   .features a {
     color: #f4f4f4;
     text-decoration: none;
     border-bottom: 1px dotted #f4f4f4; }
-    /* line 117, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 118, ../../../patterns/scss/lib/objects/_objects.scss */
     .features a:hover {
       border-bottom-style: solid; }
 
-/* line 121, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 122, ../../../patterns/scss/lib/objects/_objects.scss */
 .pricing {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -1472,7 +1549,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     display: table;
     clear: both; }
 
-/* line 123, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 124, ../../../patterns/scss/lib/objects/_objects.scss */
 .plan {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
@@ -1480,11 +1557,11 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
   transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
-  /* line 127, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 128, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan:hover {
     margin-top: 0;
     margin-bottom: 0.75em; }
-  /* line 132, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 133, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan a {
     display: block;
     padding: 1.5em 0.75em;
@@ -1494,16 +1571,16 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     background-color: #21282c;
     text-align: center;
     font-weight: 300; }
-    /* line 140, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 141, ../../../patterns/scss/lib/objects/_objects.scss */
     .plan a:hover {
       background-color: #3a82ff;
       text-decoration: none; }
-  /* line 145, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 146, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan ul {
     list-style-type: none;
     padding-left: 0;
     margin: 0; }
-  /* line 150, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 151, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan li {
     font-size: 0.9em;
     line-height: 1.22222em;
@@ -1512,48 +1589,48 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     padding: 0.75em;
     border: 1px solid #b3becb;
     border-bottom: none; }
-    /* line 156, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 157, ../../../patterns/scss/lib/objects/_objects.scss */
     .plan li:first-child {
       border-top: none; }
-    /* line 157, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 158, ../../../patterns/scss/lib/objects/_objects.scss */
     .plan li:last-child {
       border-bottom: 1px solid #b3becb;
       border-bottom-left-radius: 9px;
       border-bottom-right-radius: 9px; }
-    /* line 161, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 162, ../../../patterns/scss/lib/objects/_objects.scss */
     .plan li:hover {
       background-color: #e7e7e7; }
-  /* line 164, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 165, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan .name {
     font-size: 1.5em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  /* line 165, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 166, ../../../patterns/scss/lib/objects/_objects.scss */
   .plan .description {
     font-size: 1em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
 
 /* Feeds */
-/* line 171, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 172, ../../../patterns/scss/lib/objects/_objects.scss */
 .feed-item {
   overflow: hidden;
   width: 100%; }
-  /* line 174, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 175, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed-item > header {
     display: block;
     width: 100%;
     margin-bottom: 0.75em;
     float: left; }
-    /* line 179, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 180, ../../../patterns/scss/lib/objects/_objects.scss */
     .feed-item > header div {
       display: block; }
-      /* line 181, ../../../patterns/scss/lib/objects/_objects.scss */
+      /* line 182, ../../../patterns/scss/lib/objects/_objects.scss */
       .feed-item > header div + div {
         font-size: 0.9em;
         line-height: 1.66667em;
         margin: 0.41667em 0; }
-  /* line 186, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 187, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed-item .button, .feed-item input[type="submit"], .feed-item button {
     font-size: 0.9em;
     line-height: 1.66667em;
@@ -1561,29 +1638,29 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     line-height: 1.5em;
     float: left; }
 
-/* line 193, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 194, ../../../patterns/scss/lib/objects/_objects.scss */
 .feed {
   width: 100%; }
-  /* line 195, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 196, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed ul, .feed ol {
     list-style-type: none;
     padding-left: 0; }
-  /* line 200, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 201, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed .feed-item {
     margin: 0;
     border-top: none;
     border-radius: 0; }
-  /* line 206, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 207, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed li:first-child > .feed-item {
     border-top: 1px solid #b3becb;
     border-top-left-radius: 9px;
     border-top-right-radius: 9px; }
-  /* line 211, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 212, ../../../patterns/scss/lib/objects/_objects.scss */
   .feed li:last-child > .feed-item {
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px; }
   @media screen and (min-width: 769px) {
-    /* line 193, ../../../patterns/scss/lib/objects/_objects.scss */
+    /* line 194, ../../../patterns/scss/lib/objects/_objects.scss */
     .feed {
       float: left;
       display: block;
@@ -1592,7 +1669,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
       .feed:last-child {
         margin-right: 0; }
-      /* line 217, ../../../patterns/scss/lib/objects/_objects.scss */
+      /* line 218, ../../../patterns/scss/lib/objects/_objects.scss */
       .feed.narrow {
         float: left;
         display: block;
@@ -1601,7 +1678,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
         /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
         .feed.narrow:last-child {
           margin-right: 0; }
-      /* line 218, ../../../patterns/scss/lib/objects/_objects.scss */
+      /* line 219, ../../../patterns/scss/lib/objects/_objects.scss */
       .feed.wide {
         float: left;
         display: block;
@@ -1612,7 +1689,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
           margin-right: 0; } }
 
 /* Progress Bar */
-/* line 229, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 230, ../../../patterns/scss/lib/objects/_objects.scss */
 .progress-bar {
   display: block;
   width: 100%;
@@ -1622,7 +1699,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   border-radius: 10px;
   background-color: #f4f4f4; }
 
-/* line 239, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 240, ../../../patterns/scss/lib/objects/_objects.scss */
 .meter {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -1636,7 +1713,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   border-radius: 9px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px; }
-  /* line 247, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 248, ../../../patterns/scss/lib/objects/_objects.scss */
   .meter.completed {
     border-top-right-radius: 9px;
     border-bottom-right-radius: 9px; }
@@ -1677,18 +1754,18 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     border: 1px solid #a4b1c1; }
 
 /* Table */
-/* line 258, ../../../patterns/scss/lib/objects/_objects.scss */
+/* line 259, ../../../patterns/scss/lib/objects/_objects.scss */
 table {
   width: 100%;
   margin-top: 1.5em 0;
   border-radius: 9px; }
-  /* line 262, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 263, ../../../patterns/scss/lib/objects/_objects.scss */
   table th, table td {
     padding: 0.25em 0.5em; }
-  /* line 263, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 264, ../../../patterns/scss/lib/objects/_objects.scss */
   table tr:nth-child(odd) {
     background-color: #e7e7e7; }
-  /* line 264, ../../../patterns/scss/lib/objects/_objects.scss */
+  /* line 265, ../../../patterns/scss/lib/objects/_objects.scss */
   table, table th, table td {
     border-top: 1px solid #b3becb;
     border-bottom: 1px solid #b3becb; }
@@ -1868,66 +1945,43 @@ h1.list-label {
   margin-top: 0;
   margin-bottom: 0; }
 
-/* line 17, ../../../patterns/scss/lib/layouts/_lists.scss */
-nav.pagination ul {
-  text-align: center;
-  margin: 0.75em auto; }
-/* line 21, ../../../patterns/scss/lib/layouts/_lists.scss */
-nav.pagination li {
-  font-size: 0.95em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
-  display: block;
-  padding: 0 0.375em; }
-  @media screen and (min-width: 680px) {
-    /* line 21, ../../../patterns/scss/lib/layouts/_lists.scss */
-    nav.pagination li {
-      display: inline-block; } }
-/* line 30, ../../../patterns/scss/lib/layouts/_lists.scss */
-nav.pagination .page-ref {
-  font-weight: 300;
-  font-size: 1.25em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
-  padding: 0 0.75em; }
-
-/* line 41, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 18, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.jurisdiction h2, .collection.jurisdiction ul, .collection.agency h2, .collection.agency ul {
   text-align: center; }
-/* line 42, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 19, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.jurisdiction ul, .collection.agency ul {
   width: 100%;
   margin: 0; }
-  /* line 45, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 22, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.jurisdiction ul li, .collection.agency ul li {
     padding: 0.375em; }
   @media screen and (min-width: 540px) {
-    /* line 42, ../../../patterns/scss/lib/layouts/_lists.scss */
+    /* line 19, ../../../patterns/scss/lib/layouts/_lists.scss */
     .collection.jurisdiction ul, .collection.agency ul {
       -webkit-columns: 3 0.75em;
       -moz-columns: 3 0.75em;
       columns: 3 0.75em; }
-      /* line 48, ../../../patterns/scss/lib/layouts/_lists.scss */
+      /* line 25, ../../../patterns/scss/lib/layouts/_lists.scss */
       .collection.jurisdiction ul li:nth-child(even), .collection.agency ul li:nth-child(even) {
         background: none; } }
-/* line 54, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 31, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request h2 {
   font-size: 1.3em;
   line-height: 1.22222em;
   margin: 0.30556em 0; }
-/* line 55, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 32, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request h3 {
   font-weight: 300; }
-/* line 56, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 33, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request dt {
   margin-bottom: 0; }
-/* line 57, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 34, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request dd + dt {
   margin-top: 0.5em; }
-/* line 58, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 35, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request dt + dd {
   line-height: 1em; }
-/* line 60, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 37, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request ul.heading {
   display: block;
   display: none;
@@ -1938,29 +1992,89 @@ nav.pagination .page-ref {
     display: table;
     clear: both; }
   @media screen and (min-width: 769px) {
-    /* line 60, ../../../patterns/scss/lib/layouts/_lists.scss */
+    /* line 37, ../../../patterns/scss/lib/layouts/_lists.scss */
     .collection.request ul.heading {
       display: block; } }
-  /* line 67, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 44, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request ul.heading li {
     padding: 0; }
-  /* line 68, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 45, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request ul.heading li:first-child {
     padding-left: 1.5em; }
-  /* line 69, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 46, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request ul.heading li:nth-child(2n) {
     background: none; }
-/* line 72, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 49, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request ul.list {
   margin-top: 0; }
-/* line 73, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 50, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request li.unread {
   background-color: #d3e3ff !important; }
-@media screen and (min-width: 500px) {
-  /* line 75, ../../../patterns/scss/lib/layouts/_lists.scss */
-  .collection.request .foia-info {
-    margin-top: 0; } }
-/* line 83, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 52, ../../../patterns/scss/lib/layouts/_lists.scss */
+.collection.request .foia-info {
+  display: block;
+  float: left;
+  display: block;
+  margin-right: 2.35765%;
+  width: 48.82117%; }
+  /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+  .collection.request .foia-info:last-child {
+    margin-right: 0; }
+  /* line 55, ../../../patterns/scss/lib/layouts/_lists.scss */
+  .collection.request .foia-info:first-child {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 100%;
+    border-bottom: 1px dotted #b3becb;
+    padding-bottom: 0.25em;
+    margin-bottom: 0.25em; }
+    /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+    .collection.request .foia-info:first-child:last-child {
+      margin-right: 0; }
+  @media screen and (min-width: 500px) {
+    /* line 52, ../../../patterns/scss/lib/layouts/_lists.scss */
+    .collection.request .foia-info {
+      float: left;
+      display: block;
+      margin-right: 4.82916%;
+      width: 47.58542%;
+      margin-top: 0; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .collection.request .foia-info:last-child {
+        margin-right: 0; }
+      /* line 63, ../../../patterns/scss/lib/layouts/_lists.scss */
+      .collection.request .foia-info:first-child {
+        float: left;
+        display: block;
+        margin-right: 4.82916%;
+        width: 100%; }
+        /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+        .collection.request .foia-info:first-child:last-child {
+          margin-right: 0; } }
+  @media screen and (min-width: 769px) {
+    /* line 52, ../../../patterns/scss/lib/layouts/_lists.scss */
+    .collection.request .foia-info {
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 23.23176%; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .collection.request .foia-info:last-child {
+        margin-right: 0; }
+      /* line 68, ../../../patterns/scss/lib/layouts/_lists.scss */
+      .collection.request .foia-info:first-child {
+        float: left;
+        display: block;
+        margin-right: 2.35765%;
+        width: 48.82117%;
+        border-bottom: none;
+        padding-bottom: 0;
+        margin-bottom: 0; }
+        /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+        .collection.request .foia-info:first-child:last-child {
+          margin-right: 0; } }
+/* line 77, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters form {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -1968,11 +2082,11 @@ nav.pagination .page-ref {
     content: "";
     display: table;
     clear: both; }
-/* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 78, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .input {
   width: 100%; }
   @media screen and (min-width: 769px) {
-    /* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
+    /* line 78, ../../../patterns/scss/lib/layouts/_lists.scss */
     .collection.request .filters .input {
       float: left;
       display: block;
@@ -1981,18 +2095,18 @@ nav.pagination .page-ref {
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
       .collection.request .filters .input:last-child {
         margin-right: 0; } }
-/* line 90, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters select {
   width: 100%;
   margin-top: 0.5em; }
-/* line 94, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 88, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters input[type="text"] {
   display: block;
   width: 100%; }
-/* line 102, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 96, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .title-option {
   display: none; }
-/* line 104, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 98, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .list li {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -2000,6 +2114,20 @@ nav.pagination .page-ref {
     content: "";
     display: table;
     clear: both; }
+/* line 101, ../../../patterns/scss/lib/layouts/_lists.scss */
+.collection.request.my .list li.unread {
+  margin-bottom: 0.375em; }
+/* line 102, ../../../patterns/scss/lib/layouts/_lists.scss */
+.collection.request.my .list .foia-info.title {
+  overflow: hidden; }
+  /* line 104, ../../../patterns/scss/lib/layouts/_lists.scss */
+  .collection.request.my .list .foia-info.title input, .collection.request.my .list .foia-info.title .hgroup {
+    display: inline-block;
+    vertical-align: top; }
+  /* line 108, ../../../patterns/scss/lib/layouts/_lists.scss */
+  .collection.request.my .list .foia-info.title input {
+    margin-top: 0.9375em;
+    margin-right: 0.75em; }
 
 /* line 1, ../../../patterns/scss/lib/layouts/_front-page.scss */
 .homepage {

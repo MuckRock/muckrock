@@ -1,0 +1,28 @@
+.pagination {
+    @extend %full;
+    @include row;
+    margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
+    nav {
+        @extend %half;
+        text-align: center;
+    }
+    ul {
+        text-align: center;
+        margin: 0 auto;
+    }
+    li, .pp-set {
+        // @include font-sizing(0.95);
+        font-weight: 300;
+        display: block;
+        padding: 0 $base-vertical-rhythm/4;
+    }
+    .pp-set {
+        font-weight: 300;
+    }
+    .page-ref, .pp-ref {
+        font-weight: 300;
+        @include font-sizing(1.25);
+        padding: 0 $base-vertical-rhythm/2;
+        margin: 0;
+    }
+}

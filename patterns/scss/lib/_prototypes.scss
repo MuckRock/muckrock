@@ -149,7 +149,7 @@
     ul.list {
         @extend %full;
         margin: $base-vertical-rhythm 0 0;
-        padding: $base-vertical-rhythm 0 0;
+        padding: 0;
         list-style-type: none;
         li { 
             padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
@@ -164,4 +164,20 @@
     h2, h3 { font-weight: 400; }
     h2 { @include font-sizing(1.25); }
     h3 { @include font-sizing(1); }
+    
+    .controls {
+        width: 100%;
+        padding: $base-vertical-rhythm/2;
+        margin: 0 0 $base-vertical-rhythm/2 0;
+        border: $base-border-width solid $color-grey;
+        border-radius: $base-border-radius;
+        background-color: darken($color-white, 10%);
+        @include row();
+        button, .button {
+            display: block;
+            @include span-columns(6);
+            @include media($medium-layout) { @include span-columns(2); }
+            @include media($large-layout) { @include span-columns(3); }
+        }
+    }
 }

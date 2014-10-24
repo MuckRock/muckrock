@@ -12,29 +12,6 @@ h1.list-label {
     margin-bottom: 0;
 }
 
-nav.pagination {
-    @extend %full;
-    ul {
-        text-align: center;
-        margin: $base-vertical-rhythm/2 auto;
-    }
-    li {
-        @include font-sizing(0.95);
-        display: block;
-
-        padding: 0 $base-vertical-rhythm/4;
-        @media screen and (min-width: 680px) {
-            display: inline-block;
-        }
-    }
-    .page-ref {
-        font-weight: 300;
-        @include font-sizing(1.25);
-        padding: 0 $base-vertical-rhythm/2;
-    }
-    
-}
-
 .collection {
     @extend %collection;
     &.jurisdiction, &.agency {
@@ -73,10 +50,27 @@ nav.pagination {
         li.unread { background-color: lighten($color-primary, 30%) !important; }
         
         .foia-info {
-            @extend %quarter;
-            &:first-child { @extend %half; }
+            display: block;
+            @include span-columns(6);
+            &:first-child {
+                @include span-columns(12);
+                border-bottom: $base-border-width dotted $color-grey;
+                padding-bottom: $base-vertical-rhythm/6;
+                margin-bottom: $base-vertical-rhythm/6;
+            }
             @include media($medium-layout) {
+                @include span-columns(3);
+                &:first-child { @include span-columns(6); }
                 margin-top: 0;
+            }
+            @include media($large-layout) {
+                @include span-columns(3);
+                &:first-child {
+                    @include span-columns(6);
+                    border-bottom: none;
+                    padding-bottom: 0;
+                    margin-bottom: 0;
+                }
             }
         }
         .filters {
@@ -102,5 +96,20 @@ nav.pagination {
             .title-option { display: none; }
         }
         .list li { @include row; }
+        
+        &.my .list {
+            li.unread { margin-bottom: $base-vertical-rhythm/4; }
+            .foia-info.title {
+                overflow: hidden;
+                input, .hgroup {
+                    display: inline-block;
+                    vertical-align: top;
+                }
+                input {
+                    margin-top: $base-vertical-rhythm/1.6;
+                    margin-right: $base-vertical-rhythm/2;
+                }
+            }
+        }
     }
 }

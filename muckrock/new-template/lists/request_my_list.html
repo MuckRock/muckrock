@@ -27,15 +27,19 @@
 {% block list %}
 <form action="" method="post">
     {% csrf_token %}
-    <button name="submit" value="Mark as Read" >Mark as Read</button>
-	<button name="submit" value="Mark as Unread" >Mark as Unread</button>
+    <div class="controls">
+        <button name="submit" value="Mark as Read" >Mark as Read</button>
+	    <button name="submit" value="Mark as Unread" >Mark as Unread</button>
+	</div>
     <ul class="list">
-        {% for foia in object_list %}
-        <input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" />
+        {% for foia in object_list %}      
         <li {% if foia.updated %}class="unread"{% endif %}>
-            <div class="foia-info">
-                <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
-                <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+            <div class="foia-info title">
+                <input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" />
+                <div class="hgroup">
+                    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
+                    <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+                </div>
             </div>
             <dl class="foia-info">
                 <dt>First Created</dt>
