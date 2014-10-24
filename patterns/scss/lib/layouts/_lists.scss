@@ -74,7 +74,15 @@ h1.list-label {
             }
         }
         .filters {
-            form { @include row; }
+            form {
+                overflow: hidden;
+                width: 100%;
+                padding: $base-vertical-rhythm/2;
+                margin: 0 0 $base-vertical-rhythm/2 0;
+                border: $base-border-width solid $color-grey;
+                border-radius: $base-border-radius;
+                background-color: darken($color-white, 10%);
+            }
             .input {
                 @include fill-parent();
                 @include media($large-layout) {
@@ -83,17 +91,23 @@ h1.list-label {
             }
             select {
                 width: 100%;
-                margin-top: $base-vertical-rhythm/3;
+                margin-bottom: $base-vertical-rhythm/3;
             }
             input[type="text"] {
                 @extend small;
                 display: block;
                 width: 100%;
+                margin: $base-vertical-rhythm/4 0 0;
             }
             input[type="submit"] {
                 @extend small;
+                @extend %quarter;
             }
             .title-option { display: none; }
+            .autocomplete-light-widget {
+                display: block;
+                width: 100%;
+            }
         }
         .list li { @include row; }
         

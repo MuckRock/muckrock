@@ -1,3 +1,4 @@
+{% if page_obj.object_list.count > 0 %}
 <section class="pagination">
 {% with request.GET.per_page as per_page %}
     
@@ -40,3 +41,4 @@
     </nav>
 {% endwith %}
 </section>
+{% endif %}

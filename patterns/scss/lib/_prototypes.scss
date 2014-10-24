@@ -98,13 +98,14 @@
     @include outer-container;
     header {
         @extend %row;
+        .hgroup { @extend %three-quarters; }
+        // margin-bottom: $base-vertical-rhythm/2;
         h1 {
-            @extend %two-thirds;
             @include font-sizing(3,3);
             margin-top: 0;
         }
         .commands {
-            @extend %third;
+            @extend %quarter;
             overflow: hidden;
             .button {
                 display: block;
@@ -117,9 +118,10 @@
         }
     }
     .filters {
-        
+        @include row;
         ul {
             padding-left: 0;
+            @include span-columns(6);
         }
         li {
             display: inline-block;
@@ -141,7 +143,28 @@
             }
         }
         
+        $filter-toggle: '"filter-checkbox"';
+        label[for=#{$filter-toggle}] {
+            @include span-columns(2);
+            @include shift(4);
+            @include omega();
+            margin-top: $base-vertical-rhythm/2;
+            margin-bottom: $base-vertical-rhythm/2;
+            display: block;
+            cursor: pointer;
+            color: $color-primary;
+            &:hover {
+                text-decoration: underline;
+            }    
+        }
+        input[name=#{$filter-toggle}] {
+            display: none;
+            &:checked + form { 
+                display: block;
+            }
+        }
         form {
+            display: none;
             fieldset { display: inline-block; }
             label { @extend dfn; }
         }
@@ -154,8 +177,7 @@
         li { 
             padding: $base-vertical-rhythm/4 $base-vertical-rhythm;
             margin: 0;
-            &:first-child { padding-top: 0; }
-            &:nth-of-type(even) { background-color: $color-odd-background; }
+            &:nth-of-type(odd) { background-color: $color-odd-background; }
             @media screen and (min-width: 540px) {
                 border-radius: $base-border-radius;
             }

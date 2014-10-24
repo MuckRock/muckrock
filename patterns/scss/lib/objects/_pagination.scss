@@ -3,7 +3,13 @@
     @include row;
     margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
     nav {
-        @extend %half;
+        @include span-columns(12);
+        @include media($medium-layout) {
+            @include span-columns(3);
+        }
+        @include media($large-layout) {
+            @include span-columns(6);
+        }
         text-align: center;
     }
     ul {

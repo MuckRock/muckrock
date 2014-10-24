@@ -5,25 +5,6 @@
 {% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
 {% block type %}my request{% endblock type %}
 
-{% block filters %}
-{% if user.is_authenticated %}
-<ul>
-    <li><a href="{% url 'foia-list' %}" class="{% active request "^/foi/list/$" %}">All</a></li>
-    <li><a href="{% url 'foia-mylist-all' %}" class="{% active request "^/foi/mylist/$" %}">Mine</a></li>
-    <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
-</ul>
-{% endif %}
-<form action="" method="get" name="request-filters">
-    {% for field in form %}
-        <div class="input">
-            {{ field }}
-        </div>
-    {% endfor %}
-    <input type="submit" value="Filter" class="button" />
-</form>
-
-{% endblock filters %}
-
 {% block list %}
 <form action="" method="post">
     {% csrf_token %}

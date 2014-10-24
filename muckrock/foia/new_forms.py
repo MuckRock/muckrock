@@ -84,6 +84,7 @@ class ListFilterForm(forms.Form):
         required=False,
         queryset=Jurisdiction.objects.all(),
         widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete'))
+
     order = forms.ChoiceField(
         required=False,
         choices=(('asc', 'Ascending'), ('desc', 'Descending'))

@@ -1,5 +1,6 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
+{% load mathfilters %}
 
 {% block title %}MuckRock &bull; Requests{% endblock title %}
 {% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
@@ -40,14 +41,26 @@
     <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
 </ul>
 {% endif %}
+<label for="filter-checkbox" id="filter-checkbox-label">Show Filters</label>
+<input type="checkbox" name="filter-checkbox" id="filter-checkbox" />
 <form action="" method="get" name="request-filters">
+{% with 3 as fields_per_column %}
     {% for field in form %}
+        {% if forloop.first %}
         <div class="input">
-            {{ field }}
+        {% endif %}
+        {{ field }}
+        {% if forloop.counter|mod:fields_per_column == 0 %}
         </div>
+        <div class="input">
+        {% endif %}
+        {% if forloop.last and forloop.counter|mod:fields_per_column != 0 %}
+        </div>
+        {% endif %}
     {% endfor %}
     <input type="submit" value="Filter" class="button" />
 </form>
+{% endwith %}
 {% endblock filters %}
 
 {% block scripts %}
@@ -79,6 +92,13 @@
         } else {
             $('#id_sort').prepend('<option disabled selected class="title-option">Sort by...</option>');
         }
+        $('#filter-checkbox').change(function() {
+            if ($(this).is(':checked')) {
+                $('#filter-checkbox-label').text('Hide Filters');
+            } else {
+                $('#filter-checkbox-label').text('Show Filters');
+            }
+        });
     });
 </script>
 {% endblock scripts %}

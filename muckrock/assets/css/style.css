@@ -415,129 +415,129 @@ html, body {
     clear: both; }
 
 /* line 8, ../../../patterns/scss/lib/_grid.scss */
-.pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl, .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .pagination, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, .search.meta h2 {
+.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .plan, .agency aside dl, .collection header .commands, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header .hgroup, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .pagination, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, .request .controls .button.primary, .request .controls input.primary[type="submit"], .request .controls button.primary, .request .controls input[type="submit"] .primary, input[type="submit"] .request .controls .primary, .request .controls button .primary, button .request .controls .primary, h1.list-label, .search.meta h2 {
   width: 100%; }
 
 /* line 10, ../../../patterns/scss/lib/_grid.scss */
-.pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
+.form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
   margin-right: 0; }
   @media screen and (min-width: 769px) {
     /* line 10, ../../../patterns/scss/lib/_grid.scss */
-    .pagination nav, .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
+    .form h1, .form fieldset, .form.login ul, .request aside .draft button, .request aside .draft .button, .request aside .draft input[type="submit"], .request .controls button, .request .controls .button, .request .controls input[type="submit"], .new-request header h1, .new-request header summary {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 48.82117%; }
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-      .pagination nav:last-child, .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request aside .draft button:last-child, .request aside .draft .button:last-child, .request aside .draft input[type="submit"]:last-child, .request .controls button:last-child, .request .controls .button:last-child, .request .controls input[type="submit"]:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
         margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
   /* line 16, ../../../patterns/scss/lib/_grid.scss */
-  .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl {
+  .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .plan, .agency aside dl {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .collection header .commands:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 16, ../../../patterns/scss/lib/_grid.scss */
-  .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .collection header .commands, .plan, .agency aside dl {
+  .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .plan, .agency aside dl {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .collection header .commands:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
       margin-right: 0; } }
 /* line 52, ../../../patterns/scss/neat/grid/_omega.scss */
-.post > .meta aside:nth-child(3n), .question > .meta aside:nth-child(3n), .request > .meta aside:nth-child(3n), .jurisdiction > .meta aside:nth-child(3n), .agency > .meta aside:nth-child(3n), .profile > .meta aside:nth-child(3n), .collection header .commands:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
+.post > .meta aside:nth-child(3n), .question > .meta aside:nth-child(3n), .request > .meta aside:nth-child(3n), .jurisdiction > .meta aside:nth-child(3n), .agency > .meta aside:nth-child(3n), .profile > .meta aside:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
   margin-right: 0; }
 /* line 57, ../../../patterns/scss/neat/grid/_omega.scss */
-.post > .meta aside:nth-child(3n+1), .question > .meta aside:nth-child(3n+1), .request > .meta aside:nth-child(3n+1), .jurisdiction > .meta aside:nth-child(3n+1), .agency > .meta aside:nth-child(3n+1), .profile > .meta aside:nth-child(3n+1), .collection header .commands:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
+.post > .meta aside:nth-child(3n+1), .question > .meta aside:nth-child(3n+1), .request > .meta aside:nth-child(3n+1), .jurisdiction > .meta aside:nth-child(3n+1), .agency > .meta aside:nth-child(3n+1), .profile > .meta aside:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
   clear: left; }
 
 @media screen and (min-width: 500px) {
   /* line 23, ../../../patterns/scss/lib/_grid.scss */
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
+  .collection header .commands, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .filters input[type="submit"], .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
+    .collection header .commands:last-child, .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .filters input[type="submit"]:last-child {
       margin-right: 0; }
     /* line 52, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
+    .collection header .commands:nth-child(2n), .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n) {
       margin-right: 0; }
     /* line 57, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
+    .collection header .commands:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1) {
       clear: left; } }
 @media screen and (min-width: 769px) {
   /* line 23, ../../../patterns/scss/lib/_grid.scss */
-  .form input[type="submit"], .request .documents .dc-thumbnails li, .search.form input[type="submit"] {
+  .collection header .commands, .form input[type="submit"], .request .documents .dc-thumbnails li, .collection.request .filters input[type="submit"], .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
     /* line 64, ../../../patterns/scss/lib/_mixins.scss */
-    .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n) {
+    .collection header .commands:nth-child(2n), .form input[type="submit"]:nth-child(2n), .request .documents .dc-thumbnails li:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n) {
       margin-right: 2.35765%; }
     /* line 65, ../../../patterns/scss/lib/_mixins.scss */
-    .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1) {
+    .collection header .commands:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .request .documents .dc-thumbnails li:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1) {
       clear: none; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child {
+    .collection header .commands:last-child, .form input[type="submit"]:last-child, .request .documents .dc-thumbnails li:last-child, .collection.request .filters input[type="submit"]:last-child {
       margin-right: 0; }
     /* line 52, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n) {
+    .collection header .commands:nth-child(4n), .form input[type="submit"]:nth-child(4n), .request .documents .dc-thumbnails li:nth-child(4n), .collection.request .filters input[type="submit"]:nth-child(4n) {
       margin-right: 0; }
     /* line 57, ../../../patterns/scss/neat/grid/_omega.scss */
-    .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1) {
+    .collection header .commands:nth-child(4n+1), .form input[type="submit"]:nth-child(4n+1), .request .documents .dc-thumbnails li:nth-child(4n+1), .collection.request .filters input[type="submit"]:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
   /* line 36, ../../../patterns/scss/lib/_grid.scss */
-  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1 {
+  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .collection header h1:last-child {
+    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 36, ../../../patterns/scss/lib/_grid.scss */
-  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header h1, .search.collection header h1 {
+  .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .collection header h1:last-child {
+    .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child {
       margin-right: 0; } }
 
 @media screen and (min-width: 500px) {
   /* line 42, ../../../patterns/scss/lib/_grid.scss */
-  .search.form input[type="search"] {
+  .collection header .hgroup, .search.form input[type="search"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 100%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .search.form input[type="search"]:last-child {
+    .collection header .hgroup:last-child, .search.form input[type="search"]:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 42, ../../../patterns/scss/lib/_grid.scss */
-  .search.form input[type="search"] {
+  .collection header .hgroup, .search.form input[type="search"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 74.41059%; }
     /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
-    .search.form input[type="search"]:last-child {
+    .collection header .hgroup:last-child, .search.form input[type="search"]:last-child {
       margin-right: 0; } }
 
 /* line 48, ../../../patterns/scss/lib/_grid.scss */
@@ -682,82 +682,122 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
     content: "";
     display: table;
     clear: both; }
-  /* line 101, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 103, ../../../patterns/scss/lib/_prototypes.scss */
   .collection header h1, .search.collection header h1 {
     font-size: 3em;
     line-height: 1.22222em;
     margin: 0.30556em 0;
     margin-top: 0; }
-  /* line 106, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 107, ../../../patterns/scss/lib/_prototypes.scss */
   .collection header .commands {
     overflow: hidden; }
-    /* line 109, ../../../patterns/scss/lib/_prototypes.scss */
+    /* line 110, ../../../patterns/scss/lib/_prototypes.scss */
     .collection header .commands .button, .collection header .commands input[type="submit"], .collection header .commands button {
       display: block;
       margin-top: 1em; }
       @media screen and (min-width: 500px) {
-        /* line 109, ../../../patterns/scss/lib/_prototypes.scss */
+        /* line 110, ../../../patterns/scss/lib/_prototypes.scss */
         .collection header .commands .button, .collection header .commands input[type="submit"], .collection header .commands button {
           display: inline-block;
           float: right; } }
-  /* line 121, ../../../patterns/scss/lib/_prototypes.scss */
-  .collection .filters ul {
-    padding-left: 0; }
-  /* line 124, ../../../patterns/scss/lib/_prototypes.scss */
-  .collection .filters li {
-    display: inline-block; }
+  /* line 120, ../../../patterns/scss/lib/_prototypes.scss */
+  .collection .filters {
+    display: block; }
+    /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
+    .collection .filters:after {
+      content: "";
+      display: table;
+      clear: both; }
+    /* line 122, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .filters ul {
+      padding-left: 0;
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 48.82117%; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .collection .filters ul:last-child {
+        margin-right: 0; }
     /* line 126, ../../../patterns/scss/lib/_prototypes.scss */
-    .collection .filters li a {
-      padding: 0.375em 0.75em;
-      margin: 0;
-      border-radius: 9px;
-      text-decoration: none; }
-      /* line 131, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection .filters li a:hover, .collection .filters li a.current-tab {
-        color: #f4f4f4;
-        background-color: #3a82ff; }
-      /* line 135, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection .filters li a:active, .collection .filters li a.current-tab:hover {
-        background-color: #6da2ff; }
-      /* line 138, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection .filters li a.current-tab {
-        cursor: default; }
-  /* line 145, ../../../patterns/scss/lib/_prototypes.scss */
-  .collection .filters form fieldset {
-    display: inline-block; }
-  /* line 149, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .filters li {
+      display: inline-block; }
+      /* line 128, ../../../patterns/scss/lib/_prototypes.scss */
+      .collection .filters li a {
+        padding: 0.375em 0.75em;
+        margin: 0;
+        border-radius: 9px;
+        text-decoration: none; }
+        /* line 133, ../../../patterns/scss/lib/_prototypes.scss */
+        .collection .filters li a:hover, .collection .filters li a.current-tab {
+          color: #f4f4f4;
+          background-color: #3a82ff; }
+        /* line 137, ../../../patterns/scss/lib/_prototypes.scss */
+        .collection .filters li a:active, .collection .filters li a.current-tab:hover {
+          background-color: #6da2ff; }
+        /* line 140, ../../../patterns/scss/lib/_prototypes.scss */
+        .collection .filters li a.current-tab {
+          cursor: default; }
+    /* line 147, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .filters label[for="filter-checkbox"] {
+      float: left;
+      display: block;
+      margin-right: 2.35765%;
+      width: 14.70196%;
+      margin-left: 34.11922%;
+      margin-right: 0;
+      margin-top: 0.75em;
+      margin-bottom: 0.75em;
+      display: block;
+      cursor: pointer;
+      color: #3a82ff; }
+      /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+      .collection .filters label[for="filter-checkbox"]:last-child {
+        margin-right: 0; }
+      /* line 156, ../../../patterns/scss/lib/_prototypes.scss */
+      .collection .filters label[for="filter-checkbox"]:hover {
+        text-decoration: underline; }
+    /* line 160, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .filters input[name="filter-checkbox"] {
+      display: none; }
+      /* line 162, ../../../patterns/scss/lib/_prototypes.scss */
+      .collection .filters input[name="filter-checkbox"]:checked + form {
+        display: block; }
+    /* line 166, ../../../patterns/scss/lib/_prototypes.scss */
+    .collection .filters form {
+      display: none; }
+      /* line 168, ../../../patterns/scss/lib/_prototypes.scss */
+      .collection .filters form fieldset {
+        display: inline-block; }
+  /* line 172, ../../../patterns/scss/lib/_prototypes.scss */
   .collection ul.list {
     margin: 1.5em 0 0;
     padding: 0;
     list-style-type: none; }
-    /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
+    /* line 177, ../../../patterns/scss/lib/_prototypes.scss */
     .collection ul.list li {
       padding: 0.375em 1.5em;
       margin: 0; }
-      /* line 157, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection ul.list li:first-child {
-        padding-top: 0; }
-      /* line 158, ../../../patterns/scss/lib/_prototypes.scss */
-      .collection ul.list li:nth-of-type(even) {
+      /* line 180, ../../../patterns/scss/lib/_prototypes.scss */
+      .collection ul.list li:nth-of-type(odd) {
         background-color: #e7e7e7; }
       @media screen and (min-width: 540px) {
-        /* line 154, ../../../patterns/scss/lib/_prototypes.scss */
+        /* line 177, ../../../patterns/scss/lib/_prototypes.scss */
         .collection ul.list li {
           border-radius: 9px; } }
-  /* line 164, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 186, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h2, .search.collection h2, .collection h3, .search.collection h3 {
     font-weight: 400; }
-  /* line 165, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 187, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h2, .search.collection h2 {
     font-size: 1.25em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  /* line 166, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 188, ../../../patterns/scss/lib/_prototypes.scss */
   .collection h3, .search.collection h3 {
     font-size: 1em;
     line-height: 1.51282em;
     margin: 0.37821em 0; }
-  /* line 168, ../../../patterns/scss/lib/_prototypes.scss */
+  /* line 190, ../../../patterns/scss/lib/_prototypes.scss */
   .collection .controls {
     width: 100%;
     padding: 0.75em;
@@ -771,7 +811,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       content: "";
       display: table;
       clear: both; }
-    /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+    /* line 198, ../../../patterns/scss/lib/_prototypes.scss */
     .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
       display: block;
       float: left;
@@ -782,7 +822,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .collection .controls button:last-child, .collection .controls .button:last-child, .collection .controls input[type="submit"]:last-child, .collection .controls button:last-child {
         margin-right: 0; }
       @media screen and (min-width: 500px) {
-        /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+        /* line 198, ../../../patterns/scss/lib/_prototypes.scss */
         .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
           float: left;
           display: block;
@@ -792,7 +832,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
           .collection .controls button:last-child, .collection .controls .button:last-child, .collection .controls input[type="submit"]:last-child, .collection .controls button:last-child {
             margin-right: 0; } }
       @media screen and (min-width: 769px) {
-        /* line 176, ../../../patterns/scss/lib/_prototypes.scss */
+        /* line 198, ../../../patterns/scss/lib/_prototypes.scss */
         .collection .controls button, .collection .controls .button, .collection .controls input[type="submit"], .collection .controls button {
           float: left;
           display: block;
@@ -1385,20 +1425,47 @@ ul.notifications {
     clear: both; }
   /* line 5, ../../../patterns/scss/lib/objects/_pagination.scss */
   .pagination nav {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 100%;
     text-align: center; }
-  /* line 9, ../../../patterns/scss/lib/objects/_pagination.scss */
+    /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+    .pagination nav:last-child {
+      margin-right: 0; }
+    @media screen and (min-width: 500px) {
+      /* line 5, ../../../patterns/scss/lib/objects/_pagination.scss */
+      .pagination nav {
+        float: left;
+        display: block;
+        margin-right: 4.82916%;
+        width: 47.58542%; }
+        /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+        .pagination nav:last-child {
+          margin-right: 0; } }
+    @media screen and (min-width: 769px) {
+      /* line 5, ../../../patterns/scss/lib/objects/_pagination.scss */
+      .pagination nav {
+        float: left;
+        display: block;
+        margin-right: 2.35765%;
+        width: 48.82117%; }
+        /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
+        .pagination nav:last-child {
+          margin-right: 0; } }
+  /* line 15, ../../../patterns/scss/lib/objects/_pagination.scss */
   .pagination ul {
     text-align: center;
     margin: 0 auto; }
-  /* line 13, ../../../patterns/scss/lib/objects/_pagination.scss */
+  /* line 19, ../../../patterns/scss/lib/objects/_pagination.scss */
   .pagination li, .pagination .pp-set {
     font-weight: 300;
     display: block;
     padding: 0 0.375em; }
-  /* line 19, ../../../patterns/scss/lib/objects/_pagination.scss */
+  /* line 25, ../../../patterns/scss/lib/objects/_pagination.scss */
   .pagination .pp-set {
     font-weight: 300; }
-  /* line 22, ../../../patterns/scss/lib/objects/_pagination.scss */
+  /* line 28, ../../../patterns/scss/lib/objects/_pagination.scss */
   .pagination .page-ref, .pagination .pp-ref {
     font-weight: 300;
     font-size: 1.25em;
@@ -2076,17 +2143,18 @@ h1.list-label {
           margin-right: 0; } }
 /* line 77, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters form {
-  display: block; }
-  /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
-  .collection.request .filters form:after {
-    content: "";
-    display: table;
-    clear: both; }
-/* line 78, ../../../patterns/scss/lib/layouts/_lists.scss */
+  overflow: hidden;
+  width: 100%;
+  padding: 0.75em;
+  margin: 0 0 0.75em 0;
+  border: 1px solid #b3becb;
+  border-radius: 9px;
+  background-color: #dbdbdb; }
+/* line 86, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .input {
   width: 100%; }
   @media screen and (min-width: 769px) {
-    /* line 78, ../../../patterns/scss/lib/layouts/_lists.scss */
+    /* line 86, ../../../patterns/scss/lib/layouts/_lists.scss */
     .collection.request .filters .input {
       float: left;
       display: block;
@@ -2095,18 +2163,23 @@ h1.list-label {
       /* line 38, ../../../patterns/scss/neat/grid/_span-columns.scss */
       .collection.request .filters .input:last-child {
         margin-right: 0; } }
-/* line 84, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 92, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters select {
   width: 100%;
-  margin-top: 0.5em; }
-/* line 88, ../../../patterns/scss/lib/layouts/_lists.scss */
+  margin-bottom: 0.5em; }
+/* line 96, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters input[type="text"] {
   display: block;
-  width: 100%; }
-/* line 96, ../../../patterns/scss/lib/layouts/_lists.scss */
+  width: 100%;
+  margin: 0.375em 0 0; }
+/* line 106, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .filters .title-option {
   display: none; }
-/* line 98, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 107, ../../../patterns/scss/lib/layouts/_lists.scss */
+.collection.request .filters .autocomplete-light-widget {
+  display: block;
+  width: 100%; }
+/* line 112, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request .list li {
   display: block; }
   /* line 15, ../../../patterns/scss/bourbon/addons/_clearfix.scss */
@@ -2114,17 +2187,17 @@ h1.list-label {
     content: "";
     display: table;
     clear: both; }
-/* line 101, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 115, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request.my .list li.unread {
   margin-bottom: 0.375em; }
-/* line 102, ../../../patterns/scss/lib/layouts/_lists.scss */
+/* line 116, ../../../patterns/scss/lib/layouts/_lists.scss */
 .collection.request.my .list .foia-info.title {
   overflow: hidden; }
-  /* line 104, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 118, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request.my .list .foia-info.title input, .collection.request.my .list .foia-info.title .hgroup {
     display: inline-block;
     vertical-align: top; }
-  /* line 108, ../../../patterns/scss/lib/layouts/_lists.scss */
+  /* line 122, ../../../patterns/scss/lib/layouts/_lists.scss */
   .collection.request.my .list .foia-info.title input {
     margin-top: 0.9375em;
     margin-right: 0.75em; }

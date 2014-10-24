@@ -8,13 +8,16 @@ This is the parent style for a collection of objects: a collection of blog posts
     <section class="{% block type %}item{% endblock type %} collection">
 
         <header>
-            {% block list-title %}{% endblock list-title %}
-            {% block list-subtitle %}{% endblock list-subtitle %}
+            <div class="hgroup">
+                {% block list-title %}{% endblock list-title %}
+                {% block list-subtitle %}{% endblock list-subtitle %}
+            </div>
+            <aside class="actions">
+                {% block actions %}
+                {% endblock actions %}
+            </aside>
         </header>
-        <aside class="actions">
-            {% block actions %}
-            {% endblock actions %}
-        </aside>
+
         <section class="filters">
             {% block filters %}
             {% endblock filters %}
@@ -38,7 +41,8 @@ This is the parent style for a collection of objects: a collection of blog posts
         </ul>
         {% endblock list %}
         
-        {% include 'lib/pagination.html' %}
-        
+        {% if page_obj.object_list|length > 3 %}
+            {% include 'lib/pagination.html' %}
+        {% endif %}
     </section>
 {% endblock %}
