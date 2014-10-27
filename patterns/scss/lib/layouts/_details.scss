@@ -47,11 +47,26 @@
         @include row();
         button, .button {
             display: block;
-            @extend %half;
+            @include span-columns(6);
+            @include media($medium-layout) {
+                @include span-columns(3);
+            }
+            @include media($large-layout) {
+                @include span-columns(6);
+            }
+            &:nth-of-type(even) {
+                @include omega;
+            }
         }
         .button.primary {
             display: block;
             @extend %full;
+            & + .button {
+                @include omega-reset(n);
+                & + .button {
+                    @include omega;
+                }
+            }
         }
     }
     .edit {

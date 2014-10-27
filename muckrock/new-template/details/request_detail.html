@@ -79,47 +79,56 @@
 {% endblock header %}
 
 {% block aside %}
-    {% if user.is_authenticated %}
-        {% if foia.status == 'started' and foia.user == request.user %}
-            {% with remaining=user.get_profile.num_requests %}
-        <form action="." method="post" class="draft">
-                {% csrf_token %}
-                {% if remaining %}
-            <input type="submit"
-                   name="action"
-                   value="Submit"
-                   class="primary button"
-            />
-                {% else %}
-            <a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>
-                {% endif %}
-                {% if foia.is_editable %}
-            <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
-                {% endif %}
-            <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
-        </form>
-            {% endwith %}
-        {% else %}
+{% if user.is_authenticated %}
+    {% if foia.status == 'started' and foia.user == request.user %}
+        {% with remaining=user.get_profile.num_requests %}
+    <form action="." method="post" class="draft">
+            {% csrf_token %}
+            {% if remaining %}
+        <input type="submit"
+               name="action"
+               value="Submit"
+               class="primary button"
+        />
+            {% else %}
+        <a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>
+            {% endif %}
+            {% if foia.is_editable %}
+        <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
+            {% endif %}
+        <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+    </form>
+        {% endwith %}
+    {% else %}
     <form action="" method="post" class="controls">
         {% csrf_token %}
         {% for action in actions %}
-            {% if not action.link %}
-        <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
+            {% if action.class == 'modal' %}
+        <span class="modal-button button">{{ action.label }}</span>
+        <div class="hidden-modal">
+            <h1>{{ action.label }}</h1>
+            <h2>{{ action.title }}</h2>
+            <input type="submit" name="action" value="{{ action.label }}" />
+        </div>
             {% else %}
+                {% if not action.link %}
+        <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
+                {% else %}
         <a href="{{ action.link }}"
            class="{% if action.label == 'Clone' %}primary {%endif%}button{% if action.class %} {{ action.class }}{% endif %}"
            {% if action.title %}title="{{ action.title }}"{% endif %}>
         {{ action.label }}</a>
+                {% endif %}
             {% endif %}
         {% endfor %}
     </form> 
-        {% endif %}
-    {% else %} 
-    <section class="panel">
-        <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
-        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
-    </section> 
-    {% endif %}  
+    {% endif %}
+{% else %} 
+<section class="panel">
+    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
+    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+</section> 
+{% endif %}  
 {% endblock aside %}
 
 {% block actions %}
@@ -135,14 +144,16 @@
             <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
             <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
         {% endif %}
-        </section>
         {% endwith %}
+        </section>
     {% endif %}   
 {% endblock actions %}
 
 {% block main %}
 <div class="tabs">
+    {% if not foia.public_documents or not foia.user == request.user %}
     <label for="comms-radio">Communications<input type="radio" name="request" id="comms-radio" /></label>
+    {% endif %}
     {% if foia.public_documents %}
     <label for="docs-radio">Documents<input type="radio" name="request" id="docs-radio" /></label>
     {% endif %}
@@ -150,7 +161,7 @@
     <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
     {% endif %}
 </div>
-    <section class="tab-section communications" id="comms">
+<section class="tab-section communications" id="comms">
     {% for comm in foia.communications.all %}
             {% if comm.full_html %}
                 {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
@@ -158,53 +169,67 @@
                 {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
             {% endif %}
     {% endfor %}
-    </section>
+</section>
     {% if foia.public_documents %}
-    <section class="tab-section documents" id="docs">
-        <div id="viewer"></div>
-        {% if foia.public_documents|length > 1 %}
-        <div class="dc-thumbnails">
-            <ul class="dc-thumbnails">
-            {% for document in foia.public_documents %}
-                <li><a href="#{{ document.doc_id }}" onclick="display_doc('{{ document.doc_id }}'); return true">
-                    <img src="{{ document.get_thumbnail }}" alt="Document Thumbnail" />
-                    {{ document.title }}
-                </a></li>
-            {% endfor %}
-            </ul>
-        </div>
-        {% endif %}   
-    </section>
+<section class="tab-section documents" id="docs">
+    <div id="viewer"></div>
+    {% if foia.public_documents|length > 1 %}
+    <div class="dc-thumbnails">
+        <ul class="dc-thumbnails">
+        {% for document in foia.public_documents %}
+            <li><a href="#{{ document.doc_id }}" onclick="display_doc('{{ document.doc_id }}'); return true">
+                <img src="{{ document.get_thumbnail }}" alt="Document Thumbnail" />
+                {{ document.title }}
+            </a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}   
+</section>
     {% endif %}
     {% if foia.user == request.user %}
-    <section class="tab-section notes" id="notes">
-        <a class="primary button" 
-           href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-        Add a Note</a>
-        {% for note in foia.notes.all %}
-        <div class="note">
-            <p><strong>{{note.date|date}}</strong><br>
-            {{note.note|linebreaks}}</p>
-        </div>
-        {% empty %}
-        <p>Notes are private and can be used to store information about this request.</p>
-        {% endfor %}
-    </section>
+<section class="tab-section notes" id="notes">
+    <a class="primary button" 
+       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+    Add a Note</a>
+    {% for note in foia.notes.all %}
+    <div class="note">
+        <p><strong>{{note.date|date}}</strong><br>
+        {{note.note|linebreaks}}</p>
+    </div>
+    {% empty %}
+    <p>Notes are private and can be used to store information about this request.</p>
+    {% endfor %}
+</section>
     {% endif %}
 {% endblock main %}
 
 {% block scripts %}
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
+
+    function modal(nextSelector) {
+        console.log('modalOn');
+        var overlay = '<div class="overlay"></div>';
+        $(overlay).insertBefore($('.container'));
+        nextSelector.removeClass('hidden-modal').addClass('modal');
+        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
+        $('.overlay').click(function(){
+            console.log('overlay click');
+            $('.overlay').remove();
+            $('.modal').removeClass('modal').addClass('hidden-modal');
+        });
+    }
+    
+    function hideAllExcept(visible) {
+        $('.tab-section').removeClass( 'active' );
+        visible.addClass( 'active' );
+    }
+
     $(document).ready(function() {
     
         /* Tab Bar */
-    
-        function hideAllExcept(visible) {
-            $('.tab-section').removeClass( 'active' );
-            visible.addClass( 'active' );
-        }
-        
+
         $('#comms-radio').parent().addClass( 'active');
         hideAllExcept($('#comms'));
     
@@ -235,7 +260,11 @@
             $(this).hide();
         });
         
-        /* Documents */
+        /* Modals */
+        $('.modal-button').click(function(){ modal($(this).next()); });
+        
+        
+        /* Documents
         
         function display_doc(doc_id) {
             $("#docs-radio").attr("checked", true);
@@ -282,6 +311,7 @@
                 doc_load.loaded = true;
             }
         });
+        */
         
     });
 </script>

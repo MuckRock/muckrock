@@ -382,35 +382,40 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        if foia.user == request.user and foia.status != 'started':
+        comm = request.POST.get('text', False)
+        if foia.user == request.user and foia.status != 'started' and comm:
             save_foia_comm(
                 request,
                 foia,
                 foia.user.get_full_name(),
-                request.POST.get('text'),
+                comm,
                 'Your follow up has been sent.'
             )
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
+        q = request.POST.get('text', False)
         if foia.user == request.user:
-            title = 'Question about request: %s' % foia.title
-            question = Question.objects.create(
-                user=request.user,
-                title=title,
-                slug=slugify(title),
-                foia=foia,
-                question=request.POST.get('text'),
-                date=datetime.now()
-            )
-            messages.success(request, 'Your question has been posted.')
-            question.notify_new()
-            return redirect(question)
+            if q:
+                title = 'Question about request: %s' % foia.title
+                question = Question.objects.create(
+                    user=request.user,
+                    title=title,
+                    slug=slugify(title),
+                    foia=foia,
+                    question=q,
+                    date=datetime.now()
+                )
+                messages.success(request, 'Your question has been posted.')
+                question.notify_new()
+                return redirect(question)
+            else:
+                error_msg = 'There was an error while submitting your question.'
         else:
             error_msg = 'You may only ask questions about your own requests.'
-            messages.error(request, msg)
-            return redirect(foia)
+        messages.error(request, error_msg)
+        return redirect(foia)
 
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
