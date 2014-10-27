@@ -209,14 +209,13 @@
 <script>
 
     function modal(nextSelector) {
-        console.log('modalOn');
         var overlay = '<div class="overlay"></div>';
-        $(overlay).insertBefore($('.container'));
+        $(overlay).insertBefore($('.container')).fadeIn();
         nextSelector.removeClass('hidden-modal').addClass('modal');
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
         $('.overlay').click(function(){
-            console.log('overlay click');
-            $('.overlay').remove();
+            $('.overlay').fadeOut().remove();
+            $('.modal textarea').remove();
             $('.modal').removeClass('modal').addClass('hidden-modal');
         });
     }
