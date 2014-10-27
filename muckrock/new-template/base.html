@@ -10,7 +10,7 @@
               content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
         <link rel="shortcut icon" href="{% static '/favicon.ico' %}" />
-        <link rel="apple-touch-icon" href="{% static '/apple-touch-icon.png' %}">
+        <link rel="apple-touch-icon" href="{% static '/apple-touch-icon.png' %}" />
         <link rel="stylesheet"
               type="text/css"
               href="{% static 'css/style.css' %}" />
@@ -49,7 +49,7 @@
         <script type="text/javascript" 
                 src="{% static 'js/app.js' %}"></script>
         {% include 'autocomplete_light/static.html' %}
-    {% block scripts %}
-    {% endblock scripts %}
+        {% block scripts %}
+        {% endblock scripts %}
     </body>
 </html>
