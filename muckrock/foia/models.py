@@ -754,6 +754,7 @@ class FOIAFile(models.Model):
 
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
+        """file-image.png, file-video.png, file-spreadsheet.png, file-audio.png, file-video.png, file-presentation.png, file-archive.png"""
         match = re.match(r'^(\d+)-(.*)$', self.doc_id)
         mimetypes = {
             'avi': 'file-video.png',
