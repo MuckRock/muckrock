@@ -259,9 +259,12 @@
             $(this).hide();
         });
         
-        /* Modals */
-        $('.modal-button').click(function(){ modal($(this).next()); });
+        /* MODAL */
         
+        $('<textarea name="text"></textarea>').insertBefore($('.modal').children('input'));
+        $('.overlay').click(function(){
+            $('.modal textarea').remove();
+        });
         
         /* Documents
         

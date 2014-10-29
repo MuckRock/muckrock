@@ -46,17 +46,42 @@
         {% include 'lib/appeal_stats.html' %}
         
     </div>
+    
+    {% if user.is_authenticated %}
+    <span class="modal-button button">Submit a Change</span>
+    <div class="hidden-modal">
+        <form action="" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <object class="failure panel">
+            {{ form.non_field_errors }}
+            </object>
+            {% endif %}
+            {% for field in form.hidden_fields %}
+                {{ field }}
+            {% endfor %}
+            {% for field in form.visible_fields %}
+                
+                    <h1>{{ field.label }}</h1>
+                    <h2>{{ field.help_text }}</h2>
+                    {{ field }}
+                    {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
+            {% endfor %}
+            <input type="submit" name="submit" value="Submit" class="primary button" />
+        </form>
+    </div>
+    {% endif %}
 {% endblock aside %}
 
 {% block main %}
 
-    {{agency.public_notes|markdown:"trusted"}}
+    {{ agency.public_notes|markdown:"trusted" }}
 
-    {% include 'lib/foia_table.html' with context='jurisdiction' %}
+    {% include 'lib/foia_table.html' with requests=foia_requests title='Recent Requests' %}
     
     {% if jurisdiction.agencies.count %}
     <h3>Documented Agencies</h3>
-    <table class="agency">
+    <table>
         <tr>
             <th width="50%">Agency</th>
             <th width="20%">Requests</th>
@@ -72,11 +97,6 @@
     </table>
     {% else %}
     <h3>No agencies have been documented for this jurisdiction.</h3>
-    {% endif %}
-    
-    {% if user.is_authenticated %}
-    <a href="#hidden-form" class="button" id='hidden-form-button'>Submit a Change</a>
-        {% include 'lib/form.html' with is_hidden=1 %}
     {% endif %}
 	
 {% endblock main %}

@@ -77,6 +77,15 @@
             background-color: darken($color-white, 10%);
         }
     }
+        
+    .controls {
+        width: 100%;
+        padding: $base-vertical-rhythm/2;
+        margin-top: $base-vertical-rhythm/2;
+        border: $base-border-width solid $color-grey;
+        border-radius: $base-border-radius;
+        background-color: darken($color-white, 10%);
+    }
     
     > .main {
         @extend %full;

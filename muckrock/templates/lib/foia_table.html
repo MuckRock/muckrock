@@ -1,39 +1,21 @@
-{% if foia_requests %}
-<h3>Latest Requests</h3>
-<table class="foia">
-    <tr>
-        <th width="50%">Title</th>
-        <th width="20%">Status</th>
-        <th width="30%">Jurisdiction</th>
-    </tr>
-    {% for foia in foia_requests %}
-    <tr>
-        <td>
-            <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a>
-        </td>
-        <td>
-        <span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span>
-        </td>
-        <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
-    </tr>
-    {% endfor %}
-</table>
-    {% with foia=foia_requests|first %}
-    <a href="
-    {% if context %}
-        {% if context == 'active_user' %}
-            {% url 'foia-mylist' %}
-        {% endif %}
-        {% url 'foia-list' %}
-        {% if context == 'agency' %}
-            ?agency=foia.agency.slug
-        {% endif %}
-        {% if context == 'jurisdiction' %}
-            ?jurisdiction=foia.jurisdiction.slug
-        {% endif %}
-    {% endif %}
-    " class="button">View All Requests</a>
-    {% endwith %}
-{% else %}
-<h3>No requests have been filed. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
+{% if requests %}
+    {% if title %}<h3>{{ title }}</h3>{% endif %}
+    <table class="foia">
+        <tr>
+            <th width="50%">Title</th>
+            <th width="20%">Status</th>
+            <th width="30%">Jurisdiction</th>
+        </tr>
+        {% for foia in requests %}
+        <tr>
+            <td>
+                <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a>
+            </td>
+            <td>
+            <span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span>
+            </td>
+            <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
 {% endif %}  
