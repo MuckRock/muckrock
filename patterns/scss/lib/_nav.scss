@@ -340,11 +340,52 @@ nav.sidebar {
             margin-bottom: $base-vertical-rhythm/2;
             color: $color-white;
         }
-        li { @extend small; }
+        
+        .foia-details {
+            display: block; 
+            li {
+                display: list-item;
+                width: 100%;
+                padding: 0;
+                &:first-child a {
+                    @include border-top-radius($base-border-radius);
+                }
+                &:last-child a {
+                    @include border-bottom-radius($base-border-radius);
+                }
+            }
+            a {
+                text-align: left;
+                border-radius: 0;
+            }
+        }                    
         
         #admin-button {
             ul { margin: $base-vertical-rhythm/2 0; }
             li { width: 100%; }
+        }
+        
+        .account-info {
+            .counter {
+                margin-right: $base-vertical-rhythm/4;
+                padding: $base-vertical-rhythm/6 $base-vertical-rhythm/2 $base-vertical-rhythm/5;
+                border-radius: 50px;
+                
+                font-weight: 700;
+                text-align: center;
+                color: $color-black;
+                background-color: $color-white;
+                &.updates { background-color: $color-primary; }
+            }
+            display: block;
+            margin: $base-vertical-rhythm 0;
+            color: $color-white;
+            text-decoration: none;
+            
+            &:hover {
+                color: $color-primary;
+                .counter { background-color: $color-primary; }
+            }
         }
     }
     

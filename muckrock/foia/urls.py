@@ -26,6 +26,7 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
 list_template = 'lists/request_list.html'
+list_args = '(?P<status>\w+)(?P<agency>[0-9]+)(?P<jurisdiction>[0-9]+)'
 
 urlpatterns = patterns('',
     # Redirects
@@ -38,12 +39,12 @@ urlpatterns = patterns('',
     url(r'^list/$',
         views.List.as_view(template_name=list_template),
         name='foia-list'),
-    url(r'^list/following/$',
-        views.ListFollowing.as_view(template_name=list_template), name='foia-list-following'),
     url(r'^mylist/$',
-        views.MyList.as_view(), name='foia-mylist-all'),
-    url(r'^mylist/(?P<view>\w+)/$',
-        views.MyList.as_view(template_name=list_template), name='foia-mylist'),
+        views.MyList.as_view(),
+        name='foia-mylist'),
+    url(r'^list/following/$',
+        views.ListFollowing.as_view(template_name=list_template), 
+        name='foia-list-following'),
         
     # Detail View
     url(r'^%s/$' % foia_url,
@@ -114,4 +115,7 @@ urlpatterns = patterns('',
     url(r'^list/status-(?P<status>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?status=%(status)s'),
         name='foia-list-status'),
+    url(r'^mylist/(?P<view>\w+)/$',
+        RedirectView.as_view(url='foi/mylist/'),
+        name='foia-mylist-old'),
 )

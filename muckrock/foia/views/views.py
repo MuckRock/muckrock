@@ -57,13 +57,13 @@ def multirequest_update(request, slug, idx):
 
     if foia.user != request.user:
         messages.error(request, 'You may only edit your own requests')
-        return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+        return redirect('foia-mylist')
 
     if request.method == 'POST':
         if request.POST.get('submit') == 'Delete':
             foia.delete()
             messages.success(request, 'The request was deleted.')
-            return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+            return redirect('foia-mylist')
 
         try:
             form = FOIAMultiRequestForm(request.POST, instance=foia)
@@ -206,7 +206,7 @@ class MyList(List):
                 self.set_read_status(foia_pks, True)
         except (FOIARequest.DoesNotExist):
             pass
-        return redirect('foia-mylist-all')
+        return redirect('foia-mylist')
 
     def merge_requests(self, foia_requests, multi_requests):
         """Merges the sorted FOIA requests with the multi requests"""

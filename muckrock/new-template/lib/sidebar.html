@@ -19,11 +19,38 @@
         </form>
         {% if user.is_authenticated %}
         <section class="account">
-            <p class="username">{{ user.first_name }} {{ user.last_name }}</p>
+            <p class="username">{{ user.get_full_name }}</p>
             <ul class="options">
 			    <li><a href="{% url 'acct-my-profile' %}">Profile</a></li>
 			    <li><a href="{% url 'acct-logout' %}">Log Out</a></li>
 			</ul>
+            {% if updates %}
+            <a class="account-info" href="{% url 'foia-mylist' %}">
+                <span class="updates counter">{{ updates|length }}</span>
+                Update{{ updates|length|pluralize }}
+            </a>
+            <ul class="foia-details">
+                {% for foia in updates %}
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            
+            {% if fixes %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=fix">
+                <span class="fixes counter">{{ fixes|length }}</span>
+            	Fix{{ fixes|length|pluralize }} Required
+            </a>
+            {% endif %}
+            
+            {% if drafts %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
+                <span class="fixes counter">{{ drafts|length }}</span>
+                Draft{{ drafts|length|pluralize }}
+            </a>
+            {% endif %}
+            
+            
             {% if user.is_staff %}
             <ul id="admin-button">
                 <li><a href="/admin/">Admin</a></li>

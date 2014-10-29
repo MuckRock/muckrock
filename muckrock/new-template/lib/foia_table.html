@@ -9,19 +9,10 @@
     {% for foia in foia_requests %}
     <tr>
         <td>
-            <a href="{% if request.user == foia.user and foia.status == "started" %}{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% else %}{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}{% endif %}">{{ foia.title }}</a>
+            <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a>
         </td>
         <td>
-        {% if foia.color_code == "stop" %}
-            <span class="failure">
-        {% else %}
-            {% if foia.color_code == "go" %}
-            <span class="success">
-            {% else %}
-            <span class="default">
-            {% endif %}
-        {% endif %}
-        {{ foia.get_status_display }}</span>
+        <span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span>
         </td>
         <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
     </tr>
@@ -30,20 +21,16 @@
     {% with foia=foia_requests|first %}
     <a href="
     {% if context %}
-        {% if context == 'user' %}
-            {% url 'foia-list' user_name=foia.user.username %}
-        {% endif %}
         {% if context == 'active_user' %}
-            {% url 'foia-mylist-all' %}
+            {% url 'foia-mylist' %}
         {% endif %}
+        {% url 'foia-list' %}
         {% if context == 'agency' %}
-            {% url 'foia-list' agency=foia.agency.slug %}
+            ?agency=foia.agency.slug
         {% endif %}
         {% if context == 'jurisdiction' %}
-            {% url 'foia-list' jurisdiction=foia.jurisdiction.slug  %}
+            ?jurisdiction=foia.jurisdiction.slug
         {% endif %}
-    {% else %}
-        {% url 'foia-list' %}
     {% endif %}
     " class="button">View All Requests</a>
     {% endwith %}

@@ -136,7 +136,7 @@ mark {
  * Address inconsistent and variable font size in all browsers.
  */
 /* line 151, ../../../patterns/scss/_normalize.scss */
-small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
   font-size: 80%; }
 
 /**
@@ -928,7 +928,7 @@ blockquote {
   border-left: 1px solid #b3becb; }
 
 /* line 47, ../../../patterns/scss/lib/_typography.scss */
-small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .account li, nav.sidebar .spotlight p {
+small, dfn, .collection .filters form label, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -3194,49 +3194,93 @@ nav.sidebar {
     display: block;
     margin-bottom: 0.75em;
     color: #f4f4f4; }
-  /* line 346, ../../../patterns/scss/lib/_nav.scss */
+  /* line 344, ../../../patterns/scss/lib/_nav.scss */
+  nav.sidebar .account .foia-details {
+    display: block; }
+    /* line 346, ../../../patterns/scss/lib/_nav.scss */
+    nav.sidebar .account .foia-details li {
+      display: list-item;
+      width: 100%;
+      padding: 0; }
+      /* line 350, ../../../patterns/scss/lib/_nav.scss */
+      nav.sidebar .account .foia-details li:first-child a {
+        border-top-left-radius: 9px;
+        border-top-right-radius: 9px; }
+      /* line 353, ../../../patterns/scss/lib/_nav.scss */
+      nav.sidebar .account .foia-details li:last-child a {
+        border-bottom-left-radius: 9px;
+        border-bottom-right-radius: 9px; }
+    /* line 357, ../../../patterns/scss/lib/_nav.scss */
+    nav.sidebar .account .foia-details a {
+      text-align: left;
+      border-radius: 0; }
+  /* line 364, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .account #admin-button ul {
     margin: 0.75em 0; }
-  /* line 347, ../../../patterns/scss/lib/_nav.scss */
+  /* line 365, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .account #admin-button li {
     width: 100%; }
-  /* line 352, ../../../patterns/scss/lib/_nav.scss */
+  /* line 368, ../../../patterns/scss/lib/_nav.scss */
+  nav.sidebar .account .account-info {
+    display: block;
+    margin: 1.5em 0;
+    color: #f4f4f4;
+    text-decoration: none; }
+    /* line 369, ../../../patterns/scss/lib/_nav.scss */
+    nav.sidebar .account .account-info .counter {
+      margin-right: 0.375em;
+      padding: 0.25em 0.75em 0.3em;
+      border-radius: 50px;
+      font-weight: 700;
+      text-align: center;
+      color: #21282c;
+      background-color: #f4f4f4; }
+      /* line 378, ../../../patterns/scss/lib/_nav.scss */
+      nav.sidebar .account .account-info .counter.updates {
+        background-color: #3a82ff; }
+    /* line 385, ../../../patterns/scss/lib/_nav.scss */
+    nav.sidebar .account .account-info:hover {
+      color: #3a82ff; }
+      /* line 387, ../../../patterns/scss/lib/_nav.scss */
+      nav.sidebar .account .account-info:hover .counter {
+        background-color: #3a82ff; }
+  /* line 393, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links li {
     width: 33%; }
-  /* line 354, ../../../patterns/scss/lib/_nav.scss */
+  /* line 395, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
     margin-bottom: -0.1em;
     fill: #b3becb; }
-  /* line 360, ../../../patterns/scss/lib/_nav.scss */
+  /* line 401, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .social-links a:hover {
     background: #3a82ff; }
-    /* line 362, ../../../patterns/scss/lib/_nav.scss */
+    /* line 403, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .social-links a:hover svg {
       fill: #f4f4f4; }
-  /* line 367, ../../../patterns/scss/lib/_nav.scss */
+  /* line 408, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar .spotlight {
     margin-top: 1.5em; }
-    /* line 369, ../../../patterns/scss/lib/_nav.scss */
+    /* line 410, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight img {
       margin: 0; }
-    /* line 370, ../../../patterns/scss/lib/_nav.scss */
+    /* line 411, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight h1 {
       font-weight: 400;
       font-size: 98%;
       line-height: 1.2em; }
-    /* line 376, ../../../patterns/scss/lib/_nav.scss */
+    /* line 417, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar .spotlight p {
       line-height: 1.2em; }
-  /* line 379, ../../../patterns/scss/lib/_nav.scss */
+  /* line 420, ../../../patterns/scss/lib/_nav.scss */
   nav.sidebar form {
     display: block;
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
     margin: 0 0 1.5em; }
-    /* line 385, ../../../patterns/scss/lib/_nav.scss */
+    /* line 426, ../../../patterns/scss/lib/_nav.scss */
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -3265,11 +3309,11 @@ nav.sidebar {
       /* line 4, ../../../patterns/scss/bourbon/css3/_placeholder.scss */
       nav.sidebar form input:-ms-input-placeholder {
         color: #b3becb; }
-      /* line 397, ../../../patterns/scss/lib/_nav.scss */
+      /* line 438, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input:focus, nav.sidebar form input:hover {
         outline: none;
         border-color: #3a82ff; }
-      /* line 401, ../../../patterns/scss/lib/_nav.scss */
+      /* line 442, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input + span.input-button {
         display: block;
         float: right;
@@ -3285,7 +3329,7 @@ nav.sidebar {
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
         cursor: pointer; }
-        /* line 414, ../../../patterns/scss/lib/_nav.scss */
+        /* line 455, ../../../patterns/scss/lib/_nav.scss */
         nav.sidebar form input + span.input-button svg {
           display: inline-block;
           height: 1.25em;
@@ -3294,7 +3338,7 @@ nav.sidebar {
           margin-left: -0.15em;
           vertical-align: middle;
           fill: #b3becb; }
-        /* line 423, ../../../patterns/scss/lib/_nav.scss */
+        /* line 464, ../../../patterns/scss/lib/_nav.scss */
         nav.sidebar form input + span.input-button:hover {
           color: #f4f4f4;
           border-color: #3a82ff;
@@ -3302,7 +3346,7 @@ nav.sidebar {
           /* line 44, ../../../patterns/scss/lib/_mixins.scss */
           nav.sidebar form input + span.input-button:hover svg {
             fill: #f4f4f4; }
-      /* line 425, ../../../patterns/scss/lib/_nav.scss */
+      /* line 466, ../../../patterns/scss/lib/_nav.scss */
       nav.sidebar form input:focus + span.input-button, nav.sidebar form input:active + span.input-button {
         color: #f4f4f4;
         border-color: #3a82ff;

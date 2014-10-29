@@ -37,7 +37,7 @@
 {% if user.is_authenticated %}
 <ul>
     <li><a href="{% url 'foia-list' %}" class="{% active request "^/foi/list/$" %}">All</a></li>
-    <li><a href="{% url 'foia-mylist-all' %}" class="{% active request "^/foi/mylist/$" %}">Mine</a></li>
+    <li><a href="{% url 'foia-mylist' %}" class="{% active request "^/foi/mylist/$" %}">Mine</a></li>
     <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
 </ul>
 {% endif %}
