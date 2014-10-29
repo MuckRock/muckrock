@@ -81,6 +81,10 @@
 
 {% block main %}
     
+    {% if user == user_obj %}
+        {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all title='Requests You Follow' %}
+    {% endif %}
+    
     {% if recent_requests or recent_completed %}
         {% if recent_requests %}
             {% include 'lib/foia_table.html' with requests=recent_requests title='Latest Requests' %}
