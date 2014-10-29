@@ -1,10 +1,11 @@
+
 {% extends "base.html" %}
-{% block title %}MuckRock &bull; Server Malfunction{% endblock title %}
 
 {% block content %}
-<h1>Uh oh, something seems to have gone wrong on our end.</h1>
-<h2>We have top men working on this issue. <small>Top. Men.</small></h2>
+
+<h1>Sorry, something seems to have gone wrong!</h1>
 {% if request.sentry.id %}
 	<p class="larger">If you need assistance, you may <a href="mailto:info@muckrock.com">email us</a> and reference this error as <strong>{{ request.sentry.id }}</strong>.</p>
 {% endif %}
+
 {% endblock %}

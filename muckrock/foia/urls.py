@@ -12,7 +12,6 @@ import muckrock.foia.signals
 # pylint: enable=W0611
 from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
-from muckrock.foia.views import new_views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
@@ -51,9 +50,9 @@ urlpatterns = patterns('',
         views.Detail.as_view(template_name='details/request_detail.html'), 
         name='foia-detail'),
     url(r'^%s/clone/$' % foia_url,
-        new_views.clone_request, name='foia-clone'),
+        views.clone_request, name='foia-clone'),
     url(r'^%s/update/$' % foia_url,
-        new_views.update_request, name='foia-update'),
+        views.update_request, name='foia-update'),
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
     url(r'^%s/add_note/$' % foia_url,
@@ -75,7 +74,7 @@ urlpatterns = patterns('',
 
     # Create Views
     url(r'^create/$',
-        new_views.create_request, name='foia-create'),
+        views.create_request, name='foia-create'),
         
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
