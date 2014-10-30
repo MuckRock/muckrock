@@ -1,0 +1,270 @@
+@import 'buttons';
+@import 'panels';
+@import 'messages';
+@import 'notifications';
+@import 'pagination';
+@import 'modals';
+
+// Inputs
+
+textarea, #{$all-text-inputs} { @extend %input; }
+
+fieldset {
+    label {
+        @extend dfn;
+        @include box-sizing(border-box);
+        display: block;
+        color: $color-default;
+        text-align: left;
+    }
+    
+    input + label {
+        float: left;
+        margin-right: 1.5em;
+    }
+    
+    & > fieldset, & > fieldset + fieldset { margin: 0; }
+}
+
+.form {
+    @extend %textbox;
+    display: block;
+    padding: $base-vertical-rhythm;
+    border-radius: $base-border-radius;
+    header {
+        @include outer-container();
+        @include pad(0 5% 0 5%);
+        margin: $base-vertical-rhythm/2 0;
+    }
+    h1 {
+        @extend %half;
+        @include font-sizing(3);
+        margin-top: 0;
+    }    
+    form {
+        @include outer-container();
+        @include pad(0 0 0 5%);
+        border: none;
+    }
+    fieldset {
+        @extend %half;
+        @include omega();
+        @include pad(0 5% 0 0);
+        margin-top: 0;
+        // margin: 0.5em 0.75em 1.5em 0;
+        &.question, &.answer { @extend %full; }
+    }
+    input { width: 100%; }
+    textarea {
+        width: 100%;
+        height: 10em;
+        resize: vertical;
+    }
+    .buttons { @include row; }
+    input[type="submit"] { @extend %quarter; }
+}
+
+#hidden-form {
+    display: none;
+    &:target { display: block; }
+    width: 100%;
+    overflow: hidden;
+    margin: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    a.button, input.button { float: right; }   
+}
+#hidden-form-button:focus { outline: none; }
+
+.form.login {
+    ul {
+        @extend %half;
+        @include media($large-layout) {
+            margin: $base-vertical-rhythm/2 0 0;
+        }
+    }
+    p {
+        padding-left: 5%;
+        margin-bottom: $base-vertical-rhythm/2;
+    }   
+}
+
+.form.register {
+    h1 { @extend %full; }
+}
+
+.form.subscription form fieldset { @extend %full; }
+
+.form.password-reset, .password-change {
+    overflow: hidden;
+    h1 { margin: 0 0 $base-vertical-rhythm/2; }
+    form { @include pad(0 default 0 default); }
+    form fieldset { @extend %full; }
+}
+
+.features {
+    margin: 0 -1*$base-vertical-rhythm $base-vertical-rhythm;
+    padding: 2*$base-vertical-rhythm $base-vertical-rhythm;
+    color: $color-white;
+    background-color: $color-primary;
+    text-align: center;
+    h1 {
+        @include font-sizing(2, 3);
+        font-weight: 300;
+        margin-bottom: $base-vertical-rhythm;
+    }
+    a {
+        color: $color-white;
+        text-decoration: none;
+        border-bottom: 1px dotted $color-white;
+        &:hover { border-bottom-style: solid; }
+    }
+}
+
+.pricing { @include row; }
+
+.plan {
+    @extend %third;
+    @include border-top-radius(0px);
+    margin-top: $base-vertical-rhythm/2;
+    &:hover {
+        margin-top: 0;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    @include transition(all 0.5s $ease-out-expo);
+    a {
+        display: block;
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
+        @include border-top-radius($base-border-radius);
+        color: $color-white;
+        background-color: $color-black;
+        text-align: center;
+        font-weight: 300;
+        &:hover {
+            background-color: $color-primary;
+            text-decoration: none;
+        }
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    li {
+        @include font-sizing(0.9, 3);
+        margin: 0;
+        padding: $base-vertical-rhythm/2;
+        border: $base-border-width solid $color-grey;
+        border-bottom: none;
+        &:first-child { border-top: none; }
+        &:last-child {
+            border-bottom: $base-border-width solid $color-grey;
+            @include border-bottom-radius($base-border-radius);
+        }
+        &:hover { background-color: darken($color-white, 5%); }
+    }
+
+    .name { @include font-sizing(1.5); }
+    .description { @include font-sizing(1); }
+    
+}
+
+/* Feeds */
+
+.feed-item { @extend %panel;
+    overflow: hidden;
+    @include fill-parent();
+    > header {
+        display: block;
+        width: 100%;
+        margin-bottom: $base-vertical-rhythm/2;
+        float: left;
+        div {
+            display: block;
+            & + div { 
+                @include font-sizing(0.9, 1);
+            }
+        }
+    }
+    .button {
+        @include font-sizing(0.9, 1);
+        line-height: 1.5em;
+        float: left;
+    }
+}
+
+.feed {
+    
+    ul, ol {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .feed-item {
+        margin: 0;
+        border-top: none;
+        border-radius: 0;
+    }
+    
+    li:first-child > .feed-item {
+        border-top: $base-border-width solid $color-grey;
+        @include border-top-radius($base-border-radius);
+    }
+    
+    li:last-child > .feed-item {
+        @include border-bottom-radius($base-border-radius);
+    }
+
+    @include media($large-layout) {
+        @include span-columns(6);
+        &.narrow { @include span-columns(4); }
+        &.wide { @include span-columns(8); }
+    }
+    @include fill-parent();
+
+}
+
+/* Progress Bar */
+
+$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
+$progress-animation-duration: 0.7s;
+
+.progress-bar {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: $base-vertical-rhythm/2 0;
+    border: $base-border-width solid $color-grey;
+    border-radius: $base-border-radius + $base-border-width;
+    background-color: $color-white;
+}
+
+.meter {
+    @include box-sizing(border-box);
+    display: block;
+    height: $base-vertical-rhythm;
+    @include background-gradient($color-default);
+    border: $progress-meter-border;
+    border-radius: $base-border-radius;
+    @include border-right-radius(0px);
+    &.completed { @include border-right-radius($base-border-radius); }
+
+    @include classifier(success, $color-success);
+    @include classifier(failure, $color-failure);
+    @include classifier(primary, $color-primary);
+    @include classifier(default, $color-default);
+    @include classifier(disabled, $color-disabled);
+}
+
+/* Table */
+
+table {
+    width: 100%;
+    margin-top: $base-vertical-rhythm 0;
+    border-radius: $base-border-radius;
+    th, td { padding: 0.25em 0.5em; }
+    tr:nth-child(odd) { background-color: $color-odd-background; }
+    &, th, td {
+        border-top: $base-border-width solid $color-grey;
+        border-bottom: $base-border-width solid $color-grey
+    }
+}

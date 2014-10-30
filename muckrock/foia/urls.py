@@ -12,7 +12,6 @@ import muckrock.foia.signals
 # pylint: enable=W0611
 from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
-from muckrock.foia.views import new_views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests
 from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
@@ -26,6 +25,7 @@ old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
 list_template = 'lists/request_list.html'
+list_args = '(?P<status>\w+)(?P<agency>[0-9]+)(?P<jurisdiction>[0-9]+)'
 
 urlpatterns = patterns('',
     # Redirects
@@ -38,21 +38,21 @@ urlpatterns = patterns('',
     url(r'^list/$',
         views.List.as_view(template_name=list_template),
         name='foia-list'),
-    url(r'^list/following/$',
-        views.ListFollowing.as_view(template_name=list_template), name='foia-list-following'),
     url(r'^mylist/$',
-        views.MyList.as_view(), name='foia-mylist-all'),
-    url(r'^mylist/(?P<view>\w+)/$',
-        views.MyList.as_view(template_name=list_template), name='foia-mylist'),
+        views.MyList.as_view(),
+        name='foia-mylist'),
+    url(r'^list/following/$',
+        views.ListFollowing.as_view(template_name=list_template), 
+        name='foia-list-following'),
         
     # Detail View
     url(r'^%s/$' % foia_url,
         views.Detail.as_view(template_name='details/request_detail.html'), 
         name='foia-detail'),
     url(r'^%s/clone/$' % foia_url,
-        new_views.clone_request, name='foia-clone'),
+        views.clone_request, name='foia-clone'),
     url(r'^%s/update/$' % foia_url,
-        new_views.update_request, name='foia-update'),
+        views.update_request, name='foia-update'),
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
     url(r'^%s/add_note/$' % foia_url,
@@ -74,7 +74,7 @@ urlpatterns = patterns('',
 
     # Create Views
     url(r'^create/$',
-        new_views.create_request, name='foia-create'),
+        views.create_request, name='foia-create'),
         
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
@@ -114,4 +114,7 @@ urlpatterns = patterns('',
     url(r'^list/status-(?P<status>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?status=%(status)s'),
         name='foia-list-status'),
+    url(r'^mylist/(?P<view>\w+)/$',
+        RedirectView.as_view(url='foi/mylist/'),
+        name='foia-mylist-old'),
 )

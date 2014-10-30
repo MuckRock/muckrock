@@ -1,0 +1,99 @@
+{% extends 'details/base_detail.html' %}
+{% load markdown_deux_tags %}
+{% block title %}MuckRock &bull; {{ user_obj.username|capfirst }}{% endblock title %}
+{% block type %}profile{% endblock type %}
+
+{% block header %}
+    {% ifequal user user_obj %}
+    <h2>{{user.get_profile.get_acct_type_display}} Account</h2>
+    <h1>{{user_obj.first_name}} {{user_obj.last_name}}</h1>
+    <h2>{{user_obj.username}}</h2>
+    {% else %}
+    <dfn>Profile</dfn>
+    <h2>{{user.get_profile.get_acct_type_display}} Account</h2>
+    <h1>{{user_obj.first_name}} {{user_obj.last_name}}</h1>
+    <h2>{{user_obj.username}}</h2>
+    {% endifequal %}
+{% endblock header %}
+
+{% block aside %}
+    {% if user == user_obj %}
+    <dl>
+        <dt>Information on File</dt>
+        <dd>{{user_obj.email}}</dd>
+        {% if user_obj.get_profile.phone %}
+        <dd>{{user_obj.get_profile.phone}}</dd>
+        {% endif %}
+        {% if user_obj.get_profile.address1 or user_obj.get_profile.city %}
+            {% if user_obj.get_profile.address1 %}
+        <dd>{{ user_obj.get_profile.address1 }}</dd>
+                {% if user_obj.get_profile.address2 %}
+        <dd>{{ user_obj.get_profile.address2 }}</dd>
+                {% endif %}
+            {% endif %}
+            {% if user_obj.get_profile.city and user_obj.get_profile.state and user_obj.get_profile.zip_code %}
+        <dd>{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}</dd>
+        <dd>{{user_obj.get_profile.zip_code}}</dd>
+            {% endif %}
+        {% endif %}
+    
+        {% if user_obj.get_profile.get_cc %}
+        <dt>Credit Card on File</dt>
+        <dd>{{user_obj.get_profile.get_cc.type}} ending with {{user_obj.get_profile.get_cc.last4}}</dd>
+        {% endif %}
+    </dl>
+    {% if user.get_profile.get_acct_type_display != 'Community' %}
+    <dl>
+        <dt>Monthly Requests</dt>
+        {% if user_obj.get_profile.get_monthly_requests %}
+        <dd>{{ user_obj.get_profile.get_monthly_requests }}</dd>
+        {% else %}
+        <dd>0</dd>
+        {% endif %}
+    </dl>
+    {% endif %}
+    <dl>        
+        <dt>Requests Remaining</dt>
+        {% if user_obj.get_profile.num_requests %}
+        <dd>{{ user_obj.get_profile.num_requests }}</dd>
+        {% else %}
+        <dd>0</dd>
+        {% endif %}
+    </dl>
+    {% endif %}
+    
+{% endblock aside %}
+
+{% block actions %}
+<div class="controls">
+    <a href="{% url 'acct-buy-requests' %}" class="primary button">Buy Requests</a>
+    {% if user.get_profile.get_acct_type_display == 'Community' %}
+    <a href="{% url 'acct-manage-subsc' %}" class="primary button">Upgrade to Pro</a>
+    {% endif %}
+    {% if user.get_profile.get_acct_type_display == 'Professional' %}
+    <a href="{% url 'acct-manage-subsc' %}" class="button">Subscription Settings</a>
+    {% endif %}
+    <a href="{% url 'acct-update' %}" class="button">Account Settings</a>
+    <a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a>
+    <a href="{% url 'acct-update-cc' %}" class="button">Update Credit Card</a>
+</div>
+{% endblock actions %}
+
+{% block main %}
+    
+    {% if user == user_obj %}
+        {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all title='Requests You Follow' %}
+    {% endif %}
+    
+    {% if recent_requests or recent_completed %}
+        {% if recent_requests %}
+            {% include 'lib/foia_table.html' with requests=recent_requests title='Latest Requests' %}
+        {% endif %}
+        {% if recent_completed %}
+            {% include 'lib/foia_table.html' with requests=recent_completed title='Recently Completed Requests' %}
+        {% endif %}
+    {% else %}
+        <h3>No requests have been filed. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
+    {% endif %}
+    
+{% endblock main %}

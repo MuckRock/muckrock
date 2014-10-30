@@ -44,12 +44,10 @@ def detail(request, fed_slug, state_slug, local_slug):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
-            # DEBUG: Cannot send mail while running on localhost
-            '''
             send_mail(
-                '[FLAG] %s: %s' % (type_, jurisdiction.name),
+                '[FLAG] %s: %s' % ('Jurisdiction', jurisdiction.name),
                 render_to_string(
-                    'jurisdiction/flag.txt',
+                    'text/jurisdiction/flag.txt',
                     { 'obj': jurisdiction,
                       'user': request.user,
                       'type': 'jurisdiction',
@@ -60,7 +58,6 @@ def detail(request, fed_slug, state_slug, local_slug):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            '''
             messages.info(request, 'Agency correction succesfully submitted')
             return redirect(jurisdiction)
     else:

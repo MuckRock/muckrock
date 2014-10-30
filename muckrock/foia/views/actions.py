@@ -121,7 +121,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
             'You may only delete draft requests.'
         )],
         form_class=lambda r, f: FOIADeleteForm,
-        return_url=lambda r, f: reverse('foia-mylist', kwargs={'view': 'all'}),
+        return_url=lambda r, f: reverse('foia-mylist'),
         heading='Delete FOI Request',
         value='Delete',
         must_own=True,

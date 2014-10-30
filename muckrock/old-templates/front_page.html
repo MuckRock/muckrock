@@ -1,0 +1,161 @@
+{% extends "base_base.html" %}
+{% load tags %}
+{% load assets %}
+{% load thumbnail %}
+{% load humanize %}
+{% load staticfiles %}
+
+{% block title %}Home{% endblock %}
+{% block headline %}Home{% endblock %}
+
+{% block main %}
+		<div class="main" id="main-three-columns">
+
+			<div class="left" id="main-left">
+
+				{% if featured_article %}
+				<div class="post">
+					<div class="post-title"><h1>
+						<a href="{{ featured_article.get_absolute_url }}">{{ featured_article.title }}</a>
+					</h1></div>
+					{% if featured_article.kicker %}<div class="post-kicker">
+						<h4>{{ featured_article.kicker }}</h4>
+					</div>{% endif %}
+
+					<div class="post-body">
+
+						{% if featured_article.image %}
+						<p><a href=" {{featured_article.get_absolute_url }}"><img src="{% thumbnail featured_article.image 510x233 %}" alt="" class="bordered" /></a></p>
+						{% endif %}
+
+					<div class="post-date">by {{ featured_article.get_authors_names }} on {{ featured_article.pub_date|date:"DATETIME_FORMAT" }}</div>
+
+						<p class="large">{% autoescape off %}{{ featured_article.summary }}{% endautoescape %}</p>
+
+						<a href="{{ featured_article.get_absolute_url }}" class="more">Read more &#187;</a>
+
+					</div>
+				
+				</div>
+				{% endif %}
+
+				<div class="content-separator"></div>
+				<h1>Featured Documents &amp; Requests</h1>
+
+				{% for req in featured_reqs %}
+				<div class="col3 {% cycle 'left' 'col3-mid left' 'right' %}">
+					<div class="column-content">
+						<div class="post">
+							<p align="center"><a href="{{ req.get_absolute_url }}">
+								{% if req.files.all %}
+									<img src="{{ req.files.all.0.get_medium_thumbnail }}" alt="{{req.files.all.0.title}}" class="bordered" width="102" height="128" />
+								{% else %}
+									<img src="{% static "img/report.png" %}" alt="" class="bordered" height="128" />
+								{% endif %}
+							</a></p>
+							<h4><a href="{{ req.get_absolute_url }}">{{ req.title }}</a></h4>
+							{{ req.description }}
+						</div>
+
+					</div>
+				</div>
+				{% endfor %}
+
+				<div class="clearer">&nbsp;</div>
+				
+			</div>
+
+			<div class="left sidebar" id="sidebar-1">
+
+			<div class="post">
+					<p>MuckRock is an open news tool powered by state and federal Freedom of Information laws and you: Requests are based on your questions, concerns and passions, and you are free to embed, share and write about any of the verified government documents hosted here. Want to learn more? Check out <a href="/about/">our about page</a>. MuckRock has been funded in part by grants from <a href="http://sunlightfoundation.com/">the Sunlight Foundation</a>, <a href="https://pressfreedomfoundation.org/organization/muckrock-news">the Freedom of the Press Foundation</a> and <a href="http://www.knightfoundation.org/press-room/press-mention/knight-innovation-ard-win-selects-muckrock-25/">the Knight Foundation</a>.</p>
+
+					<p><a href="/about/interested/" class="more">Join Our Mailing List &#187;</a></p>
+				</div>
+
+
+				<div class="content-separator"></div>
+
+				<div class="post">
+					<h3>Get involved</h3>
+					<p>Filing a request through MuckRock is easy: <strong><a href="https://www.muckrock.com/accounts/register/">Starting at just $20</a></strong>, you can file up to 5 requests, and we'll help every step of the way, from writing your request to get results to digitizing the records when they come back. You can even file free requests and help other investigations via <strong><a href="https://www.muckrock.com/assignments/">MuckRock Assignments</a></strong>.</p>
+					<a href="https://www.muckrock.com/accounts/register/" class="more">Join MuckRock &#187;</a>
+				</div>		
+
+				<div class="content-separator"></div>
+
+				<div class="post">
+					<h3>Stats &amp; Figures</h3>
+					<p><ul>
+						<li>{{ num_requests|intcomma }} request{{ num_requests|pluralize }} filed</li>
+						<li>{{ num_completed_requests|intcomma }} request{{ num_completed_requests|pluralize }} succesfully completed</li>
+						<li>{{ num_denied_requests|intcomma }} request{{ num_denied_requests|pluralize }} denied</li>
+						<li>{{ num_pages|intcomma }} pages of government document{{ num_pages|pluralize }} released</li>
+					</ul></p>
+				</div>		
+			</div>
+
+			<div class="right sidebar" id="sidebar-2">
+
+				<div class="section">
+					<div class="section-title">Most Viewed Documents</div>
+					<div class="section-content">
+						<ul class="nice-list">
+							{% for req in most_viewed_reqs %}
+							<li><span class="quiet">{{forloop.counter}}.</span>
+							<a href="{{ req.get_absolute_url }}">{{ req.title }}</a></li>
+							{% endfor %}
+							<li><a href="{% url 'foia-list' %}" class="more">Browse all documents &#187;</a></li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="section network-section">
+					<div class="section-title">News &amp; Opinion</div>
+					<div class="section-content">
+
+						<ul class="nice-list">
+							{% for article in recent_articles %}
+							<li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>
+							{% endfor %}
+							<li><a href="{% url 'news-index' %}" class="more">View all news &#187;</a></li>
+						</ul>
+						
+					</div>
+
+				</div>
+				<div class="section">
+
+					<div class="section-title">
+
+						<div class="left">Overdue Requests</div>
+						<div class="right"><img src="{% static "img/icon-time.gif" %}" width="14" height="14" alt="" /></div>
+
+						<div class="clearer">&nbsp;</div>
+
+					</div>
+
+					<div class="section-content">
+
+						<ul class="nice-list">
+							{% for request in overdue_requests %}
+							<li>
+								<div class="left">
+									<a href="{{ request.get_absolute_url }}"><strong>{{ request.title }}</strong></a>
+								</div>
+								<div class="left quiet">{{ request.date_due|timesince }} overdue</div>
+								<div class="clearer">&nbsp;</div>
+							</li>
+							{% empty %}
+							<li>There are no overdue requests at this time.</li>
+							{% endfor %}
+							<li><a href="{% url 'foia-list' %}" class="more">Browse all &#187;</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+
+			<div class="clearer">&nbsp;</div>
+
+		</div>
+{% endblock %}

@@ -1,0 +1,333 @@
+{% extends 'details/base_detail.html' %}
+{% load tags %}
+{% load markdown_deux_tags %}
+{% load humanize %}
+{% load mathfilters %}
+
+{% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
+{% block type %}request{% endblock %}
+
+{% block header %}
+    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
+        <form action="" method="post" class="status-form" id="status-form">
+            {% csrf_token %}
+            <select name="status">
+            {% for choice in choices %}
+                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+            {% endfor %}
+            </select>
+            <button type="submit" name="action" value="status" class="primary button">Save</button>
+        </form>
+        {% endif %}
+    {% else %}
+    </h3>
+    {% endif %}
+    {% if foia.date_due and foia.status == "processed" %}
+        {% if past_due %}
+    <h4><small>Past due by {{ foia.date_due|timesince }}.</small></h4>
+        {% else %}
+    <h4><small>Due in {{ foia.date_due|timeuntil }}.</small></h4>
+        {% endif %}
+    {% endif %}
+    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
+        {% if foia.days_until_due >= 0 %}
+    <h4><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
+        {% else %}
+    <h4><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
+        {% endif %}
+        from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
+    {% endif %}
+    <h1>{{ foia.title }}</h1>
+    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.{% endif %}</h2>
+    <dl>
+    {% if foia.tags.all or foia.user == request.user or user.is_staff %}
+        <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
+        {% if foia.user == request.user or user.is_staff %}
+        <form action="" method="post" class="tag-form" id="tag-form">
+            {% csrf_token %}
+            <input type="text" name="tags" value="{% for tag in foia.tags.all %}{% if forloop.first %}{{ tag }}{% else %}, {{ tag }}{% endif %}{% endfor %}" />
+            <button type="submit" name="action" value="tags" class="primary button">Save</button>
+            <p><small>Separate tags with commas</small></p>
+        </form>
+        {% endif %}
+        {% for tag in foia.tags.all %}
+		<dd class="tag"><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
+	    {% empty %}
+		<dd>None</dd>
+	    {% endfor %}
+	{% endif %}
+    {% if foia.user == request.user or request.user.is_staff %}
+        {% if foia.is_embargo %}
+        <dt>Embargo</dt>
+            {% if foia.embargo_date %}
+        <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
+            {% else %}
+        <dd>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</dd>
+            {% endif %}
+        {% endif %}
+        {% if foia.user == request.user %}
+            {% if foia.status == "ack" or foia.status == "processed" %}
+        <dt>Follow-Ups</dt>
+                {% if foia.disable_autofollowups %}
+        <dd>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</dd>
+                {% else %}
+        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</dd>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endblock header %}
+
+{% block aside %}
+    {% if user.is_authenticated %}
+        {% if foia.status == 'started' and foia.user == request.user %}
+            {% with remaining=user.get_profile.num_requests %}
+        <form action="." method="post" class="draft">
+                {% csrf_token %}
+                {% if remaining %}
+            <input type="submit"
+                   name="action"
+                   value="Submit"
+                   class="primary button"
+            />
+                {% else %}
+            {#<a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>#}
+<form action="" method="POST">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="{{pub_key}}"
+    data-amount="2000"
+    data-name="MuckRock"
+    data-description="5 Requests ($20.00)"
+	data-email="{{user.email}}"
+	data-label="Buy Requests"
+	data-image="/static/img/logo.jpg"
+	>
+  </script>
+</form>
+                {% endif %}
+                {% if foia.is_editable %}
+            <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
+                {% endif %}
+            <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+        </form>
+            {% endwith %}
+        {% else %}
+    <form action="" method="post" class="controls">
+        {% csrf_token %}
+        {% for action in actions %}
+            {% if action.class == 'modal' %}
+        <span class="modal-button button">{{ action.label }}</span>
+        <div class="hidden-modal">
+            <h1>{{ action.label }}</h1>
+            <h2>{{ action.title }}</h2>
+            <input type="submit" name="action" value="{{ action.label }}" />
+        </div>
+            {% else %}
+                {% if not action.link %}
+        <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
+                {% else %}
+        <a href="{{ action.link }}"
+           class="{% if action.label == 'Clone' %}primary {%endif%}button{% if action.class %} {{ action.class }}{% endif %}"
+           {% if action.title %}title="{{ action.title }}"{% endif %}>
+        {{ action.label }}</a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </form> 
+    {% endif %}
+{% else %} 
+<section class="panel">
+    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
+    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+</section> 
+{% endif %}  
+{% endblock aside %}
+
+{% block actions %}
+    {% if foia.has_crowdfund %}
+        <section class="panel">
+        {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
+        {% if foia.crowdfund.expired %}
+            <h1>Crowdfunding Completed</h1>
+            <h2>${{ received }} raised out of ${{ required }}</h2>
+        {% else %}
+            <h1>Help fund this request</h1>
+            <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
+            <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
+            <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
+        {% endif %}
+        {% endwith %}
+        </section>
+    {% endif %}   
+{% endblock actions %}
+
+{% block main %}
+<div class="tabs">
+    {% if not foia.public_documents or not foia.user == request.user %}
+    <label for="comms-radio">Communications<input type="radio" name="request" id="comms-radio" /></label>
+    {% endif %}
+    {% if foia.public_documents %}
+    <label for="docs-radio">Documents<input type="radio" name="request" id="docs-radio" /></label>
+    {% endif %}
+    {% if foia.user == request.user %}
+    <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
+    {% endif %}
+</div>
+<section class="tab-section communications" id="comms">
+    {% for comm in foia.communications.all %}
+            {% if comm.full_html %}
+                {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
+            {% else %}
+                {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+            {% endif %}
+    {% endfor %}
+</section>
+    {% if foia.public_documents %}
+<section class="tab-section documents" id="docs">
+    <div id="viewer"></div>
+    {% if foia.public_documents|length > 1 %}
+    <div class="dc-thumbnails">
+        <ul class="dc-thumbnails">
+        {% for document in foia.public_documents %}
+            <li><a href="#{{ document.doc_id }}" onclick="display_doc('{{ document.doc_id }}'); return true">
+                <img src="{{ document.get_thumbnail }}" alt="Document Thumbnail" />
+                {{ document.title }}
+            </a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}   
+</section>
+    {% endif %}
+    {% if foia.user == request.user %}
+<section class="tab-section notes" id="notes">
+    <a class="primary button" 
+       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+    Add a Note</a>
+    {% for note in foia.notes.all %}
+    <div class="note">
+        <p><strong>{{note.date|date}}</strong><br>
+        {{note.note|linebreaks}}</p>
+    </div>
+    {% empty %}
+    <p>Notes are private and can be used to store information about this request.</p>
+    {% endfor %}
+</section>
+    {% endif %}
+{% endblock main %}
+
+{% block scripts %}
+<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
+<script>
+
+    function modal(nextSelector) {
+        var overlay = '<div class="overlay"></div>';
+        $(overlay).insertBefore($('.container')).fadeIn();
+        nextSelector.removeClass('hidden-modal').addClass('modal');
+        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
+        $('.overlay').click(function(){
+            $('.overlay').fadeOut().remove();
+            $('.modal textarea').remove();
+            $('.modal').removeClass('modal').addClass('hidden-modal');
+        });
+    }
+    
+    function hideAllExcept(visible) {
+        $('.tab-section').removeClass( 'active' );
+        visible.addClass( 'active' );
+    }
+
+    $(document).ready(function() {
+    
+        /* Tab Bar */
+
+        $('#comms-radio').parent().addClass( 'active');
+        hideAllExcept($('#comms'));
+    
+        $('input:radio').change(function() {
+            $(this).parent().addClass( 'active' );
+            $(this).parent().siblings().removeClass( "active" );
+        });
+        $('#comms-radio').change(function() {
+            hideAllExcept($('#comms'));
+        });
+        $('#docs-radio').change(function() {
+            hideAllExcept($('#docs'));
+        });
+        $('#notes-radio').change(function() {
+            hideAllExcept($('#notes'));
+        });
+        
+        /* Tag Editor */
+        
+        $('#edit-tags').click(function() {
+            $('#tag-form').show();
+            $(this).hide();
+        });
+        
+        $('#edit-status').click(function() {
+            $('#status-form').show();
+            $('#request-status').hide();
+            $(this).hide();
+        });
+        
+        /* MODAL */
+        
+        $('<textarea name="text"></textarea>').insertBefore($('.modal').children('input'));
+        $('.overlay').click(function(){
+            $('.modal textarea').remove();
+        });
+        
+        /* Documents
+        
+        function display_doc(doc_id) {
+            $("#docs-radio").attr("checked", true);
+            DV.load('https://www.documentcloud.org/documents/' + doc_id + '.js', {
+                width: 627,
+                height: 600,
+                sidebar: false,
+                container: "#viewer"
+            });
+            var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
+            var embed_code1 = '<a href="https://www.muckrock.com{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
+            $('textarea#embed0').val(embed_code0);
+            $('textarea#embed1').val(embed_code1);
+        }
+
+        function get_thumbnail(doc_id) {
+            var idx = doc_id.indexOf('-');
+            var num = doc_id.slice(0, idx);
+            var name = doc_id.slice(idx + 1);
+            return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+        }
+
+        function doc_load() {
+            var default_doc_id = "{{foia.public_documents.0.doc_id}}";
+            if (!doc_load.loaded) {
+                doc_load.loaded = true;
+                display_doc(default_doc_id);
+            }
+        }
+
+        $(function() {
+            var hash = window.location.hash.substring(1);
+            var default_doc_id = "{{ foia.public_documents.0.doc_id }}";
+            var documents = [ {% for doc in foia.public_documents %}"{{ doc.doc_id }}", {% endfor %} ];
+
+            if (!hash || ($.inArray(hash, documents) == -1)) {
+                doc_id = default_doc_id;
+            } else {
+                doc_id = hash;
+            }
+            if (hash && hash.substring(0,4) != "tabs") {
+                $("#tabs").tabs("select", "#tabs-documents");
+                display_doc(doc_id);
+                doc_load.loaded = true;
+            }
+        });
+        */
+        
+    });
+</script>
+{% endblock scripts %}

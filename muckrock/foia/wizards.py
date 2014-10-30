@@ -71,7 +71,7 @@ class SubmitMultipleWizard(SessionWizardView):
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         # redirect to your foias
-        return HttpResponseRedirect(reverse('foia-mylist', kwargs={'view': 'all'}))
+        return redirect('foia-mylist')
 
     def get_template_names(self):
         return self.templates[self.steps.current]

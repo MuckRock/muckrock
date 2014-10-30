@@ -1,0 +1,129 @@
+/* Lists */
+
+header.collection-header { @include outer-container(); }
+
+h1.list-label {
+    @extend %full;
+    font-weight: 300;
+    text-align: left;
+    @include font-sizing(3); 
+    display: block;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.collection {
+    @extend %collection;
+    &.jurisdiction, &.agency {
+        h2, ul { text-align: center; }
+        ul {
+            width: 100%;
+            margin: 0;
+            li { padding: $base-vertical-rhythm/4; }
+            @media screen and (min-width: 540px) {
+                @include columns(3 $base-vertical-rhythm/2);
+                li:nth-child(even) { background: none; }
+            }
+        }
+    }
+    
+    &.request {
+        h2 { @include font-sizing(1.3, 3); }
+        h3 { font-weight: 300; }
+        dt { margin-bottom: 0; }
+        dd + dt { margin-top: 0.5em; }
+        dt + dd { line-height: 1em; }
+        
+        ul.heading {
+            @include row;
+            display: none;
+            @include media($large-layout) {
+                display: block;
+            }
+            border: none; 
+            li { padding: 0; }
+            li:first-child { padding-left: $base-vertical-rhythm; }
+            li:nth-child(2n) { background: none; }
+        }
+        
+        ul.list { margin-top: 0; }
+        li.unread { background-color: lighten($color-primary, 30%) !important; }
+        
+        .foia-info {
+            display: block;
+            @include span-columns(6);
+            &:first-child {
+                @include span-columns(12);
+                border-bottom: $base-border-width dotted $color-grey;
+                padding-bottom: $base-vertical-rhythm/6;
+                margin-bottom: $base-vertical-rhythm/6;
+            }
+            @include media($medium-layout) {
+                @include span-columns(3);
+                &:first-child { @include span-columns(6); }
+                margin-top: 0;
+            }
+            @include media($large-layout) {
+                @include span-columns(3);
+                &:first-child {
+                    @include span-columns(6);
+                    border-bottom: none;
+                    padding-bottom: 0;
+                    margin-bottom: 0;
+                }
+            }
+        }
+        .filters {
+            form {
+                overflow: hidden;
+                width: 100%;
+                padding: $base-vertical-rhythm/2;
+                margin: 0 0 $base-vertical-rhythm/2 0;
+                border: $base-border-width solid $color-grey;
+                border-radius: $base-border-radius;
+                background-color: darken($color-white, 10%);
+            }
+            .input {
+                @include fill-parent();
+                @include media($large-layout) {
+                    @include span-columns(3);
+                }
+            }
+            select {
+                width: 100%;
+                margin-bottom: $base-vertical-rhythm/3;
+            }
+            input[type="text"] {
+                @extend small;
+                display: block;
+                width: 100%;
+                margin: $base-vertical-rhythm/4 0 0;
+            }
+            input[type="submit"] {
+                @extend small;
+                @extend %quarter;
+            }
+            .title-option { display: none; }
+            .autocomplete-light-widget {
+                display: block;
+                width: 100%;
+            }
+        }
+        .list li { @include row; }
+        
+        &.my .list {
+            li.unread { margin-bottom: $base-vertical-rhythm/4; }
+            .foia-info.title {
+                overflow: hidden;
+                input, .hgroup {
+                    display: inline-block;
+                    vertical-align: top;
+                }
+                input {
+                    margin-top: $base-vertical-rhythm/1.6;
+                    margin-right: $base-vertical-rhythm/2;
+                }
+            }
+        }
+    }
+}

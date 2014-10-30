@@ -258,12 +258,18 @@ def buy_requests(request):
 
 def profile(request, user_name=None):
     """View a user's profile"""
-    user_obj = get_object_or_404(User, username=user_name) if user_name else request.user
-    foia_requests = FOIARequest.objects.get_viewable(request.user)\
-                                       .filter(user=user_obj)\
-                                       .order_by('-date_submitted')[:5]
+    user = get_object_or_404(User, username=user_name) if user_name else request.user
+    
+    requests = FOIARequest.objects.get_viewable(request.user).filter(user=user)
+    recent_requests = requests.order_by('-date_submitted')[:5]
+    recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
 
-    context = {'user_obj': user_obj, 'foia_requests': foia_requests}
+    context = {
+        'user_obj': user,
+        'recent_requests': recent_requests,
+        'recent_completed': recent_completed,
+    }
+    
     return render_to_response(
         'details/account_detail.html',
         context,
