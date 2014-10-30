@@ -186,10 +186,19 @@ def update_request(request, jurisdiction, jidx, slug, idx):
                     fail_silently=False
                 )
                 is_new_agency = True
+
+            if request.user.get_profile().make_request():
+                foia.submit()
+                messages.success(request, 'Request succesfully submitted.')
+            else:
+                foia.status = 'started'
+                messages.error(request, 'You are out of requests for this month.  '
+                    'Your request has been saved as a draft, please '
+                    '<a href="%s">buy more requests</a> to submit it.'
+                    % reverse('acct-buy-requests'))
             
-            foia.save
+            foia.save()
             
-            messages.success(request, 'The request has been updated.')
             return redirect(foia)
         else:
             return redirect(foia)

@@ -91,7 +91,20 @@
                    class="primary button"
             />
                 {% else %}
-            <a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>
+            {#<a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>#}
+<form action="" method="POST">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="{{pub_key}}"
+    data-amount="2000"
+    data-name="MuckRock"
+    data-description="5 Requests ($20.00)"
+	data-email="{{user.email}}"
+	data-label="Buy Requests"
+	data-image="/static/img/logo.jpg"
+	>
+  </script>
+</form>
                 {% endif %}
                 {% if foia.is_editable %}
             <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
