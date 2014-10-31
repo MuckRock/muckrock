@@ -15,7 +15,7 @@
         <summary>
         {% endif %}
     </header>
-    <form action="" method="post">
+    <form action="" method="post" class="create-request">
         {% csrf_token %}
         {% if form.non_field_errors %}
         <object class="failure panel">
@@ -26,7 +26,7 @@
             {{ field }}
         {% endfor %}
         {% for field in form.visible_fields %}
-            <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
+            <fieldset class="{{ field.label|lower|slugify }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
                 {% if field.label|lower == 'jurisdiction' %}
                     <ul>
                     {% for radio in field reversed %}
@@ -66,7 +66,7 @@
                             </svg>
                         {% endif %}
                             {{ radio.choice_label }}</label>
-                            <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value={{ radio.choice_value }}>
+                            <input name="{{ radio.name }}" type="radio" id="j_{{ forloop.counter }}" value="{{ radio.choice_value }}" {% if field.value == radio.choice_value%}checked{% endif %}>
                         </li>
                     {% endfor %}
                     </ul>
@@ -78,16 +78,17 @@
                 {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
             </fieldset>
         {% endfor %}
-		{% if not user.is_authenticated %}
-		<p>This will create an account for you.  You must have an account to submit a request.  Please do not continue if you would not like an account.</p>
-		{% endif %}
+		
 
         <footer class="buttons">
-                {% if clone %}
+        {% if clone %}
             <input type="submit" name="submit" value="Clone" class="primary button"  />
-                {% else %}
+        {% else %}
             <input type="submit" name="submit" value="Create" class="primary button"  />
-                {% endif %}
+        {% endif %}
+        {% if not user.is_authenticated %}
+		<p>This will create an account for you.  You must have an account to submit a request.  Please do not continue if you would not like an account.</p>
+		{% endif %}
         </footer>
 
     </form>
@@ -98,28 +99,7 @@
 <script type="text/javascript"
 <script>
 $(document).ready(function(){
-
-    function agencyByJurisdiction(jurisdictionSelectElement) {
-        // When the jurisdiction select changes
-        val = jurisdictionSelectElement.val();
-        if (val) {
-            $.getJSON("{% url 'foia-create' %}", {j_id: val}, function(data) {
-                var options = []
-                $.each(data, function(i) {
-                    options.push(data[i]);
-                });
-                $('input#id_agency').autocomplete({
-                    source: options,
-                    minLength: 0
-                }).focus(function(){
-                    $(this).autocomplete('search', '');
-                });
-            });
-        }
-    }
     
-    $('input#id_agency')
-        
     var localField = $('fieldset.local');
     var stateField = $('fieldset.state');
     var localRadio = $('li.local input:radio');
@@ -131,89 +111,82 @@ $(document).ready(function(){
     var localInput = $('li.local .autocomplete-light-widget input');
     var localSelect = $('.autocomplete-light-widget select[name="local"]');
     var stateSelect = $('.autocomplete-light-widget select[name="state"]');
-    
     var agencyField = $('fieldset.agency');
     var agencyInput = agencyField.children('input');
+
+    function agencyByJurisdiction(jurisdictionSelectElement) {
+        agencyInput.yourlabsAutocomplete().data = {
+            jurisdictionId: jurisdictionSelectElement.val()
+        }
+    }
     
-    localField.hide();
-    stateField.hide();
+    function agencyToggle(value) {
+        if (value) {
+            agencyField.show();
+            agencyInput.focus();
+            agencyInput.keydown();
+        } else {
+            agencyField.hide();
+        }
+    }
     
-    agencyField.attr('disabled', true);
+    function selectChange(select) {
+        agencyByJurisdiction(select);
+        agencyToggle(select.val());
+        agencyInput.val('');
+    }
     
     if (localChecked.length > 0) {
+        localChecked.parent().addClass('active');
         localField.show();
-        if (localSelect.val()) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);
-        }
+        agencyToggle(localSelect.val());
     }
-    
     if (stateChecked.length > 0) {
+        stateChecked.parent().addClass('active');
         stateField.show();
-        if (stateSelect.val()) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);
-        }
+        agencyToggle(stateSelect.val());
     }
-    
     if (federalChecked.length > 0) {
+        stateChecked.parent().addClass('active');
         localField.hide();
         stateField.hide();
-        agencyField.attr('disabled', false);
+        agencyToggle(true);
     }
-    
     localRadio.change(function() {
+        $(this).parent().addClass('active');
+        $(this).parent().siblings().removeClass('active');
         localField.show();
         stateField.hide();
-        if (localSelect.val() != null) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);
-        }
+        agencyToggle(localSelect.val());
         agencyInput.val('');
     });
     
     stateRadio.change(function() {
+        $(this).parent().addClass('active');
+        $(this).parent().siblings().removeClass('active');
         localField.hide();
         stateField.show();
-        if (stateSelect.val() != null) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);
-        }
+        agencyToggle(stateSelect.val());
         agencyInput.val('');
     });
     
     federalRadio.change(function() {
+        $(this).parent().addClass('active');
+        $(this).parent().siblings().removeClass('active');
         localField.hide();
         stateField.hide();
-        agencyField.attr('disabled', false);
+        agencyToggle(true);
         agencyInput.val('');
         agencyByJurisdiction(federalRadio);
     });
     
     localSelect.change(function(){
-        agencyByJurisdiction($(this));
-        if ($(this).val()) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);  
-        }
-        agencyInput.val('');
+        selectChange($(this));
     });
-    
-    stateSelect.change(function(){ 
-        agencyByJurisdiction($(this));
-        if ($(this).val()) {
-            agencyField.attr('disabled', false);
-        } else {
-            agencyField.attr('disabled', true);
-        }
-        agencyInput.val('');
+    stateSelect.change(function(){
+        selectChange($(this));
     });
-    
+        
 });
 </script>
 {% endblock scripts %}

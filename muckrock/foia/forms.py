@@ -17,6 +17,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 class RequestForm(forms.Form):
     # form data
+        
     JURISDICTION_CHOICES = [
         ('f', 'Federal'),
         ('s', 'State'),
@@ -25,7 +26,7 @@ class RequestForm(forms.Form):
 
     # form fields
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
-    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': u'Write one sentence that describing what you\'re looking for. The more specific you can be, the better.'}))
+    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': u'Write one sentence describing what you\'re looking for. The more specific you can be, the better.'}))
     jurisdiction = forms.ChoiceField(
         choices=JURISDICTION_CHOICES,
         widget=forms.RadioSelect
@@ -42,7 +43,7 @@ class RequestForm(forms.Form):
     )
     agency = forms.CharField(
         label='Agency',
-        widget=forms.TextInput(attrs = {'placeholder': 'Name the Agency'})
+        widget=autocomplete.TextWidget('AgencyAutocomplete')
     ) 
     full_name = forms.CharField()
     email = forms.EmailField()

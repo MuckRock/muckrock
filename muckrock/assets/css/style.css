@@ -2472,18 +2472,23 @@ h1.list-label {
       margin: 0;
       font-weight: 300; }
   /* line 21, ../scss/lib/layouts/_new-request.scss */
+  .new-request .create-request {
+    border-radius: 9px;
+    background-color: #b3becb;
+    overflow: hidden; }
+  /* line 27, ../scss/lib/layouts/_new-request.scss */
   .new-request fieldset {
     margin: 0;
     padding: 1.5em; }
-  /* line 30, ../scss/lib/layouts/_new-request.scss */
+  /* line 34, ../scss/lib/layouts/_new-request.scss */
   .new-request .title {
     border-top-left-radius: 9px;
     border-top-right-radius: 9px;
     background-color: #f26c5a; }
-    /* line 33, ../scss/lib/layouts/_new-request.scss */
+    /* line 37, ../scss/lib/layouts/_new-request.scss */
     .new-request .title label {
       display: none; }
-    /* line 34, ../scss/lib/layouts/_new-request.scss */
+    /* line 38, ../scss/lib/layouts/_new-request.scss */
     .new-request .title input {
       width: 100%;
       background-color: #f26c5a;
@@ -2507,13 +2512,13 @@ h1.list-label {
       /* line 4, ../scss/bourbon/css3/_placeholder.scss */
       .new-request .title input:-ms-input-placeholder {
         color: #f8aba1; }
-  /* line 47, ../scss/lib/layouts/_new-request.scss */
+  /* line 51, ../scss/lib/layouts/_new-request.scss */
   .new-request .document {
     padding: 0; }
-    /* line 49, ../scss/lib/layouts/_new-request.scss */
+    /* line 53, ../scss/lib/layouts/_new-request.scss */
     .new-request .document label {
       display: none; }
-    /* line 50, ../scss/lib/layouts/_new-request.scss */
+    /* line 54, ../scss/lib/layouts/_new-request.scss */
     .new-request .document textarea {
       display: block;
       width: 100%;
@@ -2522,49 +2527,88 @@ h1.list-label {
       resize: none;
       border: none;
       border-radius: 0; }
-  /* line 61, ../scss/lib/layouts/_new-request.scss */
+      /* line 4, ../scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea::-webkit-input-placeholder {
+        color: #b3becb; }
+      /* line 4, ../scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea::-moz-placeholder {
+        color: #b3becb; }
+      /* line 4, ../scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea:-moz-placeholder {
+        color: #b3becb; }
+      /* line 4, ../scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea:-ms-input-placeholder {
+        color: #b3becb; }
+  /* line 69, ../scss/lib/layouts/_new-request.scss */
+  .new-request fieldset.state, .new-request fieldset.local {
+    width: 100%;
+    background-color: #2b70ee; }
+    /* line 72, ../scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state label, .new-request fieldset.local label {
+      display: none; }
+    /* line 73, ../scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state input, .new-request fieldset.local input {
+      display: block;
+      width: 100%; }
+    /* line 77, ../scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state.hidden, .new-request fieldset.local.hidden {
+      visibility: hidden; }
+    /* line 78, ../scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state.visible, .new-request fieldset.local.visible {
+      visibility: visible; }
+  /* line 81, ../scss/lib/layouts/_new-request.scss */
   .new-request .jurisdiction {
     padding: 0;
     color: #f4f4f4;
     background-color: #5a90f2;
-    width: 100%; }
-    /* line 66, ../scss/lib/layouts/_new-request.scss */
+    width: 100%;
+    max-width: 100%; }
+    /* line 87, ../scss/lib/layouts/_new-request.scss */
     .new-request .jurisdiction h2 {
       margin: 0; }
-    /* line 67, ../scss/lib/layouts/_new-request.scss */
+    /* line 88, ../scss/lib/layouts/_new-request.scss */
     .new-request .jurisdiction ul {
       display: table;
       width: 100%;
       padding: 0;
       margin: 0; }
-    /* line 73, ../scss/lib/layouts/_new-request.scss */
+    /* line 94, ../scss/lib/layouts/_new-request.scss */
     .new-request .jurisdiction li {
       display: table-cell;
       text-align: center;
       width: 33%;
       padding: 0.75em;
       border-right: 1px solid #89b0f6; }
-      /* line 79, ../scss/lib/layouts/_new-request.scss */
+      /* line 100, ../scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li.active {
+        background-color: #2b70ee; }
+        /* line 101, ../scss/lib/layouts/_new-request.scss */
+        .new-request .jurisdiction li.active:hover {
+          background-color: #2b70ee; }
+      /* line 104, ../scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li:hover {
+        background-color: #4280f0; }
+      /* line 107, ../scss/lib/layouts/_new-request.scss */
       .new-request .jurisdiction li:last-child {
         border-right: none; }
-      /* line 80, ../scss/lib/layouts/_new-request.scss */
+      /* line 108, ../scss/lib/layouts/_new-request.scss */
       .new-request .jurisdiction li svg {
         display: block;
         margin: 0 auto;
         fill: #f4f4f4;
         width: auto; }
-        /* line 85, ../scss/lib/layouts/_new-request.scss */
+        /* line 113, ../scss/lib/layouts/_new-request.scss */
         .new-request .jurisdiction li svg#icon-federal {
           height: 3em; }
-        /* line 86, ../scss/lib/layouts/_new-request.scss */
+        /* line 114, ../scss/lib/layouts/_new-request.scss */
         .new-request .jurisdiction li svg#icon-state {
           height: 2.5em;
           margin-top: 0.5em; }
-        /* line 87, ../scss/lib/layouts/_new-request.scss */
+        /* line 115, ../scss/lib/layouts/_new-request.scss */
         .new-request .jurisdiction li svg#icon-local {
           height: 2.25em;
           margin-top: 0.75em; }
-    /* line 90, ../scss/lib/layouts/_new-request.scss */
+    /* line 118, ../scss/lib/layouts/_new-request.scss */
     .new-request .jurisdiction label {
       color: #f4f4f4;
       font-size: 1em;
@@ -2573,45 +2617,26 @@ h1.list-label {
       font-weight: 700;
       text-align: center;
       cursor: pointer; }
-  /* line 100, ../scss/lib/layouts/_new-request.scss */
-  .new-request fieldset.state, .new-request fieldset.local {
-    width: 100%;
-    background-color: #2b70ee; }
-    /* line 103, ../scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state label, .new-request fieldset.local label {
+    /* line 125, ../scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction input[type="radio"] {
       display: none; }
-    /* line 104, ../scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state input, .new-request fieldset.local input {
-      display: block;
-      width: 100%; }
-    /* line 108, ../scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state.hidden, .new-request fieldset.local.hidden {
-      visibility: hidden; }
-    /* line 109, ../scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state.visible, .new-request fieldset.local.visible {
-      visibility: visible; }
-  /* line 113, ../scss/lib/layouts/_new-request.scss */
+  /* line 131, ../scss/lib/layouts/_new-request.scss */
   .new-request .agency {
+    display: none;
     overflow: hidden;
     margin: 0;
     width: 100%;
+    max-width: 100%;
     color: #f4f4f4;
     background-color: #1157d5; }
-    /* line 119, ../scss/lib/layouts/_new-request.scss */
-    .new-request .agency:disabled {
-      background-color: #d1d8e0;
-      color: #efefef; }
-      /* line 122, ../scss/lib/layouts/_new-request.scss */
-      .new-request .agency:disabled label {
-        display: none; }
-    /* line 124, ../scss/lib/layouts/_new-request.scss */
+    /* line 140, ../scss/lib/layouts/_new-request.scss */
     .new-request .agency label {
       display: block;
       color: #f4f4f4;
       margin: 0;
       font-weight: 300;
       font-size: 1rem; }
-    /* line 132, ../scss/lib/layouts/_new-request.scss */
+    /* line 148, ../scss/lib/layouts/_new-request.scss */
     .new-request .agency input {
       width: 100%;
       background-color: #1157d5;
@@ -2638,7 +2663,7 @@ h1.list-label {
       /* line 4, ../scss/bourbon/css3/_placeholder.scss */
       .new-request .agency input:-ms-input-placeholder {
         color: #5a90f2; }
-      /* line 145, ../scss/lib/layouts/_new-request.scss */
+      /* line 161, ../scss/lib/layouts/_new-request.scss */
       .new-request .agency input:disabled {
         background: #d1d8e0;
         border-bottom: none;
@@ -2656,14 +2681,24 @@ h1.list-label {
         /* line 4, ../scss/bourbon/css3/_placeholder.scss */
         .new-request .agency input:disabled:-ms-input-placeholder {
           color: #efefef; }
-        /* line 151, ../scss/lib/layouts/_new-request.scss */
+        /* line 167, ../scss/lib/layouts/_new-request.scss */
         .new-request .agency input:disabled:hover {
           padding-left: 0; }
-  /* line 157, ../scss/lib/layouts/_new-request.scss */
+  /* line 173, ../scss/lib/layouts/_new-request.scss */
+  .new-request .state, .new-request .local {
+    display: none; }
+  /* line 175, ../scss/lib/layouts/_new-request.scss */
+  .new-request .full-name, .new-request .email {
+    float: left;
+    width: 50%; }
+    /* line 178, ../scss/lib/layouts/_new-request.scss */
+    .new-request .full-name input, .new-request .email input {
+      width: 100%; }
+  /* line 181, ../scss/lib/layouts/_new-request.scss */
   .new-request .autocomplete-light-widget {
     display: block;
     width: 100%; }
-    /* line 160, ../scss/lib/layouts/_new-request.scss */
+    /* line 184, ../scss/lib/layouts/_new-request.scss */
     .new-request .autocomplete-light-widget span.deck > span {
       font-size: 1.25em;
       line-height: 1.22222em;
@@ -2672,7 +2707,7 @@ h1.list-label {
       display: block;
       width: 100%;
       margin: 0; }
-      /* line 166, ../scss/lib/layouts/_new-request.scss */
+      /* line 190, ../scss/lib/layouts/_new-request.scss */
       .new-request .autocomplete-light-widget span.deck > span:before {
         content: "Jurisdiction";
         display: block;
@@ -2680,21 +2715,24 @@ h1.list-label {
         margin: 0;
         font-weight: 300;
         font-size: 1rem; }
-      /* line 175, ../scss/lib/layouts/_new-request.scss */
+      /* line 199, ../scss/lib/layouts/_new-request.scss */
       .new-request .autocomplete-light-widget span.deck > span span.remove {
         float: right; }
-  /* line 181, ../scss/lib/layouts/_new-request.scss */
+  /* line 205, ../scss/lib/layouts/_new-request.scss */
   .new-request footer {
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px;
     overflow: hidden;
     padding: 1.5em;
-    background-color: #b3becb;
-    width: 100%;
-    overflow: hidden; }
-    /* line 188, ../scss/lib/layouts/_new-request.scss */
+    width: 100%; }
+    /* line 210, ../scss/lib/layouts/_new-request.scss */
     .new-request footer input {
       float: left; }
+    /* line 211, ../scss/lib/layouts/_new-request.scss */
+    .new-request footer p {
+      float: right;
+      width: 70%;
+      margin: 0; }
 
 /* line 1, ../scss/lib/layouts/_search.scss */
 .search {

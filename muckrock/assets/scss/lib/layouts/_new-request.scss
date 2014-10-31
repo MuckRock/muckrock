@@ -18,12 +18,16 @@
         }
     }
     
+    .create-request {
+        border-radius: $base-border-radius;
+        background-color: $color-grey;
+        overflow: hidden;
+    }
+    
     fieldset {
         margin: 0;
         padding: $base-vertical-rhythm;
     }
-    
-    
     
     $color-title: #F26C5A;
     $color-jurisdiction: #5A90F2;
@@ -55,7 +59,23 @@
             resize: none;
             border: none;
             border-radius: 0; 
+            @include placeholder {
+                color: $color-grey;
+            }
         }
+    }
+    
+    $color-jurisdiction-picker: darken($color-jurisdiction, 10%); 
+    fieldset.state, fieldset.local {
+        width: 100%;
+        background-color: $color-jurisdiction-picker;
+        label { display: none; }
+        input {
+            display: block;
+            width: 100%;
+        }
+        &.hidden { visibility: hidden; }
+        &.visible { visibility: visible; }
     }
     
     .jurisdiction {
@@ -63,6 +83,7 @@
         color: $color-white;
         background-color: $color-jurisdiction;
         width: 100%;
+        max-width: 100%;
         h2 { margin: 0; }
         ul {
             display: table;
@@ -76,6 +97,13 @@
             width: 33%;
             padding: $base-vertical-rhythm/2;
             border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
+            &.active {
+                &:hover { background-color: $color-jurisdiction-picker; }
+                background-color: $color-jurisdiction-picker;
+            }
+            &:hover {
+                background-color: darken($color-jurisdiction, 5%);
+            }
             &:last-child { border-right: none; }
             svg {
                 display: block;
@@ -94,33 +122,21 @@
             text-align: center;
             cursor: pointer;
         }
-    }
-    
-    $color-jurisdiction-picker: darken($color-jurisdiction, 10%); 
-    fieldset.state, fieldset.local {
-        width: 100%;
-        background-color: $color-jurisdiction-picker;
-        label { display: none; }
-        input {
-            display: block;
-            width: 100%;
+        input[type="radio"] {
+            display: none;
         }
-        &.hidden { visibility: hidden; }
-        &.visible { visibility: visible; }
     }
     
     $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
+        display: none;
         overflow: hidden;
         margin: 0;
         width: 100%;
+        max-width: 100%;
         color: $color-white;
         background-color: $color-agency;
-        &:disabled {
-            background-color: $color-disabled;
-            color: darken($color-white, 2%);
-            label { display: none; }
-        }
+        
         label {
             display: block;
             @extend dfn;
@@ -154,6 +170,14 @@
             
     }
     
+    .state, .local { display: none; }
+    
+    .full-name, .email {
+        float: left;
+        width: 50%;
+        input { width: 100%; }
+    }
+    
     .autocomplete-light-widget {
         display: block;
         width: 100%;
@@ -182,10 +206,13 @@
         @include border-bottom-radius($base-border-radius);
         overflow: hidden;
         padding: $base-vertical-rhythm;
-        background-color: $color-grey;
         width: 100%;
-        overflow: hidden;
         input { float: left; }
+        p {
+            float: right;
+            width: 70%;
+            margin: 0;
+        }   
     }
     
 }
