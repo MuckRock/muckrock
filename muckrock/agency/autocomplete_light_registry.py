@@ -4,6 +4,7 @@ Autocomplete registry for Agency
 
 import autocomplete_light
 from muckrock.agency.models import Agency
+from muckrock.jurisdiction.models import Jurisdiction
 
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     search_fields = ['^name']
@@ -19,7 +20,7 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
             choices = choices.filter(name__icontains=q)
         if jurisdiction_id:
             if jurisdiction_id == 'f':
-                jurisdiction_id = Jurisdiction.objects.filter(level='f')[0].id
+                jurisdiction_id = (Jurisdiction.objects.filter(level='f')[0]).id
             choices = choices.filter(jurisdiction=jurisdiction_id)
         return self.order_choices(choices)[0:self.limit_choices]
 
