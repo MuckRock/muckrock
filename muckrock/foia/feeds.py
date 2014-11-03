@@ -5,6 +5,7 @@ Feeds for the FOIA application
 # pylint: disable=E0611
 from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import escape, linebreaks
 
@@ -51,7 +52,10 @@ class FOIAFeed(Feed):
     def get_object(self, request, idx):
         """Get the FOIA Request for this feed"""
         # pylint: disable=arguments-differ
-        return get_object_or_404(FOIARequest, pk=idx)
+        foia = get_object_or_404(FOIARequest, pk=idx)
+        if not foia.is_public():
+            raise Http404()
+        return foia
 
     def title(self, obj):
         """The title of this feed"""
