@@ -24,6 +24,11 @@ The message object contains:
     {% endif %}
     {% if files %}
     <section class="attachments">
+        <ul class="attachment-list">
+            {% for file in files %}
+            <li class="attachment">{% include 'lib/file.html' %}</li>
+            {% endfor %}
+        </ul>
     </section>
     {% endif %}
 </section>

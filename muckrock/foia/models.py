@@ -215,7 +215,7 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         # pylint: disable=E1101
-        return self.files.filter(access='public').exclude(doc_id='')
+        return self.files.filter(access='public') #.exclude(doc_id='')
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
@@ -754,7 +754,16 @@ class FOIAFile(models.Model):
 
     def get_thumbnail(self, size='thumbnail', page=1):
         """Get the url to the thumbnail image"""
-        """file-image.png, file-video.png, file-spreadsheet.png, file-audio.png, file-video.png, file-presentation.png, file-archive.png"""
+        """
+        Requires the following static assets:
+            file-archive.png
+            file-audio.png
+            file-document.png
+            file-image.png
+            file-presentation.png
+            file-spreadsheet.png
+            file-video.png
+        """
         match = re.match(r'^(\d+)-(.*)$', self.doc_id)
         mimetypes = {
             'avi': 'file-video.png',

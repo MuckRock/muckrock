@@ -5,12 +5,13 @@ html, body { min-height: 100%; }
 
 %row { @include row(); }
 
-%full { @include fill-parent(); }
+%full { @include span-columns(12); }
 
 %half {
     @extend %full;
+    @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(6); }
-    @include omega();
+    @include omega(2n);
 }
 
 %third {
