@@ -29,12 +29,17 @@ from muckrock.accounts.forms import PaymentForm
 from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestForm, \
-                                RequestUpdateForm, \
-                                ListFilterForm, \
-                                MyListFilterForm, \
-                                FOIAMultiRequestForm
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, STATUS
+from muckrock.foia.forms import \
+    RequestForm, \
+    RequestUpdateForm, \
+    ListFilterForm, \
+    MyListFilterForm, \
+    FOIAMultiRequestForm
+from muckrock.foia.models import \
+    FOIARequest, \
+    FOIAMultiRequest, \
+    FOIACommunication, \
+    STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
@@ -102,10 +107,10 @@ def _make_request(request, foia):
                 approved=False
             )
             send_mail(
-                '[AGENCY] %s' % foia.agency.name,
+                '[AGENCY] %s' % agency.name,
                 render_to_string(
                     'foia/admin_agency.txt',
-                    {'agency': foia.agency}
+                    {'agency': agency}
                 ),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
@@ -147,10 +152,12 @@ def _make_user(request, data):
         user.first_name = data['full_name']
     user.save()
     user = authenticate(username=username, password=password)
-    Profile.objects.create(user=user,
-                           acct_type='community',
-                           monthly_requests=MONTHLY_REQUESTS.get('community', 0),
-                           date_update=datetime.now())
+    Profile.objects.create(
+        user=user,
+        acct_type='community',
+        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+        date_update=datetime.now()
+    )
     login(request, user)
     
 @login_required
@@ -260,16 +267,6 @@ def create_request(request):
         elif level == 'l':
             initial_data['local'] = jurisdiction
         initial_data['jurisdiction'] = level
-
-    if request.GET.get('j_id', False):
-        j_id = request.GET['j_id']
-        if j_id == 'f':
-            j_id = Jurisdiction.objects.filter(level=j_id)[0].id
-        agencies = Agency.objects.filter(jurisdiction=j_id, approved=True).order_by('name')
-        results  = [agency.name for agency in agencies]
-        json = simplejson.dumps(results)
-        return HttpResponse(json, mimetype='application/json')
-    
     if request.method == 'POST':
         form = RequestForm(request.POST, request=request)
         if form.is_valid():
@@ -306,25 +303,10 @@ def create_request(request):
             foia, foia_comm, is_new_agency = _make_request(request, foia_request)
             foia_comm.save()
             foia.save()
-            '''
-            if is_new_agency:
-                args = {
-                    'jurisdiction': foia.agency.jurisdiction.slug,
-                    'jidx': foia.agency.jurisdiction.pk,
-                    'slug': foia.agency.slug,
-                    'idx': foia.agency.pk
-                }
-                return HttpResponseRedirect(
-                    reverse('agency-update', kwargs=args) + \
-                    '?foia=%s' % foia.pk
-                )
-            else:
-                return redirect(foia)
-            messages.error(request, 'Sorry, something went wrong. We have top men on it.')
-            '''
             return redirect(foia)
     else:
         if clone:
+            print initial_data
             form = RequestForm(initial=initial_data, request=request)
         else:
             form = RequestForm(request=request)
