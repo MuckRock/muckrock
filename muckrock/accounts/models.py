@@ -157,68 +157,42 @@ class Profile(models.Model):
 
     def get_cc(self):
         """Get the user's CC if they have one on file"""
-        return getattr(self.get_customer(), 'active_card', None)
+        return getattr(self.customer(), 'active_card', None)
 
     def save_cc(self, token):
         """Save a credit card"""
-        customer = self.get_customer()
+        customer = self.customer()
         customer.card = token
         customer.save()
 
-    def get_customer(self):
-        """Get stripe customer"""
+    def customer(self):
+        """Get stripe customer or create one if it doesn't exist"""
         try:
             customer = stripe.Customer.retrieve(self.stripe_id)
         except stripe.InvalidRequestError:
-            customer = self.save_customer()
-
-        return customer
-
-    def save_customer(self, token=None):
-        """Save stripe customer"""
-        # pylint: disable=E1101
-
-        if token:
             customer = stripe.Customer.create(
                 description=self.user.username,
-                email=self.user.email,
-                card=token,
-                plan='pro')
-        else:
-            customer = stripe.Customer.create(
-                description=self.user.username,
-                email=self.user.email)
-
-        self.stripe_id = customer.id
-        self.save()
-
+                email=self.user.email
+            )
+            self.stripe_id = customer.id
+            self.save()
         return customer
 
-    def pay(self, form, amount, desc):
+    def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
-
-        customer = self.get_customer()
-        desc = '%s: %s' % (self.user.username, desc)
-        save_cc = form.cleaned_data.get('save_cc')
-        use_on_file = form.cleaned_data.get('use_on_file')
-        token = form.cleaned_data.get('token')
-
-        if not use_on_file and save_cc:
-            self.save_cc(token)
-
-        if use_on_file or save_cc:
-            stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
-                                 description=desc)
-        else:
-            stripe.Charge.create(amount=amount, currency='usd', card=token,
-                                 description=desc)
-
+        stripe.Charge.create(
+            amount=amount,
+            currency='usd',
+            card=token,
+            description='%s: %s' % (self.user.username, desc)
+        )
+        
     def api_pay(self, amount, desc):
         """Create a stripe charge for the user through the API"""
         # pylint: disable=E1101
 
-        customer = self.get_customer()
+        customer = self.customer()
         desc = '%s: %s' % (self.user.username, desc)
 
         # always use card on file

@@ -205,12 +205,12 @@ class TestProfileUnit(TestCase):
             card = profile.get_cc()
             nose.tools.ok_(card is None)
 
-    def test_get_customer(self):
-        """Test get_customer"""
+    def test_customer(self):
+        """Test customer"""
 
         # customer exists
         profile = Profile.objects.get(pk=1)
-        customer = profile.get_customer()
+        customer = profile.customer()
         nose.tools.eq_(customer, mock_customer)
 
         # customer doesn't exist
@@ -221,20 +221,8 @@ class TestProfileUnit(TestCase):
             NewMockCustomer.create.return_value = new_mock_customer
 
             profile = Profile.objects.get(pk=1)
-            customer = profile.get_customer()
+            customer = profile.customer()
             nose.tools.eq_(customer, new_mock_customer)
-
-    def test_save_customer(self):
-        """Test save_cc"""
-        profile = Profile.objects.get(pk=1)
-        customer = profile.save_customer('token')
-        nose.tools.eq_(customer, mock_customer)
-        nose.tools.eq_(profile.stripe_id, mock_customer.id)
-        nose.tools.eq_(stripe.Customer.create.call_args, ((),
-                       {'description': profile.user.username,
-                        'email': profile.user.email,
-                        'card': 'token',
-                        'plan': 'pro'}))
 
     def test_pay(self):
         """Test pay"""
@@ -247,7 +235,7 @@ class TestProfileUnit(TestCase):
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 4200,
                         'currency': 'usd',
-                        'customer': profile.get_customer().id,
+                        'customer': profile.customer().id,
                         'description': 'adam: description'}))
 
         # save cc = false and use on file = false, has a token
@@ -488,7 +476,7 @@ class TestAccountFunctional(TestCase):
         nose.tools.eq_(stripe.Charge.create.call_args, ((),
                        {'amount': 2000,
                         'currency': 'usd',
-                        'customer': profile.get_customer().id,
+                        'customer': profile.customer().id,
                         'description': 'adam: Charge for 5 requests'}))
 
         with patch('stripe.Charge') as NewMockCharge:

@@ -41,63 +41,64 @@ def account_logout(request):
 
 def register(request):
     """Pick what kind of account you want to register for"""
-    return render_to_response('user/register.html',
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'user/register.html',
+        context_instance=RequestContext(request)
+    )
 
 def register_free(request):
     """Register for a community account"""
-
-    def create_customer(user, **kwargs):
-        """Create a stripe customer for community account"""
-        # pylint: disable=W0613
-        user.get_profile().save_customer()
-
     template = 'forms/account/register_free.html'
     url_redirect = request.GET.get('next', None)
-    
-    return _register_acct(request, 'community', RegisterFree, template, create_customer, url_redirect)
+    return _register_acct(request, 'community', RegisterFree, template,  url_redirect)
 
 def register_pro(request):
     """Register for a pro account"""
-
-    def create_cc(form, user):
-        """Create a new CC on file"""
-        user.get_profile().save_customer(form.cleaned_data['token'])
-
     template = 'forms/account/register_pro.html'
     url_redirect = request.GET.get('next', None)
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
+    return _register_acct(request, 'pro', RegisterPro, template, url_redirect, extra_context)
 
-    return _register_acct(request, 'pro', RegisterPro, template, create_cc, url_redirect, extra_context)
-
-def _register_acct(request, acct_type, form_class, template, post_hook, url_redirect=None, extra_context=None):
+def _register_acct(request, acct_type, form_class, template, url_redirect=None, extra_context={}):
     """Register for an account"""
     # pylint: disable=R0913
     if request.method == 'POST':
         form = form_class(request.POST)
         if form.is_valid():
             form.save()
-            new_user = authenticate(username=form.cleaned_data['username'],
-                                    password=form.cleaned_data['password1'])
+            new_user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1']
+            )
             login(request, new_user)
-            Profile.objects.create(user=new_user,
-                                   acct_type=acct_type,
-                                   monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
-                                   date_update=datetime.now())
-
-            post_hook(form=form, user=new_user)
+            Profile.objects.create(
+                user=new_user,
+                acct_type=acct_type,
+                monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
+                date_update=datetime.now()
+            )
+            customer = user.get_profile().customer()
+            token = form.cleaned_data.get('token', False)
+            if token:
+                customer.save_cc(token)
+            
             if url_redirect:
                 return redirect(url_redirect)
             else:
-                messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
+                msg = 'Your account was successfully created. '
+                msg += 'Welcome to MuckRock!'
+                messages.success(request, msg)
                 return redirect('acct-my-profile')
     else:
         form = form_class(initial={'expiration': date.today()})
 
-    context = {'form': form}
-    if extra_context:
-        context.update(extra_context)
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    context = { 'form': form }
+    context.update(extra_context)
+    return render_to_response(
+        template,
+        context,
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 def update(request):
@@ -112,7 +113,7 @@ def update(request):
             request.user.email = form.cleaned_data['email']
             request.user.save()
 
-            customer = request.user.get_profile().get_customer()
+            customer = request.user.get_profile().customer()
             customer.email = request.user.email
             customer.save()
 
@@ -158,28 +159,21 @@ def manage_subsc(request):
     """Subscribe or unsubscribe from a pro account"""
     user_profile = request.user.get_profile()
     template = 'user/subscription.html'
-    if user_profile.acct_type == 'admin':
-        heading = 'Admin Account'
-        desc = 'You are an admin, you don\'t need a subscription'
-    elif user_profile.acct_type == 'beta':
-        heading = 'Beta Account'
-        desc = 'Thank you for being a beta tester.  You will continue to get 5 ' \
-               'free requests a month for helping out.'
-        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
-                                  context_instance=RequestContext(request))
-    elif user_profile.acct_type == 'proxy':
-        heading = 'Proxy Account'
-        desc = 'Thank you for being a proxy user.  You will continue to get 20 ' \
-               'free requests a month for helping out.'
-        return render_to_response('registration/subsc.html', {'desc': desc, 'heading': heading},
-                                  context_instance=RequestContext(request))
-    elif user_profile.acct_type == 'community':
-        heading = 'Upgrade to a Pro Account'
-        desc = 'Upgrade to a professional account. $40 per month for 20 requests per month.'
-        form_class = UpgradeSubscForm
-        template = 'forms/account/cc.html'
-    elif user_profile.acct_type == 'pro':
-        heading = 'Cancel Your Subscription'
+    heading = 'Upgrade to a Pro Account'
+    desc = ''
+    form_class = UpgradeSubscForm
+    
+    type = user_profile.acct_type
+    if type == 'admin':
+        msg = 'You are an admin, you don\'t need a subscription.'
+        messages.warning(request, msg)
+        return redirect('acct-my-profile');
+    elif type == 'proxy':
+        msg = 'You have a proxy account, you receive 20 free requests a month and do not need a subscription.'
+        messages.warning(request, msg)
+        return redirect('acct-my-profile');
+    elif type == 'pro':
+        heading = 'Cancel Your Pro Subscription'
         desc = 'You will go back to a free community account.'
         form_class = CancelSubscForm
     
@@ -188,7 +182,7 @@ def manage_subsc(request):
         if user_profile.acct_type == 'community' and form.is_valid():
             if not form.cleaned_data.get('use_on_file'):
                 user_profile.save_cc(form.cleaned_data['token'])
-            customer = user_profile.get_customer()
+            customer = user_profile.customer()
             customer.update_subscription(plan='pro')
             user_profile.acct_type = 'pro'
             user_profile.date_update = datetime.now()
@@ -196,7 +190,7 @@ def manage_subsc(request):
             user_profile.save()
             messages.success(request, 'You are now subscribed as a pro user.')
         elif user_profile.acct_type == 'pro' and form.is_valid():
-            customer = user_profile.get_customer()
+            customer = user_profile.customer()
             customer.cancel_subscription()
             user_profile.acct_type = 'community'
             user_profile.save()
@@ -220,41 +214,31 @@ def manage_subsc(request):
 @login_required
 def buy_requests(request):
     """Buy more requests"""
-
-    url_redirect = request.GET.get('next', None)
-
-    if request.method == 'POST':
-        form = PaymentForm(request.POST, request=request)
-        if form.is_valid():
-            try:
-                user_profile = request.user.get_profile()
-                user_profile.pay(form, 2000, 'Charge for 5 requests')
-                user_profile.num_requests += 5
-                user_profile.save()
-                logger.info('%s has purchased requests', request.user.username)
-                messages.success(request, 'Your account has been credited 5 requests.')
-                return redirect('acct-my-profile')
-            except stripe.CardError as exc:
-                messages.error(request, 'Payment error: %s' % exc)
-                logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-                if url_redirect:
-                    return redirect(url_redirect)
-                else:
-                    return redirect('acct-buy-requests')
-    else:
-        form = PaymentForm(
-            request=request,
-            initial={'name': request.user.get_full_name()}
-        )
-        
-    context = {
-        'form': form,
-        'pub_key': STRIPE_PUB_KEY,
-        'heading': 'Buy Requests',
-        'desc': 'Buy 5 requests for $20.  They may be used at any time.'
-    }
-    
-    return render_to_response('user/cc.html', context, context_instance=RequestContext(request))
+    url_redirect = request.GET.get('next', 'acct-my-profile')
+    if request.POST.get('stripe_token', False):
+        try:
+            user_profile = request.user.get_profile()
+            stripe_token = request.POST['stripe_token']
+            stripe_email = request.POST['stripe_email']
+            if request.user.email != stripe_email:
+                raise Exception('Account email and Stripe email do not match')
+            if not user_profile.get_cc():
+                user_profile.save_cc(stripe_token)
+            user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
+            user_profile.num_requests += 5
+            user_profile.save()
+            msg = 'Purchase successful. You have been credited 5 requests.'
+            messages.success(request, msg)
+            logger.info('%s has purchased requests', request.user.username)
+        except stripe.CardError as exc:
+            msg = 'Payment error: %s' % exc
+            messages.error(request, msg)
+            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+        except Exception as e:
+            msg = 'Payment error: %s' % e
+            messages.error(request, msg)
+            logger.error(msg)
+    return redirect(url_redirect)
 
 def profile(request, user_name=None):
     """View a user's profile"""
@@ -268,6 +252,7 @@ def profile(request, user_name=None):
         'user_obj': user,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
+        'stripe_pk': STRIPE_PUB_KEY
     }
     
     return render_to_response(
