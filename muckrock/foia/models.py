@@ -781,15 +781,10 @@ class FOIAFile(models.Model):
             'xls': 'file-spreadsheet.png',
             'xlsx': 'file-spreadsheet.png',
             'zip': 'file-archive.png',
-        }
-
-        if match and self.pages > 0 and self.access == 'public':
-            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
-                   '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
-        else:
-            ext = os.path.splitext(self.name())[1][1:]
-            filename = mimetypes.get(ext, 'file-document.png')
-            return '%simg/%s' % (STATIC_URL, filename)
+        }        
+        ext = os.path.splitext(self.name())[1][1:]
+        filename = mimetypes.get(ext, 'file-document.png')
+        return '%simg/%s' % (STATIC_URL, filename)
 
     def get_medium_thumbnail(self):
         """Convenient function for template"""
