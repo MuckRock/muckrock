@@ -337,9 +337,9 @@ class FOIARequest(models.Model):
 
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
-        can_email_appeal = appeal and self.agency and self.agency.appeal_agency and \
-                           self.agency.appeal_agency.email and \
-                           self.agency.appeal_agency.can_email_appeals
+        can_email_appeal = appeal and self.agency and \
+            self.agency.appeal_agency and self.agency.appeal_agency.email and \
+            self.agency.appeal_agency.can_email_appeals
 
         # update email addresses for the request
         if can_email_appeal:
@@ -368,10 +368,18 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
-            send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
-                      render_to_string('foia/admin_mail.txt',
-                                       {'request': self, 'appeal': appeal}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            send_mail(
+                '[%s] Freedom of Information Request: %s' % (
+                    notice, self.title
+                ),
+                render_to_string(
+                    'text/foia/admin_mail.txt',
+                    {'request': self, 'appeal': appeal}
+                ),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
             comm.delivered = 'mail'
             comm.save()
         self.save()
@@ -380,14 +388,24 @@ class FOIARequest(models.Model):
         send_data = []
         for profile in self.followed_by.all():
             link = profile.wrap_url(self.get_absolute_url())
-            msg = render_to_string('foia/mail.txt',
-                {'name': profile.user.get_full_name(),
-                 'title': self.title,
-                 'status': self.get_status_display(),
-                 'link': link,
-                 'follow': self.user != profile.user})
-            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
-                              msg, 'info@muckrock.com', [profile.user.email]))
+            msg = render_to_string(
+                'text/foia/mail.txt',
+                {
+                    'name': profile.user.get_full_name(),
+                    'title': self.title,
+                    'status': self.get_status_display(),
+                    'link': link,
+                    'follow': self.user != profile.user
+                }
+            )
+            send_data.append(
+                (
+                    '[MuckRock] FOI request "%s" has been updated' % self.title,
+                    msg,
+                    'info@muckrock.com',
+                    [profile.user.email]
+                )
+            )
 
         send_mass_mail(send_data, fail_silently=False)
 
@@ -398,7 +416,7 @@ class FOIARequest(models.Model):
         comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
-            communication=render_to_string('foia/followup.txt', {'request': self}))
+            communication=render_to_string('text/foia/followup.txt', {'request': self}))
 
         if not self.email and self.agency:
             self.email = self.agency.get_email()
@@ -411,7 +429,7 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             self.save()
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
-                      render_to_string('foia/admin_mail.txt', {'request': self}),
+                      render_to_string('text/foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
@@ -437,7 +455,7 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
-        body = render_to_string('foia/request.txt', {'request': self})
+        body = render_to_string('text/foia/request.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(subject=subject,
                            body=body,
