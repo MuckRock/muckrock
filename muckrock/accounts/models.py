@@ -207,7 +207,7 @@ class Profile(models.Model):
         if self.email_pref == 'instant':
             link = self.wrap_url(foia.get_absolute_url())
 
-            msg = render_to_string('foia/mail.txt',
+            msg = render_to_string('text/foia/mail.txt',
                 {'name': self.user.get_full_name(),
                  'title': foia.title,
                  'status': foia.get_status_display(),
@@ -269,7 +269,7 @@ class Profile(models.Model):
                                             get_subject(grouped_foias[0][1][0].status, len(foias)),
                                             get_subject(grouped_foias[1][1][0].status, len(foias)))
 
-        msg = render_to_string('registration/notify_mail.txt',
+        msg = render_to_string('text/registration/notify_mail.txt',
             {'name': self.user.get_full_name(),
              'foias': grouped_foias,
              'footer': options.email_footer})

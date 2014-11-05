@@ -70,9 +70,9 @@
             {% if foia.status == "ack" or foia.status == "processed" %}
         <dt>Follow-Ups</dt>
                 {% if foia.disable_autofollowups %}
-        <dd>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</dd>
+        <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
                 {% else %}
-        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</dd>
+        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
                 {% endif %}
             {% endif %}
         {% endif %}
