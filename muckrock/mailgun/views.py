@@ -81,7 +81,7 @@ def handle_request(request, mail_id):
 
         _forward(post, request.FILES)
         send_mail('[RESPONSE] Freedom of Information Request: %s' % foia.title,
-                  render_to_string('foia/admin_request.txt',
+                  render_to_string('text/foia/admin_request.txt',
                                    {'request': foia, 'post': post,
                                     'date': date.today().toordinal()}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
@@ -158,7 +158,7 @@ def bounces(request):
         foia = None
 
     send_mail('[%s] %s' % (event.upper(), recipient),
-              render_to_string('foia/bounce.txt',
+              render_to_string('text/foia/bounce.txt',
                                {'agencies': agencies, 'recipient': recipient,
                                 'foia': foia, 'foias': foias, 'error': error}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)

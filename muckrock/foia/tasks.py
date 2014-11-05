@@ -218,7 +218,7 @@ def embargo_warn():
     for foia in FOIARequest.objects.filter(embargo=True,
                                            date_embargo=date.today()+timedelta(1)):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
-                  render_to_string('foia/embargo.txt', {'request': foia}),
+                  render_to_string('text/foia/embargo.txt', {'request': foia}),
                   'info@muckrock.com', [foia.user.email])
 
 
@@ -421,7 +421,7 @@ def notify_unanswered():
     total = len(data)
 
     send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
-              render_to_string('foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
+              render_to_string('text/foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
 

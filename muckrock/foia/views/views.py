@@ -631,7 +631,7 @@ class Detail(DetailView):
             }
             send_mail(
                 subject,
-                render_to_string('foia/status_change.txt', args),
+                render_to_string('text/foia/status_change.txt', args),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False
@@ -685,7 +685,7 @@ class Detail(DetailView):
             }
             send_mail(
                 '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('foia/flag.txt', args),
+                render_to_string('text/foia/flag.txt', args),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False

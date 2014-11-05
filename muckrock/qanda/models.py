@@ -42,7 +42,7 @@ class Question(models.Model):
         send_data = []
         for profile in Profile.objects.filter(follow_questions=True):
             link = profile.wrap_url(reverse('question-subscribe'))
-            msg = render_to_string('qanda/notify.txt', {'question': self, 'link': link})
+            msg = render_to_string('text/qanda/notify.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
@@ -54,7 +54,7 @@ class Question(models.Model):
         for profile in self.followed_by.all():
             link = profile.wrap_url(reverse('question-follow',
                                              kwargs={'slug': self.slug, 'idx': self.pk}))
-            msg = render_to_string('qanda/follow.txt', {'question': self, 'link': link})
+            msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)

@@ -583,11 +583,7 @@ class FOIARequest(models.Model):
             (user.is_authenticated() and self.user != user,
             reverse('foia-follow', kwargs=kwargs),
             'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow'
-            ),
-            (user.is_authenticated() and self.user == user,
-            reverse('foia-toggle-followups', kwargs=kwargs),
-            'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'
-            ),
+            )
         ]
 
         unlinked_actions = [

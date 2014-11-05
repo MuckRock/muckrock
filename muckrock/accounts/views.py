@@ -293,7 +293,7 @@ def stripe_webhook(request):
         attempt = message['attempt']
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         send_mail('Payment Failed',
-                  render_to_string('registration/pay_fail.txt',
+                  render_to_string('text/registration/pay_fail.txt',
                                    {'user': user, 'attempt': attempt}),
                   'info@muckrock.com', [user.email], fail_silently=False)
     elif event == 'subscription_final_payment_attempt_failed':
@@ -303,7 +303,7 @@ def stripe_webhook(request):
         user_profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
         send_mail('Payment Failed',
-                  render_to_string('registration/pay_fail.txt',
+                  render_to_string('text/registration/pay_fail.txt',
                                    {'user': user, 'attempt': 'final'}),
                   'info@muckrock.com', [user.email], fail_silently=False)
 
@@ -381,7 +381,7 @@ def stripe_webhook_v2(request):
 
         if user:
             msg = EmailMessage(subject=subject,
-                               body=render_to_string('registration/receipt.txt',
+                               body=render_to_string('text/registration/receipt.txt',
                                    {'user': user,
                                     'id': event_data['id'],
                                     'date': datetime.fromtimestamp(event_data['created']),
@@ -394,7 +394,7 @@ def stripe_webhook_v2(request):
                                to=[user.email], bcc=['info@muckrock.com'])
         else:
             msg = EmailMessage(subject=subject,
-                               body=render_to_string('registration/anon_receipt.txt',
+                               body=render_to_string('text/registration/anon_receipt.txt',
                                    {'id': event_data['id'],
                                     'date': datetime.fromtimestamp(event_data['created']),
                                     'last4': event_data.get('card', {}).get('last4'),
@@ -415,7 +415,7 @@ def stripe_webhook_v2(request):
             user_profile.save()
             logger.info('%s subscription has been cancelled due to failed payment', user.username)
             msg = EmailMessage(subject='Payment Failed',
-                               body=render_to_string('registration/pay_fail.txt',
+                               body=render_to_string('text/registration/pay_fail.txt',
                                    {'user': user, 'attempt': 'final'}),
                                from_email='info@muckrock.com',
                                to=[user.email], bcc=['requests@muckrock.com'])
@@ -423,7 +423,7 @@ def stripe_webhook_v2(request):
         else:
             logger.info('Failed payment by %s, attempt %s', user.username, attempt)
             msg = EmailMessage(subject='Payment Failed',
-                               body=render_to_string('registration/pay_fail.txt',
+                               body=render_to_string('text/registration/pay_fail.txt',
                                    {'user': user, 'attempt': attempt}),
                                from_email='info@muckrock.com',
                                to=[user.email], bcc=['requests@muckrock.com'])
