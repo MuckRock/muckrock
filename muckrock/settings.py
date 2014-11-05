@@ -244,8 +244,8 @@ if 'REDISTOGO_URL' in os.environ:
 elif 'IRON_MQ_PROJECT_ID' in os.environ:
     BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
                                       os.environ.get('IRON_MQ_TOKEN'))
-elif DEBUG and 'REDIS_URL' in os.environ:
-    BROKER_URL = os.environ.get('REDIS_URL')
+elif DEBUG:
+    BROKER_URL = 'redis://localhost:6379/0'
 else:
     BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
 
