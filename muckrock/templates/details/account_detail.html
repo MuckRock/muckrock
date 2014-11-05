@@ -103,6 +103,7 @@
 
 {% block scripts %}
 {% if request.user == user_obj %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
 <script>
     $(document).ready(function() {
         $('.checkout-button').click(function(e){

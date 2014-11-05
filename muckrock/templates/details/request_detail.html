@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load markdown_deux_tags %}
 {% load mathfilters %}
+{% load static from staticfiles %}
 {% load tags %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
@@ -82,17 +83,24 @@
 {% if user.is_authenticated %}
     {% if foia.status == 'started' and foia.user == request.user %}
         {% with remaining=user.get_profile.num_requests %}
+        {% if not remaining %}
+        <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+        <button data-amount="2000"
+                data-description="5 requests ($20.00)"
+                data-email="{{ user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button primary">Buy Requests</button>
+        {% endif %}
     <form action="." method="post" class="draft">
             {% csrf_token %}
-            {% if remaining %}
+            
         <input type="submit"
                name="action"
                value="Submit"
                class="primary button"
+               {% if not remaining %}disabled{% endif %}
         />
-            {% else %}
-        <a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>
-            {% endif %}
             {% if foia.is_editable %}
         <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
             {% endif %}
@@ -199,6 +207,7 @@
 {% endblock main %}
 
 {% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
 
@@ -315,7 +324,18 @@
             $('.controls .modal textarea').remove();
         });
         
-        
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
         
     });
 </script>

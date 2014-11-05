@@ -43,7 +43,7 @@ from muckrock.foia.models import \
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_SECRET_KEY, MONTHLY_REQUESTS
+from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
 from muckrock.sidebar.models import Sidebar
 from muckrock.tags.models import Tag
 from muckrock.views import class_view_decorator
@@ -572,6 +572,7 @@ class Detail(DetailView):
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS if self.request.user.is_staff or foia.status == 'started' else STATUS_NODRAFT
+        context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
     def post(self, request, **kwargs):
