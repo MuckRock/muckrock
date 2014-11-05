@@ -1589,7 +1589,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     background: linear-gradient(#d1d8e0, #b9c3cf);
     border: 1px solid #a4b1c1; }
 
-/* Table */
 table {
   width: 100%;
   margin-top: 1.5em 0;
@@ -1613,6 +1612,9 @@ table {
     margin-left: 0.75em; }
     .file .actions a:first-child {
       margin-left: 0; }
+
+.hidden-stripe-handler {
+  display: none; }
 
 /* Layouts */
 /* Details */

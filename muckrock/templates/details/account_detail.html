@@ -68,13 +68,17 @@
 
 {% block actions %}
 {% if request.user == user_obj %}
-<form action="{% url 'acct-buy-requests' %}" method="POST" class="controls" id="buy-requests">
-    {% csrf_token %}
-    <button class="primary" id="buy-requests-button">Buy Requests</button>
+<form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<div class="controls">
+    <button data-amount="2000"
+            data-description="5 requests ($20.00)"
+            data-email="{{ request.user.email }}"
+            data-form="#buy-requests"
+            class="checkout-button primary">Buy Requests</button>
     <a href="{% url 'acct-update' %}" class="button">Settings</a>
     <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
     <a href="{% url 'acct-manage-subsc' %}" class="button">Manage Subscription</a>
-</form>
+</div>
 {% endif %}
 {% endblock actions %}
 
@@ -99,30 +103,19 @@
 
 {% block scripts %}
 {% if request.user == user_obj %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
 <script>
-
     $(document).ready(function() {
-        $('#buy-requests-button').click(function(e){
+        $('.checkout-button').click(function(e){
             e.preventDefault();
-            
-            var form = $(this).parent();
-            var token = function(token) {
-                form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
-                form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
-                form.submit();
-                
-            }
-            
-            StripeCheckout.open({
-                key: "{{ stripe_pk }}",
-                image: "{% static 'apple-touch-icon.png' %}",
-                name: 'MuckRock',
-                description: '5 requests ($20.00)',
-                amount: 2000,
-                email: '{{ request.user.email }}',
-                token: token
-            });
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
         });
     });
 </script>

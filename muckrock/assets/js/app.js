@@ -8,6 +8,39 @@ function modal(nextSelector) {
     });
 }
 
+function checkout(pk, image, description, amount, email, form, submit) {
+    submit = typeof submit !== 'undefined' ? submit : true;
+    var token = function(token) {
+        form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
+        form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
+        if (submit) {
+            form.submit();
+        }
+    }
+    StripeCheckout.open({
+        key: pk,
+        image: image,
+        name: 'MuckRock',
+        description: description,
+        amount: amount,
+        email: email,
+        token: token
+    });
+}
+
+function getCheckoutData(button) {
+    var amount = button.data('amount');
+    var description = button.data('description');
+    var email = button.data('email');
+    var form = button.data('form');
+    return {
+        'amount': amount,
+        'description': description,
+        'email': email,
+        'form': $(form)
+    }
+}
+
 $(document).ready(function() {
 
     $('.modal-button').click(function(){ modal($(this).next()); });
@@ -16,8 +49,11 @@ $(document).ready(function() {
         var doc_id = textarea.data('docId');
         var embed = '<div id="viewer-' + doc_id + '"></div><script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script><script>DV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", { height: 600, sidebar: false, container: "#viewer-' + doc_id + '"});<\/script>';
         textarea.val(embed);
+    });    
+    $('.notification button.close').click(function() {
+        $(this).parent().parent().hide();
     });
-
+    
     /* Key and Swipe Bindings
     $(document).bind('keydown', 'm', toggleSidebar());
     $(document).bind('keydown', 'shift+m', toggleSidebar());
@@ -40,10 +76,5 @@ $(document).ready(function() {
     //          sidebar opens
     //          a.menu-button content changes
     */
-    
-    $('.notification button.close').click(function() {
-        $(this).parent().parent().hide();
-    });
-    
     
 });

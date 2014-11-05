@@ -255,8 +255,6 @@ $progress-animation-duration: 0.7s;
     @include classifier(disabled, $color-disabled);
 }
 
-/* Table */
-
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
@@ -282,3 +280,5 @@ table {
         &:first-child { margin-left: 0; }
     }
 }
+
+.hidden-stripe-handler { display: none; }
