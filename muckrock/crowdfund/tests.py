@@ -1,3 +1,3 @@
 """
-Tests for crowdfun app
+Tests for crowdfund app
 """
