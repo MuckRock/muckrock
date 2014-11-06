@@ -100,7 +100,7 @@ class UpgradeSubscForm(CreditCardForm):
         super(UpgradeSubscForm, self).__init__(*args, **kwargs)
 
         if self.request.user.is_authenticated():
-            card = self.request.user.get_profile().get_cc()
+            card = self.request.user.get_profile().credit_card()
         else:
             card = None
         if not card:

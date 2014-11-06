@@ -78,7 +78,7 @@ class TestAccountFormsUnit(TestCase):
     def test_upgrade_subsc_form_init(self):
         """Test UpgradeSubscForm's init"""
         mock_profile = Mock()
-        mock_profile.get_cc.return_value = None
+        mock_profile.credit_card.return_value = None
         mock_request = Mock()
         mock_request.user.get_profile.return_value = mock_profile
         form = UpgradeSubscForm(request=mock_request)
@@ -87,7 +87,7 @@ class TestAccountFormsUnit(TestCase):
         mock_card = Mock()
         mock_card.type = 'Visa'
         mock_card.last4 = '1234'
-        mock_profile.get_cc.return_value = mock_card
+        mock_profile.credit_card.return_value = mock_card
         form = UpgradeSubscForm(request=mock_request)
         nose.tools.eq_(form.fields['use_on_file'].help_text, 'Visa ending in 1234')
 
@@ -97,7 +97,7 @@ class TestAccountFormsUnit(TestCase):
         mock_card.type = 'Visa'
         mock_card.last4 = '1234'
         mock_profile = Mock()
-        mock_profile.get_cc.return_value = mock_card
+        mock_profile.credit_card.return_value = mock_card
         mock_request = Mock()
         mock_request.user.get_profile.return_value = mock_profile
 
@@ -192,7 +192,7 @@ class TestProfileUnit(TestCase):
         """Test get_cc"""
 
         profile = Profile.objects.get(pk=1)
-        card = profile.get_cc()
+        card = profile.credit_card()
         nose.tools.eq_(card.last4, mock_customer.active_card.last4)
         nose.tools.eq_(card.type, mock_customer.active_card.type)
 
@@ -202,7 +202,7 @@ class TestProfileUnit(TestCase):
             NewMockCustomer.retrieve.return_value = new_mock_customer
 
             profile = Profile.objects.get(pk=1)
-            card = profile.get_cc()
+            card = profile.credit_card()
             nose.tools.ok_(card is None)
 
     def test_customer(self):

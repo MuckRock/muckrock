@@ -38,11 +38,6 @@
         <dd>{{user_obj.get_profile.zip_code}}</dd>
             {% endif %}
         {% endif %}
-    
-        {% if user_obj.get_profile.get_cc %}
-        <dt>Credit Card on File</dt>
-        <dd>{{user_obj.get_profile.get_cc.type}} ending with {{user_obj.get_profile.get_cc.last4}}</dd>
-        {% endif %}
     </dl>
     {% if user.get_profile.get_acct_type_display != 'Community' %}
     <dl>

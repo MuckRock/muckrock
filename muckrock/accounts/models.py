@@ -25,8 +25,8 @@ stripe.api_key = STRIPE_SECRET_KEY
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
     email_footer = TextValue('email footer')
-options = EmailOptions()
 
+options = EmailOptions()
 
 class Profile(models.Model):
     """User profile information for muckrock"""
@@ -47,28 +47,55 @@ class Profile(models.Model):
     )
 
     user = models.ForeignKey(User, unique=True)
-    address1 = models.CharField(max_length=50, blank=True, verbose_name='address')
-    address2 = models.CharField(max_length=50, blank=True, verbose_name='address (line 2)')
+    address1 = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name='address'
+    )
+    address2 = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name='address (line 2)'
+    )
     city = models.CharField(max_length=60, blank=True)
-    state = USStateField(blank=True, help_text='Your state will be made public on this site.  '
-        'If you do not want this information to be public, please leave blank.')
+    state = USStateField(
+        blank=True,
+        help_text='Your state will be made public on this site. If you do not want this information to be public, please leave blank.'
+    )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    follows_foia = models.ManyToManyField(FOIARequest, related_name='followed_by', blank=True)
-    follows_question = models.ManyToManyField('qanda.Question', related_name='followed_by',
-                                              blank=True)
-    notifications = models.ManyToManyField(FOIARequest, related_name='notify', blank=True)
+    follows_foia = models.ManyToManyField(
+        FOIARequest,
+        related_name='followed_by',
+        blank=True
+    )
+    follows_question = models.ManyToManyField(
+        'qanda.Question',
+        related_name='followed_by',
+        blank=True
+    )
+    notifications = models.ManyToManyField(
+        FOIARequest,
+        related_name='notify',
+        blank=True
+    )
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)
-
-    website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
-    twitter = models.CharField(max_length=255, blank=True)
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
-    linkedin = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     public_email = models.EmailField(max_length=255, blank=True)
     pgp_public_key = models.TextField(blank=True)
-    
+    website = models.URLField(
+        max_length=255,
+        blank=True,
+        help_text='Begin with http://'
+    )
+    twitter = models.CharField(max_length=255, blank=True)
+    linkedin = models.URLField(
+        max_length=255,
+        blank=True,
+        help_text='Begin with http://'
+    )
     avatar = ThumbnailerImageField(
         upload_to='account_images',
         blank=True, null=True,
@@ -76,19 +103,23 @@ class Profile(models.Model):
     )
 
     # prefrences
-    email_pref = models.CharField(max_length=10, choices=email_prefs, default='daily',
-                                  verbose_name='Email Preference', help_text='Receive email updates'
-                                  ' to your requests instantly or in a daily or weekly digest')
-    use_autologin = models.BooleanField(default=True,
-                                        help_text='Links you receive in emails from us will contain'
-                                                  ' a one time token to automatically log you in')
+    email_pref = models.CharField(
+        max_length=10,
+        choices=email_prefs,
+        default='daily',
+        verbose_name='Email Preference',
+        help_text='Receive email updates to your requests instantly or in a daily or weekly digest'
+    )
+    use_autologin = models.BooleanField(
+        default=True,
+        help_text='Links you receive in emails from us will contain a one time token to automatically log you in'
+    )
 
     # paid for requests
     num_requests = models.IntegerField(default=0)
     # for limiting # of requests / month
     monthly_requests = models.IntegerField(default=0)
     date_update = models.DateField()
-
     # for stripe
     stripe_id = models.CharField(max_length=255, blank=True)
 
@@ -103,29 +134,25 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-
-        if self.date_update.month != datetime.now().month or \
-                self.date_update.year != datetime.now().year:
-            # update requests if they have not yet been updated this month
+        not_this_month = self.date_update.month != datetime.now().month
+        not_this_year = self.date_update.year != datetime.now().year
+        # update requests if they have not yet been updated this month
+        if not_this_month or not_this_year:
             self.date_update = datetime.now()
             self.monthly_requests = MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
-
         return self.monthly_requests
 
     def make_request(self):
-        """Reduce one from the user's request amount"""
-
+        """Decrement the user's request amount by one"""
         if self.get_monthly_requests() > 0:
             self.monthly_requests -= 1
-            self.save()
-            return True
         elif self.num_requests > 0:
             self.num_requests -= 1
-            self.save()
-            return True
         else:
             return False
+        self.save()
+        return True
 
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
@@ -147,24 +174,12 @@ class Profile(models.Model):
 
     def can_embargo(self):
         """Is this user allowed to embargo?"""
-
         return self.acct_type in ['admin', 'beta', 'pro', 'proxy']
 
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
-
         return self.acct_type in ['admin', 'pro']
-
-    def get_cc(self):
-        """Get the user's CC if they have one on file"""
-        return getattr(self.customer(), 'active_card', None)
-
-    def save_cc(self, token):
-        """Save a credit card"""
-        customer = self.customer()
-        customer.card = token
-        customer.save()
-
+        
     def customer(self):
         """Get stripe customer or create one if it doesn't exist"""
         try:
@@ -178,26 +193,39 @@ class Profile(models.Model):
             self.save()
         return customer
 
+    def credit_card(self, token=None):
+        """Get the user's CC if they have one on file, or sets their credit card if the token is provided as an argument"""
+        if token:
+            customer = self.customer()
+            customer.card = token
+            customer.save()
+        return getattr(self.customer(), 'active_card', None)
+
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
+        customer = self.customer()
+        card = self.credit_card(token)
         stripe.Charge.create(
             amount=amount,
             currency='usd',
-            card=token,
+            customer=customer,
+            card=card,
             description='%s: %s' % (self.user.username, desc)
         )
         
     def api_pay(self, amount, desc):
         """Create a stripe charge for the user through the API"""
         # pylint: disable=E1101
-
         customer = self.customer()
         desc = '%s: %s' % (self.user.username, desc)
-
         # always use card on file
-        stripe.Charge.create(amount=amount, currency='usd', customer=customer.id,
-                             description=desc)
+        stripe.Charge.create(
+            amount=amount,
+            currency='usd',
+            customer=customer.id,
+            description=desc
+        )
 
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later
@@ -287,13 +315,10 @@ class Profile(models.Model):
         else:
             return link
 
-
 class Statistics(models.Model):
     """Nightly statistics"""
     # pylint: disable=invalid-name
-
     date = models.DateField()
-
     total_requests = models.IntegerField()
     total_requests_success = models.IntegerField()
     total_requests_denied = models.IntegerField()
@@ -307,18 +332,14 @@ class Statistics(models.Model):
     total_requests_no_docs = models.IntegerField(null=True)
     total_requests_partial = models.IntegerField(null=True)
     total_requests_abandoned = models.IntegerField(null=True)
-
     total_pages = models.IntegerField()
     total_users = models.IntegerField()
     users_today = models.ManyToManyField(User)
     total_agencies = models.IntegerField()
     total_fees = models.IntegerField()
-
     pro_users = models.IntegerField(null=True)
     pro_user_names = models.TextField(blank=True)
-
     total_page_views = models.IntegerField(null=True)
-
     daily_requests_pro = models.IntegerField(null=True)
     daily_requests_community = models.IntegerField(null=True)
     daily_requests_beta = models.IntegerField(null=True)
