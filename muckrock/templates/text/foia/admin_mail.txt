@@ -25,5 +25,5 @@ Request Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' req
 {% endif %}
 {% endif %}
 {% now "F j, Y" %}
-{% include "foia/comms.txt" %}
+{% include "text/foia/comms.txt" %}
 {% endautoescape %}

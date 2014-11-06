@@ -43,7 +43,7 @@ from muckrock.foia.models import \
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY, MONTHLY_REQUESTS
+from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
 from muckrock.sidebar.models import Sidebar
 from muckrock.tags.models import Tag
 from muckrock.views import class_view_decorator
@@ -582,7 +582,7 @@ class Detail(DetailView):
         context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
         context['actions'] = foia.actions(self.request.user)
         context['choices'] = STATUS if self.request.user.is_staff or foia.status == 'started' else STATUS_NODRAFT
-        context['pub_key'] = STRIPE_PUB_KEY
+        context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
     def post(self, request, **kwargs):
@@ -641,7 +641,7 @@ class Detail(DetailView):
             }
             send_mail(
                 subject,
-                render_to_string('foia/status_change.txt', args),
+                render_to_string('text/foia/status_change.txt', args),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False
@@ -695,7 +695,7 @@ class Detail(DetailView):
             }
             send_mail(
                 '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('foia/flag.txt', args),
+                render_to_string('text/foia/flag.txt', args),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False

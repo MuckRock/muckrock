@@ -38,20 +38,29 @@
     .attachments {
         display: block;
         width: 100%;
-        margin: $base-vertical-rhythm;
-        @extend %panel;
+        color: $color-black;
+        @include border-bottom-radius($base-border-radius - 1px);
+        .attachment-list { margin: 0; }
+        .attachment {
+            padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+            border-top-width: $base-border-width;
+            border-top-style: dotted;
+            /*&:last-child {
+                @include border-bottom-radius($base-border-radius);
+            }*/
+        }
     }
 
     &.received {
         border-color: $color-received;
         .meta { background-color: $color-received; }
-        .attachments { @include panel-color($color-received); }
+        .attachments { border-color: $color-sent; }
     }
     
     &.sent {
         border-color: $color-sent;
         .meta { background-color: $color-sent; }
-        .attachments { @include panel-color($color-sent); }
+        .attachments { border-color: $color-sent; }
         @include media($medium-layout) { @include shift(1); }
     }
 }

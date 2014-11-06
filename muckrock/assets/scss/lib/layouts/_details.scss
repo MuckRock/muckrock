@@ -121,23 +121,29 @@
         border-top: $base-border-width solid $color-grey;
         &.active { display: block; }
     }
-    .documents {
-        .dc-thumbnails {
-            list-style-type: 0;
+    .files {
+        ul {
+            list-style-type: none;
             padding-left: 0;
-            li { @extend %quarter; }
-            a {
-                display: block;
-                overflow: hidden;
-                padding: $base-vertical-rhythm/2;
+            @include row;
+            li {
+                @extend %half;
+                margin-bottom: $base-vertical-rhythm/2;
                 border: $base-border-width solid $color-primary;
                 border-radius: $base-border-radius;
-                img {
-                    display: block;
-                    float: left;
-                    margin: 0 $base-vertical-rhythm 0 0;
-                }
+                padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+                &.active {
+                    background-color: $color-primary;
+                    color: $color-white;
+        	        a { color: $color-white; }
+        	    }
             }
+        }
+        .viewer {
+            position: relative;
+            width: 100%;
+            height: 66em;
+            margin: $base-vertical-rhythm auto;
         }
     }
 }

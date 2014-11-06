@@ -67,7 +67,7 @@ class SubmitMultipleWizard(SessionWizardView):
         foia.save()
         messages.success(self.request, 'Request has been submitted to selected agencies')
         send_mail('[MULTI] Freedom of Information Request: %s' % (foia.title),
-                  render_to_string('foia/multi_mail.txt', {'request': foia}),
+                  render_to_string('text/foia/multi_mail.txt', {'request': foia}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
         # redirect to your foias

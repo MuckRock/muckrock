@@ -1,5 +1,7 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
+{% load static from staticfiles %}
+
 {% block title %}MuckRock &bull; {{ user_obj.username|capfirst }}{% endblock title %}
 {% block type %}profile{% endblock type %}
 
@@ -65,18 +67,19 @@
 {% endblock aside %}
 
 {% block actions %}
+{% if request.user == user_obj %}
+<form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
 <div class="controls">
-    <a href="{% url 'acct-buy-requests' %}" class="primary button">Buy Requests</a>
-    {% if user.get_profile.get_acct_type_display == 'Community' %}
-    <a href="{% url 'acct-manage-subsc' %}" class="primary button">Upgrade to Pro</a>
-    {% endif %}
-    {% if user.get_profile.get_acct_type_display == 'Professional' %}
-    <a href="{% url 'acct-manage-subsc' %}" class="button">Subscription Settings</a>
-    {% endif %}
-    <a href="{% url 'acct-update' %}" class="button">Account Settings</a>
-    <a href="{% url 'acct-change-pw' %}" class="button">Change Your Password</a>
-    <a href="{% url 'acct-update-cc' %}" class="button">Update Credit Card</a>
+    <button data-amount="2000"
+            data-description="5 requests ($20.00)"
+            data-email="{{ request.user.email }}"
+            data-form="#buy-requests"
+            class="checkout-button primary">Buy Requests</button>
+    <a href="{% url 'acct-update' %}" class="button">Settings</a>
+    <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
+    <a href="{% url 'acct-manage-subsc' %}" class="button">Manage Subscription</a>
 </div>
+{% endif %}
 {% endblock actions %}
 
 {% block main %}
@@ -97,3 +100,25 @@
     {% endif %}
     
 {% endblock main %}
+
+{% block scripts %}
+{% if request.user == user_obj %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endif %}
+{% endblock scripts %}

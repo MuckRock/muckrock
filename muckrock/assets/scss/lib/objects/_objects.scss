@@ -255,8 +255,6 @@ $progress-animation-duration: 0.7s;
     @include classifier(disabled, $color-disabled);
 }
 
-/* Table */
-
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
@@ -268,3 +266,19 @@ table {
         border-bottom: $base-border-width solid $color-grey
     }
 }
+
+.file {
+    overflow: hidden;
+    .thumbnail {
+        float: left;
+        max-height: 32px;
+        width: auto;
+        margin: $base-vertical-rhythm/4 $base-vertical-rhythm 0 0;
+    }
+    .actions a {
+        margin-left: $base-vertical-rhythm/2;
+        &:first-child { margin-left: 0; }
+    }
+}
+
+.hidden-stripe-handler { display: none; }

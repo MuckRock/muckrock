@@ -48,14 +48,12 @@ class CreditCardForm(forms.ModelForm):
     """A form for the user's CC"""
 
     name = forms.CharField(
-        required=False,
         label='Name on Card',
         widget=forms.TextInput(
             attrs={'class': 'card-name stripe-sensitive required'}
         )
     )
     card_number = forms.CharField(
-        required=False,
         max_length=20,
         widget=forms.TextInput(
             attrs={
@@ -65,7 +63,6 @@ class CreditCardForm(forms.ModelForm):
         )
     )
     cvc = forms.CharField(
-        required=False,
         max_length=4,
         label='CVC',
         widget=forms.TextInput(
@@ -81,10 +78,9 @@ class CreditCardForm(forms.ModelForm):
     def clean(self):
         """CC info is required"""
         token = self.cleaned_data.get('token')
-
         if not token:
-            raise forms.ValidationError('Please enter valid credit card information')
-
+            msg = 'Please enter valid credit card information'
+            raise forms.ValidationError(msg)
         return self.cleaned_data
 
     class Meta:

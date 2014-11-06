@@ -1,0 +1,10 @@
+
+
+{% extends "tablib/change_list.html" %}
+
+{% block content %}
+	<ul>
+		<li><a href="{% url 'admin:jurisdiction-admin-import' %}">CSV Import</a></li>
+	</ul>
+	{{block.super}}
+{% endblock %}

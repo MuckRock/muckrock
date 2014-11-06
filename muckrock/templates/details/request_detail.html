@@ -1,8 +1,9 @@
 {% extends 'details/base_detail.html' %}
-{% load tags %}
-{% load markdown_deux_tags %}
 {% load humanize %}
+{% load markdown_deux_tags %}
 {% load mathfilters %}
+{% load static from staticfiles %}
+{% load tags %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
@@ -69,9 +70,9 @@
             {% if foia.status == "ack" or foia.status == "processed" %}
         <dt>Follow-Ups</dt>
                 {% if foia.disable_autofollowups %}
-        <dd>Automatic follow ups are disabled for this request. You can enable automatic follow ups above, or follow up manually below.</dd>
+        <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
                 {% else %}
-        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. You can pause automatic follow ups on the right, and follow up manually below.</dd>
+        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -79,40 +80,34 @@
 {% endblock header %}
 
 {% block aside %}
-    {% if user.is_authenticated %}
-        {% if foia.status == 'started' and foia.user == request.user %}
-            {% with remaining=user.get_profile.num_requests %}
-        <form action="." method="post" class="draft">
-                {% csrf_token %}
-                {% if remaining %}
-            <input type="submit"
-                   name="action"
-                   value="Submit"
-                   class="primary button"
-            />
-                {% else %}
-            {#<a href="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" class="primary button">Buy Requests</a>#}
-<form action="" method="POST">
-  <script
-    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{{pub_key}}"
-    data-amount="2000"
-    data-name="MuckRock"
-    data-description="5 Requests ($20.00)"
-	data-email="{{user.email}}"
-	data-label="Buy Requests"
-	data-image="/static/img/logo.jpg"
-	>
-  </script>
-</form>
-                {% endif %}
-                {% if foia.is_editable %}
-            <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
-                {% endif %}
-            <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
-        </form>
-            {% endwith %}
-        {% else %}
+{% if user.is_authenticated %}
+    {% if foia.status == 'started' and foia.user == request.user %}
+        {% with remaining=user.get_profile.num_requests %}
+        {% if not remaining %}
+        <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+        <button data-amount="2000"
+                data-description="5 requests ($20.00)"
+                data-email="{{ user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button primary">Buy Requests</button>
+        {% endif %}
+    <form action="." method="post" class="draft">
+            {% csrf_token %}
+            
+        <input type="submit"
+               name="action"
+               value="Submit"
+               class="primary button"
+               {% if not remaining %}disabled{% endif %}
+        />
+            {% if foia.is_editable %}
+        <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
+            {% endif %}
+        <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+    </form>
+        {% endwith %}
+    {% else %}
     <form action="" method="post" class="controls">
         {% csrf_token %}
         {% for action in actions %}
@@ -138,8 +133,7 @@
     {% endif %}
 {% else %} 
 <section class="panel">
-    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
-    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools. <a href="{% url 'acct-register' %}">Sign Up Today</a> or <a href="{% url 'acct-login' %}">Log In</a></p>
 </section> 
 {% endif %}  
 {% endblock aside %}
@@ -164,11 +158,11 @@
 
 {% block main %}
 <div class="tabs">
-    {% if not foia.public_documents or not foia.user == request.user %}
-    <label for="comms-radio">Communications<input type="radio" name="request" id="comms-radio" /></label>
+    {% if foia.public_documents or foia.user == request.user %}
+    <label for="comms-radio">Comms<input type="radio" name="request" id="comms-radio" /></label>
     {% endif %}
     {% if foia.public_documents %}
-    <label for="docs-radio">Documents<input type="radio" name="request" id="docs-radio" /></label>
+    <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
     {% if foia.user == request.user %}
     <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
@@ -176,31 +170,26 @@
 </div>
 <section class="tab-section communications" id="comms">
     {% for comm in foia.communications.all %}
-            {% if comm.full_html %}
-                {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
-            {% else %}
-                {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
-            {% endif %}
+        {% if comm.full_html %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
+        {% else %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+        {% endif %}
     {% endfor %}
 </section>
-    {% if foia.public_documents %}
-<section class="tab-section documents" id="docs">
-    <div id="viewer"></div>
-    {% if foia.public_documents|length > 1 %}
-    <div class="dc-thumbnails">
-        <ul class="dc-thumbnails">
-        {% for document in foia.public_documents %}
-            <li><a href="#{{ document.doc_id }}" onclick="display_doc('{{ document.doc_id }}'); return true">
-                <img src="{{ document.get_thumbnail }}" alt="Document Thumbnail" />
-                {{ document.title }}
-            </a></li>
+{% if foia.public_documents %}
+<section class="tab-section files" id="files">
+    <div class="viewer" id="viewer"></div>
+    {% if foia.public_documents|length > 0 %}
+    <ul>
+        {% for file in foia.public_documents %}
+            <li>{% include "lib/file.html" %}</li>
         {% endfor %}
-        </ul>
-    </div>
-    {% endif %}   
-</section>
+    </ul>
     {% endif %}
-    {% if foia.user == request.user %}
+</section>
+{% endif %}
+{% if foia.user == request.user %}
 <section class="tab-section notes" id="notes">
     <a class="primary button" 
        href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
@@ -218,6 +207,7 @@
 {% endblock main %}
 
 {% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
 
@@ -237,8 +227,62 @@
         $('.tab-section').removeClass( 'active' );
         visible.addClass( 'active' );
     }
+    
+    function get_thumbnail(doc_id) {
+            var idx = doc_id.indexOf('-');
+            var num = doc_id.slice(0, idx);
+            var name = doc_id.slice(idx + 1);
+            return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
+    }
+    
+    function displayDoc(docId, docTitle, docAnchor) {
+        var title;
+        if (!!docTitle) {
+            title = docTitle;
+        } else {
+            title = 'Untitled';
+        }
+        $('#doc-title').remove();
+        $('<h2 id="doc-title">' + title + '</h2>').insertBefore('#viewer');
+        $('.file').parent('li').removeClass('active');
+        if (!!docAnchor) {
+            var idWithAnchor = '#files ul li .file#' + docAnchor;
+            console.log(idWithAnchor);
+            $(idWithAnchor).parent('li').addClass('active');
+        }
+        DV.load(
+            'https://www.documentcloud.org/documents/' + docId + '.js',
+            {
+                sidebar: false,
+                container: "#viewer"
+            }
+        );
+    }
+    
+    function displayDefaultDoc() {
+        var defaultDoc = $('a.view-file').first();
+        if (!!defaultDoc) {
+            var defaultDocId = defaultDoc.data('docId');
+            var defaultDocTitle = defaultDoc.data('docTitle');
+            var defaultDocAnchor = defaultDoc.data('docAnchor');
+            displayDoc(defaultDocId, defaultDocTitle, defaultDocAnchor);
+        }
+    }
 
     $(document).ready(function() {
+    
+        /* Documents */
+    
+        $('a.view-file').click(function() {
+            var docId = $(this).data('docId');
+            var docTitle = $(this).data('docTitle');
+            var docAnchor = $(this).data('docAnchor');
+            var docsTab = $('#files-radio').parent();
+            docsTab.addClass( 'active' );
+            docsTab.siblings().removeClass( 'active' );
+            hideAllExcept($('#files'));
+            displayDoc(docId, docTitle, docAnchor);
+        });
     
         /* Tab Bar */
 
@@ -252,8 +296,9 @@
         $('#comms-radio').change(function() {
             hideAllExcept($('#comms'));
         });
-        $('#docs-radio').change(function() {
-            hideAllExcept($('#docs'));
+        $('#files-radio').change(function() {
+            hideAllExcept($('#files'));
+            displayDefaultDoc();
         });
         $('#notes-radio').change(function() {
             hideAllExcept($('#notes'));
@@ -274,59 +319,23 @@
         
         /* MODAL */
         
-        $('<textarea name="text"></textarea>').insertBefore($('.modal').children('input'));
+        $('<textarea name="text"></textarea>').insertBefore($('.controls .modal').children('input'));
         $('.overlay').click(function(){
-            $('.modal textarea').remove();
+            $('.controls .modal textarea').remove();
         });
         
-        /* Documents
-        
-        function display_doc(doc_id) {
-            $("#docs-radio").attr("checked", true);
-            DV.load('https://www.documentcloud.org/documents/' + doc_id + '.js', {
-                width: 627,
-                height: 600,
-                sidebar: false,
-                container: "#viewer"
-            });
-            var embed_code0 = '<div id="viewer-' + doc_id + '"></div>\n<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script>\n<script>\nDV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {\n  width: 627,\n  height: 600,\n  sidebar: false,\n  container: "#viewer-' + doc_id + '"});\n<\/script>';
-            var embed_code1 = '<a href="https://www.muckrock.com{{foia.get_absolute_url}}#' + doc_id + '"><img src="' + get_thumbnail(doc_id)+ '"></a>';
-            $('textarea#embed0').val(embed_code0);
-            $('textarea#embed1').val(embed_code1);
-        }
-
-        function get_thumbnail(doc_id) {
-            var idx = doc_id.indexOf('-');
-            var num = doc_id.slice(0, idx);
-            var name = doc_id.slice(idx + 1);
-            return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
-        }
-
-        function doc_load() {
-            var default_doc_id = "{{foia.public_documents.0.doc_id}}";
-            if (!doc_load.loaded) {
-                doc_load.loaded = true;
-                display_doc(default_doc_id);
-            }
-        }
-
-        $(function() {
-            var hash = window.location.hash.substring(1);
-            var default_doc_id = "{{ foia.public_documents.0.doc_id }}";
-            var documents = [ {% for doc in foia.public_documents %}"{{ doc.doc_id }}", {% endfor %} ];
-
-            if (!hash || ($.inArray(hash, documents) == -1)) {
-                doc_id = default_doc_id;
-            } else {
-                doc_id = hash;
-            }
-            if (hash && hash.substring(0,4) != "tabs") {
-                $("#tabs").tabs("select", "#tabs-documents");
-                display_doc(doc_id);
-                doc_load.loaded = true;
-            }
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
         });
-        */
         
     });
 </script>
