@@ -72,9 +72,9 @@
         {% endfor %}
 
 				{% if request.user.is_staff %}
-				<span style="display:none" id="move-{{comm.pk}}-span">
+				<span style="{% if not foia_id %}display:none{%endif%}" id="move-{{comm.pk}}-span">
 					<label for="new_foia_pk">FOIA:</label>
-					<input type="text" name="new_foia_pk_{{comm.pk}}" value="" />
+					<input type="text" name="new_foia_pk_{{comm.pk}}" value="{{foia_id}}" />
 					<input type="submit" name="submit" value="Submit" class="button" 
                  onclick="$('input[name=action]').val('move_comm'); $('input[name=comm_pk]').val({{comm.pk}}); return true" />
 				</span>
