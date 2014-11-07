@@ -49,7 +49,7 @@ $(document).ready(function() {
     $('.embed.hidden-modal').each(function() {
         var textarea = $(this).children('textarea');
         var doc_id = textarea.data('docId');
-        var embed = '<div id="viewer-' + doc_id + '"></div><script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script><script>DV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", { height: 600, sidebar: false, container: "#viewer-' + doc_id + '"});<\/script>';
+        var embed = '<div class="viewer" id="viewer-' + doc_id + '"></div> <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script> <script>DV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", { height: 600, sidebar: false, container: "#viewer-' + doc_id + '"});<\/script>';
         textarea.val(embed);
     });    
     $('.notification button.close').click(function() {

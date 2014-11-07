@@ -224,16 +224,12 @@
 <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
-
-    function modal(nextSelector) {
-        var overlay = '<div class="overlay"></div>';
-        $(overlay).insertBefore($('.container')).fadeIn();
-        nextSelector.removeClass('hidden-modal').addClass('modal');
+    
+    function textAreaModal(nextSelector) {
+        modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
         $('.overlay').click(function(){
-            $('.overlay').fadeOut().remove();
             $('.modal textarea').remove();
-            $('.modal').removeClass('modal').addClass('hidden-modal');
         });
     }
     
@@ -297,6 +293,14 @@
             hideAllExcept($('#files'));
             displayDoc(docId, docTitle, docAnchor);
         });
+        
+        /* Modals */
+        
+        $('.controls .modal-button').click(function(e){
+            e.preventDefault();
+            textAreaModal($(this).next());
+            return false;
+        });
     
         /* Tab Bar */
 
@@ -329,13 +333,6 @@
             $('#status-form').show();
             $('#request-status').hide();
             $(this).hide();
-        });
-        
-        /* MODAL */
-        
-        $('<textarea name="text"></textarea>').insertBefore($('.controls .modal').children('input'));
-        $('.overlay').click(function(){
-            $('.controls .modal textarea').remove();
         });
         
         /* CHECKOUT */
