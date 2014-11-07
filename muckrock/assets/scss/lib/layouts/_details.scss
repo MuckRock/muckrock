@@ -63,6 +63,35 @@
             }
         }
     }
+    .crowdfund {
+        border-color: $color-success;
+        h1 {
+            @include font-sizing(1.2);
+            font-weight: 400;
+            color: $color-success;
+        }
+        h2 {
+            @include font-sizing(1.2);
+            font-weight: 400;
+        }
+        h3 {
+            @include font-sizing(0.9);
+            font-weight: 400;
+        }
+        input {
+            width: 100%;
+            border: $base-border-width solid $color-success;
+            border-radius: $base-border-radius;
+            padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
+            background-color: $color-white;
+            @include font-sizing(1.75);
+            font-weight: 300;
+        }
+        button {
+            display: block;
+            width: 100%;
+        }
+    }
     .edit {
         display: inline-block;
         font-size: 0.8rem;
