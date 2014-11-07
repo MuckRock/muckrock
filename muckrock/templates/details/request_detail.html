@@ -63,7 +63,7 @@
             {% if foia.embargo_date %}
         <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
             {% else %}
-        <dd>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</dd>
+        <dd>This request is embargoed and will not be made public{% if foia.embargo_date %} until {{ foia.embargo_date|date }}{% endif %}.</dd>
             {% endif %}
         {% endif %}
         {% if foia.user == request.user %}
@@ -72,7 +72,7 @@
                 {% if foia.disable_autofollowups %}
         <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
                 {% else %}
-        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
+        <dd>We'll automatically send a follow up to this request{% if foia.date_followup %} on {{ foia.date_followup|date:"F d, Y" }}{% endif %}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
                 {% endif %}
             {% endif %}
         {% endif %}
