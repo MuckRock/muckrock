@@ -171,63 +171,39 @@ def embargo(request, jurisdiction, jidx, slug, idx):
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
     """Pay us through CC for the payment on a request"""
-    def form_actions(request, foia, form):
-        """Pay for request"""
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    token = request.POST.get('stripe_token', False)
+    email = request.POST.get('stripe_email', False)
+    amount = request.POST.get('amount', False)
+    if token and email and amount:
         try:
-            amount = int(foia.price * 105)
             request.user.get_profile().pay(
-                form,
+                token,
                 amount,
                 'Charge for request: %s %s' % (foia.title, foia.pk)
             )
-            foia.status = 'processed'
-            foia.save()
-
-            args = { 'request': foia, 'amount': amount / 100.0 }
-            send_mail(
-                '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-                render_to_string('text/foia/admin_payment.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
-            logger.info(
-                '%s has paid %0.2f for request %s',
-                request.user.username,
-                amount/100,
-                foia.title
-            )
-            messages.success(request, 'Your payment was successful')
-            return HttpResponseRedirect(reverse('acct-my-profile'))
         except stripe.CardError as exc:
             messages.error(request, 'Payment error: %s' % exc)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-            args = {
-                'jurisdiction': foia.jurisdiction.slug,
-                'slug': foia.slug,
-                'idx': foia.pk
-            }
-            return HttpResponseRedirect(reverse('foia-pay', kwargs=args))
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = Action(
-        form_actions=form_actions,
-        msg='pay for',
-        tests=[(
-            lambda f: f.is_payable(),
-            'You may only pay for requests that require a payment'
-        )],
-        form_class=lambda r, f: lambda *args, **kwargs: PaymentForm(request=r, *args, **kwargs),
-        return_url=lambda r, f: f.get_absolute_url(),
-        heading='Pay for Request',
-        value='Pay',
-        must_own=True,
-        template='registration/cc.html',
-        extra_context=lambda f: {
-            'desc': 'You will be charged $%.2f for this request' % (f.price * Decimal('1.05')),
-            'pub_key': STRIPE_PUB_KEY
-        }
-    )
-    return _foia_action(request, foia, action)
+            return redirect(foia)
+        messages.success(request, 'Your payment was successful.')
+        logger.info(
+            '%s has paid %0.2f for request %s',
+            request.user.username,
+            int(amount)/100,
+            foia.title
+        )
+        foia.status = 'processed'
+        foia.save()
+        args = { 'request': foia, 'amount': int(amount) / 100.0 }
+        send_mail(
+            '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
+            render_to_string('text/foia/admin_payment.txt', args),
+            'info@muckrock.com',
+            ['requests@muckrock.com'],
+            fail_silently=False
+        )
+    return redirect(foia)
 
 @login_required
 def crowdfund_request(request, jurisdiction, jidx, slug, idx):
