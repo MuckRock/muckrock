@@ -149,7 +149,20 @@
             <h1>Help fund this request</h1>
             <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
             <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
-            <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
+            <form method="POST" action="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="stripe-handler" id="crowdfund-form">
+                {% csrf_token %}
+                <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
+                <input name="amount" id="crowdfund-amount" value="0" hidden>
+                <button data-amount="0"
+                        data-description=""
+                        data-email="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}"
+                        data-form="#crowdfund-form"
+                        class="disabled checkout-button" 
+                        id="crowdfund-button"
+                        disabled>
+                    Contribute
+                </button>
+            </form>
         {% endif %}
         {% endwith %}
         </section>
@@ -207,7 +220,8 @@
 {% endblock main %}
 
 {% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
 
@@ -324,9 +338,11 @@
             $('.controls .modal textarea').remove();
         });
         
+        /* CHECKOUT */
+        
         $('.checkout-button').click(function(e){
             e.preventDefault();
-            checkoutData = getCheckoutData($(this));
+            var checkoutData = getCheckoutData($(this));
             checkout(
                 "{{ stripe_pk }}",
                 "{% static 'apple-touch-icon.png' %}",
@@ -335,6 +351,32 @@
                 checkoutData.email,
                 checkoutData.form
             );
+            return false;
+        });
+        
+        var crowdfundForm = $('#crowdfund-form');
+        var crowdfundAmountInput = $('#crowdfund-amount-input');
+        var crowdfundAmount = $('#crowdfund-amount');
+        var crowdfundButton = $('#crowdfund-button');
+        
+        crowdfundAmountInput.autoNumeric('init', {aSign:'$', pSign:'p'});
+        crowdfundAmountInput.focus(function(){
+            crowdfundButton.attr('disabled', false);
+            crowdfundButton.removeClass('disabled').addClass('success');
+        });
+        crowdfundAmountInput.change(function(){
+            var amount = crowdfundAmountInput.autoNumeric('get');
+            amount *= 100;
+            if (amount > 0) {
+                crowdfundAmount.attr('value', amount);
+                crowdfundButton.attr('data-amount', amount);
+                var string = '$' + crowdfundAmountInput.autoNumeric('get');
+                var description = 'Contribute (' + string + ')';
+                crowdfundButton.attr('data-description', description);
+            } else {
+                crowdfundButton.attr('disabled', true);
+                crowdfundButton.removeClass('success').addClass('disabled');
+            }
         });
         
     });

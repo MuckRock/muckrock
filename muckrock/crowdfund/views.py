@@ -8,6 +8,7 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
+from decimal import Decimal
 import logging
 import stripe
 import sys
@@ -31,10 +32,11 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
     desc = 'Contribute to Crowdfunding: %s %s' % (crowdfund, crowdfund.pk)
     if amount and token:
         try:
-            amount = int(amount*100) # normalizes amount for Stripe
+            amount = int(amount) # normalizes amount for Stripe
             if request.user.is_authenticated():
                 user = request.user
                 user.get_profile().pay(token, amount, desc)
+                name = user.username
             else:
                 desc = '%s: %s' % (request.POST.get('stripe_email'), desc)
                 stripe.Charge.create(
@@ -44,18 +46,19 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                     card=token
                 )
                 user = None
+                name = 'A visitor'
+            amount = float(amount)/100
             payment_model.objects.create(
                 user=user,
                 crowdfund=crowdfund,
                 amount=amount,
-                name=form.cleaned_data.get('display_name'),
-                show=form.cleaned_data.get('show')
+                name=name,
+                show=False
             )
-            crowdfund.payment_received += amount
+            crowdfund.payment_received += Decimal(amount)
             crowdfund.save()
-            messages.success(request, 'You contributed $%.2f. Thanks!' % amount)
-            log_msg = ('%s has contributed to crowdfund', user.username) \
-                      if user else 'A visitor has contributed to crowdfund'
+            messages.success(request, 'You contributed $%.2f. Thank you!' % amount)
+            log_msg = ('%s has contributed to crowdfund', name)
             logger.info(log_msg)
         except stripe.CardError as exc:
             messages.error(request, 'Payment error: %s' % exc)

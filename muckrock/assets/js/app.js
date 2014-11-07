@@ -13,6 +13,8 @@ function checkout(pk, image, description, amount, email, form, submit) {
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
         form.append('<input type="hidden" name="stripe_email" value="' + token.email + '" />');
+        $('a').click(function() { return false; });
+        $('button').click(function() { return false; });
         if (submit) {
             form.submit();
         }
