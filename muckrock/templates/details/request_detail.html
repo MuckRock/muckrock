@@ -8,6 +8,26 @@
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
 
+{% block open_graph %}
+<meta property="og:title" content="{{ foia.title }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ request.get_full_path }}" />
+<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta property="og:site_name" content="MuckRock" />
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@muckrock" />
+{% if foia.user.get_profile.twitter %}
+<meta name="twitter:creator" content="{{ foia.user.get_profile.twitter }}" />
+{% endif %}
+<meta name="twitter:title" content="{{ foia.title }}" />
+<meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+{% endblock twitter_card %}
+
 {% block header %}
     <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
         <form action="" method="post" class="status-form" id="status-form">
