@@ -79,8 +79,8 @@ h1.list-label {
                 width: 100%;
                 padding: $base-vertical-rhythm/2;
                 margin: 0 0 $base-vertical-rhythm/2 0;
-                border: $base-border-width solid $color-grey;
-                border-radius: $base-border-radius;
+                @extend %border;
+                @extend %border-radius;
                 background-color: darken($color-white, 10%);
             }
             .input {

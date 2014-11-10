@@ -67,7 +67,7 @@ ul.notifications {
                     font-size: 0.8em;
                     margin-top: $base-vertical-rhythm/2;
                     padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-                    border-radius: $base-border-radius;
+                    @extend %border-radius;
                     &:hover { opacity: 0.9; }
                     @include media($medium-layout) {
                         display: inline-block;

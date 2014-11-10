@@ -370,12 +370,12 @@ html, body {
     display: table;
     clear: both; }
 
-.form h1, .form fieldset, .form.login ul, .request .files ul li, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .plan, .agency aside dl, .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header .hgroup, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .pagination, .modal textarea, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, h1.list-label, .search.meta h2 {
+.form h1, .form fieldset, .form.login ul, .request .files ul li, .new-request header h1, .new-request header summary, .post > .meta aside, .question > .meta aside, .request > .meta aside, .jurisdiction > .meta aside, .agency > .meta aside, .profile > .meta aside, .plan, .agency aside dl, .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"], .post > .meta header, .question > .meta header, .request > .meta header, .jurisdiction > .meta header, .agency > .meta header, .profile > .meta header, .collection header .hgroup, .search.form input[type="search"], .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main, .collection ul.list, .pagination, .modal textarea, .form fieldset.question, .form fieldset.answer, .form.register h1, .form.subscription form fieldset, .form.password-reset form fieldset, .password-change form fieldset, .agency figure, .agency aside div.dl-group, .request aside .draft .button.primary, .request aside .draft input.primary[type="submit"], .request aside .draft button.primary, .request aside .draft input[type="submit"] .primary, input[type="submit"] .request aside .draft .primary, .request aside .draft button .primary, button .request aside .draft .primary, h1.list-label, .search.meta h2 {
   float: left;
   display: block;
   margin-right: 2.35765%;
   width: 100%; }
-  .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .plan:last-child, .agency aside dl:last-child, .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child, .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .collection header .hgroup:last-child, .search.form input[type="search"]:last-child, .post > .main:last-child, .question > .main:last-child, .request > .main:last-child, .jurisdiction > .main:last-child, .agency > .main:last-child, .profile > .main:last-child, .collection ul.list:last-child, .pagination:last-child, .modal textarea:last-child, .form.subscription form fieldset:last-child, .form.password-reset form fieldset:last-child, .password-change form fieldset:last-child, .agency figure:last-child, .agency aside div.dl-group:last-child, .request aside .draft .button.primary:last-child, .request aside .draft input.primary[type="submit"]:last-child, .request aside .draft button.primary:last-child, .request aside .draft input[type="submit"] .primary:last-child, input[type="submit"] .request aside .draft .primary:last-child, .request aside .draft button .primary:last-child, button .request aside .draft .primary:last-child, h1.list-label:last-child, .search.meta h2:last-child {
+  .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .post > .meta aside:last-child, .question > .meta aside:last-child, .request > .meta aside:last-child, .jurisdiction > .meta aside:last-child, .agency > .meta aside:last-child, .profile > .meta aside:last-child, .plan:last-child, .agency aside dl:last-child, .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate:last-child, .post > .meta header:last-child, .question > .meta header:last-child, .request > .meta header:last-child, .jurisdiction > .meta header:last-child, .agency > .meta header:last-child, .profile > .meta header:last-child, .collection header .hgroup:last-child, .search.form input[type="search"]:last-child, .post > .main:last-child, .question > .main:last-child, .request > .main:last-child, .jurisdiction > .main:last-child, .agency > .main:last-child, .profile > .main:last-child, .collection ul.list:last-child, .pagination:last-child, .modal textarea:last-child, .form.subscription form fieldset:last-child, .form.password-reset form fieldset:last-child, .password-change form fieldset:last-child, .agency figure:last-child, .agency aside div.dl-group:last-child, .request aside .draft .button.primary:last-child, .request aside .draft input.primary[type="submit"]:last-child, .request aside .draft button.primary:last-child, .request aside .draft input[type="submit"] .primary:last-child, input[type="submit"] .request aside .draft .primary:last-child, .request aside .draft button .primary:last-child, button .request aside .draft .primary:last-child, h1.list-label:last-child, .search.meta h2:last-child {
     margin-right: 0; }
 
 @media screen and (min-width: 500px) {
@@ -421,32 +421,32 @@ html, body {
   clear: left; }
 
 @media screen and (min-width: 500px) {
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .search.form input[type="submit"] {
+  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child {
+    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate:last-child {
       margin-right: 0; }
-    .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n) {
+    .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate:nth-child(2n) {
       margin-right: 0; }
-    .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1) {
+    .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .clone-candidates .candidate:nth-child(2n+1) {
       clear: left; } }
 @media screen and (min-width: 769px) {
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .search.form input[type="submit"] {
+  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"] {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n) {
+    .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate:nth-child(2n) {
       margin-right: 2.35765%; }
-    .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1) {
+    .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .clone-candidates .candidate:nth-child(2n+1) {
       clear: none; }
-    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child {
+    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate:last-child {
       margin-right: 0; }
-    .collection header .commands:nth-child(4n), .modal input:nth-child(4n), .form input[type="submit"]:nth-child(4n), .collection.request .filters input[type="submit"]:nth-child(4n) {
+    .collection header .commands:nth-child(4n), .modal input:nth-child(4n), .form input[type="submit"]:nth-child(4n), .collection.request .filters input[type="submit"]:nth-child(4n), .clone-candidates .candidate:nth-child(4n) {
       margin-right: 0; }
-    .collection header .commands:nth-child(4n+1), .modal input:nth-child(4n+1), .form input[type="submit"]:nth-child(4n+1), .collection.request .filters input[type="submit"]:nth-child(4n+1) {
+    .collection header .commands:nth-child(4n+1), .modal input:nth-child(4n+1), .form input[type="submit"]:nth-child(4n+1), .collection.request .filters input[type="submit"]:nth-child(4n+1), .clone-candidates .candidate:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (min-width: 500px) {
@@ -506,12 +506,16 @@ html, body {
     .collection, .search.collection, ul.notifications, .homepage {
       margin: 0 -1.5em; } }
 
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form, .post > .actions form, .question > .actions form, .request > .actions form, .jurisdiction > .actions form, .agency > .actions form, .profile > .actions form, .post .controls, .question .controls, .request .controls, .jurisdiction .controls, .agency .controls, .profile .controls, .collection .controls, #hidden-form, .plan li, .progress-bar, .request .tabs label, .collection.request .filters form, .clone-candidates .candidate {
+  border: 1px solid #B3BECB; }
+
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form, .post > .actions form, .question > .actions form, .request > .actions form, .jurisdiction > .actions form, .agency > .actions form, .profile > .actions form, .post .controls, .question .controls, .request .controls, .jurisdiction .controls, .agency .controls, .profile .controls, .collection .filters li a, .collection .controls, ul.notifications li.notification span.text button.close, .modal, .meter, table, .request .crowdfund input, .request .files ul li, .collection.request .filters form, .new-request .create-request, .clone-candidates .candidate, .search.form label, nav.sidebar ul a {
+  border-radius: 9px; }
+
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  border: 1px solid #B3BECB;
-  border-radius: 9px;
   line-height: 1.5em; }
   .button ul, input[type="submit"] ul, button ul, .button.default ul, input.default[type="submit"] ul, button.default ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input.primary[type="submit"] ul, button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input.success[type="submit"] ul, button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input.failure[type="submit"] ul, button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input.disabled[type="submit"] ul, button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input[type="submit"]:disabled ul, input.button:disabled:hover ul, input[type="submit"]:disabled:hover ul, input.button:disabled:active ul, input[type="submit"]:disabled:active ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, .message ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul, .form ul {
     list-style-type: none;
@@ -574,15 +578,11 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 .post > .actions form, .question > .actions form, .request > .actions form, .jurisdiction > .actions form, .agency > .actions form, .profile > .actions form {
   list-style-type: none;
   padding: 0.75em;
-  border: 1px solid #B3BECB;
-  border-radius: 9px;
   background-color: #dbdbdb; }
 .post .controls, .question .controls, .request .controls, .jurisdiction .controls, .agency .controls, .profile .controls {
   width: 100%;
   padding: 0.75em;
   margin-top: 0.75em;
-  border: 1px solid #B3BECB;
-  border-radius: 9px;
   background-color: #dbdbdb; }
 .post > .main, .question > .main, .request > .main, .jurisdiction > .main, .agency > .main, .profile > .main {
   padding-top: 1.5em; }
@@ -636,7 +636,6 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .collection .filters li a {
         padding: 0.375em 0.75em;
         margin: 0;
-        border-radius: 9px;
         text-decoration: none; }
         .collection .filters li a:hover, .collection .filters li a.current-tab {
           color: #f4f4f4;
@@ -695,8 +694,6 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
     width: 100%;
     padding: 0.75em;
     margin: 0 0 0.75em 0;
-    border: 1px solid #B3BECB;
-    border-radius: 9px;
     background-color: #dbdbdb;
     display: block; }
     .collection .controls:after {
@@ -1158,8 +1155,7 @@ ul.notifications {
           opacity: 0.7;
           font-size: 0.8em;
           margin-top: 0.75em;
-          padding: 0.375em 0.75em;
-          border-radius: 9px; }
+          padding: 0.375em 0.75em; }
           ul.notifications li.notification span.text button.close:hover {
             opacity: 0.9; }
           @media screen and (min-width: 500px) {
@@ -1281,7 +1277,6 @@ ul.notifications {
   display: block;
   max-width: 100%;
   margin: 5%;
-  border-radius: 9px;
   padding: 1.5em;
   background-color: #f4f4f4;
   text-align: center;
@@ -1332,8 +1327,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 
 .form {
   display: block;
-  padding: 1.5em;
-  border-radius: 9px; }
+  padding: 1.5em; }
   .form header {
     max-width: 68em;
     margin-left: auto;
@@ -1380,8 +1374,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   display: none;
   width: 100%;
   overflow: hidden;
-  margin: 1.5em 0;
-  border: 1px solid #B3BECB; }
+  margin: 1.5em 0; }
   #hidden-form:target {
     display: block; }
   #hidden-form a.button, #hidden-form input.button, #hidden-form input[type="submit"] {
@@ -1462,7 +1455,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     margin: 0.30556em 0;
     margin: 0;
     padding: 0.75em;
-    border: 1px solid #B3BECB;
     border-bottom: none; }
     .plan li:first-child {
       border-top: none; }
@@ -1548,7 +1540,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   width: 100%;
   height: auto;
   margin: 0.75em 0;
-  border: 1px solid #B3BECB;
   border-radius: 10px;
   background-color: #f4f4f4; }
 
@@ -1562,7 +1553,6 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   background: -webkit-linear-gradient(#6b6a65, #565551);
   background: linear-gradient(#6b6a65, #565551);
   border: 1px solid #8697ac;
-  border-radius: 9px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px; }
   .meter.completed {
@@ -1601,8 +1591,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
 
 table {
   width: 100%;
-  margin-top: 1.5em 0;
-  border-radius: 9px; }
+  margin-top: 1.5em 0; }
   table th, table td {
     padding: 0.25em 0.5em; }
   table tr:nth-child(odd) {
@@ -1722,7 +1711,6 @@ table {
   .request .crowdfund input {
     width: 100%;
     border: 1px solid #02CF6B;
-    border-radius: 9px;
     padding: 0.1875em 0.375em;
     background-color: #f4f4f4;
     font-size: 1.75em;
@@ -1739,7 +1727,8 @@ table {
   text-transform: none;
   letter-spacing: 0;
   line-height: 1rem;
-  color: #3a82ff; }
+  color: #3a82ff;
+  cursor: pointer; }
   .request .edit:hover {
     color: #0762ff; }
 .request .tag {
@@ -1747,8 +1736,6 @@ table {
   padding: 0 0.375em; }
   .request .tag:first-of-type {
     padding-left: 0; }
-.request #edit-tags {
-  cursor: pointer; }
 .request .tag-form, .request .status-form {
   display: none;
   font-size: 0.85em;
@@ -1769,7 +1756,6 @@ table {
     float: left;
     margin: 0 0 -2px;
     padding: 0.375em 0.75em;
-    border: 1px solid #B3BECB;
     border-left: none;
     border-bottom: none; }
     .request .tabs label:first-of-type {
@@ -1796,7 +1782,6 @@ table {
   .request .files ul li {
     margin-bottom: 0.75em;
     border: 1px solid #3a82ff;
-    border-radius: 9px;
     padding: 0.75em 1.5em; }
     .request .files ul li.active {
       background-color: #3a82ff;
@@ -1933,8 +1918,6 @@ h1.list-label {
   width: 100%;
   padding: 0.75em;
   margin: 0 0 0.75em 0;
-  border: 1px solid #B3BECB;
-  border-radius: 9px;
   background-color: #dbdbdb; }
 .collection.request .filters .input {
   width: 100%; }
@@ -2109,7 +2092,6 @@ h1.list-label {
       margin: 0;
       font-weight: 300; }
   .new-request .create-request {
-    border-radius: 9px;
     background-color: #B3BECB;
     overflow: hidden; }
   .new-request fieldset {
@@ -2313,6 +2295,32 @@ h1.list-label {
       width: 70%;
       margin: 0; }
 
+.clone-candidates {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  .clone-candidates:after {
+    content: "";
+    display: table;
+    clear: both; }
+  .clone-candidates ul {
+    padding-left: 0; }
+  .clone-candidates .candidate {
+    display: inline-block;
+    margin: 0.375em 0.75em;
+    border-color: #21282c;
+    padding: 0.75em; }
+    .clone-candidates .candidate:first-child {
+      margin-left: 0; }
+    .clone-candidates .candidate .button, .clone-candidates .candidate input[type="submit"], .clone-candidates .candidate button {
+      margin-top: 0.5em;
+      margin-right: 0;
+      display: block; }
+    .clone-candidates .candidate div:first-of-type {
+      font-size: 1.2em; }
+    .clone-candidates .candidate div:last-of-type {
+      font-size: 0.9em; }
+
 .search {
   display: block;
   width: 100%; }
@@ -2328,8 +2336,7 @@ h1.list-label {
   .search.form li {
     display: inline-block; }
   .search.form label {
-    padding: 0.375em 0.75em;
-    border-radius: 9px; }
+    padding: 0.375em 0.75em; }
     .search.form label:hover {
       background-color: #d3e3ff; }
   .search.form input[type="checkbox"] {
@@ -2679,7 +2686,6 @@ nav.sidebar {
       display: block;
       padding: 0.5em 0.75em;
       border: 1px solid #181d20;
-      border-radius: 9px;
       color: #B3BECB;
       background-color: #181d20;
       text-align: center;

@@ -30,7 +30,7 @@ fieldset {
     @extend %textbox;
     display: block;
     padding: $base-vertical-rhythm;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     header {
         @include outer-container();
         @include pad(0 5% 0 5%);
@@ -70,7 +70,7 @@ fieldset {
     width: 100%;
     overflow: hidden;
     margin: $base-vertical-rhythm 0;
-    border: $base-border-width solid $color-grey;
+    @extend %border;
     a.button, input.button { float: right; }   
 }
 #hidden-form-button:focus { outline: none; }
@@ -153,7 +153,7 @@ fieldset {
         @include font-sizing(0.9, 3);
         margin: 0;
         padding: $base-vertical-rhythm/2;
-        border: $base-border-width solid $color-grey;
+        @extend %border;
         border-bottom: none;
         &:first-child { border-top: none; }
         &:last-child {
@@ -233,7 +233,7 @@ $progress-animation-duration: 0.7s;
     width: 100%;
     height: auto;
     margin: $base-vertical-rhythm/2 0;
-    border: $base-border-width solid $color-grey;
+    @extend %border;
     border-radius: $base-border-radius + $base-border-width;
     background-color: $color-white;
 }
@@ -244,7 +244,7 @@ $progress-animation-duration: 0.7s;
     height: $base-vertical-rhythm;
     @include background-gradient($color-default);
     border: $progress-meter-border;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     @include border-right-radius(0px);
     &.completed { @include border-right-radius($base-border-radius); }
 
@@ -258,7 +258,7 @@ $progress-animation-duration: 0.7s;
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
     tr:nth-child(odd) { background-color: $color-odd-background; }
     &, th, td {

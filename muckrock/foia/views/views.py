@@ -306,7 +306,14 @@ def create_request(request):
         else:
             form = RequestForm(request=request)
     
-    context = { 'form': form, 'clone': clone }
+    viewable = FOIARequest.objects.get_viewable(request.user)
+    featured = viewable.filter(featured=True)
+    
+    context = {
+        'form': form,
+        'clone': clone,
+        'featured': featured
+    }
     
     return render_to_response('forms/create.html', context, 
                               context_instance=RequestContext(request))

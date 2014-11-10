@@ -1,10 +1,13 @@
 @import 'grid';
 
+%border { border: $base-border-width solid $color-grey; }
+%border-radius { border-radius: $base-border-radius; }
+
 // Textbox
 %textbox {
     @include box-sizing(border-box);
-    border: $base-border-width solid $color-grey;
-    border-radius: $base-border-radius;
+    @extend %border;
+    @extend %border-radius;
     line-height: $base-vertical-rhythm;
     ul {
         list-style-type: none;
@@ -72,8 +75,8 @@
         form {
             list-style-type: none;
             padding: $base-vertical-rhythm/2;
-            border: $base-border-width solid $color-grey;
-            border-radius: $base-border-radius;
+            @extend %border;
+            @extend %border-radius;
             background-color: darken($color-white, 10%);
         }
     }
@@ -82,8 +85,8 @@
         width: 100%;
         padding: $base-vertical-rhythm/2;
         margin-top: $base-vertical-rhythm/2;
-        border: $base-border-width solid $color-grey;
-        border-radius: $base-border-radius;
+        @extend %border;
+        @extend %border-radius;
         background-color: darken($color-white, 10%);
     }
     
@@ -137,7 +140,7 @@
             a {
                 padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
                 margin: 0;
-                border-radius: $base-border-radius;
+                @extend %border-radius;
                 text-decoration: none;
                 &:hover, &.current-tab {
                     color: $color-white;
@@ -200,8 +203,8 @@
         width: 100%;
         padding: $base-vertical-rhythm/2;
         margin: 0 0 $base-vertical-rhythm/2 0;
-        border: $base-border-width solid $color-grey;
-        border-radius: $base-border-radius;
+        @extend %border;
+        @extend %border-radius;
         background-color: darken($color-white, 10%);
         @include row();
         button, .button {

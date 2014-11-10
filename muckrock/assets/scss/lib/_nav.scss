@@ -314,7 +314,7 @@ nav.sidebar {
             display: block;
             padding: $base-vertical-rhythm/3 $base-vertical-rhythm/2;
             border: $base-border-width solid $sidebar-button-background;
-            border-radius: $base-border-radius;
+            @extend %border-radius;
             color: $color-grey;
             background-color: $sidebar-button-background;
             text-align: center;

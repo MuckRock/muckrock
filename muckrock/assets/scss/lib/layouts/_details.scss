@@ -81,7 +81,7 @@
         input {
             width: 100%;
             border: $base-border-width solid $color-success;
-            border-radius: $base-border-radius;
+            @extend %border-radius;
             padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
             background-color: $color-white;
             @include font-sizing(1.75);
@@ -100,6 +100,7 @@
         letter-spacing: 0;
         line-height: 1rem;
         color: $color-primary;
+        cursor: pointer;
         &:hover {
             color: darken($color-primary, 10%);
         }
@@ -109,7 +110,6 @@
         padding: 0 $base-vertical-rhythm/4;
         &:first-of-type { padding-left: 0; }
     }
-    #edit-tags { cursor: pointer; }
     .tag-form, .status-form {
         display: none;
         font-size: 0.85em;
@@ -128,7 +128,7 @@
             float: left;
             margin: 0 0 2*-$base-border-width;
             padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-            border: $base-border-width solid $color-grey;
+            @extend %border;
             border-left: none;
             border-bottom: none;
             &:first-of-type {
@@ -159,7 +159,7 @@
                 @extend %half;
                 margin-bottom: $base-vertical-rhythm/2;
                 border: $base-border-width solid $color-primary;
-                border-radius: $base-border-radius;
+                @extend %border-radius;
                 padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
                 &.active {
                     background-color: $color-primary;

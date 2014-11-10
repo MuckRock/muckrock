@@ -27,7 +27,7 @@
                 
         label {
             padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-            border-radius: $base-border-radius;
+            @extend %border-radius;
             &:hover {
                 background-color: lighten($color-primary, 30%);
             }
