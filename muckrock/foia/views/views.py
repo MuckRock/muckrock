@@ -607,7 +607,7 @@ class Detail(DetailView):
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        if foia.user == request.user:
+        if foia.user == request.user or request.user.is_staff:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
