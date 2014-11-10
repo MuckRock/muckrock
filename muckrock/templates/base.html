@@ -29,7 +29,7 @@
         {% block open_graph %}
         <meta property="og:title" content="MuckRock" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="{{ request.path }}" />      
+        <meta property="og:url" content="{{ request.build_absolute_uri }}" />      
         <meta property="og:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
         <meta property="og:image" content="{{ STATIC_URL }}apple-touch-icon.png" />
         {% endblock open_graph %}

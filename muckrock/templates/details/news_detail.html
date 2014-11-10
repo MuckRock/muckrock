@@ -44,7 +44,7 @@
 {% block open_graph %}
 <meta property="og:title" content="{{ article.title }}" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="{{ request.path }}" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if article.image %}
 <meta property="og:image" content="{{ MEDIA_URL }}{{ article.image }}" />
 {% else %}
@@ -56,19 +56,19 @@
 {% endblock open_graph %}
 
 {% block twitter_card %}
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@muckrock">
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@muckrock" />
 {% with article.authors.all|first as author %}
     {% if author.get_profile.twitter %}
-<meta name="twitter:creator" content="{{ author.get_profile.twitter }}">
+<meta name="twitter:creator" content="{{ author.get_profile.twitter }}" />
     {% endif %}
 {% endwith %}
-<meta name="twitter:title" content="{{ article.title }}">
-<meta name="twitter:description" content="{{ article.summary }}">
+<meta name="twitter:title" content="{{ article.title }}" />
+<meta name="twitter:description" content="{{ article.summary }}" />
 {% if article.image %}
-<meta name="twitter:image:src" content="{{ MEDIA_URL }}{{ article.image }}">
+<meta name="twitter:image:src" content="{{ MEDIA_URL }}{{ article.image }}" />
 {% else %}
-<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}">
+<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
 {% endblock twitter_card %}
 
