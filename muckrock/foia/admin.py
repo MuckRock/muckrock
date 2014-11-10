@@ -103,6 +103,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     list_filter = ['status']
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
+    filter_horizontal = ('read_collaborators', 'edit_collaborators')
     inlines = [FOIACommunicationInline, FOIANoteInline]
     save_on_top = True
     form = FOIARequestAdminForm

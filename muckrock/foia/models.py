@@ -134,6 +134,12 @@ class FOIARequest(models.Model):
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
 
+    read_collaborators = models.ManyToManyField(User, related_name='read_access',
+                                                blank=True, null=True)
+    edit_collaborators = models.ManyToManyField(User, related_name='edit_access',
+                                                blank=True, null=True)
+
+
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
@@ -179,7 +185,10 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
+        # pylint: disable=unexpected-keyword-arg
         return user.is_staff or self.user == user or \
+            self.read_collaborators.filter(pk=user.pk).exists() or \
+            self.edit_collaborators.filter(pk=user.pk).exists() or \
             (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
@@ -201,6 +210,11 @@ class FOIARequest(models.Model):
             self.save()
 
         return False
+
+    def editable_by(self, user):
+        """Can this user edit this request"""
+        # pylint: disable=unexpected-keyword-arg
+        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists()
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
@@ -537,36 +551,36 @@ class FOIARequest(models.Model):
         side_actions = [
             (user.is_staff,
                 reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
-            (self.user == user and self.is_editable(),
+            (self.editable_by(user) and self.is_editable(),
                 reverse('foia-update', kwargs=kwargs), 'Update'),
-            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
+            (self.editable_by(user) and not self.is_editable() and user.get_profile().can_embargo(),
                 reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
-            (self.user == user and self.is_deletable(),
+            (self.editable_by(user) and self.is_deletable(),
                 reverse('foia-delete', kwargs=kwargs), 'Delete'),
             (user.is_staff,
                 reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
-            (self.user == user and self.is_payable(),
+            (self.editable_by(user) and self.is_payable(),
                 reverse('foia-pay', kwargs=kwargs), 'Pay'),
-            (self.user == user and self.is_payable(),
+            (self.editable_by(user) and self.is_payable(),
                 reverse('foia-crowdfund', kwargs=kwargs), 'Crowdfund'),
             (self.public_documents(), '#', 'Embed this Document'),
             (user.is_authenticated() and self.user != user,
                 reverse('foia-follow', kwargs=kwargs),
                 'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
                            else 'Follow'),
-            (user.is_authenticated() and self.user == user,
+            (user.is_authenticated() and self.editable_by(user),
                 reverse('foia-toggle-followups', kwargs=kwargs),
                 'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'),
             ]
 
         bottom_actions = [
-            (self.user == user and self.status != 'started',
+            (self.editable_by(user) and self.status != 'started',
                 'Follow Up', 'Send a message directly to the agency'),
-            (self.user == user,
+            (self.editable_by(user),
                 'Get Advice', "Get answers to your question from Muckrock's FOIA expert community"),
             (user.is_authenticated(),
                 'Problem?', "Something broken, buggy, or off?  Let us know and we'll fix it"),
-            (self.user == user and self.is_appealable(),
+            (self.editable_by(user) and self.is_appealable(),
                 'Appeal', 'Submit an appeal'),
             ]
 

@@ -214,8 +214,8 @@ def update(request, jurisdiction, jidx, slug, idx):
     if not foia.is_editable():
         messages.error(request, 'You may only edit non-submitted requests')
         return redirect(foia)
-    if foia.user != request.user:
-        messages.error(request, 'You may only edit your own requests')
+    if not foia.editable_by(request.user):
+        messages.error(request, 'You do not have permission to edit that request')
         return redirect(foia)
 
     return _foia_form_handler(request, foia, 'Update')
@@ -551,7 +551,7 @@ class Detail(DetailView):
     def _tags(self, request, foia):
         """Handle updating tags"""
         # pylint: disable=R0201
-        if foia.user == request.user:
+        if foia.editable_by(request.user):
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
@@ -560,7 +560,7 @@ class Detail(DetailView):
         # pylint: disable=R0201
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or
+        if ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or
            (request.user.is_staff and status in [s for s, _ in STATUS])) and \
            foia.status not in ['started', 'submitted']:
             foia.status = status
@@ -576,15 +576,15 @@ class Detail(DetailView):
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
         # pylint: disable=R0201
-        if foia.user == request.user and foia.status != 'started':
-            save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
+        if foia.editable_by(request.user) and foia.status != 'started':
+            save_foia_comm(request, foia, request.user.get_full_name(), request.POST.get('text'),
                             'Follow up succesfully sent')
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
         # pylint: disable=R0201
-        if foia.user == request.user:
+        if foia.editable_by(request.user):
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
                 user=request.user, title=title, slug=slugify(title), foia=foia,
@@ -610,7 +610,7 @@ class Detail(DetailView):
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
         # pylint: disable=R0201
-        if foia.user == request.user and foia.is_appealable():
+        if foia.editable_by(request.user) and foia.is_appealable():
             save_foia_comm(request, foia, foia.user.get_full_name(), request.POST.get('text'),
                             'Appeal succesfully sent', appeal=True)
         return redirect(foia)

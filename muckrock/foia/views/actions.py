@@ -40,8 +40,8 @@ def _foia_action(request, jurisdiction, jidx, slug, idx, action):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, pk=idx)
     form_class = action.form_class(request, foia)
 
-    if action.must_own and foia.user != request.user:
-        messages.error(request, 'You may only %s your own requests' % action.msg)
+    if action.must_own and not foia.editable_by(request.user):
+        messages.error(request, 'You do not have permission to %s this request' % action.msg)
         return redirect(foia)
 
     for test, msg in action.tests:
@@ -281,8 +281,9 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
 
-    if foia.user != request.user:
-        messages.error(request, 'You must own the request to toggle auto-followups')
+    if not foia.editable_by(request.user):
+        messages.error(request, 'You do not have permission to toggle auto-followups '
+                                'on this request')
         return redirect(foia)
 
     foia.disable_autofollowups = not foia.disable_autofollowups

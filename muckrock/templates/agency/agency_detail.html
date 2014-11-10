@@ -1,5 +1,6 @@
 
 {% extends "agency/base.html" %}
+{% load tags %}
 {% load thumbnail %}
 {% load staticfiles %}
 {% load markdown_deux_tags %}
@@ -131,7 +132,8 @@
 			{% for foia in foia_requests %}
 			<tr class="{% cycle 'even' 'odd' %}">
 				<td><a href="
-			  {% if request.user == foia.user and foia.status == "started" %}
+			  {% editable_by foia request.user as editable %}
+			  {% if editable and foia.status == "started" %}
 					{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
 				{% else %}
 					{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}
