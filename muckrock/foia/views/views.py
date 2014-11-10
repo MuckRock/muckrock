@@ -461,11 +461,13 @@ class MyList(List):
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
-            print foia_pks
             if post.get('submit') == 'Mark as Read':
                 self.set_read_status(foia_pks, False)
             elif post.get('submit') == 'Mark as Unread':
                 self.set_read_status(foia_pks, True)
+            elif post.get('submit') == 'Mark All as Read':
+                all_unread = [foia.pk for foia in  FOIARequest.objects.filter(user=self.request.user, updated=True)]
+                self.set_read_status(all_unread, False)
         except (FOIARequest.DoesNotExist):
             pass
         return redirect('foia-mylist')
