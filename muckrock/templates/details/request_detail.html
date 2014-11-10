@@ -202,9 +202,9 @@
 <section class="tab-section communications" id="comms">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
         {% else %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
 </section>

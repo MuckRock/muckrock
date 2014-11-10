@@ -1034,13 +1034,16 @@ td {
     display: block;
     width: 100%;
     padding: 0.375em;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
     line-height: 1em;
     color: #f4f4f4;
     text-align: left;
     overflow: hidden;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
     width: 100%; }
+    .message .meta.collapsed {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px; }
     .message .meta img {
       display: none;
       width: 25px;
@@ -1048,10 +1051,17 @@ td {
     .message .meta span {
       display: inline-block;
       padding: 0.75em; }
-      .message .meta span.name {
+      .message .meta span.left {
         float: left; }
-      .message .meta span.date {
+      .message .meta span.right {
         float: right; }
+    .message .meta .visibility {
+      padding-right: 0;
+      padding-top: 1em;
+      font-size: 0.8em;
+      cursor: pointer; }
+    .message .meta .permalink {
+      color: #f4f4f4; }
   .message .body {
     display: block;
     padding: 0.375em 1.125em; }

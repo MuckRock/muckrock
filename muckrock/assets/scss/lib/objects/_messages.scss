@@ -11,11 +11,12 @@
         display: block;
         width: 100%;
         padding: $base-vertical-rhythm/4;
-        @include border-top-radius($base-border-radius - 1);
         line-height: 1em;
         color: $color-white;
         text-align: left;
         overflow: hidden;
+        @include border-top-radius($base-border-radius - 1);
+        &.collapsed { @include border-bottom-radius($base-border-radius - 1); }
         img {
             display: none;
             width: 25px;
@@ -24,10 +25,17 @@
         span {
             display: inline-block;
             padding: $base-vertical-rhythm/2;
-            &.name { float: left; }
-            &.date { float: right; }
+            &.left { float: left; }
+            &.right { float: right; }
         }
         @include fill-parent();
+        .visibility {
+            padding-right: 0;
+            padding-top: 1em;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .permalink { color: $color-white; }
     }
     
     .body {

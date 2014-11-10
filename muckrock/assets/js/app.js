@@ -56,6 +56,21 @@ $(document).ready(function() {
         $(this).parent().parent().hide();
     });
     
+    $('.message .visibility').click(function() {
+        var header = $(this).parent();
+        var message = header.siblings();
+        message.toggle();
+        if ($(this).hasClass('expanded')) {
+            $(this).removeClass('expanded').addClass('collapsed');
+            header.addClass('collapsed');
+            $(this).html('&#9654;');
+        } else {
+            $(this).removeClass('collapsed').addClass('expanded');
+            header.removeClass('collapsed');
+            $(this).html('&#9660;');
+        }
+    });
+    
     /* Key and Swipe Bindings
     $(document).bind('keydown', 'm', toggleSidebar());
     $(document).bind('keydown', 'shift+m', toggleSidebar());
