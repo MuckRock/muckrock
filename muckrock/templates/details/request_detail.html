@@ -164,8 +164,8 @@
 {% endblock aside %}
 
 {% block actions %}
-{% if user.is_authenticated and foia.user == request.user %}
-    {% if foia.is_payable %}
+{% if user.is_authenticated %}
+    {% if foia.is_payable and foia.user == request.user %}
     <form method="POST" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
         <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
