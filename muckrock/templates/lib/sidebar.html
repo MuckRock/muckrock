@@ -28,9 +28,13 @@
             <a class="account-info" href="{% url 'foia-mylist' %}">
                 <span class="updates counter">{{ updates|length }}</span>
                 Update{{ updates|length|pluralize }}
+                {% if updates|length > 10 %}
+                <small>Click to see all</small>
+                {% endif %}
             </a>
+
             <ul class="foia-details">
-                {% for foia in updates %}
+                {% for foia in updates|slice:":10" %}
                 <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
                 {% endfor %}
             </ul>
