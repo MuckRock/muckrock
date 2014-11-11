@@ -3,43 +3,14 @@
 //
 // Do not appear in compiled CSS
 
-@import                 'normalize';
-@import                 'bourbon/bourbon';
-@import                 'neat/neat';
+@import 'normalize';
+@import 'bourbon/bourbon';
+@import 'neat/neat';
 
-$large-breakpoint:      769px;
-$medium-breakpoint:     500px;
-$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
-$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
-
-$color-white:           #f4f4f4;
-$color-black:           #21282c;
-$color-grey:            #B3BECB;
-$color-primary:         #3a82ff;
-$color-success:         #02CF6B;
-$color-failure:         #E35336;
-$color-warning:         #D9C227;
-$color-default:         #6b6a65;
-$color-disabled:        lighten($color-grey, 10%);
-
-$color-odd-background:  darken($color-white, 5%);
-
-$base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
-$base-font-weight:      400;
-$base-border-width:     1px;
-$base-border-radius:    9px;
-$base-vertical-rhythm:  1.5em;
-
-$base-gradient-darken:  8%;
-
-$menu-breakpoint: 1024px;
-$mobile-menu-width: 250px;
-$tablet-menu-width: 300px;
-$desktop-menu-width: 23%;
-$menu-animation: all 0.25s ease;
-
+@import 'lib/variables';
 @import 'lib/mixins';
 @import 'lib/prototypes';
+@import 'lib/fonts';
 @import 'lib/typography';
 @import 'lib/objects/objects';
 @import 'lib/layouts/layouts';
