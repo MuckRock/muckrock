@@ -5,19 +5,17 @@
     <head>
         <title>{% block title %}MuckRock{% endblock title %}</title>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1" /> 
         <meta name="google-site-verification"
               content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
-        <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}" />
+        <link rel="apple-touch-icon"
+              href="{% static 'apple-touch-icon.png' %}" />
         <link rel="stylesheet"
               type="text/css"
-              href="{% static 'css/style.css' %}" />
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/jquery-ui-1.8.4.custom.css' %}" />
-        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+              href="{% static 'style.css' %}" />
         
         <!-- Preloading and Prerendering -->
         {% block preload %}
