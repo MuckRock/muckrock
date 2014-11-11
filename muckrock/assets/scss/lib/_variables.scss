@@ -21,20 +21,21 @@ $large-breakpoint:      769px;
 $medium-breakpoint:     500px;
 $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
 $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
-$small-width:           new-breakpoint(max-width $medium-breakpoint 4);
+$small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
 
 /* Colors */
-$color-white:           #f4f4f4;
-$color-black:           #21282c;
-$color-grey:            #B3BECB;
-$color-primary:         #3a82ff;
-$color-success:         #02CF6B;
-$color-failure:         #E35336;
-$color-warning:         #D9C227;
-$color-default:         #6b6a65;
+$color-white:           #f4f4f4;        // White
+$color-black:           #21282c;        // Black
+$color-grey:            #B3BECB;        // Light Grey
+$color-gray:            $color-grey;
+$color-primary:         #3a82ff;        // Blue
+$color-success:         #02CF6B;        // Green
+$color-failure:         #E35336;        // Red
+$color-warning:         #D9C227;        // Yellow
+$color-default:         #6b6a65;        // Dark Grey
+$base-gradient-darken:  8%;
 $color-disabled:        lighten($color-grey, 10%);
 $color-odd-background:  darken($color-white, 5%);
-$base-gradient-darken:  8%;
 
 /* Menus */
 $menu-breakpoint:       1024px;

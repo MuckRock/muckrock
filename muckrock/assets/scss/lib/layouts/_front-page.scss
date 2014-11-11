@@ -16,7 +16,7 @@
         h1 {
             max-width: 12em;
             color: $color-white;
-            font-weight: 700;
+            font-weight: $bold;
             @include font-sizing(1.75, 3);
             margin: 0 auto $base-vertical-rhythm;
             @include media($medium-layout) {
@@ -36,7 +36,7 @@
                 linear-gradient(
                     rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)
             ));
-            font-weight: 700;
+            font-weight: $bold;
             text-align: center;
             padding-top: 3.5em;
             @include media($medium-layout) {
@@ -84,11 +84,11 @@
             dfn { color: $color-black; }
             h1 {
                 @include font-sizing(2, 3);
-                font-weight: 700;
+                font-weight: $bold;
             }
             h2 {
                 @include font-sizing(1.2, 3);
-                font-weight: 400;
+                font-weight: $normal;
             }
             &:hover {
                 background-color: rgba(254, 188, 16, 0.85);
@@ -110,14 +110,14 @@
         @extend %base-spacing;
         color: $color-white;
         @include background(radial-gradient($color-stats, darken($color-stats, 5%)));
-        font-weight: 400;
+        font-weight: $normal;
         ul { list-style-type: none; padding-left: 0; }
         li { margin: $base-vertical-rhythm/2 0; }
         span {
             display: block;
             @include font-sizing(2, 3);
             margin-bottom: 0;
-            font-weight: 300;
+            font-weight: $light;
         }  
         @media all and (min-width: 600px) {
             display: table-cell;

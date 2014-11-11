@@ -164,47 +164,49 @@
 {% endblock aside %}
 
 {% block actions %}
-{% if user.is_authenticated %}
-    {% if foia.is_payable and foia.user == request.user %}
-    <form method="POST" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
+<section class="actions">
+    {% if user.is_authenticated %}
+        {% if foia.is_payable and foia.user == request.user %}
+        <form method="POST" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
+            {% csrf_token %}
+            <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
+        </form>
+        {% endif %}
+    <form action="" method="post" class="controls">
         {% csrf_token %}
-        <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
-    </form>
-    {% endif %}
-<form action="" method="post" class="controls">
-    {% csrf_token %}
-    {% for action in actions %}
-        {% if action.class == 'modal' %}
-    <span class="modal-button button">{{ action.label }}</span>
-    <div class="hidden-modal">
-        <h1>{{ action.label }}</h1>
-        <h2>{{ action.title }}</h2>
-        <input type="submit" name="action" value="{{ action.label }}" />
-    </div>
-        {% else %}
-            {% if not action.link %}
-    <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
+        {% for action in actions %}
+            {% if action.class == 'modal' %}
+        <span class="modal-button button">{{ action.label }}</span>
+        <div class="hidden-modal">
+            <h1>{{ action.label }}</h1>
+            <h2>{{ action.title }}</h2>
+            <input type="submit" name="action" value="{{ action.label }}" />
+        </div>
             {% else %}
-                {% if action.label == 'Pay' %}
-    <button data-amount="{{ foia.get_stripe_amount }}"
-            data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-            data-email="{{ request.user.email }}"
-            data-form="#payment-form"
-            class="checkout-button{% if action.class %} {{ action.class }}{% endif %}">
-        {{ action.label }}
-    </button>
-                {% else %}           
-    <a href="{{ action.link }}"
-       class="button{% if action.class %} {{ action.class }}{% endif %}"
-       {% if action.title %}title="{{ action.title }}"{% endif %}>
-        {{ action.label }}
-    </a>
+                {% if not action.link %}
+        <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
+                {% else %}
+                    {% if action.label == 'Pay' %}
+        <button data-amount="{{ foia.get_stripe_amount }}"
+                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
+                data-email="{{ request.user.email }}"
+                data-form="#payment-form"
+                class="checkout-button{% if action.class %} {{ action.class }}{% endif %}">
+            {{ action.label }}
+        </button>
+                    {% else %}           
+        <a href="{{ action.link }}"
+           class="button{% if action.class %} {{ action.class }}{% endif %}"
+           {% if action.title %}title="{{ action.title }}"{% endif %}>
+            {{ action.label }}
+        </a>
+                    {% endif %}
                 {% endif %}
             {% endif %}
-        {% endif %}
-    {% endfor %}
-</form> 
-{% endif %}
+        {% endfor %}
+    </form> 
+    {% endif %}
+</section>
 {% endblock actions %}
 
 {% block main %}

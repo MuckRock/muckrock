@@ -1,12 +1,16 @@
 /* Messages */
 
-.message {  @extend %panel;
+.message {
+    @extend %panel;
     padding: 0;
     $color-sent: lighten($color-primary, 5%);
     $color-received: lighten($color-black, 5%);
     $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
-    @include span-columns(12);
-    @include media($medium-layout) { @include span-columns(11 of 12); }
+
+    @include media($small-layout) { @include span-columns(4); }
+    @include media($medium-layout) { @include span-columns(6); }
+    @include media($large-layout) { @include span-columns(11); }
+    
     .meta {
         display: block;
         width: 100%;
@@ -53,9 +57,6 @@
             padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
             border-top-width: $base-border-width;
             border-top-style: dotted;
-            /*&:last-child {
-                @include border-bottom-radius($base-border-radius);
-            }*/
         }
     }
 
@@ -69,6 +70,6 @@
         border-color: $color-sent;
         .meta { background-color: $color-sent; }
         .attachments { border-color: $color-sent; }
-        @include media($medium-layout) { @include shift(1); }
+        @include media($large-layout) { @include shift(1); }
     }
 }

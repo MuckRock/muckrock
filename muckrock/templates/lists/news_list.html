@@ -13,7 +13,7 @@
 {% endblock list-item %}
 
 {% block actions %}
-    {% if user.is_staff %}
-    <a href="#" class="primary button">Compose Article</a>
-    {% endif %}
+{% if user.is_staff %}
+<a href="#" class="primary button">Compose Article</a>
+{% endif %}
 {% endblock actions %}

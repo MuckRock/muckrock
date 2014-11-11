@@ -17,18 +17,16 @@
 }
 
 .agency {
-    figure { @extend %full; }
-    aside div.dl-group { @extend %full; @include pad(default 0 0 0);}
-    aside dl { @extend %third; @include omega(3n); }
-    //aside dd > small { text-transform: uppercase; }
-    aside dd + dt { margin-top: $base-vertical-rhythm; }
+    aside dl { @extend %third; }
+    aside dd + dt { margin-top: $base-margin; }
 }
+
 .profile {
     section.meta > header {
         h1 { 
             @include font-sizing(3);
             margin-top: 0;
-            font-weight: 300;
+            font-weight: $light;
         }
         dl { margin-top: $base-vertical-rhythm; }
     }
@@ -37,47 +35,22 @@
     h3 {
         font-size: 1.25em;
     }
-    aside .draft {
+    .draft {
         @include row();
         button, .button {
             display: block;
-            @include span-columns(6);
-            @include media($medium-layout) {
-                @include span-columns(3);
-            }
-            @include media($large-layout) {
-                @include span-columns(6);
-            }
-            &:nth-of-type(even) {
-                @include omega;
-            }
-        }
-        .button.primary {
-            display: block;
-            @extend %full;
-            & + .button {
-                @include omega-reset(n);
-                & + .button {
-                    @include omega;
-                }
-            }
+            @extend %half;
         }
     }
     .crowdfund {
         border-color: $color-success;
+        h1, h2, h3 { font-weight: $normal; }
         h1 {
             @include font-sizing(1.2);
-            font-weight: 400;
             color: $color-success;
         }
-        h2 {
-            @include font-sizing(1.2);
-            font-weight: 400;
-        }
-        h3 {
-            @include font-sizing(0.9);
-            font-weight: 400;
-        }
+        h2 { @include font-sizing(1.2); }
+        h3 { @include font-sizing(0.9); }
         input {
             width: 100%;
             border: $base-border-width solid $color-success;
@@ -85,7 +58,7 @@
             padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
             background-color: $color-white;
             @include font-sizing(1.75);
-            font-weight: 300;
+            font-weight: $light;
         }
         button {
             display: block;
@@ -95,7 +68,7 @@
     .edit {
         display: inline-block;
         font-size: 0.8rem;
-        font-weight: 400;
+        font-weight: $normal;
         text-transform: none;
         letter-spacing: 0;
         line-height: 1rem;

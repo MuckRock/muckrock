@@ -1,9 +1,8 @@
 .pagination {
-    @extend %full;
     @include row;
     margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
     nav {
-        @include span-columns(12);
+        @include span-columns(4);
         @include media($medium-layout) {
             @include span-columns(3);
         }
@@ -18,15 +17,15 @@
     }
     li, .pp-set {
         // @include font-sizing(0.95);
-        font-weight: 300;
+        font-weight: $light;
         display: block;
         padding: 0 $base-vertical-rhythm/4;
     }
     .pp-set {
-        font-weight: 300;
+        font-weight: $light;
     }
     .page-ref, .pp-ref {
-        font-weight: 300;
+        font-weight: $light;
         @include font-sizing(1.25);
         padding: 0 $base-vertical-rhythm/2;
         margin: 0;

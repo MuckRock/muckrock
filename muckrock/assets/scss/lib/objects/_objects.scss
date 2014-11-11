@@ -51,8 +51,6 @@ fieldset {
         @include omega();
         @include pad(0 5% 0 0);
         margin-top: 0;
-        // margin: 0.5em 0.75em 1.5em 0;
-        &.question, &.answer { @extend %full; }
     }
     input { width: 100%; }
     textarea {
@@ -88,17 +86,10 @@ fieldset {
     }   
 }
 
-.form.register {
-    h1 { @extend %full; }
-}
-
-.form.subscription form fieldset { @extend %full; }
-
 .form.password-reset, .password-change {
     overflow: hidden;
-    h1 { margin: 0 0 $base-vertical-rhythm/2; }
+    h1 { margin: 0 0 $base-margin/2; }
     form { @include pad(0 default 0 default); }
-    form fieldset { @extend %full; }
 }
 
 .features {
@@ -109,7 +100,7 @@ fieldset {
     text-align: center;
     h1 {
         @include font-sizing(2, 3);
-        font-weight: 300;
+        font-weight: $light;
         margin-bottom: $base-vertical-rhythm;
     }
     a {
@@ -138,7 +129,7 @@ fieldset {
         color: $color-white;
         background-color: $color-black;
         text-align: center;
-        font-weight: 300;
+        font-weight: $light;
         &:hover {
             background-color: $color-primary;
             text-decoration: none;
@@ -275,7 +266,7 @@ table {
         width: auto;
         margin: $base-vertical-rhythm/4 $base-vertical-rhythm 0 0;
     }
-    .actions a {
+    .file-actions a {
         margin-left: $base-vertical-rhythm/2;
         &:first-child { margin-left: 0; }
     }
