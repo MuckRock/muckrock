@@ -42,7 +42,7 @@ def account_logout(request):
 def register(request):
     """Pick what kind of account you want to register for"""
     return render_to_response(
-        'user/register.html',
+        'forms/account/register.html',
         context_instance=RequestContext(request)
     )
 
@@ -137,7 +137,7 @@ def update(request):
 def manage_subsc(request):
     """Subscribe or unsubscribe from a pro account"""
     user_profile = request.user.get_profile()
-    template = 'user/subscription.html'
+    template = 'forms/user/subscription.html'
     heading = 'Upgrade to a Pro Account'
     desc = ''
     form_class = UpgradeSubscForm
