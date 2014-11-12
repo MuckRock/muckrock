@@ -1,22 +1,24 @@
 {% comment %}
 Form Object
 -----------
-This form object takes two optional arguments:
-* is_hidden (bool)
+This form object takes one optional arguments:
 * button_text (string)
 
 If the form is hidden, it is revealed by the CSS :target selector. There must be at least one button with the id `hidden-form-button` on the page containing the hidden form that targets #hidden-form. There must be at most one hidden form per page.
 {% endcomment %}
-<form action="" method="post" {% if is_hidden %}id="hidden-form"{% endif %}>
+<form method="post">
     {% csrf_token %}
     {% if form.non_field_errors %}
     <object class="failure panel">
     {{ form.non_field_errors }}
     </object>
     {% endif %}
+    <div class="hidden-fields">
     {% for field in form.hidden_fields %}
         {{ field }}
     {% endfor %}
+    </div>
+    <div class="visible-fields">
     {% for field in form.visible_fields %}
         <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
             <label for="{{ field.auto_id }}">{{ field.label}}</label>
@@ -25,15 +27,8 @@ If the form is hidden, it is revealed by the CSS :target selector. There must be
             {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
         </fieldset>
     {% endfor %}
-    <div class="buttons">
-    {% if is_hidden %}
-        <a href="#hidden-form-button" class="button">Cancel</a>
-    {% endif %}
-    {% if button_text %}
-        <input type="submit" name="submit" value="{{ button_text }}" class="primary button" />
-    {% else %}
-        <input type="submit" name="submit" value="Submit" class="primary button" />
-    {% endif %}
     </div>
-    
+    <div class="buttons">
+        <input type="submit" name="submit" value="{% if button_text %}{{ button_text }}{% else %}Submit{% endif %}" class="primary button" />
+    </div>
 </form>

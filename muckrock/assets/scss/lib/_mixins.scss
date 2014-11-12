@@ -52,7 +52,7 @@
     }
 }
 
-@mixin font-sizing($size-multiplier, $line-multiplier:1.3) {
+@mixin font-sizing($size-multiplier, $line-multiplier:3) {
     $size: 1em * $size-multiplier;
     $line: 1em + (1em / ($base-vertical-rhythm * $line-multiplier));
     font-size: $size;

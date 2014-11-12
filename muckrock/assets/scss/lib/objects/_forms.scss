@@ -1,0 +1,41 @@
+.form {
+    @extend %panel;
+    padding: $base-padding;
+    header, form { @include row; }
+    h1, ul { @extend %half; }
+    h1 {
+        @include font-sizing(3);
+        margin-top: 0;
+    }
+    .visible-fields fieldset {
+        @extend %half;
+        input { width: 100%; }
+    }
+    .buttons { @include row; }
+    input[type="submit"] { @extend %quarter; }
+}
+.hidden-stripe-handler { display: none; }
+textarea, #{$all-text-inputs} { @extend %input; }
+fieldset {
+    margin-top: 0;
+    label {
+        @extend dfn;
+        @include box-sizing(border-box);
+        display: block;
+        color: $color-default;
+        text-align: left;
+    }
+    
+    input + label {
+        float: left;
+        margin-right: 1.5em;
+    }
+    
+    & > fieldset, & > fieldset + fieldset { margin: 0; }
+}
+
+@include media($medium-layout) {
+    .login.form .form-info {
+        text-align: right;
+    }
+}

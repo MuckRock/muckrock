@@ -12,7 +12,7 @@ html, body { min-height: 100%; }
 
 %half {
     @include omega(2n);
-    @include media($small-layout) { @include span-columns(2); }
+    @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(6); }
 }
@@ -54,11 +54,11 @@ html, body { min-height: 100%; }
 }
 
 %base-spacing {
-    padding: $base-vertical-rhythm/2;
-    @include media($medium-layout) { padding: $base-vertical-rhythm; }
+    padding: $base-padding/2;
+    @include media($medium-layout) { padding: $base-padding; }
 }
 
 %edge-to-edge {
-    margin: 0 -1*$base-vertical-rhythm/2;
-    @include media($medium-layout) { margin: 0 -1*$base-vertical-rhythm; }
+    margin: 0 -1*$base-margin/2;
+    @include media($medium-layout) { margin: 0 -1*$base-margin; }
 }

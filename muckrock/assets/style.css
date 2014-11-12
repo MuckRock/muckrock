@@ -412,77 +412,77 @@ html, body {
   min-height: 100%; }
 
 /* line 52, scss/neat/grid/_omega.scss */
-.form h1:nth-child(2n), .form fieldset:nth-child(2n), .form.login ul:nth-child(2n), .request .draft button:nth-child(2n), .request .draft .button:nth-child(2n), .request .draft input[type="submit"]:nth-child(2n), .request .files ul li:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .request .draft button:nth-child(2n), .request .draft .button:nth-child(2n), .request .draft input[type="submit"]:nth-child(2n), .request .files ul li:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
   margin-right: 0; }
 /* line 57, scss/neat/grid/_omega.scss */
-.form h1:nth-child(2n+1), .form fieldset:nth-child(2n+1), .form.login ul:nth-child(2n+1), .request .draft button:nth-child(2n+1), .request .draft .button:nth-child(2n+1), .request .draft input[type="submit"]:nth-child(2n+1), .request .files ul li:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .request .draft button:nth-child(2n+1), .request .draft .button:nth-child(2n+1), .request .draft input[type="submit"]:nth-child(2n+1), .request .files ul li:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
   /* line 13, scss/lib/_grid.scss */
-  .form h1, .form fieldset, .form.login ul, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
-    float: left;
-    display: block;
-    margin-right: 7.42297%;
-    width: 46.28851%; }
-    /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
-      margin-right: 0; } }
-@media screen and (min-width: 500px) {
-  /* line 13, scss/lib/_grid.scss */
-  .form h1, .form fieldset, .form.login ul, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
-    float: left;
-    display: block;
-    margin-right: 4.82916%;
-    width: 47.58542%; }
-    /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
-      margin-right: 0; } }
-@media screen and (min-width: 769px) {
-  /* line 13, scss/lib/_grid.scss */
-  .form h1, .form fieldset, .form.login ul, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
-    float: left;
-    display: block;
-    margin-right: 2.35765%;
-    width: 48.82117%; }
-    /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form fieldset:last-child, .form.login ul:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
-      margin-right: 0; } }
-
-/* line 52, scss/neat/grid/_omega.scss */
-.post .meta aside:nth-child(3n), .question .meta aside:nth-child(3n), .request .meta aside:nth-child(3n), .jurisdiction .meta aside:nth-child(3n), .agency .meta aside:nth-child(3n), .profile .meta aside:nth-child(3n), .plan:nth-child(3n), .agency aside dl:nth-child(3n) {
-  margin-right: 0; }
-/* line 57, scss/neat/grid/_omega.scss */
-.post .meta aside:nth-child(3n+1), .question .meta aside:nth-child(3n+1), .request .meta aside:nth-child(3n+1), .jurisdiction .meta aside:nth-child(3n+1), .agency .meta aside:nth-child(3n+1), .profile .meta aside:nth-child(3n+1), .plan:nth-child(3n+1), .agency aside dl:nth-child(3n+1) {
-  clear: left; }
-@media screen and (max-width: 500px) {
-  /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .plan, .agency aside dl {
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 500px) {
+  /* line 13, scss/lib/_grid.scss */
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
+    float: left;
+    display: block;
+    margin-right: 4.82916%;
+    width: 47.58542%; }
+    /* line 38, scss/neat/grid/_span-columns.scss */
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      margin-right: 0; } }
+@media screen and (min-width: 769px) {
+  /* line 13, scss/lib/_grid.scss */
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 48.82117%; }
+    /* line 38, scss/neat/grid/_span-columns.scss */
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+      margin-right: 0; } }
+
+/* line 52, scss/neat/grid/_omega.scss */
+.post .meta aside:nth-child(3n), .question .meta aside:nth-child(3n), .request .meta aside:nth-child(3n), .jurisdiction .meta aside:nth-child(3n), .agency .meta aside:nth-child(3n), .profile .meta aside:nth-child(3n), .agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n), .plan:nth-child(3n) {
+  margin-right: 0; }
+/* line 57, scss/neat/grid/_omega.scss */
+.post .meta aside:nth-child(3n+1), .question .meta aside:nth-child(3n+1), .request .meta aside:nth-child(3n+1), .jurisdiction .meta aside:nth-child(3n+1), .agency .meta aside:nth-child(3n+1), .profile .meta aside:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1), .plan:nth-child(3n+1) {
+  clear: left; }
+@media screen and (max-width: 500px) {
+  /* line 20, scss/lib/_grid.scss */
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
+    float: left;
+    display: block;
+    margin-right: 7.42297%;
+    width: 100%; }
+    /* line 38, scss/neat/grid/_span-columns.scss */
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
   /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .plan, .agency aside dl {
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .plan, .agency aside dl {
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .plan:last-child, .agency aside dl:last-child {
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 
 @media screen and (max-width: 500px) {
@@ -524,7 +524,7 @@ html, body {
   clear: left; }
 @media screen and (max-width: 500px) {
   /* line 33, scss/lib/_grid.scss */
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"] {
+  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate {
     float: left;
     display: block;
     margin-right: 7.42297%;
@@ -534,7 +534,7 @@ html, body {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
   /* line 33, scss/lib/_grid.scss */
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"] {
+  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate {
     float: left;
     display: block;
     margin-right: 4.82916%;
@@ -544,7 +544,7 @@ html, body {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 33, scss/lib/_grid.scss */
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .clone-candidates .candidate, .search.form input[type="submit"] {
+  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate {
     float: left;
     display: block;
     margin-right: 2.35765%;
@@ -610,11 +610,11 @@ html, body {
     clear: both; }
 
 /* line 56, scss/lib/_grid.scss */
-.container, .homepage .banner div, .homepage .stats, nav.sidebar {
+.container, nav.sidebar, .homepage .banner div, .homepage .stats {
   padding: 0.75em; }
   @media screen and (min-width: 500px) {
     /* line 56, scss/lib/_grid.scss */
-    .container, .homepage .banner div, .homepage .stats, nav.sidebar {
+    .container, nav.sidebar, .homepage .banner div, .homepage .stats {
       padding: 1.5em; } }
 
 /* line 61, scss/lib/_grid.scss */
@@ -626,39 +626,39 @@ html, body {
       margin: 0 -1.5em; } }
 
 /* line 3, scss/lib/_prototypes.scss */
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form, #hidden-form, .plan li, .progress-bar, .request .tabs label, .clone-candidates .candidate {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .progress-bar, .request .tabs label, .clone-candidates .candidate, .plan li {
   border: 1px solid #B3BECB; }
 
 /* line 4, scss/lib/_prototypes.scss */
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form, .collection .filters li a, ul.notifications li.notification span.text button.close, .modal, .meter, table, .request .crowdfund input, .request .files ul li, .new-request .create-request, .clone-candidates .candidate, nav.sidebar ul a {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.text button.close, .modal, .meter, table, .request .crowdfund input, .request .files ul li, nav.sidebar ul a, .new-request .create-request, .clone-candidates .candidate {
   border-radius: 9px; }
 
 /* line 7, scss/lib/_prototypes.scss */
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .form {
-  overflow: hidden;
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   line-height: 1.5em;
   border-color: #B3BECB; }
-  /* line 12, scss/lib/_prototypes.scss */
-  .button ul, input[type="submit"] ul, button ul, .button.default ul, input.default[type="submit"] ul, button.default ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input.primary[type="submit"] ul, button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input.success[type="submit"] ul, button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input.failure[type="submit"] ul, button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input.disabled[type="submit"] ul, button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input[type="submit"]:disabled ul, input.button:disabled:hover ul, input[type="submit"]:disabled:hover ul, input.button:disabled:active ul, input[type="submit"]:disabled:active ul, .post .actions ul, .question .actions ul, .request .actions ul, .jurisdiction .actions ul, .agency .actions ul, .profile .actions ul, .collection .controls ul, .collection.request .filters form ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, .message ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul, .form ul {
+  /* line 11, scss/lib/_prototypes.scss */
+  .button ul, input[type="submit"] ul, button ul, .button.default ul, input.default[type="submit"] ul, button.default ul, input[type="submit"] .default ul, button .default ul, .button.primary ul, input.primary[type="submit"] ul, button.primary ul, input[type="submit"] .primary ul, button .primary ul, .button.success ul, input.success[type="submit"] ul, button.success ul, input[type="submit"] .success ul, button .success ul, .button.failure ul, input.failure[type="submit"] ul, button.failure ul, input[type="submit"] .failure ul, button .failure ul, .button.disabled ul, input.disabled[type="submit"] ul, button.disabled ul, input[type="submit"] .disabled ul, button .disabled ul, input:disabled ul, input:disabled:hover ul, input:disabled:active ul, input.button:disabled ul, input[type="submit"]:disabled ul, input.button:disabled:hover ul, input[type="submit"]:disabled:hover ul, input.button:disabled:active ul, input[type="submit"]:disabled:active ul, .post .actions ul, .question .actions ul, .request .actions ul, .jurisdiction .actions ul, .agency .actions ul, .profile .actions ul, .collection .controls ul, .collection.request .filters form ul, .panel ul, .panel.default ul, .panel.primary ul, .panel.success ul, .panel.failure ul, .panel.disabled ul, .message ul, .form ul, .feed-item ul, textarea ul, input[type="email"] ul, input[type="number"] ul, input[type="password"] ul, input[type="search"] ul, input[type="tel"] ul, input[type="text"] ul, input[type="url"] ul, input[type="color"] ul, input[type="date"] ul, input[type="datetime"] ul, input[type="datetime-local"] ul, input[type="month"] ul, input[type="time"] ul, input[type="week"] ul {
     list-style-type: none;
     padding-left: 0; }
 
-/* line 21, scss/lib/_prototypes.scss */
+/* line 20, scss/lib/_prototypes.scss */
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active {
   display: inline-block;
   margin: 0.25em 0.325em 0.25em 0;
   padding: 0.375em 1em;
   text-decoration: none;
   text-align: center; }
-  /* line 28, scss/lib/_prototypes.scss */
+  /* line 27, scss/lib/_prototypes.scss */
   .button:hover, input[type="submit"]:hover, button:hover, button.default:hover, input[type="submit"] .default:hover, button .default:hover, button.primary:hover, input[type="submit"] .primary:hover, button .primary:hover, button.success:hover, input[type="submit"] .success:hover, button .success:hover, button.failure:hover, input[type="submit"] .failure:hover, button .failure:hover, button.disabled:hover, input[type="submit"] .disabled:hover, button .disabled:hover, input:hover:disabled, input.button:hover:disabled, input[type="submit"]:hover:disabled {
     text-decoration: none; }
 
-/* line 32, scss/lib/_prototypes.scss */
-.post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .feed-item {
+/* line 31, scss/lib/_prototypes.scss */
+.post .actions, .question .actions, .request .actions, .jurisdiction .actions, .agency .actions, .profile .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item {
+  overflow: hidden;
   display: block;
   width: 100%;
   margin: 0.75em 0;
@@ -692,13 +692,13 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
     /* line 66, scss/lib/_prototypes.scss */
     .post .meta header h1, .question .meta header h1, .request .meta header h1, .jurisdiction .meta header h1, .agency .meta header h1, .profile .meta header h1 {
       font-size: 1.5em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; }
+      line-height: 1.22222em;
+      margin: 0.30556em 0; }
     /* line 67, scss/lib/_prototypes.scss */
     .post .meta header h2, .question .meta header h2, .request .meta header h2, .jurisdiction .meta header h2, .agency .meta header h2, .profile .meta header h2 {
       font-size: 1em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0; }
+      line-height: 1.22222em;
+      margin: 0.30556em 0; }
     @media screen and (min-width: 500px) {
       /* line 63, scss/lib/_prototypes.scss */
       .post .meta header, .question .meta header, .request .meta header, .jurisdiction .meta header, .agency .meta header, .profile .meta header {
@@ -706,13 +706,13 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
         /* line 70, scss/lib/_prototypes.scss */
         .post .meta header h1, .question .meta header h1, .request .meta header h1, .jurisdiction .meta header h1, .agency .meta header h1, .profile .meta header h1 {
           font-size: 1.75em;
-          line-height: 1.51282em;
-          margin: 0.37821em 0; }
+          line-height: 1.22222em;
+          margin: 0.30556em 0; }
         /* line 71, scss/lib/_prototypes.scss */
         .post .meta header h2, .question .meta header h2, .request .meta header h2, .jurisdiction .meta header h2, .agency .meta header h2, .profile .meta header h2 {
           font-size: 1.25em;
-          line-height: 1.51282em;
-          margin: 0.37821em 0; } }
+          line-height: 1.22222em;
+          margin: 0.30556em 0; } }
   /* line 74, scss/lib/_prototypes.scss */
   .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside {
     margin: 0.75em 0; }
@@ -727,8 +727,8 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .post .meta summary, .question .meta summary, .request .meta summary, .jurisdiction .meta summary, .agency .meta summary, .profile .meta summary {
         display: block;
         font-size: 1.25em;
-        line-height: 1.51282em;
-        margin: 0.37821em 0; } }
+        line-height: 1.22222em;
+        margin: 0.30556em 0; } }
 /* line 87, scss/lib/_prototypes.scss */
 .post .main, .question .main, .request .main, .jurisdiction .main, .agency .main, .profile .main {
   max-width: 68em;
@@ -852,13 +852,13 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
   /* line 166, scss/lib/_prototypes.scss */
   .collection h2, .search.collection h2 {
     font-size: 1.25em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
   /* line 167, scss/lib/_prototypes.scss */
   .collection h3, .search.collection h3 {
     font-size: 1em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
   /* line 169, scss/lib/_prototypes.scss */
   .collection .controls {
     display: block; }
@@ -952,38 +952,38 @@ h1, h2, h3, h4, h5, nav.sidebar .account .username, h6, nav.sidebar .spotlight h
 /* line 21, scss/lib/_typography.scss */
 h1 {
   font-size: 2em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 22, scss/lib/_typography.scss */
 h2 {
   font-size: 1.875em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 23, scss/lib/_typography.scss */
 h3 {
   font-size: 1.75em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 24, scss/lib/_typography.scss */
 h4 {
   font-size: 1.5em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 25, scss/lib/_typography.scss */
 h5, nav.sidebar .account .username {
   font-size: 1.375em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 26, scss/lib/_typography.scss */
 h6, nav.sidebar .spotlight h1 {
   font-size: 1.25em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 28, scss/lib/_typography.scss */
 p {
@@ -1011,8 +1011,8 @@ blockquote {
 /* line 47, scss/lib/_typography.scss */
 small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
   font-size: 0.8em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
+  line-height: 1.22222em;
+  margin: 0.30556em 0;
   font-style: normal; }
 
 /* line 52, scss/lib/_typography.scss */
@@ -1023,8 +1023,8 @@ code {
   margin: 0.75em 0;
   font-family: 'Source Code Pro', monospace;
   font-size: 0.8em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
+  line-height: 1.22222em;
+  margin: 0.30556em 0;
   padding: 0.5em 0.75em;
   color: #21282c;
   background-color: #cecece;
@@ -1579,8 +1579,8 @@ ul.notifications {
   .pagination .page-ref, .pagination .pp-ref {
     font-weight: 300;
     font-size: 1.25em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
     padding: 0 0.75em;
     margin: 0; }
 
@@ -1654,70 +1654,27 @@ ul.notifications {
     resize: none;
     font-size: 0.9em; }
 
-/* line 13, scss/lib/objects/_objects.scss */
-fieldset label {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  display: block;
-  color: #6b6a65;
-  text-align: left; }
-/* line 21, scss/lib/objects/_objects.scss */
-fieldset input + label {
-  float: left;
-  margin-right: 1.5em; }
-/* line 26, scss/lib/objects/_objects.scss */
-fieldset > fieldset, fieldset > fieldset + fieldset {
-  margin: 0; }
-
-/* line 29, scss/lib/objects/_objects.scss */
+/* line 1, scss/lib/objects/_forms.scss */
 .form {
-  display: block;
   padding: 1.5em; }
-  /* line 34, scss/lib/objects/_objects.scss */
-  .form header {
-    max-width: 68em;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 5% 0 5%;
-    margin: 0.75em 0; }
+  /* line 4, scss/lib/objects/_forms.scss */
+  .form header, .form form {
+    display: block; }
     /* line 15, scss/bourbon/addons/_clearfix.scss */
-    .form header:after {
+    .form header:after, .form form:after {
       content: "";
       display: table;
       clear: both; }
-  /* line 39, scss/lib/objects/_objects.scss */
+  /* line 6, scss/lib/objects/_forms.scss */
   .form h1 {
     font-size: 3em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
     margin-top: 0; }
-  /* line 44, scss/lib/objects/_objects.scss */
-  .form form {
-    max-width: 68em;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 0 0 5%;
-    border: none; }
-    /* line 15, scss/bourbon/addons/_clearfix.scss */
-    .form form:after {
-      content: "";
-      display: table;
-      clear: both; }
-  /* line 49, scss/lib/objects/_objects.scss */
-  .form fieldset {
-    margin-right: 0;
-    padding: 0 5% 0 0;
-    margin-top: 0; }
-  /* line 55, scss/lib/objects/_objects.scss */
-  .form input {
+  /* line 12, scss/lib/objects/_forms.scss */
+  .form .visible-fields fieldset input {
     width: 100%; }
-  /* line 56, scss/lib/objects/_objects.scss */
-  .form textarea {
-    width: 100%;
-    height: 10em;
-    resize: vertical; }
-  /* line 61, scss/lib/objects/_objects.scss */
+  /* line 14, scss/lib/objects/_forms.scss */
   .form .buttons {
     display: block; }
     /* line 15, scss/bourbon/addons/_clearfix.scss */
@@ -1726,155 +1683,53 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       display: table;
       clear: both; }
 
-/* line 65, scss/lib/objects/_objects.scss */
-#hidden-form {
-  display: none;
-  width: 100%;
-  overflow: hidden;
-  margin: 1.5em 0; }
-  /* line 67, scss/lib/objects/_objects.scss */
-  #hidden-form:target {
-    display: block; }
-  /* line 72, scss/lib/objects/_objects.scss */
-  #hidden-form a.button, #hidden-form input.button, #hidden-form input[type="submit"] {
-    float: right; }
+/* line 17, scss/lib/objects/_forms.scss */
+.hidden-stripe-handler {
+  display: none; }
 
-/* line 74, scss/lib/objects/_objects.scss */
-#hidden-form-button:focus {
-  outline: none; }
-
-@media screen and (min-width: 769px) {
-  /* line 77, scss/lib/objects/_objects.scss */
-  .form.login ul {
-    margin: 0.75em 0 0; } }
-/* line 83, scss/lib/objects/_objects.scss */
-.form.login p {
-  padding-left: 5%;
-  margin-bottom: 0.75em; }
-
-/* line 89, scss/lib/objects/_objects.scss */
-.form.password-reset, .password-change {
-  overflow: hidden; }
-  /* line 91, scss/lib/objects/_objects.scss */
-  .form.password-reset h1, .password-change h1 {
-    margin: 0 0 0.75em; }
-  /* line 92, scss/lib/objects/_objects.scss */
-  .form.password-reset form, .password-change form {
-    padding: 0 2.35765% 0 2.35765%; }
-
-/* line 95, scss/lib/objects/_objects.scss */
-.features {
-  margin: 0 -1.5em 1.5em;
-  padding: 3em 1.5em;
-  color: #f4f4f4;
-  background-color: #3a82ff;
-  text-align: center; }
-  /* line 101, scss/lib/objects/_objects.scss */
-  .features h1 {
-    font-size: 2em;
-    line-height: 1.22222em;
-    margin: 0.30556em 0;
-    font-weight: 300;
-    margin-bottom: 1.5em; }
-  /* line 106, scss/lib/objects/_objects.scss */
-  .features a {
-    color: #f4f4f4;
-    text-decoration: none;
-    border-bottom: 1px dotted #f4f4f4; }
-    /* line 110, scss/lib/objects/_objects.scss */
-    .features a:hover {
-      border-bottom-style: solid; }
-
-/* line 114, scss/lib/objects/_objects.scss */
-.pricing {
-  display: block; }
-  /* line 15, scss/bourbon/addons/_clearfix.scss */
-  .pricing:after {
-    content: "";
-    display: table;
-    clear: both; }
-
-/* line 116, scss/lib/objects/_objects.scss */
-.plan {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  margin-top: 0.75em;
-  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
-  /* line 120, scss/lib/objects/_objects.scss */
-  .plan:hover {
-    margin-top: 0;
-    margin-bottom: 0.75em; }
-  /* line 125, scss/lib/objects/_objects.scss */
-  .plan a {
+/* line 19, scss/lib/objects/_forms.scss */
+fieldset {
+  margin-top: 0; }
+  /* line 21, scss/lib/objects/_forms.scss */
+  fieldset label {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
     display: block;
-    padding: 1.5em 0.75em;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    color: #f4f4f4;
-    background-color: #21282c;
-    text-align: center;
-    font-weight: 300; }
-    /* line 133, scss/lib/objects/_objects.scss */
-    .plan a:hover {
-      background-color: #3a82ff;
-      text-decoration: none; }
-  /* line 138, scss/lib/objects/_objects.scss */
-  .plan ul {
-    list-style-type: none;
-    padding-left: 0;
+    color: #6b6a65;
+    text-align: left; }
+  /* line 29, scss/lib/objects/_forms.scss */
+  fieldset input + label {
+    float: left;
+    margin-right: 1.5em; }
+  /* line 34, scss/lib/objects/_forms.scss */
+  fieldset > fieldset, fieldset > fieldset + fieldset {
     margin: 0; }
-  /* line 143, scss/lib/objects/_objects.scss */
-  .plan li {
-    font-size: 0.9em;
-    line-height: 1.22222em;
-    margin: 0.30556em 0;
-    margin: 0;
-    padding: 0.75em;
-    border-bottom: none; }
-    /* line 149, scss/lib/objects/_objects.scss */
-    .plan li:first-child {
-      border-top: none; }
-    /* line 150, scss/lib/objects/_objects.scss */
-    .plan li:last-child {
-      border-bottom: 1px solid #B3BECB;
-      border-bottom-left-radius: 9px;
-      border-bottom-right-radius: 9px; }
-    /* line 154, scss/lib/objects/_objects.scss */
-    .plan li:hover {
-      background-color: #e7e7e7; }
-  /* line 157, scss/lib/objects/_objects.scss */
-  .plan .name {
-    font-size: 1.5em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
-  /* line 158, scss/lib/objects/_objects.scss */
-  .plan .description {
-    font-size: 1em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
 
+@media screen and (min-width: 500px) {
+  /* line 38, scss/lib/objects/_forms.scss */
+  .login.form .form-info {
+    text-align: right; } }
 /* Feeds */
-/* line 164, scss/lib/objects/_objects.scss */
+/* line 11, scss/lib/objects/_objects.scss */
 .feed-item {
   overflow: hidden;
   width: 100%; }
-  /* line 167, scss/lib/objects/_objects.scss */
+  /* line 14, scss/lib/objects/_objects.scss */
   .feed-item > header {
     display: block;
     width: 100%;
     margin-bottom: 0.75em;
     float: left; }
-    /* line 172, scss/lib/objects/_objects.scss */
+    /* line 19, scss/lib/objects/_objects.scss */
     .feed-item > header div {
       display: block; }
-      /* line 174, scss/lib/objects/_objects.scss */
+      /* line 21, scss/lib/objects/_objects.scss */
       .feed-item > header div + div {
         font-size: 0.9em;
         line-height: 1.66667em;
         margin: 0.41667em 0; }
-  /* line 179, scss/lib/objects/_objects.scss */
+  /* line 26, scss/lib/objects/_objects.scss */
   .feed-item .button, .feed-item input[type="submit"], .feed-item button {
     font-size: 0.9em;
     line-height: 1.66667em;
@@ -1882,29 +1737,29 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     line-height: 1.5em;
     float: left; }
 
-/* line 186, scss/lib/objects/_objects.scss */
+/* line 33, scss/lib/objects/_objects.scss */
 .feed {
   width: 100%; }
-  /* line 188, scss/lib/objects/_objects.scss */
+  /* line 35, scss/lib/objects/_objects.scss */
   .feed ul, .feed ol {
     list-style-type: none;
     padding-left: 0; }
-  /* line 193, scss/lib/objects/_objects.scss */
+  /* line 40, scss/lib/objects/_objects.scss */
   .feed .feed-item {
     margin: 0;
     border-top: none;
     border-radius: 0; }
-  /* line 199, scss/lib/objects/_objects.scss */
+  /* line 46, scss/lib/objects/_objects.scss */
   .feed li:first-child > .feed-item {
     border-top: 1px solid #B3BECB;
     border-top-left-radius: 9px;
     border-top-right-radius: 9px; }
-  /* line 204, scss/lib/objects/_objects.scss */
+  /* line 51, scss/lib/objects/_objects.scss */
   .feed li:last-child > .feed-item {
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px; }
   @media screen and (min-width: 769px) {
-    /* line 186, scss/lib/objects/_objects.scss */
+    /* line 33, scss/lib/objects/_objects.scss */
     .feed {
       float: left;
       display: block;
@@ -1913,7 +1768,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
       /* line 38, scss/neat/grid/_span-columns.scss */
       .feed:last-child {
         margin-right: 0; }
-      /* line 210, scss/lib/objects/_objects.scss */
+      /* line 57, scss/lib/objects/_objects.scss */
       .feed.narrow {
         float: left;
         display: block;
@@ -1922,7 +1777,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
         /* line 38, scss/neat/grid/_span-columns.scss */
         .feed.narrow:last-child {
           margin-right: 0; }
-      /* line 211, scss/lib/objects/_objects.scss */
+      /* line 58, scss/lib/objects/_objects.scss */
       .feed.wide {
         float: left;
         display: block;
@@ -1933,7 +1788,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
           margin-right: 0; } }
 
 /* Progress Bar */
-/* line 222, scss/lib/objects/_objects.scss */
+/* line 69, scss/lib/objects/_objects.scss */
 .progress-bar {
   display: block;
   width: 100%;
@@ -1942,7 +1797,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   border-radius: 10px;
   background-color: #f4f4f4; }
 
-/* line 232, scss/lib/objects/_objects.scss */
+/* line 79, scss/lib/objects/_objects.scss */
 .meter {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -1955,7 +1810,7 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
   border: 1px solid #8697ac;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px; }
-  /* line 240, scss/lib/objects/_objects.scss */
+  /* line 87, scss/lib/objects/_objects.scss */
   .meter.completed {
     border-top-right-radius: 9px;
     border-bottom-right-radius: 9px; }
@@ -1995,40 +1850,36 @@ fieldset > fieldset, fieldset > fieldset + fieldset {
     background: linear-gradient(#d1d8e0, #b9c3cf);
     border: 1px solid #a4b1c1; }
 
-/* line 249, scss/lib/objects/_objects.scss */
+/* line 96, scss/lib/objects/_objects.scss */
 table {
   width: 100%;
   margin-top: 1.5em 0; }
-  /* line 253, scss/lib/objects/_objects.scss */
+  /* line 100, scss/lib/objects/_objects.scss */
   table th, table td {
     padding: 0.25em 0.5em; }
-  /* line 254, scss/lib/objects/_objects.scss */
+  /* line 101, scss/lib/objects/_objects.scss */
   table tr:nth-child(odd) {
     background-color: #e7e7e7; }
-  /* line 255, scss/lib/objects/_objects.scss */
+  /* line 102, scss/lib/objects/_objects.scss */
   table, table th, table td {
     border-top: 1px solid #B3BECB;
     border-bottom: 1px solid #B3BECB; }
 
-/* line 261, scss/lib/objects/_objects.scss */
+/* line 108, scss/lib/objects/_objects.scss */
 .file {
   overflow: hidden; }
-  /* line 263, scss/lib/objects/_objects.scss */
+  /* line 110, scss/lib/objects/_objects.scss */
   .file .thumbnail {
     float: left;
     max-height: 32px;
     width: auto;
     margin: 0.375em 1.5em 0 0; }
-  /* line 269, scss/lib/objects/_objects.scss */
+  /* line 116, scss/lib/objects/_objects.scss */
   .file .file-actions a {
     margin-left: 0.75em; }
-    /* line 271, scss/lib/objects/_objects.scss */
+    /* line 118, scss/lib/objects/_objects.scss */
     .file .file-actions a:first-child {
       margin-left: 0; }
-
-/* line 275, scss/lib/objects/_objects.scss */
-.hidden-stripe-handler {
-  display: none; }
 
 /* Layouts */
 /* Details */
@@ -2036,8 +1887,8 @@ table {
   /* line 8, scss/lib/layouts/_details.scss */
   .post p:first-of-type {
     font-size: 1.2em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; } }
+    line-height: 1.22222em;
+    margin: 0.30556em 0; } }
 
 /* line 14, scss/lib/layouts/_details.scss */
 .jurisdiction h3 {
@@ -2056,8 +1907,8 @@ table {
 /* line 26, scss/lib/layouts/_details.scss */
 .profile section.meta > header h1 {
   font-size: 3em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0;
+  line-height: 1.22222em;
+  margin: 0.30556em 0;
   margin-top: 0;
   font-weight: 300; }
 /* line 31, scss/lib/layouts/_details.scss */
@@ -2087,19 +1938,19 @@ table {
   /* line 48, scss/lib/layouts/_details.scss */
   .request .crowdfund h1 {
     font-size: 1.2em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
     color: #02CF6B; }
   /* line 52, scss/lib/layouts/_details.scss */
   .request .crowdfund h2 {
     font-size: 1.2em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
   /* line 53, scss/lib/layouts/_details.scss */
   .request .crowdfund h3 {
     font-size: 0.9em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0; }
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
   /* line 54, scss/lib/layouts/_details.scss */
   .request .crowdfund input {
     width: 100%;
@@ -2107,8 +1958,8 @@ table {
     padding: 0.1875em 0.375em;
     background-color: #f4f4f4;
     font-size: 1.75em;
-    line-height: 1.51282em;
-    margin: 0.37821em 0;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
     font-weight: 300; }
   /* line 63, scss/lib/layouts/_details.scss */
   .request .crowdfund button {
@@ -2229,8 +2080,8 @@ h1.list-label {
   font-weight: 300;
   text-align: left;
   font-size: 3em;
-  line-height: 1.51282em;
-  margin: 0.37821em 0; }
+  line-height: 1.22222em;
+  margin: 0.30556em 0; }
 
 /* line 17, scss/lib/layouts/_lists.scss */
 .collection.jurisdiction h2, .collection.jurisdiction ul, .collection.agency h2, .collection.agency ul {
@@ -2399,472 +2250,6 @@ h1.list-label {
   .collection.request.my .list .foia-info.title input {
     margin-top: 0.9375em;
     margin-right: 0.75em; }
-
-/* line 1, scss/lib/layouts/_front-page.scss */
-.homepage {
-  overflow: hidden; }
-  /* line 4, scss/lib/layouts/_front-page.scss */
-  .homepage .homepage-row {
-    display: table-row; }
-  /* line 5, scss/lib/layouts/_front-page.scss */
-  .homepage .banner {
-    display: block;
-    height: 23em;
-    width: 100%;
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    color: #f4f4f4; }
-    @media screen and (min-width: 500px) {
-      /* line 5, scss/lib/layouts/_front-page.scss */
-      .homepage .banner {
-        height: 35em; } }
-    /* line 16, scss/lib/layouts/_front-page.scss */
-    .homepage .banner h1 {
-      max-width: 12em;
-      color: #f4f4f4;
-      font-weight: 500;
-      font-size: 1.75em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      margin: 0 auto 1.5em; }
-      @media screen and (min-width: 500px) {
-        /* line 16, scss/lib/layouts/_front-page.scss */
-        .homepage .banner h1 {
-          max-width: 18em;
-          font-size: 2.5em;
-          line-height: 1.22222em;
-          margin: 0.30556em 0;
-          margin: 0 auto 1.5em; } }
-      @media screen and (min-width: 769px) {
-        /* line 16, scss/lib/layouts/_front-page.scss */
-        .homepage .banner h1 {
-          font-size: 3em;
-          line-height: 1.22222em;
-          margin: 0.30556em 0;
-          margin: 0 auto 2.25em; } }
-    /* line 32, scss/lib/layouts/_front-page.scss */
-    .homepage .banner div {
-      height: 100%;
-      background: -webkit-linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
-      background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25));
-      font-weight: 500;
-      text-align: center;
-      padding-top: 3.5em; }
-      @media screen and (min-width: 500px) {
-        /* line 32, scss/lib/layouts/_front-page.scss */
-        .homepage .banner div {
-          padding-top: 7.5em; } }
-    /* line 46, scss/lib/layouts/_front-page.scss */
-    .homepage .banner a.dotted {
-      color: #f4f4f4;
-      text-decoration: none;
-      border-bottom: 1px dotted #f4f4f4; }
-      /* line 50, scss/lib/layouts/_front-page.scss */
-      .homepage .banner a.dotted:hover {
-        border-bottom: 1px solid #f4f4f4; }
-    /* line 54, scss/lib/layouts/_front-page.scss */
-    .homepage .banner .button, .homepage .banner input[type="submit"], .homepage .banner button {
-      display: block;
-      margin: 0 auto 0.375em;
-      width: 65%;
-      clear: both; }
-      @media screen and (min-width: 500px) {
-        /* line 54, scss/lib/layouts/_front-page.scss */
-        .homepage .banner .button, .homepage .banner input[type="submit"], .homepage .banner button {
-          display: inline-block;
-          width: auto;
-          margin: 0 0.375em 0 0; } }
-    /* line 65, scss/lib/layouts/_front-page.scss */
-    .homepage .banner .image-attribution {
-      position: absolute;
-      bottom: 1.5em;
-      right: 1.5em;
-      color: #f4f4f4; }
-    /* line 71, scss/lib/layouts/_front-page.scss */
-    .homepage .banner #learn-more {
-      margin-left: 0.375em; }
-  /* line 76, scss/lib/layouts/_front-page.scss */
-  .homepage .featured-article {
-    width: 100%;
-    background-size: cover;
-    background-position: center; }
-    /* line 78, scss/lib/layouts/_front-page.scss */
-    .homepage .featured-article a {
-      display: block;
-      padding: 4.5em 1.5em;
-      text-decoration: none;
-      color: #21282c;
-      background-color: rgba(254, 188, 16, 0.65); }
-      /* line 84, scss/lib/layouts/_front-page.scss */
-      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
-        color: #21282c; }
-      /* line 85, scss/lib/layouts/_front-page.scss */
-      .homepage .featured-article a h1 {
-        font-size: 2em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0;
-        font-weight: 500; }
-      /* line 89, scss/lib/layouts/_front-page.scss */
-      .homepage .featured-article a h2 {
-        font-size: 1.2em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0;
-        font-weight: 400; }
-      /* line 93, scss/lib/layouts/_front-page.scss */
-      .homepage .featured-article a:hover {
-        background-color: rgba(254, 188, 16, 0.85); }
-    @media all and (min-width: 600px) {
-      /* line 76, scss/lib/layouts/_front-page.scss */
-      .homepage .featured-article {
-        display: table-cell;
-        width: 60%; } }
-  /* line 107, scss/lib/layouts/_front-page.scss */
-  .homepage .stats {
-    width: 100%;
-    color: #f4f4f4;
-    background: -webkit-radial-gradient(#2B1E5E, #22184b);
-    background: radial-gradient(#2B1E5E, #22184b);
-    font-weight: 400; }
-    /* line 114, scss/lib/layouts/_front-page.scss */
-    .homepage .stats ul {
-      list-style-type: none;
-      padding-left: 0; }
-    /* line 115, scss/lib/layouts/_front-page.scss */
-    .homepage .stats li {
-      margin: 0.75em 0; }
-    /* line 116, scss/lib/layouts/_front-page.scss */
-    .homepage .stats span {
-      display: block;
-      font-size: 2em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      margin-bottom: 0;
-      font-weight: 300; }
-    @media all and (min-width: 600px) {
-      /* line 107, scss/lib/layouts/_front-page.scss */
-      .homepage .stats {
-        display: table-cell;
-        width: 40%; } }
-  /* line 129, scss/lib/layouts/_front-page.scss */
-  .homepage .footer-container {
-    padding: 0 1.5em; }
-
-/* line 1, scss/lib/layouts/_new-request.scss */
-.new-request {
-  display: block;
-  overflow: hidden; }
-  /* line 6, scss/lib/layouts/_new-request.scss */
-  .new-request header {
-    display: block;
-    margin-bottom: 1.5em; }
-    /* line 15, scss/bourbon/addons/_clearfix.scss */
-    .new-request header:after {
-      content: "";
-      display: table;
-      clear: both; }
-    /* line 10, scss/lib/layouts/_new-request.scss */
-    .new-request header h1 {
-      font-size: 2.5em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      margin: 0;
-      font-weight: 300; }
-  /* line 21, scss/lib/layouts/_new-request.scss */
-  .new-request .create-request {
-    background-color: #B3BECB;
-    overflow: hidden; }
-  /* line 27, scss/lib/layouts/_new-request.scss */
-  .new-request fieldset {
-    margin: 0;
-    padding: 1.5em; }
-  /* line 34, scss/lib/layouts/_new-request.scss */
-  .new-request .title {
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    background-color: #F26C5A; }
-    /* line 37, scss/lib/layouts/_new-request.scss */
-    .new-request .title label {
-      display: none; }
-    /* line 38, scss/lib/layouts/_new-request.scss */
-    .new-request .title input {
-      width: 100%;
-      background-color: #F26C5A;
-      padding: 0;
-      border: none;
-      border-radius: 0;
-      border-bottom: 2px dotted #f9c0b9;
-      font-size: 2em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      color: #f4f4f4; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .title input::-webkit-input-placeholder {
-        color: #f8aba1; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .title input::-moz-placeholder {
-        color: #f8aba1; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .title input:-moz-placeholder {
-        color: #f8aba1; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .title input:-ms-input-placeholder {
-        color: #f8aba1; }
-  /* line 51, scss/lib/layouts/_new-request.scss */
-  .new-request .document {
-    padding: 0; }
-    /* line 53, scss/lib/layouts/_new-request.scss */
-    .new-request .document label {
-      display: none; }
-    /* line 54, scss/lib/layouts/_new-request.scss */
-    .new-request .document textarea {
-      display: block;
-      width: 100%;
-      height: 10em;
-      padding: 1.5em;
-      resize: none;
-      border: none;
-      border-radius: 0; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .document textarea::-webkit-input-placeholder {
-        color: #B3BECB; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .document textarea::-moz-placeholder {
-        color: #B3BECB; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .document textarea:-moz-placeholder {
-        color: #B3BECB; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .document textarea:-ms-input-placeholder {
-        color: #B3BECB; }
-  /* line 69, scss/lib/layouts/_new-request.scss */
-  .new-request fieldset.state, .new-request fieldset.local {
-    width: 100%;
-    background-color: #2b70ee; }
-    /* line 72, scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state label, .new-request fieldset.local label {
-      display: none; }
-    /* line 73, scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state input, .new-request fieldset.local input {
-      display: block;
-      width: 100%; }
-    /* line 77, scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state.hidden, .new-request fieldset.local.hidden {
-      visibility: hidden; }
-    /* line 78, scss/lib/layouts/_new-request.scss */
-    .new-request fieldset.state.visible, .new-request fieldset.local.visible {
-      visibility: visible; }
-  /* line 81, scss/lib/layouts/_new-request.scss */
-  .new-request .jurisdiction {
-    padding: 0;
-    color: #f4f4f4;
-    background-color: #5A90F2;
-    width: 100%;
-    max-width: 100%; }
-    /* line 87, scss/lib/layouts/_new-request.scss */
-    .new-request .jurisdiction h2 {
-      margin: 0; }
-    /* line 88, scss/lib/layouts/_new-request.scss */
-    .new-request .jurisdiction ul {
-      display: table;
-      width: 100%;
-      padding: 0;
-      margin: 0; }
-    /* line 94, scss/lib/layouts/_new-request.scss */
-    .new-request .jurisdiction li {
-      display: table-cell;
-      text-align: center;
-      width: 33%;
-      padding: 0.75em;
-      border-right: 1px solid #89b0f6; }
-      /* line 100, scss/lib/layouts/_new-request.scss */
-      .new-request .jurisdiction li.active {
-        background-color: #2b70ee; }
-        /* line 101, scss/lib/layouts/_new-request.scss */
-        .new-request .jurisdiction li.active:hover {
-          background-color: #2b70ee; }
-      /* line 104, scss/lib/layouts/_new-request.scss */
-      .new-request .jurisdiction li:hover {
-        background-color: #4280f0; }
-      /* line 107, scss/lib/layouts/_new-request.scss */
-      .new-request .jurisdiction li:last-child {
-        border-right: none; }
-      /* line 108, scss/lib/layouts/_new-request.scss */
-      .new-request .jurisdiction li svg {
-        display: block;
-        margin: 0 auto;
-        fill: #f4f4f4;
-        width: auto; }
-        /* line 113, scss/lib/layouts/_new-request.scss */
-        .new-request .jurisdiction li svg#icon-federal {
-          height: 3em; }
-        /* line 114, scss/lib/layouts/_new-request.scss */
-        .new-request .jurisdiction li svg#icon-state {
-          height: 2.5em;
-          margin-top: 0.5em; }
-        /* line 115, scss/lib/layouts/_new-request.scss */
-        .new-request .jurisdiction li svg#icon-local {
-          height: 2.25em;
-          margin-top: 0.75em; }
-    /* line 118, scss/lib/layouts/_new-request.scss */
-    .new-request .jurisdiction label {
-      color: #f4f4f4;
-      font-size: 1em;
-      line-height: 1.51282em;
-      margin: 0.37821em 0;
-      font-weight: 500;
-      text-align: center;
-      cursor: pointer; }
-    /* line 125, scss/lib/layouts/_new-request.scss */
-    .new-request .jurisdiction input[type="radio"] {
-      display: none; }
-  /* line 131, scss/lib/layouts/_new-request.scss */
-  .new-request .agency {
-    display: none;
-    overflow: hidden;
-    margin: 0;
-    width: 100%;
-    max-width: 100%;
-    color: #f4f4f4;
-    background-color: #1157d5; }
-    /* line 140, scss/lib/layouts/_new-request.scss */
-    .new-request .agency label {
-      display: block;
-      color: #f4f4f4;
-      margin: 0;
-      font-weight: 300;
-      font-size: 1rem; }
-    /* line 148, scss/lib/layouts/_new-request.scss */
-    .new-request .agency input {
-      width: 100%;
-      background-color: #1157d5;
-      border: none;
-      border-bottom: 2px dotted #5a90f2;
-      padding-left: 0;
-      border-radius: 0;
-      font-size: 1.25em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      color: #f4f4f4;
-      display: block;
-      width: 100%;
-      margin: 0; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .agency input::-webkit-input-placeholder {
-        color: #5A90F2; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .agency input::-moz-placeholder {
-        color: #5A90F2; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .agency input:-moz-placeholder {
-        color: #5A90F2; }
-      /* line 4, scss/bourbon/css3/_placeholder.scss */
-      .new-request .agency input:-ms-input-placeholder {
-        color: #5A90F2; }
-      /* line 161, scss/lib/layouts/_new-request.scss */
-      .new-request .agency input:disabled {
-        background: #d1d8e0;
-        border-bottom: none;
-        text-align: left;
-        padding-left: 0; }
-        /* line 4, scss/bourbon/css3/_placeholder.scss */
-        .new-request .agency input:disabled::-webkit-input-placeholder {
-          color: #efefef; }
-        /* line 4, scss/bourbon/css3/_placeholder.scss */
-        .new-request .agency input:disabled::-moz-placeholder {
-          color: #efefef; }
-        /* line 4, scss/bourbon/css3/_placeholder.scss */
-        .new-request .agency input:disabled:-moz-placeholder {
-          color: #efefef; }
-        /* line 4, scss/bourbon/css3/_placeholder.scss */
-        .new-request .agency input:disabled:-ms-input-placeholder {
-          color: #efefef; }
-        /* line 167, scss/lib/layouts/_new-request.scss */
-        .new-request .agency input:disabled:hover {
-          padding-left: 0; }
-  /* line 173, scss/lib/layouts/_new-request.scss */
-  .new-request .state, .new-request .local {
-    display: none; }
-  /* line 175, scss/lib/layouts/_new-request.scss */
-  .new-request .full-name, .new-request .email {
-    float: left;
-    width: 50%; }
-    /* line 178, scss/lib/layouts/_new-request.scss */
-    .new-request .full-name input, .new-request .email input {
-      width: 100%; }
-  /* line 181, scss/lib/layouts/_new-request.scss */
-  .new-request .autocomplete-light-widget {
-    display: block;
-    width: 100%; }
-    /* line 184, scss/lib/layouts/_new-request.scss */
-    .new-request .autocomplete-light-widget span.deck > span {
-      font-size: 1.25em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      color: #f4f4f4;
-      display: block;
-      width: 100%;
-      margin: 0; }
-      /* line 190, scss/lib/layouts/_new-request.scss */
-      .new-request .autocomplete-light-widget span.deck > span:before {
-        content: "Jurisdiction";
-        display: block;
-        color: #f4f4f4;
-        margin: 0;
-        font-weight: 300;
-        font-size: 1rem; }
-      /* line 199, scss/lib/layouts/_new-request.scss */
-      .new-request .autocomplete-light-widget span.deck > span span.remove {
-        float: right; }
-  /* line 205, scss/lib/layouts/_new-request.scss */
-  .new-request footer {
-    border-bottom-left-radius: 9px;
-    border-bottom-right-radius: 9px;
-    overflow: hidden;
-    padding: 1.5em;
-    width: 100%; }
-    /* line 210, scss/lib/layouts/_new-request.scss */
-    .new-request footer input {
-      float: left; }
-    /* line 211, scss/lib/layouts/_new-request.scss */
-    .new-request footer p {
-      float: right;
-      width: 70%;
-      margin: 0; }
-
-/* line 220, scss/lib/layouts/_new-request.scss */
-.clone-candidates {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto; }
-  /* line 15, scss/bourbon/addons/_clearfix.scss */
-  .clone-candidates:after {
-    content: "";
-    display: table;
-    clear: both; }
-  /* line 222, scss/lib/layouts/_new-request.scss */
-  .clone-candidates ul {
-    padding-left: 0; }
-  /* line 223, scss/lib/layouts/_new-request.scss */
-  .clone-candidates .candidate {
-    display: inline-block;
-    margin: 0.375em 0.75em;
-    border-color: #21282c;
-    padding: 0.75em; }
-    /* line 231, scss/lib/layouts/_new-request.scss */
-    .clone-candidates .candidate:first-child {
-      margin-left: 0; }
-    /* line 234, scss/lib/layouts/_new-request.scss */
-    .clone-candidates .candidate .button, .clone-candidates .candidate input[type="submit"], .clone-candidates .candidate button {
-      margin-top: 0.5em;
-      margin-right: 0;
-      display: block; }
-    /* line 241, scss/lib/layouts/_new-request.scss */
-    .clone-candidates .candidate div:first-of-type {
-      font-size: 1.2em; }
-    /* line 244, scss/lib/layouts/_new-request.scss */
-    .clone-candidates .candidate div:last-of-type {
-      font-size: 0.9em; }
 
 /* line 1, scss/lib/layouts/_search.scss */
 .search {
@@ -3512,3 +2897,574 @@ nav.sidebar {
         /* line 44, scss/lib/_mixins.scss */
         nav.sidebar form input:focus + span.input-button svg, nav.sidebar form input:active + span.input-button svg {
           fill: #f4f4f4; }
+
+/* line 1, scss/lib/layouts/_front-page.scss */
+.homepage {
+  overflow: hidden; }
+  /* line 4, scss/lib/layouts/_front-page.scss */
+  .homepage .banner {
+    display: block;
+    width: 100%;
+    position: relative;
+    margin-right: -1px;
+    background-size: cover;
+    background-position: center;
+    color: #f4f4f4; }
+    @media screen and (max-width: 500px) {
+      /* line 4, scss/lib/layouts/_front-page.scss */
+      .homepage .banner {
+        height: 20em; } }
+    @media screen and (min-width: 500px) {
+      /* line 4, scss/lib/layouts/_front-page.scss */
+      .homepage .banner {
+        height: 26em; } }
+    @media screen and (min-width: 769px) {
+      /* line 4, scss/lib/layouts/_front-page.scss */
+      .homepage .banner {
+        height: 30em; } }
+    /* line 15, scss/lib/layouts/_front-page.scss */
+    .homepage .banner h1 {
+      max-width: 12em;
+      color: #f4f4f4;
+      font-weight: 500;
+      font-size: 1.75em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      margin: 0 auto 1.5em; }
+      @media screen and (min-width: 500px) {
+        /* line 15, scss/lib/layouts/_front-page.scss */
+        .homepage .banner h1 {
+          max-width: 18em;
+          font-size: 2.5em;
+          line-height: 1.22222em;
+          margin: 0.30556em 0;
+          margin: 0 auto 1.5em; } }
+      @media screen and (min-width: 769px) {
+        /* line 15, scss/lib/layouts/_front-page.scss */
+        .homepage .banner h1 {
+          font-size: 3em;
+          line-height: 1.22222em;
+          margin: 0.30556em 0;
+          margin: 0 auto 2.25em; } }
+    /* line 31, scss/lib/layouts/_front-page.scss */
+    .homepage .banner div {
+      height: 100%;
+      background: -webkit-linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25));
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25));
+      font-weight: 500;
+      text-align: center;
+      padding-top: 3.5em; }
+      @media screen and (min-width: 500px) {
+        /* line 31, scss/lib/layouts/_front-page.scss */
+        .homepage .banner div {
+          padding-top: 7.5em; } }
+    /* line 45, scss/lib/layouts/_front-page.scss */
+    .homepage .banner a.dotted {
+      color: #f4f4f4;
+      text-decoration: none;
+      border-bottom: 1px dotted #f4f4f4; }
+      /* line 49, scss/lib/layouts/_front-page.scss */
+      .homepage .banner a.dotted:hover {
+        border-bottom: 1px solid #f4f4f4; }
+    /* line 53, scss/lib/layouts/_front-page.scss */
+    .homepage .banner .button, .homepage .banner input[type="submit"], .homepage .banner button {
+      display: block;
+      margin: 0 auto 0.375em;
+      width: 65%;
+      clear: both; }
+      @media screen and (min-width: 500px) {
+        /* line 53, scss/lib/layouts/_front-page.scss */
+        .homepage .banner .button, .homepage .banner input[type="submit"], .homepage .banner button {
+          display: inline-block;
+          width: auto;
+          margin: 0 0.375em 0 0; } }
+    /* line 64, scss/lib/layouts/_front-page.scss */
+    .homepage .banner .image-attribution {
+      position: absolute;
+      bottom: 1.5em;
+      right: 1.5em;
+      color: #f4f4f4; }
+    /* line 70, scss/lib/layouts/_front-page.scss */
+    .homepage .banner #learn-more {
+      margin-left: 0.375em; }
+  /* line 75, scss/lib/layouts/_front-page.scss */
+  .homepage .featured-article {
+    width: 100%;
+    background-size: cover;
+    background-position: center; }
+    /* line 77, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-article a {
+      display: block;
+      padding: 4.5em 1.5em;
+      text-decoration: none;
+      color: #21282c;
+      background-color: rgba(254, 188, 16, 0.65); }
+      /* line 83, scss/lib/layouts/_front-page.scss */
+      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
+        color: #21282c; }
+      /* line 84, scss/lib/layouts/_front-page.scss */
+      .homepage .featured-article a h1 {
+        font-size: 2em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        font-weight: 500; }
+      /* line 88, scss/lib/layouts/_front-page.scss */
+      .homepage .featured-article a h2 {
+        font-size: 1.2em;
+        line-height: 1.22222em;
+        margin: 0.30556em 0;
+        font-weight: 400; }
+      /* line 92, scss/lib/layouts/_front-page.scss */
+      .homepage .featured-article a:hover {
+        background-color: rgba(254, 188, 16, 0.85); }
+  /* line 102, scss/lib/layouts/_front-page.scss */
+  .homepage .stats {
+    width: 100%;
+    color: #f4f4f4;
+    background: -webkit-linear-gradient(#0E2340, #0b1c33);
+    background: linear-gradient(#0E2340, #0b1c33); }
+    /* line 109, scss/lib/layouts/_front-page.scss */
+    .homepage .stats h1 {
+      font-size: 1.25em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      font-weight: 400;
+      text-align: center;
+      margin: 1.5em auto; }
+    /* line 115, scss/lib/layouts/_front-page.scss */
+    .homepage .stats ul {
+      display: block;
+      text-align: center; }
+      /* line 15, scss/bourbon/addons/_clearfix.scss */
+      .homepage .stats ul:after {
+        content: "";
+        display: table;
+        clear: both; }
+    /* line 120, scss/lib/layouts/_front-page.scss */
+    .homepage .stats .stat {
+      display: block;
+      font-size: 2.5em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      margin-bottom: 0;
+      font-weight: 300; }
+    /* line 126, scss/lib/layouts/_front-page.scss */
+    .homepage .stats .legend {
+      display: block;
+      max-width: 50%;
+      margin: 0.75em auto;
+      border-top: 1px solid #326FBF;
+      padding-top: 0.75em; }
+  /* line 136, scss/lib/layouts/_front-page.scss */
+  .homepage .footer-container {
+    padding: 0 1.5em; }
+
+/* line 1, scss/lib/layouts/_new-request.scss */
+.new-request {
+  display: block;
+  overflow: hidden; }
+  /* line 6, scss/lib/layouts/_new-request.scss */
+  .new-request header {
+    display: block;
+    margin-bottom: 1.5em; }
+    /* line 15, scss/bourbon/addons/_clearfix.scss */
+    .new-request header:after {
+      content: "";
+      display: table;
+      clear: both; }
+    /* line 10, scss/lib/layouts/_new-request.scss */
+    .new-request header h1 {
+      font-size: 2.5em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      margin: 0;
+      font-weight: 300; }
+  /* line 21, scss/lib/layouts/_new-request.scss */
+  .new-request .create-request {
+    background-color: #B3BECB;
+    overflow: hidden; }
+  /* line 27, scss/lib/layouts/_new-request.scss */
+  .new-request fieldset {
+    margin: 0;
+    padding: 1.5em; }
+  /* line 34, scss/lib/layouts/_new-request.scss */
+  .new-request .title {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    background-color: #F26C5A; }
+    /* line 37, scss/lib/layouts/_new-request.scss */
+    .new-request .title label {
+      display: none; }
+    /* line 38, scss/lib/layouts/_new-request.scss */
+    .new-request .title input {
+      width: 100%;
+      background-color: #F26C5A;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      border-bottom: 2px dotted #f9c0b9;
+      font-size: 2em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      color: #f4f4f4; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .title input::-webkit-input-placeholder {
+        color: #f8aba1; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .title input::-moz-placeholder {
+        color: #f8aba1; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .title input:-moz-placeholder {
+        color: #f8aba1; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .title input:-ms-input-placeholder {
+        color: #f8aba1; }
+  /* line 51, scss/lib/layouts/_new-request.scss */
+  .new-request .document {
+    padding: 0; }
+    /* line 53, scss/lib/layouts/_new-request.scss */
+    .new-request .document label {
+      display: none; }
+    /* line 54, scss/lib/layouts/_new-request.scss */
+    .new-request .document textarea {
+      display: block;
+      width: 100%;
+      height: 10em;
+      padding: 1.5em;
+      resize: none;
+      border: none;
+      border-radius: 0; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea::-webkit-input-placeholder {
+        color: #B3BECB; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea::-moz-placeholder {
+        color: #B3BECB; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea:-moz-placeholder {
+        color: #B3BECB; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .document textarea:-ms-input-placeholder {
+        color: #B3BECB; }
+  /* line 69, scss/lib/layouts/_new-request.scss */
+  .new-request fieldset.state, .new-request fieldset.local {
+    width: 100%;
+    background-color: #2b70ee; }
+    /* line 72, scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state label, .new-request fieldset.local label {
+      display: none; }
+    /* line 73, scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state input, .new-request fieldset.local input {
+      display: block;
+      width: 100%; }
+    /* line 77, scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state.hidden, .new-request fieldset.local.hidden {
+      visibility: hidden; }
+    /* line 78, scss/lib/layouts/_new-request.scss */
+    .new-request fieldset.state.visible, .new-request fieldset.local.visible {
+      visibility: visible; }
+  /* line 81, scss/lib/layouts/_new-request.scss */
+  .new-request .jurisdiction {
+    padding: 0;
+    color: #f4f4f4;
+    background-color: #5A90F2;
+    width: 100%;
+    max-width: 100%; }
+    /* line 87, scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction h2 {
+      margin: 0; }
+    /* line 88, scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction ul {
+      display: table;
+      width: 100%;
+      padding: 0;
+      margin: 0; }
+    /* line 94, scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction li {
+      display: table-cell;
+      text-align: center;
+      width: 33%;
+      padding: 0.75em;
+      border-right: 1px solid #89b0f6; }
+      /* line 100, scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li.active {
+        background-color: #2b70ee; }
+        /* line 101, scss/lib/layouts/_new-request.scss */
+        .new-request .jurisdiction li.active:hover {
+          background-color: #2b70ee; }
+      /* line 104, scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li:hover {
+        background-color: #4280f0; }
+      /* line 107, scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li:last-child {
+        border-right: none; }
+      /* line 108, scss/lib/layouts/_new-request.scss */
+      .new-request .jurisdiction li svg {
+        display: block;
+        margin: 0 auto;
+        fill: #f4f4f4;
+        width: auto; }
+        /* line 113, scss/lib/layouts/_new-request.scss */
+        .new-request .jurisdiction li svg#icon-federal {
+          height: 3em; }
+        /* line 114, scss/lib/layouts/_new-request.scss */
+        .new-request .jurisdiction li svg#icon-state {
+          height: 2.5em;
+          margin-top: 0.5em; }
+        /* line 115, scss/lib/layouts/_new-request.scss */
+        .new-request .jurisdiction li svg#icon-local {
+          height: 2.25em;
+          margin-top: 0.75em; }
+    /* line 118, scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction label {
+      color: #f4f4f4;
+      font-size: 1em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer; }
+    /* line 125, scss/lib/layouts/_new-request.scss */
+    .new-request .jurisdiction input[type="radio"] {
+      display: none; }
+  /* line 131, scss/lib/layouts/_new-request.scss */
+  .new-request .agency {
+    display: none;
+    overflow: hidden;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    color: #f4f4f4;
+    background-color: #1157d5; }
+    /* line 140, scss/lib/layouts/_new-request.scss */
+    .new-request .agency label {
+      display: block;
+      color: #f4f4f4;
+      margin: 0;
+      font-weight: 300;
+      font-size: 1rem; }
+    /* line 148, scss/lib/layouts/_new-request.scss */
+    .new-request .agency input {
+      width: 100%;
+      background-color: #1157d5;
+      border: none;
+      border-bottom: 2px dotted #5a90f2;
+      padding-left: 0;
+      border-radius: 0;
+      font-size: 1.25em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      color: #f4f4f4;
+      display: block;
+      width: 100%;
+      margin: 0; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .agency input::-webkit-input-placeholder {
+        color: #5A90F2; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .agency input::-moz-placeholder {
+        color: #5A90F2; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .agency input:-moz-placeholder {
+        color: #5A90F2; }
+      /* line 4, scss/bourbon/css3/_placeholder.scss */
+      .new-request .agency input:-ms-input-placeholder {
+        color: #5A90F2; }
+      /* line 161, scss/lib/layouts/_new-request.scss */
+      .new-request .agency input:disabled {
+        background: #d1d8e0;
+        border-bottom: none;
+        text-align: left;
+        padding-left: 0; }
+        /* line 4, scss/bourbon/css3/_placeholder.scss */
+        .new-request .agency input:disabled::-webkit-input-placeholder {
+          color: #efefef; }
+        /* line 4, scss/bourbon/css3/_placeholder.scss */
+        .new-request .agency input:disabled::-moz-placeholder {
+          color: #efefef; }
+        /* line 4, scss/bourbon/css3/_placeholder.scss */
+        .new-request .agency input:disabled:-moz-placeholder {
+          color: #efefef; }
+        /* line 4, scss/bourbon/css3/_placeholder.scss */
+        .new-request .agency input:disabled:-ms-input-placeholder {
+          color: #efefef; }
+        /* line 167, scss/lib/layouts/_new-request.scss */
+        .new-request .agency input:disabled:hover {
+          padding-left: 0; }
+  /* line 173, scss/lib/layouts/_new-request.scss */
+  .new-request .state, .new-request .local {
+    display: none; }
+  /* line 175, scss/lib/layouts/_new-request.scss */
+  .new-request .full-name, .new-request .email {
+    float: left;
+    width: 50%; }
+    /* line 178, scss/lib/layouts/_new-request.scss */
+    .new-request .full-name input, .new-request .email input {
+      width: 100%; }
+  /* line 181, scss/lib/layouts/_new-request.scss */
+  .new-request .autocomplete-light-widget {
+    display: block;
+    width: 100%; }
+    /* line 184, scss/lib/layouts/_new-request.scss */
+    .new-request .autocomplete-light-widget span.deck > span {
+      font-size: 1.25em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0;
+      color: #f4f4f4;
+      display: block;
+      width: 100%;
+      margin: 0; }
+      /* line 190, scss/lib/layouts/_new-request.scss */
+      .new-request .autocomplete-light-widget span.deck > span:before {
+        content: "Jurisdiction";
+        display: block;
+        color: #f4f4f4;
+        margin: 0;
+        font-weight: 300;
+        font-size: 1rem; }
+      /* line 199, scss/lib/layouts/_new-request.scss */
+      .new-request .autocomplete-light-widget span.deck > span span.remove {
+        float: right; }
+  /* line 205, scss/lib/layouts/_new-request.scss */
+  .new-request footer {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    overflow: hidden;
+    padding: 1.5em;
+    width: 100%; }
+    /* line 210, scss/lib/layouts/_new-request.scss */
+    .new-request footer input {
+      float: left; }
+    /* line 211, scss/lib/layouts/_new-request.scss */
+    .new-request footer p {
+      float: right;
+      width: 70%;
+      margin: 0; }
+
+/* line 220, scss/lib/layouts/_new-request.scss */
+.clone-candidates {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  /* line 15, scss/bourbon/addons/_clearfix.scss */
+  .clone-candidates:after {
+    content: "";
+    display: table;
+    clear: both; }
+  /* line 222, scss/lib/layouts/_new-request.scss */
+  .clone-candidates ul {
+    padding-left: 0; }
+  /* line 223, scss/lib/layouts/_new-request.scss */
+  .clone-candidates .candidate {
+    display: inline-block;
+    margin: 0.375em 0.75em;
+    border-color: #21282c;
+    padding: 0.75em; }
+    /* line 231, scss/lib/layouts/_new-request.scss */
+    .clone-candidates .candidate:first-child {
+      margin-left: 0; }
+    /* line 234, scss/lib/layouts/_new-request.scss */
+    .clone-candidates .candidate .button, .clone-candidates .candidate input[type="submit"], .clone-candidates .candidate button {
+      margin-top: 0.5em;
+      margin-right: 0;
+      display: block; }
+    /* line 241, scss/lib/layouts/_new-request.scss */
+    .clone-candidates .candidate div:first-of-type {
+      font-size: 1.2em; }
+    /* line 244, scss/lib/layouts/_new-request.scss */
+    .clone-candidates .candidate div:last-of-type {
+      font-size: 0.9em; }
+
+/* Registration Page */
+/* line 3, scss/lib/layouts/_registration.scss */
+.features {
+  margin: 0 -1.5em 1.5em;
+  padding: 3em 1.5em;
+  color: #f4f4f4;
+  background-color: #3a82ff;
+  text-align: center; }
+  /* line 9, scss/lib/layouts/_registration.scss */
+  .features h1 {
+    font-size: 2em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    font-weight: 300;
+    margin-bottom: 1.5em; }
+  /* line 14, scss/lib/layouts/_registration.scss */
+  .features a {
+    color: #f4f4f4;
+    text-decoration: none;
+    border-bottom: 1px dotted #f4f4f4; }
+    /* line 18, scss/lib/layouts/_registration.scss */
+    .features a:hover {
+      border-bottom-style: solid; }
+
+/* line 21, scss/lib/layouts/_registration.scss */
+.pricing {
+  display: block; }
+  /* line 15, scss/bourbon/addons/_clearfix.scss */
+  .pricing:after {
+    content: "";
+    display: table;
+    clear: both; }
+
+/* line 22, scss/lib/layouts/_registration.scss */
+.plan {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  margin-top: 0.75em;
+  -webkit-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  -moz-transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
+  /* line 26, scss/lib/layouts/_registration.scss */
+  .plan:hover {
+    margin-top: 0;
+    margin-bottom: 0.75em; }
+  /* line 31, scss/lib/layouts/_registration.scss */
+  .plan a {
+    display: block;
+    padding: 1.5em 0.75em;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    color: #f4f4f4;
+    background-color: #21282c;
+    text-align: center;
+    font-weight: 300; }
+    /* line 39, scss/lib/layouts/_registration.scss */
+    .plan a:hover {
+      background-color: #3a82ff;
+      text-decoration: none; }
+  /* line 44, scss/lib/layouts/_registration.scss */
+  .plan ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0; }
+  /* line 49, scss/lib/layouts/_registration.scss */
+  .plan li {
+    font-size: 0.9em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    margin: 0;
+    padding: 0.75em;
+    border-bottom: none; }
+    /* line 55, scss/lib/layouts/_registration.scss */
+    .plan li:first-child {
+      border-top: none; }
+    /* line 56, scss/lib/layouts/_registration.scss */
+    .plan li:last-child {
+      border-bottom: 1px solid #B3BECB;
+      border-bottom-left-radius: 9px;
+      border-bottom-right-radius: 9px; }
+    /* line 60, scss/lib/layouts/_registration.scss */
+    .plan li:hover {
+      background-color: #e7e7e7; }
+  /* line 63, scss/lib/layouts/_registration.scss */
+  .plan .name {
+    font-size: 1.5em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
+  /* line 64, scss/lib/layouts/_registration.scss */
+  .plan .description {
+    font-size: 1em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }

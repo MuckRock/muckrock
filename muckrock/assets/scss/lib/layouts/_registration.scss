@@ -1,0 +1,65 @@
+/* Registration Page */
+
+.features {
+    margin: 0 -1*$base-vertical-rhythm $base-vertical-rhythm;
+    padding: 2*$base-vertical-rhythm $base-vertical-rhythm;
+    color: $color-white;
+    background-color: $color-primary;
+    text-align: center;
+    h1 {
+        @include font-sizing(2, 3);
+        font-weight: $light;
+        margin-bottom: $base-vertical-rhythm;
+    }
+    a {
+        color: $color-white;
+        text-decoration: none;
+        border-bottom: 1px dotted $color-white;
+        &:hover { border-bottom-style: solid; }
+    }
+}
+.pricing { @include row; }
+.plan {
+    @extend %third;
+    @include border-top-radius(0px);
+    margin-top: $base-vertical-rhythm/2;
+    &:hover {
+        margin-top: 0;
+        margin-bottom: $base-vertical-rhythm/2;
+    }
+    @include transition(all 0.5s $ease-out-expo);
+    a {
+        display: block;
+        padding: $base-vertical-rhythm $base-vertical-rhythm/2;
+        @include border-top-radius($base-border-radius);
+        color: $color-white;
+        background-color: $color-black;
+        text-align: center;
+        font-weight: $light;
+        &:hover {
+            background-color: $color-primary;
+            text-decoration: none;
+        }
+    }
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    li {
+        @include font-sizing(0.9, 3);
+        margin: 0;
+        padding: $base-vertical-rhythm/2;
+        @extend %border;
+        border-bottom: none;
+        &:first-child { border-top: none; }
+        &:last-child {
+            border-bottom: $base-border-width solid $color-grey;
+            @include border-bottom-radius($base-border-radius);
+        }
+        &:hover { background-color: darken($color-white, 5%); }
+    }
+
+    .name { @include font-sizing(1.5); }
+    .description { @include font-sizing(1); }
+}
