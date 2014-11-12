@@ -144,7 +144,7 @@ def manage_subsc(request):
     
     type = user_profile.acct_type
     if type == 'admin':
-        msg = 'You are an admin, you don\'t need a subscription.'
+        msg = 'You are on staff, you don\'t need a subscription.'
         messages.warning(request, msg)
         return redirect('acct-my-profile');
     elif type == 'proxy':
@@ -167,7 +167,7 @@ def manage_subsc(request):
             user_profile.date_update = datetime.now()
             user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
-            messages.success(request, 'You are now subscribed as a pro user.')
+            messages.success(request, 'Congratulations, you are now subscribed as a pro user!')
         elif user_profile.acct_type == 'pro' and form.is_valid():
             customer = user_profile.customer()
             customer.cancel_subscription()
@@ -206,17 +206,17 @@ def buy_requests(request):
             user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
             user_profile.num_requests += 5
             user_profile.save()
-            msg = 'Purchase successful. You have been credited 5 requests.'
+            msg = 'Purchase successful. 5 requests have been added to your account.'
             messages.success(request, msg)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
-            msg = 'Payment error: %s' % exc
+            msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
         except Exception as e:
-            msg = 'Payment error: %s' % e
+            msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
-            logger.error(msg)
+            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
 
 def profile(request, user_name=None):

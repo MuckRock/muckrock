@@ -116,7 +116,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
     def form_actions(request, foia, _):
         foia.delete()
-        messages.info(request, 'Draft deleted.')
+        messages.success(request, 'The draft has been deleted.')
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     action = Action(
         form_actions=form_actions,
@@ -186,7 +186,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             messages.error(request, 'Payment error: %s' % exc)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
             return redirect(foia)
-        messages.success(request, 'Your payment was successful.')
+        messages.success(request, 'Your payment was successful. We will get this to the agency right away.')
         logger.info(
             '%s has paid %0.2f for request %s',
             request.user.username,
@@ -214,7 +214,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
             payment_required=foia.price * Decimal('1.05'),
             date_due=date.today() + timedelta(30)
         )
-        success_msg = 'You have succesfully started a crowdfunding campaign'
+        success_msg = 'You started a crowdfunding campaign, now get the word out!'
         messages.success(request, success_msg)
         send_mail(
             '%s has launched a crowdfunding campaign' % request.user.username,
@@ -258,8 +258,8 @@ def follow(request, jurisdiction, jidx, slug, idx):
         else: # If not following, follow
             followers.add(request.user.get_profile())
             msg = ('You are now following %s. '
-                   'You will be notified when it is updated.') % foia.title
-        messages.info(request, msg)
+                   'We will notify you when it is updated.') % foia.title
+        messages.success(request, msg)
     else:
         messages.error(request, 'You may not follow your own request.')
     return redirect(foia)
@@ -273,7 +273,7 @@ def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
         foia.save()
         action = 'disabled' if foia.disable_autofollowups else 'enabled'
         msg = 'Autofollowups have been %s' % action
-        messages.info(request, msg)
+        messages.success(request, msg)
     else:
         msg = 'You must own the request to toggle auto-followups.'
         messages.error(request, msg)

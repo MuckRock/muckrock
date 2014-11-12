@@ -170,10 +170,10 @@ def update_request(request, jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     
     if not foia.is_editable():
-        messages.error(request, 'You may only edit non-submitted requests.')
+        messages.error(request, 'You may only edit drafts.')
         return redirect(foia)
-    if foia.user != request.user:
-        messages.error(request, 'You may only edit your own requests.')
+    if foia.user != request.user or not request.user.is_staff:
+        messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
     
     initial_data = {
@@ -325,7 +325,7 @@ def multirequest_update(request, slug, idx):
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:
-        messages.error(request, 'You may only edit your own requests')
+        messages.error(request, 'You may only edit your own requests.')
         return redirect('foia-mylist')
 
     if request.method == 'POST':
@@ -345,10 +345,12 @@ def multirequest_update(request, slug, idx):
                 foia.save()
 
                 if request.POST['submit'] == 'Submit Requests':
-                    return HttpResponseRedirect(reverse('foia-multi',
-                                                        kwargs={'idx': foia.pk, 'slug': foia.slug}))
+                    return HttpResponseRedirect(reverse(
+                        'foia-multi',
+                        kwargs={'idx': foia.pk, 'slug': foia.slug}
+                    ))
 
-                messages.success(request, 'Updates to this request were saved.')
+                messages.success(request, 'The request has been updated.')
                 return redirect(foia)
 
         except KeyError:
@@ -614,7 +616,9 @@ class Detail(DetailView):
         if not foia.user == request.user:
             messages.error(request, 'Only a request\'s owner may submit it.')
         if not request.user.get_profile().make_request():
-            messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
+            msg = 'You do not have any requests remaining. '
+            msg += 'Please purchase more requests and then resubmit.'
+            messages.error(request, msg)
         foia.submit()
         messages.success(request, 'Your request was submitted.')
         return redirect(foia)
@@ -683,7 +687,7 @@ class Detail(DetailView):
                 question.notify_new()
                 return redirect(question)
             else:
-                error_msg = 'There was an error while submitting your question.'
+                error_msg = 'There was an error while posting your question.'
         else:
             error_msg = 'You may only ask questions about your own requests.'
         messages.error(request, error_msg)

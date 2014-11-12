@@ -38,12 +38,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
-            # DEBUG: Cannot send mail while running on localhost
-            '''
             send_mail(
                 '[FLAG] %s: %s' % (type_, agency.name),
                 render_to_string(
-                    'jurisdiction/flag.txt',
+                    'text/jurisdiction/flag.txt',
                     { 'obj': agency,
                       'user': request.user,
                       'type': 'agency',
@@ -54,8 +52,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            '''
-            messages.info(request, 'Agency correction succesfully submitted')
+            messages.info(request, 'Correction submitted. Thanks!')
             return redirect(agency)
     else:
         form = FlagForm()
@@ -74,36 +71,6 @@ def list_(request):
     context = {'agencies': agencies}
 
     return render_to_response('lists/agency_list.html', context,
-                              context_instance=RequestContext(request))
-
-# TODO: CUT THIS OUT
-@login_required
-def update(request, jurisdiction, jidx, slug, idx):
-    """Allow the user to fill in some information about new agencies they create"""
-
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
-
-    if agency.user != request.user or agency.approved:
-        messages.error(request, 'You may only edit your own agencies which have '
-                                'not been approved yet')
-        return redirect('foia-mylist', view='all')
-
-    if request.method == 'POST':
-        form = AgencyForm(request.POST, instance=agency)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Agency information saved.')
-            if request.GET.get('foia', False):
-                foia = FOIARequest.objects.filter(pk=request.GET['foia'])
-                if foia:
-                    return redirect(foia[0])
-            else:
-                return redirect('foia-mylist', view='all')
-    else:
-        form = AgencyForm(instance=agency)
-
-    return render_to_response('agency/agency_form.html', {'form': form},
                               context_instance=RequestContext(request))
 
 def redirect_old(request, jurisdiction, slug, idx, action):

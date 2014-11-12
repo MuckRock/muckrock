@@ -49,9 +49,9 @@ class Detail(DetailView):
         if request.user == question.user or request.user.is_staff:
             question.question = request.POST.get('question')
             question.save()
-            messages.success(request, 'Question succesfully updated')
+            messages.success(request, 'Your question is updated.')
         else:
-            messages.error(request, 'You may only edit your own questions')
+            messages.error(request, 'You may only edit your own questions.')
 
     def _answer(self, request):
         """Edit an answer"""
@@ -60,9 +60,9 @@ class Detail(DetailView):
         if request.user == answer.user or request.user.is_staff:
             answer.answer = request.POST.get('answer')
             answer.save()
-            messages.success(request, 'Answer succesfully updated')
+            messages.success(request, 'Your answer is updated.')
         else:
-            messages.error(request, 'You may only edit your own answers')
+            messages.error(request, 'You may only edit your own answers.')
 
     def get_context_data(self, **kwargs):
         context = super(Detail, self).get_context_data(**kwargs)
@@ -103,12 +103,10 @@ def follow(request, slug, idx):
 
     if question.followed_by.filter(user=request.user):
         question.followed_by.remove(request.user.get_profile())
-        messages.info(request, 'You are no longer following %s' % question.title)
+        messages.success(request, 'You are no longer following %s' % question.title)
     else:
         question.followed_by.add(request.user.get_profile())
-        messages.info(request, 'You are now following %s.  You will be notified whenever an '
-                               'answer is posted.' % question.title)
-
+        messages.success(request, 'You are now following %s. We will notify you of any replies.' % question.title)
     return redirect(question)
 
 @login_required
@@ -135,22 +133,6 @@ def create_answer(request, slug, idx):
         {'form': form, 'question': question},
         context_instance=RequestContext(request)
     )
-
-@login_required
-def subscribe(request):
-    """Subscribe or unsubscribe to new questions"""
-    profile = request.user.get_profile()
-
-    if profile.follow_questions:
-        profile.follow_questions = False
-        messages.info(request, 'You are now unsubscribed from new question notifications')
-    else:
-        profile.follow_questions = True
-        messages.success(request, 'You are now subscribed to new question notifications')
-    profile.save()
-
-    return redirect(reverse('question-index'))
-
 
 class List(ListView):
     """List of unanswered questions"""

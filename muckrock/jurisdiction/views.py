@@ -58,7 +58,7 @@ def detail(request, fed_slug, state_slug, local_slug):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            messages.info(request, 'Agency correction succesfully submitted')
+            messages.info(request, 'Correction submitted, thanks.')
             return redirect(jurisdiction)
     else:
         form = FlagForm()

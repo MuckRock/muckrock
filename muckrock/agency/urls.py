@@ -16,7 +16,7 @@ old_agency_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 urlpatterns = patterns('',
     url(r'^$',                        views.list_, name='agency-list'),
     url(r'^%s/$' % agency_url,        views.detail, name='agency-detail'),
-    url(r'^%s/update/$' % agency_url, views.update, name='agency-update'),
+    # url(r'^%s/update/$' % agency_url, views.update, name='agency-update'),
     url(r'^%s/flag/$' % agency_url,   RedirectView.as_view(url='/%(agency_url)s/'), name='agency-flag'),
     url(r'^stale/$',                  views.stale, name='agency-stale'),
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',

@@ -57,11 +57,13 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
             )
             crowdfund.payment_received += Decimal(amount)
             crowdfund.save()
-            messages.success(request, 'You contributed $%.2f. Thank you!' % amount)
+            messages.success(request, 'You contributed $%.2f. Thanks!' % amount)
+            messages.info(request, 'To track this request, click Follow below.')
             log_msg = ('%s has contributed to crowdfund', name)
             logger.info(log_msg)
         except stripe.CardError as exc:
-            messages.error(request, 'Payment error: %s' % exc)
+            msg = 'Payment error. Your card has not been charged'
+            messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(redirect_url)
 
