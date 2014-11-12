@@ -412,77 +412,77 @@ html, body {
   min-height: 100%; }
 
 /* line 52, scss/neat/grid/_omega.scss */
-.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .request .draft button:nth-child(2n), .request .draft .button:nth-child(2n), .request .draft input[type="submit"]:nth-child(2n), .request .files ul li:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .request .draft button:nth-child(2n), .request .draft .button:nth-child(2n), .request .draft input[type="submit"]:nth-child(2n), .request .files ul li:nth-child(2n), .homepage .featured-requests .buttons a:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
   margin-right: 0; }
 /* line 57, scss/neat/grid/_omega.scss */
-.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .request .draft button:nth-child(2n+1), .request .draft .button:nth-child(2n+1), .request .draft input[type="submit"]:nth-child(2n+1), .request .files ul li:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .request .draft button:nth-child(2n+1), .request .draft .button:nth-child(2n+1), .request .draft input[type="submit"]:nth-child(2n+1), .request .files ul li:nth-child(2n+1), .homepage .featured-requests .buttons a:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
   /* line 13, scss/lib/_grid.scss */
-  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
   /* line 13, scss/lib/_grid.scss */
-  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 13, scss/lib/_grid.scss */
-  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .request .draft button, .request .draft .button, .request .draft input[type="submit"], .request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .request .draft button:last-child, .request .draft .button:last-child, .request .draft input[type="submit"]:last-child, .request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 
 /* line 52, scss/neat/grid/_omega.scss */
-.post .meta aside:nth-child(3n), .question .meta aside:nth-child(3n), .request .meta aside:nth-child(3n), .jurisdiction .meta aside:nth-child(3n), .agency .meta aside:nth-child(3n), .profile .meta aside:nth-child(3n), .agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n), .plan:nth-child(3n) {
+.post .meta aside:nth-child(3n), .question .meta aside:nth-child(3n), .request .meta aside:nth-child(3n), .jurisdiction .meta aside:nth-child(3n), .agency .meta aside:nth-child(3n), .profile .meta aside:nth-child(3n), .agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n), .homepage .featured-requests li:nth-child(3n), .plan:nth-child(3n) {
   margin-right: 0; }
 /* line 57, scss/neat/grid/_omega.scss */
-.post .meta aside:nth-child(3n+1), .question .meta aside:nth-child(3n+1), .request .meta aside:nth-child(3n+1), .jurisdiction .meta aside:nth-child(3n+1), .agency .meta aside:nth-child(3n+1), .profile .meta aside:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1), .plan:nth-child(3n+1) {
+.post .meta aside:nth-child(3n+1), .question .meta aside:nth-child(3n+1), .request .meta aside:nth-child(3n+1), .jurisdiction .meta aside:nth-child(3n+1), .agency .meta aside:nth-child(3n+1), .profile .meta aside:nth-child(3n+1), .agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1), .homepage .featured-requests li:nth-child(3n+1), .plan:nth-child(3n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
   /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
   /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
   /* line 20, scss/lib/_grid.scss */
-  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .plan {
+  .post .meta aside, .question .meta aside, .request .meta aside, .jurisdiction .meta aside, .agency .meta aside, .profile .meta aside, .agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
     /* line 38, scss/neat/grid/_span-columns.scss */
-    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .plan:last-child {
+    .post .meta aside:last-child, .question .meta aside:last-child, .request .meta aside:last-child, .jurisdiction .meta aside:last-child, .agency .meta aside:last-child, .profile .meta aside:last-child, .agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
       margin-right: 0; } }
 
 @media screen and (max-width: 500px) {
@@ -2998,7 +2998,7 @@ nav.sidebar {
       padding: 4.5em 1.5em;
       text-decoration: none;
       color: #21282c;
-      background-color: rgba(254, 188, 16, 0.65); }
+      background-color: rgba(247, 196, 5, 0.75); }
       /* line 83, scss/lib/layouts/_front-page.scss */
       .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
         color: #21282c; }
@@ -3016,7 +3016,7 @@ nav.sidebar {
         font-weight: 400; }
       /* line 92, scss/lib/layouts/_front-page.scss */
       .homepage .featured-article a:hover {
-        background-color: rgba(254, 188, 16, 0.85); }
+        background-color: rgba(247, 196, 5, 0.85); }
   /* line 102, scss/lib/layouts/_front-page.scss */
   .homepage .stats {
     width: 100%;
@@ -3056,6 +3056,41 @@ nav.sidebar {
       border-top: 1px solid #326FBF;
       padding-top: 0.75em; }
   /* line 136, scss/lib/layouts/_front-page.scss */
+  .homepage .featured-requests {
+    color: #f4f4f4;
+    background-color: #DE652C; }
+    /* line 140, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests ul {
+      margin: 0; }
+    /* line 141, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests li {
+      padding: 1.5em; }
+    /* line 142, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests a {
+      color: #f4f4f4;
+      text-decoration: underline; }
+    /* line 147, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests ul, .homepage .featured-requests .buttons {
+      display: block; }
+      /* line 15, scss/bourbon/addons/_clearfix.scss */
+      .homepage .featured-requests ul:after, .homepage .featured-requests .buttons:after {
+        content: "";
+        display: table;
+        clear: both; }
+    /* line 150, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests h1 {
+      font-size: 1.2em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0; }
+    /* line 151, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests h2 {
+      font-size: 1em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0; }
+    /* line 152, scss/lib/layouts/_front-page.scss */
+    .homepage .featured-requests h1, .homepage .featured-requests h2 {
+      font-weight: 400; }
+  /* line 155, scss/lib/layouts/_front-page.scss */
   .homepage .footer-container {
     padding: 0 1.5em; }
 

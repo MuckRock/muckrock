@@ -23,8 +23,8 @@ def front_page(request):
         # no published articles
         featured_article = None
 
-    featured_reqs = FOIARequest.objects.get_public().filter(featured=True)\
-                                       .order_by('-date_done')[:3]
+    public_reqs = FOIARequest.objects.get_public()
+    featured_reqs = public_reqs.filter(featured=True).order_by('-date_done')[:3]
 
     num_requests = FOIARequest.objects.exclude(status='started').count()
     num_completed_requests = FOIARequest.objects.filter(status='done').count()

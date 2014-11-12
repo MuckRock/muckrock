@@ -19,19 +19,37 @@
             <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
         </ul>
     </section>
-        {% if featured_article.image %}
-        <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
-        {% else %}
-        <section class="featured-article">
-        {% endif %}
-            <a href="{{ featured_article.get_absolute_url }}"><div>
-                <dfn>Investigative Report</dfn>
-                <h1>{{ featured_article.title }}</h1>
-                {% if featured_article.summary %}
-                <summary>{{ featured_article.summary }}</summary>
-                {% endif %}
+    {% if featured_article.image %}
+    <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
+    {% else %}
+    <section class="featured-article">
+    {% endif %}
+        <a href="{{ featured_article.get_absolute_url }}"><div>
+            <dfn>Investigative Report</dfn>
+            <h1>{{ featured_article.title }}</h1>
+            {% if featured_article.summary %}
+            <summary>{{ featured_article.summary }}</summary>
+            {% endif %}
+            </div>
+        </a>
+    </section>
+    <!--
+    {% if featured_reqs %}
+    <section class="featured-requests">
+        <ul>
+        {% for foia in featured_reqs %}
+            <li class="request">
+                <h1>{{ foia.title }}</h1>
+                <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %} It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
+                <div class="buttons">
+                    <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">View</a>
+                    <a href="{% url 'foia-clone' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Clone</a>
                 </div>
-            </a>
-        </section>
+            </li>
+        {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+    -->
 
 {% endblock content %}
