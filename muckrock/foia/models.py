@@ -563,7 +563,7 @@ class FOIARequest(models.Model):
         }
 
         linked_actions = [
-            (user.is_authenticated,
+            (True,
             reverse('foia-clone', kwargs=kwargs),
             'Clone',
             'primary'
@@ -601,6 +601,10 @@ class FOIARequest(models.Model):
         ]
 
         unlinked_actions = [
+            (True,
+            'Share',
+            'Easily share this request'
+            ),
             (self.user == user and self.status != 'started',
             'Follow Up',
             'Send a message directly to the agency'
@@ -608,10 +612,6 @@ class FOIARequest(models.Model):
             (self.user == user,
             'Get Advice',
             "Get answers to your question from Muckrock's FOIA expert community"
-            ),
-            (user.is_authenticated(),
-            'Problem?',
-            "Something broken, buggy, or off?  Let us know and we'll fix it"
             ),
             (self.user == user and self.is_appealable(),
             'Appeal',

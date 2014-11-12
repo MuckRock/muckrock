@@ -104,12 +104,14 @@
     {% with remaining=user.get_profile.num_requests %}
     {% if not remaining %}
     <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-    <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-    <button data-amount="2000"
-            data-description="5 requests ($20.00)"
-            data-email="{{ user.email }}"
-            data-form="#buy-requests"
-            class="checkout-button primary">Buy Requests</button>
+    <div class="buy-requests">
+        <p>Your account has no requests.<br>Purchase more below.</p>
+        <button data-amount="2000"
+                data-description="5 requests ($20.00)"
+                data-email="{{ user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button primary">Buy Requests</button>
+    </div>
     {% endif %}
 <form action="." method="post" class="draft">
         {% csrf_token %}
