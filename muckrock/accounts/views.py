@@ -77,7 +77,7 @@ def _register_acct(request, acct_type, form_class, template, url_redirect=None, 
                 monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
                 date_update=datetime.now()
             )
-            customer = user.get_profile().customer()
+            customer = new_user.get_profile().customer()
             token = form.cleaned_data.get('token', False)
             if token:
                 customer.save_cc(token)
