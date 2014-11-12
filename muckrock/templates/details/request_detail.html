@@ -181,6 +181,7 @@
             <h1>{{ action.label }}</h1>
             <h2>{{ action.title }}</h2>
             <input type="submit" name="action" value="{{ action.label }}" />
+            <span class="close-modal button">Close</span>
         </div>
             {% else %}
                 {% if not action.link %}
@@ -269,7 +270,10 @@
         modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
         $('.overlay').click(function(){
-            $('.modal textarea').remove();
+            nextSelector.children('textarea').remove();
+        });
+        $('.close-modal').click(function(){
+            nextSelector.children('textarea').remove();
         });
     }
     

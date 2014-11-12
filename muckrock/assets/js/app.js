@@ -6,6 +6,10 @@ function modal(nextSelector) {
         $('.overlay').fadeOut().remove();
         $('.modal').removeClass('modal').addClass('hidden-modal');
     });
+    $('.close-modal').click(function(){
+        $('.overlay').fadeOut().remove();
+        $('.modal').removeClass('modal').addClass('hidden-modal');
+    });
 }
 
 function checkout(pk, image, description, amount, email, form, submit) {
