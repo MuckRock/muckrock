@@ -12,7 +12,7 @@ Name: {{user.full_name}}
 Item: Request Payment
 Payment ID: {{data.charge}}
 Payment Date: {{data.date}}
-Payment Card: **** **** **** {{user.get_profile.get_cc.last4}}
+Payment Card: **** **** **** {{user.get_profile.credit_card.last4}}
 
 Request Fee:                   ${{fee1}}.00
 Payment Proceesing Fee (5%):   ${{fee2}}.00

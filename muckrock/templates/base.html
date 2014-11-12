@@ -5,19 +5,17 @@
     <head>
         <title>{% block title %}MuckRock{% endblock title %}</title>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1" /> 
         <meta name="google-site-verification"
               content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
         <!-- Load Assets -->
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
-        <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}" />
+        <link rel="apple-touch-icon"
+              href="{% static 'apple-touch-icon.png' %}" />
         <link rel="stylesheet"
               type="text/css"
-              href="{% static 'css/style.css' %}" />
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/jquery-ui-1.8.4.custom.css' %}" />
-        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700,300italic,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+              href="{% static 'style.css' %}" />
         
         <!-- Preloading and Prerendering -->
         {% block preload %}
@@ -26,9 +24,19 @@
         {% endblock prerender %}
         <!-- Facebook and Twitter Integration -->
         <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
-        {% block facebook_open_graph %}
-        {% endblock facebook_open_graph %}
+        {% block open_graph %}
+        <meta property="og:title" content="MuckRock" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="{{ request.build_absolute_uri }}" />      
+        <meta property="og:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
+        <meta property="og:image" content="{{ STATIC_URL }}apple-touch-icon.png" />
+        {% endblock open_graph %}
         {% block twitter_card %}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@muckrock" />
+        <meta name="twitter:title" content="MuckRock" />
+        <meta name="twitter:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
+        <meta name="twitter:image:src" content="{{ STATIC_URL }}apple-touch-icon.png" />
         {% endblock twitter_card %}
     </head>
     <body>

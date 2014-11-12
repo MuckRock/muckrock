@@ -4,14 +4,14 @@
     overflow: hidden;
     // border: $base-border-width solid darken($color-grey, 10%);
     header {
-        @extend %row;
+        @include row();
         // padding: 0 $base-vertical-rhythm;
         margin-bottom: $base-vertical-rhythm;
         h1 {
             @extend %half;
             @include font-sizing(2.5, 3);
             margin: 0;
-            font-weight: 300;
+            font-weight: $light;
         }
         summary {
             @extend %half;
@@ -19,7 +19,7 @@
     }
     
     .create-request {
-        border-radius: $base-border-radius;
+        @extend %border-radius;
         background-color: $color-grey;
         overflow: hidden;
     }
@@ -118,7 +118,7 @@
         label {
             color: $color-white;
             @include font-sizing(1);
-            font-weight: 700;
+            font-weight: $bold;
             text-align: center;
             cursor: pointer;
         }
@@ -142,7 +142,7 @@
             @extend dfn;
             color: $color-white;
             margin: 0;
-            font-weight: 300;
+            font-weight: $light;
             font-size: 1rem;
         }
         input {
@@ -193,7 +193,7 @@
                 @extend dfn;
                 color: $color-white;
                 margin: 0;
-                font-weight: 300;
+                font-weight: $light;
                 font-size: 1rem;
             }
             span.remove {
@@ -215,4 +215,35 @@
         }   
     }
     
+}
+
+.clone-candidates {
+    @include outer-container;
+    ul { padding-left: 0; }
+    .candidate {
+        @extend %quarter;
+        display: inline-block;
+        margin: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+        @extend %border;
+        @extend %border-radius;
+        border-color: $color-black;
+        padding: $base-vertical-rhythm/2;
+        &:first-child {
+            margin-left: 0;
+        }
+        .button {
+            margin-top: 0.5em;
+            margin-right: 0;
+            display: block;
+        }
+        
+        div {
+            &:first-of-type {
+                font-size: 1.2em;
+            }
+            &:last-of-type {
+                font-size: 0.9em;
+            }
+        }
+    }
 }

@@ -98,6 +98,7 @@ def _make_request(request, foia):
         agency = foia['agency']
         is_new_agency = foia['is_new_agency']
         is_clone = foia['is_clone']
+        parent = foia['parent']
         if is_new_agency:
             agency = Agency.objects.create(
                 name=agency[:255],
@@ -124,7 +125,8 @@ def _make_request(request, foia):
             slug=slug,
             agency=agency,
             requested_docs=document,
-            description=document
+            description=document,
+            parent=parent if is_clone else None
         )
         FOIACommunication.objects.create(
             foia=foia,
@@ -251,10 +253,12 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
 def create_request(request):
     initial_data = {}
     clone = False
+    parent = None
     if request.GET.get('clone', False):
         foia_pk = request.GET['clone']
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
         clone = True
+        parent = foia
         initial_data = {
             'title': foia.title,
             'document': foia.requested_docs,
@@ -297,7 +301,8 @@ def create_request(request):
                 'jurisdiction': jurisdiction,
                 'agency': agency,
                 'is_new_agency': is_new_agency,
-                'is_clone': clone
+                'is_clone': clone,
+                'parent': parent
             }
     
             foia, foia_comm, is_new_agency = _make_request(request, foia_request)
@@ -311,7 +316,14 @@ def create_request(request):
         else:
             form = RequestForm(request=request)
     
-    context = { 'form': form, 'clone': clone }
+    viewable = FOIARequest.objects.get_viewable(request.user)
+    featured = viewable.filter(featured=True)
+    
+    context = {
+        'form': form,
+        'clone': clone,
+        'featured': featured
+    }
     
     return render_to_response('forms/create.html', context, 
                               context_instance=RequestContext(request))
@@ -466,11 +478,13 @@ class MyList(List):
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
-            print foia_pks
             if post.get('submit') == 'Mark as Read':
                 self.set_read_status(foia_pks, False)
             elif post.get('submit') == 'Mark as Unread':
                 self.set_read_status(foia_pks, True)
+            elif post.get('submit') == 'Mark All as Read':
+                all_unread = [foia.pk for foia in  FOIARequest.objects.filter(user=self.request.user, updated=True)]
+                self.set_read_status(all_unread, False)
         except (FOIARequest.DoesNotExist):
             pass
         return redirect('foia-mylist')
@@ -617,7 +631,7 @@ class Detail(DetailView):
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        if foia.user == request.user:
+        if foia.user == request.user or request.user.is_staff:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 

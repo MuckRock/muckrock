@@ -8,6 +8,26 @@
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
 
+{% block open_graph %}
+<meta property="og:title" content="{{ foia.title }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta property="og:site_name" content="MuckRock" />
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@muckrock" />
+{% if foia.user.get_profile.twitter %}
+<meta name="twitter:creator" content="{{ foia.user.get_profile.twitter }}" />
+{% endif %}
+<meta name="twitter:title" content="{{ foia.title }}" />
+<meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+{% endblock twitter_card %}
+
 {% block header %}
     <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
         <form action="" method="post" class="status-form" id="status-form">
@@ -39,7 +59,7 @@
         from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
     {% endif %}
     <h1>{{ foia.title }}</h1>
-    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>.{% endif %}</h2>
+    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %} It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
     <dl>
     {% if foia.tags.all or foia.user == request.user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
@@ -63,7 +83,7 @@
             {% if foia.embargo_date %}
         <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
             {% else %}
-        <dd>This request is embargoed and will not be visible until {{ foia.embargo_date|date }}.</dd>
+        <dd>This request is embargoed and will not be made public{% if foia.embargo_date %} until {{ foia.embargo_date|date }}{% endif %}.</dd>
             {% endif %}
         {% endif %}
         {% if foia.user == request.user %}
@@ -72,7 +92,7 @@
                 {% if foia.disable_autofollowups %}
         <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
                 {% else %}
-        <dd>We'll automatically send a follow up to this request on {{ foia.date_followup|date:"F d, Y" }}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
+        <dd>We'll automatically send a follow up to this request{% if foia.date_followup %} on {{ foia.date_followup|date:"F d, Y" }}{% endif %}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
                 {% endif %}
             {% endif %}
         {% endif %}
@@ -80,34 +100,78 @@
 {% endblock header %}
 
 {% block aside %}
-{% if user.is_authenticated %}
-    {% if foia.status == 'started' and foia.user == request.user %}
-        {% with remaining=user.get_profile.num_requests %}
-        {% if not remaining %}
-        <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-        <button data-amount="2000"
-                data-description="5 requests ($20.00)"
-                data-email="{{ user.email }}"
-                data-form="#buy-requests"
-                class="checkout-button primary">Buy Requests</button>
+{% if foia.status == 'started' and foia.user == request.user %}
+    {% with remaining=user.get_profile.num_requests %}
+    {% if not remaining %}
+    <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+    <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+    <button data-amount="2000"
+            data-description="5 requests ($20.00)"
+            data-email="{{ user.email }}"
+            data-form="#buy-requests"
+            class="checkout-button primary">Buy Requests</button>
+    {% endif %}
+<form action="." method="post" class="draft">
+        {% csrf_token %}
+        
+    <input type="submit"
+           name="action"
+           value="Submit"
+           class="primary button"
+           {% if not remaining %}disabled{% endif %}
+    />
+        {% if foia.is_editable %}
+    <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
         {% endif %}
-    <form action="." method="post" class="draft">
-            {% csrf_token %}
-            
-        <input type="submit"
-               name="action"
-               value="Submit"
-               class="primary button"
-               {% if not remaining %}disabled{% endif %}
-        />
-            {% if foia.is_editable %}
-        <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
-            {% endif %}
-        <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
-    </form>
-        {% endwith %}
+    <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+</form>
+    {% endwith %}
+{% endif %}
+{% if foia.has_crowdfund %}
+    <section class="crowdfund panel">
+    {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
+    {% if foia.crowdfund.expired %}
+        <h1>Crowdfunding Completed</h1>
+        <h2>${{ received }} raised out of ${{ required }}</h2>
     {% else %}
+        <h1>Free these docs!</h1>
+        <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
+        <h3>{{ foia.crowdfund.date_due|timeuntil }} remaining</h3>
+        <form method="POST" action="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="stripe-handler" id="crowdfund-form">
+            {% csrf_token %}
+            <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
+            <input name="amount" id="crowdfund-amount" value="0" hidden>
+            <button data-amount="0"
+                    data-description=""
+                    data-email="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}"
+                    data-form="#crowdfund-form"
+                    class="disabled checkout-button" 
+                    id="crowdfund-button"
+                    disabled>
+                Contribute
+            </button>
+        </form>
+    {% endif %}
+    {% endwith %}
+    </section>
+{% endif %}
+{% if not user.is_authenticated and not foia.has_crowdfund %}
+<section class="panel">
+    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
+    <p><a href="{% url 'acct-register' %}">Sign Up Today</a></p>
+</section> 
+{% endif %}  
+{% endblock aside %}
+
+{% block actions %}
+<section class="actions">
+    {% if user.is_authenticated %}
+        {% if foia.is_payable and foia.user == request.user %}
+        <form method="POST" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
+            {% csrf_token %}
+            <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
+        </form>
+        {% endif %}
     <form action="" method="post" class="controls">
         {% csrf_token %}
         {% for action in actions %}
@@ -122,38 +186,27 @@
                 {% if not action.link %}
         <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
                 {% else %}
+                    {% if action.label == 'Pay' %}
+        <button data-amount="{{ foia.get_stripe_amount }}"
+                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
+                data-email="{{ request.user.email }}"
+                data-form="#payment-form"
+                class="checkout-button{% if action.class %} {{ action.class }}{% endif %}">
+            {{ action.label }}
+        </button>
+                    {% else %}           
         <a href="{{ action.link }}"
-           class="{% if action.label == 'Clone' %}primary {%endif%}button{% if action.class %} {{ action.class }}{% endif %}"
+           class="button{% if action.class %} {{ action.class }}{% endif %}"
            {% if action.title %}title="{{ action.title }}"{% endif %}>
-        {{ action.label }}</a>
+            {{ action.label }}
+        </a>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         {% endfor %}
     </form> 
     {% endif %}
-{% else %} 
-<section class="panel">
-    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools. <a href="{% url 'acct-register' %}">Sign Up Today</a> or <a href="{% url 'acct-login' %}">Log In</a></p>
-</section> 
-{% endif %}  
-{% endblock aside %}
-
-{% block actions %}
-    {% if foia.has_crowdfund %}
-        <section class="panel">
-        {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
-        {% if foia.crowdfund.expired %}
-            <h1>Crowdfunding Completed</h1>
-            <h2>${{ received }} raised out of ${{ required }}</h2>
-        {% else %}
-            <h1>Help fund this request</h1>
-            <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
-            <h3>{{ foia.crowdfund.date_due|timeuntil }} to go!</h3>
-            <a href="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="primary button">Contribute</a>
-        {% endif %}
-        {% endwith %}
-        </section>
-    {% endif %}   
+</section>
 {% endblock actions %}
 
 {% block main %}
@@ -171,9 +224,9 @@
 <section class="tab-section communications" id="comms">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
         {% else %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
 </section>
@@ -207,19 +260,16 @@
 {% endblock main %}
 
 {% block scripts %}
-<script src="https://checkout.stripe.com/checkout.js"></script>
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js?20120815" type="text/javascript"></script>
 <script>
-
-    function modal(nextSelector) {
-        var overlay = '<div class="overlay"></div>';
-        $(overlay).insertBefore($('.container')).fadeIn();
-        nextSelector.removeClass('hidden-modal').addClass('modal');
+    
+    function textAreaModal(nextSelector) {
+        modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
         $('.overlay').click(function(){
-            $('.overlay').fadeOut().remove();
             $('.modal textarea').remove();
-            $('.modal').removeClass('modal').addClass('hidden-modal');
         });
     }
     
@@ -283,6 +333,14 @@
             hideAllExcept($('#files'));
             displayDoc(docId, docTitle, docAnchor);
         });
+        
+        /* Modals */
+        
+        $('.controls .modal-button').click(function(e){
+            e.preventDefault();
+            textAreaModal($(this).next());
+            return false;
+        });
     
         /* Tab Bar */
 
@@ -317,16 +375,11 @@
             $(this).hide();
         });
         
-        /* MODAL */
-        
-        $('<textarea name="text"></textarea>').insertBefore($('.controls .modal').children('input'));
-        $('.overlay').click(function(){
-            $('.controls .modal textarea').remove();
-        });
+        /* CHECKOUT */
         
         $('.checkout-button').click(function(e){
             e.preventDefault();
-            checkoutData = getCheckoutData($(this));
+            var checkoutData = getCheckoutData($(this));
             checkout(
                 "{{ stripe_pk }}",
                 "{% static 'apple-touch-icon.png' %}",
@@ -335,8 +388,48 @@
                 checkoutData.email,
                 checkoutData.form
             );
+            return false;
         });
         
+    {% if foia.has_crowdfund %}
+        var crowdfundForm = $('#crowdfund-form');
+        var crowdfundAmountInput = $('#crowdfund-amount-input');
+        var crowdfundAmount = $('#crowdfund-amount');
+        var crowdfundButton = $('#crowdfund-button');
+        
+        crowdfundAmountInput.autoNumeric('init', {aSign:'$', pSign:'p'});        
+        crowdfundAmountInput.keyup(function(){
+            var amount = crowdfundAmountInput.autoNumeric('get');
+            var disabled = crowdfundButton.attr('disabled');
+            var enable;
+            if (amount > 0) {
+                crowdfundButton.attr('disabled', false);
+                enable = true;
+            } else {
+                crowdfundButton.attr('disabled', true);
+                enable = false;
+            }
+            if (disabled && enable) {
+                crowdfundButton.removeClass('disabled').addClass('success');
+            } else if (!disabled && !enable) {
+                crowdfundButton.removeClass('success').addClass('disabled');
+            }
+        });
+        crowdfundAmountInput.change(function(){
+            var amount = crowdfundAmountInput.autoNumeric('get');
+            amount *= 100;
+            if (amount > 0) {
+                crowdfundAmount.attr('value', amount);
+                crowdfundButton.attr('data-amount', amount);
+                var string = '$' + crowdfundAmountInput.autoNumeric('get');
+                var description = 'Contribute (' + string + ')';
+                crowdfundButton.attr('data-description', description);
+            } else {
+                crowdfundButton.attr('disabled', true);
+                crowdfundButton.removeClass('success').addClass('disabled');
+            }
+        });
+    {% endif %}
     });
 </script>
 {% endblock scripts %}

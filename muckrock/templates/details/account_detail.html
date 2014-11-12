@@ -6,16 +6,8 @@
 {% block type %}profile{% endblock type %}
 
 {% block header %}
-    {% ifequal user user_obj %}
-    <h2>{{user.get_profile.get_acct_type_display}} Account</h2>
     <h1>{{user_obj.first_name}} {{user_obj.last_name}}</h1>
     <h2>{{user_obj.username}}</h2>
-    {% else %}
-    <dfn>Profile</dfn>
-    <h2>{{user.get_profile.get_acct_type_display}} Account</h2>
-    <h1>{{user_obj.first_name}} {{user_obj.last_name}}</h1>
-    <h2>{{user_obj.username}}</h2>
-    {% endifequal %}
 {% endblock header %}
 
 {% block aside %}
@@ -37,11 +29,6 @@
         <dd>{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}</dd>
         <dd>{{user_obj.get_profile.zip_code}}</dd>
             {% endif %}
-        {% endif %}
-    
-        {% if user_obj.get_profile.get_cc %}
-        <dt>Credit Card on File</dt>
-        <dd>{{user_obj.get_profile.get_cc.type}} ending with {{user_obj.get_profile.get_cc.last4}}</dd>
         {% endif %}
     </dl>
     {% if user.get_profile.get_acct_type_display != 'Community' %}
@@ -67,19 +54,21 @@
 {% endblock aside %}
 
 {% block actions %}
-{% if request.user == user_obj %}
-<form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-<div class="controls">
-    <button data-amount="2000"
-            data-description="5 requests ($20.00)"
-            data-email="{{ request.user.email }}"
-            data-form="#buy-requests"
-            class="checkout-button primary">Buy Requests</button>
-    <a href="{% url 'acct-update' %}" class="button">Settings</a>
-    <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
-    <a href="{% url 'acct-manage-subsc' %}" class="button">Manage Subscription</a>
-</div>
-{% endif %}
+<section class="actions">
+    {% if request.user == user_obj %}
+    <form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+    <div class="controls">
+        <button data-amount="2000"
+                data-description="5 requests ($20.00)"
+                data-email="{{ request.user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button primary">Buy Requests</button>
+        <a href="{% url 'acct-update' %}" class="button">Settings</a>
+        <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
+        <a href="{% url 'acct-manage-subsc' %}" class="button">Manage Subscription</a>
+    </div>
+    {% endif %}
+</section>
 {% endblock actions %}
 
 {% block main %}

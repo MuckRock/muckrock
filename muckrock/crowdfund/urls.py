@@ -7,5 +7,9 @@ from django.conf.urls import patterns, url
 from muckrock.crowdfund import views
 
 urlpatterns = patterns('',
-    url(r'^project/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$', views.project_detail, name='project-detail'),
-    )
+    url(
+        r'^project/(?P<slug>[\w\d_-]+)-(?P<pk>\d+)/$',
+        views.project_detail,
+        name='project-detail'
+    ),
+)

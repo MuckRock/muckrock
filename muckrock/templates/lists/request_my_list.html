@@ -9,8 +9,9 @@
 <form action="" method="post">
     {% csrf_token %}
     <div class="controls">
-        <button name="submit" value="Mark as Read" >Mark as Read</button>
-	    <button name="submit" value="Mark as Unread" >Mark as Unread</button>
+        <button name="submit" value="Mark as Read">Mark as Read</button>
+	    <button name="submit" value="Mark as Unread">Mark as Unread</button>
+	    <button name="submit" value="Mark All as Read">Mark All as Read</button>
 	</div>
     <ul class="list">
         {% for foia in object_list %}      

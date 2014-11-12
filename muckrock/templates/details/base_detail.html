@@ -16,11 +16,9 @@ This is the parent style for a single object: a blog post, a FOI request, a ques
                 {% block aside %}
                 {% endblock aside %}
             </aside>
-        </section>
-        <section class="actions">
-            {% block actions %}
-            {% endblock actions %}
-        </section>
+        </section>    
+        {% block actions %}
+        {% endblock actions %}
         <section class="main">
             {% block main %}
             {% endblock main %}

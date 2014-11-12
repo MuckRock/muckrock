@@ -30,7 +30,7 @@ fieldset {
     @extend %textbox;
     display: block;
     padding: $base-vertical-rhythm;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     header {
         @include outer-container();
         @include pad(0 5% 0 5%);
@@ -51,8 +51,6 @@ fieldset {
         @include omega();
         @include pad(0 5% 0 0);
         margin-top: 0;
-        // margin: 0.5em 0.75em 1.5em 0;
-        &.question, &.answer { @extend %full; }
     }
     input { width: 100%; }
     textarea {
@@ -70,7 +68,7 @@ fieldset {
     width: 100%;
     overflow: hidden;
     margin: $base-vertical-rhythm 0;
-    border: $base-border-width solid $color-grey;
+    @extend %border;
     a.button, input.button { float: right; }   
 }
 #hidden-form-button:focus { outline: none; }
@@ -88,17 +86,10 @@ fieldset {
     }   
 }
 
-.form.register {
-    h1 { @extend %full; }
-}
-
-.form.subscription form fieldset { @extend %full; }
-
 .form.password-reset, .password-change {
     overflow: hidden;
-    h1 { margin: 0 0 $base-vertical-rhythm/2; }
+    h1 { margin: 0 0 $base-margin/2; }
     form { @include pad(0 default 0 default); }
-    form fieldset { @extend %full; }
 }
 
 .features {
@@ -109,7 +100,7 @@ fieldset {
     text-align: center;
     h1 {
         @include font-sizing(2, 3);
-        font-weight: 300;
+        font-weight: $light;
         margin-bottom: $base-vertical-rhythm;
     }
     a {
@@ -138,7 +129,7 @@ fieldset {
         color: $color-white;
         background-color: $color-black;
         text-align: center;
-        font-weight: 300;
+        font-weight: $light;
         &:hover {
             background-color: $color-primary;
             text-decoration: none;
@@ -153,7 +144,7 @@ fieldset {
         @include font-sizing(0.9, 3);
         margin: 0;
         padding: $base-vertical-rhythm/2;
-        border: $base-border-width solid $color-grey;
+        @extend %border;
         border-bottom: none;
         &:first-child { border-top: none; }
         &:last-child {
@@ -233,7 +224,7 @@ $progress-animation-duration: 0.7s;
     width: 100%;
     height: auto;
     margin: $base-vertical-rhythm/2 0;
-    border: $base-border-width solid $color-grey;
+    @extend %border;
     border-radius: $base-border-radius + $base-border-width;
     background-color: $color-white;
 }
@@ -244,7 +235,7 @@ $progress-animation-duration: 0.7s;
     height: $base-vertical-rhythm;
     @include background-gradient($color-default);
     border: $progress-meter-border;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     @include border-right-radius(0px);
     &.completed { @include border-right-radius($base-border-radius); }
 
@@ -258,7 +249,7 @@ $progress-animation-duration: 0.7s;
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
-    border-radius: $base-border-radius;
+    @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
     tr:nth-child(odd) { background-color: $color-odd-background; }
     &, th, td {
@@ -275,7 +266,7 @@ table {
         width: auto;
         margin: $base-vertical-rhythm/4 $base-vertical-rhythm 0 0;
     }
-    .actions a {
+    .file-actions a {
         margin-left: $base-vertical-rhythm/2;
         &:first-child { margin-left: 0; }
     }

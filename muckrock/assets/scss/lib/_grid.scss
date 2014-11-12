@@ -3,30 +3,37 @@ html, body { min-height: 100%; }
 
 // Prototypes
 
-%row { @include row(); }
-
-%full { @include span-columns(12); }
+%full {
+    @include omega;
+    @include media($small-layout) { @include span-columns(4); }
+    @include media($medium-layout) { @include span-columns(6); }
+    @include media($medium-layout) { @include span-columns(12); }
+}
 
 %half {
-    @extend %full;
+    @include omega(2n);
+    @include media($small-layout) { @include span-columns(2); }
     @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(6); }
-    @include omega(2n);
 }
 
 %third {
-    @extend %full;
+    @include omega(3n);
+    @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(2); }
     @include media($large-layout) { @include span-columns(4); }
-    @include omega(3n);
+}
+
+%two-thirds {
+    @include media($small-layout) { @include span-columns(4); }
+    @include media($medium-layout) { @include span-columns(4); }
+    @include media($large-layout) { @include span-columns(8); }
 }
 
 %quarter {
-    @extend %full;
-    @include media($medium-layout) {
-        @include span-columns(3);
-        @include omega(2n);
-    }
+    @include omega(2n);
+    @include media($small-layout) { @include span-columns(2); }
+    @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) {
         @include omega-reset(2n);
         @include span-columns(3);
@@ -34,14 +41,8 @@ html, body { min-height: 100%; }
     }
 }
 
-%two-thirds {
-    @extend %full;
-    @include media($medium-layout) { @include span-columns(4); }
-    @include media($large-layout) { @include span-columns(8); }
-}
-
 %three-quarters {
-    @extend %full;
+    @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(6); }
     @include media($large-layout) { @include span-columns(9); }
 }

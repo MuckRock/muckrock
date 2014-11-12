@@ -1,15 +1,14 @@
 /* Lists */
 
-header.collection-header { @include outer-container(); }
+header.collection-header { @include outer-container; }
 
 h1.list-label {
-    @extend %full;
-    font-weight: 300;
-    text-align: left;
-    @include font-sizing(3); 
     display: block;
     margin-top: 0;
     margin-bottom: 0;
+    font-weight: $light;
+    text-align: left;
+    @include font-sizing(3);
 }
 
 .collection {
@@ -74,21 +73,8 @@ h1.list-label {
             }
         }
         .filters {
-            form {
-                overflow: hidden;
-                width: 100%;
-                padding: $base-vertical-rhythm/2;
-                margin: 0 0 $base-vertical-rhythm/2 0;
-                border: $base-border-width solid $color-grey;
-                border-radius: $base-border-radius;
-                background-color: darken($color-white, 10%);
-            }
-            .input {
-                @include fill-parent();
-                @include media($large-layout) {
-                    @include span-columns(3);
-                }
-            }
+            form { @extend %controls; }
+            .input { @extend %quarter; }
             select {
                 width: 100%;
                 margin-bottom: $base-vertical-rhythm/3;

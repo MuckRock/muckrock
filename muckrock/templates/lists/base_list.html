@@ -12,10 +12,8 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% block list-title %}{% endblock list-title %}
                 {% block list-subtitle %}{% endblock list-subtitle %}
             </div>
-            <aside class="actions">
-                {% block actions %}
-                {% endblock actions %}
-            </aside>
+            {% block actions %}
+            {% endblock actions %}
         </header>
 
         <section class="filters">

@@ -173,6 +173,10 @@ class FOIARequest(models.Model):
     def is_payable(self):
         """Can this request be payed for by the user?"""
         return self.status == 'payment' and self.price > 0 and not self.has_crowdfund()
+        
+    def get_stripe_amount(self):
+        """Output a Stripe Checkout formatted price"""
+        return int(self.price*105)
 
     def is_deletable(self):
         """Can this request be deleted?"""
@@ -551,39 +555,49 @@ class FOIARequest(models.Model):
     def actions(self, user):
         """What actions may the given user take on this Request"""
         # pylint: disable=E1101
-
-        kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
-                  'idx': self.pk, 'slug': self.slug}
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
 
         linked_actions = [
             (user.is_authenticated,
             reverse('foia-clone', kwargs=kwargs),
-            'Clone'
-            ),
-            (user.is_staff,
-            reverse('admin:foia_foiarequest_change', args=(self.pk,)),
-            'Admin'
-            ),
-            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
-            reverse('foia-embargo', kwargs=kwargs), 
-            'Update Embargo'
-            ),
-            (user.is_staff,
-            reverse('foia-admin-fix', kwargs=kwargs),
-            'Admin Fix'
-            ),
-            (self.user == user and self.is_payable(),
-            reverse('foia-pay', kwargs=kwargs),
-            'Pay'
-            ),
-            (self.user == user and self.is_payable(),
-            reverse('foia-crowdfund', kwargs=kwargs),
-            'Crowdfund'
+            'Clone',
+            'primary'
             ),
             (user.is_authenticated() and self.user != user,
             reverse('foia-follow', kwargs=kwargs),
-            'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow'
-            )
+            'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow',
+            '' if user.is_authenticated() and self.followed_by.filter(user=user) else 'primary'
+            ),
+            (self.user == user and self.is_payable(),
+            reverse('foia-pay', kwargs=kwargs),
+            'Pay',
+            'success'
+            ),
+            (self.user == user and self.is_payable(),
+            reverse('foia-crowdfund', kwargs=kwargs),
+            'Crowdfund',
+            'success'
+            ),
+            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
+            reverse('foia-embargo', kwargs=kwargs), 
+            'Embargo',
+            ''
+            ),
+            (user.is_staff,
+            reverse('admin:foia_foiarequest_change', args=(self.pk,)),
+            'Admin',
+            ''
+            ),
+            (user.is_staff,
+            reverse('foia-admin-fix', kwargs=kwargs),
+            'Admin Fix',
+            ''
+            ),
         ]
 
         unlinked_actions = [
@@ -609,8 +623,8 @@ class FOIARequest(models.Model):
             'title': '',
             'link': link,
             'label': label,
-            'class': ''
-        } for bool, link, label in linked_actions if bool] + [{
+            'class': className
+        } for bool, link, label, className in linked_actions if bool] + [{
             'title': title,
             'link': '',
             'label': label,

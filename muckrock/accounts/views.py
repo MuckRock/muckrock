@@ -80,7 +80,7 @@ def _register_acct(request, acct_type, form_class, template, url_redirect=None, 
             customer = new_user.get_profile().customer()
             token = form.cleaned_data.get('token', False)
             if token:
-                customer.save_cc(token)
+                customer.credit_card(token)
             
             if url_redirect:
                 return redirect(url_redirect)
@@ -134,27 +134,6 @@ def update(request):
                               context_instance=RequestContext(request))
 
 @login_required
-def update_cc(request):
-    """Update a user's CC"""
-    if request.method == 'POST':
-        form = CreditCardForm(request.POST)
-        if form.is_valid():
-            request.user.get_profile().save_cc(form.cleaned_data['token'])
-            messages.success(request, 'Your credit card has been saved.')
-            return redirect('acct-my-profile')
-    else:
-        form = CreditCardForm(initial={'name': request.user.get_full_name()})
-    card = request.user.get_profile().get_cc()
-    desc = 'Current card on file: %s ending in %s' % (card.type, card.last4) if card else 'No card currently on file'
-    context = {
-        'form': form,
-        'pub_key': STRIPE_PUB_KEY,
-        'desc': desc,
-        'heading': 'Update Credit Card'
-    }
-    return render_to_response('forms/account/cc.html', context, context_instance=RequestContext(request))
-
-@login_required
 def manage_subsc(request):
     """Subscribe or unsubscribe from a pro account"""
     user_profile = request.user.get_profile()
@@ -181,7 +160,7 @@ def manage_subsc(request):
         form = form_class(request.POST, request=request)
         if user_profile.acct_type == 'community' and form.is_valid():
             if not form.cleaned_data.get('use_on_file'):
-                user_profile.save_cc(form.cleaned_data['token'])
+                user_profile.credit_card(form.cleaned_data['token'])
             customer = user_profile.customer()
             customer.update_subscription(plan='pro')
             user_profile.acct_type = 'pro'
@@ -222,8 +201,8 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise Exception('Account email and Stripe email do not match')
-            if not user_profile.get_cc():
-                user_profile.save_cc(stripe_token)
+            if not user_profile.credit_card():
+                user_profile.credit_card(stripe_token)
             user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
             user_profile.num_requests += 5
             user_profile.save()

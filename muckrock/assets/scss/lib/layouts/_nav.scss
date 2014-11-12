@@ -314,7 +314,7 @@ nav.sidebar {
             display: block;
             padding: $base-vertical-rhythm/3 $base-vertical-rhythm/2;
             border: $base-border-width solid $sidebar-button-background;
-            border-radius: $base-border-radius;
+            @extend %border-radius;
             color: $color-grey;
             background-color: $sidebar-button-background;
             text-align: center;
@@ -371,7 +371,7 @@ nav.sidebar {
                 padding: $base-vertical-rhythm/6 $base-vertical-rhythm/2 $base-vertical-rhythm/5;
                 border-radius: 50px;
                 
-                font-weight: 700;
+                font-weight: $bold;
                 text-align: center;
                 color: $color-black;
                 background-color: $color-white;
@@ -410,7 +410,7 @@ nav.sidebar {
         img { margin: 0; }
         h1 {
             @extend h6;
-            font-weight: 400;
+            font-weight: $normal;
             font-size: 98%;
             line-height: 1.2em;
         }

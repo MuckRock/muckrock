@@ -14,7 +14,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
-    font-weight: 300;
+    font-weight: $light;
     strong, b { font-weight: $base-font-weight; }
 }
 
@@ -34,13 +34,13 @@ a {
 }
 
 ul, ol {
-    margin: $base-vertical-rhythm/2 0;
-    padding-left: $base-vertical-rhythm;
+    margin: $base-margin/2 0;
+    padding-left: 0;
 }
 
 blockquote {
     margin-left: 0;
-    padding-left: $base-vertical-rhythm/2;
+    padding-left: $base-padding/2;
     border-left: 1px solid $color-grey;
 }
 
@@ -50,10 +50,14 @@ small {
 }
 
 code {
+    overflow-x: auto;
     display: block;
-    @include font-sizing(0.8);
-    font-family: 'Source Code Pro';
+    width: 100%;
     margin: $base-vertical-rhythm/2 0;
+
+    font-family: 'Source Code Pro', monospace;
+    @include font-sizing(0.8);
+
     padding: $base-vertical-rhythm/3 $base-vertical-rhythm/2;
     color: $color-black;
     background-color: darken($color-white, 15%);
@@ -116,6 +120,6 @@ td { vertical-align: bottom; }
 .disabled { color: $color-disabled; }
 
 .large-number {
-    font-weight: 300;
+    font-weight: $light;
     font-size: 2em;
 }

@@ -10,7 +10,9 @@
         {% else %}
         <h1>Create a Request</h1>
         <summary>
-            Not sure where to start? <a href="#">We can help.</a>
+            Not sure where to start? <a href="/about/foia-101/">We can help.</a>
+            <br>
+            Out of ideas? <a href="#clone">Try cloning a request.</a>
             <noscript>It looks like you have JavaScript turned off. Unfortunately, this page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
         {% endif %}
@@ -93,6 +95,21 @@
 
     </form>
 </div>
+{% if featured and not clone %}
+<div class="clone-candidates" id="clone">
+    <h1>Clone a Request</h1>
+    <ul>
+    {% for candidate in featured %}
+        <li class="candidate">
+            <div><a href="{{ candidate.get_absolute_url }}">{{ candidate.title }}</a></div>
+            <div>{{ candidate.agency.name }}</div>
+            <div>{{ candidate.jurisdiction.name }}</div>
+            <small><a href="{% url 'foia-clone' jurisdiction=candidate.jurisdiction.slug jidx=candidate.jurisdiction.pk idx=candidate.id slug=candidate.slug %}" class="button">Clone</a></small>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
