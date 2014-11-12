@@ -8,11 +8,17 @@
     <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
         <div>
             <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
-            <p><a href="{% url 'foia-create' %}" class="primary button">Create a request</a> or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></p>
+            <p><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a> or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></p>
         </div>
-        <p class="image-attribution"><small>Image courtesy <a href="http://www.shorpy.com/node/17626" class="dotted">Shorpy</a></small></p>
     </section>
-    <div class="homepage-row">
+    <section class="stats">
+        <h1>Since 2010, MuckRock has releasing govt. records into the public domain.</h1>
+        <ul>
+            <li><span class="stat">{{ num_requests|intcomma }}</span><span class="legend"> request{{ num_requests|pluralize }} filed</span></li>
+            <li><span class="stat">{{ num_completed_requests|intcomma }}</span><span class="legend"> request{{ num_completed_requests|pluralize }} completed succesfully</span></li>
+            <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
+        </ul>
+    </section>
         {% if featured_article.image %}
         <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
         {% else %}
@@ -27,12 +33,5 @@
                 </div>
             </a>
         </section>
-        <section class="stats">
-            <ul>
-                <li><span class="stat">{{ num_requests|intcomma }}</span> request{{ num_requests|pluralize }} filed</li>
-                <li><span class="stat">{{ num_completed_requests|intcomma }}</span> request{{ num_completed_requests|pluralize }} completed  succesfully</li>
-                <li><span class="stat">{{ num_pages|intcomma }}</span> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</li>
-            </ul>
-        </section>
-    </div>
+
 {% endblock content %}

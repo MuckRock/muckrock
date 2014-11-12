@@ -1,18 +1,17 @@
 .homepage {
     overflow: hidden;
     @extend %edge-to-edge;
-    .homepage-row { display: table-row; }
     .banner {
         display: block;
-        height: 23em;
         width: 100%;
         position: relative;
+        margin-right: -1px;
         background-size: cover;
         background-position: center;
         color: $color-white;
-        @include media($medium-layout) {
-            height: 35em;
-        }
+        @include media($small-layout) { height: 20em; }
+        @include media($medium-layout) { height: 26em; }
+        @include media($large-layout) { height: 30em; }
         h1 {
             max-width: 12em;
             color: $color-white;
@@ -34,7 +33,7 @@
             @extend %base-spacing;
             @include background(
                 linear-gradient(
-                    rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.25)
+                    rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25)
             ));
             font-weight: $bold;
             text-align: center;
@@ -98,30 +97,38 @@
         background-size: cover;
         background-position: center;
         
-        @media all and (min-width: 600px) {
-            display: table-cell;
-            width: 60%;
-        }
     }
     
     .stats {
-        $color-stats: #2B1E5E;
-        width: 100%;
+        $color-stat-dark: #0E2340;
+        $color-stat-light: #326FBF;
         @extend %base-spacing;
+        width: 100%;
         color: $color-white;
-        @include background(radial-gradient($color-stats, darken($color-stats, 5%)));
-        font-weight: $normal;
-        ul { list-style-type: none; padding-left: 0; }
-        li { margin: $base-vertical-rhythm/2 0; }
-        span {
+        @include background(linear-gradient($color-stat-dark, darken($color-stat-dark, 3%)));
+        h1 {
+            @include font-sizing(1.25);
+            font-weight: $normal;
+            text-align: center;
+            margin: $base-margin auto;
+        }
+        ul {
+            @include row;
+            text-align: center;
+        }
+        li { @extend %third; }
+        .stat {
             display: block;
-            @include font-sizing(2, 3);
+            @include font-sizing(2.5);
             margin-bottom: 0;
             font-weight: $light;
-        }  
-        @media all and (min-width: 600px) {
-            display: table-cell;
-            width: 40%;
+        }
+        .legend {
+            display: block;
+            max-width: 50%;
+            margin: $base-margin/2 auto;
+            border-top: $base-border-width solid $color-stat-light;
+            padding-top: $base-padding/2;
         }
         
     }
