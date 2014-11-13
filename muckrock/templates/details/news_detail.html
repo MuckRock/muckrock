@@ -9,7 +9,7 @@
 
 {% block image %}
 {% if article.image %}
-style="background-image:url('{{ STATIC_URL }}{{ article.image }}');"
+style="background-image:url('{% static article.image %}');"
 {% endif %}
 {% endblock image %}
 
@@ -61,7 +61,7 @@ style="background-image:url('{{ STATIC_URL }}{{ article.image }}');"
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if article.image %}
-<meta property="og:image" content="{{ STATIC_URL }}{{ article.image }}" />
+<meta property="og:image" content="{% static article.image %}" />
 {% else %}
 <meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
@@ -81,7 +81,7 @@ style="background-image:url('{{ STATIC_URL }}{{ article.image }}');"
 <meta name="twitter:title" content="{{ article.title }}" />
 <meta name="twitter:description" content="{{ article.summary }}" />
 {% if article.image %}
-<meta name="twitter:image:src" content="{{ STATIC_URL }}{{ article.image }}" />
+<meta name="twitter:image:src" content="{% static article.image %}" />
 {% else %}
 <meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
@@ -90,7 +90,7 @@ style="background-image:url('{{ STATIC_URL }}{{ article.image }}');"
 {% endwith %}
 
 {% block scripts %}
-<script src="{{ STATIC_URL }}js/jquery.fitvids.js" type="text/javascript"></script>
+<script src="{% static 'js/jquery.fitvids.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
     // Find all iframes
     var $iframes = $( "iframe" );
