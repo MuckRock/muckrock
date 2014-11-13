@@ -6,17 +6,19 @@ This is the parent style for a single object: a blog post, a FOI request, a ques
 
 {% endcomment %}
 {% block content %}
-    <article class="{% block type %}{% endblock type %}">
-        <section class="meta">
-            <header>
-                {% block header %}
-                {% endblock header %}
-            </header>
-            <aside>
-                {% block aside %}
-                {% endblock aside %}
-            </aside>
-        </section>    
+    <article class="{% block type %}{% endblock type %} detail">
+        <header {% block image %}{% endblock image %}>
+            <div class="meta">
+                <div class="title">
+                    {% block header %}
+                    {% endblock header %}
+                </div>
+                <div class="author">
+                    {% block aside %}
+                    {% endblock aside %}
+                </div>
+            </div>
+        </header>    
         {% block actions %}
         {% endblock actions %}
         <section class="main">

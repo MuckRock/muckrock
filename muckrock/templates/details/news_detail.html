@@ -5,27 +5,48 @@
 {% with object as article %}
 
 {% block title %}MuckRock &bull; {{ article.title }}{% endblock title %}
-{% block type %}post{% endblock type %}		
+{% block type %}news{% endblock type %}
+
+{% block image %}
+{% if article.image %}
+style="background-image:url('{{ STATIC_URL }}{{ article.image }}');"
+{% endif %}
+{% endblock image %}
 
 {% block header %}
     <h1>{{ article.title }}</h1>
-    <h2>by {{ article.get_authors_names }} 
-    on {{ article.pub_date | date:"F j, Y" }}</h2>
-    {% if article.image %}
-    <figure>
-        <img src="{{ MEDIA_URL }}{{ article.image }}" alt="" />
-        {% if article.image_attr_line %}
-        <figcaption>{{ article.image_attr_line | safe }}</figcaption>
-        {% endif %}
-    </figure>
+    {% if article.kicker %}
+    <summary>{{ article.kicker }}</summary>
     {% endif %}
 {% endblock header %}
 
 {% block aside %}
-    {% if article.kicker %}
-    <summary>{{ article.kicker }}</summary>
-    {% endif %}
-    {% if article.foias.exists %}
+    <div class="half">
+        <div class="article-date">{{ article.pub_date | date:"F j, Y" }}</div>
+        <h2>by <span class="author-name">{{ article.get_authors_names }}</span></h2>
+    </div>
+    <ul class="half">
+    {% for author in article.authors.all %}
+        {% if forloop.first and forloop.last %}
+        <li class="author-meta">
+        {% else %}
+        <li class="author-meta">
+            <span class="author-name">{{ author.get_full_name }}</span>
+        {% endif %}
+        {% with author.get_profile as author_profile %}
+            <span class="author-email"><a href="mailto:author_profile.public_email">{{ author_profile.public_email }}</a></span>
+            <span class="author-twitter"><a href="https://www.twitter.com/{% if author_profile.twitter|make_list|first == '@' %}{{ author_profile.twitter|slice:"1:"}}{% else %}{{ author_profile.twitter }}{% endif %}">{% if not author_profile.twitter|make_list|first == '@' %}@{% endif %}{{ author_profile.twitter }}</a></span>
+        {% endwith %}
+        </li>
+    </ul>
+    {% endfor %}
+{% endblock aside %}
+
+{% block main %}
+    {% autoescape off %}
+    {{ article.body | markdown:"trusted" }}
+	{% endautoescape %}
+	{% if article.foias.exists %}
     <dl>
 	    <dt>Related Requests</dt>
 	    {% for foia in article.foias.all %}
@@ -33,12 +54,6 @@
 		{% endfor %}
 	</dl>
 	{% endif %}
-{% endblock aside %}
-
-{% block main %}
-    {% autoescape off %}
-    {{ article.body | markdown:"trusted" }}
-	{% endautoescape %}
 {% endblock main %}	
 
 {% block open_graph %}
@@ -66,10 +81,38 @@
 <meta name="twitter:title" content="{{ article.title }}" />
 <meta name="twitter:description" content="{{ article.summary }}" />
 {% if article.image %}
-<meta name="twitter:image:src" content="{{ MEDIA_URL }}{{ article.image }}" />
+<meta name="twitter:image:src" content="{{ STATIC_URL }}{{ article.image }}" />
 {% else %}
 <meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
 {% endblock twitter_card %}
 
 {% endwith %}
+
+{% block scripts %}
+<script src="{{ STATIC_URL }}js/jquery.fitvids.js" type="text/javascript"></script>
+<script type="text/javascript">
+    // Find all iframes
+    var $iframes = $( "iframe" );
+ 
+    // Find & save the aspect ratio for all iframes
+    $iframes.each(function () {
+      $( this ).data( "ratio", this.height / this.width )
+        // Remove the hardcoded width & height attributes
+        .removeAttr( "style" )
+        .removeAttr( "width" )
+        .removeAttr( "height" );
+    });
+ 
+    // Resize the iframes when the window is resized
+    $( window ).resize( function () {
+      $iframes.each( function() {
+        // Get the parent container's width
+        var width = $( this ).parent().width();
+        $( this ).width( width )
+          .height( width * $( this ).data( "ratio" ) );
+      });
+    // Resize to fix all iframes on page load.
+    }).resize();
+</script>
+{% endblock scripts %}

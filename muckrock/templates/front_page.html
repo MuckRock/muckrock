@@ -12,7 +12,7 @@
         </div>
     </section>
     <section class="stats">
-        <h1>Since 2010, MuckRock has releasing govt. records into the public domain.</h1>
+        <h1>Since 2010, MuckRock&rsquo;s users have freed tens of thousands of government records.</h1>
         <ul>
             <li><span class="stat">{{ num_requests|intcomma }}</span><span class="legend"> request{{ num_requests|pluralize }} filed</span></li>
             <li><span class="stat">{{ num_completed_requests|intcomma }}</span><span class="legend"> request{{ num_completed_requests|pluralize }} completed succesfully</span></li>
@@ -20,7 +20,7 @@
         </ul>
     </section>
     {% if featured_article.image %}
-    <section class="featured-article" style="background-image:url('{{ STATIC_URL }}{{ featured_article.image }}');">
+    <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
     {% else %}
     <section class="featured-article">
     {% endif %}
