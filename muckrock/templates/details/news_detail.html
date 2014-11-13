@@ -35,8 +35,12 @@ style="background-image:url('{% thumbnail article.image 1200x675 %}');"
             <span class="author-name">{{ author.get_full_name }}</span>
         {% endif %}
         {% with author.get_profile as author_profile %}
+            {% if author_profile.public_email %}
             <span class="author-email"><a href="mailto:author_profile.public_email">{{ author_profile.public_email }}</a></span>
+            {% endif %}
+            {% if author_profile.twitter %}
             <span class="author-twitter"><a href="https://www.twitter.com/{% if author_profile.twitter|make_list|first == '@' %}{{ author_profile.twitter|slice:"1:"}}{% else %}{{ author_profile.twitter }}{% endif %}">{% if not author_profile.twitter|make_list|first == '@' %}@{% endif %}{{ author_profile.twitter }}</a></span>
+            {% endif %}
         {% endwith %}
         </li>
     </ul>
