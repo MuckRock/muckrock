@@ -46,7 +46,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if article.image %}
-<meta property="og:image" content="{{ MEDIA_URL }}{{ article.image }}" />
+<meta property="og:image" content="{{ STATIC_URL }}{{ article.image }}" />
 {% else %}
 <meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}

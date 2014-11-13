@@ -20,7 +20,7 @@
         </ul>
     </section>
     {% if featured_article.image %}
-    <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
+    <section class="featured-article" style="background-image:url('{{ STATIC_URL }}{{ featured_article.image }}');">
     {% else %}
     <section class="featured-article">
     {% endif %}
