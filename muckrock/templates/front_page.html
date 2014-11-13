@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load humanize %}
+{% load thumbnail %}
 {% load static from staticfiles %}
 
 {% block content %}
@@ -20,7 +21,7 @@
         </ul>
     </section>
     {% if featured_article.image %}
-    <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
+    <section class="featured-article" style="background-image:url('{% thumbnail featured_article.image 1200x675 %}');">
     {% else %}
     <section class="featured-article">
     {% endif %}
