@@ -1558,7 +1558,7 @@ table {
 .detail.news header {
   position: relative;
   display: block;
-  height: 40em;
+  height: 35em;
   background-size: cover;
   background-position: left top;
   background-repeat: no-repeat;
@@ -1568,6 +1568,7 @@ table {
     display: block;
     position: absolute;
     bottom: 0;
+    width: 100%;
     background: -webkit-linear-gradient(rgba(241, 241, 241, 0.75), #f1f1f1);
     background: linear-gradient(rgba(241, 241, 241, 0.75), #f1f1f1); }
     .detail.news header .meta:after {
