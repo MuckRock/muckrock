@@ -1561,7 +1561,9 @@ table {
   height: 40em;
   background-size: cover;
   background-position: left top;
-  background-repeat: no-repeat; }
+  background-repeat: no-repeat;
+  background-color: #326FBF;
+  background-blend-mode: multiply; }
   .detail.news header .meta {
     display: block;
     position: absolute;

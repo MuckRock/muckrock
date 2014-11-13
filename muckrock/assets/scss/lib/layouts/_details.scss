@@ -11,6 +11,8 @@
             background-size: cover;
             background-position: left top;
             background-repeat: no-repeat;
+            background-color: #326FBF;
+            background-blend-mode: multiply;
             .meta {
                 @include row;
                 @extend %base-spacing;
