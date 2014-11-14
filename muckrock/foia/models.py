@@ -563,11 +563,11 @@ class FOIARequest(models.Model):
         }
 
         linked_actions = [
-            (True,
-            reverse('foia-clone', kwargs=kwargs),
-            'Clone',
-            'primary'
-            ),
+            # (True,
+            # reverse('foia-clone', kwargs=kwargs),
+            # 'Clone',
+            # 'primary'
+            # ),
             (user.is_authenticated() and self.user != user,
             reverse('foia-follow', kwargs=kwargs),
             'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow',

@@ -2815,9 +2815,15 @@ nav.sidebar {
     clear: both; }
   .clone-candidates ul {
     padding-left: 0; }
+  .clone-candidates .row {
+    display: block;
+    margin-bottom: 1.5em; }
+    .clone-candidates .row:after {
+      content: "";
+      display: table;
+      clear: both; }
   .clone-candidates .candidate {
     display: inline-block;
-    margin: 0.375em 0.75em;
     border-color: #21282c;
     padding: 0.75em; }
     .clone-candidates .candidate:first-child {
