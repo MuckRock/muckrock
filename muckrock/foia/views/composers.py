@@ -123,7 +123,7 @@ def _make_request(request, foia_request, parent=None):
             status='started',
             title=foia_request['title'],
             jurisdiction=foia_request['jurisdiction'],
-            slug=slugify(title) or 'untitled',
+            slug=slugify(foia_request['title']) or 'untitled',
             agency=foia_request['agency'],
             requested_docs=foia_request['document'],
             description=foia_request['document'],
@@ -250,20 +250,20 @@ def create_request(request):
         'featured': featured
     }
     
-    return render_to_response('forms/create.html', context, 
+    return render_to_response('forms/foia/create.html', context, 
                               context_instance=RequestContext(request))
 
 """
 Views for updating single- or multi-requests
 """
 @login_required
-def confirm_request(request, jurisdiction, jidx, slug, idx):
-    """Confirm a drafted FOIA Request"""
+def draft_request(request, jurisdiction, jidx, slug, idx):
+    """Edit a drafted FOIA Request"""
     foia = get_foia(jurisdiction, jidx, slug, idx)
     if not foia.is_editable():
-        messages.error(request, 'You may only edit drafts.')
+        messages.error(request, 'This is not a draft.')
         return redirect(foia)
-    if foia.user != request.user or not request.user.is_staff:
+    if foia.user != request.user and not request.user.is_staff:
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
     
@@ -285,7 +285,7 @@ def confirm_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.communication = data['request']
             foia_comm.save()
             foia.save
-            messages.success(request, 'The request has been updated.')
+            messages.success(request, 'Your draft has been updated.')
         return redirect(
             'foia-detail',
             jurisdiction=foia.jurisdiction.slug,
@@ -297,8 +297,8 @@ def confirm_request(request, jurisdiction, jidx, slug, idx):
         form = RequestUpdateForm(initial=initial_data)
     
     return render_to_response(
-        'forms/foia.html',
-        {'form': form, 'action': 'Confirm'},
+        'forms/foia/draft.html',
+        {'form': form, 'action': 'Draft', 'foia': foia},
         context_instance=RequestContext(request)
     )
 

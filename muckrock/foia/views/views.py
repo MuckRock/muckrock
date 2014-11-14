@@ -260,7 +260,7 @@ class Detail(DetailView):
         foia = get_foia(jurisdiction, jidx, slug, idx)
         if foia.status == 'started': 
             return redirect(
-                'foia-confirm',
+                'foia-draft',
                 jurisdiction=jurisdiction,
                 jidx=jidx,
                 slug=slug,
