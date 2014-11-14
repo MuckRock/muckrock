@@ -54,11 +54,9 @@ logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
-'''
-HELPER FUNCTIONS
-'''
+# HELPER FUNCTIONS
 
-def _get_foia(jurisdiction, jidx, slug, idx):
+def get_foia(jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
@@ -201,12 +199,12 @@ def _process_request_form(request):
     return foia_request
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 @login_required
 def multiply_request(request, jurisdiction, jids, slug, idx):
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?multiply=%s' % foia.pk)
 
 def create_request(request):
@@ -259,20 +257,19 @@ def create_request(request):
 Views for updating single- or multi-requests
 """
 @login_required
-def update_request(request, jurisdiction, jidx, slug, idx):
-    """Update a started FOIA Request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
+def confirm_request(request, jurisdiction, jidx, slug, idx):
+    """Confirm a drafted FOIA Request"""
+    foia = get_foia(jurisdiction, jidx, slug, idx)
     if not foia.is_editable():
-        messages.error(request, 'You may only edit non-submitted requests.')
+        messages.error(request, 'You may only edit drafts.')
         return redirect(foia)
-    if foia.user != request.user:
-        messages.error(request, 'You may only edit your own requests.')
+    if foia.user != request.user or not request.user.is_staff:
+        messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
     
     initial_data = {
         'title': foia.title,
         'request': foia.first_request(),
-        'agency': foia.agency.name,
         'embargo': foia.embargo
     }
     
@@ -287,44 +284,21 @@ def update_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.date = datetime.now()
             foia_comm.communication = data['request']
             foia_comm.save()
-            agency_query = Agency.objects.filter(name=data['agency'])
-            if agency_query:
-                agency = agency_query[0]
-                foia.agency = agency
-                is_new_agency = False
-            else:
-                agency = data['agency']
-                foia.agency = Agency.objects.create(
-                    name=agency[:255],
-                    slug=(slugify(agency[:255]) or 'untitled'),
-                    jurisdiction=jurisdiction,
-                    user=request.user,
-                    approved=False
-                )
-                send_mail(
-                    '[AGENCY] %s' % foia.agency.name,
-                    render_to_string(
-                        'foia/admin_agency.txt',
-                        {'agency': foia.agency}
-                    ),
-                    'info@muckrock.com',
-                    ['requests@muckrock.com'],
-                    fail_silently=False
-                )
-                is_new_agency = True
-            
             foia.save
-            
             messages.success(request, 'The request has been updated.')
-            return redirect(foia)
-        else:
-            return redirect(foia)
+        return redirect(
+            'foia-detail',
+            jurisdiction=foia.jurisdiction.slug,
+            jidx=foia.jurisdiction.pk,
+            slug=foia.slug,
+            idx=foia.pk
+        )
     else:
         form = RequestUpdateForm(initial=initial_data)
     
     return render_to_response(
         'forms/foia.html',
-        {'form': form, 'action': 'Update'},
+        {'form': form, 'action': 'Confirm'},
         context_instance=RequestContext(request)
     )
 

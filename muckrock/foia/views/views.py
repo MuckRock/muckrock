@@ -29,12 +29,19 @@ from muckrock.accounts.forms import PaymentForm
 from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
+from muckrock.foia.forms import \
+    RequestForm, \
+    RequestUpdateForm, \
+    ListFilterForm, \
+    MyListFilterForm, \
+    FOIAMultiRequestForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
     FOIACommunication, \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
+from muckrock.foia.views.composers import get_foia
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
@@ -244,6 +251,23 @@ class Detail(DetailView):
 
     model = FOIARequest
     context_object_name = 'foia'
+    
+    def dispatch(self, request, *args, **kwargs):
+        jurisdiction = self.kwargs['jurisdiction']
+        jidx = self.kwargs['jidx']
+        slug = self.kwargs['slug']
+        idx = self.kwargs['idx']
+        foia = get_foia(jurisdiction, jidx, slug, idx)
+        if foia.status == 'started': 
+            return redirect(
+                'foia-confirm',
+                jurisdiction=jurisdiction,
+                jidx=jidx,
+                slug=slug,
+                idx=idx
+            )
+        else:
+            return super(Detail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
@@ -261,9 +285,10 @@ class Detail(DetailView):
         )
         if not foia.is_viewable(self.request.user):
             raise Http404()
-        if foia.updated and foia.user == self.request.user:
-            foia.updated = False
-            foia.save()
+        if foia.user == self.request.user:
+            if foia.updated:
+                foia.updated = False
+                foia.save()
         return foia
 
     def get_context_data(self, **kwargs):

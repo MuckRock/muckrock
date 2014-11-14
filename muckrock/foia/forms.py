@@ -71,14 +71,13 @@ class RequestForm(forms.Form):
 class RequestUpdateForm(forms.Form):
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
     request = forms.CharField(widget=forms.Textarea())
-    agency = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Name an Agency' }))
     embargo = forms.BooleanField(required=False)
     
     def clean(self):
         data = self.cleaned_data
         embargo = data.get('embargo')
         if embargo and not self.request.user.can_embargo():
-            error_msg = 'No state was selected'
+            error_msg = 'Only Pro users may embargo their requests.'
             messages.error(request, error_msg)
             self._errors['embargo'] = self.error_class([error_msg])
         return self.cleaned_data
