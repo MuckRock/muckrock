@@ -73,13 +73,22 @@
     }
     
     .featured-article {
-        width: 100%;
+
+        
+        .image {
+            @extend %third;
+        }
+        .article {
+            @extend %two-thirds;
+        }
         a {
+            @include row;
+            width: 100%;
             display: block;
-            padding: 3*$base-vertical-rhythm $base-vertical-rhythm;
+            padding: $base-padding $base-padding;
             text-decoration: none;
             color: $color-black;
-            background-color: rgba(247, 196, 5, 0.75);
+            border-top: $base-border-radius solid #326FBF;
             dfn { color: $color-black; }
             h1 {
                 @include font-sizing(2, 3);
@@ -90,8 +99,12 @@
                 font-weight: $normal;
             }
             &:hover {
-                background-color: rgba(247, 196, 5, 0.85);
+                background-color: lighten(#326FBF, 10%);
             }
+            
+            transition-duration: 0.25s;
+            transition-property: background-color;
+            transition-timing-function: ease;
         }
         
         background-size: cover;
@@ -131,25 +144,6 @@
             padding-top: $base-padding/2;
         }
         
-    }
-    
-    .featured-requests {
-        color: $color-white;
-        background-color: #DE652C;
-        
-        ul { margin: 0; }
-        li { padding: $base-padding; }
-        a {
-            color: $color-white;
-            text-decoration: underline;
-        }
-
-        ul, .buttons { @include row; }
-        li { @extend %third; }
-        .buttons a { @extend %half; }
-        h1 { @include font-sizing(1.2); }
-        h2 { @include font-sizing(1); }
-        h1, h2 { font-weight: $normal }
     }
     
     .footer-container { padding: 0 $base-vertical-rhythm; }
