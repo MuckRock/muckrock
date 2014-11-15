@@ -1,6 +1,7 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
+{% load thumbnail %}
 
 {% with object as article %}
 
@@ -9,7 +10,7 @@
 
 {% block image %}
 {% if article.image %}
-style="background-image:url('{% static article.image %}');"
+style="background-image:url('{% thumbnail article.image 1200x675 %}');"
 {% endif %}
 {% endblock image %}
 
@@ -61,7 +62,7 @@ style="background-image:url('{% static article.image %}');"
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if article.image %}
-<meta property="og:image" content="{% static article.image %}" />
+<meta property="og:image" content="{% thumbnail article.image 1200x675 %}" />
 {% else %}
 <meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
