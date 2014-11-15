@@ -369,87 +369,87 @@ th {
 html, body {
   min-height: 100%; }
 
-.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .homepage .featured-requests .buttons a:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n) {
   margin-right: 0; }
-.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), .homepage .featured-requests .buttons a:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-requests .buttons a, .new-request header h1, .new-request header summary {
+  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .new-request header h1, .new-request header summary {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-requests .buttons a:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .new-request header h1:last-child, .new-request header summary:last-child {
       margin-right: 0; } }
 
-.detail .meta aside:nth-child(3n), .detail.news header .author:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n), .homepage .featured-requests li:nth-child(3n), .plan:nth-child(3n) {
+.detail .meta aside:nth-child(3n), .detail.news header .author:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .featured-article .image:nth-child(3n), .homepage .stats li:nth-child(3n), .plan:nth-child(3n) {
   margin-right: 0; }
-.detail .meta aside:nth-child(3n+1), .detail.news header .author:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1), .homepage .featured-requests li:nth-child(3n+1), .plan:nth-child(3n+1) {
+.detail .meta aside:nth-child(3n+1), .detail.news header .author:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .featured-article .image:nth-child(3n+1), .homepage .stats li:nth-child(3n+1), .plan:nth-child(3n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
+  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .featured-article .image, .homepage .stats li, .plan {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
+    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .featured-article .image:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
+  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .featured-article .image, .homepage .stats li, .plan {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
+    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .featured-article .image:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .stats li, .homepage .featured-requests li, .plan {
+  .detail .meta aside, .detail.news header .author, .detail.agency aside dl, .homepage .featured-article .image, .homepage .stats li, .plan {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child, .homepage .featured-requests li:last-child, .plan:last-child {
+    .detail .meta aside:last-child, .detail.news header .author:last-child, .detail.agency aside dl:last-child, .homepage .featured-article .image:last-child, .homepage .stats li:last-child, .plan:last-child {
       margin-right: 0; } }
 
 @media screen and (max-width: 500px) {
-  .detail .meta header, .detail.news header .title {
+  .detail .meta header, .detail.news header .title, .homepage .featured-article .article {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta header:last-child, .detail.news header .title:last-child {
+    .detail .meta header:last-child, .detail.news header .title:last-child, .homepage .featured-article .article:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta header, .detail.news header .title {
+  .detail .meta header, .detail.news header .title, .homepage .featured-article .article {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
-    .detail .meta header:last-child, .detail.news header .title:last-child {
+    .detail .meta header:last-child, .detail.news header .title:last-child, .homepage .featured-article .article:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta header, .detail.news header .title {
+  .detail .meta header, .detail.news header .title, .homepage .featured-article .article {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
-    .detail .meta header:last-child, .detail.news header .title:last-child {
+    .detail .meta header:last-child, .detail.news header .title:last-child, .homepage .featured-article .article:last-child {
       margin-right: 0; } }
 
 .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate:nth-child(2n) {
@@ -1558,22 +1558,22 @@ table {
 .detail.news header {
   position: relative;
   display: block;
-  height: 40em;
+  height: 35em;
   background-size: cover;
-  background-position: left top;
+  background-position: center top;
   background-repeat: no-repeat; }
   .detail.news header .meta {
     display: block;
     position: absolute;
     bottom: 0;
-    background: -webkit-linear-gradient(rgba(241, 241, 241, 0.75), #f1f1f1);
-    background: linear-gradient(rgba(241, 241, 241, 0.75), #f1f1f1); }
+    width: 100%;
+    background: #f4f4f4; }
     .detail.news header .meta:after {
       content: "";
       display: table;
       clear: both; }
   .detail.news header .title h1 {
-    font-weight: 500;
+    font-weight: 600;
     margin-top: 0; }
     @media screen and (max-width: 500px) {
       .detail.news header .title h1 {
@@ -2345,7 +2345,7 @@ nav.sidebar {
       margin-right: 0.375em;
       padding: 0.25em 0.75em 0.3em;
       border-radius: 50px;
-      font-weight: 500;
+      font-weight: 600;
       text-align: center;
       color: #21282c;
       background-color: #f4f4f4; }
@@ -2467,7 +2467,7 @@ nav.sidebar {
     .homepage .banner h1 {
       max-width: 12em;
       color: #f4f4f4;
-      font-weight: 500;
+      font-weight: 600;
       font-size: 1.75em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
@@ -2489,7 +2489,7 @@ nav.sidebar {
       height: 100%;
       background: -webkit-linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25));
       background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25));
-      font-weight: 500;
+      font-weight: 600;
       text-align: center;
       padding-top: 3.5em; }
       @media screen and (min-width: 500px) {
@@ -2519,29 +2519,37 @@ nav.sidebar {
     .homepage .banner #learn-more {
       margin-left: 0.375em; }
   .homepage .featured-article {
-    width: 100%;
     background-size: cover;
     background-position: center; }
     .homepage .featured-article a {
       display: block;
-      padding: 4.5em 1.5em;
+      width: 100%;
+      display: block;
+      padding: 1.5em 1.5em;
       text-decoration: none;
       color: #21282c;
-      background-color: rgba(247, 196, 5, 0.75); }
+      border-top: 9px solid #326FBF;
+      transition-duration: 0.25s;
+      transition-property: background-color;
+      transition-timing-function: ease; }
+      .homepage .featured-article a:after {
+        content: "";
+        display: table;
+        clear: both; }
       .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
         color: #21282c; }
       .homepage .featured-article a h1 {
         font-size: 2em;
         line-height: 1.22222em;
         margin: 0.30556em 0;
-        font-weight: 500; }
+        font-weight: 600; }
       .homepage .featured-article a h2 {
         font-size: 1.2em;
         line-height: 1.22222em;
         margin: 0.30556em 0;
         font-weight: 400; }
       .homepage .featured-article a:hover {
-        background-color: rgba(247, 196, 5, 0.85); }
+        background-color: #5289d2; }
   .homepage .stats {
     width: 100%;
     color: #f4f4f4;
@@ -2574,32 +2582,6 @@ nav.sidebar {
       margin: 0.75em auto;
       border-top: 1px solid #326FBF;
       padding-top: 0.75em; }
-  .homepage .featured-requests {
-    color: #f4f4f4;
-    background-color: #DE652C; }
-    .homepage .featured-requests ul {
-      margin: 0; }
-    .homepage .featured-requests li {
-      padding: 1.5em; }
-    .homepage .featured-requests a {
-      color: #f4f4f4;
-      text-decoration: underline; }
-    .homepage .featured-requests ul, .homepage .featured-requests .buttons {
-      display: block; }
-      .homepage .featured-requests ul:after, .homepage .featured-requests .buttons:after {
-        content: "";
-        display: table;
-        clear: both; }
-    .homepage .featured-requests h1 {
-      font-size: 1.2em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0; }
-    .homepage .featured-requests h2 {
-      font-size: 1em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0; }
-    .homepage .featured-requests h1, .homepage .featured-requests h2 {
-      font-weight: 400; }
   .homepage .footer-container {
     padding: 0 1.5em; }
 
@@ -2727,7 +2709,7 @@ nav.sidebar {
       font-size: 1em;
       line-height: 1.22222em;
       margin: 0.30556em 0;
-      font-weight: 500;
+      font-weight: 600;
       text-align: center;
       cursor: pointer; }
     .new-request .jurisdiction input[type="radio"] {
@@ -2833,9 +2815,15 @@ nav.sidebar {
     clear: both; }
   .clone-candidates ul {
     padding-left: 0; }
+  .clone-candidates .row {
+    display: block;
+    margin-bottom: 1.5em; }
+    .clone-candidates .row:after {
+      content: "";
+      display: table;
+      clear: both; }
   .clone-candidates .candidate {
     display: inline-block;
-    margin: 0.375em 0.75em;
     border-color: #21282c;
     padding: 0.75em; }
     .clone-candidates .candidate:first-child {

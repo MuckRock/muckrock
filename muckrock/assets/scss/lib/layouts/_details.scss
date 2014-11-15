@@ -7,16 +7,17 @@
         header {
             position: relative;
             display: block;
-            height: 40em;
+            height: 35em;
             background-size: cover;
-            background-position: left top;
+            background-position: center top;
             background-repeat: no-repeat;
             .meta {
                 @include row;
                 @extend %base-spacing;
                 position: absolute;
                 bottom: 0;
-                @include background(linear-gradient(rgba(241, 241, 241, 0.75), rgba(241, 241, 241, 1)));
+                width: 100%;
+                background: $color-white;
             }
             .title {
                 @extend %two-thirds;

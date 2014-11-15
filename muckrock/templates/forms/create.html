@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}MuckRock &bull; New Request{% endblock %}
 
+{% load mathfilters %}
+
 {% block content %}
 <div class="new-request">
     <header>
@@ -100,12 +102,21 @@
     <h1>Clone a Request</h1>
     <ul>
     {% for candidate in featured %}
-        <li class="candidate">
-            <div><a href="{{ candidate.get_absolute_url }}">{{ candidate.title }}</a></div>
-            <div>{{ candidate.agency.name }}</div>
-            <div>{{ candidate.jurisdiction.name }}</div>
-            <small><a href="{% url 'foia-clone' jurisdiction=candidate.jurisdiction.slug jidx=candidate.jurisdiction.pk idx=candidate.id slug=candidate.slug %}" class="button">Clone</a></small>
-        </li>
+        {% if forloop.counter0|mod:"4" == 0 or forloop.first %}
+            {% if not forloop.first %}
+        </div>
+            {% endif %}
+        <div class="row">
+        {% endif %}
+            <li class="candidate">
+                <div><a href="{{ candidate.get_absolute_url }}">{{ candidate.title }}</a></div>
+                <div>{{ candidate.agency.name }}</div>
+                <div>{{ candidate.jurisdiction.name }}</div>
+                <small><a href="{% url 'foia-clone' jurisdiction=candidate.jurisdiction.slug jidx=candidate.jurisdiction.pk idx=candidate.id slug=candidate.slug %}" class="button">Clone</a></small>
+            </li>
+        {% if forloop.last %}
+        </div>
+        {% endif %}
     {% endfor %}
     </ul>
 </div>

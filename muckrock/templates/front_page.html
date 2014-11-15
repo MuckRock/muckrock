@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load humanize %}
+{% load thumbnail %}
 {% load static from staticfiles %}
 
 {% block content %}
@@ -19,12 +20,14 @@
             <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
         </ul>
     </section>
-    {% if featured_article.image %}
-    <section class="featured-article" style="background-image:url('{{ MEDIA_URL }}{{ featured_article.image }}');">
-    {% else %}
     <section class="featured-article">
-    {% endif %}
-        <a href="{{ featured_article.get_absolute_url }}"><div>
+        <a href="{{ featured_article.get_absolute_url }}">
+            <div class="image">
+            {% if featured_article.image %}
+            <img src="{% thumbnail featured_article.image 1200x675 %}">
+            {% endif %}
+            </div>
+            <div class="article">
             <dfn>Investigative Report</dfn>
             <h1>{{ featured_article.title }}</h1>
             {% if featured_article.summary %}

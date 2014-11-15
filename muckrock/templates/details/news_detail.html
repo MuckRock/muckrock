@@ -1,5 +1,6 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
+{% load thumbnail %}
 {% load static from staticfiles %}
 {% load thumbnail %}
 
@@ -35,8 +36,12 @@ style="background-image:url('{% thumbnail article.image 1200x675 %}');"
             <span class="author-name">{{ author.get_full_name }}</span>
         {% endif %}
         {% with author.get_profile as author_profile %}
+            {% if author_profile.public_email %}
             <span class="author-email"><a href="mailto:author_profile.public_email">{{ author_profile.public_email }}</a></span>
+            {% endif %}
+            {% if author_profile.twitter %}
             <span class="author-twitter"><a href="https://www.twitter.com/{% if author_profile.twitter|make_list|first == '@' %}{{ author_profile.twitter|slice:"1:"}}{% else %}{{ author_profile.twitter }}{% endif %}">{% if not author_profile.twitter|make_list|first == '@' %}@{% endif %}{{ author_profile.twitter }}</a></span>
+            {% endif %}
         {% endwith %}
         </li>
     </ul>
@@ -82,7 +87,7 @@ style="background-image:url('{% thumbnail article.image 1200x675 %}');"
 <meta name="twitter:title" content="{{ article.title }}" />
 <meta name="twitter:description" content="{{ article.summary }}" />
 {% if article.image %}
-<meta name="twitter:image:src" content="{% static article.image %}" />
+<meta name="twitter:image:src" content="{% thumbnail article.image 1200x675 %}" />
 {% else %}
 <meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
