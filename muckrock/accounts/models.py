@@ -16,6 +16,7 @@ import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
 
@@ -59,6 +60,7 @@ class Profile(models.Model):
     notifications = models.ManyToManyField(FOIARequest, related_name='notify', blank=True)
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=acct_types)
+    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='users')
 
     website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     twitter = models.CharField(max_length=255, blank=True)
@@ -109,6 +111,11 @@ class Profile(models.Model):
     def make_request(self):
         """Reduce one from the user's request amount"""
 
+        organization = self.organization
+        if organization and organization.get_requests() > 0:
+            organization.num_requests -= 1
+            organization.save()
+            return True
         if self.get_monthly_requests() > 0:
             self.monthly_requests -= 1
             self.save()
@@ -122,7 +129,17 @@ class Profile(models.Model):
 
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
-        request_dict = {'monthly_requests': 0, 'reg_requests': 0, 'extra_requests': 0}
+        request_dict = {'org_requests': 0, 'monthly_requests': 0,
+                        'reg_requests': 0, 'extra_requests': 0}
+
+        org_reqs = self.organization.get_requests()
+        if org_reqs > num:
+            request_dict['org_requests'] = num
+            return request_dict
+        else:
+            request_dict['org_requests'] = org_reqs
+            num -= org_reqs
+
         monthly = self.get_monthly_requests()
         if monthly > num:
             request_dict['monthly_requests'] = num
@@ -130,6 +147,7 @@ class Profile(models.Model):
         else:
             request_dict['monthly_requests'] = monthly
             num -= monthly
+
         if self.num_requests > num:
             request_dict['reg_requests'] = num
             return request_dict

@@ -7,7 +7,11 @@
 
 {% block content %}
 	<h1>Confirm</h1>
-	<p class="large">This request will use {{ monthly_requests }} monthly request{{monthly_requests|pluralize}}, {{ reg_requests }} regular request{{reg_requests|pluralize}}, and {{ extra_requests }} additional request{{extra_requests|pluralize}}.</p>
+    {% if org_requests > 0 %}
+		<p class="large">This request will use {{ org_requests }} organization request{{org_requests|pluralize}}, {{ monthly_requests }} monthly request{{monthly_requests|pluralize}}, {{ reg_requests }} regular request{{reg_requests|pluralize}}, and {{ extra_requests }} additional request{{extra_requests|pluralize}}.</p>
+	{% else %}
+		<p class="large">This request will use {{ monthly_requests }} monthly request{{monthly_requests|pluralize}}, {{ reg_requests }} regular request{{reg_requests|pluralize}}, and {{ extra_requests }} additional request{{extra_requests|pluralize}}.</p>
+	{% endif %}
 
   {% if extra_requests > 0 %}
   <p class="large">The additional requests are $4 each, for a total of ${{ payment_required }}, and may be paid for now.</p>

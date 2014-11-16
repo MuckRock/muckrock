@@ -1,0 +1,68 @@
+
+{% extends "organization/base.html" %}
+
+{% load tags %}
+
+{% block content %}
+
+	<h2>Organizations</h2>
+
+	<div class="post-meta archive-pagination">
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+		
+	</div>
+
+		<ul>
+		{% for org in object_list %}
+		<li><a href="{{ org.get_absolute_url }}">{{org.name}}</a></li>
+		{% endfor %}
+		</ul>
+
+	<div class="post-meta archive-pagination">
+		
+		<div class="nav-left">
+			{% if page_obj.has_previous %}
+			<a href="?page=1">&#171; First page</a>
+			&nbsp; &nbsp;
+			<a href="?page={{page_obj.previous_page_number}}">&#171; Previous page</a>
+			{% else %}
+			&nbsp;
+			{% endif %}
+		</div>
+		<div class="nav-center">
+			{% page_links page_obj %}
+		</div>
+		{% if page_obj.has_next %}
+		<div class="nav-right">
+			<a href="?page={{page_obj.next_page_number}}">Next page &#187;</a>
+			&nbsp; &nbsp;
+			<a href="?page={{paginator.num_pages}}">Last page &#187;</a>
+		</div>
+		{% endif %}
+
+		<div class="clearer">&nbsp;</div>
+	</div>
+	
+{% endblock %}
+
