@@ -62,6 +62,12 @@ class Profile(models.Model):
     acct_type = models.CharField(max_length=10, choices=acct_types)
     organization = models.ForeignKey(Organization, blank=True, null=True, related_name='users')
 
+    # email confirmation
+    email_confirmed = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=24, blank=True)
+    key_expire_date = models.DateField(blank=True, null=True)
+
+    # extended information
     website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
     twitter = models.CharField(max_length=255, blank=True)
     profile = models.TextField(blank=True)

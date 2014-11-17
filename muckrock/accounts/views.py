@@ -9,21 +9,23 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from random import choice
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
 import logging
+import string
 import stripe
 import sys
 
 from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
-                           PaymentForm, UpgradeSubscForm, CancelSubscForm
+                           PaymentForm, UpgradeSubscForm, CancelSubscForm, EmailConfirmForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
@@ -74,9 +76,14 @@ def _register_acct(request, acct_type, form_class, template, post_hook, extra_co
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
             Profile.objects.create(user=new_user,
-                                   acct_type=acct_type,
-                                   monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
-                                   date_update=datetime.now())
+               acct_type=acct_type,
+               monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
+               date_update=datetime.now(),
+               confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
+               key_expire_date=date.today() + timedelta(2))
+            send_mail('Welcome to MuckRock',
+                  render_to_string('registration/welcome.txt', {'user': new_user}),
+                  'info@muckrock.com', [new_user.email], fail_silently=False)
 
             post_hook(form=form, user=new_user)
 
@@ -234,6 +241,48 @@ def buy_requests(request):
     return render_to_response('registration/cc.html',
                               {'form': form, 'pub_key': STRIPE_PUB_KEY, 'heading': 'Buy Requests',
                                'desc': 'Buy 5 requests for $20.  They may be used at any time.'},
+                              context_instance=RequestContext(request))
+
+@login_required
+def confirm_email(request):
+    """Confirm your email address"""
+
+    user = request.user
+
+    def check_key(key):
+        """Check to see if confirmation key is correct"""
+        if key == user.confirmation_key and date.today() <= user.key_expire_date:
+            messages.success(request, 'Your email address has been confirmed')
+            user.email_confirmed = True
+            user.save()
+            return True
+        else:
+            return False
+
+    if request.method == 'POST':
+        if request.POST['submit'] == 'Submit':
+            form = EmailConfirmForm(request.POST)
+            if form.is_valid() and check_key(form.cleaned_data['key']):
+                return redirect(user.get_profile())
+            elif form.is_valid():
+                messages.error(request, 'Sorry, that confirmation key is incorrect or expired')
+        elif request.POST['submit'] == 'Resend Key':
+            prof = user.get_profile()
+            prof.confirmation_key = ''.join(choice(string.ascii_letters) for _ in range(24))
+            prof.key_expire_date = date.today() + timedelta(2)
+            prof.save()
+            send_mail('Confirmation Key',
+                  render_to_string('registration/resend.txt', {'user': user}),
+                  'info@muckrock.com', [user.email], fail_silently=False)
+    elif 'key' in request.GET:
+        if check_key(request.GET['key']):
+            return redirect(user.get_profile())
+        else:
+            messages.error(request, 'Sorry, that confirmation key is incorrect or expired')
+    else:
+        form = EmailConfirmForm()
+
+    return render_to_response('registration/confirm_email.html', {'form': form},
                               context_instance=RequestContext(request))
 
 def profile(request, user_name=None):
