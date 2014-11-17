@@ -6,8 +6,10 @@ $base-padding:          $base-vertical-rhythm;
 /* Typography */
 $light:                 300;
 $normal:                400;
-$bold:                  600;
-$base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
+$bold:                  500;
+$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
+$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
+$base-font-family:      $font-sans-serif;
 $base-font-weight:      $normal;
 $base-font-size:        1em;
 $base-line-height:      $base-vertical-rhythm;

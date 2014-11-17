@@ -44,15 +44,22 @@ urlpatterns = patterns('',
     url(r'^list/following/$',
         views.ListFollowing.as_view(template_name=list_template), 
         name='foia-list-following'),
-        
+    
+    # Create Views
+    url(r'^create/$',
+        views.create_request, name='foia-create'),
+    
     # Detail View
     url(r'^%s/$' % foia_url,
         views.Detail.as_view(template_name='details/request_detail.html'), 
         name='foia-detail'),
+    url(r'^%s/draft/$' % foia_url,
+        views.draft_request, name='foia-draft'),
     url(r'^%s/clone/$' % foia_url,
         views.clone_request, name='foia-clone'),
-    url(r'^%s/update/$' % foia_url,
-        views.update_request, name='foia-update'),
+    url(r'^%s/multiply/$' % foia_url,
+        views.multiply_request, name='foia-multiply'),
+
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
     url(r'^%s/add_note/$' % foia_url,
@@ -71,10 +78,6 @@ urlpatterns = patterns('',
         views.follow, name='foia-follow'),
     url(r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups, name='foia-toggle-followups'),
-
-    # Create Views
-    url(r'^create/$',
-        views.create_request, name='foia-create'),
         
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',

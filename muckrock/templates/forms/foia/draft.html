@@ -1,0 +1,66 @@
+{% extends 'forms/base_form.html' %}
+{% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
+{% block form-type %}foia-draft{% endblock %}
+
+
+{% block form-head %}
+{% with remaining=foia.user.get_profile.num_requests %}
+<h1>{{ action|title }}</h1>
+{% if not remaining %}
+    <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+    <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+    <button data-amount="2000"
+            data-description="5 requests ($20.00)"
+            data-email="{{ user.email }}"
+            data-form="#buy-requests"
+            class="checkout-button primary">Buy Requests</button>
+{% endif %}
+{% endwith %}
+{% endblock form-head %}
+
+{% block form-form %}
+
+{% if form %}
+{% with remaining=foia.user.get_profile.num_requests %}
+<form method="post" class="draft">
+    {% csrf_token %}
+    
+    <section class="info">
+        <summary>From {{ foia.user.get_full_name }} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}</summary>
+        {{ form.title }}
+    </section>
+    
+    <section class="request sent message">
+        <section class="meta">
+            <span class="date right">{% now "m/d/Y" %}</span>
+        </section>
+        <section class="body">
+            {{ form.request }}
+        </section>    
+    </section>
+
+    
+    {% if foia.user.get_profile.can_embargo %}
+    <section class="embargo">
+        <div class="input">
+            {{ form.embargo }}
+            <label for="id_embargo">Embargo</dfn>
+        </div>
+        <small>{{ form.embargo.help_text }}</small>
+    </section>
+    {% endif %}
+    
+    <section class="buttons">    
+        <input type="submit"
+           name="action"
+           value="Submit"
+           class="primary button"
+           {% if not remaining %}disabled{% endif %}
+        />
+        <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+    </section>
+</form>
+{% endwith %}
+{% endif %}
+    
+{% endblock form-form %}

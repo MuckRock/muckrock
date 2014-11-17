@@ -100,35 +100,6 @@
 {% endblock header %}
 
 {% block aside %}
-{% if foia.status == 'started' and foia.user == request.user %}
-    {% with remaining=user.get_profile.num_requests %}
-    {% if not remaining %}
-    <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-    <div class="buy-requests">
-        <p>Your account has no requests.<br>Purchase more below.</p>
-        <button data-amount="2000"
-                data-description="5 requests ($20.00)"
-                data-email="{{ user.email }}"
-                data-form="#buy-requests"
-                class="checkout-button primary">Buy Requests</button>
-    </div>
-    {% endif %}
-<form action="." method="post" class="draft">
-        {% csrf_token %}
-        
-    <input type="submit"
-           name="action"
-           value="Submit"
-           class="primary button"
-           {% if not remaining %}disabled{% endif %}
-    />
-        {% if foia.is_editable %}
-    <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
-        {% endif %}
-    <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
-</form>
-    {% endwith %}
-{% endif %}
 {% if foia.has_crowdfund %}
     <section class="crowdfund panel">
     {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}

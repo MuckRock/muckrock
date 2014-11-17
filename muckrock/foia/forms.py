@@ -71,14 +71,18 @@ class RequestForm(forms.Form):
 class RequestUpdateForm(forms.Form):
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
     request = forms.CharField(widget=forms.Textarea())
-    agency = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Name an Agency' }))
-    embargo = forms.BooleanField(required=False)
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+                  'other users until the embargo date you set. '
+                  'You may change this whenever you want.'
+    )
     
     def clean(self):
         data = self.cleaned_data
         embargo = data.get('embargo')
         if embargo and not self.request.user.can_embargo():
-            error_msg = 'No state was selected'
+            error_msg = 'Only Pro users may embargo their requests.'
             messages.error(request, error_msg)
             self._errors['embargo'] = self.error_class([error_msg])
         return self.cleaned_data
@@ -268,105 +272,3 @@ class FOIAAdminFixForm(forms.ModelForm):
     other_emails = forms.CharField(label='CC', required=False)
     comm = forms.CharField(label='Body', widget=forms.Textarea())
     snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
-
-    
-
-class FOIAWizardParent(forms.Form):
-    """A form with generic options for every template"""
-    agency = None
-    agency_type = None
-
-    @classmethod
-    def get_agency(cls, jurisdiction):
-        """Get the agency for this template given a jurisdiction"""
-
-        def get_first(list_):
-            """Get first element of a list or none if it is empty"""
-            if list_:
-                return list_[0]
-
-        agency = None
-        if cls.agency:
-            try:
-                agency = (Agency.objects.filter(name=cls.agency, jurisdiction=jurisdiction))[0]
-            except IndeXError:
-                print 'index error'
-        if not agency and cls.agency_type:
-            try:
-                type = (AgencyType.objects.filter(name=cls.agency_type))[0]
-            except IndexError:
-                return None
-            try:
-                agency = (Agency.objects.filter(types=type, jurisdiction=jurisdiction))[0]
-            except IndexError:
-                return None
-
-        return agency
-
-class FOIABlankForm(FOIAWizardParent):
-    title = forms.CharField(
-        help_text='70 character limit',
-        max_length=70,
-        widget=forms.TextInput()
-    )
-    document_request = forms.CharField(
-        help_text='Write one sentence specifically describing the document.',
-        widget=forms.Textarea()
-    )
-    slug = 'none'
-    name = 'Write My Own Request'
-    category = 'None'
-    level = 'lsf'
-    agency_type = 'Clerk'
-
-TEMPLATES = dict((form.slug, form) for form_name, form in inspect.getmembers(sys.modules[__name__],
-                 lambda member: inspect.isclass(member) and issubclass(member, FOIAWizardParent))
-                 if form is not FOIAWizardParent)
-LOCAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'l')
-STATE_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 's')
-FEDERAL_TEMPLATE_CHOICES = make_template_choices(TEMPLATES, 'f')
-
-class FOIAWizardWhereForm(forms.Form):
-    """A form to select the jurisdiction to file the request in"""
-    level = forms.ChoiceField(widget=forms.CheckboxSelectMultiple, choices=(('federal', 'Federal'),
-                                       ('state', 'State'),
-                                       ('local', 'Local'),
-                                       ('multi', 'Multiple Agencies')))
-    state = autocomplete.ModelChoiceField('StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False), required=False)
-    local = autocomplete.ModelChoiceField('LocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
-        required=False)
-
-    def clean(self):
-        """Make sure state or local is required based off of choice of level"""
-
-        level = self.cleaned_data.get('level')
-        state = self.cleaned_data.get('state')
-        local = self.cleaned_data.get('local')
-
-        if level == 'state' and not state:
-            self._errors['state'] = self.error_class(
-                    ['State required if you choose to file at the state level'])
-
-        if level == 'local' and not local:
-            self._errors['local'] = self.error_class(
-                    ['Local required if you choose to file at the local level'])
-
-        return self.cleaned_data
-
-class FOIAWhatLocalForm(forms.Form):
-    """A form to select what template to use for a local request"""
-
-    template = forms.ChoiceField(choices=LOCAL_TEMPLATE_CHOICES)
-
-class FOIAWhatStateForm(forms.Form):
-    """A form to select what template to use for a state request"""
-
-    template = forms.ChoiceField(choices=STATE_TEMPLATE_CHOICES)
-
-class FOIAWhatFederalForm(forms.Form):
-    """A form to select what template to use for a federal request"""
-
-    template = forms.ChoiceField(choices=FEDERAL_TEMPLATE_CHOICES)
-
