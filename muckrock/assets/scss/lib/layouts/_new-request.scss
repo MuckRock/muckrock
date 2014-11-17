@@ -219,31 +219,34 @@
 
 .clone-candidates {
     @include outer-container;
-    ul { padding-left: 0; }
+    ul {
+        padding-left: 0;
+        overflow: hidden;
+    }
     .candidate {
-        @extend %quarter;
+        @extend %half;
+        @include row;
         display: inline-block;
-        margin: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+        margin-bottom: $base-vertical-rhythm/2;
+        padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
         @extend %border;
         @extend %border-radius;
-        border-color: $color-black;
-        padding: $base-vertical-rhythm/2;
         &:first-child {
             margin-left: 0;
         }
-        .button {
+        .candidate-body {
+            @extend %three-quarters;
+        }
+        h3 {
+            @include font-sizing(1.2);
+            font-weight: $normal;
+        }
+        .clone-button {
+            @extend %quarter;
+            @include font-sizing(0.8);
             margin-top: 0.5em;
             margin-right: 0;
-            display: block;
-        }
-        
-        div {
-            &:first-of-type {
-                font-size: 1.2em;
-            }
-            &:last-of-type {
-                font-size: 0.9em;
-            }
+            float: right;
         }
     }
 }

@@ -25,7 +25,7 @@ h4 { @include font-sizing(1.5); }
 h5 { @include font-sizing(1.375); }
 h6 { @include font-sizing(1.25); }
 
-p { margin: $base-vertical-rhythm/2 0; }
+p { margin: 0 0 $base-vertical-rhythm/2 0; }
 
 a {
     color: $color-primary;

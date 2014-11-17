@@ -12,7 +12,7 @@ html, body { min-height: 100%; }
 
 %half {
     @include omega(2n);
-    @include media($small-layout) { @include span-columns(2); }
+    @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(3); }
     @include media($large-layout) { @include span-columns(6); }
 }
