@@ -1,0 +1,53 @@
+
+
+.foia-draft {
+    overflow: hidden;
+    header, form { padding-left: 0; }
+    header, h1 { margin: 0; }
+    #id_title {
+        width: 100%;
+        background-color: $color-white;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        border-bottom: 2*$base-border-width dotted lighten($color-black, 20%);
+        @include font-sizing(2);
+        @include media($small-layout) { @include font-sizing(1.5); }
+    }
+    .request {
+        @include span-columns(12);
+        @include shift(0);
+        .body {
+            padding: 0;
+            height: 100%;
+            background-color: white;
+            textarea {
+                border: none;
+                border-radius: 0;
+                resize: none;
+                height: 20em;
+                overflow-y: scroll;
+                font-family: $font-monospace;
+            }
+        }
+    }
+    @include media($medium-layout) {
+        .embargo, .buttons {
+            width: 50%;
+            float: left;
+        } 
+        .buttons .button {
+            float: right;
+        }
+    }  
+    .embargo .input {
+        display: block;
+        dfn, input {
+            display: inline-block;
+            width: auto;
+        }
+        input {
+            margin: $base-margin/4 $base-margin/6 $base-margin/6 0;
+        }
+    }
+}

@@ -71,7 +71,12 @@ class RequestForm(forms.Form):
 class RequestUpdateForm(forms.Form):
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
     request = forms.CharField(widget=forms.Textarea())
-    embargo = forms.BooleanField(required=False)
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+                  'other users until the embargo date you set. '
+                  'You may change this whenever you want.'
+    )
     
     def clean(self):
         data = self.cleaned_data

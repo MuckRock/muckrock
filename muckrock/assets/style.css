@@ -779,7 +779,7 @@ body {
   color: #21282c;
   background-color: #f4f4f4;
   font-size: 14px;
-  font-family: "Source Sans Pro", "Helvetica Neue", "sans-serif";
+  font-family: "Source Sans Pro", "Helvetica Neue", sans-serif;
   font-weight: 400;
   line-height: 24px;
   -webkit-font-feature-settings: "liga", "kern";
@@ -2338,6 +2338,60 @@ h1.list-label {
       margin-top: 0.5em;
       margin-right: 0;
       float: right; }
+
+.foia-draft {
+  overflow: hidden; }
+  .foia-draft header, .foia-draft form {
+    padding-left: 0; }
+  .foia-draft header, .foia-draft h1 {
+    margin: 0; }
+  .foia-draft #id_title {
+    width: 100%;
+    background-color: #f4f4f4;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    border-bottom: 2px dotted #4d5d66;
+    font-size: 2em;
+    line-height: 1.51282em;
+    margin: 0.37821em 0; }
+    @media screen and (max-width: 500px) {
+      .foia-draft #id_title {
+        font-size: 1.5em;
+        line-height: 1.51282em;
+        margin: 0.37821em 0; } }
+  .foia-draft .request {
+    float: left;
+    display: block;
+    margin-right: 2.35765%;
+    width: 100%;
+    margin-left: 0%; }
+    .foia-draft .request:last-child {
+      margin-right: 0; }
+    .foia-draft .request .body {
+      padding: 0;
+      height: 100%;
+      background-color: white; }
+      .foia-draft .request .body textarea {
+        border: none;
+        border-radius: 0;
+        resize: none;
+        height: 20em;
+        overflow-y: scroll;
+        font-family: "Source Code Pro", "Courier Prime", monospace; }
+  @media screen and (min-width: 500px) {
+    .foia-draft .embargo, .foia-draft .buttons {
+      width: 50%;
+      float: left; }
+    .foia-draft .buttons .button, .foia-draft .buttons input[type="submit"], .foia-draft .buttons button {
+      float: right; } }
+  .foia-draft .embargo .input {
+    display: block; }
+    .foia-draft .embargo .input dfn, .foia-draft .embargo .input fieldset label, fieldset .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .agency label, .new-request .agency .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .foia-draft .embargo .input span.deck > span:before, .foia-draft .embargo .input input {
+      display: inline-block;
+      width: auto; }
+    .foia-draft .embargo .input input {
+      margin: 0.375em 0.25em 0.25em 0; }
 
 .search {
   display: block;
