@@ -59,8 +59,8 @@
 %article {
     @extend %body;
     .meta {
-        @include row();
-        header {
+        @include row;
+        .header {
             @extend %two-thirds;
             margin: $base-margin/2 0 0;
             h1 { @include font-sizing(1.5); }
@@ -71,7 +71,7 @@
                 h2 { @include font-sizing(1.25); }
             }
         }
-        aside {
+        .aside {
             @extend %third;
             margin: $base-vertical-rhythm/2 0;
             dl { margin-top: 0; }
