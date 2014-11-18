@@ -2515,6 +2515,9 @@ nav.sidebar {
       line-height: 1.22222em;
       margin: 0.30556em 0;
       font-weight: 400; }
+    @media screen and (min-width: 500px) {
+      .homepage .banner .left {
+        padding-top: 3em; } }
     .homepage .banner h1 {
       max-width: 15em; }
       @media screen and (max-width: 500px) {

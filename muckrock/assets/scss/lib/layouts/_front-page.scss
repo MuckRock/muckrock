@@ -38,7 +38,6 @@
             
         
         .right {
-        
             @include media($small-layout) {
                 margin: 0 $base-margin $base-margin $base-margin;
                 text-align: center;
@@ -60,10 +59,10 @@
                 @include font-sizing(1.25);
                 font-weight: $normal;
             }
-            
-            
-            
+        }
         
+        @include media($medium-layout) {
+            .left { padding-top: 3em; }
         }
         
         h1 {
