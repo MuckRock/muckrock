@@ -43,5 +43,8 @@ $color-odd-background:  darken($color-white, 5%);
 $menu-breakpoint:       1024px;
 $mobile-menu-width:     250px;
 $tablet-menu-width:     300px;
-$desktop-menu-width:    23%;
+$desktop-menu-width:    22%;
 $menu-animation:        all 0.25s ease;
+
+/* Animation */
+$base-duration:         0.25s;

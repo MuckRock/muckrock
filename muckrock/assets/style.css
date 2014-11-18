@@ -365,6 +365,7 @@ th {
 /* Breakpoints */
 /* Colors */
 /* Menus */
+/* Animation */
 /* Allows for full-height elements with CSS */
 html, body {
   min-height: 100%; }
@@ -2176,7 +2177,7 @@ nav.secondary {
 /* Global Sidebar */
 .container {
   display: block;
-  width: 77%;
+  width: 78%;
   float: left;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
@@ -2186,7 +2187,7 @@ nav.secondary {
   position: fixed;
   top: 0;
   right: 0;
-  width: 23%;
+  width: 22%;
   height: 100%;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
@@ -2306,55 +2307,68 @@ nav.sidebar {
         background: #3a82ff; }
         nav.sidebar ul a:hover svg {
           fill: #f4f4f4; }
-  nav.sidebar #new-request {
+  nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
     display: block;
     height: 2.5rem;
     width: 100%;
-    margin-bottom: 1.5em;
-    background-color: #3a82ff;
-    color: #f4f4f4; }
-  nav.sidebar .account .username {
-    display: block;
     margin-bottom: 0.75em;
-    color: #f4f4f4; }
-  nav.sidebar .account .foia-details {
-    display: block; }
-    nav.sidebar .account .foia-details li {
-      display: list-item;
-      width: 100%;
-      padding: 0; }
-      nav.sidebar .account .foia-details li:first-child a {
-        border-top-left-radius: 9px;
-        border-top-right-radius: 9px; }
-      nav.sidebar .account .foia-details li:last-child a {
-        border-bottom-left-radius: 9px;
-        border-bottom-right-radius: 9px; }
-    nav.sidebar .account .foia-details a {
-      text-align: left;
-      border-radius: 0; }
-  nav.sidebar .account #admin-button ul {
-    margin: 0.75em 0; }
-  nav.sidebar .account #admin-button li {
-    width: 100%; }
-  nav.sidebar .account .account-info {
-    display: block;
-    margin: 1.5em 0;
-    color: #f4f4f4;
-    text-decoration: none; }
-    nav.sidebar .account .account-info .counter {
-      margin-right: 0.375em;
-      padding: 0.25em 0.75em 0.3em;
-      border-radius: 50px;
-      font-weight: 500;
-      text-align: center;
-      color: #21282c;
-      background-color: #f4f4f4; }
-      nav.sidebar .account .account-info .counter.updates {
-        background-color: #3a82ff; }
-    nav.sidebar .account .account-info:hover {
-      color: #3a82ff; }
-      nav.sidebar .account .account-info:hover .counter {
-        background-color: #3a82ff; }
+    background: #181d20;
+    border: none;
+    color: #B3BECB; }
+    nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
+      background: #3a82ff;
+      color: #f4f4f4; }
+  nav.sidebar .account {
+    margin-top: 3em; }
+    nav.sidebar .account .username {
+      display: block;
+      margin-bottom: 0.75em;
+      color: #f4f4f4; }
+    nav.sidebar .account .foia-details {
+      display: block; }
+      nav.sidebar .account .foia-details li {
+        display: list-item;
+        width: 100%;
+        padding: 0;
+        border-top: 1px solid #21282c; }
+        nav.sidebar .account .foia-details li:first-child a {
+          border-top: none;
+          border-top-left-radius: 9px;
+          border-top-right-radius: 9px; }
+        nav.sidebar .account .foia-details li:last-child a {
+          border-bottom-left-radius: 9px;
+          border-bottom-right-radius: 9px; }
+      nav.sidebar .account .foia-details a {
+        text-align: left;
+        border-radius: 0; }
+    nav.sidebar .account #admin-button ul {
+      margin: 0.75em 0; }
+    nav.sidebar .account #admin-button li {
+      width: 100%; }
+    nav.sidebar .account .account-info {
+      display: block;
+      margin: 1.5em 0;
+      color: #f4f4f4;
+      text-decoration: none;
+      -webkit-transition: color 0.25s ease;
+      -moz-transition: color 0.25s ease;
+      transition: color 0.25s ease; }
+      nav.sidebar .account .account-info .counter {
+        margin-right: 0.375em;
+        padding: 0.3em 0.75em;
+        border-radius: 100%;
+        font-weight: 500;
+        text-align: center;
+        color: #f4f4f4;
+        background-color: none;
+        -webkit-transition: background-color 0.25s ease;
+        -moz-transition: background-color 0.25s ease;
+        transition: background-color 0.25s ease; }
+      nav.sidebar .account .account-info:hover {
+        color: #3a82ff; }
+        nav.sidebar .account .account-info:hover .counter {
+          border-color: #3a82ff;
+          background-color: #3a82ff; }
   nav.sidebar .social-links li {
     width: 33%; }
   nav.sidebar .social-links a svg {
@@ -3149,7 +3163,7 @@ nav.secondary {
 /* Global Sidebar */
 .container {
   display: block;
-  width: 77%;
+  width: 78%;
   float: left;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
@@ -3159,7 +3173,7 @@ nav.secondary {
   position: fixed;
   top: 0;
   right: 0;
-  width: 23%;
+  width: 22%;
   height: 100%;
   -webkit-transition: all 0.25s ease;
   -moz-transition: all 0.25s ease;
@@ -3279,55 +3293,68 @@ nav.sidebar {
         background: #3a82ff; }
         nav.sidebar ul a:hover svg {
           fill: #f4f4f4; }
-  nav.sidebar #new-request {
+  nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
     display: block;
     height: 2.5rem;
     width: 100%;
-    margin-bottom: 1.5em;
-    background-color: #3a82ff;
-    color: #f4f4f4; }
-  nav.sidebar .account .username {
-    display: block;
     margin-bottom: 0.75em;
-    color: #f4f4f4; }
-  nav.sidebar .account .foia-details {
-    display: block; }
-    nav.sidebar .account .foia-details li {
-      display: list-item;
-      width: 100%;
-      padding: 0; }
-      nav.sidebar .account .foia-details li:first-child a {
-        border-top-left-radius: 9px;
-        border-top-right-radius: 9px; }
-      nav.sidebar .account .foia-details li:last-child a {
-        border-bottom-left-radius: 9px;
-        border-bottom-right-radius: 9px; }
-    nav.sidebar .account .foia-details a {
-      text-align: left;
-      border-radius: 0; }
-  nav.sidebar .account #admin-button ul {
-    margin: 0.75em 0; }
-  nav.sidebar .account #admin-button li {
-    width: 100%; }
-  nav.sidebar .account .account-info {
-    display: block;
-    margin: 1.5em 0;
-    color: #f4f4f4;
-    text-decoration: none; }
-    nav.sidebar .account .account-info .counter {
-      margin-right: 0.375em;
-      padding: 0.25em 0.75em 0.3em;
-      border-radius: 50px;
-      font-weight: 500;
-      text-align: center;
-      color: #21282c;
-      background-color: #f4f4f4; }
-      nav.sidebar .account .account-info .counter.updates {
-        background-color: #3a82ff; }
-    nav.sidebar .account .account-info:hover {
-      color: #3a82ff; }
-      nav.sidebar .account .account-info:hover .counter {
-        background-color: #3a82ff; }
+    background: #181d20;
+    border: none;
+    color: #B3BECB; }
+    nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
+      background: #3a82ff;
+      color: #f4f4f4; }
+  nav.sidebar .account {
+    margin-top: 3em; }
+    nav.sidebar .account .username {
+      display: block;
+      margin-bottom: 0.75em;
+      color: #f4f4f4; }
+    nav.sidebar .account .foia-details {
+      display: block; }
+      nav.sidebar .account .foia-details li {
+        display: list-item;
+        width: 100%;
+        padding: 0;
+        border-top: 1px solid #21282c; }
+        nav.sidebar .account .foia-details li:first-child a {
+          border-top: none;
+          border-top-left-radius: 9px;
+          border-top-right-radius: 9px; }
+        nav.sidebar .account .foia-details li:last-child a {
+          border-bottom-left-radius: 9px;
+          border-bottom-right-radius: 9px; }
+      nav.sidebar .account .foia-details a {
+        text-align: left;
+        border-radius: 0; }
+    nav.sidebar .account #admin-button ul {
+      margin: 0.75em 0; }
+    nav.sidebar .account #admin-button li {
+      width: 100%; }
+    nav.sidebar .account .account-info {
+      display: block;
+      margin: 1.5em 0;
+      color: #f4f4f4;
+      text-decoration: none;
+      -webkit-transition: color 0.25s ease;
+      -moz-transition: color 0.25s ease;
+      transition: color 0.25s ease; }
+      nav.sidebar .account .account-info .counter {
+        margin-right: 0.375em;
+        padding: 0.3em 0.75em;
+        border-radius: 100%;
+        font-weight: 500;
+        text-align: center;
+        color: #f4f4f4;
+        background-color: none;
+        -webkit-transition: background-color 0.25s ease;
+        -moz-transition: background-color 0.25s ease;
+        transition: background-color 0.25s ease; }
+      nav.sidebar .account .account-info:hover {
+        color: #3a82ff; }
+        nav.sidebar .account .account-info:hover .counter {
+          border-color: #3a82ff;
+          background-color: #3a82ff; }
   nav.sidebar .social-links li {
     width: 33%; }
   nav.sidebar .social-links a svg {

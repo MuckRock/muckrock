@@ -42,7 +42,11 @@
         {% endblock twitter_card %}
     </head>
     <body>
+        {% if user.is_authenticated %}
         {% include 'lib/sidebar.html' %}
+        {% else %}
+        {% include 'lib/sidebar.html' with hidden=1 %}
+        {% endif %}
         <div class="container">
             {% include 'lib/header.html' %}
             {% include 'lib/notification.html' %}

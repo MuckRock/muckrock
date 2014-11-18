@@ -323,16 +323,22 @@ nav.sidebar {
         }
     }
     
-    #new-request {
+    .button {
         display: block;
         height: $sidebar-object-height;
         width: 100%;
-        margin-bottom: $base-vertical-rhythm;
-        background-color: $color-primary;
-        color: $color-white;
+        margin-bottom: $base-vertical-rhythm/2;
+        background: $sidebar-button-background;
+        border: none;
+        color: $color-grey;
+        &:hover {
+            background: $color-primary;
+            color: $color-white;
+        }
     }
     
     .account {
+        margin-top: 2 * $base-margin;
         .username {
             display: block;
             @extend h5;
@@ -347,7 +353,9 @@ nav.sidebar {
                 display: list-item;
                 width: 100%;
                 padding: 0;
+                border-top: $base-border-width solid $color-black;
                 &:first-child a {
+                    border-top: none;
                     @include border-top-radius($base-border-radius);
                 }
                 &:last-child a {
@@ -368,14 +376,21 @@ nav.sidebar {
         .account-info {
             .counter {
                 margin-right: $base-vertical-rhythm/4;
-                padding: $base-vertical-rhythm/6 $base-vertical-rhythm/2 $base-vertical-rhythm/5;
-                border-radius: 50px;
+                padding: $base-vertical-rhythm/5 $base-vertical-rhythm/2;
+                // border: $base-border-width solid $color-white;
+                border-radius: 100%;
                 
                 font-weight: $bold;
                 text-align: center;
-                color: $color-black;
-                background-color: $color-white;
-                &.updates { background-color: $color-primary; }
+                color: $color-white;
+                background-color: none;
+                
+                &:hover {
+
+                }
+                
+//                @include transition (color $base-duration ease);
+                @include transition (background-color $base-duration ease);
             }
             display: block;
             margin: $base-vertical-rhythm 0;
@@ -384,8 +399,13 @@ nav.sidebar {
             
             &:hover {
                 color: $color-primary;
-                .counter { background-color: $color-primary; }
+                .counter {
+                    border-color: $color-primary;
+                    background-color: $color-primary;
+                }
             }
+            
+            @include transition (color $base-duration ease);
         }
     }
     
