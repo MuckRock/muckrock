@@ -13,11 +13,10 @@
         <ul class="choice agencies list">
         {% for agency in agencies %}
             <li class="agency">
-                <div class="info">
-                    <div class="name">{{ agency.name }}</div>
-                    <div class="jurisdiction">{{ agency.jurisdiction }}</div>
-                    <div class="type">{{ agency.types.all|join:", " }}</div>
-                </div>
+                <div class="id">{{ agency.id }}</div>
+                <div class="name">{{ agency.name }}</div>
+                <div class="jurisdiction">{{ agency.jurisdiction.name }}</div>
+                <div class="type">{{ agency.types.all|join:", " }}</div>
                 <div class="button add">
                     <svg class="svg-icon" id="icon-add" viewBox="0 0 20 20">
                         <path fill="none" d="M13.68,9.448h-3.128V6.319c0-0.304-0.248-0.551-0.552-0.551S9.448,6.015,9.448,6.319v3.129H6.319
@@ -46,29 +45,43 @@
 <script src="{% static 'js/list.min.js' %}" type="text/javascript"></script>
 <script>
 
+    var options = { valueNames: ['id', 'name', 'jurisdiction', 'type'] };
+    var agencyList = new List('agency-list', options);
+
     function addAgency(button) {
         console.log('add');
         button.removeClass('add').addClass('remove');
-        button.parent().appendTo('ul.chosen.agencies');
+        var id = button.siblings('.id').html();
+        var clone = button.parent().clone();
+        console.log(agencyList.remove('id', id));
+        $('.chosen.agencies').append(button.parent());
     }
     
     function removeAgency(button) {
         console.log('remove');
         button.removeClass('remove').addClass('add');
-        button.parent().appendTo('ul.choice.agencies');
+        var id = button.siblings('.id').html();
+        var name = button.siblings('.name').html();
+        var jurisdiction = button.siblings('.jurisdiction').html();
+        var types = button.siblings('.types').html();
+        agencyList.add(
+            {
+                id: id,
+                name: name,
+                jurisdiction: jurisdiction,
+                types: types
+            }
+        );
+        button.parent().remove();
     }
 
-    $(document).ready(function(){
-        var options = { valueNames: ['name', 'jurisdiction', 'type'] };
-        var agencyList = new List('agency-list', options);
-        $('.agency .button').click(function(e){
-            e.preventDefault();
-            if ($(this).hasClass('add')) {
-                addAgency($(this));
-            } else {
-                removeAgency($(this));
-            }
-        });
+    $(document).on('click', '.agency .button', function(e){
+        e.preventDefault();
+        if ($(this).hasClass('add')) {
+            addAgency($(this));
+        } else {
+            removeAgency($(this));
+        }
     });
 </script>
 {% endblock scripts %}

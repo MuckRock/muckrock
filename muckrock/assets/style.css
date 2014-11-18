@@ -2344,13 +2344,14 @@ h1.list-label {
 
 .new-multi-request .agency {
   width: 100%;
-  overflow: hidden; }
+  overflow: hidden;
+  background-color: #B3BECB; }
   .new-multi-request .agency .info {
     width: 75%;
     float: left; }
   .new-multi-request .agency .button, .new-multi-request .agency input[type="submit"], .new-multi-request .agency button {
     width: 25%;
-    float: right;
+    float: left;
     background: none;
     background-color: none;
     border: none; }
