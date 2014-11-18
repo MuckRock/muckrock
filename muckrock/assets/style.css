@@ -1178,19 +1178,6 @@ ul.notifications {
         width: auto;
         color: #f4f4f4;
         text-align: center; }
-        ul.notifications li.notification span.symbol .svg-icon {
-          display: inline-block;
-          width: auto;
-          height: 2rem;
-          vertical-align: middle;
-          margin: 0 0.5em; }
-        ul.notifications li.notification span.symbol .svg-icon path,
-        ul.notifications li.notification span.symbol .svg-icon polygon,
-        ul.notifications li.notification span.symbol .svg-icon rect {
-          fill: #f4f4f4; }
-        ul.notifications li.notification span.symbol .svg-icon circle {
-          stroke: #f4f4f4;
-          stroke-width: 1; }
       ul.notifications li.notification span.text {
         /*
         width: 70%;
@@ -1673,6 +1660,22 @@ table {
 
 .hidden-stripe-handler {
   display: none; }
+
+.svg-icon {
+  display: inline-block;
+  width: auto;
+  height: 2rem;
+  vertical-align: middle;
+  margin: 0 0.5em; }
+
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+  fill: #f4f4f4; }
+
+.svg-icon circle {
+  stroke: #f4f4f4;
+  stroke-width: 1; }
 
 /* Layouts */
 /* Details */
@@ -2338,6 +2341,47 @@ h1.list-label {
       margin-top: 0.5em;
       margin-right: 0;
       float: right; }
+
+.new-multi-request .agency {
+  width: 100%;
+  overflow: hidden; }
+  .new-multi-request .agency .info {
+    width: 75%;
+    float: left; }
+  .new-multi-request .agency .button, .new-multi-request .agency input[type="submit"], .new-multi-request .agency button {
+    width: 25%;
+    float: right;
+    background: none;
+    background-color: none;
+    border: none; }
+    .new-multi-request .agency .button.add .svg-icon path, .new-multi-request .agency input.add[type="submit"] .svg-icon path, .new-multi-request .agency button.add .svg-icon path,
+    .new-multi-request .agency .button.add .svg-icon polygon,
+    .new-multi-request .agency input.add[type="submit"] .svg-icon polygon,
+    .new-multi-request .agency button.add .svg-icon polygon,
+    .new-multi-request .agency .button.add .svg-icon rect,
+    .new-multi-request .agency input.add[type="submit"] .svg-icon rect,
+    .new-multi-request .agency button.add .svg-icon rect {
+      fill: #02CF6B; }
+    .new-multi-request .agency .button.add .svg-icon circle, .new-multi-request .agency input.add[type="submit"] .svg-icon circle, .new-multi-request .agency button.add .svg-icon circle {
+      stroke: #02CF6B; }
+    .new-multi-request .agency .button.add #icon-add, .new-multi-request .agency input.add[type="submit"] #icon-add, .new-multi-request .agency button.add #icon-add {
+      display: inline-block; }
+    .new-multi-request .agency .button.add #icon-remove, .new-multi-request .agency input.add[type="submit"] #icon-remove, .new-multi-request .agency button.add #icon-remove {
+      display: none; }
+    .new-multi-request .agency .button.remove .svg-icon path, .new-multi-request .agency input.remove[type="submit"] .svg-icon path, .new-multi-request .agency button.remove .svg-icon path,
+    .new-multi-request .agency .button.remove .svg-icon polygon,
+    .new-multi-request .agency input.remove[type="submit"] .svg-icon polygon,
+    .new-multi-request .agency button.remove .svg-icon polygon,
+    .new-multi-request .agency .button.remove .svg-icon rect,
+    .new-multi-request .agency input.remove[type="submit"] .svg-icon rect,
+    .new-multi-request .agency button.remove .svg-icon rect {
+      fill: #E35336; }
+    .new-multi-request .agency .button.remove .svg-icon circle, .new-multi-request .agency input.remove[type="submit"] .svg-icon circle, .new-multi-request .agency button.remove .svg-icon circle {
+      stroke: #E35336; }
+    .new-multi-request .agency .button.remove #icon-add, .new-multi-request .agency input.remove[type="submit"] #icon-add, .new-multi-request .agency button.remove #icon-add {
+      display: none; }
+    .new-multi-request .agency .button.remove #icon-remove, .new-multi-request .agency input.remove[type="submit"] #icon-remove, .new-multi-request .agency button.remove #icon-remove {
+      display: inline-block; }
 
 .foia-draft {
   overflow: hidden; }

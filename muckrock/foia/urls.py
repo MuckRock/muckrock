@@ -48,6 +48,8 @@ urlpatterns = patterns('',
     # Create Views
     url(r'^create/$',
         views.create_request, name='foia-create'),
+    url(r'^create_multirequest/$',
+        views.create_multirequest, name='foia-create-multi'),
     
     # Detail View
     url(r'^%s/$' % foia_url,
@@ -57,9 +59,6 @@ urlpatterns = patterns('',
         views.draft_request, name='foia-draft'),
     url(r'^%s/clone/$' % foia_url,
         views.clone_request, name='foia-clone'),
-    url(r'^%s/multiply/$' % foia_url,
-        views.multiply_request, name='foia-multiply'),
-
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
     url(r'^%s/add_note/$' % foia_url,

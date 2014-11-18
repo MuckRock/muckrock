@@ -250,3 +250,34 @@
         }
     }
 }
+
+.new-multi-request {
+    .agency {
+        width: 100%;
+        overflow: hidden;
+        background-color: $color-grey;
+        
+        .info {
+            width: 75%;
+            float: left;
+        }
+        .button {
+            width: 25%;
+            float: left;
+            background: none;
+            background-color: none;
+            border: none;
+            &.add {
+                @include colorize-icon($color-success);
+                #icon-add { display: inline-block; }
+                #icon-remove { display: none;; }
+            }
+            &.remove {
+                @include colorize-icon($color-failure);
+                #icon-add { display: none; }
+                #icon-remove { display: inline-block; }
+            }
+        }
+    }
+
+}

@@ -175,6 +175,23 @@ class FOIAMultiRequestForm(forms.ModelForm):
         model = FOIAMultiRequest
         fields = ['title', 'embargo', 'requested_docs']
         widgets = {'title': forms.TextInput(attrs={'style': 'width:450px;'})}
+        
+class FOIAMultipleSubmitForm(forms.Form):
+    """Form to select multiple agencies to submit to"""
+    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
+    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
+
+class AgencyConfirmForm(forms.Form):
+    """Confirm agencies for a multiple submit"""
+    def __init__(self, *args, **kwargs):
+        self.queryset = kwargs.pop('queryset', [])
+        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
+        self.fields['agencies'].queryset = self.queryset
+    class AgencyChoiceField(forms.ModelMultipleChoiceField):
+        """Add jurisdiction to agency label"""
+        def label_from_instance(self, obj):
+            return '%s - %s' % (obj.name, obj.jurisdiction)
+    agencies = AgencyChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
@@ -216,32 +233,12 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
-class FOIAMultipleSubmitForm(forms.Form):
-    """Form to select multiple agencies to submit to"""
-
-    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
-    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
-
-class AgencyConfirmForm(forms.Form):
-    """Confirm agencies for a multiple submit"""
-
-    def __init__(self, *args, **kwargs):
-        self.queryset = kwargs.pop('queryset', [])
-        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
-        self.fields['agencies'].queryset = self.queryset
-
-    class AgencyChoiceField(forms.ModelMultipleChoiceField):
-        """Add jurisdiction to agency label"""
-        def label_from_instance(self, obj):
-            return '%s - %s' % (obj.name, obj.jurisdiction)
-
-    agencies = AgencyChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
-
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
-
-    confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
-                                 help_text='This cannot be undone!')
+    confirm = forms.BooleanField(
+        label='Are you sure you want to delete this FOIA request?',
+        help_text='This cannot be undone!'
+    )
 
 FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
 

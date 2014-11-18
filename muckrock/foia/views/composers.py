@@ -202,11 +202,6 @@ def clone_request(request, jurisdiction, jidx, slug, idx):
     foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
-@login_required
-def multiply_request(request, jurisdiction, jids, slug, idx):
-    foia = get_foia(jurisdiction, jidx, slug, idx)
-    return HttpResponseRedirect(reverse('foia-create') + '?multiply=%s' % foia.pk)
-
 def create_request(request):
     initial_data = {}
     clone = False
@@ -251,6 +246,13 @@ def create_request(request):
     }
     
     return render_to_response('forms/foia/create.html', context, 
+                              context_instance=RequestContext(request))
+
+@login_required
+def create_multirequest(request):
+    agencies = Agency.objects.all();
+    context = { 'agencies': agencies }
+    return render_to_response('forms/foia/create_multirequest.html', context,
                               context_instance=RequestContext(request))
 
 """
@@ -305,7 +307,6 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def multirequest_update(request, slug, idx):
     """Update a started FOIA MultiRequest"""
-
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:
@@ -339,7 +340,7 @@ def multirequest_update(request, slug, idx):
         form = FOIAMultiRequestForm(instance=foia)
 
     return render_to_response(
-        'foia/foiamultirequest_form.html',
-        {'form': form, 'foia': foia},
+        'forms/foia/draft_multi.html',
+        {'form': form, 'action': 'Draft', 'foia': foia},
         context_instance=RequestContext(request)
     )
