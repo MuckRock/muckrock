@@ -30,11 +30,8 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
-    RequestForm, \
-    RequestUpdateForm, \
     ListFilterForm, \
-    MyListFilterForm, \
-    FOIAMultiRequestForm
+    MyListFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \

@@ -160,38 +160,27 @@ class FOIARequestForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'style': 'width:450px;'}),
         }
 
-class FOIAMultiRequestForm(forms.ModelForm):
-    """A form for a FOIA Multi-Request"""
+class MultiRequestForm(forms.ModelForm):
+    """A form for a multi-Request"""
 
-    embargo = forms.BooleanField(required=False,
-                                 help_text='Embargoing a request keeps it completely private from '
-                                           'other users until the embargo date you set.  '
-                                           'You may change this whenever you want.')
-    requested_docs = forms.CharField(label='Request',
-        widget=forms.Textarea(attrs={'style': 'width:450px; height:50px;'}))
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Name your multirequest'})
+    )
+    requested_docs = forms.CharField(
+        label='Request',
+        widget=forms.Textarea()
+    )
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+                  'other users until the embargo date you set.  '
+                  'You may change this whenever you want.'
+    )
 
     class Meta:
         # pylint: disable=R0903
         model = FOIAMultiRequest
-        fields = ['title', 'embargo', 'requested_docs']
-        widgets = {'title': forms.TextInput(attrs={'style': 'width:450px;'})}
-        
-class FOIAMultipleSubmitForm(forms.Form):
-    """Form to select multiple agencies to submit to"""
-    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
-    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
-
-class AgencyConfirmForm(forms.Form):
-    """Confirm agencies for a multiple submit"""
-    def __init__(self, *args, **kwargs):
-        self.queryset = kwargs.pop('queryset', [])
-        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
-        self.fields['agencies'].queryset = self.queryset
-    class AgencyChoiceField(forms.ModelMultipleChoiceField):
-        """Add jurisdiction to agency label"""
-        def label_from_instance(self, obj):
-            return '%s - %s' % (obj.name, obj.jurisdiction)
-    agencies = AgencyChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
+        fields = ['title', 'requested_docs', 'embargo']
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""

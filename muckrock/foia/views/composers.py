@@ -32,9 +32,8 @@ from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
     RequestForm, \
     RequestUpdateForm, \
-    ListFilterForm, \
-    MyListFilterForm, \
-    FOIAMultiRequestForm
+    MultiRequestForm
+    
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -250,8 +249,18 @@ def create_request(request):
 
 @login_required
 def create_multirequest(request):
-    agencies = Agency.objects.all();
-    context = { 'agencies': agencies }
+    
+    if request.method == 'POST':
+        form = MultiRequestForm(request.POST)
+        if form.is_valid():
+            # TODO: Create multirequest object and save it
+            print 'Ok'
+            
+    else:
+        form = MultiRequestForm()
+    
+    agencies = Agency.objects.filter(approved=True);
+    context = { 'agencies': agencies, 'form': form }
     return render_to_response('forms/foia/create_multirequest.html', context,
                               context_instance=RequestContext(request))
 
@@ -305,7 +314,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     )
 
 @login_required
-def multirequest_update(request, slug, idx):
+def draft_multirequest(request, slug, idx):
     """Update a started FOIA MultiRequest"""
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
