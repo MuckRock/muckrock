@@ -8,15 +8,11 @@
     <ul class="chosen agencies">
     </ul>
     <div id="agency-list">
-        <input class="search" />
+        <input class="search" placeholder="Filter agencies by name, jurisdiction, or tag"/>
         <span class="sort" data-sort="name">Sort by name</span>    
         <ul class="choice agencies list">
         {% for agency in agencies %}
             <li class="agency">
-                <div class="id">{{ agency.id }}</div>
-                <div class="name">{{ agency.name }}</div>
-                <div class="jurisdiction">{{ agency.jurisdiction.name }}</div>
-                <div class="type">{{ agency.types.all|join:", " }}</div>
                 <div class="button add">
                     <svg class="svg-icon" id="icon-add" viewBox="0 0 20 20">
                         <path fill="none" d="M13.68,9.448h-3.128V6.319c0-0.304-0.248-0.551-0.552-0.551S9.448,6.015,9.448,6.319v3.129H6.319
@@ -32,6 +28,12 @@
 								s4.043,9.031,9.031,9.031s9.031-4.043,9.031-9.031S15.082,0.875,10.094,0.875z M10.094,17.809c-4.365,0-7.902-3.538-7.902-7.902
 								c0-4.365,3.538-7.902,7.902-7.902c4.364,0,7.902,3.538,7.902,7.902C17.996,14.271,14.458,17.809,10.094,17.809z"></path>
 					</svg>
+                </div>
+                <div class="info">
+                    <div class="id">{{ agency.id }}</div>
+                    <div class="name">{{ agency.name }}</div>
+                    <div class="jurisdiction">{{ agency.jurisdiction.name }}</div>
+                    <div class="type">{{ agency.types.all|join:", " }}</div>
                 </div>
             </li>
         {% endfor %}
@@ -51,7 +53,7 @@
     function addAgency(button) {
         console.log('add');
         button.removeClass('add').addClass('remove');
-        var id = button.siblings('.id').html();
+        var id = button.siblings().children('.id').html();
         var clone = button.parent().clone();
         console.log(agencyList.remove('id', id));
         $('.chosen.agencies').append(button.parent());
@@ -60,10 +62,10 @@
     function removeAgency(button) {
         console.log('remove');
         button.removeClass('remove').addClass('add');
-        var id = button.siblings('.id').html();
-        var name = button.siblings('.name').html();
-        var jurisdiction = button.siblings('.jurisdiction').html();
-        var types = button.siblings('.types').html();
+        var id = button.siblings().children('.id').html();
+        var name = button.siblings().children('.name').html();
+        var jurisdiction = button.siblings().children('.jurisdiction').html();
+        var types = button.siblings().children('.types').html();
         agencyList.add(
             {
                 id: id,

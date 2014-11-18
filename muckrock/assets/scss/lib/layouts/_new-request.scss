@@ -252,18 +252,29 @@
 }
 
 .new-multi-request {
+    .agencies {
+    }
     .agency {
-        width: 100%;
-        overflow: hidden;
-        background-color: $color-grey;
+        border: $base-border-width solid $color-grey;
+        &:not(:last-child) {
+            border-bottom: none;
+        }
         
+        .id, .types { display: none; }
+        .jurisdiction {
+            @extend dfn;
+            margin: 0;
+        }
         .info {
-            width: 75%;
-            float: left;
+            display: inline-block;
+            vertical-align: middle;
         }
         .button {
-            width: 25%;
-            float: left;
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 0;
+            cursor: pointer;
+            
             background: none;
             background-color: none;
             border: none;

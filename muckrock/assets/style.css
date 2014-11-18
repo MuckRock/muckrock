@@ -101,7 +101,7 @@ strong {
 /**
  * Address styling not present in Safari and Chrome.
  */
-dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before {
+dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, .new-multi-request .agency .jurisdiction {
   font-style: italic; }
 
 /**
@@ -122,7 +122,7 @@ mark {
 /**
  * Address inconsistent and variable font size in all browsers.
  */
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
+small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, .new-multi-request .agency .jurisdiction, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
   font-size: 80%; }
 
 /**
@@ -845,7 +845,7 @@ blockquote {
   padding-left: 0.75em;
   border-left: 1px solid #B3BECB; }
 
-small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
+small, dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, .new-multi-request .agency .jurisdiction, dt, figcaption, .collection.request .filters input[type="text"], .collection.request .filters input[type="submit"], nav.sidebar .spotlight p {
   font-size: 0.8em;
   line-height: 1.51282em;
   margin: 0.37821em 0;
@@ -874,7 +874,7 @@ code {
     text-decoration: none;
     color: #02CF6B; }
 
-dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, dt {
+dfn, fieldset label, .new-request .agency label, .new-request .autocomplete-light-widget span.deck > span:before, .new-multi-request .agency .jurisdiction, dt {
   display: block;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -2044,7 +2044,7 @@ h1.list-label {
       text-decoration: none;
       color: #21282c;
       background-color: rgba(254, 188, 16, 0.65); }
-      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before {
+      .homepage .featured-article a dfn, .homepage .featured-article a fieldset label, fieldset .homepage .featured-article a label, .homepage .featured-article a .new-request .agency label, .new-request .agency .homepage .featured-article a label, .homepage .featured-article a .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .homepage .featured-article a span.deck > span:before, .homepage .featured-article a .new-multi-request .agency .jurisdiction, .new-multi-request .agency .homepage .featured-article a .jurisdiction {
         color: #21282c; }
       .homepage .featured-article a h1 {
         font-size: 2em;
@@ -2343,15 +2343,21 @@ h1.list-label {
       float: right; }
 
 .new-multi-request .agency {
-  width: 100%;
-  overflow: hidden;
-  background-color: #B3BECB; }
+  border: 1px solid #B3BECB; }
+  .new-multi-request .agency:not(:last-child) {
+    border-bottom: none; }
+  .new-multi-request .agency .id, .new-multi-request .agency .types {
+    display: none; }
+  .new-multi-request .agency .jurisdiction {
+    margin: 0; }
   .new-multi-request .agency .info {
-    width: 75%;
-    float: left; }
+    display: inline-block;
+    vertical-align: middle; }
   .new-multi-request .agency .button, .new-multi-request .agency input[type="submit"], .new-multi-request .agency button {
-    width: 25%;
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 0;
+    cursor: pointer;
     background: none;
     background-color: none;
     border: none; }
@@ -2432,7 +2438,7 @@ h1.list-label {
       float: right; } }
   .foia-draft .embargo .input {
     display: block; }
-    .foia-draft .embargo .input dfn, .foia-draft .embargo .input fieldset label, fieldset .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .agency label, .new-request .agency .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .foia-draft .embargo .input span.deck > span:before, .foia-draft .embargo .input input {
+    .foia-draft .embargo .input dfn, .foia-draft .embargo .input fieldset label, fieldset .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .agency label, .new-request .agency .foia-draft .embargo .input label, .foia-draft .embargo .input .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .foia-draft .embargo .input span.deck > span:before, .foia-draft .embargo .input .new-multi-request .agency .jurisdiction, .new-multi-request .agency .foia-draft .embargo .input .jurisdiction, .foia-draft .embargo .input input {
       display: inline-block;
       width: auto; }
     .foia-draft .embargo .input input {
@@ -2777,7 +2783,7 @@ nav.sidebar {
   @media screen and (min-width: 540px) {
     nav.sidebar {
       padding: 1.5em 1.5em 1em; } }
-  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
+  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before, nav.sidebar .new-multi-request .agency .jurisdiction, .new-multi-request .agency nav.sidebar .jurisdiction {
     padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
     display: table;
