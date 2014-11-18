@@ -7,10 +7,44 @@
 {% block content %}
 <div class="homepage">
     <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
-        <div>
-            <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
-            <p><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a> or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></p>
+        <div class="banner-container">
+            <h1>MuckRock brings public records requests into the 21<sup><small>st</small></sup> Century</h1>
+            <div class="right">
+                <h2>Transparency is a dirty business.</h2>
+                <h2>MuckRock cleans it up.</h2>
+                <p>MuckRock allows anyone to file, track, and share public records requests. With an intuitive request composer and automated follow-up tools, we cut through red tape like a hot knife through butter.</p>
+            </div>
+             <div class="left">
+                <div><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a></div>
+                <div>or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></div>
+            </div>
         </div>
+    </section>
+    <section class="articles">
+        {% for article in articles %}
+        {% if forloop.first %}
+        <section class="featured-article">
+            <div class="image">
+                {% if article.image %}
+                <a href="{{ article.get_absolute_url }}">
+                    <img src="{% thumbnail article.image 1200x675 %}">
+                </a>
+                {% endif %}
+            </div>
+        {% else %}
+        <section class="article">
+        {% endif %}
+            <div class="body">
+            <dfn>Investigative Report</dfn>
+            <h1><a href="{{ article.get_absolute_url }}">
+            {{ article.title }}
+            </a></h1>
+            {% if article.summary %}
+            <summary>{{ article.summary }}</summary>
+            {% endif %}
+            </div>
+        </section>
+        {% endfor %}
     </section>
     <section class="stats">
         <h1>Since 2010, MuckRock&rsquo;s users have freed tens of thousands of government records.</h1>
@@ -19,22 +53,6 @@
             <li><span class="stat">{{ num_completed_requests|intcomma }}</span><span class="legend"> request{{ num_completed_requests|pluralize }} completed succesfully</span></li>
             <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
         </ul>
-    </section>
-    <section class="featured-article">
-        <a href="{{ featured_article.get_absolute_url }}">
-            <div class="image">
-            {% if featured_article.image %}
-            <img src="{% thumbnail featured_article.image 1200x675 %}">
-            {% endif %}
-            </div>
-            <div class="article">
-            <dfn>Investigative Report</dfn>
-            <h1>{{ featured_article.title }}</h1>
-            {% if featured_article.summary %}
-            <summary>{{ featured_article.summary }}</summary>
-            {% endif %}
-            </div>
-        </a>
     </section>
     <!--
     {% if featured_reqs %}

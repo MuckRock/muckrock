@@ -17,6 +17,11 @@ html, body { min-height: 100%; }
     @include media($large-layout) { @include span-columns(6); }
 }
 
+%half-flip {
+    &:nth-child(even) { clear: left; }
+    &:nth-child(odd) { clear: right; }
+}
+
 %third {
     @include omega(3n);
     @include media($small-layout) { @include span-columns(4); }
