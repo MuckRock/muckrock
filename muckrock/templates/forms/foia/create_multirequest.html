@@ -5,6 +5,22 @@
 {% block content %}
 <div class="new-multi-request">
     
+    <form method="POST" class="multi-request-form">
+        <div class="title">
+            {{ form.title }}
+        </div>
+        <div class="request">
+            {{ form.requested_docs.label }}
+            {{ form.requested_docs }}
+        </div>
+        <div class="embargo">
+            {{ form.embargo.label }}
+            {{ form.embargo }}
+        </div>
+        <div class="agency-fields">
+        </div>
+    </form>
+    
     <ul class="chosen agencies">
     </ul>
     <div id="agency-list">
@@ -45,9 +61,16 @@
 
 {% block scripts %}
 <script src="{% static 'js/list.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/list.pagination.min.js' %}" type="text/javascript"></script>
 <script>
 
-    var options = { valueNames: ['id', 'name', 'jurisdiction', 'type'] };
+    var options = {
+        valueNames: ['id', 'name', 'jurisdiction', 'type'],
+        page: 100,
+        plugins: [
+            ListPagination({})
+        ]
+    };
     var agencyList = new List('agency-list', options);
 
     function addAgency(button) {
