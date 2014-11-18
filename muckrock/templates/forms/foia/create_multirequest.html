@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; New Multirequest{% endblock %}
+
+{% block content %}
+<div class="new-multi-request">
+    <ul class="agencies">
+    {% for agency in agencies %}
+        <li>
+            <div class="name">{{ agency.name }}</div>
+            <div class="jurisdiction">{{ agency.jurisdiction }}</div>
+            <div class="type">{{ agency.types.all|join:", " }}</div>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock content %}
