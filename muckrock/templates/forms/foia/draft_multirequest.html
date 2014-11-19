@@ -1,0 +1,101 @@
+{% extends 'forms/base_form.html' %}
+{% load static from staticfiles %}
+{% load mathfilters %}
+
+{% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
+{% block form-type %}multirequest-draft{% endblock %}
+
+{% block form-head %}
+<h1>{{ action|title }}</h1>
+{% endblock form-head %}
+
+{% block form-form %}
+{% with requests=foia.agencies.all|length remaining=profile.num_requests %}
+
+<p>You will send this request to {{requests}} agenc{{ requests|pluralize:"y,ies" }}:
+    {% if requests > 1 %}
+    <ul>
+        {% for agency in foia.agencies.all %}
+        <li>{{ agency.name }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    {{ foia.agencies.all|first }}
+    {% endif %}
+</p>
+
+<form method="post" class="Draft">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <object class="failure panel">
+    {{ form.non_field_errors }}
+    </object>
+    {% endif %}
+    {% for field in form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    {% for field in form.visible_fields %}
+        {% if field.label == 'Request' %}
+        <p>To Whom It May Concern:</p>
+        <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
+        {{ field }}
+        <p>I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.</p>
+        <p>In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.</p>
+        <p>Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within 20 business days, as the statute requires.</p>
+        <p>Sincerely,</p>
+        <p>{{foia.user.get_full_name}}</p>
+        {{field.errors}}
+        {% else %}
+        <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
+            <label for="{{ field.auto_id }}">{{ field.label}}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+            {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
+        </fieldset>
+        {% endif %}
+    {% endfor %}
+    {% if not balance.extra_requests %}
+    <section class="buttons">    
+        <input type="submit" name="submit" value="Submit" class="primary button" />
+        <input type="submit" name="submit" value="Delete" class="failure button" />
+    </section>
+    {% endif %}
+</form>
+
+{% if balance.extra_requests %}
+<form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
+<button data-amount="{{ bundles|mul:'2000' }}"
+        data-description="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)"
+        data-email="{{ user.email }}"
+        data-form="#buy-requests"
+        class="checkout-button primary">Buy Requests</button>
+{% else %}
+<p>You will be submitting {{ requests }} request{{ requests|pluralize }}, leaving
+you with {% if balance.monthly_requests %}{{ profile.monthly_requests|sub:balance.monthly_requests }}
+monthly request{{ profile.monthly_requests|sub:balance.monthly_requests|pluralize }} and {% endif %}
+{{ profile.num_requests|sub:balance.reg_requests }} request{{ profile.num_requests|sub:balance.reg_requests|pluralize }}.</p>
+{% endif %}
+
+{% endwith %}
+{% endblock form-form %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endblock scripts %}

@@ -1,4 +1,6 @@
 {% extends 'forms/base_form.html' %}
+{% load static from staticfiles %}
+
 {% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
 {% block form-type %}foia-draft{% endblock %}
 
@@ -52,15 +54,43 @@
     
     <section class="buttons">    
         <input type="submit"
-           name="action"
+            name="submit"
+            value="Save"
+            class="button" />
+        <input type="submit"
+           name="submit"
            value="Submit"
            class="primary button"
            {% if not remaining %}disabled{% endif %}
         />
-        <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
+
+        <input type="submit"
+               name="submit"
+               value="Delete"
+               class="failure button" />
     </section>
 </form>
 {% endwith %}
 {% endif %}
     
 {% endblock form-form %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endblock scripts %}

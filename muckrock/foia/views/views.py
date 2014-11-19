@@ -319,16 +319,7 @@ class Detail(DetailView):
         except KeyError: # if submitting form from web page improperly
             return redirect(foia)
     
-    def _submit(self, request, foia):
-        """Submit request for user"""
-        if not foia.user == request.user:
-            messages.error(request, 'Only a request\'s owner may submit it.')
-        if not request.user.get_profile().make_request():
-            messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
-        foia.submit()
-        messages.success(request, 'Your request was submitted.')
-        return redirect(foia)
-
+    
     def _tags(self, request, foia):
         """Handle updating tags"""
         if foia.user == request.user or request.user.is_staff:

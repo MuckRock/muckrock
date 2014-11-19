@@ -32,7 +32,7 @@ urlpatterns = patterns('',
     url(r'^$',
         RedirectView.as_view(url='list'), name='foia-root'),
     url(r'^multi/$',                       
-        RedirectView.as_view(url='/foia/new')),
+        RedirectView.as_view(url='/foia/create_multi')),
 
     # List Views
     url(r'^list/$',
@@ -45,18 +45,21 @@ urlpatterns = patterns('',
         views.ListFollowing.as_view(template_name=list_template), 
         name='foia-list-following'),
     
-    # Create Views
+    # Create and Draft Views
     url(r'^create/$',
         views.create_request, name='foia-create'),
-    url(r'^create_multirequest/$',
+    url(r'^%s/draft/$' % foia_url,
+        views.draft_request, name='foia-draft'),
+    url(r'^create_multi/$',
         views.create_multirequest, name='foia-create-multi'),
+    url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
+        views.draft_multirequest, name='foia-multi-draft'),
     
     # Detail View
     url(r'^%s/$' % foia_url,
         views.Detail.as_view(template_name='details/request_detail.html'), 
         name='foia-detail'),
-    url(r'^%s/draft/$' % foia_url,
-        views.draft_request, name='foia-draft'),
+    
     url(r'^%s/clone/$' % foia_url,
         views.clone_request, name='foia-clone'),
     url(r'^%s/admin_fix/$' % foia_url,
