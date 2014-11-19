@@ -25,22 +25,6 @@ ul.notifications {
                 width: auto;
                 color: $color-white;
                 text-align: center;
-                .svg-icon {
-                    display: inline-block;
-                    width: auto;
-                    height: 2rem;
-                    vertical-align: middle;
-                    margin: 0 0.5em;
-                }
-                .svg-icon path,
-                .svg-icon polygon,
-                .svg-icon rect {
-                    fill: $color-white;
-                }
-                .svg-icon circle {
-                    stroke: $color-white;
-                    stroke-width: 1;
-                }
             }
             &.text {
                 /*
@@ -81,12 +65,7 @@ ul.notifications {
             span.text { background-color: $color; }
             span.symbol {
                 color: $color;
-                .svg-icon path,
-                .svg-icon polygon,
-                .svg-icon rect {
-                    fill: $color;
-                }
-                .svg-icon circle { stroke: $color; }
+                @include colorize-icon($color);
             }
         }
                 

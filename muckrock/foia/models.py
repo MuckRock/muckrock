@@ -676,7 +676,7 @@ class FOIAMultiRequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-multi-update', [], {'slug': self.slug, 'idx': self.pk})
+        return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
 
     def color_code(self):
         """Get the color code for the current status"""

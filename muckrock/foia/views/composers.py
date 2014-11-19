@@ -31,10 +31,9 @@ from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
     RequestForm, \
-    RequestUpdateForm, \
-    ListFilterForm, \
-    MyListFilterForm, \
-    FOIAMultiRequestForm
+    RequestDraftForm, \
+    MultiRequestForm, \
+    MultiRequestDraftForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -61,23 +60,19 @@ def get_foia(jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(user, document, jurisdiction):
-        intro = 'This is a request under the Freedom of Information Act.'
-        waiver = ('I also request that, if appropriate, fees be waived as I '
+def _make_comm(user, document, intro=None, waver=None, delay=None):
+        if not intro:
+            intro = 'This is a request under the Freedom of Information Act.'
+        if not waver:
+            waiver = ('I also request that, if appropriate, fees be waived as I '
                   'believe this request is in the public interest. '
                   'The requested documents  will be made available to the ' 
                   'general public free of charge as part of the public ' 
                   'information service at MuckRock.com, processed by a ' 
                   'representative of the news media/press and is made in the ' 
                   ' process of news gathering and not for commercial usage.')
-        delay = '20 business days'
-        
-        if jurisdiction.get_intro():
-            intro = jurisdiction.get_intro()                
-        if jurisdiction.get_waiver():
-            waiver = jurisdiction.get_waiver()
-        if jurisdiction.get_days():
-            delay = jurisdiction.get_days()
+        if not delay:
+            delay = '20 business days'
         
         prepend = [
             'To Whom it May Concern:',
@@ -139,7 +134,9 @@ def _make_request(request, foia_request, parent=None):
             communication=_make_comm(
                 request.user,
                 foia.requested_docs,
-                foia.jurisdiction
+                foia.jurisdiction.get_intro(),
+                foia.jurisdiction.get_waiver(),
+                foia.jurisdiction.get_days()
             )
         )
         foia_comm = foia.communications.all()[0]
@@ -198,14 +195,20 @@ def _process_request_form(request):
         })
     return foia_request
 
+def _submit_request(request, foia):
+        """Submit request for user"""
+        if not foia.user == request.user:
+            messages.error(request, 'Only a request\'s owner may submit it.')
+        if not request.user.get_profile().make_request():
+            messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
+        foia.submit()
+        messages.success(request, 'Your request was submitted.')
+        return redirect(foia)
+
+
 def clone_request(request, jurisdiction, jidx, slug, idx):
     foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
-
-@login_required
-def multiply_request(request, jurisdiction, jids, slug, idx):
-    foia = get_foia(jurisdiction, jidx, slug, idx)
-    return HttpResponseRedirect(reverse('foia-create') + '?multiply=%s' % foia.pk)
 
 def create_request(request):
     initial_data = {}
@@ -250,12 +253,12 @@ def create_request(request):
         'featured': featured
     }
     
-    return render_to_response('forms/foia/create.html', context, 
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'forms/foia/create.html',
+        context, 
+        context_instance=RequestContext(request)
+    )
 
-"""
-Views for updating single- or multi-requests
-"""
 @login_required
 def draft_request(request, jurisdiction, jidx, slug, idx):
     """Edit a drafted FOIA Request"""
@@ -274,7 +277,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     }
     
     if request.method == 'POST':
-        form = RequestUpdateForm(request.POST)
+        if request.POST.get('submit') == 'Delete':
+            foia.delete()
+            messages.success(request, 'The request was deleted.')
+            return redirect('foia-mylist')
+        form = RequestDraftForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             foia.title = data['title']
@@ -284,8 +291,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia_comm.date = datetime.now()
             foia_comm.communication = data['request']
             foia_comm.save()
-            foia.save
-            messages.success(request, 'Your draft has been updated.')
+            foia.save()
+            if request.POST.get('submit') == 'Save':
+                messages.success(request, 'Your draft has been updated.')
+            elif request.POST.get('submit') == 'Submit':
+                _submit_request(request, foia)
         return redirect(
             'foia-detail',
             jurisdiction=foia.jurisdiction.slug,
@@ -294,18 +304,42 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             idx=foia.pk
         )
     else:
-        form = RequestUpdateForm(initial=initial_data)
+        form = RequestDraftForm(initial=initial_data)
     
     return render_to_response(
         'forms/foia/draft.html',
-        {'form': form, 'action': 'Draft', 'foia': foia},
+        {'form': form, 'action': 'Draft', 'foia': foia, 'stripe_pk': STRIPE_PUB_KEY },
         context_instance=RequestContext(request)
     )
 
 @login_required
-def multirequest_update(request, slug, idx):
-    """Update a started FOIA MultiRequest"""
+def create_multirequest(request):
+    
+    if request.method == 'POST':
+        form = MultiRequestForm(request.POST)
+        if form.is_valid():
+            print form.cleaned_data['agencies']
+            multirequest = form.save(commit=False)
+            multirequest.user = request.user
+            multirequest.slug = slugify(multirequest.title)
+            multirequest.status = 'started'
+            multirequest.save()
+            form.save_m2m()
+            return redirect(multirequest)
+    else:
+        form = MultiRequestForm()
+    
+    context = { 'form': form }
+    return render_to_response(
+        'forms/foia/create_multirequest.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
+@login_required
+def draft_multirequest(request, slug, idx):
+    from math import ceil
+    """Update a started FOIA MultiRequest"""
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:
@@ -317,29 +351,66 @@ def multirequest_update(request, slug, idx):
             messages.success(request, 'The request was deleted.')
             return redirect('foia-mylist')
         try:
-            form = FOIAMultiRequestForm(request.POST, instance=foia)
+            form = MultiRequestDraftForm(request.POST, instance=foia)
             if form.is_valid():
                 foia = form.save(commit=False)
                 foia.user = request.user
                 foia.slug = slugify(foia.title) or 'untitled'
                 foia.save()
-                if request.POST['submit'] == 'Submit Requests':
-                    return HttpResponseRedirect(
-                        reverse(
-                            'foia-multi',
-                            kwargs={'idx': foia.pk, 'slug': foia.slug}
-                        )
+                if request.POST['submit'] == 'Submit':
+                    print foia.agencies.all()
+                    profile = request.user.get_profile()
+                    num_requests = len(foia.agencies.all())
+                    request_count = profile.multiple_requests(num_requests)
+                    if request_count['extra_requests']:
+                        err_msg = 'You have not purchased enough requests.'
+                        err_msg = 'Please purchase more requests, then try submitting again.'
+                        messages.warning(request, err_msg)
+                        return redirect(foia)
+                    print request_count
+                    print num_requests
+                    profile.num_requests -= request_count['reg_requests']
+                    profile.monthly_requests -= request_count['monthly_requests']
+                    profile.save()
+                    foia.status = 'submitted'
+                    foia.save()
+                    messages.success(request, 'Your multi-request was submitted.')
+                    send_mail(
+                        '[MULTI] Freedom of Information Request: %s' % (foia.title),
+                        render_to_string(
+                            'text/foia/multi_mail.txt',
+                            {'request': foia}
+                        ),
+                        'info@muckrock.com',
+                        ['requests@muckrock.com'],
+                        fail_silently=False
                     )
+                    return redirect('foia-mylist')
                 messages.success(request, 'Updates to this request were saved.')
                 return redirect(foia)
         except KeyError:
             # bad post, not possible from web form
-            form = FOIAMultiRequestForm(instance=foia)
+            form = MultiRequestDraftForm(instance=foia)
     else:
-        form = FOIAMultiRequestForm(instance=foia)
+        form = MultiRequestDraftForm(instance=foia)
+
+    profile = request.user.get_profile()
+    num_requests = len(foia.agencies.all())
+    request_balance = profile.multiple_requests(num_requests)
+    num_bundles = int(ceil(request_balance['extra_requests']/5.0))
+    
+    context = {
+        'action': 'Draft',
+        'form': form,
+        'foia': foia,
+        'profile': profile,
+        'balance': request_balance,
+        'bundles': num_bundles,
+        'stripe_pk': STRIPE_PUB_KEY
+    }
 
     return render_to_response(
-        'foia/foiamultirequest_form.html',
-        {'form': form, 'foia': foia},
+        'forms/foia/draft_multirequest.html',
+        context,
         context_instance=RequestContext(request)
     )

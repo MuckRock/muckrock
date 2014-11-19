@@ -68,7 +68,7 @@ class RequestForm(forms.Form):
             self._errors['local'] = self.error_class([error_msg])
         return self.cleaned_data
 
-class RequestUpdateForm(forms.Form):
+class RequestDraftForm(forms.Form):
     title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
     request = forms.CharField(widget=forms.Textarea())
     embargo = forms.BooleanField(
@@ -86,6 +86,45 @@ class RequestUpdateForm(forms.Form):
             messages.error(request, error_msg)
             self._errors['embargo'] = self.error_class([error_msg])
         return self.cleaned_data
+
+class MultiRequestForm(forms.ModelForm):
+    """A form for a multi-Request"""
+
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
+    )
+    requested_docs = forms.CharField(
+        label='Request',
+        widget=forms.Textarea()
+    )
+    embargo = forms.BooleanField(
+        required=False,
+        help_text='Embargoing a request keeps it completely private from '
+                  'other users until the embargo date you set.  '
+                  'You may change this whenever you want.'
+    )
+    agencies = forms.ModelMultipleChoiceField(
+        label='Agencies',
+        queryset=Agency.objects.filter(approved=True)
+    )
+
+    class Meta:
+        # pylint: disable=R0903
+        model = FOIAMultiRequest
+        fields = ['title', 'requested_docs', 'agencies', 'embargo']
+        
+class MultiRequestDraftForm(forms.ModelForm):
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
+    )
+    requested_docs = forms.CharField(
+        label='Request',
+        widget=forms.Textarea()
+    )
+    class Meta:
+        # pylint: disable=R0903
+        model = FOIAMultiRequest
+        fields = ['title', 'requested_docs']
 
 class ListFilterForm(forms.Form):
     status = forms.ChoiceField(
@@ -124,57 +163,6 @@ class MyListFilterForm(ListFilterForm):
             ('read_status', 'Read Status')
         )
     )
-
-class FOIARequestForm(forms.ModelForm):
-    """A form for a FOIA Request"""
-    agency = forms.ModelChoiceField(
-        label='Agency',
-        required=False,
-        queryset=Agency.objects.order_by('name'),
-        widget=forms.Select(attrs={'class': 'combobox'}),
-        help_text=('Select one of the agencies for the jurisdiction you '
-                   'have chosen, or write in the correct agency if known.')
-    )    
-    embargo = forms.BooleanField(
-        required=False,
-        help_text=('Embargoing a request keeps it completely private from '
-                   'other users until the embargo date you set. '
-                   'You may change this whenever you want.')
-    )
-    request = forms.CharField(
-        widget=forms.Textarea(attrs={'style': 'width:450px; height:200px;'})
-    )
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(FOIARequestForm, self).__init__(*args, **kwargs)
-        if not (self.request and self.request.user.get_profile().can_embargo()):
-            del self.fields['embargo']
-            self.Meta.fields = ['title', 'agency']
-
-    class Meta:
-        # pylint: disable=R0903
-        model = FOIARequest
-        fields = ['title', 'agency', 'embargo']
-        widgets = {
-            'title': forms.TextInput(attrs={'style': 'width:450px;'}),
-        }
-
-class FOIAMultiRequestForm(forms.ModelForm):
-    """A form for a FOIA Multi-Request"""
-
-    embargo = forms.BooleanField(required=False,
-                                 help_text='Embargoing a request keeps it completely private from '
-                                           'other users until the embargo date you set.  '
-                                           'You may change this whenever you want.')
-    requested_docs = forms.CharField(label='Request',
-        widget=forms.Textarea(attrs={'style': 'width:450px; height:50px;'}))
-
-    class Meta:
-        # pylint: disable=R0903
-        model = FOIAMultiRequest
-        fields = ['title', 'embargo', 'requested_docs']
-        widgets = {'title': forms.TextInput(attrs={'style': 'width:450px;'})}
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
@@ -216,32 +204,12 @@ class FOIAEmbargoDateForm(FOIAEmbargoForm):
         model = FOIARequest
         fields = ['embargo', 'date_embargo']
 
-class FOIAMultipleSubmitForm(forms.Form):
-    """Form to select multiple agencies to submit to"""
-
-    agency_type = forms.ModelChoiceField(queryset=AgencyType.objects.all(), required=False)
-    jurisdiction = forms.ModelChoiceField(queryset=Jurisdiction.objects.all(), required=False)
-
-class AgencyConfirmForm(forms.Form):
-    """Confirm agencies for a multiple submit"""
-
-    def __init__(self, *args, **kwargs):
-        self.queryset = kwargs.pop('queryset', [])
-        super(AgencyConfirmForm, self).__init__(*args, **kwargs)
-        self.fields['agencies'].queryset = self.queryset
-
-    class AgencyChoiceField(forms.ModelMultipleChoiceField):
-        """Add jurisdiction to agency label"""
-        def label_from_instance(self, obj):
-            return '%s - %s' % (obj.name, obj.jurisdiction)
-
-    agencies = AgencyChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
-
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
-
-    confirm = forms.BooleanField(label='Are you sure you want to delete this FOIA request?',
-                                 help_text='This cannot be undone!')
+    confirm = forms.BooleanField(
+        label='Are you sure you want to delete this FOIA request?',
+        help_text='This cannot be undone!'
+    )
 
 FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
 

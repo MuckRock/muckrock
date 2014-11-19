@@ -30,11 +30,8 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
-    RequestForm, \
-    RequestUpdateForm, \
     ListFilterForm, \
-    MyListFilterForm, \
-    FOIAMultiRequestForm
+    MyListFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -321,18 +318,6 @@ class Detail(DetailView):
             return actions[request.POST['action']](request, foia)
         except KeyError: # if submitting form from web page improperly
             return redirect(foia)
-    
-    def _submit(self, request, foia):
-        """Submit request for user"""
-        if not foia.user == request.user:
-            messages.error(request, 'Only a request\'s owner may submit it.')
-        if not request.user.get_profile().make_request():
-            msg = 'You do not have any requests remaining. '
-            msg += 'Please purchase more requests and then resubmit.'
-            messages.error(request, msg)
-        foia.submit()
-        messages.success(request, 'Your request was submitted.')
-        return redirect(foia)
 
     def _tags(self, request, foia):
         """Handle updating tags"""
