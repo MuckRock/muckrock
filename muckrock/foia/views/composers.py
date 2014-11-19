@@ -244,8 +244,11 @@ def create_request(request):
         'featured': featured
     }
     
-    return render_to_response('forms/foia/create.html', context, 
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'forms/foia/create.html',
+        context, 
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 def create_multirequest(request):
@@ -259,10 +262,12 @@ def create_multirequest(request):
     else:
         form = MultiRequestForm()
     
-    agencies = Agency.objects.filter(approved=True);
-    context = { 'agencies': agencies, 'form': form }
-    return render_to_response('forms/foia/create_multirequest.html', context,
-                              context_instance=RequestContext(request))
+    context = { 'form': form }
+    return render_to_response(
+        'forms/foia/create_multirequest.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 """
 Views for updating single- or multi-requests

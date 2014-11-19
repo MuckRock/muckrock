@@ -176,11 +176,15 @@ class MultiRequestForm(forms.ModelForm):
                   'other users until the embargo date you set.  '
                   'You may change this whenever you want.'
     )
+    agencies = forms.ModelMultipleChoiceField(
+        label='Agencies',
+        queryset=Agency.objects.filter(approved=True)
+    )
 
     class Meta:
         # pylint: disable=R0903
         model = FOIAMultiRequest
-        fields = ['title', 'requested_docs', 'embargo']
+        fields = ['title', 'requested_docs', 'agencies', 'embargo']
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
