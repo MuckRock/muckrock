@@ -100,6 +100,7 @@
 {% endblock header %}
 
 {% block aside %}
+{% include 'lib/social.html' with title=foia.title %}
 {% if foia.has_crowdfund %}
     <section class="crowdfund panel">
     {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
@@ -149,7 +150,7 @@
         {% csrf_token %}
         {% for action in actions %}
             {% if action.class == 'modal' %}
-        <span class="modal-button button">{{ action.label }}</span>
+        <span class="text-area modal-button button">{{ action.label }}</span>
         <div class="hidden-modal">
             <h1>{{ action.label }}</h1>
             <h2>{{ action.title }}</h2>
@@ -313,7 +314,7 @@
         
         /* Modals */
         
-        $('.controls .modal-button').click(function(e){
+        $('.controls .text-area .modal-button').click(function(e){
             e.preventDefault();
             textAreaModal($(this).next());
             return false;

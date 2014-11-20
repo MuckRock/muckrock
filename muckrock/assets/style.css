@@ -19,6 +19,7 @@ body {
   margin: 0; }
 
 /* HTML5 display definitions
+   ========================================================================== */
 /**
  * Correct `block` display not defined for any HTML5 element in IE 8/9.
  * Correct `block` display not defined for `details` or `summary` in IE 10/11 and Firefox.
@@ -68,6 +69,7 @@ template {
   display: none; }
 
 /* Links
+   ========================================================================== */
 /**
  * Remove the gray background color from active links in IE 10.
  */
@@ -82,6 +84,7 @@ a:hover {
   outline: 0; }
 
 /* Text-level semantics
+   ========================================================================== */
 /**
  * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
  */
@@ -139,6 +142,7 @@ sub {
   bottom: -0.25em; }
 
 /* Embedded content
+   ========================================================================== */
 /**
  * Remove border when inside `a` element in IE 8/9/10.
  */
@@ -152,6 +156,7 @@ svg:not(:root) {
   overflow: hidden; }
 
 /* Grouping content
+   ========================================================================== */
 /**
  * Address margin not present in IE 8/9 and Safari.
  */
@@ -183,6 +188,7 @@ samp {
   font-size: 1em; }
 
 /* Forms
+   ========================================================================== */
 /**
  * Known limitation: by default, Chrome and Safari on OS X allow very limited
  * styling of `select`, unless a `border` property is set.
@@ -336,6 +342,7 @@ optgroup {
   font-weight: bolder; }
 
 /* Tables
+   ========================================================================== */
 /**
  * Remove most spacing between table cells.
  */
@@ -1534,6 +1541,67 @@ table {
     .file .file-actions a:first-child {
       margin-left: 0; }
 
+.hidden-stripe-handler {
+  display: none; }
+
+/* SVG Icons */
+.svg-icon {
+  display: inline-block;
+  width: auto;
+  height: 2rem;
+  vertical-align: middle;
+  margin: 0 0.5em; }
+
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+  fill: #f4f4f4; }
+
+.svg-icon circle {
+  stroke: #f4f4f4;
+  stroke-width: 1; }
+
+/* Sharing */
+.social.sharing {
+  width: 100%;
+  margin: 0 0 1.5em 0;
+  text-align: center; }
+
+.sharing > a {
+  width: 33%;
+  margin: 0 0.1875em;
+  text-decoration: none; }
+  .sharing > a .svg-icon path,
+  .sharing > a .svg-icon polygon,
+  .sharing > a .svg-icon rect {
+    fill: #B3BECB; }
+  .sharing > a .svg-icon circle {
+    stroke: #B3BECB; }
+  .sharing > a:first-child {
+    margin-left: 0; }
+  .sharing > a .svg-icon {
+    height: 20px;
+    width: 20px; }
+
+.sharing > a:hover.facebook .svg-icon path,
+.sharing > a:hover.facebook .svg-icon polygon,
+.sharing > a:hover.facebook .svg-icon rect {
+  fill: #3b5998; }
+.sharing > a:hover.facebook .svg-icon circle {
+  stroke: #3b5998; }
+.sharing > a:hover.twitter .svg-icon path,
+.sharing > a:hover.twitter .svg-icon polygon,
+.sharing > a:hover.twitter .svg-icon rect {
+  fill: #55acee; }
+.sharing > a:hover.twitter .svg-icon circle {
+  stroke: #55acee; }
+.sharing > a:hover.email .svg-icon path,
+.sharing > a:hover.email .svg-icon polygon,
+.sharing > a:hover.email .svg-icon rect {
+  fill: #663285; }
+.sharing > a:hover.email .svg-icon circle {
+  stroke: #663285; }
+
 /* Layouts */
 /* Details */
 .detail.news header {
@@ -2259,7 +2327,7 @@ nav.sidebar {
   @media screen and (min-width: 540px) {
     nav.sidebar {
       padding: 1.5em 1.5em 1em; } }
-  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
+  nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before, nav.sidebar .new-multi-request .agency .jurisdiction, .new-multi-request .agency nav.sidebar .jurisdiction {
     padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
     display: table;

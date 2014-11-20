@@ -23,6 +23,7 @@ style="background-image:url('{% thumbnail article.image 1200x675 %}');"
 {% endblock header %}
 
 {% block aside %}
+    {% include 'lib/social.html' with title=article.title %}
     <div class="half">
         <div class="article-date">{{ article.pub_date | date:"F j, Y" }}</div>
         <h2>by <span class="author-name">{{ article.get_authors_names }}</span></h2>
@@ -46,6 +47,7 @@ style="background-image:url('{% thumbnail article.image 1200x675 %}');"
         </li>
     </ul>
     {% endfor %}
+    
 {% endblock aside %}
 
 {% block main %}

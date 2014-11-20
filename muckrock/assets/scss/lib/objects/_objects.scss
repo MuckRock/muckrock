@@ -121,6 +121,8 @@ table {
 
 .hidden-stripe-handler { display: none; }
 
+/* SVG Icons */
+
 .svg-icon {
     display: inline-block;
     width: auto;
@@ -136,4 +138,33 @@ table {
 .svg-icon circle {
     stroke: $color-white;
     stroke-width: 1;
+}
+
+/* Sharing */
+
+$color-facebook: #3b5998;
+$color-twitter: #55acee;
+$color-email: #663285;
+
+.social.sharing {
+    width: 100%;
+    margin: 0 0 $base-margin 0;
+    text-align: center;
+}
+.sharing > a {
+    @include colorize-icon($color-grey);
+    width: 33%;
+    margin: 0 $base-margin/8;
+    &:first-child { margin-left: 0; }
+    text-decoration: none;
+    .svg-icon {
+        height: 20px;
+        width: 20px;
+    }
+}
+
+.sharing > a:hover {
+    &.facebook {  @include colorize-icon($color-facebook); }
+    &.twitter { @include colorize-icon($color-twitter); }
+    &.email { @include colorize-icon($color-email); }
 }
