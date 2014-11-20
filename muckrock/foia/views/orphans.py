@@ -43,11 +43,10 @@ def orphans(request):
         except KeyError:
             # should never happen if submitting form from web page properly
             return redirect('foia-orphans')
-    elif 'comm_id' in request.GET and 'foia_id' in request.GET:
+    elif 'comm_id' in request.GET:
         communications = FOIACommunication.objects.filter(foia=None, pk=request.GET['comm_id'])
         return render_to_response('foia/orphans.html',
-                                  {'communications': communications,
-                                   'foia_id': request.GET['foia_id']},
+                                  {'communications': communications},
                                   context_instance=RequestContext(request))
     else:
         communications = FOIACommunication.objects.filter(foia=None)

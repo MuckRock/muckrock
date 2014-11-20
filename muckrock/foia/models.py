@@ -133,6 +133,9 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
+    block_incoming = models.BooleanField(default=False,
+        help_text='Block emails incoming to this request from '
+                  'automatically being posted on the site')
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -455,6 +458,10 @@ class FOIARequest(models.Model):
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
 
+        # unblock incoming messages if we send one out
+        self.block_incoming = False
+        self.save()
+
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         # pylint: disable=E1101
@@ -656,6 +663,10 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
     opened = models.BooleanField()
+
+    # only used for orphans
+    likely_foia = models.ForeignKey(FOIARequest, related_name='likely_communications',
+        blank=True, null=True)
 
     raw_email = models.TextField(blank=True)
 

@@ -68,6 +68,7 @@ class FOIAFileInline(NestedTabularInline):
 class FOIACommunicationInline(NestedTabularInline):
     """FOIA Communication Inline admin options"""
     model = FOIACommunication
+    fk_name = 'foia'
     extra = 1
     readonly_fields = ['opened']
     inlines = [FOIAFileInline]
