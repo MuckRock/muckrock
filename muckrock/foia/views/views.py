@@ -305,7 +305,6 @@ class Detail(DetailView):
         actions = {
             'status': self._status,
             'tags': self._tags,
-            'Submit': self._submit,
             'Follow Up': self._follow_up,
             'Get Advice': self._question,
             'Problem?': self._flag,
