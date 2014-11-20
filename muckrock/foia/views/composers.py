@@ -22,6 +22,7 @@ from django.views.generic.list import ListView
 from datetime import datetime
 import logging
 import stripe
+import re
 from random import random, randint, choice
 import string
 
@@ -61,36 +62,41 @@ def get_foia(jurisdiction, jidx, slug, idx):
     return foia
 
 def _make_comm(user, document, intro=None, waver=None, delay=None):
-        if not intro:
-            intro = 'This is a request under the Freedom of Information Act.'
-        if not waver:
-            waiver = ('I also request that, if appropriate, fees be waived as I '
-                  'believe this request is in the public interest. '
-                  'The requested documents  will be made available to the ' 
-                  'general public free of charge as part of the public ' 
-                  'information service at MuckRock.com, processed by a ' 
-                  'representative of the news media/press and is made in the ' 
-                  ' process of news gathering and not for commercial usage.')
-        if not delay:
-            delay = '20 business days'
-        
-        prepend = [
-            'To Whom it May Concern:',
-            intro + ' I hereby request the following records:'
-        ]
-        append = [
-            waiver,
-            ('In the event that fees cannot be waived, I would be '
-            'grateful if you would inform me of the total charges in '     
-            'advance of fulfilling my request. I would prefer the '
-            'request filled electronically, by e-mail attachment if ' 
-            'available or CD-ROM if not.'),
-            ('Thank you in advance for your anticipated cooperation in '
-            'this matter. I look forward to receiving your response to ' 
-            'this request within %s, as the statute requires.' % delay ),
-            'Sincerely, ' + user.get_full_name()
-        ]
-        return '\n\n'.join(prepend + [document] + append)
+    if not intro:
+        intro = 'This is a request under the Freedom of Information Act.'
+    if not waver:
+        waiver = ('I also request that, if appropriate, fees be waived as I '
+              'believe this request is in the public interest. '
+              'The requested documents  will be made available to the ' 
+              'general public free of charge as part of the public ' 
+              'information service at MuckRock.com, processed by a ' 
+              'representative of the news media/press and is made in the ' 
+              ' process of news gathering and not for commercial usage.')
+    if not delay:
+        delay = '20 business days'
+    
+    regexp = re.compile(r'I hereby request the following records');
+    if regexp.search(intro) is None:
+        intro += ' I hereby request the following records:'
+    
+    prepend = [
+        'To Whom it May Concern:',
+        intro
+    ]
+    append = [
+        waiver,
+        ('In the event that fees cannot be waived, I would be '
+        'grateful if you would inform me of the total charges in '     
+        'advance of fulfilling my request. I would prefer the '
+        'request filled electronically, by e-mail attachment if ' 
+        'available or CD-ROM if not.'),
+        ('Thank you in advance for your anticipated cooperation in '
+        'this matter. I look forward to receiving your response to ' 
+        'this request within %s, as the statute requires.' % delay ),
+        'Sincerely, ',
+        user.get_full_name()
+    ]
+    return '\n\n'.join(prepend + [document] + append)
         
 def _make_new_agency(request, agency, jurisdiction):
     agency = Agency.objects.create(
@@ -196,14 +202,14 @@ def _process_request_form(request):
     return foia_request
 
 def _submit_request(request, foia):
-        """Submit request for user"""
-        if not foia.user == request.user:
-            messages.error(request, 'Only a request\'s owner may submit it.')
-        if not request.user.get_profile().make_request():
-            messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
-        foia.submit()
-        messages.success(request, 'Your request was submitted.')
-        return redirect(foia)
+    """Submit request for user"""
+    if not foia.user == request.user:
+        messages.error(request, 'Only a request\'s owner may submit it.')
+    if not request.user.get_profile().make_request():
+        messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
+    foia.submit()
+    messages.success(request, 'Your request was submitted.')
+    return redirect(foia)
 
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
@@ -306,9 +312,16 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     else:
         form = RequestDraftForm(initial=initial_data)
     
+    context = {
+        'action': 'Draft',
+        'form': form,
+        'foia': foia,
+        'stripe_pk': STRIPE_PUB_KEY
+    }
+    
     return render_to_response(
         'forms/foia/draft.html',
-        {'form': form, 'action': 'Draft', 'foia': foia, 'stripe_pk': STRIPE_PUB_KEY },
+        context,
         context_instance=RequestContext(request)
     )
 
