@@ -9,7 +9,7 @@ from muckrock.agency.models import Agency
 #pylint: disable=interface-not-implemented
 class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Autocomplete for Agencies"""
-    autocomplete_js_attributes = {'placeholder': 'Agency?'}
+    attrs = {'placeholder': 'Agency?'}
 
     def choices_for_request(self):
         """Filter the choices based on the jurisdiction"""
