@@ -569,7 +569,7 @@ html, body {
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .progress-bar, .detail.request .tabs label, .clone-candidates .candidate {
   border: 1px solid #B3BECB; }
 
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.text button.close, .modal, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar ul a, .new-request .create-request, .clone-candidates .candidate {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.dismiss button.close, .modal, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar ul a, .new-request .create-request, .clone-candidates .candidate {
   border-radius: 9px; }
 
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -1190,47 +1190,39 @@ ul.notifications {
     overflow: hidden;
     background-color: #21282c; }
     ul.notifications li.notification span {
-      display: table-cell; }
+      display: table-cell;
+      vertical-align: middle; }
       ul.notifications li.notification span.symbol {
-        /*
-        width: 30%;
-        @include media($medium-layout) { width: 15%; }
-        @include media($large-layout) { width: 10%; }
-        */
-        height: 100%;
-        width: auto;
+        height: 4em;
+        width: 4em;
         color: #f4f4f4;
         text-align: center; }
       ul.notifications li.notification span.text {
-        /*
-        width: 70%;
-        @include media($medium-layout) { width: 85%; }
-        @include media($large-layout) { width: 90%; }
-        */
-        padding: 1.5em;
         color: #f4f4f4;
-        background-color: #B3BECB; }
+        background-color: #B3BECB;
+        padding: 0.75em; }
         ul.notifications li.notification span.text p {
-          display: inline-block;
           vertical-align: middle;
           font-size: 1.1em;
+          margin: 0;
           color: #21282c; }
-        ul.notifications li.notification span.text button.close {
-          display: none;
+      ul.notifications li.notification span.dismiss {
+        color: #f4f4f4;
+        background-color: #B3BECB;
+        text-align: center;
+        width: 6em; }
+        ul.notifications li.notification span.dismiss button.close {
           color: #f4f4f4;
           background: #21282c;
           float: right;
           border: none;
           opacity: 0.7;
           font-size: 0.8em;
-          margin-top: 0.75em;
+          margin: 0 1.5em;
           padding: 0.375em 0.75em; }
-          ul.notifications li.notification span.text button.close:hover {
+          ul.notifications li.notification span.dismiss button.close:hover {
             opacity: 0.9; }
-          @media screen and (min-width: 500px) {
-            ul.notifications li.notification span.text button.close {
-              display: inline-block; } }
-    ul.notifications li.notification.success span.text {
+    ul.notifications li.notification.success span.text, ul.notifications li.notification.success span.dismiss {
       background-color: #02CF6B; }
     ul.notifications li.notification.success span.symbol {
       color: #02CF6B; }
@@ -1240,7 +1232,7 @@ ul.notifications {
         fill: #02CF6B; }
       ul.notifications li.notification.success span.symbol .svg-icon circle {
         stroke: #02CF6B; }
-    ul.notifications li.notification.error span.text {
+    ul.notifications li.notification.error span.text, ul.notifications li.notification.error span.dismiss {
       background-color: #E35336; }
     ul.notifications li.notification.error span.symbol {
       color: #E35336; }
@@ -1250,7 +1242,7 @@ ul.notifications {
         fill: #E35336; }
       ul.notifications li.notification.error span.symbol .svg-icon circle {
         stroke: #E35336; }
-    ul.notifications li.notification.info span.text {
+    ul.notifications li.notification.info span.text, ul.notifications li.notification.info span.dismiss {
       background-color: #3a82ff; }
     ul.notifications li.notification.info span.symbol {
       color: #3a82ff; }
@@ -1260,7 +1252,7 @@ ul.notifications {
         fill: #3a82ff; }
       ul.notifications li.notification.info span.symbol .svg-icon circle {
         stroke: #3a82ff; }
-    ul.notifications li.notification.warning span.text {
+    ul.notifications li.notification.warning span.text, ul.notifications li.notification.warning span.dismiss {
       background-color: #D9C227; }
     ul.notifications li.notification.warning span.symbol {
       color: #D9C227; }
