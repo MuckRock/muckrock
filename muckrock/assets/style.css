@@ -399,58 +399,58 @@ html, body {
     .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .clone-candidates .candidate:last-child {
       margin-right: 0; } }
 
-.detail .meta .aside:nth-child(3n), .detail.news header .aside:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
+.detail .meta .aside:nth-child(3n), .collection .filters label[for="filter-checkbox"]:nth-child(3n), .detail.news header .aside:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
   margin-right: 0; }
-.detail .meta .aside:nth-child(3n+1), .detail.news header .aside:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1) {
+.detail .meta .aside:nth-child(3n+1), .collection .filters label[for="filter-checkbox"]:nth-child(3n+1), .detail.news header .aside:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .detail .meta .aside, .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta .aside:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta .aside, .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .detail .meta .aside:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta .aside, .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .detail .meta .aside:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 
 @media screen and (max-width: 500px) {
-  .detail .meta .header, .detail.news header .header {
+  .detail .meta .header, .collection .filters ul, .detail.news header .header {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta .header:last-child, .detail.news header .header:last-child {
+    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta .header, .detail.news header .header {
+  .detail .meta .header, .collection .filters ul, .detail.news header .header {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
-    .detail .meta .header:last-child, .detail.news header .header:last-child {
+    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta .header, .detail.news header .header {
+  .detail .meta .header, .collection .filters ul, .detail.news header .header {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
-    .detail .meta .header:last-child, .detail.news header .header:last-child {
+    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
       margin-right: 0; } }
 
 .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate .clone-button:nth-child(2n), .foia-draft .buy-requests button:nth-child(2n) {
@@ -678,19 +678,13 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .collection .filters li a.current-tab {
         cursor: default; }
     .collection .filters label[for="filter-checkbox"] {
-      float: left;
-      display: block;
-      margin-right: 2.35765%;
-      width: 14.70196%;
-      margin-left: 34.11922%;
       margin-right: 0;
       margin-top: 0.75em;
       margin-bottom: 0.75em;
       display: block;
       cursor: pointer;
-      color: #3a82ff; }
-      .collection .filters label[for="filter-checkbox"]:last-child {
-        margin-right: 0; }
+      color: #3a82ff;
+      text-align: right; }
       .collection .filters label[for="filter-checkbox"]:hover {
         text-decoration: underline; }
     .collection .filters input[name="filter-checkbox"] {

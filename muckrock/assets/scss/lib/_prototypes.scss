@@ -115,6 +115,7 @@
     }
     .filters {
         @include row;
+        ul { @extend %two-thirds; }
         li { display: inline-block; }
         li a {
             margin: 0;
@@ -131,14 +132,14 @@
         
         $filter-toggle: '"filter-checkbox"';
         label[for=#{$filter-toggle}] {
-            @include span-columns(2);
-            @include shift(4);
-            @include omega();
+            @extend %third;
+            @include omega;
             margin-top: $base-vertical-rhythm/2;
             margin-bottom: $base-vertical-rhythm/2;
             display: block;
             cursor: pointer;
             color: $color-primary;
+            text-align: right;
             &:hover {
                 text-decoration: underline;
             }    
