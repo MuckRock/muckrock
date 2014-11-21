@@ -5,20 +5,13 @@
 {% block form-type %}foia-draft{% endblock %}
 
 
-{% block form-head %}
+{% block form-title %}{{ action|title }}{% endblock %}
+
+{% block form-info %}
 {% with remaining=foia.user.get_profile.num_requests %}
-<h1>{{ action|title }}</h1>
-{% if not remaining %}
-    <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-    <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
-    <button data-amount="2000"
-            data-description="5 requests ($20.00)"
-            data-email="{{ user.email }}"
-            data-form="#buy-requests"
-            class="checkout-button primary">Buy Requests</button>
-{% endif %}
+
 {% endwith %}
-{% endblock form-head %}
+{% endblock form-info %}
 
 {% block form-form %}
 
@@ -40,7 +33,17 @@
             {{ form.request }}
         </section>    
     </section>
-
+    
+    {% if not remaining %}
+    <div class="buy-requests panel">
+        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+        <button data-amount="2000"
+                data-description="5 requests ($20.00)"
+                data-email="{{ user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button success">Buy Requests</button>
+    </div>
+    {% endif %}
     
     {% if foia.user.get_profile.can_embargo %}
     <section class="embargo">
@@ -52,7 +55,8 @@
     </section>
     {% endif %}
     
-    <section class="buttons">    
+    <section class="buttons">
+    
         <input type="submit"
             name="submit"
             value="Save"
@@ -68,8 +72,14 @@
                name="submit"
                value="Delete"
                class="failure button" />
+        
     </section>
+    
+    
 </form>
+{% if not remaining %}
+<form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+{% endif %}
 {% endwith %}
 {% endif %}
     
