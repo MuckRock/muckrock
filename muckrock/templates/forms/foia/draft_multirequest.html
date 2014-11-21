@@ -5,25 +5,26 @@
 {% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
 {% block form-type %}multirequest-draft{% endblock %}
 
-{% block form-head %}
-<h1>{{ action|title }}</h1>
-{% endblock form-head %}
+{% block form-title %}{{ action|title }}{% endblock %}
+
+{% block form-info %}
+{% with requests=foia.agencies.all|length remaining=profile.num_requests %}
+<p>You will send this request to {{requests}} agenc{{ requests|pluralize:"y,ies" }}:
+{% for agency in foia.agencies.all %}
+{% if forloop.last %}
+{% if not forloop.first %}
+and 
+{% endif %}
+{{ agency.name }}.
+{% else %}
+{{ agency.name }}, 
+{% endif %}
+{% endfor %}</p>
+{% endwith %}
+{% endblock %}
 
 {% block form-form %}
 {% with requests=foia.agencies.all|length remaining=profile.num_requests %}
-
-<p>You will send this request to {{requests}} agenc{{ requests|pluralize:"y,ies" }}:
-    {% if requests > 1 %}
-    <ul>
-        {% for agency in foia.agencies.all %}
-        <li>{{ agency.name }}</li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    {{ foia.agencies.all|first }}
-    {% endif %}
-</p>
-
 <form method="post" class="Draft">
     {% csrf_token %}
     {% if form.non_field_errors %}
@@ -36,15 +37,22 @@
     {% endfor %}
     {% for field in form.visible_fields %}
         {% if field.label == 'Request' %}
-        <p>To Whom It May Concern:</p>
-        <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
-        {{ field }}
-        <p>I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.</p>
-        <p>In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.</p>
-        <p>Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within 20 business days, as the statute requires.</p>
-        <p>Sincerely,</p>
-        <p>{{foia.user.get_full_name}}</p>
-        {{field.errors}}
+        <div class="sent message request">
+            <section class="meta">
+                <span class="date right">{% now "m/d/Y" %}</span>
+            </section>
+            <section class="body">
+                <p>To Whom It May Concern:</p>
+                <p>This is a request under [Insert jurisdiction's applicable freedom of information law] for a copy of the following records:</p>
+                {{ field }}
+                <p>I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.</p>
+                <p>In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.</p>
+                <p>Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within 20 business days, as the statute requires.</p>
+                <p>Sincerely,</p>
+                <p>{{foia.user.get_full_name}}</p>
+            </section>
+        </div>
+                    {{field.errors}}
         {% else %}
         <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
             <label for="{{ field.auto_id }}">{{ field.label}}</label>

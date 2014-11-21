@@ -255,44 +255,16 @@
     }
 }
 
-.new-multi-request {
-    .agencies {
-    }
-    .agency {
-        border: $base-border-width solid $color-grey;
-        &:not(:last-child) {
-            border-bottom: none;
-        }
-        
-        .id, .types { display: none; }
-        .jurisdiction {
-            @extend dfn;
-            margin: 0;
-        }
-        .info {
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .button {
-            display: inline-block;
-            vertical-align: middle;
-            padding-left: 0;
-            cursor: pointer;
-            
-            background: none;
-            background-color: none;
-            border: none;
-            &.add {
-                @include colorize-icon($color-success);
-                #icon-add { display: inline-block; }
-                #icon-remove { display: none;; }
-            }
-            &.remove {
-                @include colorize-icon($color-failure);
-                #icon-add { display: none; }
-                #icon-remove { display: inline-block; }
+.multirequest-create {
+    @include outer-container;
+    form {
+        @include row;
+        .visible-fields fieldset {
+            @extend %full;
+            textarea {
+                width: 100%;
             }
         }
     }
-
+    .agencies > label { display: none; }
 }
