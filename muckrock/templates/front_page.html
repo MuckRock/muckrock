@@ -9,16 +9,17 @@
     <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
         <div class="banner-container">
             <h1>MuckRock brings public records requests into the 21<sup><small>st</small></sup> Century</h1>
-            <div class="right">
-                <h2>Transparency is a dirty business.</h2>
-                <h2>MuckRock cleans it up.</h2>
-                <p>MuckRock allows anyone to file, track, and share public records requests. With an intuitive request composer and automated follow-up tools, we cut through red tape like a hot knife through butter.</p>
-            </div>
-             <div class="left">
-                <div><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a></div>
-                <div>or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></div>
-            </div>
+            <h2>File, track, and share public records requests</h2>
+            <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></div>
         </div>
+    </section>
+    <section class="stats">
+        <h1>Since 2010, MuckRock&rsquo;s users have freed tens of thousands of government records.</h1>
+        <ul>
+            <li><span class="stat">{{ num_requests|intcomma }}</span><span class="legend"> request{{ num_requests|pluralize }} filed</span></li>
+            <li><span class="stat">{{ num_completed_requests|intcomma }}</span><span class="legend"> request{{ num_completed_requests|pluralize }} completed succesfully</span></li>
+            <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
+        </ul>
     </section>
     <section class="articles">
         {% for article in articles %}
@@ -46,14 +47,7 @@
         </section>
         {% endfor %}
     </section>
-    <section class="stats">
-        <h1>Since 2010, MuckRock&rsquo;s users have freed tens of thousands of government records.</h1>
-        <ul>
-            <li><span class="stat">{{ num_requests|intcomma }}</span><span class="legend"> request{{ num_requests|pluralize }} filed</span></li>
-            <li><span class="stat">{{ num_completed_requests|intcomma }}</span><span class="legend"> request{{ num_completed_requests|pluralize }} completed succesfully</span></li>
-            <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
-        </ul>
-    </section>
+    
     <!--
     {% if featured_reqs %}
     <section class="featured-requests">
