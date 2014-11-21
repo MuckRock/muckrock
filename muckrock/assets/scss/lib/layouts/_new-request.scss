@@ -130,10 +130,8 @@
     $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
         display: none;
-        overflow: hidden;
         margin: 0;
         width: 100%;
-        max-width: 100%;
         color: $color-white;
         background-color: $color-agency;
         
@@ -198,6 +196,12 @@
             }
             span.remove {
                 float: right;
+                height: 24px !important;
+                width: 24px !important;
+                background-image: url('img/remove.png') !important;
+                background-size: 90%;
+                background-position: center center !important;
+                &:hover { background-position: center center !important; }
             }
         }
     }

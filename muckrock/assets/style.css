@@ -2782,10 +2782,8 @@ nav.sidebar {
       display: none; }
   .new-request .agency {
     display: none;
-    overflow: hidden;
     margin: 0;
     width: 100%;
-    max-width: 100%;
     color: #f4f4f4;
     background-color: #1157d5; }
     .new-request .agency label {
@@ -2857,7 +2855,14 @@ nav.sidebar {
         font-weight: 300;
         font-size: 1rem; }
       .new-request .autocomplete-light-widget span.deck > span span.remove {
-        float: right; }
+        float: right;
+        height: 24px !important;
+        width: 24px !important;
+        background-image: url("img/remove.png") !important;
+        background-size: 90%;
+        background-position: center center !important; }
+        .new-request .autocomplete-light-widget span.deck > span span.remove:hover {
+          background-position: center center !important; }
   .new-request footer {
     border-bottom-left-radius: 9px;
     border-bottom-right-radius: 9px;
@@ -3543,6 +3548,23 @@ nav.sidebar {
         background: #3a82ff; }
         nav.sidebar form input:focus + span.input-button svg, nav.sidebar form input:active + span.input-button svg {
           fill: #f4f4f4; }
+
+.autocomplete-light-widget {
+  font-family: "Source Sans Pro", "Helvetica Neue", sans-serif !important;
+  color: #21282c !important; }
+
+.yourlabs-autocomplete {
+  background-color: #f4f4f4 !important;
+  border-radius: 9px !important; }
+  .yourlabs-autocomplete .hilight {
+    background-color: #3a82ff !important;
+    background-image: none !important; }
+  .yourlabs-autocomplete .choice, .yourlabs-autocomplete [data-value], .yourlabs-autocomplete em {
+    color: #21282c !important;
+    width: 100%; }
+
+input.autocomplete.xhr-pending {
+  background-image: none !important; }
 
 .ms-container {
   width: 370px; }
