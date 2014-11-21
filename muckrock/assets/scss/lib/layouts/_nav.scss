@@ -74,7 +74,8 @@ nav.primary {
     }
     
     .menu-text { display: none; }
-    @media screen and (min-width: $small-menu-breakpoint) {
+    @media screen 
+    and (min-width: $small-menu-breakpoint - 200px) {
         .menu-text { display: inline; }
     }
     
@@ -257,7 +258,6 @@ nav.primary ul.right { display: none; }
                 width: 100%;
                 margin-left: -$tablet-menu-width;
             }
-        
             & ~ .container header .primary #muckrock-text {
                 margin-left: $tablet-menu-width;
             }

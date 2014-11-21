@@ -2088,7 +2088,7 @@ nav.primary {
     border-left: none; }
   nav.primary .menu-text {
     display: none; }
-  @media screen and (min-width: 540px) {
+  @media screen and (min-width: 340px) {
     nav.primary .menu-text {
       display: inline; } }
   nav.primary #muckrock-text, nav.primary #muckrock-icon {
@@ -2270,30 +2270,30 @@ nav.primary ul.right {
   display: table; }
 
 #sidebar-menu.hidden-menu {
-  width: 250px;
-  margin-right: -250px; }
+  width: 240px;
+  margin-right: -240px; }
   #sidebar-menu.hidden-menu #new-request {
     display: none; }
   #sidebar-menu.hidden-menu:target {
     margin-right: 0; }
     #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
       width: 100%;
-      margin-left: -250px; }
+      margin-left: -240px; }
     #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
-      margin-left: 250px; }
+      margin-left: 240px; }
   @media screen and (min-width: 500px) {
     #sidebar-menu.hidden-menu {
-      width: 300px;
-      margin-right: -300px; }
+      width: 240px;
+      margin-right: -240px; }
       #sidebar-menu.hidden-menu #new-request {
         display: none; }
       #sidebar-menu.hidden-menu:target {
         margin-right: 0; }
         #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
           width: 100%;
-          margin-left: -300px; }
+          margin-left: -240px; }
         #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
-          margin-left: 300px; } }
+          margin-left: 240px; } }
 
 #right-menu-button.hidden-menu {
   display: block; }
@@ -2303,8 +2303,8 @@ nav.primary ul.right {
     width: 100%; }
 
   #sidebar-menu {
-    width: 250px;
-    margin-right: -250px; }
+    width: 240px;
+    margin-right: -240px; }
     #sidebar-menu #new-request {
       display: none; }
 
@@ -2315,7 +2315,7 @@ nav.primary ul.right {
     margin-right: 0; }
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
-      margin-left: -250px; }
+      margin-left: -240px; }
 
   nav.primary ul.right {
     display: table; } }
@@ -3125,7 +3125,7 @@ nav.primary {
     border-left: none; }
   nav.primary .menu-text {
     display: none; }
-  @media screen and (min-width: 540px) {
+  @media screen and (min-width: 340px) {
     nav.primary .menu-text {
       display: inline; } }
   nav.primary #muckrock-text, nav.primary #muckrock-icon {
@@ -3307,30 +3307,30 @@ nav.primary ul.right {
   display: table; }
 
 #sidebar-menu.hidden-menu {
-  width: 250px;
-  margin-right: -250px; }
+  width: 240px;
+  margin-right: -240px; }
   #sidebar-menu.hidden-menu #new-request {
     display: none; }
   #sidebar-menu.hidden-menu:target {
     margin-right: 0; }
     #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
       width: 100%;
-      margin-left: -250px; }
+      margin-left: -240px; }
     #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
-      margin-left: 250px; }
+      margin-left: 240px; }
   @media screen and (min-width: 500px) {
     #sidebar-menu.hidden-menu {
-      width: 300px;
-      margin-right: -300px; }
+      width: 240px;
+      margin-right: -240px; }
       #sidebar-menu.hidden-menu #new-request {
         display: none; }
       #sidebar-menu.hidden-menu:target {
         margin-right: 0; }
         #sidebar-menu.hidden-menu:target ~ .container, #sidebar-menu.hidden-menu:target ~ .footer {
           width: 100%;
-          margin-left: -300px; }
+          margin-left: -240px; }
         #sidebar-menu.hidden-menu:target ~ .container header .primary #muckrock-text {
-          margin-left: 300px; } }
+          margin-left: 240px; } }
 
 #right-menu-button.hidden-menu {
   display: block; }
@@ -3340,8 +3340,8 @@ nav.primary ul.right {
     width: 100%; }
 
   #sidebar-menu {
-    width: 250px;
-    margin-right: -250px; }
+    width: 240px;
+    margin-right: -240px; }
     #sidebar-menu #new-request {
       display: none; }
 
@@ -3352,7 +3352,7 @@ nav.primary ul.right {
     margin-right: 0; }
     #sidebar-menu:target ~ .container, #sidebar-menu:target ~ .footer {
       width: 100%;
-      margin-left: -250px; }
+      margin-left: -240px; }
 
   nav.primary ul.right {
     display: table; } }
