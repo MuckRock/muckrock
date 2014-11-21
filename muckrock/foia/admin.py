@@ -71,6 +71,7 @@ class FOIACommunicationInline(NestedTabularInline):
     fk_name = 'foia'
     extra = 1
     readonly_fields = ['opened']
+    exclude = ('likely_foia', )
     inlines = [FOIAFileInline]
 
 class FOIANoteInline(NestedTabularInline):
