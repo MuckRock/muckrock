@@ -520,7 +520,8 @@ html, body {
   overflow: hidden;
   max-width: 68em;
   margin-left: auto;
-  margin-right: auto; }
+  margin-right: auto;
+  max-width: none; }
   .detail:after, .collection:after, .search.collection:after, .search.form:after, .search.meta:after {
     content: "";
     display: table;
@@ -1607,9 +1608,9 @@ table {
 .detail.news header {
   position: relative;
   display: block;
-  height: 35em;
+  height: 42.5em;
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   background-repeat: no-repeat; }
   .detail.news header .meta {
     display: block;
@@ -1692,6 +1693,7 @@ table {
   font-size: 1.1em;
   line-height: 1.44444em;
   margin: 0.36111em 0;
+  margin: 1.5em auto;
   padding-top: 0;
   max-width: 45em; }
   .detail.news .main div[id^='viewer'] {

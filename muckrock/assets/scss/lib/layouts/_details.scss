@@ -7,9 +7,9 @@
         header {
             position: relative;
             display: block;
-            height: 35em;
+            height: 42.5em;
             background-size: cover;
-            background-position: center top;
+            background-position: center center;
             background-repeat: no-repeat;
             .meta {
                 @include row;
@@ -72,6 +72,7 @@
         .main {
             @extend %base-spacing;
             @include font-sizing(1.1, 1.5);
+            margin: $base-margin auto;
             padding-top: 0;
             max-width: 45em;
             div[id^='viewer'] {
