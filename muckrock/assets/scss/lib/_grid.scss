@@ -7,7 +7,7 @@ html, body { min-height: 100%; }
     @include omega;
     @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(6); }
-    @include media($medium-layout) { @include span-columns(12); }
+    @include media($large-layout) { @include span-columns(12); }
 }
 
 %half {
