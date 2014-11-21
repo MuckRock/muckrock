@@ -16,3 +16,7 @@ autocomplete_light.register(Jurisdiction, name='StateAutocomplete',
                             attrs={'placeholder': 'State name?',
                                    'data-autocomplete-minimum-characters': 2})
 
+autocomplete_light.register(Jurisdiction, name='JurisdictionAutocomplete',
+                            choices=Jurisdiction.objects.all(),
+                            attrs={'placeholder': 'Jurisdiction?',
+                                   'data-autocomplete-minimum-characters': 2})

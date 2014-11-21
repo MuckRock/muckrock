@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
+import autocomplete_light
 from datetime import date, datetime, timedelta
 from reversion import VersionAdmin
 
@@ -20,6 +21,7 @@ from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIACo
                                  FOIANote, STATUS
 from muckrock.foia.tasks import upload_document_cloud, set_document_cloud_pages, autoimport, \
                                 submit_multi_request
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
@@ -74,22 +76,23 @@ class FOIACommunicationInline(NestedTabularInline):
     exclude = ('likely_foia', )
     inlines = [FOIAFileInline]
 
+    def queryset(self, request):
+        return super(FOIACommunicationInline, self).queryset(request)
+
+
 class FOIANoteInline(NestedTabularInline):
     """FOIA Notes Inline admin options"""
     model = FOIANote
     extra = 1
 
 
-class AgencyChoiceField(forms.models.ModelChoiceField):
-    """Agency choice field includes jurisdiction in label"""
-    def label_from_instance(self, obj):
-        return '%s - %s' % (obj.name, obj.jurisdiction.name)
-
-
 class FOIARequestAdminForm(forms.ModelForm):
-    """Form to include custom agency choice field"""
-    agency = AgencyChoiceField(queryset=Agency.objects.select_related('jurisdiction')
-                                                      .order_by('name'))
+    """Form to include custom choice fields"""
+
+    jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAutocomplete',
+                                                       queryset=Jurisdiction.objects.all())
+    agency = autocomplete_light.ModelChoiceField('AgencyAutocomplete',
+                                                 queryset=Agency.objects.all())
     user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'))
 
     class Meta:
@@ -103,6 +106,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     list_filter = ['status']
+    list_select_related = True
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
     readonly_fields = ['mail_id']
     inlines = [FOIACommunicationInline, FOIANoteInline]
@@ -162,7 +166,6 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
                 upload_document_cloud.apply_async(args=[instance.pk, change], countdown=30)
 
         formset.save_m2m()
-
 
     def get_urls(self):
         """Add custom URLs here"""
