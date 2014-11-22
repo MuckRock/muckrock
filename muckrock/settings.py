@@ -123,6 +123,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 MIDDLEWARE_CLASSES = (
+    'johnny.middleware.LocalStoreClearMiddleware',
+    'johnny.middleware.QueryCacheMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -449,13 +451,17 @@ if url.scheme == 'mysql':
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        'BACKEND': 'johnny.backends.locmem.LocMemCache',
+        'JOHNNY_CACHE': True,
     }
 }
 
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
+    CACHES['default']['BACKEND'] = 'johnny.backends.memcached.MemcachedCache',
     CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
+
+JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jc_muckrock'
+
 
 REST_FRAMEWORK = {
     'PAGINATE_BY': 20,                 # Default to 20

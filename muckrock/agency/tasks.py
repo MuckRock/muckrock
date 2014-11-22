@@ -2,8 +2,11 @@
 
 from celery.schedules import crontab
 from celery.task import periodic_task
+from johnny.cache import enable
 
 from muckrock.agency.models import Agency
+
+enable()
 
 @periodic_task(run_every=crontab(day_of_week='sunday', hour=4, minute=0),
                name='muckrock.agency.tasks.stale')

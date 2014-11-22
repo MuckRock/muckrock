@@ -22,6 +22,7 @@ from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
+from johnny.cache import enable
 
 from muckrock.foia.models import FOIAFile, FOIARequest, FOIAMultiRequest, FOIACommunication
 from muckrock.foia.codes import CODES
@@ -33,6 +34,7 @@ from muckrock.vendor import MultipartPostHandler
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 
 logger = logging.getLogger(__name__)
+enable()
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""

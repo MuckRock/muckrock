@@ -15,6 +15,7 @@ from hashlib import md5
 from itertools import chain
 from taggit.managers import TaggableManager
 from unidecode import unidecode
+import johnny.cache
 import logging
 import os
 import re
@@ -250,6 +251,7 @@ class FOIARequest(models.Model):
         # pylint: disable=E1101
 
         # use raw sql here in order to avoid race conditions
+        johnny.cache.disable()
         uid = int(md5(self.title.encode('utf8') +
                       datetime.now().isoformat()).hexdigest(), 16) % 10 ** 8
         mail_id = '%s-%08d' % (self.pk, uid)
@@ -260,6 +262,8 @@ class FOIARequest(models.Model):
         transaction.commit_unless_managed()
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
+        johnny.cache.invalidate(FOIARequest)
+        johnny.cache.enable()
 
     def get_mail_id(self):
         """Get the mail id - generate it if it doesn't exist"""
