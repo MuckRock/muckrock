@@ -721,7 +721,7 @@ class FOIAFile(models.Model):
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
     title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True)
+    date = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
@@ -797,5 +797,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-        ordering = ['comm', 'date']
+        ordering = ['date']
 
