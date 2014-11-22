@@ -691,7 +691,7 @@ class FOIACommunication(models.Model):
 
     class Meta:
         # pylint: disable=R0903
-        ordering = ['foia', 'date']
+        ordering = ['date']
         verbose_name = 'FOIA Communication'
 
 
