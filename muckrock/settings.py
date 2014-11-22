@@ -456,9 +456,13 @@ CACHES = {
     }
 }
 
+os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
+os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'johnny.backends.memcached.MemcachedCache'
-    CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
+    CACHES['default']['BACKEND'] = 'muckrock.backends.JohnnyPyLibMCCache'
+    CACHES['default']['LOCATION'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
+    CACHES['default']['BINARY'] = True
 
 JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jc_muckrock'
 
