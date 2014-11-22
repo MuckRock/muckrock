@@ -457,7 +457,7 @@ CACHES = {
 }
 
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'johnny.backends.memcached.MemcachedCache',
+    CACHES['default']['BACKEND'] = 'johnny.backends.memcached.MemcachedCache'
     CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
 
 JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jc_muckrock'
