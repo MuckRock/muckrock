@@ -219,40 +219,15 @@
         }   
     }
     
+    
+    
 }
 
-.clone-candidates {
-    @include outer-container;
-    ul {
-        padding-left: 0;
-        overflow: hidden;
-    }
-    .candidate {
-        @extend %half;
-        @include row;
-        display: inline-block;
-        margin-bottom: $base-vertical-rhythm/2;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-        @extend %border;
-        @extend %border-radius;
-        &:first-child {
-            margin-left: 0;
-        }
-        .candidate-body {
-            @extend %three-quarters;
-        }
-        h3 {
-            @include font-sizing(1.2);
-            font-weight: $normal;
-        }
-        .clone-button {
-            @extend %quarter;
-            @include font-sizing(0.8);
-            margin-top: 0.5em;
-            margin-right: 0;
-            float: right;
-        }
-    }
+
+
+.clone-candidates h2 {
+    @include font-sizing(1.4);
+    margin: $base-margin 0;
 }
 
 .multirequest-create {
