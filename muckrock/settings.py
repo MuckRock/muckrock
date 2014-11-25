@@ -79,7 +79,6 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
-COMPRESS_ENABLED = True
 COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
@@ -99,8 +98,10 @@ if not DEBUG:
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
+    STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
     STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
