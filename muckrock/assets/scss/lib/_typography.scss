@@ -111,7 +111,9 @@ th {
     vertical-align: top;
 }
 
-td { vertical-align: bottom; }
+td { vertical-align: top; }
+
+table + h3 { margin-top: $base-margin/2; }
 
 .default { color: $color-default; }
 .primary { color: $color-primary; }
