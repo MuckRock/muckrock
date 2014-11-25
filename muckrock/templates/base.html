@@ -74,11 +74,11 @@
                 src="{% static 'js/jquery.min.js' %}"></script>
         <script type="text/javascript" 
                 src="{% static 'js/muckrock.js' %}"></script>
+        {% endcompress %}
         <!--<script type="text/javascript" 
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
         {% block scripts %}
         {% endblock scripts %}
-        {% endcompress %}
         <!-- END SCRIPTS -->
     </body>
 </html>
