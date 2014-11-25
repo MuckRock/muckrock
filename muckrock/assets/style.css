@@ -370,60 +370,60 @@ th {
 html, body {
   min-height: 100%; }
 
-.multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
   margin-right: 0; }
   @media screen and (max-width: 500px) {
-    .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 7.42297%;
       width: 100%; }
-      .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 500px) {
-    .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 4.82916%;
       width: 100%; }
-      .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 769px) {
-    .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 100%; }
-      .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
 
-.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), nav.sidebar .account .options li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
   margin-right: 0; }
-.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .foia-single:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .foia-single:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), nav.sidebar .account .options li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 
 .detail .header-container .aside:nth-child(3n), .collection .filters label[for="filter-checkbox"]:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
@@ -784,27 +784,27 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 
 @font-face {
   font-family: 'Source Code Pro';
-  src: url("fonts/sourcecodepro-regular.woff") format("woff");
+  src: url("/../static/fonts/sourcecodepro-regular.woff") format("woff");
   font-weight: normal;
   font-style: normal; }
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url("fonts/sourcesanspro-light.woff") format("woff");
+  src: url("/../static/fonts/sourcesanspro-light.woff") format("woff");
   font-weight: 300;
   font-style: normal; }
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url("fonts/sourcesanspro-regular.woff") format("woff");
+  src: url("/../static/fonts/sourcesanspro-regular.woff") format("woff");
   font-weight: 400;
   font-style: normal; }
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url("fonts/sourcesanspro-it.woff") format("woff");
+  src: url("/../static/fonts/sourcesanspro-it.woff") format("woff");
   font-weight: 400;
   font-style: italic; }
 @font-face {
   font-family: 'Source Sans Pro';
-  src: url("fonts/sourcesanspro-semibold.woff") format("woff");
+  src: url("/../static/fonts/sourcesanspro-semibold.woff") format("woff");
   font-weight: 500;
   font-style: normal; }
 body {
@@ -2428,6 +2428,12 @@ nav.sidebar {
       display: block;
       margin-bottom: 0.75em;
       color: #f4f4f4; }
+    nav.sidebar .account .options {
+      display: block; }
+      nav.sidebar .account .options:after {
+        content: "";
+        display: table;
+        clear: both; }
     nav.sidebar .account .foia-details {
       display: block; }
       nav.sidebar .account .foia-details li {
@@ -3444,6 +3450,12 @@ nav.sidebar {
       display: block;
       margin-bottom: 0.75em;
       color: #f4f4f4; }
+    nav.sidebar .account .options {
+      display: block; }
+      nav.sidebar .account .options:after {
+        content: "";
+        display: table;
+        clear: both; }
     nav.sidebar .account .foia-details {
       display: block; }
       nav.sidebar .account .foia-details li {
