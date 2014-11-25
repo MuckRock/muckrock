@@ -56,19 +56,23 @@
     background-color: darken($color-white, 10%);
 }
 
-%article {
+%detail {
     @extend %body;
-    .meta {
-        @include row;
-        .header {
+    @extend %edge-to-edge;
+    
+    .header-container {
+        @include outer-container;
+        @extend %base-spacing;
+        padding-bottom: 0;
+        .main {
             @extend %two-thirds;
             margin: $base-margin/2 0 0;
             h1 { @include font-sizing(1.5); }
             h2 { @include font-sizing(1); }
             @include media($medium-layout) {
                 padding-right: $base-padding;
-                h1 { @include font-sizing(1.75); }
-                h2 { @include font-sizing(1.25); }
+                h1 { @include font-sizing(2); }
+                h2 { @include font-sizing(1.5); }
             }
         }
         .aside {
@@ -84,7 +88,14 @@
             }
         }
     }
-    .main { @include outer-container; }
+    .body {
+        @include outer-container;
+        @extend %base-spacing;
+        .stats {
+            @include row;
+            dl { @extend %quarter; }
+        }
+    }
     .actions { @extend %controls; }
 }
 

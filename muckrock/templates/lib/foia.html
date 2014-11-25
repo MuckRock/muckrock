@@ -3,7 +3,7 @@ Pass a 'foias' object and it'll render a group of them.
 {% endcomment %}
 <div class="foia-group">
 {% for foia in foias %}
-    <section class="foia">
+    <section class="foia-single">
         <div class="foia-body">
             <h3><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h3>
             {% if foia.description %}

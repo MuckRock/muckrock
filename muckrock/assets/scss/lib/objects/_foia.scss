@@ -1,5 +1,5 @@
 .foia-group { @include outer-container; }
-.foia {
+.foia-single {
     @extend %half;
     @include row;
     display: inline-block;
