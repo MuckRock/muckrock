@@ -123,8 +123,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 
 MIDDLEWARE_CLASSES = (
-    'johnny.middleware.LocalStoreClearMiddleware',
-    'johnny.middleware.QueryCacheMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'dogslow.WatchdogMiddleware',
     'django.middleware.gzip.GZipMiddleware',
@@ -451,20 +449,13 @@ if url.scheme == 'mysql':
 
 CACHES = {
     'default': {
-        'BACKEND': 'johnny.backends.locmem.LocMemCache',
-        'JOHNNY_CACHE': True,
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
 }
 
-os.environ['MEMCACHE_SERVERS'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
-os.environ['MEMCACHE_USERNAME'] = os.environ.get('MEMCACHIER_USERNAME', '')
-os.environ['MEMCACHE_PASSWORD'] = os.environ.get('MEMCACHIER_PASSWORD', '')
 if 'MEMCACHIER_SERVERS' in os.environ:
-    CACHES['default']['BACKEND'] = 'muckrock.backends.JohnnyPyLibMCCache'
-    CACHES['default']['LOCATION'] = os.environ.get('MEMCACHIER_SERVERS', '').replace(',', ';')
-    CACHES['default']['BINARY'] = True
-
-JOHNNY_MIDDLEWARE_KEY_PREFIX = 'jc_muckrock'
+    CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
+    CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
 
 
 REST_FRAMEWORK = {

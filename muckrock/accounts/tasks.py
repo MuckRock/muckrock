@@ -11,7 +11,6 @@ from django.db.models import Sum
 import gdata.analytics.service
 import logging
 from datetime import date, timedelta
-from johnny.cache import enable
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
@@ -20,7 +19,6 @@ from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 
 logger = logging.getLogger(__name__)
-enable()
 
 @periodic_task(run_every=crontab(hour=0, minute=30), name='muckrock.accounts.tasks.store_statstics')
 def store_statstics():
