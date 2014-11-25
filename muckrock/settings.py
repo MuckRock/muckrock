@@ -41,11 +41,9 @@ DOGSLOW_EMAIL_FROM = 'info@muckrock.com'
 DOGSLOW_LOGGER = 'dogslow' # can be anything, but must match `logger` below
 DOGSLOW_LOG_TO_SENTRY = True
 
-
-
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
-    ('Allan Lasser', 'lasser.allan+local.server@gmail.com'),
+    ('Allan Lasser', 'allan@muckrock.com'),
 )
 
 MANAGERS = ADMINS
@@ -81,6 +79,18 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+COMPRESS_ENABLED = True
+COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    #'compressor.filters.csstidy.CSSTidyFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+]
+COMPRESS_PRECOMPILERS = (
+    #('text/x-scss', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
+)
+
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
@@ -102,6 +112,11 @@ else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+    STATICFILES_FINDERS = (
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'compressor.finders.CompressorFinder',
+    )
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
@@ -181,31 +196,30 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.staticfiles',
     #'staticfiles',
-    'raven.contrib.django',
-    'gunicorn',
-    'south',
-    'debug_toolbar',
-    'haystack',
-    'django_assets',
-    'djcelery',
-    'filer',
-    'easy_thumbnails',
-    'pingback',
-    'taggit',
+    'autocomplete_light',
+    'compressor',
     'dbsettings',
-    'storages',
+    'debug_toolbar',
     'django_tablib',
-    'urlauth',
-    'epiceditor',
+    'djangosecure',
+    'djcelery',
+    'easy_thumbnails',
+    'filer',
+    'gunicorn',
+    'haystack',
     'markdown_deux',
     'mathfilters',
+    'pingback',
+    'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
-    'autocomplete_light',
     'reversion',
-    'djangosecure',
     'robots',
+    'south',
+    'storages',
+    'taggit',
+    'urlauth',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',

@@ -10,7 +10,8 @@ Whoosh==2.4.1
 django-debug-toolbar==0.9.4
 mock==0.7.0b2
 webassets==0.7.1
-cssutils==0.9.7b3
+django-compressor==1.4
+django-libsass==0.2
 gdata==2.0.17
 django-pingback==0.3
 BeautifulSoup==3.2.1
@@ -39,7 +40,6 @@ iron-celery==0.3.1
 kombu==3.0.14
 django-tablib==2.4.1
 django-urlauth==0.1.8
-django-epiceditor==0.2.1.2
 Markdown==2.3.1
 django-markdown-deux==1.0.4
 djangorestframework==2.3.10

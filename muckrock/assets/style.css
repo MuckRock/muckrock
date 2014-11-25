@@ -397,149 +397,149 @@ html, body {
       .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
 
-.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .clone-candidates .candidate:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
   margin-right: 0; }
-.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .clone-candidates .candidate:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .foia-single:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .clone-candidates .candidate, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .clone-candidates .candidate:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .clone-candidates .candidate, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .clone-candidates .candidate:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .clone-candidates .candidate, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .clone-candidates .candidate:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 
-.detail .meta .aside:nth-child(3n), .collection .filters label[for="filter-checkbox"]:nth-child(3n), .detail.news header .aside:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
+.detail .header-container .aside:nth-child(3n), .collection .filters label[for="filter-checkbox"]:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
   margin-right: 0; }
-.detail .meta .aside:nth-child(3n+1), .collection .filters label[for="filter-checkbox"]:nth-child(3n+1), .detail.news header .aside:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1) {
+.detail .header-container .aside:nth-child(3n+1), .collection .filters label[for="filter-checkbox"]:nth-child(3n+1), .detail.agency aside dl:nth-child(3n+1), .homepage .stats li:nth-child(3n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .header-container .aside, .collection .filters label[for="filter-checkbox"], .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .header-container .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .header-container .aside, .collection .filters label[for="filter-checkbox"], .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 30.11389%; }
-    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .header-container .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta .aside, .collection .filters label[for="filter-checkbox"], .detail.news header .aside, .detail.agency aside dl, .homepage .stats li {
+  .detail .header-container .aside, .collection .filters label[for="filter-checkbox"], .detail.agency aside dl, .homepage .stats li {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 31.76157%; }
-    .detail .meta .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.news header .aside:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
+    .detail .header-container .aside:last-child, .collection .filters label[for="filter-checkbox"]:last-child, .detail.agency aside dl:last-child, .homepage .stats li:last-child {
       margin-right: 0; } }
 
 @media screen and (max-width: 500px) {
-  .detail .meta .header, .collection .filters ul, .detail.news header .header {
+  .detail .header-container .main, .collection .filters ul {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
+    .detail .header-container .main:last-child, .collection .filters ul:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .detail .meta .header, .collection .filters ul, .detail.news header .header {
+  .detail .header-container .main, .collection .filters ul {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 65.05695%; }
-    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
+    .detail .header-container .main:last-child, .collection .filters ul:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .detail .meta .header, .collection .filters ul, .detail.news header .header {
+  .detail .header-container .main, .collection .filters ul {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 65.88078%; }
-    .detail .meta .header:last-child, .collection .filters ul:last-child, .detail.news header .header:last-child {
+    .detail .header-container .main:last-child, .collection .filters ul:last-child {
       margin-right: 0; } }
 
-.collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate .clone-button:nth-child(2n), .foia-draft .buy-requests button:nth-child(2n) {
+.detail .body .stats dl:nth-child(2n), .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .foia-single .foia-actions:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .foia-draft .buy-requests button:nth-child(2n) {
   margin-right: 0; }
-.collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .clone-candidates .candidate .clone-button:nth-child(2n+1), .foia-draft .buy-requests button:nth-child(2n+1) {
+.detail .body .stats dl:nth-child(2n+1), .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .foia-single .foia-actions:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .foia-draft .buy-requests button:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate .clone-button, .foia-draft .buy-requests button {
+  .detail .body .stats dl, .collection header .commands, .modal input, .form input[type="submit"], .foia-single .foia-actions, .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .foia-draft .buy-requests button {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 46.28851%; }
-    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate .clone-button:last-child, .foia-draft .buy-requests button:last-child {
+    .detail .body .stats dl:last-child, .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .foia-single .foia-actions:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .foia-draft .buy-requests button:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate .clone-button, .foia-draft .buy-requests button {
+  .detail .body .stats dl, .collection header .commands, .modal input, .form input[type="submit"], .foia-single .foia-actions, .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .foia-draft .buy-requests button {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate .clone-button:last-child, .foia-draft .buy-requests button:last-child {
+    .detail .body .stats dl:last-child, .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .foia-single .foia-actions:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .foia-draft .buy-requests button:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .collection header .commands, .modal input, .form input[type="submit"], .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .clone-candidates .candidate .clone-button, .foia-draft .buy-requests button {
+  .detail .body .stats dl, .collection header .commands, .modal input, .form input[type="submit"], .foia-single .foia-actions, .collection.request .filters .input, .collection.request .filters input[type="submit"], .search.form input[type="submit"], .foia-draft .buy-requests button {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 23.23176%; }
-    .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .clone-candidates .candidate .clone-button:nth-child(2n), .foia-draft .buy-requests button:nth-child(2n) {
+    .detail .body .stats dl:nth-child(2n), .collection header .commands:nth-child(2n), .modal input:nth-child(2n), .form input[type="submit"]:nth-child(2n), .foia-single .foia-actions:nth-child(2n), .collection.request .filters .input:nth-child(2n), .collection.request .filters input[type="submit"]:nth-child(2n), .foia-draft .buy-requests button:nth-child(2n) {
       margin-right: 2.35765%; }
-    .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .clone-candidates .candidate .clone-button:nth-child(2n+1), .foia-draft .buy-requests button:nth-child(2n+1) {
+    .detail .body .stats dl:nth-child(2n+1), .collection header .commands:nth-child(2n+1), .modal input:nth-child(2n+1), .form input[type="submit"]:nth-child(2n+1), .foia-single .foia-actions:nth-child(2n+1), .collection.request .filters .input:nth-child(2n+1), .collection.request .filters input[type="submit"]:nth-child(2n+1), .foia-draft .buy-requests button:nth-child(2n+1) {
       clear: none; }
-    .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .clone-candidates .candidate .clone-button:last-child, .foia-draft .buy-requests button:last-child {
+    .detail .body .stats dl:last-child, .collection header .commands:last-child, .modal input:last-child, .form input[type="submit"]:last-child, .foia-single .foia-actions:last-child, .collection.request .filters .input:last-child, .collection.request .filters input[type="submit"]:last-child, .foia-draft .buy-requests button:last-child {
       margin-right: 0; }
-    .collection header .commands:nth-child(4n), .modal input:nth-child(4n), .form input[type="submit"]:nth-child(4n), .collection.request .filters .input:nth-child(4n), .collection.request .filters input[type="submit"]:nth-child(4n), .clone-candidates .candidate .clone-button:nth-child(4n), .foia-draft .buy-requests button:nth-child(4n) {
+    .detail .body .stats dl:nth-child(4n), .collection header .commands:nth-child(4n), .modal input:nth-child(4n), .form input[type="submit"]:nth-child(4n), .foia-single .foia-actions:nth-child(4n), .collection.request .filters .input:nth-child(4n), .collection.request .filters input[type="submit"]:nth-child(4n), .foia-draft .buy-requests button:nth-child(4n) {
       margin-right: 0; }
-    .collection header .commands:nth-child(4n+1), .modal input:nth-child(4n+1), .form input[type="submit"]:nth-child(4n+1), .collection.request .filters .input:nth-child(4n+1), .collection.request .filters input[type="submit"]:nth-child(4n+1), .clone-candidates .candidate .clone-button:nth-child(4n+1), .foia-draft .buy-requests button:nth-child(4n+1) {
+    .detail .body .stats dl:nth-child(4n+1), .collection header .commands:nth-child(4n+1), .modal input:nth-child(4n+1), .form input[type="submit"]:nth-child(4n+1), .foia-single .foia-actions:nth-child(4n+1), .collection.request .filters .input:nth-child(4n+1), .collection.request .filters input[type="submit"]:nth-child(4n+1), .foia-draft .buy-requests button:nth-child(4n+1) {
       clear: left; } }
 
 @media screen and (max-width: 500px) {
-  .collection header .hgroup, .search.form input[type="search"], .clone-candidates .candidate .candidate-body, .foia-draft .buy-requests p {
+  .collection header .hgroup, .foia-single .foia-body, .search.form input[type="search"], .foia-draft .buy-requests p {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .collection header .hgroup:last-child, .search.form input[type="search"]:last-child, .clone-candidates .candidate .candidate-body:last-child, .foia-draft .buy-requests p:last-child {
+    .collection header .hgroup:last-child, .foia-single .foia-body:last-child, .search.form input[type="search"]:last-child, .foia-draft .buy-requests p:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .collection header .hgroup, .search.form input[type="search"], .clone-candidates .candidate .candidate-body, .foia-draft .buy-requests p {
+  .collection header .hgroup, .foia-single .foia-body, .search.form input[type="search"], .foia-draft .buy-requests p {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 100%; }
-    .collection header .hgroup:last-child, .search.form input[type="search"]:last-child, .clone-candidates .candidate .candidate-body:last-child, .foia-draft .buy-requests p:last-child {
+    .collection header .hgroup:last-child, .foia-single .foia-body:last-child, .search.form input[type="search"]:last-child, .foia-draft .buy-requests p:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .collection header .hgroup, .search.form input[type="search"], .clone-candidates .candidate .candidate-body, .foia-draft .buy-requests p {
+  .collection header .hgroup, .foia-single .foia-body, .search.form input[type="search"], .foia-draft .buy-requests p {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 74.41059%; }
-    .collection header .hgroup:last-child, .search.form input[type="search"]:last-child, .clone-candidates .candidate .candidate-body:last-child, .foia-draft .buy-requests p:last-child {
+    .collection header .hgroup:last-child, .foia-single .foia-body:last-child, .search.form input[type="search"]:last-child, .foia-draft .buy-requests p:last-child {
       margin-right: 0; } }
 
 .detail, .collection, .search.collection, .search.form, .search.meta {
@@ -554,22 +554,22 @@ html, body {
     display: table;
     clear: both; }
 
-.container, .detail.news header .meta, .detail.news .main, nav.sidebar, .homepage .banner .banner-container, .homepage .stats {
+.detail .header-container, .detail .body, .container, nav.sidebar, .homepage .banner .banner-container, .homepage .stats {
   padding: 0.75em; }
   @media screen and (min-width: 500px) {
-    .container, .detail.news header .meta, .detail.news .main, nav.sidebar, .homepage .banner .banner-container, .homepage .stats {
+    .detail .header-container, .detail .body, .container, nav.sidebar, .homepage .banner .banner-container, .homepage .stats {
       padding: 1.5em; } }
 
-.collection, .search.collection, ul.notifications, .detail.news, .homepage {
+.detail, .collection, .search.collection, ul.notifications, .homepage {
   margin: 0 -0.75em; }
   @media screen and (min-width: 500px) {
-    .collection, .search.collection, ul.notifications, .detail.news, .homepage {
+    .detail, .collection, .search.collection, ul.notifications, .homepage {
       margin: 0 -1.5em; } }
 
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .progress-bar, .detail.request .tabs label, .clone-candidates .candidate {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .foia-single, .progress-bar, .detail.request .tabs label {
   border: 1px solid #B3BECB; }
 
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.dismiss button.close, .modal, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar ul a, .new-request .create-request, .clone-candidates .candidate {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.dismiss button.close, .modal, .foia-single, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar ul a, .new-request .create-request {
   border-radius: 9px; }
 
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -609,53 +609,62 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
 .detail .actions, .collection .controls, .collection.request .filters form {
   background-color: #dbdbdb; }
 
-.detail .meta {
-  display: block; }
-  .detail .meta:after {
+.detail .header-container {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 0; }
+  .detail .header-container:after {
     content: "";
     display: table;
     clear: both; }
-  .detail .meta .header {
+  .detail .header-container .main {
     margin: 0.75em 0 0; }
-    .detail .meta .header h1 {
+    .detail .header-container .main h1 {
       font-size: 1.5em;
       line-height: 1.22222em;
       margin: 0.30556em 0; }
-    .detail .meta .header h2 {
+    .detail .header-container .main h2 {
       font-size: 1em;
       line-height: 1.22222em;
       margin: 0.30556em 0; }
     @media screen and (min-width: 500px) {
-      .detail .meta .header {
+      .detail .header-container .main {
         padding-right: 1.5em; }
-        .detail .meta .header h1 {
-          font-size: 1.75em;
+        .detail .header-container .main h1 {
+          font-size: 2em;
           line-height: 1.22222em;
           margin: 0.30556em 0; }
-        .detail .meta .header h2 {
-          font-size: 1.25em;
+        .detail .header-container .main h2 {
+          font-size: 1.5em;
           line-height: 1.22222em;
           margin: 0.30556em 0; } }
-  .detail .meta .aside {
+  .detail .header-container .aside {
     margin: 0.75em 0; }
-    .detail .meta .aside dl {
+    .detail .header-container .aside dl {
       margin-top: 0; }
-  .detail .meta summary {
+  .detail .header-container summary {
     font-weight: 300; }
     @media screen and (min-width: 500px) {
-      .detail .meta summary {
+      .detail .header-container summary {
         display: block;
         font-size: 1.25em;
         line-height: 1.22222em;
         margin: 0.30556em 0; } }
-.detail .main {
+.detail .body {
   max-width: 68em;
   margin-left: auto;
   margin-right: auto; }
-  .detail .main:after {
+  .detail .body:after {
     content: "";
     display: table;
     clear: both; }
+  .detail .body .stats {
+    display: block; }
+    .detail .body .stats:after {
+      content: "";
+      display: table;
+      clear: both; }
 
 .collection, .search.collection {
   max-width: 68em;
@@ -929,7 +938,10 @@ th {
   vertical-align: top; }
 
 td {
-  vertical-align: bottom; }
+  vertical-align: top; }
+
+table + h3 {
+  margin-top: 0.75em; }
 
 .default {
   color: #6b6a65; }
@@ -1416,6 +1428,39 @@ fieldset {
 @media screen and (min-width: 500px) {
   .login.form .form-info {
     text-align: right; } }
+.foia-group {
+  max-width: 68em;
+  margin-left: auto;
+  margin-right: auto; }
+  .foia-group:after {
+    content: "";
+    display: table;
+    clear: both; }
+
+.foia-single {
+  display: block;
+  display: inline-block;
+  margin-bottom: 0.75em;
+  padding: 0.375em 0.75em; }
+  .foia-single:after {
+    content: "";
+    display: table;
+    clear: both; }
+  .foia-single:first-child {
+    margin-left: 0; }
+  .foia-single h3 {
+    font-size: 1.2em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    font-weight: 400; }
+  .foia-single .foia-actions .button, .foia-single .foia-actions input[type="submit"], .foia-single .foia-actions button {
+    font-size: 0.8em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    margin-top: 0.5em;
+    margin-right: 0;
+    display: block; }
+
 /* Feeds */
 .feed-item {
   overflow: hidden;
@@ -1534,7 +1579,8 @@ fieldset {
 
 table {
   width: 100%;
-  margin-top: 1.5em 0; }
+  margin-top: 1.5em 0;
+  border: 1px solid #B3BECB; }
   table th, table td {
     padding: 0.25em 0.5em; }
   table tr:nth-child(odd) {
@@ -1618,114 +1664,109 @@ table {
 
 /* Layouts */
 /* Details */
-.detail.news header {
+.detail.news .header, .detail.agency .header, .detail.jurisdiction .header {
   position: relative;
   display: block;
   height: 42.5em;
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat; }
-  .detail.news header .meta {
-    display: block;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: #f4f4f4; }
-    .detail.news header .meta:after {
-      content: "";
-      display: table;
-      clear: both; }
-  .detail.news header .header h1 {
-    font-weight: 500;
-    margin-top: 0; }
-    @media screen and (max-width: 500px) {
-      .detail.news header .header h1 {
-        font-size: 1.75em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0; } }
-    @media screen and (min-width: 500px) {
-      .detail.news header .header h1 {
-        font-size: 2em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0; } }
-    @media screen and (min-width: 769px) {
-      .detail.news header .header h1 {
-        font-size: 2.25em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0; } }
-  .detail.news header .header summary {
-    font-weight: 400; }
-    @media screen and (max-width: 500px) {
-      .detail.news header .header summary {
-        font-size: 1.25em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0; } }
-    @media screen and (min-width: 769px) {
-      .detail.news header .header summary {
-        font-size: 1.5em;
-        line-height: 1.22222em;
-        margin: 0.30556em 0; } }
-  .detail.news header .aside {
-    padding-left: 1.5em; }
-    .detail.news header .aside h2, .detail.news header .aside .article-date {
+.detail.news .header-container, .detail.agency .header-container, .detail.jurisdiction .header-container {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #f4f4f4; }
+.detail.news .main h1 {
+  font-weight: 500;
+  margin-top: 0; }
+  @media screen and (max-width: 500px) {
+    .detail.news .main h1 {
+      font-size: 1.75em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0; } }
+  @media screen and (min-width: 500px) {
+    .detail.news .main h1 {
+      font-size: 2em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0; } }
+  @media screen and (min-width: 769px) {
+    .detail.news .main h1 {
+      font-size: 2.25em;
+      line-height: 1.22222em;
+      margin: 0.30556em 0; } }
+.detail.news .main summary {
+  font-weight: 400; }
+  @media screen and (max-width: 500px) {
+    .detail.news .main summary {
       font-size: 1.25em;
       line-height: 1.22222em;
-      margin: 0.30556em 0;
-      font-weight: 300;
-      color: #21282c; }
-    .detail.news header .aside .author-name {
-      font-size: 1.275em;
+      margin: 0.30556em 0; } }
+  @media screen and (min-width: 769px) {
+    .detail.news .main summary {
+      font-size: 1.5em;
       line-height: 1.22222em;
-      margin: 0.30556em 0; }
-    .detail.news header .aside ul {
-      list-style-type: none;
-      padding-left: 0; }
-      .detail.news header .aside ul span {
-        display: block; }
-    @media screen and (max-width: 500px) {
-      .detail.news header .aside {
+      margin: 0.30556em 0; } }
+.detail.news .aside {
+  padding-left: 1.5em; }
+  .detail.news .aside h2, .detail.news .aside .article-date {
+    font-size: 1.2em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0;
+    font-weight: 300;
+    color: #21282c; }
+  .detail.news .aside .author-name {
+    font-size: 1.275em;
+    line-height: 1.22222em;
+    margin: 0.30556em 0; }
+  .detail.news .aside ul {
+    list-style-type: none;
+    padding-left: 0; }
+    .detail.news .aside ul span {
+      display: block; }
+  @media screen and (max-width: 500px) {
+    .detail.news .aside {
+      display: block;
+      margin: 0.75em 0;
+      border-top: 1px solid #B3BECB;
+      border-bottom: 1px solid #B3BECB;
+      padding: 0.75em 0; }
+      .detail.news .aside:after {
+        content: "";
+        display: table;
+        clear: both; }
+      .detail.news .aside .half {
+        float: left;
         display: block;
-        margin: 0.75em 0;
-        border-top: 1px solid #B3BECB;
-        border-bottom: 1px solid #B3BECB;
-        padding: 0.75em 0; }
-        .detail.news header .aside:after {
-          content: "";
-          display: table;
-          clear: both; }
-        .detail.news header .aside .half {
-          float: left;
-          display: block;
-          margin-right: 7.42297%;
-          width: 46.28851%; }
-          .detail.news header .aside .half:last-child {
-            margin-right: 0; }
-        .detail.news header .aside ul {
-          margin-top: 0; } }
-.detail.news .main {
+        margin-right: 7.42297%;
+        width: 46.28851%; }
+        .detail.news .aside .half:last-child {
+          margin-right: 0; }
+      .detail.news .aside ul {
+        margin-top: 0; } }
+.detail.news .body {
   font-size: 1.1em;
   line-height: 1.44444em;
   margin: 0.36111em 0;
   margin: 1.5em auto;
   padding-top: 0;
   max-width: 45em; }
-  .detail.news .main div[id^='viewer'] {
-    max-width: 90%;
-    margin: 1.5em auto; }
-    @media screen and (min-width: 769px) {
-      .detail.news .main div[id^='viewer'] {
-        margin: 1.5em auto 1.5em 0; } }
-  .detail.news .main .iframe-container {
-    position: relative;
-    padding-bottom: 75%;
-    height: 0;
-    overflow: hidden; }
-    .detail.news .main .iframe-container > iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%; }
+.detail.news div[id^='viewer'] {
+  max-width: 90%;
+  margin: 1.5em auto; }
+  @media screen and (min-width: 769px) {
+    .detail.news div[id^='viewer'] {
+      margin: 1.5em auto 1.5em 0; } }
+.detail.news .iframe-container {
+  position: relative;
+  padding-bottom: 75%;
+  height: 0;
+  overflow: hidden; }
+  .detail.news .iframe-container > iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; }
 .detail.jurisdiction h3 {
   font-weight: normal; }
 .detail.jurisdiction h3 + table {
@@ -2895,40 +2936,11 @@ nav.sidebar {
       width: 70%;
       margin: 0; }
 
-.clone-candidates {
-  max-width: 68em;
-  margin-left: auto;
-  margin-right: auto; }
-  .clone-candidates:after {
-    content: "";
-    display: table;
-    clear: both; }
-  .clone-candidates ul {
-    padding-left: 0;
-    overflow: hidden; }
-  .clone-candidates .candidate {
-    display: block;
-    display: inline-block;
-    margin-bottom: 0.75em;
-    padding: 0.375em 0.75em; }
-    .clone-candidates .candidate:after {
-      content: "";
-      display: table;
-      clear: both; }
-    .clone-candidates .candidate:first-child {
-      margin-left: 0; }
-    .clone-candidates .candidate h3 {
-      font-size: 1.2em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      font-weight: 400; }
-    .clone-candidates .candidate .clone-button {
-      font-size: 0.8em;
-      line-height: 1.22222em;
-      margin: 0.30556em 0;
-      margin-top: 0.5em;
-      margin-right: 0;
-      float: right; }
+.clone-candidates h2 {
+  font-size: 1.4em;
+  line-height: 1.22222em;
+  margin: 0.30556em 0;
+  margin: 1.5em 0; }
 
 .multirequest-create {
   max-width: 68em;
