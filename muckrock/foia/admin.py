@@ -84,7 +84,7 @@ class FOIAFileInline(NestedTabularInline):
     """FOIA File Inline admin options"""
     model = FOIAFile
     form = FOIAFileAdminForm
-    formset = BaseInlinePrefetchedFormSet
+    #formset = BaseInlinePrefetchedFormSet
     readonly_fields = ['doc_id', 'pages']
     exclude = ('foia', 'access', 'source')
     extra = 0
