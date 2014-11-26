@@ -12,9 +12,6 @@ mock==0.7.0b2
 django-staticfiles==1.2.1
 webassets==0.7.1
 django-compressor==1.4
-six==1.8.0
-libsass==0.6.2
-django-libsass==0.2
 gdata==2.0.17
 django-pingback==0.3
 BeautifulSoup==3.2.1
