@@ -73,7 +73,7 @@ PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
-
+COMPRESS_ROOT = STATIC_ROOT
 
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),

@@ -59,3 +59,5 @@ django-xmlrpc==0.1.3
 newrelic==2.18.1.15
 dogslow==0.9.7
 django-mathfilters==0.3.0
+pylint==1.4.0
+pylint-django==0.5.5
