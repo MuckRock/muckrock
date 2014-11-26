@@ -79,6 +79,10 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+
+if not os.environ.has_key('COMPRESS_OFFLINE'):
+    # compress_offline is set to true during deployment to Heroku
+    COMPRESS_OFFLINE=True 
 COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
