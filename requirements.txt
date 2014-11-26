@@ -9,8 +9,11 @@ django-haystack==1.2.7
 Whoosh==2.4.1
 django-debug-toolbar==0.9.4
 mock==0.7.0b2
+django-staticfiles==1.2.1
 webassets==0.7.1
 django-compressor==1.4
+six==1.8.0
+libsass==0.6.2
 django-libsass==0.2
 gdata==2.0.17
 django-pingback==0.3
@@ -24,7 +27,6 @@ boto==2.27.0
 gunicorn==0.14.3
 gevent==0.13.7
 greenlet==0.3.4
-django-staticfiles==1.2.1
 argparse==1.2.1
 python-memcached==1.48
 raven>=1.7.3
