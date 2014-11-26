@@ -13,3 +13,4 @@ apache
 .webassets-cache
 .sass-cache
 dump.rdb
+.bundle
