@@ -20,7 +20,7 @@ from muckrock.crowdfund.models import \
     CrowdfundProjectPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.settings import STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -81,7 +81,7 @@ def contribute_request(request, jurisdiction, jidx, slug, idx):
         pk=idx
     )
     crowdfund = get_object_or_404(CrowdfundRequest, foia=foia)
-    redirect = reverse(
+    redirect_url = reverse(
         'foia-detail',
         kwargs={
             'jurisdiction': crowdfund.foia.jurisdiction.slug,
@@ -96,13 +96,13 @@ def contribute_request(request, jurisdiction, jidx, slug, idx):
         request,
         crowdfund,
         CrowdfundRequestPayment,
-        redirect
+        redirect_url
     )
 
 def contribute_project(request, idx):
     """Contribute to a crowdfunding project"""
     crowdfund = get_object_or_404(CrowdfundProject, pk=idx)
-    redirect = reverse(
+    redirect_url = reverse(
         'project-detail',
         kwargs={'slug': crowdfund.project.slug, 'idx': crowdfund.project.pk}
     )
@@ -110,7 +110,7 @@ def contribute_project(request, idx):
         request,
         crowdfund,
         CrowdfundProjectPayment,
-        redirect
+        redirect_url
     )
 
 def project_detail(request, slug, idx):
@@ -118,6 +118,6 @@ def project_detail(request, slug, idx):
     project = get_object_or_404(CrowdfundProject, slug=slug, pk=idx)
     return render_to_response(
         'crowdfund/project_detail.html',
-        { 'project': project },
+        {'project': project},
         context_instance=RequestContext(request)
     )

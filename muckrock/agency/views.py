@@ -2,7 +2,6 @@
 Views for the Agency application
 """
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count
@@ -13,14 +12,12 @@ from django.template import RequestContext
 from rest_framework import viewsets
 import django_filters
 
-from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock.agency.serializers import AgencySerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
-from muckrock.sidebar.models import Sidebar
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -41,11 +38,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
             send_mail(
                 '[FLAG] %s: %s' % (type_, agency.name),
                 render_to_string(
-                    'text/jurisdiction/flag.txt',
-                    { 'obj': agency,
-                      'user': request.user,
-                      'type': 'agency',
-                      'reason': form.cleaned_data.get('reason')
+                    'text/jurisdiction/flag.txt', {
+                        'obj': agency,
+                        'user': request.user,
+                        'type': 'agency',
+                        'reason': form.cleaned_data.get('reason')
                     }
                 ),
                 'info@muckrock.com',
@@ -56,11 +53,11 @@ def detail(request, jurisdiction, jidx, slug, idx):
             return redirect(agency)
     else:
         form = FlagForm()
-    
-    context = {'agency': agency, 'foia_requests': foia_requests, 'form': form }
-    
+
+    context = {'agency': agency, 'foia_requests': foia_requests, 'form': form}
+
     collect_stats(agency, context)
-    
+
     return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
 

@@ -41,18 +41,31 @@ class Holiday(models.Model):
 
     name = models.CharField(max_length=255)
     kind = models.CharField(max_length=8, choices=kinds)
-    month = models.PositiveSmallIntegerField(choices=months, null=True, blank=True,
-        help_text='Only used for date and ordinal weekday holidays')
-
+    month = models.PositiveSmallIntegerField(
+        choices=months,
+        null=True,
+        blank=True,
+        help_text='Only used for date and ordinal weekday holidays'
+    )
     # date
-    day = models.PositiveSmallIntegerField(choices=zip(range(1, 32), range(1, 32)),
-        null=True, blank=True, help_text='Only used for date holidays')
-
+    day = models.PositiveSmallIntegerField(
+        choices=zip(range(1, 32), range(1, 32)),
+        null=True,
+        blank=True,
+        help_text='Only used for date holidays'
+    )
     # ord weekday
-    weekday = models.PositiveSmallIntegerField(choices=weekdays, null=True, blank=True,
-        help_text='Only used for ordinal weekday holidays')
-    num = models.SmallIntegerField(null=True, blank=True,
-        help_text='Only used for ordinal weekday holidays')
+    weekday = models.PositiveSmallIntegerField(
+        choices=weekdays,
+        null=True,
+        blank=True,
+        help_text='Only used for ordinal weekday holidays'
+    )
+    num = models.SmallIntegerField(
+        null=True,
+        blank=True,
+        help_text='Only used for ordinal weekday holidays'
+    )
 
     # easter and election day do not need any additional info
 

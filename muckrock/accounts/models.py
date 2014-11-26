@@ -60,7 +60,9 @@ class Profile(models.Model):
     city = models.CharField(max_length=60, blank=True)
     state = USStateField(
         blank=True,
-        help_text='Your state will be made public on this site. If you do not want this information to be public, please leave blank.'
+        help_text=('Your state will be made public on this site.'
+                   'If you do not want this information to be public,'
+                   ' please leave blank.')
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
@@ -108,11 +110,13 @@ class Profile(models.Model):
         choices=email_prefs,
         default='daily',
         verbose_name='Email Preference',
-        help_text='Receive email updates to your requests instantly or in a daily or weekly digest'
+        help_text=('Receive email updates to your requests instantly'
+                   ' or in a daily or weekly digest')
     )
     use_autologin = models.BooleanField(
         default=True,
-        help_text='Links you receive in emails from us will contain a one time token to automatically log you in'
+        help_text=('Links you receive in emails from us will contain'
+                   ' a one time token to automatically log you in')
     )
 
     # paid for requests
@@ -179,7 +183,7 @@ class Profile(models.Model):
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
         return self.acct_type in ['admin', 'pro']
-        
+
     def customer(self):
         """Get stripe customer or create one if it doesn't exist"""
         try:
@@ -194,7 +198,8 @@ class Profile(models.Model):
         return customer
 
     def credit_card(self, token=None):
-        """Get the user's CC if they have one on file, or sets their credit card if the token is provided as an argument"""
+        """Get the user's CC if they have one on file, or sets their
+        credit card if the token is provided as an argument"""
         if token:
             customer = self.customer()
             customer.card = token
@@ -212,7 +217,7 @@ class Profile(models.Model):
             card=token,
             description='%s: %s' % (self.user.username, desc)
         )
-        
+
     def api_pay(self, amount, desc):
         """Create a stripe charge for the user through the API"""
         # pylint: disable=E1101
@@ -234,17 +239,21 @@ class Profile(models.Model):
         if self.email_pref == 'instant':
             link = self.wrap_url(foia.get_absolute_url())
 
-            msg = render_to_string('text/foia/mail.txt',
-                {'name': self.user.get_full_name(),
-                 'title': foia.title,
-                 'status': foia.get_status_display(),
-                 'link': link,
-                 'follow': self.user != foia.user,
-                 'footer': options.email_footer})
-            email = EmailMessage(subject='[MuckRock] FOI request "%s" has been updated'
-                                         % foia.title,
-                                 body=msg, from_email='info@muckrock.com',
-                                 to=[self.user.email], bcc=['diagnostics@muckrock.com'])
+            msg = render_to_string('text/foia/mail.txt', {
+                'name': self.user.get_full_name(),
+                'title': foia.title,
+                'status': foia.get_status_display(),
+                'link': link,
+                'follow': self.user != foia.user,
+                'footer': options.email_footer
+            })
+            email = EmailMessage(
+                subject='[MuckRock] FOI request "%s" has been updated' % foia.title,
+                body=msg,
+                from_email='info@muckrock.com',
+                to=[self.user.email],
+                bcc=['diagnostics@muckrock.com']
+            )
             email.send(fail_silently=False)
 
         else:
@@ -282,27 +291,40 @@ class Profile(models.Model):
             else:
                 return 'a MuckRock request has been updated'
 
-        foias = sorted(self.notifications.all(),
-            key=lambda f: status_order.index(f.status) if f.status in status_order else 100)
-        grouped_foias = list((s, list(fs)) for s, fs in groupby(foias,
-            lambda f: category.get(f.status, 'Recently Updated Requests')))
+        foias = sorted(
+            self.notifications.all(),
+            key=lambda f: status_order.index(f.status) if f.status in status_order else 100
+        )
+        grouped_foias = list((s, list(fs)) for s, fs in groupby(
+            foias,
+            lambda f: category.get(f.status, 'Recently Updated Requests')
+        ))
         if not grouped_foias:
             return
         if len(grouped_foias) == 1:
-            subject = '%s, %s' % (self.user.first_name,
-                                   get_subject(grouped_foias[0][1][0].status, len(foias)))
+            subject = '%s, %s' % (
+                self.user.first_name,
+                get_subject(grouped_foias[0][1][0].status, len(foias))
+            )
         else:
-            subject = '%s, %s  Plus, %s' % (self.user.first_name,
-                                            get_subject(grouped_foias[0][1][0].status, len(foias)),
-                                            get_subject(grouped_foias[1][1][0].status, len(foias)))
+            subject = '%s, %s  Plus, %s' % (
+                self.user.first_name,
+                get_subject(grouped_foias[0][1][0].status, len(foias)),
+                get_subject(grouped_foias[1][1][0].status, len(foias))
+            )
 
-        msg = render_to_string('text/registration/notify_mail.txt',
-            {'name': self.user.get_full_name(),
-             'foias': grouped_foias,
-             'footer': options.email_footer})
-        email = EmailMessage(subject=subject, body=msg,
-                             from_email='info@muckrock.com',
-                             to=[self.user.email], bcc=['diagnostics@muckrock.com'])
+        msg = render_to_string('text/registration/notify_mail.txt', {
+            'name': self.user.get_full_name(),
+            'foias': grouped_foias,
+            'footer': options.email_footer
+        })
+        email = EmailMessage(
+            subject=subject,
+            body=msg,
+            from_email='info@muckrock.com',
+            to=[self.user.email],
+            bcc=['diagnostics@muckrock.com']
+        )
         email.send(fail_silently=False)
 
         self.notifications.clear()

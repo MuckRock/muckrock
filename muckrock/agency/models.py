@@ -45,7 +45,12 @@ class Agency(models.Model, RequestHelper):
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     can_email_appeals = models.BooleanField()
-    image = ThumbnailerImageField(upload_to='agency_images', blank=True, null=True, resize_source={'size': (900, 600), 'crop': 'smart'})
+    image = ThumbnailerImageField(
+        upload_to='agency_images',
+        blank=True,
+        null=True,
+        resize_source={'size': (900, 600), 'crop': 'smart'}
+    )
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
     stale = models.BooleanField(default=False)
