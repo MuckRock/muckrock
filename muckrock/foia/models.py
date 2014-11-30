@@ -102,6 +102,18 @@ STATUS = (
     ('abandoned', 'Withdrawn'),
 )
 
+class Action():
+    '''A helper class to provide interfaces for request actions'''
+    def __init__(self, test=None, link=None, title=None, desc=None, class_name=None):
+        self.test = test
+        self.link = link
+        self.title = title
+        self.desc = desc
+        self.class_name = class_name
+    
+    def is_possible(self):
+        return self.test
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable=R0904
@@ -551,87 +563,119 @@ class FOIARequest(models.Model):
             new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
-
-    def actions(self, user):
-        """What actions may the given user take on this Request"""
-        # pylint: disable=E1101
+        
+    def admin_actions(self, user):
+        '''Provides action interfaces for admins'''
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
             'idx': self.pk,
             'slug': self.slug
         }
-
-        linked_actions = [
-            # (True,
-            # reverse('foia-clone', kwargs=kwargs),
-            # 'Clone',
-            # 'primary'
-            # ),
-            (user.is_authenticated() and self.user != user,
-            reverse('foia-follow', kwargs=kwargs),
-            'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow',
-            '' if user.is_authenticated() and self.followed_by.filter(user=user) else 'primary'
+        return [
+            Action(
+                test=user.is_staff,
+                link=reverse('admin:foia_foiarequest_change', args=(self.pk,)),
+                title='Admin',
+                desc='Open in admin interface',
+                class_name='default'
             ),
-            (self.user == user and self.is_payable(),
-            reverse('foia-pay', kwargs=kwargs),
-            'Pay',
-            'success'
-            ),
-            (self.user == user and self.is_payable(),
-            reverse('foia-crowdfund', kwargs=kwargs),
-            'Crowdfund',
-            'success'
-            ),
-            (self.user == user and not self.is_editable() and user.get_profile().can_embargo(),
-            reverse('foia-embargo', kwargs=kwargs), 
-            'Embargo',
-            ''
-            ),
-            (user.is_staff,
-            reverse('admin:foia_foiarequest_change', args=(self.pk,)),
-            'Admin',
-            ''
-            ),
-            (user.is_staff,
-            reverse('foia-admin-fix', kwargs=kwargs),
-            'Admin Fix',
-            ''
+            Action(
+                test=user.is_staff,
+                link=reverse('foia-admin-fix', kwargs=kwargs),
+                title='Admin Fix',
+                desc='Open the admin fix form',
+                class_name='default'
             ),
         ]
-
-        unlinked_actions = [
-            (True,
-            'Share',
-            'Easily share this request'
+        
+    def user_actions(self, user):
+        '''Provides action interfaces for users'''
+        is_owner = self.user == user
+        can_follow = user.is_authenticated() and not is_owner
+        is_following = user.is_authenticated() and self.followed_by.filter(user=user)
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
+        return [
+            Action(
+                test=False,
+                link=reverse('foia-clone', kwargs=kwargs),
+                title='Clone',
+                desc='Start a new request using this one as a base',
+                class_name='primary'
             ),
-            (self.user == user and self.status != 'started',
-            'Follow Up',
-            'Send a message directly to the agency'
-            ),
-            (self.user == user,
-            'Get Advice',
-            "Get answers to your question from Muckrock's FOIA expert community"
-            ),
-            (self.user == user and self.is_appealable(),
-            'Appeal',
-            'Submit an appeal'
+            Action(
+                test=can_follow,
+                link=reverse('foia-follow', kwargs=kwargs),
+                title=('Unfollow' if is_following else 'Follow'),
+                class_name=('default' if is_following else 'primary')
             ),
         ]
-                              
-        actions = [{
-            'title': '',
-            'link': link,
-            'label': label,
-            'class': className
-        } for bool, link, label, className in linked_actions if bool] + [{
-            'title': title,
-            'link': '',
-            'label': label,
-            'class': 'modal'
-        } for bool, label, title in unlinked_actions if bool]
-
-        return actions
+        
+    def noncontextual_request_actions(self, user):
+        '''Provides context-insensitive action interfaces for requests'''
+        is_owner = self.user == user
+        can_embargo = is_owner and user.get_profile().can_embargo()
+        can_pay = is_owner and self.is_payable()
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
+        return [
+            Action(
+                test=(not self.is_editable() and can_embargo),
+                link=reverse('foia-embargo', kwargs=kwargs), 
+                title='Embargo',
+                desc='Keep this request private',
+                class_name='default'
+            ),
+            Action(
+                test=can_pay,
+                link=reverse('foia-pay', kwargs=kwargs),
+                title='Pay',
+                desc='Pay the fee for this request',
+                class_name='success'
+            ),
+            Action(
+                test=can_pay,
+                link=reverse('foia-crowdfund', kwargs=kwargs),
+                title='Crowdfund',
+                desc='Ask the community to help pay the fee for this request',
+                class_name='success'
+            ),
+        ]
+        
+    def contextual_request_actions(self, user):
+        '''Provides context-sensitive action interfaces for requests'''
+        is_owner = self.user == user
+        can_follow_up = is_owner and self.status != 'started'
+        can_appeal = is_owner and self.is_appealable()
+        return [
+            Action(
+                test=is_owner,
+                title='Get Advice',
+                desc='Get your questions answered by Muckrock\'s community of FOIA experts',
+                class_name='modal'
+            ),
+            Action(
+                test=can_follow_up,
+                title='Follow Up',
+                desc='Send a message directly to the agency',
+                class_name='reply'
+            ),
+            Action(
+                test=can_appeal,
+                title='Appeal',
+                desc='Appeal an agency\'s decision',
+                class_name='reply'
+            ),
+        ]
 
     def total_pages(self):
         """Get the total number of pages for this request"""

@@ -292,10 +292,15 @@ class Detail(DetailView):
         """Add extra context data"""
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
+        user = self.request.user
+        is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         context['all_tags'] = Tag.objects.all()
-        context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
-        context['actions'] = foia.actions(self.request.user)
-        context['choices'] = STATUS if self.request.user.is_staff or foia.status == 'started' else STATUS_NODRAFT
+        context['past_due'] =  is_past_due
+        context['admin_actions'] = foia.admin_actions(user)
+        context['user_actions'] = foia.user_actions(user)
+        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
+        context['contextual_request_actions'] = foia.contextual_request_actions(user)
+        context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
