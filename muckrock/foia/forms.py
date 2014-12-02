@@ -77,19 +77,28 @@ class RequestDraftForm(forms.Form):
                   'other users until the embargo date you set. '
                   'You may change this whenever you want.'
     )
-    
-    def clean(self):
-        data = self.cleaned_data
-        embargo = data.get('embargo')
-        if embargo and not self.request.user.can_embargo():
-            error_msg = 'Only Pro users may embargo their requests.'
-            messages.error(request, error_msg)
-            self._errors['embargo'] = self.error_class([error_msg])
-        return self.cleaned_data
 
 class MultiRequestForm(forms.ModelForm):
     """A form for a multi-Request"""
 
+    title = forms.CharField(
+        widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
+    )
+    requested_docs = forms.CharField(
+        label='Request',
+        widget=forms.Textarea()
+    )
+    agencies = forms.ModelMultipleChoiceField(
+        label='Agencies',
+        queryset=Agency.objects.filter(approved=True)
+    )
+
+    class Meta:
+        # pylint: disable=R0903
+        model = FOIAMultiRequest
+        fields = ['title', 'requested_docs', 'agencies']
+        
+class MultiRequestDraftForm(forms.ModelForm):
     title = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
     )
@@ -103,28 +112,10 @@ class MultiRequestForm(forms.ModelForm):
                   'other users until the embargo date you set.  '
                   'You may change this whenever you want.'
     )
-    agencies = forms.ModelMultipleChoiceField(
-        label='Agencies',
-        queryset=Agency.objects.filter(approved=True)
-    )
-
     class Meta:
         # pylint: disable=R0903
         model = FOIAMultiRequest
-        fields = ['title', 'requested_docs', 'agencies', 'embargo']
-        
-class MultiRequestDraftForm(forms.ModelForm):
-    title = forms.CharField(
-        widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
-    )
-    requested_docs = forms.CharField(
-        label='Request',
-        widget=forms.Textarea()
-    )
-    class Meta:
-        # pylint: disable=R0903
-        model = FOIAMultiRequest
-        fields = ['title', 'requested_docs']
+        fields = ['title', 'requested_docs', 'embargo']
 
 class ListFilterForm(forms.Form):
     status = forms.ChoiceField(
@@ -166,37 +157,33 @@ class MyListFilterForm(ListFilterForm):
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
-
-    embargo = forms.BooleanField(required=False,
-                                 help_text='Embargoing a request keeps it completely private from '
-                                           'other users until the embargo date you set.  '
-                                           'You may change this whenever you want.')
-
-    class Meta:
-        # pylint: disable=R0903
-        model = FOIARequest
-        fields = ['embargo']
-
-class FOIAEmbargoDateForm(FOIAEmbargoForm):
-    """A form to update the embargo status of a FOIA Request"""
-
-    date_embargo = forms.DateField(label='Embargo date', required=False,
-                                   widget=forms.TextInput(attrs={'class': 'datepicker'}))
-
+    embargo = forms.BooleanField(
+        label='Embargo?',
+        required=False,
+        help_text=(
+            'Embargoing a request keeps it completely private from other '
+            'users until the embargo date you set. You may change this '
+            'whenever you want.'
+        )
+    )
+    date_embargo = forms.DateField(
+        label='Embargo date',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'datepicker'})
+    )
+    
     def clean(self):
-        """date_embargo is required if embargo is checked and must be within 30 days"""
-
+        """Checks if date embargo is necessary and if it is within 30 days"""
         embargo = self.cleaned_data.get('embargo')
         date_embargo = self.cleaned_data.get('date_embargo')
-
-        if embargo:
+        finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
+        if embargo and self.instance.status in finished_status:
             if not date_embargo:
-                self._errors['date_embargo'] = self.error_class(
-                        ['Embargo date is required if embargo is selected'])
+                error_msg = 'Embargo date is required for finished requests'
+                self._errors['date_embargo'] = self.error_class([error_msg])
             elif date_embargo > date.today() + timedelta(30):
-                self._errors['date_embargo'] = self.error_class(
-                        ['Embargo date must be within 30 days of today'])
-
+                error_msg = 'Embargo date must be within 30 days of today'
+                self._errors['date_embargo'] = self.error_class([error_msg])
         return self.cleaned_data
 
     class Meta:

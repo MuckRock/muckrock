@@ -293,6 +293,10 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
+            if foia.embargo and not request.user.get_profile().can_embargo():
+                error_msg = 'Only Pro users may embargo their requests.'
+                messages.error(request, error_msg)
+                return redirect(foia)
             foia_comm = foia.communications.all()[0]
             foia_comm.date = datetime.now()
             foia_comm.communication = data['request']
