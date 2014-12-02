@@ -20,7 +20,7 @@
                 <input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" />
                 <div class="hgroup">
                     <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
-                    <h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+                    <h2><a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a></h2>
                 </div>
             </div>
             <dl class="foia-info">

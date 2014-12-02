@@ -245,7 +245,7 @@ class FOIARequest(models.Model):
         """Get the color code for the current status"""
         # pylint: disable=bad-whitespace
         stop = 'failure'
-        wait = 'default'
+        wait = ''
         go = 'success'
         processed = stop if self.date_due and date.today() > self.date_due else go
         colors = {'started':   wait, 'submitted': go,   'processed': processed,
