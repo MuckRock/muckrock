@@ -80,11 +80,7 @@
     {% if foia.user == request.user or request.user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
-            {% if foia.embargo_date %}
-        <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
-            {% else %}
-        <dd>This request is embargoed and will not be made public{% if foia.embargo_date %} until {{ foia.embargo_date|date }}{% endif %}.</dd>
-            {% endif %}
+        <dd>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}it is completed{% endif %}.</dd>
         {% endif %}
         {% if foia.user == request.user %}
             {% if foia.status == "ack" or foia.status == "processed" %}

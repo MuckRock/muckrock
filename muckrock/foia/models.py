@@ -631,8 +631,8 @@ class FOIARequest(models.Model):
             Action(
                 test=(not self.is_editable() and can_embargo),
                 link=reverse('foia-embargo', kwargs=kwargs), 
-                title='Embargo',
-                desc='Keep this request private',
+                title=('Unembargo' if self.embargo else 'Embargo'),
+                desc=('Make this request public' if self.embargo else 'Make this request private'),
                 class_name='default'
             ),
             Action(

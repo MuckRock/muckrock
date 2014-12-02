@@ -370,60 +370,60 @@ th {
 html, body {
   min-height: 100%; }
 
-nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
   margin-right: 0; }
   @media screen and (max-width: 500px) {
-    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 7.42297%;
       width: 100%; }
-      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 500px) {
-    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 4.82916%;
       width: 100%; }
-      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 769px) {
-    nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 100%; }
-      nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
 
-.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), nav.sidebar .account .options li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
+.form h1:nth-child(2n), .form ul:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), nav.sidebar li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
   margin-right: 0; }
-.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .foia-single:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), nav.sidebar .account .options li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
+.form h1:nth-child(2n+1), .form ul:nth-child(2n+1), .form .visible-fields fieldset:nth-child(2n+1), .foia-single:nth-child(2n+1), .detail.request .draft button:nth-child(2n+1), .detail.request .draft .button:nth-child(2n+1), .detail.request .draft input[type="submit"]:nth-child(2n+1), .detail.request .files ul li:nth-child(2n+1), nav.sidebar li:nth-child(2n+1), .homepage .featured-article .image:nth-child(2n+1), .homepage .featured-article .body:nth-child(2n+1), .homepage .article:nth-child(2n+1), .new-request header h1:nth-child(2n+1), .new-request header summary:nth-child(2n+1), .ms-container .ms-selectable:nth-child(2n+1), .ms-container .ms-selection:nth-child(2n+1) {
   clear: left; }
 @media screen and (max-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 7.42297%;
     width: 100%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 500px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 4.82916%;
     width: 47.58542%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 @media screen and (min-width: 769px) {
-  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar .account .options li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
+  .form h1, .form ul, .form .visible-fields fieldset, .foia-single, .detail.request .draft button, .detail.request .draft .button, .detail.request .draft input[type="submit"], .detail.request .files ul li, nav.sidebar li, .homepage .featured-article .image, .homepage .featured-article .body, .homepage .article, .new-request header h1, .new-request header summary, .ms-container .ms-selectable, .ms-container .ms-selection {
     float: left;
     display: block;
     margin-right: 2.35765%;
     width: 48.82117%; }
-    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar .account .options li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
+    .form h1:last-child, .form ul:last-child, .form .visible-fields fieldset:last-child, .foia-single:last-child, .detail.request .draft button:last-child, .detail.request .draft .button:last-child, .detail.request .draft input[type="submit"]:last-child, .detail.request .files ul li:last-child, nav.sidebar li:last-child, .homepage .featured-article .image:last-child, .homepage .featured-article .body:last-child, .homepage .article:last-child, .new-request header h1:last-child, .new-request header summary:last-child, .ms-container .ms-selectable:last-child, .ms-container .ms-selection:last-child {
       margin-right: 0; } }
 
 .detail .header-container .aside:nth-child(3n), .collection .filters label[for="filter-checkbox"]:nth-child(3n), .detail.agency aside dl:nth-child(3n), .homepage .stats li:nth-child(3n) {
@@ -569,7 +569,7 @@ nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .foia-single, .progress-bar, .detail.request .tabs label {
   border: 1px solid #B3BECB; }
 
-.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.dismiss button.close, .modal, .foia-single, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar ul a, .new-request .create-request {
+.button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"], .collection .filters li a, ul.notifications li.notification span.dismiss button.close, .modal, .foia-single, .meter, table, .detail.request .crowdfund input, .detail.request .files ul li, nav.sidebar a, nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button, .new-request .create-request {
   border-radius: 9px; }
 
 .button, input[type="submit"], button, .button.default, input.default[type="submit"], button.default, input[type="submit"] .default, button .default, .button.primary, input.primary[type="submit"], button.primary, input[type="submit"] .primary, button .primary, .button.success, input.success[type="submit"], button.success, input[type="submit"] .success, button .success, .button.failure, input.failure[type="submit"], button.failure, input[type="submit"] .failure, button .failure, .button.disabled, input.disabled[type="submit"], button.disabled, input[type="submit"] .disabled, button .disabled, input:disabled, input:disabled:hover, input:disabled:active, input.button:disabled, input[type="submit"]:disabled, input.button:disabled:hover, input[type="submit"]:disabled:hover, input.button:disabled:active, input[type="submit"]:disabled:active, .detail .actions, .collection .controls, .collection.request .filters form, .panel, .panel.default, .panel.primary, .panel.success, .panel.failure, .panel.disabled, .message, .form, .feed-item, .ms-container .ms-list, textarea, input[type="email"], input[type="number"], input[type="password"], input[type="search"], input[type="tel"], input[type="text"], input[type="url"], input[type="color"], input[type="date"], input[type="datetime"], input[type="datetime-local"], input[type="month"], input[type="time"], input[type="week"] {
@@ -2386,42 +2386,41 @@ nav.sidebar {
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
     padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
-    display: table;
-    width: 100%;
-    margin: 0 0 0.75em 0; }
-    nav.sidebar ul li {
-      display: table-cell;
-      width: 50%;
-      padding: 0 0.25em; }
-    nav.sidebar ul li:first-child {
-      padding-left: 0; }
-    nav.sidebar ul li:last-child {
-      padding-right: 0; }
-    nav.sidebar ul a {
-      display: block;
-      padding: 0.5em 0.75em;
-      border: 1px solid #181d20;
-      color: #B3BECB;
-      background-color: #181d20;
-      text-align: center;
-      text-decoration: none; }
-      nav.sidebar ul a:hover {
-        color: #f4f4f4;
-        border-color: #3a82ff;
-        background: #3a82ff; }
-        nav.sidebar ul a:hover svg {
-          fill: #f4f4f4; }
-  nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
+    display: block; }
+    nav.sidebar ul:after {
+      content: "";
+      display: table;
+      clear: both; }
+  nav.sidebar a, nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
     display: block;
     height: 2.5rem;
     width: 100%;
-    margin-bottom: 0.75em;
-    background: #181d20;
-    border: none;
-    color: #B3BECB; }
-    nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
+    margin-bottom: 0.375em;
+    padding: 0.375em 0.75em;
+    border: 1px solid #181d20;
+    text-align: center;
+    text-decoration: none;
+    color: #B3BECB;
+    background: #181d20; }
+    nav.sidebar a:hover, nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
       background: #3a82ff;
       color: #f4f4f4; }
+  nav.sidebar .button-list {
+    display: block;
+    margin-top: 0.75em; }
+    nav.sidebar .button-list li:first-child a {
+      border-top: none;
+      border-top-left-radius: 9px;
+      border-top-right-radius: 9px; }
+    nav.sidebar .button-list li:last-child a {
+      border-bottom-left-radius: 9px;
+      border-bottom-right-radius: 9px; }
+    nav.sidebar .button-list a, nav.sidebar .button-list .button, nav.sidebar .button-list input[type="submit"], nav.sidebar .button-list button {
+      margin: 0;
+      border-radius: 0;
+      border-top: 1px solid #21282c; }
+  nav.sidebar .updated a, nav.sidebar .updated .button, nav.sidebar .updated input[type="submit"], nav.sidebar .updated button {
+    text-align: left; }
   nav.sidebar .account {
     margin-top: 3em; }
     nav.sidebar .account .username {
@@ -2434,30 +2433,14 @@ nav.sidebar {
         content: "";
         display: table;
         clear: both; }
-    nav.sidebar .account .foia-details {
-      display: block; }
-      nav.sidebar .account .foia-details li {
-        display: list-item;
-        width: 100%;
-        padding: 0;
-        border-top: 1px solid #21282c; }
-        nav.sidebar .account .foia-details li:first-child a {
-          border-top: none;
-          border-top-left-radius: 9px;
-          border-top-right-radius: 9px; }
-        nav.sidebar .account .foia-details li:last-child a {
-          border-bottom-left-radius: 9px;
-          border-bottom-right-radius: 9px; }
-      nav.sidebar .account .foia-details a {
-        text-align: left;
-        border-radius: 0; }
-    nav.sidebar .account #admin-button ul {
-      margin: 0.75em 0; }
-    nav.sidebar .account #admin-button li {
-      width: 100%; }
     nav.sidebar .account .account-info {
       display: block;
-      margin: 1.5em 0;
+      height: auto;
+      margin: 1.5em 0 0;
+      border: none;
+      padding: 0;
+      background: none;
+      text-align: left;
       color: #f4f4f4;
       text-decoration: none;
       -webkit-transition: color 0.25s ease;
@@ -2466,21 +2449,13 @@ nav.sidebar {
       nav.sidebar .account .account-info .counter {
         margin-right: 0.375em;
         padding: 0.3em 0.75em;
-        border-radius: 100%;
+        border-radius: 1.5em;
         font-weight: 500;
         text-align: center;
         color: #f4f4f4;
-        background-color: none;
-        -webkit-transition: background-color 0.25s ease;
-        -moz-transition: background-color 0.25s ease;
-        transition: background-color 0.25s ease; }
+        background-color: #3a82ff; }
       nav.sidebar .account .account-info:hover {
         color: #3a82ff; }
-        nav.sidebar .account .account-info:hover .counter {
-          border-color: #3a82ff;
-          background-color: #3a82ff; }
-  nav.sidebar .social-links li {
-    width: 33%; }
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
@@ -2505,7 +2480,7 @@ nav.sidebar {
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
-    margin: 0 0 1.5em; }
+    margin: 0 0 0.75em; }
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;
@@ -3408,42 +3383,41 @@ nav.sidebar {
   nav.sidebar dfn, nav.sidebar fieldset label, fieldset nav.sidebar label, nav.sidebar .new-request .agency label, .new-request .agency nav.sidebar label, nav.sidebar .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget nav.sidebar span.deck > span:before {
     padding: 1.5em 0 0.5em 0; }
   nav.sidebar ul {
-    display: table;
-    width: 100%;
-    margin: 0 0 0.75em 0; }
-    nav.sidebar ul li {
-      display: table-cell;
-      width: 50%;
-      padding: 0 0.25em; }
-    nav.sidebar ul li:first-child {
-      padding-left: 0; }
-    nav.sidebar ul li:last-child {
-      padding-right: 0; }
-    nav.sidebar ul a {
-      display: block;
-      padding: 0.5em 0.75em;
-      border: 1px solid #181d20;
-      color: #B3BECB;
-      background-color: #181d20;
-      text-align: center;
-      text-decoration: none; }
-      nav.sidebar ul a:hover {
-        color: #f4f4f4;
-        border-color: #3a82ff;
-        background: #3a82ff; }
-        nav.sidebar ul a:hover svg {
-          fill: #f4f4f4; }
-  nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
+    display: block; }
+    nav.sidebar ul:after {
+      content: "";
+      display: table;
+      clear: both; }
+  nav.sidebar a, nav.sidebar .button, nav.sidebar input[type="submit"], nav.sidebar button {
     display: block;
     height: 2.5rem;
     width: 100%;
-    margin-bottom: 0.75em;
-    background: #181d20;
-    border: none;
-    color: #B3BECB; }
-    nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
+    margin-bottom: 0.375em;
+    padding: 0.375em 0.75em;
+    border: 1px solid #181d20;
+    text-align: center;
+    text-decoration: none;
+    color: #B3BECB;
+    background: #181d20; }
+    nav.sidebar a:hover, nav.sidebar .button:hover, nav.sidebar input[type="submit"]:hover, nav.sidebar button:hover {
       background: #3a82ff;
       color: #f4f4f4; }
+  nav.sidebar .button-list {
+    display: block;
+    margin-top: 0.75em; }
+    nav.sidebar .button-list li:first-child a {
+      border-top: none;
+      border-top-left-radius: 9px;
+      border-top-right-radius: 9px; }
+    nav.sidebar .button-list li:last-child a {
+      border-bottom-left-radius: 9px;
+      border-bottom-right-radius: 9px; }
+    nav.sidebar .button-list a, nav.sidebar .button-list .button, nav.sidebar .button-list input[type="submit"], nav.sidebar .button-list button {
+      margin: 0;
+      border-radius: 0;
+      border-top: 1px solid #21282c; }
+  nav.sidebar .updated a, nav.sidebar .updated .button, nav.sidebar .updated input[type="submit"], nav.sidebar .updated button {
+    text-align: left; }
   nav.sidebar .account {
     margin-top: 3em; }
     nav.sidebar .account .username {
@@ -3456,30 +3430,14 @@ nav.sidebar {
         content: "";
         display: table;
         clear: both; }
-    nav.sidebar .account .foia-details {
-      display: block; }
-      nav.sidebar .account .foia-details li {
-        display: list-item;
-        width: 100%;
-        padding: 0;
-        border-top: 1px solid #21282c; }
-        nav.sidebar .account .foia-details li:first-child a {
-          border-top: none;
-          border-top-left-radius: 9px;
-          border-top-right-radius: 9px; }
-        nav.sidebar .account .foia-details li:last-child a {
-          border-bottom-left-radius: 9px;
-          border-bottom-right-radius: 9px; }
-      nav.sidebar .account .foia-details a {
-        text-align: left;
-        border-radius: 0; }
-    nav.sidebar .account #admin-button ul {
-      margin: 0.75em 0; }
-    nav.sidebar .account #admin-button li {
-      width: 100%; }
     nav.sidebar .account .account-info {
       display: block;
-      margin: 1.5em 0;
+      height: auto;
+      margin: 1.5em 0 0;
+      border: none;
+      padding: 0;
+      background: none;
+      text-align: left;
       color: #f4f4f4;
       text-decoration: none;
       -webkit-transition: color 0.25s ease;
@@ -3488,21 +3446,13 @@ nav.sidebar {
       nav.sidebar .account .account-info .counter {
         margin-right: 0.375em;
         padding: 0.3em 0.75em;
-        border-radius: 100%;
+        border-radius: 1.5em;
         font-weight: 500;
         text-align: center;
         color: #f4f4f4;
-        background-color: none;
-        -webkit-transition: background-color 0.25s ease;
-        -moz-transition: background-color 0.25s ease;
-        transition: background-color 0.25s ease; }
+        background-color: #3a82ff; }
       nav.sidebar .account .account-info:hover {
         color: #3a82ff; }
-        nav.sidebar .account .account-info:hover .counter {
-          border-color: #3a82ff;
-          background-color: #3a82ff; }
-  nav.sidebar .social-links li {
-    width: 33%; }
   nav.sidebar .social-links a svg {
     height: 1em;
     width: auto;
@@ -3527,7 +3477,7 @@ nav.sidebar {
     width: 100%;
     overflow: hidden;
     height: 2.5rem;
-    margin: 0 0 1.5em; }
+    margin: 0 0 0.75em; }
     nav.sidebar form input {
       -webkit-appearance: none;
       -moz-appearance: none;

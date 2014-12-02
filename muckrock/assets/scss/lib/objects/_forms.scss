@@ -1,11 +1,15 @@
 .form {
     @extend %panel;
+    @include outer-container;
     padding: $base-padding;
     header, form { @include row; }
     h1, ul { @extend %half; }
     h1 {
         @include font-sizing(3);
         margin-top: 0;
+    }
+    .visible-fields {
+        @include row;
     }
     .visible-fields fieldset {
         @extend %half;

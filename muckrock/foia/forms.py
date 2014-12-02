@@ -160,16 +160,12 @@ class FOIAEmbargoForm(forms.ModelForm):
     embargo = forms.BooleanField(
         label='Embargo?',
         required=False,
-        help_text=(
-            'Embargoing a request keeps it completely private from other '
-            'users until the embargo date you set. You may change this '
-            'whenever you want.'
-        )
     )
     date_embargo = forms.DateField(
         label='Embargo date',
         required=False,
-        widget=forms.TextInput(attrs={'class': 'datepicker'})
+        widget=forms.TextInput(attrs={'class': 'datepicker'}),
+        help_text='Choose the date the embargo will expire and become public.'
     )
     
     def clean(self):

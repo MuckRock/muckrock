@@ -54,12 +54,15 @@ and
         </div>
                     {{field.errors}}
         {% else %}
+            {% if field.label == 'Embargo' and not profile.can_embargo %}
+            {% else %}
         <fieldset class="{{ field.label|lower }}{% if field.errors %} failure{% endif %}{% if field.field.required %} required{% endif %}">
             <label for="{{ field.auto_id }}">{{ field.label}}</label>
             {{ field }}
             {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
             {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
         </fieldset>
+            {% endif %}
         {% endif %}
     {% endfor %}
     {% if not balance.extra_requests %}
