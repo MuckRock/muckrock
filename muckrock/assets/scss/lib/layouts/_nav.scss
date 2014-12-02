@@ -377,10 +377,14 @@ nav.sidebar {
                 font-weight: $bold;
                 text-align: center;
                 color: $color-white;
-                background-color: $color-primary;
+                background: lighten($color-black, 8%);
             }
-            &:hover { color: $color-primary; }
-            @include transition (color $base-duration ease);
+            &:hover {
+                color: $color-primary;
+                .counter {
+                    background: $color-primary;
+                }
+            }
         }
         
     }
