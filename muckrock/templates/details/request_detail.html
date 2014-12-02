@@ -226,17 +226,17 @@
 {% endif %}
 {% if foia.user == request.user %}
 <section class="tab-section notes" id="notes">
-    <a class="primary button" 
-       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-    Add a Note</a>
     {% for note in foia.notes.all %}
     <div class="note">
-        <p><strong>{{note.date|date}}</strong><br>
-        {{note.note|linebreaks}}</p>
+        <div class="note-date">{{note.date|date}}</div>
+        <div class="note-body">{{note.note|linebreaks}}</div>
     </div>
     {% empty %}
     <p>Notes are private and can be used to store information about this request.</p>
     {% endfor %}
+    <a class="primary button" 
+       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+    Add a Note</a>
 </section>
     {% endif %}
 {% endblock main %}

@@ -602,7 +602,7 @@ class FOIARequest(models.Model):
         }
         return [
             Action(
-                test=False,
+                test=True,
                 link=reverse('foia-clone', kwargs=kwargs),
                 title='Clone',
                 desc='Start a new request using this one as a base',

@@ -151,7 +151,7 @@ $color-email: #663285;
 .social.sharing {
     width: 100%;
     margin: 0 0 $base-margin 0;
-    text-align: center;
+    text-align: left;
 }
 .sharing > a {
     @include colorize-icon($color-grey);

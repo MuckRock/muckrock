@@ -233,5 +233,25 @@
                 margin: $base-vertical-rhythm auto;
             }
         }
+        .notes {
+            .note {
+                @include row;
+                margin: $base-margin 0 0;
+                padding: 0 0 $base-padding/2;
+                border-bottom: $base-border-width solid $color-grey;
+                .note-date {
+                    @extend %quarter;
+                    color: $color-grey;
+                    text-align: right;
+                }
+                .note-body { @extend %three-quarters; }
+            }
+
+            .button {
+                display: block;
+                width: 10em;
+                margin: 1.5em auto;
+            }
+        }
     }
 }
