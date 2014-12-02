@@ -73,19 +73,22 @@
 
 {% block main %}
     
-    {% if user == user_obj %}
-        {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all title='Requests You Follow' %}
-    {% endif %}
-    
     {% if recent_requests or recent_completed %}
         {% if recent_requests %}
-            {% include 'lib/foia_table.html' with requests=recent_requests title='Latest Requests' %}
+            <h3>Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
+            {% include 'lib/foia_table.html' with requests=recent_requests %}
         {% endif %}
         {% if recent_completed %}
-            {% include 'lib/foia_table.html' with requests=recent_completed title='Recently Completed Requests' %}
+            <h3>Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
+            {% include 'lib/foia_table.html' with requests=recent_completed %}
         {% endif %}
     {% else %}
         <h3>No requests have been filed. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
+    {% endif %}
+    
+    {% if user == user_obj %}
+        <h3>Requests You Follow</h3>
+        {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all %}
     {% endif %}
     
 {% endblock main %}
