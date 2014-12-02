@@ -73,7 +73,7 @@ def _make_comm(user, document, intro=None, waver=None, delay=None):
               'representative of the news media/press and is made in the ' 
               ' process of news gathering and not for commercial usage.')
     if not delay:
-        delay = '20 business days'
+        delay = '20'
     
     regexp = re.compile(r'I hereby request the following records');
     if regexp.search(intro) is None:
@@ -92,7 +92,7 @@ def _make_comm(user, document, intro=None, waver=None, delay=None):
         'available or CD-ROM if not.'),
         ('Thank you in advance for your anticipated cooperation in '
         'this matter. I look forward to receiving your response to ' 
-        'this request within %s, as the statute requires.' % delay ),
+        'this request within %s business days, as the statute requires.' % delay ),
         'Sincerely, ',
         user.get_full_name()
     ]
