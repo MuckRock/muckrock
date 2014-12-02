@@ -186,7 +186,7 @@
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
-    <form method="post" class="controls panel">
+    <form method="post" class="request controls panel">
         {% csrf_token %}
         {% for action in contextual_request_actions %}
             {% if action.is_possible %}
@@ -204,8 +204,10 @@
                     <div class="hidden-reply">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
-                        <input type="submit" name="action" value="{{ action.title }}" />
-                        <span class="close-reply button">Close</span>
+                        <div class="buttons">
+                            <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                            <span class="close-reply button">Close</span>
+                        </div>
                     </div>
                 {% endif %}
             {% endif %}
@@ -261,10 +263,17 @@
     function textAreaReply(nextSelector) {
         console.log(nextSelector);
         nextSelector.show();
-        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
-        nextSelector.children('.close-reply').click(function(){
+        $('.reply-button').hide();
+        $('.modal-button').hide();
+        nextSelector.siblings('.hidden-reply:visible').hide();
+        if (nextSelector.children('textarea').length == 0) {
+            $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('.buttons'));
+        }
+        nextSelector.children('.buttons').children('.close-reply').click(function(){
             nextSelector.hide();
             nextSelector.children('textarea').remove();
+            $('.reply-button').show();
+            $('.modal-button').show();
         });
     }
     
