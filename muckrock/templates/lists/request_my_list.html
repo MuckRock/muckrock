@@ -19,10 +19,16 @@
             <div class="foia-info title">
                 <input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" />
                 <div class="hgroup">
-                    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
+                    {% if foia.foia_type == 'multi' %}
+                    <h3 class="{{ foia.color_code }}" id="request-status">{{ foia.get_status_display }} &bull; Multi-request</h3>
+                    <h2>{% if foia.status == 'started' %}<a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a>{% else %}{{ foia.title }}{% endif %}</h2>
+                    {% else %}
+                    <h3 class="{{ foia.color_code }}" id="request-status">{{ foia.get_status_display }}</h3>
                     <h2><a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a></h2>
+                    {% endif %}
                 </div>
             </div>
+            {% if foia.foia_type == 'foia' %}
             <dl class="foia-info">
                 <dt>First Created</dt>
                 <dd>{{ foia.communications.all.0.date|date:"m/d/Y" }}</dd>
@@ -37,6 +43,7 @@
                 <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
                 {% endif %}
             </dl>
+            {% endif %}
         </li>
         {% empty %}
         <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
