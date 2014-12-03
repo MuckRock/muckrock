@@ -2,34 +2,27 @@
 FOIA views for composing
 """
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string, get_template
+from django.template.loader import render_to_string
 from django.template import RequestContext
-from django.utils import simplejson
-from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
 
 from datetime import datetime
 import logging
 import stripe
 import re
-from random import random, randint, choice
+from random import randint, choice
 import string
 
-from muckrock.accounts.forms import PaymentForm
 from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
-from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
     RequestForm, \
     RequestDraftForm, \
@@ -42,11 +35,7 @@ from muckrock.foia.models import \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
-from muckrock.sidebar.models import Sidebar
-from muckrock.tags.models import Tag
-from muckrock.views import class_view_decorator
 
 # pylint: disable=R0901
 
@@ -75,7 +64,7 @@ def _make_comm(user, document, intro=None, waver=None, delay=None):
     if not delay:
         delay = '20'
     
-    regexp = re.compile(r'I hereby request the following records');
+    regexp = re.compile(r'I hereby request the following records')
     if regexp.search(intro) is None:
         intro += ' I hereby request the following records:'
     
@@ -119,33 +108,33 @@ def _make_new_agency(request, agency, jurisdiction):
     return agency
 
 def _make_request(request, foia_request, parent=None):
-        foia = FOIARequest.objects.create(
-            user=request.user,
-            status='started',
-            title=foia_request['title'],
-            jurisdiction=foia_request['jurisdiction'],
-            slug=slugify(foia_request['title']) or 'untitled',
-            agency=foia_request['agency'],
-            requested_docs=foia_request['document'],
-            description=foia_request['document'],
-            parent=parent
+    foia = FOIARequest.objects.create(
+        user=request.user,
+        status='started',
+        title=foia_request['title'],
+        jurisdiction=foia_request['jurisdiction'],
+        slug=slugify(foia_request['title']) or 'untitled',
+        agency=foia_request['agency'],
+        requested_docs=foia_request['document'],
+        description=foia_request['document'],
+        parent=parent
+    )
+    foia_comm = FOIACommunication.objects.create(
+        foia=foia,
+        from_who=request.user.get_full_name(),             
+        to_who=foia.get_to_who(),
+        date=datetime.now(),
+        response=False,
+        full_html=False,
+        communication=_make_comm(
+            request.user,
+            foia.requested_docs,
+            foia.jurisdiction.get_intro(),
+            foia.jurisdiction.get_waiver(),
+            foia.jurisdiction.get_days()
         )
-        foia_comm = FOIACommunication.objects.create(
-            foia=foia,
-            from_who=request.user.get_full_name(),             
-            to_who=foia.get_to_who(),
-            date=datetime.now(),
-            response=False,
-            full_html=False,
-            communication=_make_comm(
-                request.user,
-                foia.requested_docs,
-                foia.jurisdiction.get_intro(),
-                foia.jurisdiction.get_waiver(),
-                foia.jurisdiction.get_days()
-            )
-        )
-        return foia, foia_comm
+    )
+    return foia, foia_comm
 
 def _make_user(request, data):
     """Helper function to create a new user"""
@@ -208,7 +197,6 @@ def _submit_request(request, foia):
     foia.submit()
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
-
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
     foia = get_foia(jurisdiction, jidx, slug, idx)
@@ -353,8 +341,9 @@ def create_multirequest(request):
 
 @login_required
 def draft_multirequest(request, slug, idx):
-    from math import ceil
     """Update a started FOIA MultiRequest"""
+    from math import ceil
+    
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:

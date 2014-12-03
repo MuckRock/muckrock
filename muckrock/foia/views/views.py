@@ -2,31 +2,22 @@
 Views for the FOIA application
 """
 
-from django import forms
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
-from django.db.models import Q
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string, get_template
+from django.template.loader import render_to_string
 from django.template import RequestContext
-from django.utils import simplejson
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from datetime import datetime
 import logging
 import stripe
-from random import random, randint, choice
-import string
 
-from muckrock.accounts.forms import PaymentForm
-from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
@@ -35,14 +26,12 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
-    FOIACommunication, \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.views.composers import get_foia
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
-from muckrock.sidebar.models import Sidebar
+from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
 from muckrock.views import class_view_decorator
 
@@ -60,7 +49,7 @@ class List(ListView):
         get = self.request.GET
         order = get.get('order', 'desc')
         sort = get.get('sort', 'date_submitted')
-        filter = {
+        list_filter = {
             'status': get.get('status', False),
             'agency': get.get('agency', False),
             'jurisdiction': get.get('jurisdiction', False),
@@ -69,7 +58,7 @@ class List(ListView):
         }
         
         # TODO: handle a list of tags
-        for key, value in filter.iteritems():
+        for key, value in list_filter.iteritems():
             if value:
                 print value
                 if key == 'status':
@@ -82,7 +71,7 @@ class List(ListView):
                     j = get_object_or_404(Jurisdiction, id=value[0])
                     foia_requests = foia_requests.filter(jurisdiction=j)
                 elif key == 'user':
-                    u = get_object_or_404(User, name=value)
+                    u = get_object_or_404(User, username=value)
                     foia_requests = foia_requests.filter(user=u)
                 elif key == 'tags':
                     foia_requests = foia_requests.filter(tags__contains=value)
@@ -136,12 +125,6 @@ class List(ListView):
     def get_queryset(self):
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.filter_sort_requests(query)
-    
-    '''
-    def get(self):
-        cleaned_url = self.request.GET.copy().urlencode()
-        return redirect(cleaned_url)
-    '''
 
 @class_view_decorator(login_required)
 class MyList(List):
@@ -304,7 +287,7 @@ class Detail(DetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
-    def post(self, request, **kwargs):
+    def post(self, request):
         """Handle form submissions"""
         foia = self.get_object()
         actions = {

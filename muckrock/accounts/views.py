@@ -194,7 +194,7 @@ def buy_requests(request):
             stripe_token = request.POST['stripe_token']
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
-                raise Exception('Account email and Stripe email do not match')
+                raise ValueError('Account email and Stripe email do not match')
             if not user_profile.credit_card():
                 user_profile.credit_card(stripe_token)
             user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
@@ -207,7 +207,7 @@ def buy_requests(request):
             msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-        except Exception as exc:
+        except ValueError as exc:
             msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())

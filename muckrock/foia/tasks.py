@@ -155,9 +155,9 @@ def submit_multi_request(req_pk, **kwargs):
                 requested_docs=req.requested_docs, description=req.requested_docs)
 
             FOIACommunication.objects.create(
-                    foia=new_foia, from_who=new_foia.user.get_full_name(),
-                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                    full_html=False, communication=foia_request)
+                foia=new_foia, from_who=new_foia.user.get_full_name(),
+                to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                full_html=False, communication=foia_request)
 
             new_foia.submit()
     req.delete()
@@ -264,8 +264,10 @@ def autoimport():
                 if key.name == key_or_pre.name:
                     key.copy(bucket, dest_name)
                     continue
-                s3_copy(bucket, key, '%s/%s' %
-                    (dest_name, os.path.basename(os.path.normpath(key.name))))
+                s3_copy(bucket, key, '%s/%s' % (
+                    dest_name,
+                    os.path.basename(os.path.normpath(key.name))
+                ))
         else:
             key_or_pre.copy(bucket, dest_name)
 
@@ -366,10 +368,10 @@ def autoimport():
                 source = foia.agency.name if foia.agency else ''
 
                 comm = FOIACommunication.objects.create(
-                        foia=foia, from_who=source,
-                        to_who=foia.user.get_full_name(), response=True,
-                        date=file_date, full_html=False, delivered='mail',
-                        communication=body, status=status)
+                    foia=foia, from_who=source,
+                    to_who=foia.user.get_full_name(), response=True,
+                    date=file_date, full_html=False, delivered='mail',
+                    communication=body, status=status)
 
                 foia.status = status or foia.status
                 if foia.status in ['done', 'rejected', 'no_docs']:

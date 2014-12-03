@@ -24,6 +24,7 @@ from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
 # pylint: disable=R0904
+# pylint: disable=bad-continuation
 
 class FOIAFileAdminForm(forms.ModelForm):
     """Form to validate document only has ASCII characters in it"""

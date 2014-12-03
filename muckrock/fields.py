@@ -131,14 +131,15 @@ class GroupedModelChoiceIterator(ModelChoiceIterator):
             if self.field.choice_cache is None:
                 self.field.choice_cache = [
                     (self.field.group_label(group), [self.choice(ch) for ch in choices])
-                        for group, choices in groupby(self.queryset.all(),
-                            key=lambda row: getattr(row, self.field.group_by_field))
+                    for group, choices in groupby(
+                        self.queryset.all(),
+                        key=lambda row: getattr(row, self.field.group_by_field)
+                    )
                 ]
             for choice in self.field.choice_cache:
                 yield choice
         else:
-            for group, choices in groupby(self.queryset.all(),
-                    key=lambda row: getattr(row, self.field.group_by_field)):
+            for group, choices in groupby(self.queryset.all(), key=lambda row: getattr(row, self.field.group_by_field)):
                 yield (self.field.group_label(group), [self.choice(ch) for ch in choices])
 
 
@@ -171,14 +172,20 @@ class CCExpField(forms.MultiValueField):
         if 'error_messages' in kwargs:
             errors.update(kwargs['error_messages'])
         fields = (
-            forms.ChoiceField(choices=self.EXP_MONTH,
+            forms.ChoiceField(
+                choices=self.EXP_MONTH,
                 error_messages={'invalid': errors['invalid_month']},
                 widget=forms.Select(
-                    attrs={'class': 'card-expiry-month stripe-sensitive required'})),
-            forms.ChoiceField(choices=self.EXP_YEAR,
+                    attrs={'class': 'card-expiry-month stripe-sensitive required'}
+                )
+            ),
+            forms.ChoiceField(
+                choices=self.EXP_YEAR,
                 error_messages={'invalid': errors['invalid_year']},
                 widget=forms.Select(
-                    attrs={'class': 'card-expiry-year stripe-sensitive required'})),
+                    attrs={'class': 'card-expiry-year stripe-sensitive required'}
+                )
+            ),
         )
         super(CCExpField, self).__init__(fields, *args, **kwargs)
         self.widget = CCExpWidget(widgets=[fields[0].widget, fields[1].widget])

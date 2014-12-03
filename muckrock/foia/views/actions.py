@@ -19,7 +19,6 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import PaymentForm
 from muckrock.crowdfund.forms import CrowdfundEnableForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.forms import \
@@ -31,13 +30,15 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.settings import STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-RequestAction = namedtuple('RequestAction', 'form_actions msg tests form_class return_url '
-                              'heading value must_own template extra_context')
+RequestAction = namedtuple(
+    'RequestAction',
+    'form_actions msg tests form_class return_url heading value must_own template extra_context'
+)
 
 action_template = 'forms/base_form.html'
 
@@ -69,8 +70,11 @@ def _foia_action(request, foia, action):
             action.form_actions(request, foia, form)
             return HttpResponseRedirect(action.return_url(request, foia))
     else:
-        form = form_class(instance=foia) if isinstance(form_class, type) and issubclass(form_class, forms.ModelForm) else form_class()
-    
+        if isinstance(form_class, type) and issubclass(form_class, forms.ModelForm):
+            form = form_class(instance=foia)
+        else:
+            form = form_class()
+
     context = action.extra_context(foia)
     args = {
         'form': form,
@@ -91,6 +95,7 @@ def _foia_action(request, foia, action):
 def note(request, jurisdiction, jidx, slug, idx):
     """Add a note to a request"""
     def form_actions(_, foia, form):
+        """Helper class, passed to generic function"""
         foia_note = form.save(commit=False)
         foia_note.foia = foia
         foia_note.date = datetime.now()
@@ -114,6 +119,7 @@ def note(request, jurisdiction, jidx, slug, idx):
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
     def form_actions(request, foia, _):
+        """Helper class, passed to generic function"""
         foia.delete()
         messages.success(request, 'The draft has been deleted.')
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -190,7 +196,8 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             messages.error(request, 'Payment error: %s' % exc)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
             return redirect(foia)
-        messages.success(request, 'Your payment was successful. We will get this to the agency right away.')
+        msg = 'Your payment was successful. We will get this to the agency right away.'
+        messages.success(request, msg)
         logger.info(
             '%s has paid %0.2f for request %s',
             request.user.username,
@@ -199,7 +206,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         )
         foia.status = 'processed'
         foia.save()
-        args = { 'request': foia, 'amount': int(amount) / 100.0 }
+        args = {'request': foia, 'amount': int(amount) / 100.0}
         send_mail(
             '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
             render_to_string('text/foia/admin_payment.txt', args),
@@ -213,6 +220,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
 def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     """Enable crowdfunding on the request, and send an email announcing it."""
     def form_actions(request, foia, _):
+        """Helper class, passed to generic function"""
         crowdfund = CrowdfundRequest.objects.create(
             foia=foia,
             payment_required=foia.price * Decimal('1.05'),
@@ -224,7 +232,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
             '%s has launched a crowdfunding campaign' % request.user.username,
             render_to_string(
                 'text/crowdfund/notify.txt',
-                { 'crowdfund': crowdfund, 'user': request.user }
+                {'crowdfund': crowdfund, 'user': request.user}
             ),
             'info@muckrock.com',
             ['requests@muckrock.com'],
@@ -234,19 +242,19 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     action = RequestAction(
         form_actions=form_actions,
         msg='enabled crowdfunding for',
-        tests=[
-            (lambda f: f.is_payable(),
-            'You can only start a crowdfund for a request requiring payment.')
-        ],
+        tests=[(
+            lambda f: f.is_payable(),
+            'You can only start a crowdfund for a request requiring payment.'
+        )],
         form_class=lambda r, f: CrowdfundEnableForm,
         return_url=lambda r, f: f.get_absolute_url(),
         heading='Enable Crowdfunding for Your Request',
         value='Crowdfund',
         must_own=True,
         template=action_template,
-        extra_context=lambda f: {'desc': ('With crowdfunding, others will '     
+        extra_context=lambda f: {'desc': ('With crowdfunding, others will '
                                           'be able to contribute the money '
-                                          'needed to fufill this request.') }
+                                          'needed to fufill this request.')}
     )
     return _foia_action(request, foia, action)
 

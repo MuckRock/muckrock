@@ -18,20 +18,20 @@ from muckrock.views import jurisdiction
 
 # pylint: disable=E1120
 # pylint: disable=bad-whitespace
+# pylint: disable=bad-continuation
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
+list_template = 'lists/request_list.html'
 
 register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
-list_template = 'lists/request_list.html'
-list_args = '(?P<status>\w+)(?P<agency>[0-9]+)(?P<jurisdiction>[0-9]+)'
-
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Redirects
     url(r'^$',
         RedirectView.as_view(url='list'), name='foia-root'),
-    url(r'^multi/$',                       
+    url(r'^multi/$',
         RedirectView.as_view(url='/foia/create_multi')),
 
     # List Views
@@ -42,9 +42,9 @@ urlpatterns = patterns('',
         views.MyList.as_view(),
         name='foia-mylist'),
     url(r'^list/following/$',
-        views.ListFollowing.as_view(template_name=list_template), 
+        views.ListFollowing.as_view(template_name=list_template),
         name='foia-list-following'),
-    
+
     # Create and Draft Views
     url(r'^create/$',
         views.create_request, name='foia-create'),
@@ -54,12 +54,12 @@ urlpatterns = patterns('',
         views.create_multirequest, name='foia-create-multi'),
     url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
         views.draft_multirequest, name='foia-multi-draft'),
-    
+
     # Detail View
     url(r'^%s/$' % foia_url,
-        views.Detail.as_view(template_name='details/request_detail.html'), 
+        views.Detail.as_view(template_name='details/request_detail.html'),
         name='foia-detail'),
-    
+
     url(r'^%s/clone/$' % foia_url,
         views.clone_request, name='foia-clone'),
     url(r'^%s/admin_fix/$' % foia_url,
@@ -80,7 +80,7 @@ urlpatterns = patterns('',
         views.follow, name='foia-follow'),
     url(r'^%s/toggle-followups/$' % foia_url,
         views.toggle_autofollowups, name='foia-toggle-followups'),
-        
+
     # Misc Views
     url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
         jurisdiction, name='foia-jurisdiction'),
@@ -88,33 +88,31 @@ urlpatterns = patterns('',
         views.orphans, name='foia-orphans'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
-        
+
     # Feeds
     url(r'^feeds/submitted/$',
         LatestSubmittedRequests(), name='foia-submitted-feed'),
     url(r'^feeds/completed/$',
         LatestDoneRequests(), name='foia-done-feed'),
 
-    # Old URLS 
-    url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',                            
+    # Old URLS
+    url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',
         RedirectView.as_view(url='/foi/list/user-%(user_name)s')),
-    url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',                                       
+    url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',
         RedirectView.as_view(url='/foi/list/tag-%(tag_slug)s')),
     url(r'^(?P<action>[\w_-]+)/%s/$' % old_foia_url,
         views.redirect_old),
-        
-    # TODO: Redirect old list urls
     url(r'^list/user-(?P<user_name>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?user=%(user_name)s'),
         name='foia-list-user'),
     url(r'^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
-        RedirectView.as_view(url='/foi/list/?agency=%(idx)s'),     
+        RedirectView.as_view(url='/foi/list/?agency=%(idx)s'),
         name='foia-list-agency'),
     url(r'^list/place-(?P<jurisdiction>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
         RedirectView.as_view(url='/foi/list/?jurisdiction=%(idx)s'),
         name='foia-list-jurisdiction'),
     url(r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
-        RedirectView.as_view(url='/foi/list/?tags=%(tag_slug)s'),     
+        RedirectView.as_view(url='/foi/list/?tags=%(tag_slug)s'),
         name='foia-list-tag'),
     url(r'^list/status-(?P<status>[\w\d_.@ -]+)/$',
         RedirectView.as_view(url='/foi/list/?status=%(status)s'),

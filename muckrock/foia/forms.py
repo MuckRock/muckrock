@@ -5,35 +5,34 @@ Forms for FOIA application
 from django import forms
 
 import autocomplete_light as autocomplete
-import inspect
-import sys
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 
-from muckrock.agency.models import Agency, AgencyType
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
-from muckrock.foia.utils import make_template_choices
-from muckrock.foia.validate import validate_date_order
 from muckrock.jurisdiction.models import Jurisdiction
 
 class RequestForm(forms.Form):
-    # form data
-        
+    """This form creates new, single MuckRock requests"""
+
     JURISDICTION_CHOICES = [
         ('f', 'Federal'),
         ('s', 'State'),
         ('l', 'Local')
     ]
 
-    # form fields
-    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
-    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': u'Write one sentence describing what you\'re looking for. The more specific you can be, the better.'}))
+    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}))
+    document_placeholder = (
+        'Write one sentence describing what you\'re looking for. '
+        'The more specific you can be, the better.'
+    )
+    document = forms.CharField(widget=forms.Textarea(attrs={'placeholder': document_placeholder}))
     jurisdiction = forms.ChoiceField(
         choices=JURISDICTION_CHOICES,
         widget=forms.RadioSelect
     )
     state = autocomplete.ModelChoiceField(
         'StateAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='s', hidden=False), 
+        queryset=Jurisdiction.objects.filter(level='s', hidden=False),
         required=False
     )
     local = autocomplete.ModelChoiceField(
@@ -44,7 +43,7 @@ class RequestForm(forms.Form):
     agency = forms.CharField(
         label='Agency',
         widget=autocomplete.TextWidget('AgencyAutocomplete')
-    ) 
+    )
     full_name = forms.CharField()
     email = forms.EmailField()
 
@@ -54,7 +53,7 @@ class RequestForm(forms.Form):
         if self.request and self.request.user.is_authenticated():
             del self.fields['full_name']
             del self.fields['email']
-    
+
     def clean(self):
         data = self.cleaned_data
         jurisdiction = data.get('jurisdiction')
@@ -69,7 +68,8 @@ class RequestForm(forms.Form):
         return self.cleaned_data
 
 class RequestDraftForm(forms.Form):
-    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
+    """Presents limited information from created single request for editing"""
+    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'}))
     request = forms.CharField(widget=forms.Textarea())
     embargo = forms.BooleanField(
         required=False,
@@ -79,7 +79,7 @@ class RequestDraftForm(forms.Form):
     )
 
 class MultiRequestForm(forms.ModelForm):
-    """A form for a multi-Request"""
+    """A form for a multi-request"""
 
     title = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
@@ -97,8 +97,9 @@ class MultiRequestForm(forms.ModelForm):
         # pylint: disable=R0903
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'agencies']
-        
+
 class MultiRequestDraftForm(forms.ModelForm):
+    """Presents info from created multi-request for editing"""
     title = forms.CharField(
         widget=forms.TextInput(attrs={'placeholder': 'Pick a Title'})
     )
@@ -118,6 +119,7 @@ class MultiRequestDraftForm(forms.ModelForm):
         fields = ['title', 'requested_docs', 'embargo']
 
 class ListFilterForm(forms.Form):
+    """Provides options for filtering list by request characteristics"""
     status = forms.ChoiceField(
         choices=STATUS,
         required=False
@@ -145,6 +147,7 @@ class ListFilterForm(forms.Form):
     )
 
 class MyListFilterForm(ListFilterForm):
+    """Extends ListFilterFrom with a 'read_status' sort choice"""
     sort = forms.ChoiceField(
         required=False,
         choices=(
@@ -167,7 +170,7 @@ class FOIAEmbargoForm(forms.ModelForm):
         widget=forms.TextInput(attrs={'class': 'datepicker'}),
         help_text='Choose the date the embargo will expire and become public.'
     )
-    
+
     def clean(self):
         """Checks if date embargo is necessary and if it is within 30 days"""
         embargo = self.cleaned_data.get('embargo')
@@ -209,7 +212,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     class Meta:
         model = FOIARequest
         fields = ['from_email', 'email', 'other_emails', 'comm']
-    
+
     from_email = forms.CharField(
         label='From',
         required=False,

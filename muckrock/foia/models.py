@@ -17,7 +17,6 @@ from taggit.managers import TaggableManager
 from unidecode import unidecode
 import logging
 import os
-import re
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -73,8 +72,10 @@ class FOIARequestManager(ChainableManager):
     def get_followup(self):
         """Get requests which require us to follow up on with the agency"""
 
-        return [f for f in self.get_overdue()
-                  if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()]
+        return [
+            f for f in self.get_overdue()
+            if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()
+        ]
         # Change to this after all follow ups have been resolved
         #return self.filter(status='processed', date_followup__lte=date.today())
 
@@ -103,15 +104,17 @@ STATUS = (
 )
 
 class Action():
-    '''A helper class to provide interfaces for request actions'''
+    """A helper class to provide interfaces for request actions"""
+    # pylint: disable=R0913
     def __init__(self, test=None, link=None, title=None, desc=None, class_name=None):
         self.test = test
         self.link = link
         self.title = title
         self.desc = desc
         self.class_name = class_name
-    
+
     def is_possible(self):
+        """Is this action possible given the current context?"""
         return self.test
 
 class FOIARequest(models.Model):
@@ -158,10 +161,12 @@ class FOIARequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
-        return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
-                                    'jidx': self.jurisdiction.pk,
-                                    'slug': self.slug, 'idx': self.pk})
+        return ('foia-detail', [], {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'slug': self.slug,
+            'idx': self.pk
+        })
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -185,7 +190,7 @@ class FOIARequest(models.Model):
     def is_payable(self):
         """Can this request be payed for by the user?"""
         return self.status == 'payment' and self.price > 0 and not self.has_crowdfund()
-        
+
     def get_stripe_amount(self):
         """Output a Stripe Checkout formatted price"""
         return int(self.price*105)
@@ -230,8 +235,7 @@ class FOIARequest(models.Model):
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
-        # pylint: disable=E1101
-        return self.files.filter(access='public') #.exclude(doc_id='')
+        return self.files.filter(access='public')
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
@@ -243,20 +247,19 @@ class FOIARequest(models.Model):
 
     def color_code(self):
         """Get the color code for the current status"""
-        # pylint: disable=bad-whitespace
-        stop = 'failure'
-        wait = ''
-        go = 'success'
-        processed = stop if self.date_due and date.today() > self.date_due else go
-        colors = {'started':   wait, 'submitted': go,   'processed': processed,
-                  'fix':       wait, 'payment':   wait, 'rejected':  stop,
-                  'no_docs':   stop, 'done':      go,   'partial': go,
-                  'abandoned': stop, 'appealing': processed, 'ack': processed}
-        return colors.get(self.status, go)
+        # pylint: disable=C0326
+        code_stop = 'failure'
+        code_wait = ''
+        code_go = 'success'
+        code_processed = code_stop if self.date_due and date.today() > self.date_due else code_go
+        colors = {'started':   code_wait, 'submitted': code_go,   'code_processed': code_processed,
+                  'fix':       code_wait, 'payment':   code_wait, 'rejected':  code_stop,
+                  'no_docs':   code_stop, 'done':      code_go,   'partial': code_go,
+                  'abandoned': code_stop, 'appealing': code_processed, 'ack': code_processed}
+        return colors.get(self.status, code_wait)
 
     def first_request(self):
         """Return the first request text"""
-        # pylint: disable=E1101
         try:
             return self.communications.all()[0].communication
         except IndexError:
@@ -473,13 +476,17 @@ class FOIARequest(models.Model):
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         body = render_to_string('text/foia/request.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
-        msg = EmailMultiAlternatives(subject=subject,
-                           body=body,
-                           from_email=from_email,
-                           to=[self.email],
-                           bcc=cc_addrs + ['diagnostics@muckrock.com'],
-                           headers={'Cc': ','.join(cc_addrs),
-                                    'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk})
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=body,
+            from_email=from_email,
+            to=[self.email],
+            bcc=cc_addrs + ['diagnostics@muckrock.com'],
+            headers={
+                'Cc': ','.join(cc_addrs),
+                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+            }
+        )
         if from_addr != 'fax':
             msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
@@ -563,7 +570,7 @@ class FOIARequest(models.Model):
             new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
-        
+
     def admin_actions(self, user):
         '''Provides action interfaces for admins'''
         kwargs = {
@@ -588,7 +595,7 @@ class FOIARequest(models.Model):
                 class_name='default'
             ),
         ]
-        
+
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.user == user
@@ -615,7 +622,7 @@ class FOIARequest(models.Model):
                 class_name=('default' if is_following else 'primary')
             ),
         ]
-        
+
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
         is_owner = self.user == user
@@ -630,7 +637,7 @@ class FOIARequest(models.Model):
         return [
             Action(
                 test=(not self.is_editable() and can_embargo),
-                link=reverse('foia-embargo', kwargs=kwargs), 
+                link=reverse('foia-embargo', kwargs=kwargs),
                 title=('Unembargo' if self.embargo else 'Embargo'),
                 desc=('Make this request public' if self.embargo else 'Make this request private'),
                 class_name='default'
@@ -650,7 +657,7 @@ class FOIARequest(models.Model):
                 class_name='success'
             ),
         ]
-        
+
     def contextual_request_actions(self, user):
         '''Provides context-sensitive action interfaces for requests'''
         is_owner = self.user == user
@@ -824,19 +831,8 @@ class FOIAFile(models.Model):
         _, ext = os.path.splitext(self.ffile.name)
         return ext.lower() in ['.pdf', '.doc', '.docx']
 
-    def get_thumbnail(self, size='thumbnail', page=1):
+    def get_thumbnail(self):
         """Get the url to the thumbnail image"""
-        """
-        Requires the following static assets:
-            file-archive.png
-            file-audio.png
-            file-document.png
-            file-image.png
-            file-presentation.png
-            file-spreadsheet.png
-            file-video.png
-        """
-        match = re.match(r'^(\d+)-(.*)$', self.doc_id)
         mimetypes = {
             'avi': 'file-video.png',
             'bmp': 'file-image.png',
@@ -853,14 +849,10 @@ class FOIAFile(models.Model):
             'xls': 'file-spreadsheet.png',
             'xlsx': 'file-spreadsheet.png',
             'zip': 'file-archive.png',
-        }        
+        }
         ext = os.path.splitext(self.name())[1][1:]
         filename = mimetypes.get(ext, 'file-document.png')
         return '%simg/%s' % (STATIC_URL, filename)
-
-    def get_medium_thumbnail(self):
-        """Convenient function for template"""
-        return self.get_thumbnail('small')
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""

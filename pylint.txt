@@ -1,488 +1,14 @@
 Warning: option include-ids is deprecated and ignored.
-************* Module muckrock.accounts.views
-W:210,15: Catching too general exception Exception (broad-except)
 ************* Module muckrock.agency.views
-E: 38,12: Undefined variable 'send_mail' (undefined-variable)
-E: 39,35: Undefined variable 'type_' (undefined-variable)
-E: 40,16: Undefined variable 'render_to_string' (undefined-variable)
+E: 41,35: Undefined variable 'type_' (undefined-variable)
 ************* Module muckrock.fields
-C:134, 0: Wrong hanging indentation.
-                        for group, choices in groupby(self.queryset.all(),
-                    |   ^ (bad-continuation)
-C:135, 0: Wrong continued indentation.
-                            key=lambda row: getattr(row, self.field.group_by_field))
-                            ^                         | (bad-continuation)
-C:141, 0: Wrong continued indentation.
-                    key=lambda row: getattr(row, self.field.group_by_field)):
-                    ^                     | (bad-continuation)
-C:175, 0: Wrong continued indentation.
-                error_messages={'invalid': errors['invalid_month']},
-                ^             | (bad-continuation)
-C:176, 0: Wrong continued indentation.
-                widget=forms.Select(
-                ^             | (bad-continuation)
-C:179, 0: Wrong continued indentation.
-                error_messages={'invalid': errors['invalid_year']},
-                ^             | (bad-continuation)
-C:180, 0: Wrong continued indentation.
-                widget=forms.Select(
-                ^             | (bad-continuation)
+C:142, 0: Line too long (120/100) (line-too-long)
 E:119,19: Instance of 'GroupedModelChoiceField' has no '_choices' member (no-member)
 E:121,37: Class 'ModelChoiceField' has no '_set_choices' member (no-member)
-E:184,43: Instance of 'ChoiceField' has no 'widget' member (no-member)
-E:184,61: Instance of 'ChoiceField' has no 'widget' member (no-member)
-************* Module muckrock.foia.admin
-C: 89, 0: Wrong continued indentation.
-                                                      .order_by('name'))
-                               |                      ^ (bad-continuation)
-C:169, 0: Wrong continued indentation.
-                               url(r'^followup/$', self.admin_site.admin_view(self.followup),
-                           |   ^ (bad-continuation)
-C:171, 0: Wrong continued indentation.
-                               url(r'^undated/$', self.admin_site.admin_view(self.undated),
-                           |   ^ (bad-continuation)
-C:173, 0: Wrong continued indentation.
-                               url(r'^send_update/(?P<idx>\d+)/$',
-                           |   ^ (bad-continuation)
-C:176, 0: Wrong continued indentation.
-                               url(r'^retry_pages/(?P<idx>\d+)/$',
-                           |   ^ (bad-continuation)
-C:179, 0: Wrong continued indentation.
-                               url(r'^set_status/(?P<idx>\d+)/(?P<status>\w+)/$',
-                           |   ^ (bad-continuation)
-C:182, 0: Wrong continued indentation.
-                               url(r'^autoimport/$',
-                           |   ^ (bad-continuation)
-C:240, 0: Wrong continued indentation.
-                               % docs.count())
-                      |        ^ (bad-continuation)
-************* Module muckrock.foia.codes
-C:  6, 0: Wrong hanging indentation.
-	'ACK': ('Acknowledgement Letter', 'processed', 'An acknowledgement letter, stating the request is being processed.'),
- ^  | (bad-continuation)
-C:  7, 0: Wrong hanging indentation.
-	'NRD': ('No Responsive Documents', 'no_docs', 'A no responsive documents response.'),
- ^  | (bad-continuation)
-C:  8, 0: Wrong hanging indentation.
-	'NRD-T': ('No Responsive Documents', 'no_docs', 'Potentially responsive documents were transferred to another department.'),
- ^  | (bad-continuation)
-C:  9, 0: Wrong hanging indentation.
-	'RES-C': ('Cover Letter', 'done', 'A cover letter granting the request and outlining any exempted materials, if any.'),
- ^  | (bad-continuation)
-C: 10, 0: Wrong hanging indentation.
-	'RES-P': ('Partial Responsive Documents', 'partial', 'A first set of responsive documents from the agency, with more to be sent at a specified date.'),
- ^  | (bad-continuation)
-C: 11, 0: Wrong hanging indentation.
-	'RES': ('Responsive Documents', 'done', 'A copy of documents responsive to the request.'),
- ^  | (bad-continuation)
-C: 12, 0: Wrong hanging indentation.
-	'FEE-R': ('Fee Waiver Rejected', 'payment', 'A letter stating the request for reduced or waived fees has been rejected.'),
- ^  | (bad-continuation)
-C: 13, 0: Wrong hanging indentation.
-	'FEE-A': ('Fee Waiver Accepted', 'processed', 'A letter stating the request for reduced or waived fees has been accepted.'),
- ^  | (bad-continuation)
-C: 14, 0: Wrong hanging indentation.
-	'FEE': ('Payment Required', 'payment', 'A letter stating the requester must agree to or prepay assessed or estimated fees in order for the agency to continue processing the request.'),
- ^  | (bad-continuation)
-C: 15, 0: Wrong hanging indentation.
-	'REJ-V': ('Request Rejected', 'rejected', 'The request has been rejected as being too vague, burdensome or otherwise unprocessable.'),
- ^  | (bad-continuation)
-C: 16, 0: Wrong hanging indentation.
-	'REJ-G': ('Glomar Response', 'rejected', 'The request has been rejected, with the agency stating that it can neither confirm nor deny the existence of the requested documents.'),
- ^  | (bad-continuation)
-C: 17, 0: Wrong hanging indentation.
-	'REJ-E': ('Materials exempt from disclosure', 'rejected', 'The request has been rejected, with the agency stating that the information or document(s) requested are exempt from disclosure.'),
- ^  | (bad-continuation)
-C: 18, 0: Wrong hanging indentation.
-	'REJ': ('Request rejected', 'rejected', 'The request has been rejectedby the agency.'),
- ^  | (bad-continuation)
-C: 19, 0: Wrong hanging indentation.
-	'FIX-D': ('Fix Required', 'fix', 'A fix is required to perfect the request. The agency has asked the requester to specify a date range for the requested materials.'),
- ^  | (bad-continuation)
-C: 20, 0: Wrong hanging indentation.
-	'FIX-F': ('Fee Agreement Required', 'fix', 'The user must agree to pay fees in order for the process to be continued being processed.  No payment is due at this time.'),
- ^  | (bad-continuation)
-C: 21, 0: Wrong hanging indentation.
-	'FIX-V': ('Fix Required', 'fix', 'A fix is required to perfect the request. The request has been rejected as being too vague, burdensome or otherwise unprocessable.'),
- ^  | (bad-continuation)
-C: 22, 0: Wrong hanging indentation.
-	'FIX-I': ('Fix Required', 'fix', 'A letter stating that a certificate of identity, proof of death, or other privacy-related fix is required in order to continue processing the request.'),
- ^  | (bad-continuation)
-C: 23, 0: Wrong hanging indentation.
-	'FIX': ('Fix Required', 'fix', 'A fix is required to perfect the request.'),
- ^  | (bad-continuation)
-C: 24, 0: Wrong hanging indentation.
-	'FWD': ('Request Forwarded', None, 'The request has been forwarded from one agency to another agency or department for further review or follow up.'),
- ^  | (bad-continuation)
-C: 25, 0: Wrong hanging indentation.
-	'INT': ('Interim Response', 'processed', 'An interim response, stating the request is being processed.'),
- ^  | (bad-continuation)
-C: 26, 0: Wrong hanging indentation.
-	'INT-D': ('Interim Response', 'processed', 'An interim response, stating the request has been delayed'),
- ^  | (bad-continuation)
-C: 27, 0: Wrong hanging indentation.
-	'APP-ACK': ('Appeal Acknowledgement', 'appealing', 'A letter stating that the request appeal has been received and is being processed.'),
- ^  | (bad-continuation)
-C: 28, 0: Wrong hanging indentation.
-	'APP-R': ('Appeal Rejected', 'rejected', 'A letter stating that the request appeal has been rejected.'),
- ^  | (bad-continuation)
-C: 29, 0: Wrong hanging indentation.
-	'APP-A': ('Appeal Succesful', 'processed', 'A letter stating that the request appeal has been succesful.'),
- ^  | (bad-continuation)
-C: 30, 0: Wrong hanging indentation.
-	'APP-W': ('Appeal Withdrawn', 'abandoned', 'An acknowledgment that the requester has withdrawn an appeal.'),
- ^  | (bad-continuation)
-************* Module muckrock.foia.forms
-C: 20, 0: Trailing whitespace (trailing-whitespace)
-C: 28, 0: No space allowed around keyword argument assignment
-    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
-                                                         ^ (bad-whitespace)
-C: 29, 0: Line too long (180/100) (line-too-long)
-C: 29, 0: No space allowed around keyword argument assignment
-    document = forms.CharField(widget=forms.Textarea(attrs = {'placeholder': u'Write one sentence describing what you\'re looking for. The more specific you can be, the better.'}))
-                                                           ^ (bad-whitespace)
-C: 36, 0: Trailing whitespace (trailing-whitespace)
-C: 47, 0: Trailing whitespace (trailing-whitespace)
-C: 57, 0: Trailing whitespace (trailing-whitespace)
-C: 72, 0: No space allowed around keyword argument assignment
-    title = forms.CharField(widget=forms.TextInput(attrs = {'placeholder': 'Pick a Title'}))
-                                                         ^ (bad-whitespace)
-C: 80, 0: Trailing whitespace (trailing-whitespace)
-C:115, 0: Trailing whitespace (trailing-whitespace)
-C:195, 0: Wrong hanging indentation.
-                        ['Embargo date is required if embargo is selected'])
-                    |   ^ (bad-continuation)
-C:198, 0: Wrong hanging indentation.
-                        ['Embargo date must be within 30 days of today'])
-                    |   ^ (bad-continuation)
-C:229, 0: Trailing whitespace (trailing-whitespace)
-C: 18, 0: Missing class docstring (missing-docstring)
-C: 71, 0: Missing class docstring (missing-docstring)
-E: 84,27: Instance of 'CharField' has no 'user' member (no-member)
-E: 86,12: Undefined variable 'messages' (undefined-variable)
-E: 86,27: Undefined variable 'request' (undefined-variable)
-C:116, 0: Missing class docstring (missing-docstring)
-C:129, 0: Missing class docstring (missing-docstring)
-C:156, 0: Missing class docstring (missing-docstring)
-W:  8, 0: Unused import inspect (unused-import)
-W:  9, 0: Unused import sys (unused-import)
-W: 10, 0: Unused datetime imported from datetime (unused-import)
-W: 12, 0: Unused AgencyType imported from muckrock.agency.models (unused-import)
-W: 14, 0: Unused make_template_choices imported from muckrock.foia.utils (unused-import)
-W: 15, 0: Unused validate_date_order imported from muckrock.foia.validate (unused-import)
-************* Module muckrock.foia.models
-C: 77, 0: Wrong continued indentation.
-                  if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()]
-                | ^ (bad-continuation)
-C:176, 0: Trailing whitespace (trailing-whitespace)
-C:465, 0: Wrong continued indentation.
-                           body=body,
-                           ^         | (bad-continuation)
-C:466, 0: Wrong continued indentation.
-                           from_email=from_email,
-                           ^         | (bad-continuation)
-C:467, 0: Wrong continued indentation.
-                           to=[self.email],
-                           ^         | (bad-continuation)
-C:468, 0: Wrong continued indentation.
-                           bcc=cc_addrs + ['diagnostics@muckrock.com'],
-                           ^         | (bad-continuation)
-C:469, 0: Wrong continued indentation.
-                           headers={'Cc': ','.join(cc_addrs),
-                           ^         | (bad-continuation)
-C:572, 0: Wrong continued indentation.
-            reverse('foia-follow', kwargs=kwargs),
-            ^| (bad-continuation)
-C:573, 0: Wrong continued indentation.
-            'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user) else 'Follow',
-            ^| (bad-continuation)
-C:573, 0: Line too long (103/100) (line-too-long)
-C:574, 0: Wrong continued indentation.
-            '' if user.is_authenticated() and self.followed_by.filter(user=user) else 'primary'
-            ^| (bad-continuation)
-C:577, 0: Wrong continued indentation.
-            reverse('foia-pay', kwargs=kwargs),
-            ^| (bad-continuation)
-C:578, 0: Wrong continued indentation.
-            'Pay',
-            ^| (bad-continuation)
-C:579, 0: Wrong continued indentation.
-            'success'
-            ^| (bad-continuation)
-C:582, 0: Wrong continued indentation.
-            reverse('foia-crowdfund', kwargs=kwargs),
-            ^| (bad-continuation)
-C:583, 0: Wrong continued indentation.
-            'Crowdfund',
-            ^| (bad-continuation)
-C:584, 0: Wrong continued indentation.
-            'success'
-            ^| (bad-continuation)
-C:587, 0: Wrong continued indentation.
-            reverse('foia-embargo', kwargs=kwargs), 
-            ^| (bad-continuation)
-C:587, 0: Trailing whitespace (trailing-whitespace)
-C:588, 0: Wrong continued indentation.
-            'Embargo',
-            ^| (bad-continuation)
-C:589, 0: Wrong continued indentation.
-            ''
-            ^| (bad-continuation)
-C:592, 0: Wrong continued indentation.
-            reverse('admin:foia_foiarequest_change', args=(self.pk,)),
-            ^| (bad-continuation)
-C:593, 0: Wrong continued indentation.
-            'Admin',
-            ^| (bad-continuation)
-C:594, 0: Wrong continued indentation.
-            ''
-            ^| (bad-continuation)
-C:597, 0: Wrong continued indentation.
-            reverse('foia-admin-fix', kwargs=kwargs),
-            ^| (bad-continuation)
-C:598, 0: Wrong continued indentation.
-            'Admin Fix',
-            ^| (bad-continuation)
-C:599, 0: Wrong continued indentation.
-            ''
-            ^| (bad-continuation)
-C:605, 0: Wrong continued indentation.
-            'Share',
-            ^| (bad-continuation)
-C:606, 0: Wrong continued indentation.
-            'Easily share this request'
-            ^| (bad-continuation)
-C:609, 0: Wrong continued indentation.
-            'Follow Up',
-            ^| (bad-continuation)
-C:610, 0: Wrong continued indentation.
-            'Send a message directly to the agency'
-            ^| (bad-continuation)
-C:613, 0: Wrong continued indentation.
-            'Get Advice',
-            ^| (bad-continuation)
-C:614, 0: Wrong continued indentation.
-            "Get answers to your question from Muckrock's FOIA expert community"
-            ^| (bad-continuation)
-C:617, 0: Wrong continued indentation.
-            'Appeal',
-            ^| (bad-continuation)
-C:618, 0: Wrong continued indentation.
-            'Submit an appeal'
-            ^| (bad-continuation)
-C:621, 0: Trailing whitespace (trailing-whitespace)
-C:812, 0: Trailing whitespace (trailing-whitespace)
-C:237, 8: Invalid variable name "go" (invalid-name)
-W:627,14: Redefining built-in 'bool' (redefined-builtin)
-W:794,-1: String statement has no effect (pointless-string-statement)
-W:783,28: Unused argument 'size' (unused-argument)
-W:783,46: Unused argument 'page' (unused-argument)
-W:795, 8: Unused variable 'match' (unused-variable)
+E:191,43: Instance of 'ChoiceField' has no 'widget' member (no-member)
+E:191,61: Instance of 'ChoiceField' has no 'widget' member (no-member)
 ************* Module muckrock.foia.tasks
-C:158, 0: Wrong hanging indentation.
-                    foia=new_foia, from_who=new_foia.user.get_full_name(),
-                |   ^ (bad-continuation)
-C:159, 0: Wrong hanging indentation.
-                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                |   ^ (bad-continuation)
-C:160, 0: Wrong hanging indentation.
-                    full_html=False, communication=foia_request)
-                |   ^ (bad-continuation)
-C:268, 0: Wrong continued indentation.
-                    (dest_name, os.path.basename(os.path.normpath(key.name))))
-                    ^   | (bad-continuation)
-C:369, 0: Wrong hanging indentation.
-                        foia=foia, from_who=source,
-                    |   ^ (bad-continuation)
-C:370, 0: Wrong hanging indentation.
-                        to_who=foia.user.get_full_name(), response=True,
-                    |   ^ (bad-continuation)
-C:371, 0: Wrong hanging indentation.
-                        date=file_date, full_html=False, delivered='mail',
-                    |   ^ (bad-continuation)
-C:372, 0: Wrong hanging indentation.
-                        communication=body, status=status)
-                    |   ^ (bad-continuation)
-W:394,19: Catching too general exception Exception (broad-except)
-************* Module muckrock.foia.urls
-W:106, 0: TODO: Redirect old list urls (fixme)
-C: 31, 0: Wrong continued indentation.
-    # Redirects
-    ^                  | (bad-continuation)
-C: 32, 0: Wrong continued indentation.
-    url(r'^$',
-    ^                  | (bad-continuation)
-C: 34, 0: Wrong continued indentation.
-    url(r'^multi/$',                       
-    ^                  | (bad-continuation)
-C: 34, 0: Trailing whitespace (trailing-whitespace)
-C: 37, 0: Wrong continued indentation.
-    # List Views
-    ^                  | (bad-continuation)
-C: 38, 0: Wrong continued indentation.
-    url(r'^list/$',
-    ^                  | (bad-continuation)
-C: 41, 0: Wrong continued indentation.
-    url(r'^mylist/$',
-    ^                  | (bad-continuation)
-C: 44, 0: Wrong continued indentation.
-    url(r'^list/following/$',
-    ^                  | (bad-continuation)
-C: 45, 0: Trailing whitespace (trailing-whitespace)
-C: 47, 0: Trailing whitespace (trailing-whitespace)
-C: 48, 0: Wrong continued indentation.
-    # Create and Draft Views
-    ^                  | (bad-continuation)
-C: 49, 0: Wrong continued indentation.
-    url(r'^create/$',
-    ^                  | (bad-continuation)
-C: 51, 0: Wrong continued indentation.
-    url(r'^%s/draft/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 53, 0: Wrong continued indentation.
-    url(r'^create_multi/$',
-    ^                  | (bad-continuation)
-C: 55, 0: Wrong continued indentation.
-    url(r'^multi/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)/draft/$',
-    ^                  | (bad-continuation)
-C: 57, 0: Trailing whitespace (trailing-whitespace)
-C: 58, 0: Wrong continued indentation.
-    # Detail View
-    ^                  | (bad-continuation)
-C: 59, 0: Wrong continued indentation.
-    url(r'^%s/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 60, 0: Trailing whitespace (trailing-whitespace)
-C: 62, 0: Trailing whitespace (trailing-whitespace)
-C: 63, 0: Wrong continued indentation.
-    url(r'^%s/clone/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 65, 0: Wrong continued indentation.
-    url(r'^%s/admin_fix/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 67, 0: Wrong continued indentation.
-    url(r'^%s/add_note/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 69, 0: Wrong continued indentation.
-    url(r'^%s/delete/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 71, 0: Wrong continued indentation.
-    url(r'^%s/embargo/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 73, 0: Wrong continued indentation.
-    url(r'^%s/pay/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 75, 0: Wrong continued indentation.
-    url(r'^%s/crowdfund/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 77, 0: Wrong continued indentation.
-    url(r'^%s/contribute/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 79, 0: Wrong continued indentation.
-    url(r'^%s/follow/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 81, 0: Wrong continued indentation.
-    url(r'^%s/toggle-followups/$' % foia_url,
-    ^                  | (bad-continuation)
-C: 83, 0: Trailing whitespace (trailing-whitespace)
-C: 84, 0: Wrong continued indentation.
-    # Misc Views
-    ^                  | (bad-continuation)
-C: 85, 0: Wrong continued indentation.
-    url(r'^(?P<jurisdiction>[\w\d_-]+)-(?P<idx>\d+)/$',
-    ^                  | (bad-continuation)
-C: 87, 0: Wrong continued indentation.
-    url(r'^orphans/$',
-    ^                  | (bad-continuation)
-C: 89, 0: Wrong continued indentation.
-    url(r'^acronyms/$',
-    ^                  | (bad-continuation)
-C: 91, 0: Trailing whitespace (trailing-whitespace)
-C: 92, 0: Wrong continued indentation.
-    # Feeds
-    ^                  | (bad-continuation)
-C: 93, 0: Wrong continued indentation.
-    url(r'^feeds/submitted/$',
-    ^                  | (bad-continuation)
-C: 95, 0: Wrong continued indentation.
-    url(r'^feeds/completed/$',
-    ^                  | (bad-continuation)
-C: 98, 0: Wrong continued indentation.
-    # Old URLS 
-    ^                  | (bad-continuation)
-C: 98, 0: Trailing whitespace (trailing-whitespace)
-C: 99, 0: Wrong continued indentation.
-    url(r'^list/user/(?P<user_name>[\w\d_.@ ]+)/$',                            
-    ^                  | (bad-continuation)
-C: 99, 0: Trailing whitespace (trailing-whitespace)
-C:101, 0: Wrong continued indentation.
-    url(r'^list/tag/(?P<tag_slug>[\w\d_.@-]+)/$',                                       
-    ^                  | (bad-continuation)
-C:101, 0: Trailing whitespace (trailing-whitespace)
-C:103, 0: Wrong continued indentation.
-    url(r'^(?P<action>[\w_-]+)/%s/$' % old_foia_url,
-    ^                  | (bad-continuation)
-C:105, 0: Trailing whitespace (trailing-whitespace)
-C:106, 0: Wrong continued indentation.
-    # TODO: Redirect old list urls
-    ^                  | (bad-continuation)
-C:107, 0: Wrong continued indentation.
-    url(r'^list/user-(?P<user_name>[\w\d_.@ -]+)/$',
-    ^                  | (bad-continuation)
-C:110, 0: Wrong continued indentation.
-    url(r'^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
-    ^                  | (bad-continuation)
-C:111, 0: Trailing whitespace (trailing-whitespace)
-C:113, 0: Wrong continued indentation.
-    url(r'^list/place-(?P<jurisdiction>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
-    ^                  | (bad-continuation)
-C:116, 0: Wrong continued indentation.
-    url(r'^list/tag-(?P<tag_slug>[\w\d_.@-]+)/$',
-    ^                  | (bad-continuation)
-C:117, 0: Trailing whitespace (trailing-whitespace)
-C:119, 0: Wrong continued indentation.
-    url(r'^list/status-(?P<status>[\w\d_.@ -]+)/$',
-    ^                  | (bad-continuation)
-C:122, 0: Wrong continued indentation.
-    url(r'^mylist/(?P<view>\w+)/$',
-    ^                  | (bad-continuation)
-C:125, 0: Wrong continued indentation.
-)^                     | (bad-continuation)
-C:125, 0: Final newline missing (missing-final-newline)
-W: 28, 0: Anomalous backslash in string: '\w'. String constant might be missing an r prefix. (anomalous-backslash-in-string)
-************* Module muckrock.foia.validate
-C: 14, 0: Wrong hanging indentation.
-                    ['%s must be later than %s' % (end_field, begin_field)])
-                |   ^ (bad-continuation)
-************* Module muckrock.foia.views.actions
-C: 73, 0: Line too long (134/100) (line-too-long)
-C: 74, 0: Trailing whitespace (trailing-whitespace)
-C:189, 0: Line too long (108/100) (line-too-long)
-C:198, 0: No space allowed after bracket
-        args = { 'request': foia, 'amount': int(amount) / 100.0 }
-               ^ (bad-whitespace)
-C:198, 0: No space allowed before bracket
-        args = { 'request': foia, 'amount': int(amount) / 100.0 }
-                                                                ^ (bad-whitespace)
-C:223, 0: No space allowed after bracket
-                { 'crowdfund': crowdfund, 'user': request.user }
-                ^ (bad-whitespace)
-C:223, 0: No space allowed before bracket
-                { 'crowdfund': crowdfund, 'user': request.user }
-                                                               ^ (bad-whitespace)
-C:235, 0: Wrong continued indentation.
-            'You can only start a crowdfund for a request requiring payment.')
-            ^| (bad-continuation)
-C:243, 0: Trailing whitespace (trailing-whitespace)
-C:245, 0: No space allowed before bracket
-                                          'needed to fufill this request.') }
-                                                                            ^ (bad-whitespace)
-C:327, 0: Final newline missing (missing-final-newline)
-C: 94, 4: Missing function docstring (missing-docstring)
-C:117, 4: Missing function docstring (missing-docstring)
-C:211, 4: Missing function docstring (missing-docstring)
-W: 22, 0: Unused PaymentForm imported from muckrock.accounts.forms (unused-import)
-W: 35, 0: Unused STRIPE_PUB_KEY imported from muckrock.settings (unused-import)
+W:396,19: Catching too general exception Exception (broad-except)
 ************* Module muckrock.foia.views.comms
 C: 18, 0: Wrong hanging indentation.
             foia=foia, from_who=from_who, to_who=foia.get_to_who(),
@@ -497,139 +23,96 @@ C: 40, 0: Trailing whitespace (trailing-whitespace)
 C:111, 0: Final newline missing (missing-final-newline)
 R: 15, 0: Too many arguments (8/5) (too-many-arguments)
 ************* Module muckrock.foia.views.composers
-W:155, 0: XXX verify this is unique (fixme)
-W:158, 0: XXX email the user their account details (fixme)
-C: 69, 0: Wrong continued indentation.
+W:142, 0: XXX verify this is unique (fixme)
+W:145, 0: XXX email the user their account details (fixme)
+C: 58, 0: Wrong continued indentation.
               'believe this request is in the public interest. '
               ^   | (bad-continuation)
+C: 59, 0: Trailing whitespace (trailing-whitespace)
+C: 60, 0: Trailing whitespace (trailing-whitespace)
+C: 61, 0: Trailing whitespace (trailing-whitespace)
+C: 62, 0: Trailing whitespace (trailing-whitespace)
+C: 66, 0: Trailing whitespace (trailing-whitespace)
 C: 70, 0: Trailing whitespace (trailing-whitespace)
-C: 71, 0: Trailing whitespace (trailing-whitespace)
-C: 72, 0: Trailing whitespace (trailing-whitespace)
-C: 73, 0: Trailing whitespace (trailing-whitespace)
-C: 77, 0: Trailing whitespace (trailing-whitespace)
-W: 78, 0: Unnecessary semicolon (unnecessary-semicolon)
-C: 81, 0: Trailing whitespace (trailing-whitespace)
-C: 89, 0: Wrong continued indentation.
+C: 78, 0: Wrong continued indentation.
         'grateful if you would inform me of the total charges in '     
         ^| (bad-continuation)
-C: 89, 0: Trailing whitespace (trailing-whitespace)
-C: 91, 0: Trailing whitespace (trailing-whitespace)
-C: 94, 0: Wrong continued indentation.
+C: 78, 0: Trailing whitespace (trailing-whitespace)
+C: 80, 0: Trailing whitespace (trailing-whitespace)
+C: 83, 0: Wrong continued indentation.
         'this matter. I look forward to receiving your response to ' 
         ^| (bad-continuation)
-C: 94, 0: Trailing whitespace (trailing-whitespace)
-C: 95, 0: No space allowed before bracket
-        'this request within %s, as the statute requires.' % delay ),
-                                                                   ^ (bad-whitespace)
-C:100, 0: Trailing whitespace (trailing-whitespace)
-W:122, 0: Bad indentation. Found 8 spaces, expected 4 (bad-indentation)
-W:133, 0: Bad indentation. Found 8 spaces, expected 4 (bad-indentation)
-C:135, 0: Trailing whitespace (trailing-whitespace)
-W:148, 0: Bad indentation. Found 8 spaces, expected 4 (bad-indentation)
-W:149, 0: Bad indentation. Found 8 spaces, expected 4 (bad-indentation)
-W:150, 0: Bad indentation. Found 8 spaces, expected 4 (bad-indentation)
-C:172, 0: Trailing whitespace (trailing-whitespace)
-C:180, 0: Trailing whitespace (trailing-whitespace)
-C:188, 0: Trailing whitespace (trailing-whitespace)
-C:195, 0: Trailing whitespace (trailing-whitespace)
-C:209, 0: Line too long (123/100) (line-too-long)
-C:252, 0: Trailing whitespace (trailing-whitespace)
-C:255, 0: Trailing whitespace (trailing-whitespace)
-C:261, 0: Trailing whitespace (trailing-whitespace)
+C: 83, 0: Trailing whitespace (trailing-whitespace)
+C: 84, 0: No space allowed before bracket
+        'this request within %s business days, as the statute requires.' % delay ),
+                                                                                 ^ (bad-whitespace)
+C: 89, 0: Trailing whitespace (trailing-whitespace)
+C:124, 0: Trailing whitespace (trailing-whitespace)
+C:159, 0: Trailing whitespace (trailing-whitespace)
+C:167, 0: Trailing whitespace (trailing-whitespace)
+C:175, 0: Trailing whitespace (trailing-whitespace)
+C:182, 0: Trailing whitespace (trailing-whitespace)
+C:196, 0: Line too long (123/100) (line-too-long)
+C:238, 0: Trailing whitespace (trailing-whitespace)
+C:241, 0: Trailing whitespace (trailing-whitespace)
+C:247, 0: Trailing whitespace (trailing-whitespace)
+C:250, 0: Trailing whitespace (trailing-whitespace)
 C:264, 0: Trailing whitespace (trailing-whitespace)
-C:278, 0: Trailing whitespace (trailing-whitespace)
-C:284, 0: Trailing whitespace (trailing-whitespace)
-C:314, 0: Trailing whitespace (trailing-whitespace)
-C:321, 0: Trailing whitespace (trailing-whitespace)
-C:330, 0: Trailing whitespace (trailing-whitespace)
-C:344, 0: Trailing whitespace (trailing-whitespace)
-C:345, 0: No space allowed after bracket
+C:270, 0: Trailing whitespace (trailing-whitespace)
+C:304, 0: Trailing whitespace (trailing-whitespace)
+C:311, 0: Trailing whitespace (trailing-whitespace)
+C:320, 0: Trailing whitespace (trailing-whitespace)
+C:334, 0: Trailing whitespace (trailing-whitespace)
+C:335, 0: No space allowed after bracket
     context = { 'form': form }
               ^ (bad-whitespace)
-C:345, 0: No space allowed before bracket
+C:335, 0: No space allowed before bracket
     context = { 'form': form }
                              ^ (bad-whitespace)
-C:414, 0: Trailing whitespace (trailing-whitespace)
-C:429, 0: Final newline missing (missing-final-newline)
-C: 59, 0: Missing function docstring (missing-docstring)
-C: 64, 0: Missing function docstring (missing-docstring)
-C:101, 0: Missing function docstring (missing-docstring)
-C:121, 0: Missing function docstring (missing-docstring)
-C:173, 0: Missing function docstring (missing-docstring)
-C:215, 0: Missing function docstring (missing-docstring)
-W:215,18: Unused argument 'request' (unused-argument)
-C:219, 0: Missing function docstring (missing-docstring)
-C:329, 0: Missing function docstring (missing-docstring)
-C:353, 0: Missing function docstring (missing-docstring)
-W:355, 4: String statement has no effect (pointless-string-statement)
-W:  5, 0: Unused forms imported from django (unused-import)
-W:  8, 0: Unused user_passes_test imported from django.contrib.auth.decorators (unused-import)
-W: 12, 0: Unused Q imported from django.db.models (unused-import)
-W: 13, 0: Unused Http404 imported from django.http (unused-import)
-W: 16, 0: Unused get_template imported from django.template.loader (unused-import)
-W: 18, 0: Unused simplejson imported from django.utils (unused-import)
-W: 19, 0: Unused DetailView imported from django.views.generic.detail (unused-import)
-W: 20, 0: Unused ListView imported from django.views.generic.list (unused-import)
-W: 26, 0: Unused random imported from random (unused-import)
-W: 29, 0: Unused PaymentForm imported from muckrock.accounts.forms (unused-import)
-W: 32, 0: Unused CODES imported from muckrock.foia.codes (unused-import)
-W: 43, 0: Unused save_foia_comm imported from muckrock.foia.views.comms (unused-import)
-W: 43, 0: Unused resend_comm imported from muckrock.foia.views.comms (unused-import)
-W: 43, 0: Unused delete_comm imported from muckrock.foia.views.comms (unused-import)
-W: 43, 0: Unused move_comm imported from muckrock.foia.views.comms (unused-import)
-W: 45, 0: Unused Question imported from muckrock.qanda.models (unused-import)
-W: 47, 0: Unused Sidebar imported from muckrock.sidebar.models (unused-import)
-W: 48, 0: Unused Tag imported from muckrock.tags.models (unused-import)
-W: 49, 0: Unused class_view_decorator imported from muckrock.views (unused-import)
-************* Module muckrock.foia.views.orphans
-C: 56, 0: Final newline missing (missing-final-newline)
+C:346, 0: Trailing whitespace (trailing-whitespace)
+C:405, 0: Trailing whitespace (trailing-whitespace)
+C:420, 0: Final newline missing (missing-final-newline)
+C: 48, 0: Missing function docstring (missing-docstring)
+C: 53, 0: Missing function docstring (missing-docstring)
+C: 90, 0: Missing function docstring (missing-docstring)
+C:110, 0: Missing function docstring (missing-docstring)
+C:160, 0: Missing function docstring (missing-docstring)
+C:201, 0: Missing function docstring (missing-docstring)
+W:201,18: Unused argument 'request' (unused-argument)
+C:205, 0: Missing function docstring (missing-docstring)
+C:319, 0: Missing function docstring (missing-docstring)
+W: 36, 0: Unused move_comm imported from muckrock.foia.views.comms (unused-import)
+W: 36, 0: Unused delete_comm imported from muckrock.foia.views.comms (unused-import)
+W: 36, 0: Unused save_foia_comm imported from muckrock.foia.views.comms (unused-import)
+W: 36, 0: Unused resend_comm imported from muckrock.foia.views.comms (unused-import)
 ************* Module muckrock.foia.views.views
-W: 71, 0: TODO: handle a list of tags (fixme)
-C: 70, 0: Trailing whitespace (trailing-whitespace)
-C: 77, 0: Trailing whitespace (trailing-whitespace)
-C: 89, 0: Trailing whitespace (trailing-whitespace)
-C:101, 0: Trailing whitespace (trailing-whitespace)
-C:130, 0: Trailing whitespace (trailing-whitespace)
-C:135, 0: Trailing whitespace (trailing-whitespace)
-C:139, 0: Trailing whitespace (trailing-whitespace)
-C:168, 0: Line too long (116/100) (line-too-long)
-C:170, 0: Unnecessary parens after 'except' keyword (superfluous-parens)
-C:225, 0: Trailing whitespace (trailing-whitespace)
-C:251, 0: Trailing whitespace (trailing-whitespace)
-C:258, 0: Trailing whitespace (trailing-whitespace)
-C:298, 0: Line too long (113/100) (line-too-long)
-C:331, 0: Line too long (198/100) (line-too-long)
-C:334, 0: Trailing whitespace (trailing-whitespace)
-W: 63, 8: Redefining built-in 'filter' (redefined-builtin)
-C: 78,20: Invalid variable name "a" (invalid-name)
-C: 85,20: Invalid variable name "u" (invalid-name)
-W:144,-1: String statement has no effect (pointless-string-statement)
-C:252, 4: Missing method docstring (missing-docstring)
-W:302, 0: Unused argument 'kwargs' (unused-argument)
-R:321, 4: Method could be a function (no-self-use)
-R:327, 4: Method could be a function (no-self-use)
-R:354, 4: Method could be a function (no-self-use)
-C:369, 8: Invalid variable name "q" (invalid-name)
-R:367, 4: Method could be a function (no-self-use)
-R:391, 4: Method could be a function (no-self-use)
-R:409, 4: Method could be a function (no-self-use)
-W:  5, 0: Unused forms imported from django (unused-import)
-W:  7, 0: Unused authenticate imported from django.contrib.auth (unused-import)
-W:  7, 0: Unused login imported from django.contrib.auth (unused-import)
-W: 11, 0: Unused reverse imported from django.core.urlresolvers (unused-import)
-W: 12, 0: Unused Q imported from django.db.models (unused-import)
-W: 13, 0: Unused HttpResponseRedirect imported from django.http (unused-import)
-W: 16, 0: Unused get_template imported from django.template.loader (unused-import)
-W: 18, 0: Unused simplejson imported from django.utils (unused-import)
-W: 25, 0: Unused randint imported from random (unused-import)
-W: 25, 0: Unused random imported from random (unused-import)
-W: 25, 0: Unused choice imported from random (unused-import)
-W: 26, 0: Unused import string (unused-import)
-W: 28, 0: Unused PaymentForm imported from muckrock.accounts.forms (unused-import)
-W: 29, 0: Unused Profile imported from muckrock.accounts.models (unused-import)
-W: 35, 0: Unused FOIACommunication imported from muckrock.foia.models (unused-import)
-W: 44, 0: Unused MONTHLY_REQUESTS imported from muckrock.settings (unused-import)
-W: 45, 0: Unused Sidebar imported from muckrock.sidebar.models (unused-import)
+W: 60, 0: TODO: handle a list of tags (fixme)
+C: 59, 0: Trailing whitespace (trailing-whitespace)
+C: 66, 0: Trailing whitespace (trailing-whitespace)
+C: 78, 0: Trailing whitespace (trailing-whitespace)
+C: 90, 0: Trailing whitespace (trailing-whitespace)
+C:119, 0: Trailing whitespace (trailing-whitespace)
+C:124, 0: Trailing whitespace (trailing-whitespace)
+C:151, 0: Line too long (116/100) (line-too-long)
+C:153, 0: Unnecessary parens after 'except' keyword (superfluous-parens)
+C:208, 0: Trailing whitespace (trailing-whitespace)
+C:234, 0: Trailing whitespace (trailing-whitespace)
+C:241, 0: Trailing whitespace (trailing-whitespace)
+C:281, 0: Exactly one space required after assignment
+        context['past_due'] =  is_past_due
+                            ^ (bad-whitespace)
+C:319, 0: Line too long (198/100) (line-too-long)
+C:322, 0: Trailing whitespace (trailing-whitespace)
+C: 67,20: Invalid variable name "a" (invalid-name)
+C: 74,20: Invalid variable name "u" (invalid-name)
+C:235, 4: Missing method docstring (missing-docstring)
+R:309, 4: Method could be a function (no-self-use)
+R:315, 4: Method could be a function (no-self-use)
+R:342, 4: Method could be a function (no-self-use)
+C:357, 8: Invalid variable name "q" (invalid-name)
+R:355, 4: Method could be a function (no-self-use)
+R:379, 4: Method could be a function (no-self-use)
+R:397, 4: Method could be a function (no-self-use)
 ************* Module muckrock.foia.viewsets
 C: 80, 0: Wrong hanging indentation.
                     foia=foia, from_who=request.user.get_full_name(), to_who=foia.get_to_who(),
@@ -661,22 +144,6 @@ C:131, 0: Wrong continued indentation.
 C:159, 0: Wrong continued indentation.
                              status=http_status.HTTP_200_OK)
                             |^ (bad-continuation)
-************* Module muckrock.foia.wizards
-C:126, 0: Final newline missing (missing-final-newline)
-E: 21, 0: No name 'TEMPLATES' in module 'muckrock.foia.forms' (no-name-in-module)
-E: 74,15: Undefined variable 'redirect' (undefined-variable)
-W:  8, 0: Unused reverse imported from django.core.urlresolvers (unused-import)
-W: 10, 0: Unused HttpResponseRedirect imported from django.http (unused-import)
-W: 12, 0: Unused slugify imported from django.template.defaultfilters (unused-import)
-W: 13, 0: Unused get_template imported from django.template.loader (unused-import)
-W: 14, 0: Unused RequestContext imported from django.template (unused-import)
-W: 16, 0: Unused datetime imported from datetime (unused-import)
-W: 17, 0: Unused import HTMLParser (unused-import)
-W: 21, 0: Unused TEMPLATES imported from muckrock.foia.forms (unused-import)
-W: 22, 0: Unused Jurisdiction imported from muckrock.jurisdiction.models (unused-import)
-W: 23, 0: Unused FOIACommunication imported from muckrock.foia.models (unused-import)
-W: 23, 0: Unused FOIARequest imported from muckrock.foia.models (unused-import)
-W: 25, 0: Unused get_node imported from muckrock.utils (unused-import)
 ************* Module muckrock.jurisdiction.admin
 C: 63, 0: Wrong continued indentation.
                         'CSV - %d jurisdictions imported' % len(jurisdictions))
@@ -1000,10 +467,10 @@ C: 85, 0: Trailing whitespace (trailing-whitespace)
 C: 85, 0: Exactly one space required around assignment
     COMPRESS_OFFLINE=True 
                     ^ (bad-whitespace)
-C:134, 0: Wrong hanging indentation.
+C:135, 0: Wrong hanging indentation.
 #     'django.template.loaders.eggs.load_template_source',
 ^   | (bad-continuation)
-C:247, 0: Wrong continued indentation.
+C:248, 0: Wrong continued indentation.
             request.user and request.user.username == 'mitch'):
             ^    | (bad-continuation)
 ************* Module muckrock.sidebar.context_processors

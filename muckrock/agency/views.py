@@ -3,11 +3,13 @@ Views for the Agency application
 """
 
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
+from django.template.loader import render_to_string
 
 from rest_framework import viewsets
 import django_filters
