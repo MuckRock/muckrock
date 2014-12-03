@@ -191,11 +191,11 @@
                 border-left: none;
                 border-bottom: none;
                 &:first-of-type {
-                    border-top-left-radius: $base-border-radius;
+                    border-left-radius: $base-border-radius;
                     border-left: $base-border-width solid $color-grey;
                 }
                 &:last-of-type {
-                    border-top-right-radius: $base-border-radius;
+                    border-right-radius: $base-border-radius;
                 }
                 &.active {
                     color: white;
@@ -208,7 +208,6 @@
             display: none;
             &.active { display: block; }
         }
-        .tabs + .tab-section { border-top: $base-border-width solid $color-grey; }
         .files {
             ul {
                 list-style-type: none;
