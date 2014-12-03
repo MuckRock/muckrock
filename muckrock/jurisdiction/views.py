@@ -2,7 +2,6 @@
 Views for the Jurisdiction application
 """
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -15,7 +14,6 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
-from muckrock.sidebar.models import Sidebar
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
