@@ -7,8 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -22,19 +21,19 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, RegisterPro, \
-                           PaymentForm, UpgradeSubscForm, CancelSubscForm
+from muckrock.accounts.forms import UserChangeForm, RegisterFree, RegisterPro, \
+                                    UpgradeSubscForm, CancelSubscForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
-from muckrock.sidebar.models import Sidebar
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def account_logout(request):
+    """Logs a user out of their account and redirects to index page"""
     logout(request)
     messages.success(request, 'You have successfully logged out.')
     return redirect('index')
@@ -50,7 +49,7 @@ def register_free(request):
     """Register for a community account"""
     template = 'forms/account/register_free.html'
     url_redirect = request.GET.get('next', None)
-    return _register_acct(request, 'community', RegisterFree, template,  url_redirect)
+    return _register_acct(request, 'community', RegisterFree, template, url_redirect)
 
 def register_pro(request):
     """Register for a pro account"""
@@ -59,7 +58,7 @@ def register_pro(request):
     extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
     return _register_acct(request, 'pro', RegisterPro, template, url_redirect, extra_context)
 
-def _register_acct(request, acct_type, form_class, template, url_redirect=None, extra_context={}):
+def _register_acct(request, acct_type, form_class, template, url_redirect=None, extra_context=None):
     """Register for an account"""
     # pylint: disable=R0913
     if request.method == 'POST':
@@ -81,7 +80,6 @@ def _register_acct(request, acct_type, form_class, template, url_redirect=None, 
             token = form.cleaned_data.get('token', False)
             if token:
                 customer.credit_card(token)
-            
             if url_redirect:
                 return redirect(url_redirect)
             else:
@@ -92,8 +90,9 @@ def _register_acct(request, acct_type, form_class, template, url_redirect=None, 
     else:
         form = form_class(initial={'expiration': date.today()})
 
-    context = { 'form': form }
-    context.update(extra_context)
+    context = {'form': form}
+    if extra_context:
+        context.update(extra_context)
     return render_to_response(
         template,
         context,
@@ -112,14 +111,11 @@ def update(request):
             request.user.last_name = form.cleaned_data['last_name']
             request.user.email = form.cleaned_data['email']
             request.user.save()
-
             customer = request.user.get_profile().customer()
             customer.email = request.user.email
             customer.save()
-
             user_profile = form.save()
-
-            messages.success(request, 'Your account has been updated.') 
+            messages.success(request, 'Your account has been updated.')
             return redirect('acct-my-profile')
     else:
         user_profile = request.user.get_profile()
@@ -141,24 +137,23 @@ def manage_subsc(request):
     heading = 'Upgrade to a Pro Account'
     desc = ''
     form_class = UpgradeSubscForm
-    
-    type = user_profile.acct_type
-    if type == 'admin':
+    acct_type = user_profile.acct_type
+    if acct_type == 'admin':
         msg = 'You are on staff, you don\'t need a subscription.'
         messages.warning(request, msg)
-        return redirect('acct-my-profile');
-    elif type == 'proxy':
-        msg = 'You have a proxy account, you receive 20 free requests a month and do not need a subscription.'
+        return redirect('acct-my-profile')
+    elif acct_type == 'proxy':
+        msg = ('You have a proxy account, you receive 20 free '
+               'requests a month and do not need a subscription.')
         messages.warning(request, msg)
-        return redirect('acct-my-profile');
-    elif type == 'pro':
+        return redirect('acct-my-profile')
+    elif acct_type == 'pro':
         heading = 'Cancel Your Pro Subscription'
         desc = 'You will go back to a free community account.'
         form_class = CancelSubscForm
-    
     if request.method == 'POST':
         form = form_class(request.POST, request=request)
-        if user_profile.acct_type == 'community' and form.is_valid():
+        if acct_type == 'community' and form.is_valid():
             if not form.cleaned_data.get('use_on_file'):
                 user_profile.credit_card(form.cleaned_data['token'])
             customer = user_profile.customer()
@@ -168,7 +163,7 @@ def manage_subsc(request):
             user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
             user_profile.save()
             messages.success(request, 'Congratulations, you are now subscribed as a pro user!')
-        elif user_profile.acct_type == 'pro' and form.is_valid():
+        elif acct_type == 'pro' and form.is_valid():
             customer = user_profile.customer()
             customer.cancel_subscription()
             user_profile.acct_type = 'community'
@@ -178,9 +173,8 @@ def manage_subsc(request):
     else:
         form = form_class(
             request=request,
-            initial={ 'name': request.user.get_full_name() }
+            initial={'name': request.user.get_full_name()}
         )
-    
     context = {
         'heading': heading,
         'desc': desc,
@@ -213,7 +207,7 @@ def buy_requests(request):
             msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-        except Exception as e:
+        except Exception as exc:
             msg = 'Payment error. Your card has not been charged.'
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
@@ -222,18 +216,15 @@ def buy_requests(request):
 def profile(request, user_name=None):
     """View a user's profile"""
     user = get_object_or_404(User, username=user_name) if user_name else request.user
-    
     requests = FOIARequest.objects.get_viewable(request.user).filter(user=user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
-
     context = {
         'user_obj': user,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
         'stripe_pk': STRIPE_PUB_KEY
     }
-    
     return render_to_response(
         'details/account_detail.html',
         context,
@@ -281,10 +272,16 @@ def stripe_webhook(request):
         user_profile.acct_type = 'community'
         user_profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        send_mail('Payment Failed',
-                  render_to_string('text/registration/pay_fail.txt',
-                                   {'user': user, 'attempt': 'final'}),
-                  'info@muckrock.com', [user.email], fail_silently=False)
+        send_mail(
+            'Payment Failed',
+            render_to_string(
+                'text/registration/pay_fail.txt',
+                {'user': user, 'attempt': 'final'}
+            ),
+            'info@muckrock.com',
+            [user.email],
+            fail_silently=False
+        )
 
     return HttpResponse()
 
@@ -301,8 +298,13 @@ def stripe_webhook_v2(request):
     event_json = json.loads(request.raw_post_data)
     event_data = event_json['data']['object']
 
-    logger.info('Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s',
-        event_json['type'], request.META['REMOTE_ADDR'], event_json['id'], event_json)
+    logger.info(
+        'Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s',
+        event_json['type'],
+        request.META['REMOTE_ADDR'],
+        event_json['id'],
+        event_json
+    )
 
     description = event_data.get('description')
     customer = event_data.get('customer')
@@ -359,31 +361,35 @@ def stripe_webhook_v2(request):
             subject = 'Payment received for professional account'
 
         if user:
-            msg = EmailMessage(subject=subject,
-                               body=render_to_string('text/registration/receipt.txt',
-                                   {'user': user,
-                                    'id': event_data['id'],
-                                    'date': datetime.fromtimestamp(event_data['created']),
-                                    'amount': amount,
-                                    'base_amount': base_amount,
-                                    'fee_amount': fee_amount,
-                                    'url': url,
-                                    'type': type_}),
-                               from_email='info@muckrock.com',
-                               to=[user.email], bcc=['info@muckrock.com'])
+            msg = EmailMessage(
+                subject=subject,
+                body=render_to_string('text/registration/receipt.txt', {
+                    'user': user,
+                    'id': event_data['id'],
+                    'date': datetime.fromtimestamp(event_data['created']),
+                    'amount': amount,
+                    'base_amount': base_amount,
+                    'fee_amount': fee_amount,
+                    'url': url,
+                    'type': type_}),
+                from_email='info@muckrock.com',
+                to=[user.email], bcc=['info@muckrock.com']
+            )
         else:
-            msg = EmailMessage(subject=subject,
-                               body=render_to_string('text/registration/anon_receipt.txt',
-                                   {'id': event_data['id'],
-                                    'date': datetime.fromtimestamp(event_data['created']),
-                                    'last4': event_data.get('card', {}).get('last4'),
-                                    'amount': amount,
-                                    'base_amount': base_amount,
-                                    'fee_amount': fee_amount,
-                                    'url': url,
-                                    'type': type_}),
-                               from_email='info@muckrock.com',
-                               to=[email], bcc=['info@muckrock.com'])
+            msg = EmailMessage(
+                subject=subject,
+                body=render_to_string('text/registration/anon_receipt.txt', {
+                    'id': event_data['id'],
+                    'date': datetime.fromtimestamp(event_data['created']),
+                    'last4': event_data.get('card', {}).get('last4'),
+                    'amount': amount,
+                    'base_amount': base_amount,
+                    'fee_amount': fee_amount,
+                    'url': url,
+                    'type': type_}),
+                from_email='info@muckrock.com',
+                to=[email], bcc=['info@muckrock.com']
+            )
         msg.send(fail_silently=False)
 
     elif event_json['type'] == 'invoice.payment_failed':
@@ -393,19 +399,25 @@ def stripe_webhook_v2(request):
             user_profile.acct_type = 'community'
             user_profile.save()
             logger.info('%s subscription has been cancelled due to failed payment', user.username)
-            msg = EmailMessage(subject='Payment Failed',
-                               body=render_to_string('text/registration/pay_fail.txt',
-                                   {'user': user, 'attempt': 'final'}),
-                               from_email='info@muckrock.com',
-                               to=[user.email], bcc=['requests@muckrock.com'])
+            msg = EmailMessage(
+                subject='Payment Failed',
+                body=render_to_string('text/registration/pay_fail.txt', {
+                    'user': user,
+                    'attempt': 'final'}),
+                from_email='info@muckrock.com',
+                to=[user.email], bcc=['requests@muckrock.com']
+            )
             msg.send(fail_silently=False)
         else:
             logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-            msg = EmailMessage(subject='Payment Failed',
-                               body=render_to_string('text/registration/pay_fail.txt',
-                                   {'user': user, 'attempt': attempt}),
-                               from_email='info@muckrock.com',
-                               to=[user.email], bcc=['requests@muckrock.com'])
+            msg = EmailMessage(
+                subject='Payment Failed',
+                body=render_to_string('text/registration/pay_fail.txt', {
+                    'user': user,
+                    'attempt': attempt}),
+                from_email='info@muckrock.com',
+                to=[user.email], bcc=['requests@muckrock.com']
+            )
             msg.send(fail_silently=False)
 
     return HttpResponse()

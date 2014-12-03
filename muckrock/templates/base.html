@@ -1,4 +1,5 @@
 {% load static from staticfiles %}
+{% load compress %}
 <!doctype html>
 
 <html>
@@ -13,11 +14,14 @@
         <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
         <link rel="apple-touch-icon"
               href="{% static 'apple-touch-icon.png' %}" />
+        {% compress css %}
         <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'style.css' %}" />
-        <!-- Temp Font Fix until hosting issues solved -->
-        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,300,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+              type="text/x-scss"
+              href="{% static 'scss/style.scss' %}" />
+        {% endcompress %}
+        <!-- Temp Font Fix until hosting issues solved
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+        -->
         
         <!-- Preloading and Prerendering -->
         {% block preload %}
@@ -42,7 +46,11 @@
         {% endblock twitter_card %}
     </head>
     <body>
+        {% if user.is_authenticated %}
         {% include 'lib/sidebar.html' %}
+        {% else %}
+        {% include 'lib/sidebar.html' with hidden=1 %}
+        {% endif %}
         <div class="container">
             {% include 'lib/header.html' %}
             {% include 'lib/notification.html' %}
@@ -50,14 +58,27 @@
             {% endblock content %}
             {% include 'lib/footer.html' %}
         </div>
+        <!-- SCRIPTS -->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-16635809-1']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+        {% compress js %}
         <script type="text/javascript" 
                 src="{% static 'js/jquery.min.js' %}"></script>
         <script type="text/javascript" 
-                src="{% static 'js/jquery.hotkeys.js' %}"></script>
-        <script type="text/javascript" 
-                src="{% static 'js/app.js' %}"></script>
-        {% include 'autocomplete_light/static.html' %}
+                src="{% static 'js/muckrock.js' %}"></script>
+        {% endcompress %}
+        <!--<script type="text/javascript" 
+                src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
         {% block scripts %}
         {% endblock scripts %}
+        <!-- END SCRIPTS -->
     </body>
 </html>

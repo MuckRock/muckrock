@@ -9,39 +9,52 @@
         background-size: cover;
         background-position: center;
         color: $color-white;
-        @include media($small-layout) { height: 20em; }
-        @include media($medium-layout) { height: 26em; }
-        @include media($large-layout) { height: 30em; }
-        h1 {
-            max-width: 12em;
-            color: $color-white;
-            font-weight: $bold;
-            @include font-sizing(1.75, 3);
-            margin: 0 auto $base-vertical-rhythm;
-            @include media($medium-layout) {
-                max-width: 18em;
-                @include font-sizing(2.5, 3);
-                margin: 0 auto $base-vertical-rhythm;
-            }
-            @include media($large-layout) {
-                @include font-sizing(3, 3);
-                margin: 0 auto 1.5*$base-vertical-rhythm;
-            }
-        }
-        div {
+        @include media($small-layout) { height: 26em; }
+        @include media($medium-layout) { height: 32.5em; }
+        @include media($large-layout) { height: 35em; }
+        
+        .banner-container {
             height: 100%;
+            overflow: hidden;
             @extend %base-spacing;
+            @include row;
             @include background(
                 linear-gradient(
-                    rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.25)
+                    rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.75)
             ));
-            font-weight: $bold;
             text-align: center;
             padding-top: 3.5em;
             @include media($medium-layout) {
-                padding-top: 7.5em;
+                padding-top: 9em;
             }
         }
+        
+        h1 {
+            @include media($small-layout) {
+                @include font-sizing(1.85);
+                margin: 0 auto;
+            }
+            @include media($medium-layout) {
+                @include font-sizing(2.5); 
+                margin: 0 auto;
+            }
+            @include media($large-layout) {
+                @include font-sizing(3.5);
+                margin: 0 auto;
+            }
+            max-width: 15em;
+        }
+        
+        h2 {
+            @include media($small-layout) {
+                @include font-sizing(1.5);
+            }
+        }
+        
+        .call-to-action {
+            margin: $base-margin*2 auto;
+        }
+        
         a.dotted {
             color: $color-white;
             text-decoration: none;
@@ -51,14 +64,13 @@
             }
         }
         .button {
-            display: block;
-            margin: 0 auto $base-vertical-rhythm/4;
-            width: 65%;
+            display: inline-block;
+            margin: $base-vertical-rhythm/4 auto;
             clear: both;
-            @include media($medium-layout) {
-                display: inline-block;
-                width: auto;
-                margin: 0 $base-vertical-rhythm/4 0 0;
+            @include media($small-layout) {
+                display: block;
+                max-width: 15em;
+                margin: 0 auto;
             }
         }
         .image-attribution {
@@ -71,45 +83,29 @@
             margin-left: $base-vertical-rhythm/4;
         }
     }
-    
+    .articles { @include row; }
     .featured-article {
-
-        
+        @include row;
+        margin: $base-margin;
+        padding-bottom: $base-padding;
         .image {
-            @extend %third;
+            @extend %half;
+            @include media($small-layout) {
+                margin-bottom: $base-margin/3;
+            }
         }
-        .article {
-            @extend %two-thirds;
-        }
-        a {
-            @include row;
-            width: 100%;
-            display: block;
-            padding: $base-padding $base-padding;
-            text-decoration: none;
-            color: $color-black;
-            border-top: $base-border-radius solid #326FBF;
-            dfn { color: $color-black; }
-            h1 {
-                @include font-sizing(2, 3);
-                font-weight: $bold;
-            }
-            h2 {
-                @include font-sizing(1.2, 3);
-                font-weight: $normal;
-            }
-            &:hover {
-                background-color: lighten(#326FBF, 10%);
-            }
+        .body { @extend %half; }
+        @include media($medium-layout) {
+            border-bottom: $base-border-width solid $color-grey;
             
-            transition-duration: 0.25s;
-            transition-property: background-color;
-            transition-timing-function: ease;
         }
-        
-        background-size: cover;
-        background-position: center;
-        
+    }
+    .article {
+        @extend %half;
+        &:nth-child(even) { clear: left; }
+        &:nth-child(odd) { clear: none; }
+        padding: 0 $base-padding $base-padding;
+        h1 { @include font-sizing(1.5); }
     }
     
     .stats {

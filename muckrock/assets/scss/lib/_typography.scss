@@ -25,7 +25,7 @@ h4 { @include font-sizing(1.5); }
 h5 { @include font-sizing(1.375); }
 h6 { @include font-sizing(1.25); }
 
-p { margin: $base-vertical-rhythm/2 0; }
+p { margin: 0 0 $base-vertical-rhythm/2 0; }
 
 a {
     color: $color-primary;
@@ -111,11 +111,14 @@ th {
     vertical-align: top;
 }
 
-td { vertical-align: bottom; }
+td { vertical-align: top; }
+
+table + h3 { margin-top: $base-margin/2; }
 
 .default { color: $color-default; }
 .primary { color: $color-primary; }
 .success { color: $color-success; }
+.warning { color: $color-warning; }
 .failure { color: $color-failure; }
 .disabled { color: $color-disabled; }
 

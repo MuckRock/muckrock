@@ -41,11 +41,9 @@ DOGSLOW_EMAIL_FROM = 'info@muckrock.com'
 DOGSLOW_LOGGER = 'dogslow' # can be anything, but must match `logger` below
 DOGSLOW_LOG_TO_SENTRY = True
 
-
-
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
-    ('Allan Lasser', 'lasser.allan+local.server@gmail.com'),
+    ('Allan Lasser', 'allan@muckrock.com'),
 )
 
 MANAGERS = ADMINS
@@ -75,10 +73,25 @@ PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
-
+COMPRESS_ROOT = STATIC_ROOT
 
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
+)
+
+
+if not os.environ.has_key('COMPRESS_OFFLINE'):
+    # compress_offline is set to true during deployment to Heroku
+    COMPRESS_OFFLINE=True 
+COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    #'compressor.filters.csstidy.CSSTidyFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+]
+COMPRESS_PRECOMPILERS = (
+    #('text/x-scss', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -89,8 +102,10 @@ if not DEBUG:
     BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
+    STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
     STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -102,6 +117,11 @@ else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+    STATICFILES_FINDERS = (
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'compressor.finders.CompressorFinder',
+    )
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
@@ -181,31 +201,30 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.staticfiles',
     #'staticfiles',
-    'raven.contrib.django',
-    'gunicorn',
-    'south',
-    'debug_toolbar',
-    'haystack',
-    'django_assets',
-    'djcelery',
-    'filer',
-    'easy_thumbnails',
-    'pingback',
-    'taggit',
+    'autocomplete_light',
+    'compressor',
     'dbsettings',
-    'storages',
+    'debug_toolbar',
     'django_tablib',
-    'urlauth',
-    'epiceditor',
+    'djangosecure',
+    'djcelery',
+    'easy_thumbnails',
+    'filer',
+    'gunicorn',
+    'haystack',
     'markdown_deux',
     'mathfilters',
+    'pingback',
+    'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
-    'autocomplete_light',
     'reversion',
-    'djangosecure',
     'robots',
+    'south',
+    'storages',
+    'taggit',
+    'urlauth',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -231,7 +250,7 @@ def show_toolbar(request):
 
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
-    'INTERCEPT_REDIRECTS': True,
+    'INTERCEPT_REDIRECTS': False,
 }
 
 urlparse.uses_netloc.append('redis')

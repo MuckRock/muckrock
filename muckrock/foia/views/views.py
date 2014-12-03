@@ -30,17 +30,15 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
-    RequestForm, \
-    RequestUpdateForm, \
     ListFilterForm, \
-    MyListFilterForm, \
-    FOIAMultiRequestForm
+    MyListFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
     FOIACommunication, \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
+from muckrock.foia.views.composers import get_foia
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
@@ -53,324 +51,6 @@ from muckrock.views import class_view_decorator
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
-
-def _compose_comm(user, document, jurisdiction):
-        intro = 'This is a request under the Freedom of Information Act.'
-        waiver = ('I also request that, if appropriate, fees be waived as I '
-                  'believe this request is in the public interest. '
-                  'The requested documents  will be made available to the ' 
-                  'general public free of charge as part of the public ' 
-                  'information service at MuckRock.com, processed by a ' 
-                  'representative of the news media/press and is made in the ' 
-                  ' process of news gathering and not for commercial usage.')
-        delay = '20 business days'
-        
-        if jurisdiction.get_intro():
-            intro = jurisdiction.get_intro()                
-        if jurisdiction.get_waiver():
-            waiver = jurisdiction.get_waiver()
-        if jurisdiction.get_days():
-            delay = jurisdiction.get_days()
-        
-        prepend = [
-            'To Whom it May Concern:',
-            intro + ' I hereby request the following records:'
-        ]
-        append = [
-            waiver,
-            ('In the event that fees cannot be waived, I would be '
-            'grateful if you would inform me of the total charges in '     
-            'advance of fulfilling my request. I would prefer the '
-            'request filled electronically, by e-mail attachment if ' 
-            'available or CD-ROM if not.'),
-            ('Thank you in advance for your anticipated cooperation in '
-            'this matter. I look forward to receiving your response to ' 
-            'this request within %s, as the statute requires.' % delay ),
-            'Sincerely, ' + user.get_full_name()
-        ]
-        return '\n\n'.join(prepend + [document] + append)
-
-def _make_request(request, foia):
-        title = foia['title']
-        document = foia['document']
-        slug = slugify(title) or 'untitled'
-        jurisdiction = foia['jurisdiction']
-        agency = foia['agency']
-        is_new_agency = foia['is_new_agency']
-        is_clone = foia['is_clone']
-        parent = foia['parent']
-        if is_new_agency:
-            agency = Agency.objects.create(
-                name=agency[:255],
-                slug=(slugify(agency[:255]) or 'untitled'),
-                jurisdiction=jurisdiction,
-                user=request.user,
-                approved=False
-            )
-            send_mail(
-                '[AGENCY] %s' % agency.name,
-                render_to_string(
-                    'foia/admin_agency.txt',
-                    {'agency': agency}
-                ),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
-        foia = FOIARequest.objects.create(
-            user=request.user,
-            status='started',
-            title=title,
-            jurisdiction=jurisdiction,
-            slug=slug,
-            agency=agency,
-            requested_docs=document,
-            description=document,
-            parent=parent if is_clone else None
-        )
-        FOIACommunication.objects.create(
-            foia=foia,
-            from_who=request.user.get_full_name(),             
-            to_who=foia.get_to_who(),
-            date=datetime.now(),
-            response=False,
-            full_html=False,
-            communication=_compose_comm(request.user, document, jurisdiction)
-        )
-        foia_comm = foia.communications.all()[0]
-        foia_comm.date = datetime.now()
-        return foia, foia_comm, is_new_agency
-
-def _make_user(request, data):
-    """Helper function to create a new user"""
-    username = 'MuckRocker%d' % randint(1, 10000)
-    # XXX verify this is unique
-    password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
-    user = User.objects.create_user(username, data['email'], password)
-    # XXX email the user their account details
-    if ' ' in data['full_name']:
-        user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
-    else:
-        user.first_name = data['full_name']
-    user.save()
-    user = authenticate(username=username, password=password)
-    Profile.objects.create(
-        user=user,
-        acct_type='community',
-        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
-        date_update=datetime.now()
-    )
-    login(request, user)
-    
-@login_required
-def update_request(request, jurisdiction, jidx, slug, idx):
-    """Update a started FOIA Request"""
-    
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-    
-    if not foia.is_editable():
-        messages.error(request, 'You may only edit drafts.')
-        return redirect(foia)
-    if foia.user != request.user or not request.user.is_staff:
-        messages.error(request, 'You may only edit your own drafts.')
-        return redirect(foia)
-    
-    initial_data = {
-        'title': foia.title,
-        'request': foia.first_request(),
-        'agency': foia.agency.name,
-        'embargo': foia.embargo
-    }
-    
-    if request.method == 'POST':
-        form = RequestUpdateForm(request.POST)
-        if form.is_valid():
-            data = form.cleaned_data
-            foia.title = data['title']
-            foia.slug = slugify(foia.title) or 'untitled'
-            foia.embargo = data['embargo']
-            foia_comm = foia.communications.all()[0]
-            foia_comm.date = datetime.now()
-            foia_comm.communication = data['request']
-            foia_comm.save()
-            agency_query = Agency.objects.filter(name=data['agency'])
-            if agency_query:
-                agency = agency_query[0]
-                foia.agency = agency
-                is_new_agency = False
-            else:
-                agency = data['agency']
-                foia.agency = Agency.objects.create(
-                    name=agency[:255],
-                    slug=(slugify(agency[:255]) or 'untitled'),
-                    jurisdiction=jurisdiction,
-                    user=request.user,
-                    approved=False
-                )
-                send_mail(
-                    '[AGENCY] %s' % foia.agency.name,
-                    render_to_string(
-                        'foia/admin_agency.txt',
-                        {'agency': foia.agency}
-                    ),
-                    'info@muckrock.com',
-                    ['requests@muckrock.com'],
-                    fail_silently=False
-                )
-                is_new_agency = True
-            
-            if request.user.get_profile().make_request():
-                foia.submit()
-                messages.success(request, 'Request succesfully submitted.')
-            else:
-                foia.status = 'started'
-                messages.error(request, 'You are out of requests for this month.  '
-                    'Your request has been saved as a draft, please '
-                    '<a href="%s">buy more requests</a> to submit it.'
-                    % reverse('acct-buy-requests'))
-            
-            foia.save()
-            
-            messages.success(request, 'The request has been updated.')
-            return redirect(foia)
-        else:
-            return redirect(foia)
-    else:
-        form = RequestUpdateForm(initial=initial_data)
-    
-    return render_to_response(
-        'forms/foia.html',
-        {'form': form, 'action': 'Update'},
-        context_instance=RequestContext(request)
-    )
-
-def clone_request(request, jurisdiction, jidx, slug, idx):
-    jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
-    foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
-    return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
-
-def create_request(request):
-    initial_data = {}
-    clone = False
-    parent = None
-    if request.GET.get('clone', False):
-        foia_pk = request.GET['clone']
-        foia = get_object_or_404(FOIARequest, pk=foia_pk)
-        clone = True
-        parent = foia
-        initial_data = {
-            'title': foia.title,
-            'document': foia.requested_docs,
-            'agency': foia.agency.name
-        }
-        jurisdiction = foia.jurisdiction
-        level = jurisdiction.level
-        if level == 's':
-            initial_data['state'] = jurisdiction
-        elif level == 'l':
-            initial_data['local'] = jurisdiction
-        initial_data['jurisdiction'] = level
-    if request.method == 'POST':
-        form = RequestForm(request.POST, request=request)
-        if form.is_valid():
-            data = form.cleaned_data
-            title = data['title']
-            document = data['document']
-            level = data['jurisdiction']
-            if level == 'f':
-                jurisdiction = Jurisdiction.objects.filter(level='f')[0]
-            elif level == 's':
-                jurisdiction = data['state']
-            else:
-                jurisdiction = data['local']
-            agency_query = Agency.objects.filter(name=data['agency'])
-            if agency_query:
-                agency = agency_query[0]
-                is_new_agency = False
-            else:
-                agency = data['agency']
-                is_new_agency = True
-
-            if request.user.is_anonymous():
-                _make_user(request, data)
-        
-            foia_request = {
-                'title': title,
-                'document': document,
-                'jurisdiction': jurisdiction,
-                'agency': agency,
-                'is_new_agency': is_new_agency,
-                'is_clone': clone,
-                'parent': parent
-            }
-    
-            foia, foia_comm, is_new_agency = _make_request(request, foia_request)
-            foia_comm.save()
-            foia.save()
-            return redirect(foia)
-    else:
-        if clone:
-            print initial_data
-            form = RequestForm(initial=initial_data, request=request)
-        else:
-            form = RequestForm(request=request)
-    
-    viewable = FOIARequest.objects.get_viewable(request.user)
-    featured = viewable.filter(featured=True)
-    
-    context = {
-        'form': form,
-        'clone': clone,
-        'featured': featured
-    }
-    
-    return render_to_response('forms/create.html', context, 
-                              context_instance=RequestContext(request))
-
-@login_required
-def multirequest_update(request, slug, idx):
-    """Update a started FOIA MultiRequest"""
-
-    foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
-
-    if foia.user != request.user:
-        messages.error(request, 'You may only edit your own requests.')
-        return redirect('foia-mylist')
-
-    if request.method == 'POST':
-        if request.POST.get('submit') == 'Delete':
-            foia.delete()
-            messages.success(request, 'The request was deleted.')
-            return redirect('foia-mylist')
-
-        try:
-            form = FOIAMultiRequestForm(request.POST, instance=foia)
-
-            if form.is_valid():
-
-                foia = form.save(commit=False)
-                foia.user = request.user
-                foia.slug = slugify(foia.title) or 'untitled'
-                foia.save()
-
-                if request.POST['submit'] == 'Submit Requests':
-                    return HttpResponseRedirect(reverse(
-                        'foia-multi',
-                        kwargs={'idx': foia.pk, 'slug': foia.slug}
-                    ))
-
-                messages.success(request, 'The request has been updated.')
-                return redirect(foia)
-
-        except KeyError:
-            # bad post, not possible from web form
-            form = FOIAMultiRequestForm(instance=foia)
-    else:
-        form = FOIAMultiRequestForm(instance=foia)
-
-    return render_to_response('foia/foiamultirequest_form.html', {'form': form, 'foia': foia},
-                              context_instance=RequestContext(request))
 
 class List(ListView):
     """Base list view for other list views to inherit from"""
@@ -568,6 +248,23 @@ class Detail(DetailView):
 
     model = FOIARequest
     context_object_name = 'foia'
+    
+    def dispatch(self, request, *args, **kwargs):
+        jurisdiction = self.kwargs['jurisdiction']
+        jidx = self.kwargs['jidx']
+        slug = self.kwargs['slug']
+        idx = self.kwargs['idx']
+        foia = get_foia(jurisdiction, jidx, slug, idx)
+        if foia.status == 'started': 
+            return redirect(
+                'foia-draft',
+                jurisdiction=jurisdiction,
+                jidx=jidx,
+                slug=slug,
+                idx=idx
+            )
+        else:
+            return super(Detail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
@@ -585,19 +282,25 @@ class Detail(DetailView):
         )
         if not foia.is_viewable(self.request.user):
             raise Http404()
-        if foia.updated and foia.user == self.request.user:
-            foia.updated = False
-            foia.save()
+        if foia.user == self.request.user:
+            if foia.updated:
+                foia.updated = False
+                foia.save()
         return foia
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
+        user = self.request.user
+        is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         context['all_tags'] = Tag.objects.all()
-        context['past_due'] = foia.date_due < datetime.now().date() if foia.date_due else False
-        context['actions'] = foia.actions(self.request.user)
-        context['choices'] = STATUS if self.request.user.is_staff or foia.status == 'started' else STATUS_NODRAFT
+        context['past_due'] =  is_past_due
+        context['admin_actions'] = foia.admin_actions(user)
+        context['user_actions'] = foia.user_actions(user)
+        context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
+        context['contextual_request_actions'] = foia.contextual_request_actions(user)
+        context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
@@ -607,7 +310,6 @@ class Detail(DetailView):
         actions = {
             'status': self._status,
             'tags': self._tags,
-            'Submit': self._submit,
             'Follow Up': self._follow_up,
             'Get Advice': self._question,
             'Problem?': self._flag,
@@ -620,18 +322,6 @@ class Detail(DetailView):
             return actions[request.POST['action']](request, foia)
         except KeyError: # if submitting form from web page improperly
             return redirect(foia)
-    
-    def _submit(self, request, foia):
-        """Submit request for user"""
-        if not foia.user == request.user:
-            messages.error(request, 'Only a request\'s owner may submit it.')
-        if not request.user.get_profile().make_request():
-            msg = 'You do not have any requests remaining. '
-            msg += 'Please purchase more requests and then resubmit.'
-            messages.error(request, msg)
-        foia.submit()
-        messages.success(request, 'Your request was submitted.')
-        return redirect(foia)
 
     def _tags(self, request, foia):
         """Handle updating tags"""

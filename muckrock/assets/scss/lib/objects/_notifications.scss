@@ -2,6 +2,7 @@
 
 ul.notifications {
     display: block;
+    margin-bottom: $base-margin;
     padding: 0;
     list-style-type: none;
     @extend %edge-to-edge;
@@ -15,78 +16,49 @@ ul.notifications {
         background-color: $color-black;
         span {
             display: table-cell;
+            vertical-align: middle;
             &.symbol {
-                /*
-                width: 30%;
-                @include media($medium-layout) { width: 15%; }
-                @include media($large-layout) { width: 10%; }
-                */
-                height: 100%;
-                width: auto;
+                height: 4em;
+                width: 4em;
                 color: $color-white;
                 text-align: center;
-                .svg-icon {
-                    display: inline-block;
-                    width: auto;
-                    height: 2rem;
-                    vertical-align: middle;
-                    margin: 0 0.5em;
-                }
-                .svg-icon path,
-                .svg-icon polygon,
-                .svg-icon rect {
-                    fill: $color-white;
-                }
-                .svg-icon circle {
-                    stroke: $color-white;
-                    stroke-width: 1;
-                }
             }
             &.text {
-                /*
-                width: 70%;
-                @include media($medium-layout) { width: 85%; }
-                @include media($large-layout) { width: 90%; }
-                */
-                padding: $base-vertical-rhythm;
                 color: $color-white;
                 background-color: $color-grey;
+                padding: $base-padding/2;
                 p {
-                    display: inline-block;
                     vertical-align: middle;
                     font-size: 1.1em;
+                    margin: 0;
                     color: $color-black;
                 }
+            }
+            &.dismiss {
+                color: $color-white;
+                background-color: $color-grey;
+                text-align: center;
+                width: 6em;
                 button.close {
-                    display: none;
                     color: $color-white;
                     background: $color-black;
                     float: right;
                     border: none;
                     opacity: 0.7;
                     font-size: 0.8em;
-                    margin-top: $base-vertical-rhythm/2;
+                    margin: 0 1.5em;
                     padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
                     @extend %border-radius;
                     &:hover { opacity: 0.9; }
-                    @include media($medium-layout) {
-                        display: inline-block;
-
-                    }
                 }
             }
         }
         
         @mixin colorize($color) {
-            span.text { background-color: $color; }
+            span.text, span.dismiss { background-color: $color; }
             span.symbol {
                 color: $color;
-                .svg-icon path,
-                .svg-icon polygon,
-                .svg-icon rect {
-                    fill: $color;
-                }
-                .svg-icon circle { stroke: $color; }
+                @include colorize-icon($color);
             }
         }
                 

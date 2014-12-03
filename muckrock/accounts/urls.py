@@ -10,7 +10,8 @@ import muckrock.accounts.views as views
 
 # pylint: disable=bad-whitespace
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(
         r'^login/$',
         auth_views.login,
@@ -47,37 +48,37 @@ urlpatterns = patterns('',
     url(
         r'^change_pw/$',
         auth_views.password_change,
-        {'template_name': 'forms/account/pw_change.html'}, 
+        {'template_name': 'forms/account/pw_change.html'},
         name='acct-change-pw'
     ),
     url(
         r'^change_pw_done/$',
         auth_views.password_change_done,
-        {'template_name': 'forms/account/pw_change_done.html'}, 
+        {'template_name': 'forms/account/pw_change_done.html'},
         name='acct-change-pw-done'
     ),
     url(
         r'^reset_pw/$',
         auth_views.password_reset,
-        {'template_name': 'forms/account/pw_reset_part1.html'}, 
+        {'template_name': 'forms/account/pw_reset_part1.html'},
         name='acct-reset-pw'
     ),
     url(
         r'^reset_pw_done/$',
         auth_views.password_reset_done,
-        {'template_name': 'forms/account/pw_reset_part1_done.html'}, 
+        {'template_name': 'forms/account/pw_reset_part1_done.html'},
         name='acct-reset-pw-done'
     ),
     url(
         r'^reset_pw_complete/$',
         auth_views.password_reset_complete,
-        {'template_name': 'forms/account/pw_reset_part2_done.html'}, 
+        {'template_name': 'forms/account/pw_reset_part2_done.html'},
         name='acct-reset-pw-complete'
     ),
     url(
         r'^reset_pw/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
-        {'template_name': 'forms/account/pw_reset_part2.html'}, 
+        {'template_name': 'forms/account/pw_reset_part2.html'},
         name='acct-reset-pw-confirm'
     ),
 )

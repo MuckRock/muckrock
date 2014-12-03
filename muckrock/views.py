@@ -1,7 +1,6 @@
 """
 Views for muckrock project
 """
-from django.contrib import messages
 from django.db.models import Sum
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -18,10 +17,10 @@ def front_page(request):
     # pylint: disable=E1103
 
     try:
-        featured_article = Article.objects.get_published()[0]
+        articles = Article.objects.get_published()[:3]
     except IndexError:
         # no published articles
-        featured_article = None
+        articles = None
 
     public_reqs = FOIARequest.objects.get_public()
     featured_reqs = public_reqs.filter(featured=True).order_by('-date_done')[:3]
@@ -32,7 +31,6 @@ def front_page(request):
     num_pages = FOIAFile.objects.aggregate(Sum('pages'))['pages__sum']
 
     most_viewed_reqs = FOIARequest.objects.order_by('-times_viewed')[:5]
-    recent_articles = Article.objects.get_published()[:5]
     overdue_requests = FOIARequest.objects.get_overdue().get_public()[:5]
 
     return render_to_response('front_page.html', locals(),

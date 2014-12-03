@@ -232,20 +232,22 @@ class TestProfileUnit(TestCase):
         # save cc = true
         form.cleaned_data = {'save_cc': True, 'token': 'token'}
         profile.pay(form, 4200, 'description')
-        nose.tools.eq_(stripe.Charge.create.call_args, ((),
-                       {'amount': 4200,
-                        'currency': 'usd',
-                        'customer': profile.customer().id,
-                        'description': 'adam: description'}))
+        nose.tools.eq_(stripe.Charge.create.call_args, ((), {
+            'amount': 4200,
+            'currency': 'usd',
+            'customer': profile.customer().id,
+            'description': 'adam: description'
+        }))
 
         # save cc = false and use on file = false, has a token
         form.cleaned_data = {'use_on_file': False, 'save_cc': False, 'token': 'token'}
         profile.pay(form, 4200, 'description')
-        nose.tools.eq_(stripe.Charge.create.call_args, ((),
-                       {'amount': 4200,
-                        'currency': 'usd',
-                        'card': 'token',
-                        'description': 'adam: description'}))
+        nose.tools.eq_(stripe.Charge.create.call_args, ((), {
+            'amount': 4200,
+            'currency': 'usd',
+            'card': 'token',
+            'description': 'adam: description'
+        }))
 
 
 @patch('stripe.Customer', MockCustomer)
@@ -264,14 +266,14 @@ class TestAccountFunctional(TestCase):
         # pylint: disable=bad-whitespace
 
         urls_and_templates = [
-                (reverse('acct-profile', args=['adam']), 'registration/profile.html'),
-                (reverse('acct-login'),                  'registration/login.html'),
-                (reverse('acct-register'),               'registration/register.html'),
-                (reverse('acct-register-free'),          'registration/register_free.html'),
-                (reverse('acct-register-pro'),           'registration/cc.html'),
-                (reverse('acct-reset-pw'),               'registration/password_reset_form.html'),
-                (reverse('acct-logout'),                 'registration/logged_out.html'),
-                ]
+            (reverse('acct-profile', args=['adam']), 'registration/profile.html'),
+            (reverse('acct-login'),                  'registration/login.html'),
+            (reverse('acct-register'),               'registration/register.html'),
+            (reverse('acct-register-free'),          'registration/register_free.html'),
+            (reverse('acct-register-pro'),           'registration/cc.html'),
+            (reverse('acct-reset-pw'),               'registration/password_reset_form.html'),
+            (reverse('acct-logout'),                 'registration/logged_out.html'),
+        ]
 
         for url, template in urls_and_templates:
             get_allowed(self.client, url, [template, 'registration/base.html'])
@@ -345,12 +347,12 @@ class TestAccountFunctional(TestCase):
 
         # get authenticated pages
         urls_and_templates = [
-                ('acct-my-profile',   'registration/profile.html'),
-                ('acct-update',       'registration/update.html'),
-                ('acct-change-pw',    'registration/password_change_form.html'),
-                ('acct-update-cc',    'registration/cc.html'),
-                ('acct-buy-requests', 'registration/cc.html'),
-                ]
+            ('acct-my-profile',   'registration/profile.html'),
+            ('acct-update',       'registration/update.html'),
+            ('acct-change-pw',    'registration/password_change_form.html'),
+            ('acct-update-cc',    'registration/cc.html'),
+            ('acct-buy-requests', 'registration/cc.html'),
+        ]
 
         for url_name, template in urls_and_templates:
             get_allowed(self.client, reverse(url_name), [template, 'registration/base.html'])
@@ -473,11 +475,12 @@ class TestAccountFunctional(TestCase):
                                     {'token': 'token', 'save_cc': True})
         profile = Profile.objects.get(user__username='adam')
         nose.tools.eq_(profile.num_requests, 15)
-        nose.tools.eq_(stripe.Charge.create.call_args, ((),
-                       {'amount': 2000,
-                        'currency': 'usd',
-                        'customer': profile.customer().id,
-                        'description': 'adam: Charge for 5 requests'}))
+        nose.tools.eq_(stripe.Charge.create.call_args, ((), {
+            'amount': 2000,
+            'currency': 'usd',
+            'customer': profile.customer().id,
+            'description': 'adam: Charge for 5 requests'
+        }))
 
         with patch('stripe.Charge') as NewMockCharge:
             NewMockCharge.create.side_effect = stripe.CardError('Message', 'Param', 'Code')
@@ -503,16 +506,18 @@ class TestAccountFunctional(TestCase):
         response = self.client.post(reverse('acct-webhook'),
                                     {'json': json.dumps({'event': 'ping'})}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
-
-        webhook_json = open(os.path.join(SITE_ROOT, 'accounts/fixtures/'
-                            'webhook_recurring_payment_failed.json')).read()
+        webhook_json = open(os.path.join(
+            SITE_ROOT,
+            'accounts/fixtures/webhook_recurring_payment_failed.json'
+        )).read()
         response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
-
-        webhook_json = open(os.path.join(SITE_ROOT, 'accounts/fixtures/'
-                            'webhook_subscription_final_payment_attempt_failed.json')).read()
+        webhook_json = open(os.path.join(
+            SITE_ROOT,
+            'accounts/fixtures/webhook_subscription_final_payment_attempt_failed.json'
+        )).read()
         response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
         nose.tools.eq_(response.status_code, 200)
         nose.tools.eq_(len(mail.outbox), 2)

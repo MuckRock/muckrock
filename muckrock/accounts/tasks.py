@@ -55,12 +55,18 @@ def store_statstics():
         pro_users=Profile.objects.filter(acct_type='pro').count(),
         pro_user_names=';'.join(p.user.username for p in Profile.objects.filter(acct_type='pro')),
         total_page_views=total_page_views,
-        daily_requests_pro=FOIARequest.objects.filter(user__profile__acct_type='pro',
-                                                      date_submitted=yesterday).count(),
-        daily_requests_community=FOIARequest.objects.filter(user__profile__acct_type='community',
-                                                      date_submitted=yesterday).count(),
-        daily_requests_beta=FOIARequest.objects.filter(user__profile__acct_type='beta',
-                                                      date_submitted=yesterday).count(),
+        daily_requests_pro=FOIARequest.objects.filter(
+            user__profile__acct_type='pro',
+            date_submitted=yesterday
+        ).count(),
+        daily_requests_community=FOIARequest.objects.filter(
+            user__profile__acct_type='community',
+            date_submitted=yesterday
+        ).count(),
+        daily_requests_beta=FOIARequest.objects.filter(
+            user__profile__acct_type='beta',
+            date_submitted=yesterday
+        ).count(),
         daily_articles=Article.objects.filter(pub_date=yesterday).count(),
         )
     # stats needs to be saved before many to many relationships can be set

@@ -8,6 +8,7 @@
     @include box-sizing(border-box);
     @extend %border;
     @extend %border-radius;
+    @include outer-container;
     ul {
         list-style-type: none;
         padding-left: 0;
@@ -34,7 +35,7 @@
     display: block;
     width: 100%;
     margin:  $base-margin/2 0;
-    padding: $base-padding/2;
+    padding: $base-padding/6 $base-padding/3;
 
 }
 
@@ -53,25 +54,29 @@
 // Textbox -> Panel -> Controls
 %controls {
     @extend %panel;
-    background-color: darken($color-white, 10%);
+    // background-color: darken($color-white, 10%);
 }
 
-%article {
+%detail {
     @extend %body;
-    .meta {
-        @include row();
-        header {
+    @extend %edge-to-edge;
+    
+    .header-container {
+        @include outer-container;
+        @extend %base-spacing;
+        padding-bottom: 0;
+        .main {
             @extend %two-thirds;
             margin: $base-margin/2 0 0;
             h1 { @include font-sizing(1.5); }
             h2 { @include font-sizing(1); }
             @include media($medium-layout) {
                 padding-right: $base-padding;
-                h1 { @include font-sizing(1.75); }
-                h2 { @include font-sizing(1.25); }
+                h1 { @include font-sizing(2); }
+                h2 { @include font-sizing(1.5); }
             }
         }
-        aside {
+        .aside {
             @extend %third;
             margin: $base-vertical-rhythm/2 0;
             dl { margin-top: 0; }
@@ -84,8 +89,19 @@
             }
         }
     }
-    .main { @include outer-container; }
-    .actions { @extend %controls; }
+    .body {
+        @include outer-container;
+        @extend %base-spacing;
+        .stats {
+            @include row;
+            dl { @extend %quarter; }
+        }
+    }
+    .actions {
+        @include outer-container;
+        @extend %base-spacing;
+        @extend %controls;
+    }
 }
 
 %collection {
@@ -115,6 +131,7 @@
     }
     .filters {
         @include row;
+        ul { @extend %two-thirds; }
         li { display: inline-block; }
         li a {
             margin: 0;
@@ -131,14 +148,14 @@
         
         $filter-toggle: '"filter-checkbox"';
         label[for=#{$filter-toggle}] {
-            @include span-columns(2);
-            @include shift(4);
-            @include omega();
+            @extend %third;
+            @include omega;
             margin-top: $base-vertical-rhythm/2;
             margin-bottom: $base-vertical-rhythm/2;
             display: block;
             cursor: pointer;
             color: $color-primary;
+            text-align: right;
             &:hover {
                 text-decoration: underline;
             }    

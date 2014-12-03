@@ -184,11 +184,12 @@ class CCExpField(forms.MultiValueField):
         self.widget = CCExpWidget(widgets=[fields[0].widget, fields[1].widget])
 
     def clean(self, value):
-        """Make sure the expiration date i sin the future"""
+        """Make sure the expiration date is in the future"""
         exp = super(CCExpField, self).clean(value)
         if exp and date.today() > exp:
             raise forms.ValidationError(
-            "The expiration date you entered is in the past.")
+                "The expiration date you entered is in the past."
+            )
         return exp
 
     def compress(self, data_list):
@@ -210,9 +211,7 @@ class CCExpField(forms.MultiValueField):
 
 #https://github.com/fusionbox/django-fusionbox/blob/master/fusionbox/forms/fields.py
 class USDCurrencyField(forms.DecimalField):
-    """
-    Form field for entering dollar amounts. Allows an optional leading dollar
-    sign, which gets stripped.
-    """
+    """Form field for entering dollar amounts."""
     def clean(self, value):
+        """Allows an optional leading dollar sign, which gets stripped."""
         return super(USDCurrencyField, self).clean(value.lstrip('$'))

@@ -130,10 +130,8 @@
     $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
         display: none;
-        overflow: hidden;
         margin: 0;
         width: 100%;
-        max-width: 100%;
         color: $color-white;
         background-color: $color-agency;
         
@@ -198,6 +196,12 @@
             }
             span.remove {
                 float: right;
+                height: 24px !important;
+                width: 24px !important;
+                background-image: url('img/remove.png') !important;
+                background-size: 90%;
+                background-position: center center !important;
+                &:hover { background-position: center center !important; }
             }
         }
     }
@@ -215,38 +219,27 @@
         }   
     }
     
+    
+    
 }
 
-.clone-candidates {
+
+
+.clone-candidates h2 {
+    @include font-sizing(1.4);
+    margin: $base-margin 0;
+}
+
+.multirequest-create {
     @include outer-container;
-    ul { padding-left: 0; }
-    .row {
+    form {
         @include row;
-        margin-bottom: $base-margin;
-    }
-    .candidate {
-        @extend %quarter;
-        display: inline-block;
-        @extend %border;
-        @extend %border-radius;
-        border-color: $color-black;
-        padding: $base-vertical-rhythm/2;
-        &:first-child {
-            margin-left: 0;
-        }
-        .button {
-            margin-top: 0.5em;
-            margin-right: 0;
-            display: block;
-        }
-        
-        div {
-            &:first-of-type {
-                font-size: 1.2em;
-            }
-            &:last-of-type {
-                font-size: 0.9em;
+        .visible-fields fieldset {
+            @extend %full;
+            textarea {
+                width: 100%;
             }
         }
     }
+    .agencies > label { display: none; }
 }

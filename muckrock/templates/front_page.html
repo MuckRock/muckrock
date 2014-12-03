@@ -7,9 +7,10 @@
 {% block content %}
 <div class="homepage">
     <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
-        <div>
-            <h1>MuckRock brings the Freedom of Information Act into the 21<sup><small>st</small></sup> Century</h1>
-            <p><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a> or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></p>
+        <div class="banner-container">
+            <h1>MuckRock brings public records requests into the 21<sup><small>st</small></sup> Century</h1>
+            <h2>File, track, and share public records requests</h2>
+            <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></div>
         </div>
     </section>
     <section class="stats">
@@ -20,22 +21,33 @@
             <li><span class="stat">{{ num_pages|intcomma }}</span><span class="legend"> page{{ num_pages|pluralize }} of government document{{ num_pages|pluralize }} released</span></li>
         </ul>
     </section>
-    <section class="featured-article">
-        <a href="{{ featured_article.get_absolute_url }}">
+    <section class="articles">
+        {% for article in articles %}
+        {% if forloop.first %}
+        <section class="featured-article">
             <div class="image">
-            {% if featured_article.image %}
-            <img src="{% thumbnail featured_article.image 1200x675 %}">
-            {% endif %}
+                {% if article.image %}
+                <a href="{{ article.get_absolute_url }}">
+                    <img src="{% thumbnail article.image 1200x675 %}">
+                </a>
+                {% endif %}
             </div>
-            <div class="article">
+        {% else %}
+        <section class="article">
+        {% endif %}
+            <div class="body">
             <dfn>Investigative Report</dfn>
-            <h1>{{ featured_article.title }}</h1>
-            {% if featured_article.summary %}
-            <summary>{{ featured_article.summary }}</summary>
+            <h1><a href="{{ article.get_absolute_url }}">
+            {{ article.title }}
+            </a></h1>
+            {% if article.summary %}
+            <summary>{{ article.summary }}</summary>
             {% endif %}
             </div>
-        </a>
+        </section>
+        {% endfor %}
     </section>
+    
     <!--
     {% if featured_reqs %}
     <section class="featured-requests">

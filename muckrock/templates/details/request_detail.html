@@ -30,7 +30,7 @@
 
 {% block header %}
     <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
-        <form action="" method="post" class="status-form" id="status-form">
+        <form method="post" class="status-form" id="status-form">
             {% csrf_token %}
             <select name="status">
             {% for choice in choices %}
@@ -64,7 +64,7 @@
     {% if foia.tags.all or foia.user == request.user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
         {% if foia.user == request.user or user.is_staff %}
-        <form action="" method="post" class="tag-form" id="tag-form">
+        <form method="post" class="tag-form" id="tag-form">
             {% csrf_token %}
             <input type="text" name="tags" value="{% for tag in foia.tags.all %}{% if forloop.first %}{{ tag }}{% else %}, {{ tag }}{% endif %}{% endfor %}" />
             <button type="submit" name="action" value="tags" class="primary button">Save</button>
@@ -80,11 +80,7 @@
     {% if foia.user == request.user or request.user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
-            {% if foia.embargo_date %}
-        <dd>This request is embargoed and will not be visible to others until 30 days after a response is received.</dd>
-            {% else %}
-        <dd>This request is embargoed and will not be made public{% if foia.embargo_date %} until {{ foia.embargo_date|date }}{% endif %}.</dd>
-            {% endif %}
+        <dd>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}it is completed{% endif %}.</dd>
         {% endif %}
         {% if foia.user == request.user %}
             {% if foia.status == "ack" or foia.status == "processed" %}
@@ -100,35 +96,43 @@
 {% endblock header %}
 
 {% block aside %}
-{% if foia.status == 'started' and foia.user == request.user %}
-    {% with remaining=user.get_profile.num_requests %}
-    {% if not remaining %}
-    <form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
-    <div class="buy-requests">
-        <p>Your account has no requests.<br>Purchase more below.</p>
-        <button data-amount="2000"
-                data-description="5 requests ($20.00)"
-                data-email="{{ user.email }}"
-                data-form="#buy-requests"
-                class="checkout-button primary">Buy Requests</button>
-    </div>
-    {% endif %}
-<form action="." method="post" class="draft">
+    {% include 'lib/social.html' with title=foia.title %}
+    {% if foia.is_payable and foia.user == request.user %}
+    <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
-        
-    <input type="submit"
-           name="action"
-           value="Submit"
-           class="primary button"
-           {% if not remaining %}disabled{% endif %}
-    />
-        {% if foia.is_editable %}
-    <a href="{% url 'foia-update' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="default button">Edit</a>
+        <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
+    </form>
+    {% endif %}
+    <div class="controls panel">
+    {% for action in user_actions %}
+        {% if action.is_possible %}
+            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
         {% endif %}
-    <a href="{% url 'foia-delete' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="failure button">Delete</a>
-</form>
-    {% endwith %}
-{% endif %}
+    {% endfor %}
+    {% for action in noncontextual_request_actions %}
+        {% if action.is_possible %}
+             {% if action.title == 'Pay' %}
+            <button data-amount="{{ foia.get_stripe_amount }}"
+                    data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
+                    data-email="{{ request.user.email }}"
+                    data-form="#payment-form"
+                    class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
+                {{ action.title }}
+            </button>
+            {% else %}  
+            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% for action in admin_actions %}
+        {% if action.is_possible %}
+            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+        {% endif %}
+    {% endfor %}
+    </div>  
+{% endblock aside %}
+
+{% block main %}
 {% if foia.has_crowdfund %}
     <section class="crowdfund panel">
     {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
@@ -161,62 +165,11 @@
 <section class="panel">
     <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
     <p><a href="{% url 'acct-register' %}">Sign Up Today</a></p>
-</section> 
-{% endif %}  
-{% endblock aside %}
-
-{% block actions %}
-<section class="actions">
-    {% if user.is_authenticated %}
-        {% if foia.is_payable and foia.user == request.user %}
-        <form method="POST" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
-            {% csrf_token %}
-            <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
-        </form>
-        {% endif %}
-    <form action="" method="post" class="controls">
-        {% csrf_token %}
-        {% for action in actions %}
-            {% if action.class == 'modal' %}
-        <span class="modal-button button">{{ action.label }}</span>
-        <div class="hidden-modal">
-            <h1>{{ action.label }}</h1>
-            <h2>{{ action.title }}</h2>
-            <input type="submit" name="action" value="{{ action.label }}" />
-            <span class="close-modal button">Close</span>
-        </div>
-            {% else %}
-                {% if not action.link %}
-        <button name="{{ action.label }}" {% if action.class %}class="{{ action.class }}"{% endif %}>{{ action.label }}</button>
-                {% else %}
-                    {% if action.label == 'Pay' %}
-        <button data-amount="{{ foia.get_stripe_amount }}"
-                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-                data-email="{{ request.user.email }}"
-                data-form="#payment-form"
-                class="checkout-button{% if action.class %} {{ action.class }}{% endif %}">
-            {{ action.label }}
-        </button>
-                    {% else %}           
-        <a href="{{ action.link }}"
-           class="button{% if action.class %} {{ action.class }}{% endif %}"
-           {% if action.title %}title="{{ action.title }}"{% endif %}>
-            {{ action.label }}
-        </a>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </form> 
-    {% endif %}
 </section>
-{% endblock actions %}
-
-{% block main %}
+{% endif %}
+{% if foia.public_documents or foia.user == request.user %}
 <div class="tabs">
-    {% if foia.public_documents or foia.user == request.user %}
-    <label for="comms-radio">Comms<input type="radio" name="request" id="comms-radio" /></label>
-    {% endif %}
+    <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
     {% if foia.public_documents %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
@@ -224,7 +177,8 @@
     <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
     {% endif %}
 </div>
-<section class="tab-section communications" id="comms">
+{% endif %}
+<section class="tab-section communications" id="request">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
@@ -232,6 +186,33 @@
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
+    <form method="post" class="request controls panel">
+        {% csrf_token %}
+        {% for action in contextual_request_actions %}
+            {% if action.is_possible %}
+                {% if action.class_name == 'modal' %}
+                    <span class="text-area modal-button button">{{ action.title }}</span>
+                    <div class="hidden-modal">
+                        <h1>{{ action.title }}</h1>
+                        <h2>{{ action.desc }}</h2>
+                        <input type="submit" name="action" value="{{ action.title }}" />
+                        <span class="close-modal button">Close</span>
+                    </div>
+                {% endif %}
+                {% if action.class_name == 'reply' %}
+                    <span class="text-area reply-button button">{{ action.title }}</span>
+                    <div class="hidden-reply">
+                        <h1>{{ action.title }}</h1>
+                        <h2>{{ action.desc }}</h2>
+                        <div class="buttons">
+                            <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                            <span class="close-reply button">Close</span>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </form>
 </section>
 {% if foia.public_documents %}
 <section class="tab-section files" id="files">
@@ -247,17 +228,17 @@
 {% endif %}
 {% if foia.user == request.user %}
 <section class="tab-section notes" id="notes">
-    <a class="primary button" 
-       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-    Add a Note</a>
     {% for note in foia.notes.all %}
     <div class="note">
-        <p><strong>{{note.date|date}}</strong><br>
-        {{note.note|linebreaks}}</p>
+        <div class="note-date">{{note.date|date}}</div>
+        <div class="note-body">{{note.note|linebreaks}}</div>
     </div>
     {% empty %}
     <p>Notes are private and can be used to store information about this request.</p>
     {% endfor %}
+    <a class="primary button" 
+       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
+    Add a Note</a>
 </section>
     {% endif %}
 {% endblock main %}
@@ -276,6 +257,23 @@
         });
         $('.close-modal').click(function(){
             nextSelector.children('textarea').remove();
+        });
+    }
+    
+    function textAreaReply(nextSelector) {
+        console.log(nextSelector);
+        nextSelector.show();
+        $('.reply-button').hide();
+        $('.modal-button').hide();
+        nextSelector.siblings('.hidden-reply:visible').hide();
+        if (nextSelector.children('textarea').length == 0) {
+            $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('.buttons'));
+        }
+        nextSelector.children('.buttons').children('.close-reply').click(function(){
+            nextSelector.hide();
+            nextSelector.children('textarea').remove();
+            $('.reply-button').show();
+            $('.modal-button').show();
         });
     }
     
@@ -327,6 +325,8 @@
 
     $(document).ready(function() {
     
+        $('.hidden-reply').hide();
+    
         /* Documents */
     
         $('a.view-file').click(function() {
@@ -342,23 +342,32 @@
         
         /* Modals */
         
-        $('.controls .modal-button').click(function(e){
+        $('.text-area.modal-button').click(function(e){
             e.preventDefault();
             textAreaModal($(this).next());
+            return false;
+        });
+        
+        /* Replies */
+        
+        $('.text-area.reply-button').click(function(e){
+            e.preventDefault();
+            console.log($(this).next());
+            textAreaReply($(this).next());
             return false;
         });
     
         /* Tab Bar */
 
-        $('#comms-radio').parent().addClass( 'active');
-        hideAllExcept($('#comms'));
+        $('#request-radio').parent().addClass( 'active');
+        hideAllExcept($('#request'));
     
         $('input:radio').change(function() {
             $(this).parent().addClass( 'active' );
             $(this).parent().siblings().removeClass( "active" );
         });
-        $('#comms-radio').change(function() {
-            hideAllExcept($('#comms'));
+        $('#request-radio').change(function() {
+            hideAllExcept($('#request'));
         });
         $('#files-radio').change(function() {
             hideAllExcept($('#files'));

@@ -27,7 +27,6 @@ from muckrock.foia.forms import \
     FOIAAdminFixForm, \
     FOIANoteForm, \
     FOIAEmbargoForm, \
-    FOIAEmbargoDateForm, \
     FOIAFileFormSet
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.foia.views.comms import save_foia_comm
@@ -37,10 +36,10 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-Action = namedtuple('Action', 'form_actions msg tests form_class return_url '
+RequestAction = namedtuple('RequestAction', 'form_actions msg tests form_class return_url '
                               'heading value must_own template extra_context')
 
-action_template = 'forms/foia.html'
+action_template = 'forms/base_form.html'
 
 # Helper Functions
 
@@ -97,7 +96,7 @@ def note(request, jurisdiction, jidx, slug, idx):
         foia_note.date = datetime.now()
         foia_note.save()
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = Action(
+    action = RequestAction(
         form_actions=form_actions,
         msg='add notes',
         tests=[],
@@ -118,7 +117,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
         foia.delete()
         messages.success(request, 'The draft has been deleted.')
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = Action(
+    action = RequestAction(
         form_actions=form_actions,
         msg='delete',
         tests=[(
@@ -150,23 +149,28 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             foia.embargo
         )
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = Action(
-        form_actions=form_actions,
-        msg='embargo',
-        tests=[(
-            lambda f: f.user.get_profile().can_embargo(),
-            'You may not embargo requests with your account type'
-        )],
-        form_class=lambda r, f: FOIAEmbargoDateForm if f.date_embargo \
-                                                    else FOIAEmbargoForm,
-        return_url=lambda r, f: f.get_absolute_url(),
-        heading='Update the Embargo Date',
-        value='Update',
-        must_own=True,
-        template=action_template,
-        extra_context=lambda f: {}
-    )
-    return _foia_action(request, foia, action)
+    finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
+    if foia.embargo or foia.status not in finished_status:
+        foia.embargo = not foia.embargo
+        foia.save()
+        return redirect(foia)
+    else:
+        action = RequestAction(
+            form_actions=form_actions,
+            msg='embargo',
+            tests=[(
+                lambda f: f.user.get_profile().can_embargo(),
+                'You may not embargo requests with your account type'
+            )],
+            form_class=lambda r, f: FOIAEmbargoForm,
+            return_url=lambda r, f: f.get_absolute_url(),
+            heading='Update the Embargo Date',
+            value='Update',
+            must_own=True,
+            template='forms/foia/embargo.html',
+            extra_context=lambda f: {}
+        )
+        return _foia_action(request, foia, action)
 
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
@@ -227,7 +231,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
             fail_silently=False
         )
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = Action(
+    action = RequestAction(
         form_actions=form_actions,
         msg='enabled crowdfunding for',
         tests=[

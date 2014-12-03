@@ -6,8 +6,10 @@ $base-padding:          $base-vertical-rhythm;
 /* Typography */
 $light:                 300;
 $normal:                400;
-$bold:                  600;
-$base-font-family:      'Source Sans Pro', 'Helvetica Neue', 'sans-serif';
+$bold:                  500;
+$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
+$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
+$base-font-family:      $font-sans-serif;
 $base-font-weight:      $normal;
 $base-font-size:        1em;
 $base-line-height:      $base-vertical-rhythm;
@@ -24,22 +26,26 @@ $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 $small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
 
 /* Colors */
-$color-white:           #f4f4f4;        // White
-$color-black:           #21282c;        // Black
-$color-grey:            #B3BECB;        // Light Grey
+$color-white:           hsl(0, 0%, 96%);        // White
+$color-black:           hsl(218, 15%, 18%);     // Black
+$color-grey:            hsl(218, 15%, 80%);     // Light Grey
 $color-gray:            $color-grey;
-$color-primary:         #3a82ff;        // Blue
-$color-success:         #02CF6B;        // Green
-$color-failure:         #E35336;        // Red
-$color-warning:         #D9C227;        // Yellow
-$color-default:         #6b6a65;        // Dark Grey
+$color-default:         hsl(218, 15%, 65%);     // Dark Grey
+$color-primary:         hsl(218, 100%, 60%);    // Blue
+$color-success:         hsl(151, 100%, 41%);    // Green
+$color-failure:         hsl(10, 80%, 55%);      // Red
+$color-warning:         hsl(51, 80%, 45%);      // Yellow
+
 $base-gradient-darken:  8%;
 $color-disabled:        lighten($color-grey, 10%);
 $color-odd-background:  darken($color-white, 5%);
 
 /* Menus */
 $menu-breakpoint:       1024px;
-$mobile-menu-width:     250px;
-$tablet-menu-width:     300px;
-$desktop-menu-width:    23%;
+$mobile-menu-width:     240px;
+$tablet-menu-width:     240px;
+$desktop-menu-width:    22%;
 $menu-animation:        all 0.25s ease;
+
+/* Animation */
+$base-duration:         0.25s;

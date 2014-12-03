@@ -1,52 +1,34 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
+{% load thumbnail %}
 {% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
 {% block type %}jurisdiction{% endblock type %}
+
+{% block image %}
+{% if jurisdiction.image %}
+style="background-image:url('{% thumbnail jurisdiction.image 1200x675 %}');"
+{% endif %}
+{% endblock %}
 
 {% block header %}
 	<h1>{{ jurisdiction.name }}</h1>
 	{% if jurisdiction.parent %}
 	<h2>A {% if jurisdiction.level == "s" %}state{% else %}locality{% endif %} of <a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent.name }}</a></h2>
     {% endif %}
-    {% if jurisdiction.image %}
-    <figure>
-        <img src="{{ MEDIA_URL }}{{ jurisdiction.image }}" alt="" />
-        {% if jurisdiction.image_attr_line %}
-        <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
-        {% endif %}
-    </figure>
-    {% else %}
+    
+    {% comment %}
     <object class="failure panel">
         <p><strong>This jurisdiction is incomplete!</strong></p>
         <p>To help us complete it, click &ldquo;Suggest a Change&rdquo; at the bottom of this page.</p>
     </object>
-    {% endif %}
+    {% endcomment %}
+    
 {% endblock header %}
 
 {% block aside %}
-    <div class="dl-group">
-        <dl>
-            <dt>Allowed Response Time</dt>
-            {% with jurisdiction.get_days as days %}
-                {% if days %}
-                    <dd>{{days}} day{{days|pluralize}}</dd>
-                {% else %}
-                    <dd>No limit</dd>
-                {% endif %}
-            {% endwith %}
-        </dl>
-
-        <dl>
-            <dt>Average Response Time</dt>
-            <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
-        </dl>
-
-        {% include 'lib/request_stats.html' %}
-        
-        {% include 'lib/appeal_stats.html' %}
-        
-    </div>
-    
+    {% if jurisdiction.image_attr_line %}
+    <p><small>{{ jurisdiction.image_attr_line | safe }}</small></p>
+    {% endif %}
     {% if user.is_authenticated %}
     <span class="modal-button button">Submit a Change</span>
     <div class="hidden-modal">
@@ -68,16 +50,37 @@
                     {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
             {% endfor %}
             <input type="submit" name="submit" value="Submit" class="primary button" />
+            <span class="close-modal button">Close</span>
         </form>
     </div>
-    {% endif %}
+    {% endif %}    
 {% endblock aside %}
 
 {% block main %}
 
+    <section class="stats">
+        {% include 'lib/request_stats.html' %}
+        {% include 'lib/appeal_stats.html' %}
+        <dl>
+            <dt>Allowed Response Time</dt>
+            {% with jurisdiction.get_days as days %}
+                {% if days %}
+                    <dd>{{days}} day{{days|pluralize}}</dd>
+                {% else %}
+                    <dd>No limit</dd>
+                {% endif %}
+            {% endwith %}
+        </dl>
+        <dl>
+            <dt>Average Response Time</dt>
+            <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
+        </dl> 
+    </section>
+
     {{ agency.public_notes|markdown:"trusted" }}
 
-    {% include 'lib/foia_table.html' with requests=foia_requests title='Recent Requests' %}
+    <h3>Recent Requests <small><a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
+    {% include 'lib/foia_table.html' with requests=foia_requests %}
     
     {% if jurisdiction.agencies.count %}
     <h3>Documented Agencies</h3>

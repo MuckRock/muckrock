@@ -1,99 +1,101 @@
 /* Details */
 
+@mixin header-image {
+    .header {
+        position: relative;
+        display: block;
+        height: 42.5em;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+    }
+    .header-container {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: $color-white;
+    }
+}
+
 .detail {
-    @extend %article;
+    @extend %detail;
+    &.news, &.agency, &.jurisdiction {
+        @include header-image;
+    }
     &.news {
-        @extend %edge-to-edge;
-        header {
-            position: relative;
-            display: block;
-            height: 35em;
-            background-size: cover;
-            background-position: center top;
-            background-repeat: no-repeat;
-            .meta {
-                @include row;
-                @extend %base-spacing;
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                background: $color-white;
-            }
-            .title {
-                @extend %two-thirds;
-                h1 {
-                    font-weight: $bold;
-                    @include media($small-layout) {
-                        @include font-sizing(1.75);
-                    }
-                    @include media($medium-layout) {
-                        @include font-sizing(2);
-                    }
-                    @include media($large-layout) {
-                        @include font-sizing(2.25);
-                    }
-                    margin-top: 0;
-                }
-                summary {
-                    font-weight: $normal;
-                    @include media($small-layout) {
-                        @include font-sizing(1.25);
-                    }
-                    @include media($large-layout) {
-                        @include font-sizing(1.5);
-                    }
-                }
-            }
-            .author {
-                @extend %third;
-                padding-left: $base-padding;
-                h2, .article-date {
-                    @include font-sizing(1.25);
-                    font-weight: $light;
-                    color: $color-black;
-                }
-                .author-name { @include font-sizing(1.275); }
-                ul {
-                    list-style-type: none;
-                    padding-left: 0;
-                    span { display: block; }
-                }
+        .main {
+            h1 {
+                font-weight: $bold;
                 @include media($small-layout) {
-                    @include row;                    
-                    margin: $base-margin/2 0;
-                    border-top: $base-border-width solid $color-grey;
-                    border-bottom: $base-border-width solid $color-grey;
-                    padding: $base-padding/2 0;
-                    .half { @include span-columns(2); }
-                    ul { margin-top: 0; }
+                    @include font-sizing(1.75);
+                }
+                @include media($medium-layout) {
+                    @include font-sizing(2);
+                }
+                @include media($large-layout) {
+                    @include font-sizing(2.25);
+                }
+                margin-top: 0;
+            }
+            summary {
+                font-weight: $normal;
+                @include media($small-layout) {
+                    @include font-sizing(1.25);
+                }
+                @include media($large-layout) {
+                    @include font-sizing(1.5);
                 }
             }
         }
-        .main {
-            @extend %base-spacing;
+        .aside {
+            padding-left: $base-padding;
+            h2, .article-date {
+                @include font-sizing(1.2);
+                font-weight: $light;
+                color: $color-black;
+            }
+            .author-name { @include font-sizing(1.275); }
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+                span { display: block; }
+            }
+            @include media($small-layout) {
+                @include row;                    
+                margin: $base-margin/2 0;
+                border-top: $base-border-width solid $color-grey;
+                border-bottom: $base-border-width solid $color-grey;
+                padding: $base-padding/2 0;
+                .half { @include span-columns(2); }
+                ul { margin-top: 0; }
+            }
+        }
+        .body {
             @include font-sizing(1.1, 1.5);
+            margin: $base-margin auto;
             padding-top: 0;
             max-width: 45em;
-            div[id^='viewer'] {
-                max-width: 90%;
-                margin: $base-margin auto;
-                @include media($large-layout) {
-                    margin: $base-margin auto $base-margin 0;
-                }
-                
+        }
+        // Fixes for embedded content
+        div[id^='viewer'] {
+            max-width: 90%;
+            margin: $base-margin auto;
+            @include media($large-layout) {
+                margin: $base-margin auto $base-margin 0;
             }
-            .iframe-container {
-                position: relative;
-                padding-bottom: 75%;
-                height: 0;
-                overflow: hidden;
-                > iframe {
-                    position: absolute;
-                    top:0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                }
+            
+        }
+        .iframe-container {
+            position: relative;
+            padding-bottom: 75%;
+            height: 0;
+            overflow: hidden;
+            & > iframe {
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+                height: 100%;
             }
         }
     }
@@ -229,6 +231,55 @@
                 width: 100%;
                 height: 66em;
                 margin: $base-vertical-rhythm auto;
+            }
+        }
+        .notes {
+            .note {
+                @include row;
+                margin: $base-margin 0 0;
+                padding: 0 0 $base-padding/2;
+                border-bottom: $base-border-width solid $color-grey;
+                .note-date {
+                    @extend %quarter;
+                    color: $color-grey;
+                    text-align: right;
+                }
+                .note-body { @extend %three-quarters; }
+            }
+
+            .button {
+                display: block;
+                width: 10em;
+                margin: 1.5em auto;
+            }
+        }
+        .request.controls {
+            position: relative;
+            .hidden-reply {
+                display: block;
+                max-width: 30em;
+                margin: 0 auto;
+                @include row;
+                h1 {
+                    @include font-sizing(1.5);
+                    @extend %half;
+                }
+                h2 {
+                    @include font-sizing(1.25);
+                    @extend %half;
+                    text-align: right;
+                }
+                textarea {
+                    @extend %full;
+                    height: 10em;
+                    overflow-y: scroll;
+                    resize: vertical;
+                    margin-bottom: $base-margin/2;
+                }
+                .buttons {
+                    @extend %full;
+                    input, span { float: right; }
+                }
             }
         }
     }
