@@ -87,7 +87,8 @@
     .articles { @include outer-container; }
     .featured-article {
         @include row;
-        padding: $base-padding 0;
+        padding: $base-padding/2;
+        @include media($medium-layout) { padding: $base-padding 0; }
         .image {
             @extend %half;
             @include media($small-layout) {
@@ -143,5 +144,8 @@
         
     }
     
-    .footer-container { padding: 0 $base-vertical-rhythm; }
+    .footer-container {
+        padding: 0 $base-padding/2;
+        @include media($medium-layout) { padding: 0 $base-padding; }
+    }
 }
