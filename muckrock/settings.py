@@ -91,7 +91,7 @@ COMPRESS_CSS_FILTERS = [
 ]
 COMPRESS_PRECOMPILERS = (
     #('text/x-scss', 'django_libsass.SassCompiler'),
-    ('text/x-scss', '/app/vendor/bundle/bin/sass --sourcemap=none {infile} {outfile}'),
+    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
