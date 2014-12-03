@@ -130,7 +130,7 @@ def _make_request(request, foia_request, parent=None):
             description=foia_request['document'],
             parent=parent
         )
-        FOIACommunication.objects.create(
+        foia_comm = FOIACommunication.objects.create(
             foia=foia,
             from_who=request.user.get_full_name(),             
             to_who=foia.get_to_who(),
@@ -145,8 +145,6 @@ def _make_request(request, foia_request, parent=None):
                 foia.jurisdiction.get_days()
             )
         )
-        foia_comm = foia.communications.all()[0]
-        foia_comm.date = datetime.now()
         return foia, foia_comm
 
 def _make_user(request, data):
@@ -297,7 +295,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
-            foia_comm = foia.communications.all()[0]
+            foia_comm = foia.last_comm()
             foia_comm.date = datetime.now()
             foia_comm.communication = data['request']
             foia_comm.save()
