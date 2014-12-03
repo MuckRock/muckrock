@@ -122,13 +122,36 @@
     &.request {
         h3 { font-size: 1.25em; }
         .draft {
-            @include row();
+            @include row;
             button, .button {
                 display: block;
                 @extend %half;
             }
         }
         .crowdfund {
+            @include row;
+            .crowdfund-info {
+                @include media($small-layout) {
+                    @include span-columns(4);
+                }
+                @include media($medium-layout) {
+                    @include span-columns(4);
+                }
+                @include media($large-layout) {
+                    @include span-columns(9);
+                }
+            }
+            .crowdfund-form {
+                @include media($small-layout) {
+                    @include span-columns(4);
+                }
+                @include media($medium-layout) {
+                    @include span-columns(2);
+                }
+                @include media($large-layout) {
+                    @include span-columns(3);
+                }
+            }
             border-color: $color-success;
             h1, h2, h3 { font-weight: $normal; }
             h1 {
