@@ -1,9 +1,8 @@
 /* Layouts */
 
 .container {
-    @extend %base-spacing;
-    padding-top: 0 $base-padding/2;
-    @include media($medium-layout) { padding-top: $base-padding; }
+    padding: $base-padding/2;
+    @include media($medium-layout) { padding: $base-padding; }
 }
 
 @import 'details';
