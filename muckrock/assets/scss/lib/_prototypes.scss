@@ -64,7 +64,6 @@
     .header-container {
         @include outer-container;
         @extend %base-spacing;
-        padding-bottom: 0;
         .main {
             @extend %two-thirds;
             margin: $base-margin/2 0 0;

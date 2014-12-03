@@ -60,8 +60,8 @@ html, body { min-height: 100%; }
 }
 
 %base-spacing {
-    padding: $base-padding/2;
-    @include media($medium-layout) { padding: $base-padding; }
+    padding: 0 $base-padding/2;
+    @include media($medium-layout) { padding: 0 $base-padding; }
 }
 
 %edge-to-edge {

@@ -59,7 +59,7 @@
         from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
     {% endif %}
     <h1>{{ foia.title }}</h1>
-    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %} It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
+    <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %}<br>It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
     <dl>
     {% if foia.tags.all or foia.user == request.user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
@@ -103,6 +103,7 @@
         <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
     </form>
     {% endif %}
+    {% if user.is_authenticated %}
     <div class="controls panel">
     {% for action in user_actions %}
         {% if action.is_possible %}
@@ -129,7 +130,13 @@
             <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
         {% endif %}
     {% endfor %}
-    </div>  
+    </div>
+    {% else %}
+    <section class="panel">
+        <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
+        <small><a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a></small>
+    </section>
+    {% endif %}
 {% endblock aside %}
 
 {% block main %}
@@ -161,12 +168,6 @@
     {% endwith %}
     </section>
 {% endif %}
-{% if not user.is_authenticated and not foia.has_crowdfund %}
-<section class="panel">
-    <p>MuckRock is a participatory news tool that allows anyone to easily file, track, and share their public records requests with an easy, intuitive letter generator and automated follow up tools.</p>
-    <p><a href="{% url 'acct-register' %}">Sign Up Today</a></p>
-</section>
-{% endif %}
 {% if foia.public_documents or foia.user == request.user %}
 <div class="tabs">
     <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
@@ -186,6 +187,7 @@
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
+    {% if foia.user == request.user %}
     <form method="post" class="request controls panel">
         {% csrf_token %}
         {% for action in contextual_request_actions %}
@@ -213,6 +215,7 @@
             {% endif %}
         {% endfor %}
     </form>
+    {% endif %}
 </section>
 {% if foia.public_documents %}
 <section class="tab-section files" id="files">

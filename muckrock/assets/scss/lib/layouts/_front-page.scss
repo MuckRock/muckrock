@@ -16,7 +16,8 @@
         .banner-container {
             height: 100%;
             overflow: hidden;
-            @extend %base-spacing;
+            padding: $base-padding/2;
+            @include media($medium-layout) { padding: $base-padding; }
             @include row;
             @include background(
                 linear-gradient(
@@ -83,11 +84,10 @@
             margin-left: $base-vertical-rhythm/4;
         }
     }
-    .articles { @include row; }
+    .articles { @include outer-container; }
     .featured-article {
         @include row;
-        margin: $base-margin;
-        padding-bottom: $base-padding;
+        padding: $base-padding 0;
         .image {
             @extend %half;
             @include media($small-layout) {
@@ -111,7 +111,8 @@
     .stats {
         $color-stat-dark: #0E2340;
         $color-stat-light: #326FBF;
-        @extend %base-spacing;
+        padding: $base-padding/2;
+        @include media($medium-layout) { padding: $base-padding; }
         width: 100%;
         color: $color-white;
         @include background(linear-gradient($color-stat-dark, darken($color-stat-dark, 3%)));
@@ -122,7 +123,7 @@
             margin: $base-margin auto;
         }
         ul {
-            @include row;
+            @include outer-container;
             text-align: center;
         }
         li { @extend %third; }

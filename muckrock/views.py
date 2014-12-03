@@ -17,7 +17,7 @@ def front_page(request):
     # pylint: disable=E1103
 
     try:
-        articles = Article.objects.get_published()[:3]
+        articles = Article.objects.get_published()[:1]
     except IndexError:
         # no published articles
         articles = None

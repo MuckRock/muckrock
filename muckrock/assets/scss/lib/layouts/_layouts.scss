@@ -1,6 +1,10 @@
 /* Layouts */
 
-.container { @extend %base-spacing; }
+.container {
+    @extend %base-spacing;
+    padding-top: 0 $base-padding/2;
+    @include media($medium-layout) { padding-top: $base-padding; }
+}
 
 @import 'details';
 @import 'lists';

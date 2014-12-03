@@ -206,9 +206,9 @@
         }
         .tab-section {
             display: none;
-            border-top: $base-border-width solid $color-grey;
             &.active { display: block; }
         }
+        .tabs + .tab-section { border-top: $base-border-width solid $color-grey; }
         .files {
             ul {
                 list-style-type: none;
