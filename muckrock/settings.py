@@ -482,7 +482,7 @@ CACHES = {
 
 if 'MEMCACHIER_SERVERS' in os.environ:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
-    CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
+    CACHES['default']['LOCATION'] = os.environ.get('MEMCACHIER_SERVERS')
 
 REST_FRAMEWORK = {
     'PAGINATE_BY': 20,                 # Default to 20
