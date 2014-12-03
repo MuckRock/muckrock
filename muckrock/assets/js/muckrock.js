@@ -72,14 +72,14 @@ $(document).ready(function() {
         }
     });
     
-    notificationCloseButton = $('.notification .dismiss .close');
+    var notificationCloseButton = $('.notification .dismiss .close');
     notificationCloseButton.click(function(){
         $(this).parent().parent().hide();
-        notificationContainer = $('.notifications');
+        var notificationContainer = $('.notifications');
         if (notificationContainer.children(':visible').length == 0) {
             notificationContainer.hide();
         }
-    });    
+    });
     
     /* Key and Swipe Bindings
     $(document).bind('keydown', 'm', toggleSidebar());
