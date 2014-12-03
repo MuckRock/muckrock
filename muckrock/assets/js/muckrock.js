@@ -56,9 +56,6 @@ $(document).ready(function() {
         var embed = '<div class="viewer" id="viewer-' + doc_id + '"></div> <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script> <script>DV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", { height: 600, sidebar: false, container: "#viewer-' + doc_id + '"});<\/script>';
         textarea.val(embed);
     });    
-    $('.notification button.close').click(function() {
-        $(this).parent().parent().hide();
-    });
     
     $('.message .visibility').click(function() {
         var header = $(this).parent();
@@ -74,6 +71,15 @@ $(document).ready(function() {
             $(this).html('&#9660;');
         }
     });
+    
+    notificationCloseButton = $('.notification .dismiss .close');
+    notificationCloseButton.click(function(){
+        $(this).parent().parent().hide();
+        notificationContainer = $('.notifications');
+        if (notificationContainer.children(':visible').length == 0) {
+            notificationContainer.hide();
+        }
+    });    
     
     /* Key and Swipe Bindings
     $(document).bind('keydown', 'm', toggleSidebar());
