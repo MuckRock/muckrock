@@ -181,21 +181,21 @@
             list-style-type: none;
             overflow: hidden;
             padding-left: $base-vertical-rhythm;
+            border-bottom: $base-border-width solid $color-grey;
             input[type="radio"] { display: none; }
             label {
                 display: block;
                 float: left;
-                margin: 0 0 2*-$base-border-width;
                 padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
                 @extend %border;
                 border-left: none;
                 border-bottom: none;
                 &:first-of-type {
-                    border-left-radius: $base-border-radius;
+                    border-top-left-radius: $base-border-radius;
                     border-left: $base-border-width solid $color-grey;
                 }
                 &:last-of-type {
-                    border-right-radius: $base-border-radius;
+                    border-top-right-radius: $base-border-radius;
                 }
                 &.active {
                     color: white;
