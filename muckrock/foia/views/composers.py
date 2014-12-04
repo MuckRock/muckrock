@@ -164,7 +164,6 @@ def _process_request_form(request):
         data = form.cleaned_data
         title = data['title']
         document = data['document']
-        
         level = data['jurisdiction']
         if level == 'f':
             jurisdiction = Jurisdiction.objects.filter(level='f')[0]
@@ -172,14 +171,11 @@ def _process_request_form(request):
             jurisdiction = data['state']
         else:
             jurisdiction = data['local']
-            
-        agency_query = Agency.objects.filter(name=data['agency'])
+        agency_query = Agency.objects.filter(name=data['agency'], jurisdiction=jurisdiction)
         agency = agency_query[0] if agency_query \
                  else _make_new_agency(request, data['agency'], jurisdiction)
-
         if request.user.is_anonymous():
             _make_user(request, data)
-    
         foia_request.update({
             'title': title,
             'document': document,
