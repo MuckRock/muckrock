@@ -4,6 +4,12 @@
 <aside id="sidebar-menu">
 {% endif %}
     <nav class="sidebar">
+        {% if broadcast %}
+        <div class="broadcast panel">
+            <p>{{ broadcast }}</p>
+            <span id="close-broadcast">&times;</span>
+        </div>
+        {% endif %}
         <form name="search" action="/search/" method="get">
             <!--{% csrf_token %}-->
             <input type="search" name="q" placeholder="Search">

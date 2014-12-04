@@ -28,17 +28,17 @@ class EmailOptions(dbsettings.Group):
 
 options = EmailOptions()
 
+ACCT_TYPES = [
+    ('admin', 'Admin'),
+    ('beta', 'Beta'),
+    ('community', 'Community'),
+    ('pro', 'Professional'),
+    ('proxy', 'Proxy'),
+]
+
 class Profile(models.Model):
     """User profile information for muckrock"""
     # pylint: disable=too-many-public-methods
-
-    acct_types = (
-        ('admin', 'Admin'),
-        ('beta', 'Beta'),
-        ('community', 'Community'),
-        ('pro', 'Professional'),
-        ('proxy', 'Proxy'),
-    )
 
     email_prefs = (
         ('instant', 'Instant'),
@@ -82,7 +82,7 @@ class Profile(models.Model):
         blank=True
     )
     follow_questions = models.BooleanField(default=False)
-    acct_type = models.CharField(max_length=10, choices=acct_types)
+    acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
     public_email = models.EmailField(max_length=255, blank=True)
