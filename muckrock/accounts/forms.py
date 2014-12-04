@@ -18,10 +18,8 @@ class ProfileForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Profile
 
-
 class UserChangeForm(ProfileForm):
     """A form for updating user information"""
-
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.EmailField()
@@ -43,120 +41,7 @@ class UserChangeForm(ProfileForm):
 
         return email
 
-
-class CreditCardForm(forms.ModelForm):
-    """A form for the user's CC"""
-
-    name = forms.CharField(
-        label='Name on Card',
-        widget=forms.TextInput(
-            attrs={'class': 'card-name stripe-sensitive required'}
-        )
-    )
-    card_number = forms.CharField(
-        max_length=20,
-        widget=forms.TextInput(
-            attrs={
-                'autocomplete': 'off',
-                'class': 'card-number stripe-sensitive required'
-            }
-        )
-    )
-    cvc = forms.CharField(
-        max_length=4,
-        label='CVC',
-        widget=forms.TextInput(
-            attrs={
-                'autocomplete': 'off',
-                'class': 'card-cvc stripe-sensitive required'
-            }
-        )
-    )
-    expiration = CCExpField(required=False)
-    token = forms.CharField(required=False, widget=forms.HiddenInput())
-
-    def clean(self):
-        """CC info is required"""
-        token = self.cleaned_data.get('token')
-        if not token:
-            msg = 'Please enter valid credit card information'
-            raise forms.ValidationError(msg)
-        return self.cleaned_data
-
-    class Meta:
-        # pylint: disable=R0903
-        # This is a model form just for inheritance purposes
-        model = User
-        fields = ['name', 'card_number', 'cvc', 'expiration', 'token']
-
-
-class UpgradeSubscForm(CreditCardForm):
-    """A form for subscribing to pro accounts"""
-
-    use_on_file = forms.BooleanField(required=False, label='Use card on file', initial=True)
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(UpgradeSubscForm, self).__init__(*args, **kwargs)
-
-        if self.request.user.is_authenticated():
-            card = self.request.user.get_profile().credit_card()
-        else:
-            card = None
-        if not card:
-            del self.fields['use_on_file']
-        else:
-            self.fields['use_on_file'].help_text = '%s ending in %s' % (card.type, card.last4)
-
-    def clean(self):
-        """Validate the form"""
-
-        use_on_file = self.cleaned_data.get('use_on_file')
-        token = self.cleaned_data.get('token')
-
-        if not use_on_file and not token:
-            raise forms.ValidationError('Please enter valid credit card information')
-
-        return self.cleaned_data
-
-    class Meta(CreditCardForm.Meta):
-        # pylint: disable=R0903
-        fields = ['use_on_file', 'name', 'card_number', 'cvc', 'expiration', 'token']
-
-
-class PaymentForm(UpgradeSubscForm):
-    """A form for buying requests"""
-
-    save_cc = forms.BooleanField(required=False, initial=True, label='Save for future use')
-
-    def clean(self):
-        """Validate the form"""
-
-        super(PaymentForm, self).clean()
-
-        save_cc = self.cleaned_data.get('save_cc')
-        use_on_file = self.cleaned_data.get('use_on_file')
-
-        if use_on_file and save_cc:
-            raise forms.ValidationError('You may not use the card on file and save a new one')
-
-        return self.cleaned_data
-
-    class Meta(UpgradeSubscForm.Meta):
-        # pylint: disable=R0903
-        fields = ['use_on_file', 'name', 'card_number', 'cvc', 'expiration', 'save_cc', 'token']
-
-
-class CancelSubscForm(forms.Form):
-    """Cancel subscription form"""
-    confirm = forms.BooleanField(label='Are you sure you want to cancel your Pro Subscription?')
-
-    def __init__(self, *args, **kwargs):
-        kwargs.pop('request', None)
-        super(CancelSubscForm, self).__init__(*args, **kwargs)
-
-
-class RegisterFree(UserCreationForm):
+class RegisterForm(UserCreationForm):
     """Register for a community account"""
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
@@ -185,14 +70,3 @@ class RegisterFree(UserCreationForm):
         if User.objects.filter(email__iexact=email):
             raise forms.ValidationError("User with this Email already exists.")
         return email
-
-
-class RegisterPro(RegisterFree, CreditCardForm):
-    """Register for a pro account"""
-    # pylint: disable=R0901
-
-    class Meta(RegisterFree.Meta):
-        # pylint: disable=R0903
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2',
-                  'name', 'card_number', 'cvc', 'expiration', 'token']
-

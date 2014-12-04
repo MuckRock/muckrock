@@ -1,9 +1,81 @@
-{% extends 'forms/base_form.html' %}
+{% extends 'base.html' %}
+{% load static from staticfiles %}
 {% block title %}MuckRock &bull; Subscription{% endblock title %}
-{% block form-type %}subscription{% endblock %}
-{% block form-head %}
-    <h1>{{heading}}</h1>
-    {% if desc %}
-    <p>{{desc}}</p>
-    {% endif %}
-{% endblock form-head %}
+{% block content %}
+<div class="subscription page">
+    <header>
+        <h1 class="heading">Subscription</h1>
+        <p class="subheading"><sup>$</sup><span class="amount">40</span> per month</p>
+        <div class="help panel">
+            <p>Question?<br><a href="mailto:info@muckrock.com" title="Email MuckRock">Contact us.</a></p>
+        </div>
+    </header>
+    <section class="body">
+        <section class="features">
+            <h2>HERE'S THE TON OF VALUE YOU GET</h2>
+            <h3>ONE COOL THING YOU GET</h3>
+            <p>DESCRIPTION OF THAT COOL THING</p>
+            <h3>ONE COOL THING YOU GET</h3>
+            <p>DESCRIPTION OF THAT COOL THING</p>
+            <h3>ONE COOL THING YOU GET</h3>
+            <p>DESCRIPTION OF THAT COOL THING</p>
+            <h3>ONE COOL THING YOU GET</h3>
+            <p>DESCRIPTION OF THAT COOL THING</p>
+        </section>
+        <section class="faq">
+            <h2>ABOUT SUBSCRIPTIONS</h2>
+            <h3>WHAT THE HECK IS THIS?</h3>
+            <p>ANSWER TO YOUR DUMB QUESTION</p>
+            <h3>WHAT THE HECK IS THIS?</h3>
+            <p>ANSWER TO YOUR DUMB QUESTION</p>
+            <h3>WHAT THE HECK IS THIS?</h3>
+            <p>ANSWER TO YOUR DUMB QUESTION</p>
+        </section>
+    </section>
+    <section class="interaction">
+        <section class="interaction-button">
+            {% if can_subscribe %}
+            <form method="POST" class="hidden-stripe-handler" id="subscribe">{% csrf_token %}</form>
+            <button
+                data-amount="4000"
+                data-description="Subscription ($40.00/month)"
+                data-email="{{ request.user.email }}"
+                data-form="#subscribe"
+                class="checkout-button primary">{{ button_text }}</button>
+            {% endif %}
+            {% if can_unsubscribe %}
+            <form method="POST" class="interaction-form">
+                {% csrf_token %}
+                <input type="submit" class="failure button" value="{{ button_text }}">
+            </form>
+            {% endif %}
+        </section>
+        <section class="interaction-information">
+            <h2 class="interaction-call-to-action">{{ call_to_action }}</h2>
+            <p>{{ description }}</p>
+        </section>
+    </section>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+{% if can_subscribe %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endif %}
+{% endblock scripts %}

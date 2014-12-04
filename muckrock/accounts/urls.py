@@ -5,6 +5,7 @@ URL mappings for the accounts application
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
 import django.contrib.auth.views as auth_views
+from django.views.generic.base import RedirectView
 
 import muckrock.accounts.views as views
 
@@ -34,17 +35,11 @@ urlpatterns = patterns(
         name='acct-profile'
     ),
     url(r'^register/$', views.register, name='acct-register'),
-    url(r'^register/free/$', views.register_free, name='acct-register-free'),
-    url(r'^register/pro/$', views.register_pro, name='acct-register-pro'),
+    url(r'^subscribe/$', views.subscribe, name='acct-subscribe'),
     url(r'^update/$', views.update, name='acct-update'),
-    url(r'^manage_subsc/$', views.manage_subsc, name='acct-manage-subsc'),
     url(r'^buy_requests/$', views.buy_requests, name='acct-buy-requests'),
     url(r'^stripe_webhook/$', views.stripe_webhook, name='acct-webhook'),
-    url(
-        r'^stripe_webhook_v2/$',
-        views.stripe_webhook_v2,
-        name='acct-webhook-v2'
-    ),
+    url(r'^stripe_webhook_v2/$', views.stripe_webhook_v2, name='acct-webhook-v2'),
     url(
         r'^change_pw/$',
         auth_views.password_change,
@@ -70,15 +65,19 @@ urlpatterns = patterns(
         name='acct-reset-pw-done'
     ),
     url(
-        r'^reset_pw_complete/$',
-        auth_views.password_reset_complete,
-        {'template_name': 'forms/account/pw_reset_part2_done.html'},
-        name='acct-reset-pw-complete'
-    ),
-    url(
         r'^reset_pw/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
         {'template_name': 'forms/account/pw_reset_part2.html'},
         name='acct-reset-pw-confirm'
     ),
+    url(
+        r'^reset_pw_complete/$',
+        auth_views.password_reset_complete,
+        {'template_name': 'forms/account/pw_reset_part2_done.html'},
+        name='acct-reset-pw-complete'
+    ),
+    # REDIRECT VIEWS
+    url(r'^register/free/$', RedirectView.as_view(url='/accounts/register/'), name='acct-register-free'),
+    url(r'^register/pro/$', RedirectView.as_view(url='/accounts/subscribe/'), name='acct-register-pro'),
+    url(r'^manage_subsc/$', RedirectView.as_view(url='/accounts/subscribe/'), name='acct-manage-subsc'),
 )
