@@ -344,6 +344,32 @@ nav.sidebar {
         text-align: left;
     }
     
+    .broadcast {
+        position: relative;
+        margin-top: 0;
+        font-size: 0.9em;
+        color: $color-black;
+        background-color: $color-white;
+        box-shadow: 1px 1px 10px black;
+        p {
+            width: 90%;
+            &:last-of-type {
+                margin-bottom: 0;
+            }
+        }
+        #close-broadcast {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            font-size: 1.5em;
+            color: $color-default;
+            cursor: pointer;
+            &:hover {
+                color: $color-black;
+            }
+        }
+    }
+    
     .account {
         margin-top: 2 * $base-margin;
         .username {
