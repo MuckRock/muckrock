@@ -47,6 +47,10 @@ function getCheckoutData(button) {
     }
 }
 
+if (typeof $.cookie('broadcast') == 'undefined') {
+    $.cookie('broadcast', 1);
+}
+
 $(document).ready(function() {
 
     $('.modal-button').click(function(){ modal($(this).next()); });
@@ -79,6 +83,16 @@ $(document).ready(function() {
         if (notificationContainer.children(':visible').length == 0) {
             notificationContainer.hide();
         }
+    });
+    
+    console.log($.cookie('broadcast'));
+    if ($.cookie('broadcast') == false) {
+        var broadcastPanel= $('.sidebar .broadcast')[0];
+        $(broadcastPanel).hide();
+    }
+    $('#close-broadcast').click(function(){
+        $(this).parent().hide();
+        $.cookie('broadcast', 0);
     });
     
     /* Key and Swipe Bindings

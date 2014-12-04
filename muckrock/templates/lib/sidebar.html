@@ -6,7 +6,7 @@
     <nav class="sidebar">
         {% if broadcast %}
         <div class="broadcast panel">
-            <p>{{ broadcast }}</p>
+            <p>{{ broadcast|safe }}</p>
             <span id="close-broadcast">&times;</span>
         </div>
         {% endif %}
