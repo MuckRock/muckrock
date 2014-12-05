@@ -31,15 +31,10 @@
     {% endwith %}
 {% endblock list-item %}
 
-{% block actions %}
-<a href="{% url 'question-create' %}" class="primary button">Ask a Question</a>
-{% endblock actions %}
-
 {% block filters %}
 <ul>
     <li><a href="{% url 'question-index' %}" class="{% active request "^/questions/$" %}">All</a></li>
     <li><a href="{% url 'question-unanswered' %}" class="{% active request "^/questions/unanswered/$" %}">Unanswered</a></li>
     <li><a href="{% url 'question-recent' %}" class="{% active request "^/questions/recent/$" %}">Recently Answered</a></li>
 </ul>
-
 {% endblock filters %}
