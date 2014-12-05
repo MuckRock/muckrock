@@ -138,11 +138,18 @@ def _make_request(request, foia_request, parent=None):
 
 def _make_user(request, data):
     """Helper function to create a new user"""
-    username = 'MuckRocker%d' % randint(1, 10000)
-    # XXX verify this is unique
+    base_username = data['full_name'].replace(' ', '')
+    username = base_username
+    num = 1
+    while User.objects.filter(username=username).exists():
+        username = '%s%d' % (base_username, num)
+        num += 1
     password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
     user = User.objects.create_user(username, data['email'], password)
-    # XXX email the user their account details
+    send_mail('Welcome to MuckRock',
+              render_to_string('text/user/welcome.txt',
+                               {'data': data, 'pw': password, 'username': username}),
+              'info@muckrock.com', [data['email']], fail_silently=False)
     if ' ' in data['full_name']:
         user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
     else:
@@ -221,13 +228,16 @@ def create_request(request):
         parent = foia
     if request.method == 'POST':
         foia_request = _process_request_form(request)
-        foia, foia_comm = _make_request(request, foia_request, parent)
-        foia_comm.save()
-        foia.save()
-        return redirect(foia)
+        if foia_request:
+            foia, foia_comm = _make_request(request, foia_request, parent)
+            foia_comm.save()
+            foia.save()
+            return redirect(foia)
+        else:
+            # form is invalid
+            form = RequestForm(request.POST, request=request)
     else:
         if clone:
-            print initial_data
             form = RequestForm(initial=initial_data, request=request)
         else:
             form = RequestForm(request=request)

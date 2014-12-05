@@ -1,0 +1,3 @@
+{{data.full_name}}, welcome to MuckRock!
+
+Thank you for filing a request.  An account has been created for you.  Your username is {{username}} and your password is {{pw}}.  You can change it now by going to https://www.muckrock.com{% url 'acct-change-pw' %}.

@@ -3,6 +3,7 @@ Forms for FOIA application
 """
 
 from django import forms
+from django.contrib.auth.models import User
 
 import autocomplete_light as autocomplete
 from datetime import date, timedelta
@@ -66,6 +67,13 @@ class RequestForm(forms.Form):
             error_msg = 'No locality was selected'
             self._errors['local'] = self.error_class([error_msg])
         return self.cleaned_data
+
+    def clean_email(self):
+        """Do a case insensitive uniqueness check"""
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email):
+            raise forms.ValidationError("User with this email already exists.  Please login first.")
+        return email
 
 class RequestDraftForm(forms.Form):
     """Presents limited information from created single request for editing"""
