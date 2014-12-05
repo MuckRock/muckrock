@@ -1,5 +1,6 @@
 .new-request {
     // @extend %edge-to-edge;
+    @include outer-container;
     display: block;
     overflow: hidden;
     // border: $base-border-width solid darken($color-grey, 10%);
@@ -10,11 +11,12 @@
         h1 {
             @extend %half;
             @include font-sizing(2.5, 3);
-            margin: 0;
+            margin-top: 0;
             font-weight: $light;
         }
         summary {
             @extend %half;
+            @include media($medium-layout) { text-align: right; }
         }
     }
     
@@ -207,24 +209,27 @@
     }
    
     footer {
+        padding: $base-padding;
         @include border-bottom-radius($base-border-radius);
-        overflow: hidden;
-        padding: $base-vertical-rhythm;
-        width: 100%;
-        input { float: left; }
+        @include row;
+        input {
+            @extend %quarter;
+        }
         p {
-            float: right;
-            width: 70%;
-            margin: 0;
-        }   
+            @extend %three-quarters;
+            margin-top: $base-margin;
+            @include media($large-layout) {
+                margin-top: 0;
+                padding-left: $base-padding;
+            }
+        }
     }
     
     
     
 }
 
-
-
+.clone-candidates { @include outer-container; }
 .clone-candidates h2 {
     @include font-sizing(1.4);
     margin: $base-margin 0;
