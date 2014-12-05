@@ -45,36 +45,37 @@
     </div>
     {% endif %}
     
-    {% if foia.user.get_profile.can_embargo %}
-    <section class="embargo">
-        <div class="input">
-            {{ form.embargo }}
-            <label for="id_embargo">Embargo</dfn>
-        </div>
-        <small>{{ form.embargo.help_text }}</small>
-    </section>
-    {% endif %}
+    <div class="bottom">
+        {% if foia.user.get_profile.can_embargo %}
+        <section class="embargo">
+            <div class="input">
+                {{ form.embargo }}
+                <label for="id_embargo">Embargo</dfn>
+            </div>
+            <small>{{ form.embargo.help_text }}</small>
+        </section>
+        {% endif %}
     
-    <section class="buttons">
+        <section class="buttons">
     
-        <input type="submit"
-            name="submit"
-            value="Save"
-            class="button" />
-        <input type="submit"
-           name="submit"
-           value="Submit"
-           class="primary button"
-           {% if not remaining %}disabled{% endif %}
-        />
-
-        <input type="submit"
+            <input type="submit"
+                name="submit"
+                value="Save"
+                class="button" />
+            <input type="submit"
                name="submit"
-               value="Delete"
-               class="failure button" />
+               value="Submit"
+               class="primary button"
+               {% if not remaining %}disabled{% endif %}
+            />
+
+            <input type="submit"
+                   name="submit"
+                   value="Delete"
+                   class="failure button" />
         
-    </section>
-    
+        </section>
+    </div>    
     
 </form>
 {% if not remaining %}

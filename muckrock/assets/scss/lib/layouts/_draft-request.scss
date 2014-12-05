@@ -34,6 +34,7 @@
     overflow: hidden;
     header, form { padding-left: 0; }
     header, h1 { margin: 0; }
+    @include row;
     
     #id_title {
         @extend %draft-title;
@@ -54,26 +55,31 @@
         }
     }
     
-    @include media($medium-layout) {
-        .embargo, .buttons {
-            width: 50%;
-            float: left;
+    .bottom { @include row; }
+    .embargo {
+        @extend %three-quarters;
+        .input {
+            display: block;
+            dfn, input {
+                display: inline-block;
+                width: auto;
+            }
+            input {
+                margin: $base-margin/4 $base-margin/6 $base-margin/6 0;
+            }
         }
-        .buttons {
-            padding-left: $base-padding;
-        }
-    }  
-    .embargo .input {
-        display: block;
-        dfn, input {
-            display: inline-block;
-            width: auto;
-        }
-        input {
-            margin: $base-margin/4 $base-margin/6 $base-margin/6 0;
+        small {
+            display: block;
+            max-width: 30em;
         }
     }
-    
+    .buttons {
+        @extend %quarter;
+        input {
+            display: block;
+            width: 100%;
+        }
+    }
 }
 
 
