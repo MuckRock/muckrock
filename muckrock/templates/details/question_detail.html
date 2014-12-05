@@ -36,18 +36,16 @@
             {% include 'lib/message.html' with uid=forloop.counter body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=1 %}
         {% endif %}
     {% endfor %}
+    <section class="actions">
+        <a class="primary button" href="{% url 'question-follow' slug=object.slug idx=object.pk %}">Follow</a>
+        <a class="button" href="{% url 'answer-create' slug=object.slug idx=object.pk %}">Reply</a>
+    </section>
 {% endblock main %}
 
 {% block aside %}
+{% include 'lib/social.html' with title=object.title %}
 {% if object.foia %}
     <dfn>Related request</dfn>
     {% include 'lib/foia.html' with foia=object.foia %}
 {% endif %}        
 {% endblock aside %}
-
-{% block actions %}
-<section class="actions">
-    <a class="primary button" href="{% url 'question-follow' slug=object.slug idx=object.pk %}">Follow</a>
-    <a class="button" href="#">Share</a>
-</section>
-{% endblock actions %}
