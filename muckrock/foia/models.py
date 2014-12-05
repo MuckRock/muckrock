@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Models for the FOIA application
 """
@@ -629,6 +630,12 @@ class FOIARequest(models.Model):
                 title=('Unfollow' if is_following else 'Follow'),
                 class_name=('default' if is_following else 'primary')
             ),
+            Action(
+                test=True,
+                title='Problem?',
+                desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
+                class_name='modal'
+            ),
         ]
 
     def noncontextual_request_actions(self, user):
@@ -675,7 +682,7 @@ class FOIARequest(models.Model):
             Action(
                 test=is_owner,
                 title='Get Advice',
-                desc='Get your questions answered by Muckrock\'s community of FOIA experts',
+                desc=u'Get your questions answered by Muckrock’s community of FOIA experts',
                 class_name='modal'
             ),
             Action(
@@ -687,9 +694,10 @@ class FOIARequest(models.Model):
             Action(
                 test=can_appeal,
                 title='Appeal',
-                desc='Appeal an agency\'s decision',
+                desc=u'Appeal an agency’s decision',
                 class_name='reply'
             ),
+            
         ]
 
     def total_pages(self):

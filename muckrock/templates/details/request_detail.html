@@ -104,10 +104,21 @@
     </form>
     {% endif %}
     {% if user.is_authenticated %}
-    <div class="controls panel">
+    <form method="POST" class="controls panel">
     {% for action in user_actions %}
         {% if action.is_possible %}
-            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            {% if action.link %}
+                <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            {% endif %}
+            {% if action.class_name == 'modal' %}
+                <span class="text-area modal-button button">{{ action.title }}</span>
+                <div class="hidden-modal">
+                    <h1>{{ action.title }}</h1>
+                    <h2>{{ action.desc }}</h2>
+                    <input type="submit" name="action" value="{{ action.title }}" />
+                    <span class="close-modal button">Close</span>
+                </div>
+            {% endif %}
         {% endif %}
     {% endfor %}
     {% for action in noncontextual_request_actions %}
@@ -120,8 +131,19 @@
                     class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
                 {{ action.title }}
             </button>
-            {% else %}  
-            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            {% else %}
+                {% if action.link %}
+                    <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+                {% endif %}
+                {% if action.class_name == 'modal' %}
+                    <span class="text-area modal-button button">{{ action.title }}</span>
+                    <div class="hidden-modal">
+                        <h1>{{ action.title }}</h1>
+                        <h2>{{ action.desc }}</h2>
+                        <input type="submit" name="action" value="{{ action.title }}" />
+                        <span class="close-modal button">Close</span>
+                    </div>
+                {% endif %}
             {% endif %}
         {% endif %}
     {% endfor %}
@@ -130,7 +152,7 @@
             <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
         {% endif %}
     {% endfor %}
-    </div>
+    </form>
     {% else %}
     <section class="panel">
         <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
