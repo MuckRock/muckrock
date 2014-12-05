@@ -26,12 +26,21 @@ textarea {
 }
 fieldset {
     margin-top: 0;
-    label {
+    label, .errorlist {
         @extend dfn;
         @include box-sizing(border-box);
         display: block;
         color: $color-black;
         text-align: left;
+    }
+    
+    @include media($large-layout) {
+        label.failure {
+            float: left;
+        }
+        .errorlist {
+            float: right;
+        }
     }
     
     input + label {
