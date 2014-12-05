@@ -155,7 +155,7 @@
             display: block;
             cursor: pointer;
             color: $color-primary;
-            text-align: right;
+            @include media($medium-layout) { text-align: right; }
             &:hover {
                 text-decoration: underline;
             }    
