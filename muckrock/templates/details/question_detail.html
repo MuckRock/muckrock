@@ -28,23 +28,21 @@
 {% endblock header %}
 
 {% block main %}
-    {% include 'lib/message.html' with body=object.question|markdown user=object.user.get_full_name date=object.date response=0 %}
+    {% include 'lib/message.html' with uid='0' body=object.question|markdown user=object.user.get_full_name date=object.date response=0 %}
     {% for answer in object.answers.all %}
         {% if answer.user == object.user %}
-            {% include 'lib/message.html' with body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=0 %}
+            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=0 %}
         {% else %}
-            {% include 'lib/message.html' with body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=1 %}
+            {% include 'lib/message.html' with uid=forloop.counter body=answer.answer|markdown user=answer.user.get_full_name date=answer.date response=1 %}
         {% endif %}
     {% endfor %}
 {% endblock main %}
 
 {% block aside %}
-    <dl>
-        {% if object.foia %}
-        <dt>Related Request</dt>
-        <dd><a href="{% url 'foia-detail' jurisdiction=object.foia.jurisdiction.slug jidx=object.foia.jurisdiction.pk idx=object.foia.pk slug=object.foia.slug %}">{{object.foia.title}}</a></dd>
-        {% endif %}        
-	</dl>
+{% if object.foia %}
+    <dfn>Related request</dfn>
+    {% include 'lib/foia.html' with foia=object.foia %}
+{% endif %}        
 {% endblock aside %}
 
 {% block actions %}
