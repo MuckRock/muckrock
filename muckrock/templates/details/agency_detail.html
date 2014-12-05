@@ -82,7 +82,7 @@ style="background-image:url('{% thumbnail agency.image 1200x675 %}');"
                 {% if request.user.get_profile.can_view_emails %}
             <dd>{{agency.email}}</dd>
                 {% else %}
-            <dd>{% if request.user.is_anonymous %}<a href="{% url 'acct-register-pro' %}">{% else %}<a href="{% url 'acct-manage-subsc' %}">{% endif %}Available to Pro Users</a></dd>
+            <dd><a href="{% url 'acct-subscribe' %}">Available to Pro Users</a></dd>
                 {% endif %}
             {% else %}
             <dd>Unknown</dd>

@@ -21,8 +21,7 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import UserChangeForm, RegisterFree, RegisterPro, \
-                                    UpgradeSubscForm, CancelSubscForm
+from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
@@ -39,30 +38,10 @@ def account_logout(request):
     return redirect('index')
 
 def register(request):
-    """Pick what kind of account you want to register for"""
-    return render_to_response(
-        'forms/account/register.html',
-        context_instance=RequestContext(request)
-    )
-
-def register_free(request):
     """Register for a community account"""
-    template = 'forms/account/register_free.html'
     url_redirect = request.GET.get('next', None)
-    return _register_acct(request, 'community', RegisterFree, template, url_redirect)
-
-def register_pro(request):
-    """Register for a pro account"""
-    template = 'forms/account/register_pro.html'
-    url_redirect = request.GET.get('next', None)
-    extra_context = {'heading': 'Pro Account', 'pub_key': STRIPE_PUB_KEY}
-    return _register_acct(request, 'pro', RegisterPro, template, url_redirect, extra_context)
-
-def _register_acct(request, acct_type, form_class, template, url_redirect=None, extra_context=None):
-    """Register for an account"""
-    # pylint: disable=R0913
     if request.method == 'POST':
-        form = form_class(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
             form.save()
             new_user = authenticate(
@@ -72,30 +51,19 @@ def _register_acct(request, acct_type, form_class, template, url_redirect=None, 
             login(request, new_user)
             Profile.objects.create(
                 user=new_user,
-                acct_type=acct_type,
-                monthly_requests=MONTHLY_REQUESTS.get(acct_type, 0),
+                acct_type='community',
+                monthly_requests=0,
                 date_update=datetime.now()
-            )
-            customer = new_user.get_profile().customer()
-            token = form.cleaned_data.get('token', False)
-            if token:
-                customer.credit_card(token)
-            if url_redirect:
-                return redirect(url_redirect)
-            else:
-                msg = 'Your account was successfully created. '
-                msg += 'Welcome to MuckRock!'
-                messages.success(request, msg)
-                return redirect('acct-my-profile')
+            )            
+            msg = 'Your account was successfully created. '
+            msg += 'Welcome to MuckRock!'
+            messages.success(request, msg)
+            return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
     else:
-        form = form_class(initial={'expiration': date.today()})
-
-    context = {'form': form}
-    if extra_context:
-        context.update(extra_context)
+        form = RegisterForm()
     return render_to_response(
-        template,
-        context,
+        'forms/account/register.html',
+        {'form': form},
         context_instance=RequestContext(request)
     )
 
@@ -129,60 +97,89 @@ def update(request):
     return render_to_response('forms/account/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
-@login_required
-def manage_subsc(request):
+def subscribe(request):
     """Subscribe or unsubscribe from a pro account"""
-    user_profile = request.user.get_profile()
-    template = 'forms/user/subscription.html'
-    heading = 'Upgrade to a Pro Account'
-    desc = ''
-    form_class = UpgradeSubscForm
-    acct_type = user_profile.acct_type
-    if acct_type == 'admin':
-        msg = 'You are on staff, you don\'t need a subscription.'
-        messages.warning(request, msg)
-        return redirect('acct-my-profile')
-    elif acct_type == 'proxy':
-        msg = ('You have a proxy account, you receive 20 free '
-               'requests a month and do not need a subscription.')
-        messages.warning(request, msg)
-        return redirect('acct-my-profile')
-    elif acct_type == 'pro':
-        heading = 'Cancel Your Pro Subscription'
-        desc = 'You will go back to a free community account.'
-        form_class = CancelSubscForm
+    
+    call_to_action = 'Go Pro!' 
+    description = ('Are you a journalist, activist, or just planning on filing '
+                   'a lot of requests? A Pro subscription might be right for you.')
+    button_text = 'Subscribe'
+    can_subscribe = True
+    can_unsubscribe = not can_subscribe
+    
+    if request.user.is_authenticated():
+        user_profile = request.user.get_profile()
+        acct_type = user_profile.acct_type
+        can_subscribe = acct_type == 'community' or acct_type == 'beta'
+        can_unsubscribe = acct_type == 'pro'
+    
+        if acct_type == 'admin':
+            msg = 'You are on staff, you don\'t need a subscription.'
+            messages.warning(request, msg)
+            return redirect('acct-my-profile')
+        elif acct_type == 'proxy':
+            msg = ('You have a proxy account. You receive 20 free '
+                   'requests a month and do not need a subscription.')
+            messages.warning(request, msg)
+            return redirect('acct-my-profile')
+        elif can_unsubscribe:
+            call_to_action = 'Unsubscribe'
+            description = ('Are you sure you want to unsubscribe? You will go back '
+                           'to an unpaid account and miss out on all these great features.')
+            button_text = 'Unsubscribe'
+    else:
+        description = ('First you will create an account, then be redirected '
+                       'back to this page to subscribe.')
+        button_text = 'Create Account'
+    
     if request.method == 'POST':
-        form = form_class(request.POST, request=request)
-        if acct_type == 'community' and form.is_valid():
-            if not form.cleaned_data.get('use_on_file'):
-                user_profile.credit_card(form.cleaned_data['token'])
-            customer = user_profile.customer()
-            customer.update_subscription(plan='pro')
-            user_profile.acct_type = 'pro'
-            user_profile.date_update = datetime.now()
-            user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
-            user_profile.save()
-            messages.success(request, 'Congratulations, you are now subscribed as a pro user!')
-        elif acct_type == 'pro' and form.is_valid():
+        if can_subscribe and request.POST.get('stripe_token', False):
+            try:
+                stripe_token = request.POST['stripe_token']
+                stripe_email = request.POST['stripe_email']
+                if request.user.email != stripe_email:
+                    raise ValueError('Account email and Stripe email do not match')
+                if not user_profile.credit_card():
+                    user_profile.credit_card(stripe_token)
+                customer = user_profile.customer()
+                customer.update_subscription(plan='pro')
+                user_profile.acct_type = 'pro'
+                user_profile.date_update = datetime.now()
+                user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
+                user_profile.save()
+                msg = 'Congratulations, you are now subscribed as a pro user!'
+                messages.success(request, msg)
+                logger.info('%s has purchased requests', request.user.username)
+            except stripe.CardError as exc:
+                msg = 'Payment error. Your card has not been charged.'
+                messages.error(request, msg)
+                logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            except ValueError as exc:
+                msg = 'Payment error. Your card has not been charged.'
+                messages.error(request, msg)
+                logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+        elif can_unsubscribe:
             customer = user_profile.customer()
             customer.cancel_subscription()
             user_profile.acct_type = 'community'
             user_profile.save()
-            messages.info(request, 'Your professional subscription has been cancelled.')
+            messages.success(request, 'Your professional subscription has been cancelled.')
         return redirect('acct-my-profile')
-    else:
-        form = form_class(
-            request=request,
-            initial={'name': request.user.get_full_name()}
-        )
+        
     context = {
-        'heading': heading,
-        'desc': desc,
-        'pub_key': STRIPE_PUB_KEY
+        'can_subscribe': can_subscribe,
+        'can_unsubscribe': can_unsubscribe,
+        'call_to_action': call_to_action,
+        'description': description,
+        'button_text': button_text,    
+        'stripe_pk': STRIPE_PUB_KEY
     }
-    if form_class:
-        context.update({'form': form_class})
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    
+    return render_to_response(
+        'forms/account/subscription.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 def buy_requests(request):

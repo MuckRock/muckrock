@@ -84,8 +84,7 @@ $(document).ready(function() {
             notificationContainer.hide();
         }
     });
-    
-    console.log($.cookie('broadcast'));
+
     if ($.cookie('broadcast') == false) {
         var broadcastPanel= $('.sidebar .broadcast')[0];
         $(broadcastPanel).hide();
