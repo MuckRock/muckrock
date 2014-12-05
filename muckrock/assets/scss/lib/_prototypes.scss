@@ -54,13 +54,12 @@
 // Textbox -> Panel -> Controls
 %controls {
     @extend %panel;
-    // background-color: darken($color-white, 10%);
 }
 
 %detail {
     @extend %body;
     @extend %edge-to-edge;
-    
+    margin: 0 auto;
     .header-container {
         @include outer-container;
         @extend %base-spacing;
@@ -97,9 +96,11 @@
         }
     }
     .actions {
-        @include outer-container;
-        @extend %base-spacing;
         @extend %controls;
+        width: auto;
+        @include media($medium-layout){
+            margin: $base-margin/2 $base-margin;
+        }
     }
 }
 

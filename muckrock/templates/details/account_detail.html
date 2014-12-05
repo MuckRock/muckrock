@@ -54,8 +54,8 @@
 {% endblock aside %}
 
 {% block actions %}
+{% if request.user == user_obj %}
 <section class="actions">
-    {% if request.user == user_obj %}
     <form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
     <div class="controls">
         <button data-amount="2000"
@@ -67,8 +67,8 @@
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
         <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
     </div>
-    {% endif %}
 </section>
+{% endif %}
 {% endblock actions %}
 
 {% block main %}
@@ -86,7 +86,7 @@
         <h3>No requests have been filed. <small><a href="{% url 'foia-create'%}">Create one now.</a></small></h3>
     {% endif %}
     
-    {% if user == user_obj %}
+    {% if user == user_obj and user_obj.get_profile.follows_foia.all %}
         <h3>Requests You Follow</h3>
         {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all %}
     {% endif %}

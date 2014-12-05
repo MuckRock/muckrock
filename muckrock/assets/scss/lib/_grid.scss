@@ -56,7 +56,6 @@ html, body { min-height: 100%; }
     display: block;
     overflow: hidden;
     @include outer-container;
-    max-width: none;
 }
 
 %base-spacing {
