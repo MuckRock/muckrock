@@ -15,6 +15,7 @@ class QuestionForm(forms.ModelForm):
 
 class AnswerForm(forms.ModelForm):
     """A form for an Answer"""
+    answer = forms.CharField(widget=forms.Textarea(), label='')
     class Meta:
         # pylint: disable=R0903
         model = Answer

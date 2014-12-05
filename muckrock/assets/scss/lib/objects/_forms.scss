@@ -20,6 +20,10 @@
 }
 .hidden-stripe-handler { display: none; }
 textarea, #{$all-text-inputs} { @extend %input; }
+textarea {
+    width: 100%;
+    resize: vertical;
+}
 fieldset {
     margin-top: 0;
     label {
@@ -42,4 +46,8 @@ fieldset {
     .login.form .form-info {
         text-align: right;
     }
+}
+
+.question.form, .reply.form {
+    .visible-fields fieldset { @extend %full; }
 }
