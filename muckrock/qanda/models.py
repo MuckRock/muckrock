@@ -23,7 +23,7 @@ class Question(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
-    question = models.TextField(blank=True)
+    question = models.TextField()
     date = models.DateTimeField()
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
