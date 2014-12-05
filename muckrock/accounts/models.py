@@ -147,6 +147,10 @@ class Profile(models.Model):
             self.save()
         return self.monthly_requests
 
+    def total_requests(self):
+        """Get sum of paid for requests and monthly requests"""
+        return self.num_requests + self.get_monthly_requests()
+
     def make_request(self):
         """Decrement the user's request amount by one"""
         if self.get_monthly_requests() > 0:

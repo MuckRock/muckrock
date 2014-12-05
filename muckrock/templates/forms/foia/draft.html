@@ -16,7 +16,7 @@
 {% block form-form %}
 
 {% if form %}
-{% with remaining=foia.user.get_profile.num_requests %}
+{% with remaining=foia.user.get_profile.total_requests %}
 <form method="post" class="draft">
     {% csrf_token %}
     
