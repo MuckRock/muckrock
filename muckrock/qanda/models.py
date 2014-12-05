@@ -88,7 +88,7 @@ class Answer(models.Model):
         super(Answer, self).save(*args, **kwargs)
         question = self.question
         question.answer_date = self.date
-        question.answer_authors.update(self.user)
+        question.answer_authors.update([self.user])
         question.save()
 
     class Meta:
