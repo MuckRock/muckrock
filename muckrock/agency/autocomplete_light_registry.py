@@ -45,3 +45,4 @@ class AgencyAdminAutocomplete(autocomplete_light.AutocompleteModelBase):
         return self.order_choices(choices)[0:self.limit_choices]
 
 autocomplete_light.register(Agency, AgencyAutocomplete)
+autocomplete_light.register(Agency, AgencyAdminAutocomplete)
