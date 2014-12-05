@@ -50,10 +50,10 @@ def get_foia(jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(user, document, intro=None, waver=None, delay=None):
+def _make_comm(user, document, intro=None, waiver=None, delay=None):
     if not intro:
         intro = 'This is a request under the Freedom of Information Act.'
-    if not waver:
+    if not waiver:
         waiver = ('I also request that, if appropriate, fees be waived as I '
               'believe this request is in the public interest. '
               'The requested documents  will be made available to the ' 
