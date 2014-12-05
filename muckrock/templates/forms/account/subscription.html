@@ -2,39 +2,22 @@
 {% load static from staticfiles %}
 {% block title %}MuckRock &bull; Subscription{% endblock title %}
 {% block content %}
-<div class="subscription page">
+<div class="subscribe page">
     <header>
-        <h1 class="heading">Subscription</h1>
-        <p class="subheading"><sup>$</sup><span class="amount">40</span> per month</p>
-        <div class="help panel">
-            <p>Question?<br><a href="mailto:info@muckrock.com" title="Email MuckRock">Contact us.</a></p>
+        <h1 class="heading">{{ call_to_action }}</h1>
+        {% if can_subscribe %}
+        <div class="subheading">
+            <p class="price"><sup>$</sup><span class="amount">40</span> per month</p>
+            <p class="help">Question? <a href="mailto:info@muckrock.com" title="Email MuckRock">Contact us.</a></p>
         </div>
+        {% endif %}
     </header>
-    <section class="body">
-        <section class="features">
-            <h2>HERE'S THE TON OF VALUE YOU GET</h2>
-            <h3>ONE COOL THING YOU GET</h3>
-            <p>DESCRIPTION OF THAT COOL THING</p>
-            <h3>ONE COOL THING YOU GET</h3>
-            <p>DESCRIPTION OF THAT COOL THING</p>
-            <h3>ONE COOL THING YOU GET</h3>
-            <p>DESCRIPTION OF THAT COOL THING</p>
-            <h3>ONE COOL THING YOU GET</h3>
-            <p>DESCRIPTION OF THAT COOL THING</p>
-        </section>
-        <section class="faq">
-            <h2>ABOUT SUBSCRIPTIONS</h2>
-            <h3>WHAT THE HECK IS THIS?</h3>
-            <p>ANSWER TO YOUR DUMB QUESTION</p>
-            <h3>WHAT THE HECK IS THIS?</h3>
-            <p>ANSWER TO YOUR DUMB QUESTION</p>
-            <h3>WHAT THE HECK IS THIS?</h3>
-            <p>ANSWER TO YOUR DUMB QUESTION</p>
-        </section>
-    </section>
     <section class="interaction">
         <section class="interaction-button">
             {% if can_subscribe %}
+                {% if user.is_anonymous %}
+                <a href="{% url 'acct-register' %}?next=/accounts/subscribe/" class="button primary">{{ button_text }}</a>
+                {% else %}
             <form method="POST" class="hidden-stripe-handler" id="subscribe">{% csrf_token %}</form>
             <button
                 data-amount="4000"
@@ -42,6 +25,7 @@
                 data-email="{{ request.user.email }}"
                 data-form="#subscribe"
                 class="checkout-button primary">{{ button_text }}</button>
+                {% endif %}
             {% endif %}
             {% if can_unsubscribe %}
             <form method="POST" class="interaction-form">
@@ -50,11 +34,30 @@
             </form>
             {% endif %}
         </section>
-        <section class="interaction-information">
-            <h2 class="interaction-call-to-action">{{ call_to_action }}</h2>
-            <p>{{ description }}</p>
-        </section>
+        <p class="interaction-information">{{ description }}</p>
     </section>
+    <section class="body">
+        <section class="features">
+            {% if can_subscribe %}
+            <h2>Why go pro?</h2>
+            {% endif %}
+            {% if can_unsubscribe %}
+            <h2>Why stay pro?</h2>
+            {% endif %}
+            <ul>
+                <li>No need to keep buying requests; Pro User subscription includes up to 20 requests a month.</li>
+                <li>Planning on filing more than that? Pro Users purchase additional requests at a reduced rate.</li>
+                <li>Working on a story that you don't want scooped? Pro Users' embargo option allows you to keep requests private for as long as you'd like.</li>
+                <li>We've dealt with more agencies than anyone else in the field. Pro Users get exclusive access to our large (and growing) database, including contact info and response analysis.</li>
+                <li>Need help with a difficult agency, or not quite sure how to word that appeal? Pro Users get priority customer service support, via phone, email, or IM.</li>
+            </ul>
+        </section>
+        <!--
+        <section class="faq">
+        </section>
+        -->
+    </section>
+    
 </div>
 {% endblock content %}
 

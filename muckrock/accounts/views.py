@@ -97,33 +97,40 @@ def update(request):
     return render_to_response('forms/account/update.html', {'form': form},
                               context_instance=RequestContext(request))
 
-@login_required
 def subscribe(request):
     """Subscribe or unsubscribe from a pro account"""
-    user_profile = request.user.get_profile()
-    acct_type = user_profile.acct_type
-    
-    can_subscribe = acct_type == 'community' or acct_type == 'beta'
-    can_unsubscribe = acct_type == 'pro'
     
     call_to_action = 'Go Pro!' 
-    description = ''
+    description = ('Are you a journalist, activist, or just planning on filing '
+                   'a lot of requests? A Pro subscription might be right for you.')
     button_text = 'Subscribe'
+    can_subscribe = True
+    can_unsubscribe = not can_subscribe
     
-    if acct_type == 'admin':
-        msg = 'You are on staff, you don\'t need a subscription.'
-        messages.warning(request, msg)
-        return redirect('acct-my-profile')
-    elif acct_type == 'proxy':
-        msg = ('You have a proxy account. You receive 20 free '
-               'requests a month and do not need a subscription.')
-        messages.warning(request, msg)
-        return redirect('acct-my-profile')
-    elif can_unsubscribe:
-        call_to_action = 'Cancel your subscription?'
-        description = ('Are you sure? You will go back to an unpaid account '
-                       'and miss out on all these great features.')
-        button_text = 'Unsubscribe' 
+    if request.user.is_authenticated():
+        user_profile = request.user.get_profile()
+        acct_type = user_profile.acct_type
+        can_subscribe = acct_type == 'community' or acct_type == 'beta'
+        can_unsubscribe = acct_type == 'pro'
+    
+        if acct_type == 'admin':
+            msg = 'You are on staff, you don\'t need a subscription.'
+            messages.warning(request, msg)
+            return redirect('acct-my-profile')
+        elif acct_type == 'proxy':
+            msg = ('You have a proxy account. You receive 20 free '
+                   'requests a month and do not need a subscription.')
+            messages.warning(request, msg)
+            return redirect('acct-my-profile')
+        elif can_unsubscribe:
+            call_to_action = 'Unsubscribe'
+            description = ('Are you sure you want to unsubscribe? You will go back '
+                           'to an unpaid account and miss out on all these great features.')
+            button_text = 'Unsubscribe'
+    else:
+        description = ('First you will create an account, then be redirected '
+                       'back to this page to subscribe.')
+        button_text = 'Create Account'
     
     if request.method == 'POST':
         if can_subscribe and request.POST.get('stripe_token', False):

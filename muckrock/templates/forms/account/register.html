@@ -1,56 +1,23 @@
-<!-- Pricing Table -->
-{% extends 'base.html' %}
-{% block title %}MuckRock &bull; Sign Up{% endblock title %}
+{% extends 'forms/base_form.html' %}
+{% block title %}MuckRock &bull; Create an Account{% endblock title %}
+{% block form-type %}register{% endblock %}
 
-{% block content %}
-<section class="features">
+{% block form-head %}
+<div class="form-title">
     <h1>For MuckRock users, requesting public records is a breeze.</h1>
-    <p>File requests to any federal, state, or local agency in all 50 states plus Washington D.C.</p>
-    <p>We are paper-free, scanning responses and making them searchable.</p>
-    <p>Tightly integrated with Spot.us to crowdfund expensive request fees.</p>
-    <p>30-day money-back guarantee</p>
-    <p>Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></p>
-</section>
+    <p>Serious about public records? <a href="{% url 'acct-subscribe' %}">Go pro.</a></p>
+</div>
+<ul class="form-info">
+    <li>Free to sign up, no credit card required.</li>
+    <li>File requests to any federal, state, or local agency in all 50 states.</li>
+    <li>We scan paper responses and make them searchable.</li>
+    <li>Earn free requests by helping us to improve the site.</li>
+    <li>Create campaigns to crowdfund expensive request fees.</li>
+    <li>30-day money-back guarantee.</li>
+    <li>Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></li>
+</ul>
+{% endblock %}
 
-<section class="pricing">
-    <section class="personal plan">
-        <a href="{% url 'acct-register-free' %}">
-            <div class="name">Personal</div>
-            <div class="description">For bloggers, upstanding citizens, and individuals.</div>
-        </a>
-        <ul>
-            <li>Free to sign up, no credit card required.</li>
-            <li>Purchase five requests for $20.</li>
-            <li>Earn free requests by participating in site assignments.</li>
-            <li>Join our growing community of government watchdogs.</li>
-        </ul>
-    </section>
-
-    <section class="professional plan">
-        <a href="{% url 'acct-register-pro' %}">
-            <div class="name">Professional</div>
-            <div class="description">For journalists, researchers, and professionals.</div>
-        </a>
-        <ul>
-            <li>Each month, file up to 20 requests for $40.</li>
-            <li>Purchase additional requests at a reduced rate.</li>
-            <li>Private Requests</li>
-            <li>Document Conversion</li>
-            <li>Priority Support</li>
-            <li>Access to a growing directory of 250 government agencies, including contact information, historical response data, and more.</li>
-        </ul>
-    </section>
-
-    <section class="organization plan">
-        <a href="mailto:info@muckrock.com">
-            <div class="name">Organization</div>
-            <div class="description">A custom-built plan to meet the needs of newsrooms, law firms, and other organizations.</div>
-        </a>
-        <ul>
-            <li>Used by reporters at the Boston Globe, Talking Points Memo, Gannett and more.</li>
-            <li>Hands-on training and advice for filing FOI requests.</li>
-            <li>E-mail us for a quote.</li>
-        </ul>
-    </section>
-</section>
-{% endblock content %}
+{% block form-form %}
+    {% include 'lib/form.html' with button_text='Create Account' %}
+{% endblock %}
