@@ -301,7 +301,7 @@
                 }
                 .buttons {
                     @extend %full;
-                    input, span { float: right; }
+                    input, span { float: left; }
                 }
             }
         }

@@ -105,6 +105,7 @@
     {% endif %}
     {% if user.is_authenticated %}
     <form method="POST" class="controls panel">
+    {% csrf_token %}
     {% for action in user_actions %}
         {% if action.is_possible %}
             {% if action.link %}
@@ -115,7 +116,7 @@
                 <div class="hidden-modal">
                     <h1>{{ action.title }}</h1>
                     <h2>{{ action.desc }}</h2>
-                    <input type="submit" name="action" value="{{ action.title }}" />
+                    <input type="submit" name="action" value="{{ action.title }}" class="primary" />
                     <span class="close-modal button">Close</span>
                 </div>
             {% endif %}
@@ -140,7 +141,7 @@
                     <div class="hidden-modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
-                        <input type="submit" name="action" value="{{ action.title }}" />
+                        <input type="submit" name="action" value="{{ action.title }}" class="primary" />
                         <span class="close-modal button">Close</span>
                     </div>
                 {% endif %}
@@ -222,7 +223,7 @@
                     <div class="hidden-modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
-                        <input type="submit" name="action" value="{{ action.title }}" />
+                        <input type="submit" name="action" value="{{ action.title }}" class="primary" />
                         <span class="close-modal button">Close</span>
                     </div>
                 {% endif %}

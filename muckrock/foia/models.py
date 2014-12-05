@@ -632,7 +632,7 @@ class FOIARequest(models.Model):
             ),
             Action(
                 test=True,
-                title='Problem?',
+                title='Report',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='modal'
             ),

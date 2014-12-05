@@ -230,18 +230,19 @@ class Detail(DetailView):
     context_object_name = 'foia'
     
     def dispatch(self, request, *args, **kwargs):
-        jurisdiction = self.kwargs['jurisdiction']
-        jidx = self.kwargs['jidx']
-        slug = self.kwargs['slug']
-        idx = self.kwargs['idx']
-        foia = get_foia(jurisdiction, jidx, slug, idx)
+        foia = get_foia(
+            self.kwargs['jurisdiction'],
+            self.kwargs['jidx'],
+            self.kwargs['slug'],
+            self.kwargs['idx']
+        )
         if foia.status == 'started': 
             return redirect(
                 'foia-draft',
-                jurisdiction=jurisdiction,
-                jidx=jidx,
-                slug=slug,
-                idx=idx
+                jurisdiction=self.kwargs['jurisdiction'],
+                jidx=self.kwargs['jidx'],
+                slug=self.kwargs['slug'],
+                idx=self.kwargs['idx']
             )
         else:
             return super(Detail, self).dispatch(request, *args, **kwargs)
@@ -249,16 +250,11 @@ class Detail(DetailView):
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
         # pylint: disable=W0613
-        jmodel = get_object_or_404(
-            Jurisdiction,
-            slug=self.kwargs['jurisdiction'],
-            pk=self.kwargs['jidx']
-        )
-        foia = get_object_or_404(
-            FOIARequest,
-            jurisdiction=jmodel,
-            slug=self.kwargs['slug'],
-            pk=self.kwargs['idx']
+        foia = get_foia(
+            self.kwargs['jurisdiction'],
+            self.kwargs['jidx'],
+            self.kwargs['slug'],
+            self.kwargs['idx']
         )
         if not foia.is_viewable(self.request.user):
             raise Http404()
@@ -284,7 +280,7 @@ class Detail(DetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
-    def post(self, request):
+    def post(self, request, **kwargs):
         """Handle form submissions"""
         foia = self.get_object()
         actions = {
@@ -338,48 +334,44 @@ class Detail(DetailView):
 
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
-        comm = request.POST.get('text', False)
-        if foia.user == request.user and foia.status != 'started' and comm:
+        text = request.POST.get('text', False)
+        if foia.user == request.user and foia.status != 'started' and text:
             save_foia_comm(
                 request,
                 foia,
                 foia.user.get_full_name(),
-                comm,
+                text,
                 'Your follow up has been sent.'
             )
         return redirect(foia)
 
     def _question(self, request, foia):
         """Handle asking a question"""
-        q = request.POST.get('text', False)
-        if foia.user == request.user:
-            if q:
-                title = 'Question about request: %s' % foia.title
-                question = Question.objects.create(
-                    user=request.user,
-                    title=title,
-                    slug=slugify(title),
-                    foia=foia,
-                    question=q,
-                    date=datetime.now()
-                )
-                messages.success(request, 'Your question has been posted.')
-                question.notify_new()
-                return redirect(question)
-            else:
-                error_msg = 'There was an error while posting your question.'
-        else:
-            error_msg = 'You may only ask questions about your own requests.'
-        messages.error(request, error_msg)
+        text = request.POST.get('text')
+        if foia.user == request.user and text:
+            title = 'Question about request: %s' % foia.title
+            question = Question.objects.create(
+                user=request.user,
+                title=title,
+                slug=slugify(title),
+                foia=foia,
+                question=text,
+                date=datetime.now()
+            )
+            messages.success(request, 'Your question has been posted.')
+            question.notify_new()
+            return redirect(question)
+        
         return redirect(foia)
 
     def _flag(self, request, foia):
         """Allow a user to notify us of a problem with the request"""
-        if request.user.is_authenticated():
+        text = request.POST.get('text')
+        if request.user.is_authenticated() and text:
             args = {
                 'request': foia,
                 'user': request.user,
-                'reason': request.POST.get('text')
+                'reason': text
             }
             send_mail(
                 '[FLAG] Freedom of Information Request: %s' % foia.title,
@@ -388,17 +380,18 @@ class Detail(DetailView):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
-            messages.info(request, 'Problem succesfully reported')
+            messages.success(request, 'Problem succesfully reported')
         return redirect(foia)
 
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
-        if foia.user == request.user and foia.is_appealable():
+        text = request.POST.get('text')
+        if foia.user == request.user and foia.is_appealable() and text:
             save_foia_comm(
                 request,
                 foia,
                 foia.user.get_full_name(),
-                request.POST.get('text'),
+                text,
                 'Appeal succesfully sent',
                 appeal=True
             )
