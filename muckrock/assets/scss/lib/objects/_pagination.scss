@@ -1,33 +1,23 @@
 .pagination {
     @include row;
     margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
-    nav {
-        @include span-columns(4);
-        @include media($medium-layout) {
-            @include span-columns(3);
-        }
-        @include media($large-layout) {
-            @include span-columns(6);
-        }
+    .page-ref {
+        @include media($small-layout){ @include span-columns(4); }
+        @include media($medium-layout){ @include span-columns(2); }
+        @include media($large-layout){ @include span-columns(4); }
         text-align: center;
+        @include media($medium-layout){ text-align: left; }
     }
-    ul {
+    .page-set {
+        @include media($small-layout){ @include span-columns(4); }
+        @include media($medium-layout){ @include span-columns(4); }
+        @include media($large-layout){ @include span-columns(8); }
         text-align: center;
-        margin: 0 auto;
+        @include media($medium-layout){ text-align: right; }
     }
-    li, .pp-set {
-        // @include font-sizing(0.95);
-        font-weight: $light;
+    ul { margin: 0 auto; }
+    li {
         display: block;
         padding: 0 $base-vertical-rhythm/4;
-    }
-    .pp-set {
-        font-weight: $light;
-    }
-    .page-ref, .pp-ref {
-        font-weight: $light;
-        @include font-sizing(1.25);
-        padding: 0 $base-vertical-rhythm/2;
-        margin: 0;
     }
 }

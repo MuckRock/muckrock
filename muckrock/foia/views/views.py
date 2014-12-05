@@ -91,10 +91,7 @@ class List(ListView):
         return foia_requests
 
     def get_paginate_by(self, queryset):
-        try:
-            return min(int(self.request.GET.get('per_page', 10)), 100)
-        except ValueError:
-            return 10
+        return 15
 
     def get_context_data(self, **kwargs):
         context = super(List, self).get_context_data(**kwargs)
