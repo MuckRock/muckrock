@@ -149,6 +149,9 @@ class FOIARequest(models.Model):
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
     parent = models.ForeignKey('self', blank=True, null=True)
+    block_incoming = models.BooleanField(default=False,
+        help_text='Block emails incoming to this request from '
+                  'automatically being posted on the site')
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -346,7 +349,8 @@ class FOIARequest(models.Model):
         self.save()
 
         for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
-            profile.notify(self)
+            if self.is_viewable(profile.user):
+                profile.notify(self)
 
         self.update_dates()
 
@@ -498,6 +502,10 @@ class FOIARequest(models.Model):
         comm.raw_email = msg.message()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
+
+        # unblock incoming messages if we send one out
+        self.block_incoming = False
+        self.save()
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
@@ -754,18 +762,28 @@ class FOIACommunication(models.Model):
     to_who = models.CharField(max_length=255, blank=True)
     priv_from_who = models.CharField(max_length=255, blank=True)
     priv_to_who = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField()
+    date = models.DateTimeField(db_index=True)
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField(blank=True)
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
+    opened = models.BooleanField()
+
+    # only used for orphans
+    likely_foia = models.ForeignKey(FOIARequest, related_name='likely_communications',
+        blank=True, null=True)
 
     raw_email = models.TextField(blank=True)
 
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
+
+    def get_absolute_url(self):
+        """The url for this object"""
+        # pylint: disable=E1101
+        return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
 
     def save(self, *args, **kwargs):
         """Remove controls characters from text before saving"""
@@ -780,7 +798,7 @@ class FOIACommunication(models.Model):
 
     class Meta:
         # pylint: disable=R0903
-        ordering = ['foia', 'date']
+        ordering = ['date']
         verbose_name = 'FOIA Communication'
 
 
@@ -810,7 +828,7 @@ class FOIAFile(models.Model):
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
     title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True)
+    date = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
@@ -876,5 +894,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-        ordering = ['comm', 'date']
+        ordering = ['date']
 

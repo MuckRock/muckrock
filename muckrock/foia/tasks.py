@@ -21,6 +21,7 @@ import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from django_mailgun import MailgunAPIError
 
 from muckrock.foia.models import FOIAFile, FOIARequest, FOIAMultiRequest, FOIACommunication
 from muckrock.foia.codes import CODES
@@ -205,8 +206,11 @@ def followup_requests():
                                                    date_followup__lte=date.today(),
                                                    disable_autofollowups=False)
         for foia in foia_requests:
-            log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
-            foia.followup()
+            try:
+                foia.followup()
+                log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
+            except MailgunAPIError as exc:
+                log.append('ERROR: %s - %d - %s - %s' % (foia.status, foia.pk, foia.title, exc))
 
         send_mail('[LOG] Follow Ups', '\n'.join(log), 'info@muckrock.com',
                   ['requests@muckrock.com', 'mitch@muckrock.com'])

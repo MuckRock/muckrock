@@ -389,6 +389,13 @@
 		<div class="content-separator"></div>
 	</div>
 
+	{% if not foia.is_embargo %}
+	<div>
+		<a href="{% url 'foia-feed' idx=foia.pk %}" class="feed">Follow this request</a>
+	</div>
+	<div class="content-separator"></div>
+	{% endif %}
+
 
 {% endblock %}
 

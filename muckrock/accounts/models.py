@@ -357,10 +357,16 @@ class Statistics(models.Model):
     total_requests_no_docs = models.IntegerField(null=True)
     total_requests_partial = models.IntegerField(null=True)
     total_requests_abandoned = models.IntegerField(null=True)
+
+    orphaned_communications = models.IntegerField(null=True)
+
+    total_agencies = models.IntegerField()
+    stale_agencies = models.IntegerField(null=True)
+    unapproved_agencies = models.IntegerField(null=True)
+
     total_pages = models.IntegerField()
     total_users = models.IntegerField()
     users_today = models.ManyToManyField(User)
-    total_agencies = models.IntegerField()
     total_fees = models.IntegerField()
     pro_users = models.IntegerField(null=True)
     pro_user_names = models.TextField(blank=True)

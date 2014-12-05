@@ -25,6 +25,9 @@
 			{% for comm in communications %}
 			<a name="{{comm.anchor}}"></a>
 			<div class="{% if comm.response %}response{% else %}request{% endif %}">
+				{% if comm.likely_foia %}
+				<p><a href="{% url "admin:foia_foiarequest_change" comm.likely_foia.pk %}">Likely FOIA for this comm</a></p>
+				{% endif %}
 				<strong>From {{comm.priv_from_who}} {% if comm.priv_to_who %}to {{comm.priv_to_who}} {% endif %}on {{comm.date|date}}:</strong><br />
 
 				{# html communication #}
@@ -74,7 +77,7 @@
 				{% if request.user.is_staff %}
 				<span style="display:none" id="move-{{comm.pk}}-span">
 					<label for="new_foia_pk">FOIA:</label>
-					<input type="text" name="new_foia_pk_{{comm.pk}}" value="" />
+					<input type="text" name="new_foia_pk_{{comm.pk}}" value="{{comm.likely_foia.pk}}" />
 					<input type="submit" name="submit" value="Submit" class="button" 
                  onclick="$('input[name=action]').val('move_comm'); $('input[name=comm_pk]').val({{comm.pk}}); return true" />
 				</span>

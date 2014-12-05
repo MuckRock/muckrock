@@ -34,3 +34,8 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     }
     
 autocomplete_light.register(Jurisdiction, JurisdictionAutocomplete)
+
+autocomplete_light.register(Jurisdiction, name='JurisdictionAdminAutocomplete',
+                            choices=Jurisdiction.objects.all(),
+                            attrs={'placeholder': 'Jurisdiction?',
+                                   'data-autocomplete-minimum-characters': 2})

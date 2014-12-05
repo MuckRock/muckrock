@@ -23,6 +23,25 @@ class AgencyAutocomplete(autocomplete_light.AutocompleteModelBase):
             if jurisdiction_id == 'f':
                 jurisdiction_id = (Jurisdiction.objects.filter(level='f')[0]).id
             choices = choices.filter(jurisdiction=jurisdiction_id)
+
+        return self.order_choices(choices)[0:self.limit_choices]
+
+#pylint: disable=interface-not-implemented
+class AgencyAdminAutocomplete(autocomplete_light.AutocompleteModelBase):
+    """Autocomplete for Agencies for FOIA admin page"""
+    attrs = {'placeholder': 'Agency?'}
+
+    def choices_for_request(self):
+        """Filter the choices based on the jurisdiction"""
+        query = self.request.GET.get('q', '')
+        jurisdiction_id = self.request.GET.get('jurisdiction_id', None)
+
+        choices = self.choices.all()
+        if query:
+            choices = choices.filter(name__icontains=query)
+        if jurisdiction_id:
+            choices = choices.filter(jurisdiction_id=jurisdiction_id)
+
         return self.order_choices(choices)[0:self.limit_choices]
 
 autocomplete_light.register(Agency, AgencyAutocomplete)

@@ -60,3 +60,5 @@ newrelic==2.18.1.15
 dogslow==0.9.7
 django-mathfilters==0.3.0
 django-epiceditor==0.2.1.2
+django-pylibmc-sasl==0.2.4
+pylibmc==1.2.3

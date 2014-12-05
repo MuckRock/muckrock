@@ -40,6 +40,11 @@ def orphans(request):
             return actions[request.POST['action']](request, 'foia-orphans')
         except KeyError: # if submitting form from web page improperly
             return redirect('foia-orphans')
+    elif 'comm_id' in request.GET:
+        communications = FOIACommunication.objects.filter(foia=None, pk=request.GET['comm_id'])
+        return render_to_response('foia/orphans.html',
+                                  {'communications': communications},
+                                  context_instance=RequestContext(request))
     else:
         communications = FOIACommunication.objects.filter(foia=None)
         paginator = Paginator(communications, 25)

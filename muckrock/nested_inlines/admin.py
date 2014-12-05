@@ -2,6 +2,7 @@
 """
 Nested Inlines
 """
+# pylint: disable-all
 
 from django.contrib.admin import ModelAdmin, helpers
 from django.contrib.admin.options import InlineModelAdmin
@@ -22,10 +23,12 @@ csrf_protect_m = method_decorator(csrf_protect)
 class NestedModelAdmin(ModelAdmin):
     """A model admin that can have nested inlines"""
 
-    def _nested_formsets(self, request, admin, instance, create_formset, prefixes=None):
+    def _nested_formsets(self, request, admin, instance, create_formset, prefixes=None,
+                         qs_field=None):
         """Collect all formsets recursively"""
         # pylint: disable=R0913
         # pylint: disable=R0914
+        # pylint: disable=too-many-locals
 
         formsets = []
         inline_admin_formsets = []
@@ -38,7 +41,20 @@ class NestedModelAdmin(ModelAdmin):
             prefixes[prefix] = prefixes.get(prefix, 0) + 1
             if prefixes[prefix] != 1:
                 prefix = "%s-%s" % (prefix, prefixes[prefix])
-            formset = create_formset(form_set, request, admin, instance, prefix, inline)
+
+            new_qs_field = None
+            if qs_field:
+                # if we were passed a qs_field, grab the qs from their directly to avoid
+                # hitting the database again
+                qset = getattr(instance, qs_field).all()
+            elif hasattr(inline, 'prefetch'):
+                # we prefetch the related field, then pass that field recursively
+                qset = inline.queryset(request).prefetch_related(inline.prefetch)
+                new_qs_field = inline.prefetch
+            else:
+                # normal qs
+                qset = inline.queryset(request)
+            formset = create_formset(form_set, request, admin, instance, prefix, qset)
             formsets.append(formset)
 
             fieldsets = list(inline.get_fieldsets(request))
@@ -51,7 +67,7 @@ class NestedModelAdmin(ModelAdmin):
             for form in formset.forms:
                 new_formsets, new_inline_admin_formsets, new_media = \
                     self._nested_formsets(request, inline, form.instance,
-                                          create_formset, prefixes=prefixes)
+                                          create_formset, prefixes=prefixes, qs_field=new_qs_field)
                 formsets.extend(new_formsets)
                 form.inline_admin_formsets = new_inline_admin_formsets
                 media.extend(new_media)
@@ -63,6 +79,7 @@ class NestedModelAdmin(ModelAdmin):
     @transaction.commit_on_success
     def add_view(self, request, form_url='', extra_context=None):
         """The 'add' admin view for this model."""
+        # pylint: disable=protected-access
         model = self.model
         opts = model._meta
 
@@ -169,9 +186,9 @@ class NestedModelAdmin(ModelAdmin):
 
             formsets, inline_admin_formsets, media = \
                 self._nested_formsets(request, self, new_object,
-                    lambda FormSet, req, admin, inst, prefix, inline:
+                    lambda FormSet, req, admin, inst, prefix, qs:
                         FormSet(data=req.POST, files=req.FILES, instance=inst,
-                                prefix=prefix, queryset=inline.queryset(req)))
+                                prefix=prefix, queryset=qs))
 
             if all_valid(formsets) and form_validated:
                 self.save_model(request, new_object, form, change=True)
@@ -187,8 +204,8 @@ class NestedModelAdmin(ModelAdmin):
             form = ModelForm(instance=obj)
             formsets, inline_admin_formsets, media = \
                 self._nested_formsets(request, self, obj,
-                    lambda FormSet, req, admin, inst, prefix, inline:
-                        FormSet(instance=inst, prefix=prefix, queryset=inline.queryset(req)))
+                    lambda FormSet, req, admin, inst, prefix, qs:
+                        FormSet(instance=inst, prefix=prefix, queryset=qs))
 
         adminForm = helpers.AdminForm(form, self.get_fieldsets(request, obj),
             self.prepopulated_fields, self.get_readonly_fields(request, obj),
