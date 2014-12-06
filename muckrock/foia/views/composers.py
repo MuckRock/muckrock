@@ -146,9 +146,17 @@ def _make_user(request, data):
         num += 1
     password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
     user = User.objects.create_user(username, data['email'], password)
+    Profile.objects.create(
+        user=user,
+        acct_type='community',
+        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+        date_update=datetime.now()
+    )
+    link = user.get_profile().wrap_url(reverse('acct-change-pw'))
     send_mail('Welcome to MuckRock',
               render_to_string('text/user/welcome.txt',
-                               {'data': data, 'pw': password, 'username': username}),
+                               {'data': data, 'pw': password,
+                                'username': username, 'link': link}),
               'info@muckrock.com', [data['email']], fail_silently=False)
     if ' ' in data['full_name']:
         user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
@@ -156,12 +164,6 @@ def _make_user(request, data):
         user.first_name = data['full_name']
     user.save()
     user = authenticate(username=username, password=password)
-    Profile.objects.create(
-        user=user,
-        acct_type='community',
-        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
-        date_update=datetime.now()
-    )
     login(request, user)
     
 def _process_request_form(request):

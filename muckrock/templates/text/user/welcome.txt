@@ -1,3 +1,18 @@
-{{data.full_name}}, welcome to MuckRock!
+Hi {{data.full_name}}, and welcome to MuckRock!
 
-Thank you for filing a request.  An account has been created for you.  Your username is {{username}} and your password is {{pw}}.  You can change it now by going to https://www.muckrock.com{% url 'acct-change-pw' %}.
+Thanks for registering: You're all set to get started, and we're here to answer any questions you might have, whether you want help crafting the perfect request or just want to find some interesting stuff to follow and read.
+
+We've set your username to {{username}}, associated with the email address {{data.email}}.
+
+Your password has been set to {{pw}}.  Log in and change it now:
+
+https://www.muckrock.com{{ link }}
+
+After that, get started filing by just clicking the blue "Create a FOIA Request" button on the top right of any page.
+
+Thanks again for trying MuckRock. To get in touch with staff, just reply to this email, and we'll respond as soon as we can.
+
+Thanks!
+
+Michael
+MuckRock.com
