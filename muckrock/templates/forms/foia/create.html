@@ -1,8 +1,16 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
 {% block title %}MuckRock &bull; New Request{% endblock %}
 
 {% load mathfilters %}
 
+{% block styles %}
+<style>
+    .new-request .autocomplete-light-widget span.deck > span span.remove {
+        background-image:url("{% static 'img/remove.png' %}") !important;
+    }
+</style>
+{% endblock styles %}
 {% block content %}
 <div class="new-request">
     <header>
@@ -206,7 +214,6 @@ $(document).ready(function(){
     stateSelect.change(function(){
         selectChange($(this));
     });
-        
 });
 </script>
 {% endblock scripts %}
