@@ -73,16 +73,16 @@ PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
-COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_ROOT = ASSETS_ROOT
 
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
 
-if not os.environ.has_key('COMPRESS_OFFLINE'):
-    # compress_offline is set to true during deployment to Heroku
-    COMPRESS_OFFLINE=True 
+COMPRESS_OFFLINE=True 
+COMPRESS_ENABLED=True 
+
 COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
