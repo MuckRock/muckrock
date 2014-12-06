@@ -81,7 +81,6 @@ STATICFILES_DIRS = (
 
 
 COMPRESS_OFFLINE=True 
-COMPRESS_ENABLED=True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
@@ -123,6 +122,7 @@ else:
     # un comment out to precompress
     #BUCKET_NAME = 'muckrock'
     #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    #COMPRESS_ENABLED=True
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
