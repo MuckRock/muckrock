@@ -15,8 +15,8 @@ old_jur_url = r'(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
 
 urlpatterns = patterns('',
     url(r'^$',                   views.list_, name='jurisdiction-list'),
+    url(r'^%s/flag/$' % jur_url, views.redirect_flag),
     url(r'^%s/$' % jur_url,      views.detail, name='jurisdiction-detail'),
-    url(r'^%s/flag/$' % jur_url, RedirectView.as_view(url='/%(jur_url)s/'), name='jurisdiction-flag'),
 )
 
 # old url patterns go under jurisdictions, new ones switched to places

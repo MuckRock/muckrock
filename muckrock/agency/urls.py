@@ -27,7 +27,6 @@ urlpatterns = patterns(
     ),
     url(
         r'^%s/flag/$' % agency_url,
-        RedirectView.as_view(url='/%(agency_url)s/'),
-        name='agency-flag'
+        views.redirect_flag,
     ),
 )

@@ -81,6 +81,11 @@ def list_(request):
     return render_to_response('lists/jurisdiction_list.html', context,
                               context_instance=RequestContext(request))
 
+def redirect_flag(request, **kwargs):
+    """Redirect flag urls to base agency"""
+    # filter None from kwargs
+    kwargs = {key:kwargs[key] for key in kwargs if kwargs[key]!=None}
+    return redirect('jurisdiction-detail', **kwargs)
 
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
