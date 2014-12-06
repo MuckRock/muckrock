@@ -121,7 +121,7 @@ else:
     MEDIA_URL = '/media/'
 
     # un comment out to precompress
-    #BUCKET_NAME = 'muckrock-staging'
+    #BUCKET_NAME = 'muckrock'
     #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
 
 STATICFILES_FINDERS = (
