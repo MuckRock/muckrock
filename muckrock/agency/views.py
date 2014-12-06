@@ -87,6 +87,10 @@ def redirect_old(request, jurisdiction, slug, idx, action):
 
     return redirect('/agency/%(jurisdiction)s-%(jidx)s/%(slug)s-%(idx)s/%(action)s/' % locals())
 
+def redirect_flag(request, jurisdiction, jidx, slug, idx):
+    """Redirect flag urls to base agency"""
+    return redirect('agency-detail', jurisdiction, jidx, slug, idx)
+
 def stale(request):
     """List all stale agencies"""
 
