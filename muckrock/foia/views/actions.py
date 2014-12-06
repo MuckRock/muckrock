@@ -145,7 +145,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
     def form_actions(_, foia, form):
         """Update the embargo date"""
-        foia.embargo = form.cleaned_data.get('embargo')
+        foia.embargo = True
         foia.date_embargo = form.cleaned_data.get('date_embargo')
         foia.save()
         logger.info(

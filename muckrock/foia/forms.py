@@ -168,10 +168,6 @@ class MyListFilterForm(ListFilterForm):
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
-    embargo = forms.BooleanField(
-        label='Embargo?',
-        required=False,
-    )
     date_embargo = forms.DateField(
         label='Embargo date',
         required=False,
@@ -181,10 +177,9 @@ class FOIAEmbargoForm(forms.ModelForm):
 
     def clean(self):
         """Checks if date embargo is necessary and if it is within 30 days"""
-        embargo = self.cleaned_data.get('embargo')
         date_embargo = self.cleaned_data.get('date_embargo')
         finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
-        if embargo and self.instance.status in finished_status:
+        if self.instance.status in finished_status:
             if not date_embargo:
                 error_msg = 'Embargo date is required for finished requests'
                 self._errors['date_embargo'] = self.error_class([error_msg])
@@ -196,7 +191,7 @@ class FOIAEmbargoForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = FOIARequest
-        fields = ['embargo', 'date_embargo']
+        fields = ['date_embargo']
 
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""

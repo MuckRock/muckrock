@@ -57,6 +57,13 @@ fieldset {
     }
 }
 
-.question.form, .reply.form {
-    .visible-fields fieldset { @extend %full; }
+.form {
+
+    &.question,
+    &.reply,
+    &.update,
+    &.password-change,
+    &.foia-embargo {
+        .visible-fields fieldset { @extend %full; }
+    }
 }
