@@ -485,7 +485,10 @@ CACHES = {
 
 if 'MEMCACHIER_SERVERS' in os.environ:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
-    CACHES['default']['LOCATION'] = os.environ.get('MEMCACHIER_SERVERS')
+    server = os.environ.get('MEMCACHIER_SERVERS')
+    if not server.endswith(':11211'):
+        server += ':11211'
+    CACHES['default']['LOCATION'] = server
 
 
 REST_FRAMEWORK = {
