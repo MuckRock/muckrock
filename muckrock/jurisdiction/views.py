@@ -84,7 +84,7 @@ def list_(request):
 def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
     # filter None from kwargs
-    kwargs = {key:kwargs[key] for key in kwargs if kwargs[key]!=None}
+    kwargs = dict((key, kwargs[key]) for key in kwargs if kwargs[key] is not None)
     return redirect('jurisdiction-detail', **kwargs)
 
 class JurisdictionViewSet(viewsets.ModelViewSet):
