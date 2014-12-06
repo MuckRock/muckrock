@@ -81,9 +81,9 @@ STATICFILES_DIRS = (
 
 
 COMPRESS_OFFLINE=True 
-COMPRESS_ENABLED=True 
+COMPRESS_ENABLED=True
 
-COMPRESS_STORAGE = 'compressor.storage.GzipCompressorFileStorage'
+COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     #'compressor.filters.csstidy.CSSTidyFilter',
@@ -111,12 +111,18 @@ elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
     STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
 else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
+
+    # un comment out to precompress
+    #BUCKET_NAME = 'muckrock-staging'
+    #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
