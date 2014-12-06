@@ -225,7 +225,15 @@
         }
     }
     
-    
+    .failure.panel {
+        ul {
+            padding-left: $base-padding;
+            list-style-type: disc;
+        }
+        ul li ul {
+            list-style-type: circle;
+        }
+    }
     
 }
 

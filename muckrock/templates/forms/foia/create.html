@@ -23,13 +23,21 @@
         <summary>
         {% endif %}
     </header>
+    {% if form.non_field_errors or form.errors %}
+        <section class="failure panel">
+            <p>The form could not be submitted due to the following errors:</p>
+            {{ form.non_field_errors }}
+            <ul>
+            {% for field in form.visible_fields %}
+                {% if field.errors %}
+                <li>{{ field.label }} field: {{ field.errors }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </section>
+    {% endif %}
     <form action="" method="post" class="create-request">
         {% csrf_token %}
-        {% if form.non_field_errors %}
-        <object class="failure panel">
-        {{ form.non_field_errors }}
-        </object>
-        {% endif %}
         {% for field in form.hidden_fields %}
             {{ field }}
         {% endfor %}
@@ -82,8 +90,6 @@
                     <label for="{{ field.auto_id }}">{{ field.label}}</label>
                     {{ field }}
                 {% endif %}
-                {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
             </fieldset>
         {% endfor %}
 		
