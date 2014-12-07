@@ -14,3 +14,4 @@ apache
 .sass-cache
 dump.rdb
 .bundle
+.noseids
