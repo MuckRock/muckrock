@@ -398,7 +398,7 @@ def stripe_webhook_v2(request):
             logger.info('%s subscription has been cancelled due to failed payment', user.username)
             msg = EmailMessage(
                 subject='Payment Failed',
-                body=render_to_string('text/registration/pay_fail.txt', {
+                body=render_to_string('text/user/pay_fail.txt', {
                     'user': user,
                     'attempt': 'final'}),
                 from_email='info@muckrock.com',
@@ -409,7 +409,7 @@ def stripe_webhook_v2(request):
             logger.info('Failed payment by %s, attempt %s', user.username, attempt)
             msg = EmailMessage(
                 subject='Payment Failed',
-                body=render_to_string('text/registration/pay_fail.txt', {
+                body=render_to_string('text/user/pay_fail.txt', {
                     'user': user,
                     'attempt': attempt}),
                 from_email='info@muckrock.com',
