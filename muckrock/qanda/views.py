@@ -133,6 +133,21 @@ def create_answer(request, slug, idx):
         context_instance=RequestContext(request)
     )
 
+@login_required
+def subscribe(request):
+    """Subscribe or unsubscribe to new questions"""
+    profile = request.user.get_profile()
+
+    if profile.follow_questions:
+        profile.follow_questions = False
+        messages.info(request, 'You are now unsubscribed from new question notifications')
+    else:
+        profile.follow_questions = True
+        messages.success(request, 'You are now subscribed to new question notifications')
+    profile.save()
+
+    return redirect(reverse('question-index'))
+
 class List(ListView):
     """List of unanswered questions"""
     paginate_by = 10
