@@ -112,7 +112,7 @@ class FOIARequestAdminForm(forms.ModelForm):
 
     jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
                                                        queryset=Jurisdiction.objects.all())
-    Adminagency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
+    agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
                                                  queryset=Agency.objects.all())
     user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'))
 
