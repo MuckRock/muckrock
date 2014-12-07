@@ -360,7 +360,7 @@ def stripe_webhook_v2(request):
         if user:
             msg = EmailMessage(
                 subject=subject,
-                body=render_to_string('text/registration/receipt.txt', {
+                body=render_to_string('text/user/receipt.txt', {
                     'user': user,
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
@@ -375,7 +375,7 @@ def stripe_webhook_v2(request):
         else:
             msg = EmailMessage(
                 subject=subject,
-                body=render_to_string('text/registration/anon_receipt.txt', {
+                body=render_to_string('text/user/anon_receipt.txt', {
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
                     'last4': event_data.get('card', {}).get('last4'),
