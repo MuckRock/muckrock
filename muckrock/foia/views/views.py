@@ -74,7 +74,7 @@ class List(ListView):
                     u = get_object_or_404(User, username=value)
                     foia_requests = foia_requests.filter(user=u)
                 elif key == 'tags':
-                    foia_requests = foia_requests.filter(tags__contains=value)
+                    foia_requests = foia_requests.filter(tags__slug=value)
                     
 
         # Handle extra cases by resorting to default values
