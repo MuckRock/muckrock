@@ -88,12 +88,14 @@ def _make_comm(user, document, intro=None, waiver=None, delay=None):
     return '\n\n'.join(prepend + [document] + append)
         
 def _make_new_agency(request, agency, jurisdiction):
+    """Helper function to create new agency"""
+    user = request.user if request.user.is_authenticated() else None
     agency = Agency.objects.create(
         name=agency[:255],
         slug=(slugify(agency[:255]) or 'untitled'),
         jurisdiction=jurisdiction,
-        user=request.user,
-        approved=False
+        user=user,
+        approved=False,
     )
     send_mail(
         '[AGENCY] %s' % agency.name,
