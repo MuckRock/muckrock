@@ -260,7 +260,7 @@ def stripe_webhook(request):
         attempt = message['attempt']
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         send_mail('Payment Failed',
-                  render_to_string('text/registration/pay_fail.txt',
+                  render_to_string('text/user/pay_fail.txt',
                                    {'user': user, 'attempt': attempt}),
                   'info@muckrock.com', [user.email], fail_silently=False)
     elif event == 'subscription_final_payment_attempt_failed':
@@ -272,7 +272,7 @@ def stripe_webhook(request):
         send_mail(
             'Payment Failed',
             render_to_string(
-                'text/registration/pay_fail.txt',
+                'text/user/pay_fail.txt',
                 {'user': user, 'attempt': 'final'}
             ),
             'info@muckrock.com',
