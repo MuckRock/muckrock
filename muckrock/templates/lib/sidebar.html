@@ -29,10 +29,10 @@
         <section class="account">
             <p class="username">{{ user.get_full_name }}</p>
             <ul class="options">
-			    <li><a href="{% url 'acct-my-profile' %}">Profile</a></li>
-			    <li><a href="{% url 'acct-logout' %}">Log Out</a></li>
+			    <li><a href="{% url 'acct-my-profile' %}" class="button">Profile</a></li>
+			    <li><a href="{% url 'acct-logout' %}" class="button">Log Out</a></li>
 			</ul>
-			<a href="{% url 'foia-mylist' %}">My Requests</a>
+			<a href="{% url 'foia-mylist' %}" class="button">My Requests</a>
 			{% if drafts %}
             <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
                 <span class="fixes counter">{{ drafts|length }}</span>
@@ -56,7 +56,7 @@
 
             <ul class="updated button-list">
                 {% for foia in updates|slice:":10" %}
-                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}" class="button">{{ foia.title }}</a></li>
                 {% endfor %}
             </ul>
             {% endif %}
@@ -64,8 +64,8 @@
             
         {% else %}
         <ul class="account-links">
-            <li><a href="{% url 'acct-register' %}">Sign&nbsp;Up</a></li>
-            <li><a href="{% url 'acct-login' %}">Log&nbsp;In</a></li>
+            <li><a href="{% url 'acct-register' %}" class="button">Sign&nbsp;Up</a></li>
+            <li><a href="{% url 'acct-login' %}" class="button">Log&nbsp;In</a></li>
         </ul>
         {% endif %}
         
@@ -82,14 +82,14 @@
                 </svg>
             </a></li>
             -->
-            <li><a href="http://www.twitter.com/muckrock" title="MuckRock on Twitter">
+            <li><a href="http://www.twitter.com/muckrock" title="MuckRock on Twitter" class="button">
                 <svg width="25px" height="25px" viewBox="0 0 59 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <title>Twitter Icon</title>
                     <description>Symbolizes a link to our Twitter page</description>
                     <path d="M56.8,1.5 C54.5,2.9 51.9,3.9 49.2,4.4 C47.1,2.1 43.9,0.7 40.6,0.7 C34.1,0.7 28.7,6 28.7,12.6 C28.7,13.5 28.7,14.5 29,15.3 C19.1,14.8 10.3,10.1 4.5,2.9 C3.5,4.7 2.8,6.8 2.8,8.9 C2.8,13 4.8,16.6 8,18.8 C6,18.8 4.1,18.2 2.3,17.3 C2.3,23.2 6.6,27.9 12.1,29 C11.1,29.3 10.3,29.5 9.2,29.5 C8.5,29.5 7.7,29.4 7,29.3 C8.5,34 12.9,37.4 18.1,37.6 C14,40.7 8.9,42.7 3.4,42.7 C2.4,42.7 1.5,42.7 0.6,42.5 C5.9,45.9 12.1,47.8 18.8,47.8 C40.6,47.8 52.6,29.7 52.6,14.1 L52.6,12.5 C54.9,10.9 56.9,8.8 58.5,6.3 C56.2,7.2 53.9,7.8 51.5,8.1 C54,6.6 55.8,4.2 56.8,1.5 Z" id="twitter-icon"></path>
                 </svg>
             </a></li>
-            <li><a href="https://www.facebook.com/muckrock" title="MuckRock on Facebook">
+            <li><a href="https://www.facebook.com/muckrock" title="MuckRock on Facebook" class="button">
                 <svg width="25px" height="25px" viewBox="0 0 35 73" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <title>Facebook Icon</title>
                     <description>Symbolizes a link to our Facebook page</description>
@@ -97,10 +97,10 @@
                 </svg>
             </a></li>
         </ul>
-        <form name="newsletter-signup" action="http://muckrock.us2.list-manage2.com/subscribe/post?u=74862d74361490eca930f4384&amp;id=20aa4a931d" method="post">
+        <form name="newsletterSignup" action="https://muckrock.us2.list-manage2.com/subscribe/post?u=74862d74361490eca930f4384&amp;id=20aa4a931d" method="post">
             <input type="text" for="mce-EMAIL" value="" name="EMAIL" id="mce-EMAIL" placeholder="your.email@biz.com"></input>
             <input type="submit" value="Subscribe" style="display: none;" />
-            <span class="input-button" id="newsletter-button" onclick="newsletter-signup.submit()">
+            <span class="input-button" id="newsletter-button" onclick="newsletterSignup.submit()">
                 <svg width="25px" height="25px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <title>Envelope Icon</title>
                     <description>Symbolizes an email action.</description>
