@@ -1,28 +1,7 @@
 /* Details */
 
-@mixin header-image {
-    .header {
-        position: relative;
-        display: block;
-        height: 42.5em;
-        background-size: cover;
-        background-position: center center;
-        background-repeat: no-repeat;
-    }
-    .header-container {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        max-width: none;
-        background: $color-white;
-    }
-}
-
 .detail {
     @extend %detail;
-    &.news, &.agency, &.jurisdiction {
-        @include header-image;
-    }
     &.news {
         .main {
             h1 {
