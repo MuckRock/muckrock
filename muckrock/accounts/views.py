@@ -194,10 +194,10 @@ def buy_requests(request):
                 raise ValueError('Account email and Stripe email do not match')
             if not user_profile.credit_card():
                 user_profile.credit_card(stripe_token)
-            user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
-            user_profile.num_requests += 5
+            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            user_profile.num_requests += 4
             user_profile.save()
-            msg = 'Purchase successful. 5 requests have been added to your account.'
+            msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
@@ -260,7 +260,7 @@ def stripe_webhook(request):
         attempt = message['attempt']
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         send_mail('Payment Failed',
-                  render_to_string('text/registration/pay_fail.txt',
+                  render_to_string('text/user/pay_fail.txt',
                                    {'user': user, 'attempt': attempt}),
                   'info@muckrock.com', [user.email], fail_silently=False)
     elif event == 'subscription_final_payment_attempt_failed':
@@ -272,7 +272,7 @@ def stripe_webhook(request):
         send_mail(
             'Payment Failed',
             render_to_string(
-                'text/registration/pay_fail.txt',
+                'text/user/pay_fail.txt',
                 {'user': user, 'attempt': 'final'}
             ),
             'info@muckrock.com',
@@ -330,7 +330,7 @@ def stripe_webhook_v2(request):
         fee_amount = amount - base_amount
 
         if event_data.get('description') and \
-                event_data['description'].endswith('Charge for 5 requests'):
+                event_data['description'].endswith('Charge for 4 requests'):
             type_ = 'community'
             url = '/foia/new/'
             subject = 'Payment received for additional requests'
@@ -398,7 +398,7 @@ def stripe_webhook_v2(request):
             logger.info('%s subscription has been cancelled due to failed payment', user.username)
             msg = EmailMessage(
                 subject='Payment Failed',
-                body=render_to_string('text/registration/pay_fail.txt', {
+                body=render_to_string('text/user/pay_fail.txt', {
                     'user': user,
                     'attempt': 'final'}),
                 from_email='info@muckrock.com',
@@ -409,7 +409,7 @@ def stripe_webhook_v2(request):
             logger.info('Failed payment by %s, attempt %s', user.username, attempt)
             msg = EmailMessage(
                 subject='Payment Failed',
-                body=render_to_string('text/registration/pay_fail.txt', {
+                body=render_to_string('text/user/pay_fail.txt', {
                     'user': user,
                     'attempt': attempt}),
                 from_email='info@muckrock.com',

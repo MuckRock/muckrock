@@ -479,7 +479,7 @@ class TestAccountFunctional(TestCase):
             'amount': 2000,
             'currency': 'usd',
             'customer': profile.customer().id,
-            'description': 'adam: Charge for 5 requests'
+            'description': 'adam: Charge for 4 requests'
         }))
 
         with patch('stripe.Charge') as NewMockCharge:

@@ -317,7 +317,7 @@ class Profile(models.Model):
                 get_subject(grouped_foias[1][1][0].status, len(foias))
             )
 
-        msg = render_to_string('text/registration/notify_mail.txt', {
+        msg = render_to_string('text/user/notify_mail.txt', {
             'name': self.user.get_full_name(),
             'foias': grouped_foias,
             'footer': options.email_footer
