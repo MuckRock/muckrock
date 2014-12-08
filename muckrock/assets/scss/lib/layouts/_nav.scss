@@ -355,12 +355,13 @@ nav.sidebar {
         color: $color-black;
         background-color: $color-white;
         box-shadow: 1px 1px 10px black;
-        p {
-            width: 90%;
-            &:last-of-type {
-                margin-bottom: 0;
-            }
+        h1, h2, h3, h4, h5, h6, p {
+            width: 95%;
         }
+        p:last-of-type {
+            margin-bottom: 0;
+        }
+        
         #close-broadcast {
             position: absolute;
             top: 5%;
