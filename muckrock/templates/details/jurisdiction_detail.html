@@ -6,9 +6,9 @@
 
 {% block image %}
 {% if jurisdiction.image %}
-style="background-image:url('{% thumbnail jurisdiction.image 1200x675 %}');"
+<img src="{% thumbnail jurisdiction.image 1200x675 %}" class="header-image">
 {% endif %}
-{% endblock %}
+{% endblock image %}
 
 {% block header %}
 	<h1>{{ jurisdiction.name }}</h1>

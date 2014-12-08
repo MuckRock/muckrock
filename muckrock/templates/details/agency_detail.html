@@ -6,7 +6,7 @@
 
 {% block image %}
 {% if agency.image %}
-style="background-image:url('{% thumbnail agency.image 1200x675 %}');"
+<img src="{% thumbnail agency.image 1200x675 %}" class="header-image">
 {% endif %}
 {% endblock image %}
 
