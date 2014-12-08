@@ -146,7 +146,7 @@ def subscribe(request):
         messages.success(request, 'You are now subscribed to new question notifications')
     profile.save()
 
-    return redirect(reverse('question-index'))
+    return redirect('question-index')
 
 class List(ListView):
     """List of unanswered questions"""
