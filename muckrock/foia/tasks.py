@@ -242,7 +242,8 @@ def set_all_document_cloud_pages():
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     # pylint: disable=E1101
-    docs = [doc for doc in FOIAFile.objects.filter(doc_id='') if doc.is_doccloud()]
+    docs = [doc for doc in FOIAFile.objects.filter(doc_id='')
+            if doc.is_doccloud() and doc.get_foia()]
     logger.info('Reupload documents, %d documents are stuck', len(docs))
     for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
