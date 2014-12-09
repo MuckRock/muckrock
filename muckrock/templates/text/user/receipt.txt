@@ -11,7 +11,7 @@ Name: {{user.get_full_name}}
 {% if type == "pro" %}Item: Professional Account{% endif %}{% if type == "community" %}Item: 5 Requests{% endif %}
 Payment ID: {{id}}
 Payment Date: {{date|date}}
-Payment Card: **** **** **** {{user.get_profile.credit_card.last4}}
+{% if last4 %}Payment Card: **** **** **** {{last4}}{% endif %}
 
 {% if type == "doc" %}Request Fee: ${{base_amount|floatformat:2}}
 Payment Proceesing Fee (5%): ${{fee_amount|floatformat:2}}

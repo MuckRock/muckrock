@@ -201,20 +201,9 @@ class Profile(models.Model):
             self.save()
         return customer
 
-    def credit_card(self, token=None):
-        """Get the user's CC if they have one on file, or sets their
-        credit card if the token is provided as an argument"""
-        if token:
-            customer = self.customer()
-            customer.card = token
-            customer.save()
-        return getattr(self.customer(), 'active_card', None)
-
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
-        # customer = self.customer()
-        # card = self.credit_card() if self.credit_card() else self.credit_card(token)
         stripe.Charge.create(
             amount=amount,
             currency='usd',

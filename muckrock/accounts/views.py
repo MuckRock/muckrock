@@ -139,8 +139,6 @@ def subscribe(request):
                 stripe_email = request.POST['stripe_email']
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
-                if not user_profile.credit_card():
-                    user_profile.credit_card(stripe_token)
                 customer = user_profile.customer()
                 customer.update_subscription(plan='pro')
                 user_profile.acct_type = 'pro'
@@ -192,8 +190,6 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise ValueError('Account email and Stripe email do not match')
-            if not user_profile.credit_card():
-                user_profile.credit_card(stripe_token)
             user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
             user_profile.num_requests += 5
             user_profile.save()
@@ -364,6 +360,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
+                    'last4': event_data.get('card', {}).get('last4'),
                     'amount': amount,
                     'base_amount': base_amount,
                     'fee_amount': fee_amount,
