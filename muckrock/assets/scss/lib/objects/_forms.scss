@@ -66,4 +66,18 @@ fieldset {
     &.foia-embargo {
         .visible-fields fieldset { @extend %full; }
     }
+    
+    &.search {
+        dfn { margin: $base-margin/2 $base-margin/4; }
+        .search-filters {
+            margin: 0;
+            li {
+                display: inline-block;
+                padding: 0 $base-padding/4;
+            }
+            label {
+                padding-left: $base-padding/6;
+            }
+        }
+    }
 }

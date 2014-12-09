@@ -29,7 +29,7 @@
 {% endblock twitter_card %}
 
 {% block header %}
-    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == request.user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
+    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
         <form method="post" class="status-form" id="status-form">
             {% csrf_token %}
             <select name="status">
@@ -61,9 +61,9 @@
     <h1>{{ foia.title }}</h1>
     <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %}<br>It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
     <dl>
-    {% if foia.tags.all or foia.user == request.user or user.is_staff %}
-        <dt>Tags{% if user.is_staff or foia.user == request.user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
-        {% if foia.user == request.user or user.is_staff %}
+    {% if foia.tags.all or foia.user == user or user.is_staff %}
+        <dt>Tags{% if user.is_staff or foia.user == user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
+        {% if foia.user == user or user.is_staff %}
         <form method="post" class="tag-form" id="tag-form">
             {% csrf_token %}
             <input type="text" name="tags" value="{% for tag in foia.tags.all %}{% if forloop.first %}{{ tag }}{% else %}, {{ tag }}{% endif %}{% endfor %}" />
@@ -77,12 +77,12 @@
 		<dd>None</dd>
 	    {% endfor %}
 	{% endif %}
-    {% if foia.user == request.user or request.user.is_staff %}
+    {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
         <dd>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}it is completed{% endif %}.</dd>
         {% endif %}
-        {% if foia.user == request.user %}
+        {% if foia.user == user %}
             {% if foia.status == "ack" or foia.status == "processed" %}
         <dt>Follow-Ups</dt>
                 {% if foia.disable_autofollowups %}
@@ -97,7 +97,7 @@
 
 {% block aside %}
     {% include 'lib/social.html' with title=foia.title %}
-    {% if foia.is_payable and foia.user == request.user %}
+    {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
         <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
@@ -127,7 +127,7 @@
              {% if action.title == 'Pay' %}
             <button data-amount="{{ foia.get_stripe_amount }}"
                     data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-                    data-email="{{ request.user.email }}"
+                    data-email="{{ user.email }}"
                     data-form="#payment-form"
                     class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
                 {{ action.title }}
@@ -182,7 +182,7 @@
         <input name="amount" id="crowdfund-amount" value="0" hidden>
         <button data-amount="0"
                 data-description=""
-                data-email="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}"
+                data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
                 data-form="#crowdfund-form"
                 class="disabled checkout-button" 
                 id="crowdfund-button"
@@ -194,13 +194,13 @@
     {% endwith %}
     </section>
 {% endif %}
-{% if foia.public_documents or foia.user == request.user %}
+{% if foia.public_documents or foia.user == user or user.is_staff %}
 <div class="tabs">
     <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
     {% if foia.public_documents %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
-    {% if foia.user == request.user %}
+    {% if foia.user == user %}
     <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
     {% endif %}
 </div>
@@ -213,7 +213,7 @@
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
     {% endfor %}
-    {% if foia.user == request.user %}
+    {% if foia.user == user or user.is_staff %}
     <form method="post" class="request controls panel">
         {% csrf_token %}
         {% for action in contextual_request_actions %}
@@ -255,7 +255,7 @@
     {% endif %}
 </section>
 {% endif %}
-{% if foia.user == request.user %}
+{% if foia.user == user or user.is_staff %}
 <section class="tab-section notes" id="notes">
     {% for note in foia.notes.all %}
     <div class="note">

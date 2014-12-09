@@ -54,7 +54,7 @@ def _foia_action(request, foia, action):
     """Generic helper for FOIA actions"""
     form_class = action.form_class(request, foia)
     # Check that the request belongs to the user
-    if action.must_own and foia.user != request.user:
+    if action.must_own and foia.user != request.user and not request.user.is_staff:
         msg = 'You may only %s your own requests.' % action.msg
         messages.error(request, msg)
         return redirect(foia)

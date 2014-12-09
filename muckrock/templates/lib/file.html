@@ -1,4 +1,3 @@
-{% if file.is_public or file.is_viewable or file.get_foia.user == request.user %}
 <div class="file" id="{{ file.anchor }}">
     <img src="{{ SITE_ROOT }}{{ file.get_thumbnail }}" class="thumbnail">
     <div class="title">{{ file.title }}</div>
@@ -14,4 +13,3 @@
         <a href="{{file.ffile.url}}" target="_blank">Download</a>
     </div>
 </div>
-{% endif %}

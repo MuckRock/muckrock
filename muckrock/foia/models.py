@@ -640,7 +640,7 @@ class FOIARequest(models.Model):
 
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
-        is_owner = self.user == user
+        is_owner = self.user == user or user.is_staff
         can_embargo = is_owner and user.get_profile().can_embargo()
         can_pay = is_owner and self.is_payable()
         kwargs = {
@@ -675,7 +675,7 @@ class FOIARequest(models.Model):
 
     def contextual_request_actions(self, user):
         '''Provides context-sensitive action interfaces for requests'''
-        is_owner = self.user == user
+        is_owner = self.user == user or user.is_staff
         can_follow_up = is_owner and self.status != 'started'
         can_appeal = is_owner and self.is_appealable()
         return [
