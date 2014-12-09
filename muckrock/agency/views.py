@@ -38,7 +38,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
         form = FlagForm(request.POST)
         if form.is_valid():
             send_mail(
-                '[FLAG] %s: %s' % (type_, agency.name),
+                '[FLAG] Agency: %s' % agency.name,
                 render_to_string(
                     'text/jurisdiction/flag.txt', {
                         'obj': agency,
