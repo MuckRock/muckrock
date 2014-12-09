@@ -98,6 +98,11 @@
             dl { margin-top: $base-vertical-rhythm; }
         }
     }
+    &.question {
+        .messages-container {
+            @include row;
+        }
+    }
     &.request {
         h3 { font-size: 1.25em; }
         .draft {
