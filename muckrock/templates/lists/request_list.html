@@ -61,6 +61,7 @@
 {% endblock filters %}
 
 {% block scripts %}
+{% include 'autocomplete_light/static.html' %}
 <script>
     $.urlParam = function(name){
         console.log(name);

@@ -190,10 +190,10 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise ValueError('Account email and Stripe email do not match')
-            user_profile.pay(stripe_token, 2000, 'Charge for 5 requests')
-            user_profile.num_requests += 5
+            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            user_profile.num_requests += 4
             user_profile.save()
-            msg = 'Purchase successful. 5 requests have been added to your account.'
+            msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
@@ -326,7 +326,7 @@ def stripe_webhook_v2(request):
         fee_amount = amount - base_amount
 
         if event_data.get('description') and \
-                event_data['description'].endswith('Charge for 5 requests'):
+                event_data['description'].endswith('Charge for 4 requests'):
             type_ = 'community'
             url = '/foia/new/'
             subject = 'Payment received for additional requests'
