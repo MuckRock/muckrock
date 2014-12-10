@@ -150,9 +150,11 @@ class FOIARequest(models.Model):
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
     parent = models.ForeignKey('self', blank=True, null=True)
-    block_incoming = models.BooleanField(default=False,
-        help_text='Block emails incoming to this request from '
-                  'automatically being posted on the site')
+    block_incoming = models.BooleanField(
+        default=False,
+        help_text=('Block emails incoming to this request from '
+                   'automatically being posted on the site')
+    )
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -479,7 +481,7 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
-        body = render_to_string('text/foia/request.txt', {'request': self})
+        body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
             subject=subject,
@@ -697,7 +699,6 @@ class FOIARequest(models.Model):
                 desc=u'Appeal an agency’s decision',
                 class_name='reply'
             ),
-            
         ]
 
     def total_pages(self):
@@ -780,8 +781,12 @@ class FOIACommunication(models.Model):
     opened = models.BooleanField()
 
     # only used for orphans
-    likely_foia = models.ForeignKey(FOIARequest, related_name='likely_communications',
-        blank=True, null=True)
+    likely_foia = models.ForeignKey(
+        FOIARequest,
+        related_name='likely_communications',
+        blank=True,
+        null=True
+    )
 
     raw_email = models.TextField(blank=True)
 

@@ -9,6 +9,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 from muckrock.tags.models import Tag
 
+# pylint: disable=bad-continuation
+
 class RequestHelper(object):
     """Helper methods for classes that have a foiarequest_set"""
     # pylint: disable=E1101

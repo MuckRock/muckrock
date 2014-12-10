@@ -12,12 +12,18 @@ from datetime import datetime
 
 from muckrock.foia.models import FOIARequest, FOIACommunication
 
+# pylint: disable=too-many-arguments
 def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False, snail=False):
     """Save the FOI Communication"""
     comm = FOIACommunication.objects.create(
-            foia=foia, from_who=from_who, to_who=foia.get_to_who(),
-            date=datetime.now(), response=False, full_html=False,
-            communication=comm)
+        foia=foia,
+        from_who=from_who,
+        to_who=foia.get_to_who(),
+        date=datetime.now(),
+        response=False,
+        full_html=False,
+        communication=comm
+    )
     if formset is not None:
         foia_files = formset.save(commit=False)
         for foia_file in foia_files:
@@ -37,7 +43,7 @@ def move_comm(request, next_):
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
         return redirect(next_)
-        
+
     files = comm.files.all()
     new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
     new_foias = []

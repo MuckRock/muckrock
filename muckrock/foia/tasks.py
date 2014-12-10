@@ -144,7 +144,7 @@ def submit_multi_request(req_pk, **kwargs):
         for agency in agency_chunk:
             # make a copy of the foia (and its communication) for each agency
             title = '%s (%s)' % (req.title, agency.name)
-            template = get_template('request_templates/none.txt')
+            template = get_template('text/foia/request.txt')
             context = Context({'document_request': req.requested_docs,
                                'jurisdiction': agency.jurisdiction,
                                'user': req.user})
@@ -250,6 +250,7 @@ def retry_stuck_documents():
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
 
+# pylint: disable=broad-except
 @periodic_task(run_every=crontab(hour=2, minute=0), name='muckrock.foia.tasks.autoimport')
 def autoimport():
     """Auto import documents from S3"""

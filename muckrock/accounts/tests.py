@@ -16,8 +16,7 @@ from datetime import datetime, timedelta
 from mock import Mock, patch
 
 from muckrock.accounts.models import Profile
-from muckrock.accounts.forms import UserChangeForm, CreditCardForm, RegisterFree, \
-                           PaymentForm, UpgradeSubscForm
+from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
@@ -65,76 +64,17 @@ class TestAccountFormsUnit(TestCase):
         form.cleaned_data['email'] = 'bob@example.com'
         nose.tools.assert_raises(ValidationError, form.clean_email) # conflicting email
 
-    def test_credit_card_form(self):
-        """Test validation on credit card form"""
-        data = {'token': 'token'}
-        form = CreditCardForm(data)
-        nose.tools.ok_(form.is_valid())
-
-        data = {'foo': 'bar'}
-        form = CreditCardForm(data)
-        nose.tools.assert_false(form.is_valid())
-
-    def test_upgrade_subsc_form_init(self):
-        """Test UpgradeSubscForm's init"""
-        mock_profile = Mock()
-        mock_profile.credit_card.return_value = None
-        mock_request = Mock()
-        mock_request.user.get_profile.return_value = mock_profile
-        form = UpgradeSubscForm(request=mock_request)
-        nose.tools.ok_('use_on_file' not in form.fields)
-
-        mock_card = Mock()
-        mock_card.type = 'Visa'
-        mock_card.last4 = '1234'
-        mock_profile.credit_card.return_value = mock_card
-        form = UpgradeSubscForm(request=mock_request)
-        nose.tools.eq_(form.fields['use_on_file'].help_text, 'Visa ending in 1234')
-
-    def test_upgrade_subsc_form_clean(self):
-        """Test UpgradeSubscForm's clean"""
-        mock_card = Mock()
-        mock_card.type = 'Visa'
-        mock_card.last4 = '1234'
-        mock_profile = Mock()
-        mock_profile.credit_card.return_value = mock_card
-        mock_request = Mock()
-        mock_request.user.get_profile.return_value = mock_profile
-
-        data = {'token': 'token', 'use_on_file': False}
-        form = UpgradeSubscForm(data, request=mock_request)
-        nose.tools.ok_(form.is_valid())
-
-        data = {'use_on_file': False}
-        form = UpgradeSubscForm(data, request=mock_request)
-        nose.tools.assert_false(form.is_valid())
-
-        data = {'use_on_file': True}
-        form = UpgradeSubscForm(data, request=mock_request)
-        nose.tools.ok_(form.is_valid())
-
-    def test_payment_form_clean(self):
-        """Test PaymentForm's clean"""
-        mock_request = Mock()
-        data = {'use_on_file': True, 'save_cc': True}
-        form = PaymentForm(data, request=mock_request)
-        nose.tools.assert_false(form.is_valid())
-
-        data = {'token': 'token', 'use_on_file': False, 'save_cc': True}
-        form = PaymentForm(data, request=mock_request)
-        nose.tools.ok_(form.is_valid())
-
     def test_user_creation_form(self):
         """Create a new user - name/email should be unique (case insensitive)"""
 
         data = {'username': 'ADAM', 'email': 'notadam@example.com', 'first_name': 'adam',
                 'last_name': 'smith', 'password1': '123', 'password2': '123'}
-        form = RegisterFree(data)
+        form = RegisterForm(data)
         nose.tools.assert_false(form.is_valid())
 
         data = {'username': 'not_adam', 'email': 'ADAM@EXAMPLE.COM', 'first_name': 'adam',
                 'last_name': 'smith', 'password1': '123', 'password2': '123'}
-        form = RegisterFree(data)
+        form = RegisterForm(data)
         nose.tools.assert_false(form.is_valid())
 
 

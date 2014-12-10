@@ -1,9 +1,23 @@
-{% autoescape off %}
-{% now "F j, Y" %}
-{% if request.agency %}{{ request.agency.name }}
-{{ request.agency.address }}{% endif %}
-{% if request.communications.count > 1 %}{% if request.tracking_id %}
-This is a follow up to request number {{request.tracking_id}}:{% else %}
-This is a follow up to a previous request:{% endif %}{% endif %}
-{% include "text/foia/comms.txt" %}
+{% autoescape off%}
+{% block title %}{% endblock %}
+
+To Whom It May Concern:
+
+{{ jurisdiction.get_intro }}
+
+{% block content %}{{document_request}}{% endblock %}
+{% if jurisdiction.get_waiver %}
+{{ jurisdiction.get_waiver }}
+{% else %}
+I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.
+{% endif %}
+In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.
+{% if jurisdiction.get_days %}
+Thank you in advance for your anticipated cooperation in this matter. I look forward to receiving your response to this request within {{ jurisdiction.get_days }} {{ jurisdiction.get_day_type }} days, as the statute requires.
+{% else %}
+Thank you in advance for your anticipated cooperation in this matter. I would request your response within ten (10) business days.
+{% endif %}
+Sincerely,
+
+{{user.get_full_name}}
 {% endautoescape %}

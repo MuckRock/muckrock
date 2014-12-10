@@ -101,8 +101,9 @@ class UserSubmittedFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        return FOIARequest.objects.get_submitted().get_public().filter(user=obj)\
-                                  .order_by('-date_submitted')[:25]
+        foia_requests = FOIARequest.objects.get_submitted()
+        foia_requests = foia_requests.filter(user=obj, embargo=False)
+        return foia_requests.order_by('-date_submitted')[:25]
 
     def item_description(self, item):
         """The description of each rss item"""
@@ -132,8 +133,9 @@ class UserDoneFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        return FOIARequest.objects.get_done().get_public().filter(user=obj)\
-                                  .order_by('-date_submitted')[:25]
+        foia_requests = FOIARequest.objects.get_done()
+        foia_requests = foia_requests.filter(user=obj, embargo=False)
+        return foia_requests.order_by('-date_submitted')[:25]
 
     def item_description(self, item):
         """The description of each rss item"""
