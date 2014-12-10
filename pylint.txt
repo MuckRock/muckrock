@@ -1,5 +1,3 @@
 Warning: option include-ids is deprecated and ignored.
-************* Module muckrock.foia.views.composers
-W: 55, 0: TODO: Abstract this out into a template (fixme)
 ************* Module muckrock.foia.views.views
 W: 60, 0: TODO: handle a list of tags (fixme)
