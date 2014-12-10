@@ -59,8 +59,8 @@ class JurisdictionAdmin(VersionAdmin):
             if form.is_valid():
                 try:
                     jurisdictions = JurisdictionCsvModel.import_data(data=request.FILES['csv_file'])
-                    messages.success(request,
-                        'CSV - %d jurisdictions imported' % len(jurisdictions))
+                    msg = 'CSV - %d jurisdictions imported' % len(jurisdictions)
+                    messages.success(request, msg)
                 except Exception as exc:
                     messages.error(request, 'ERROR: %s' % str(exc))
                     logger.error('Import error: %s', exc, exc_info=sys.exc_info())

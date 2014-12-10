@@ -4,7 +4,6 @@ Views for the QandA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -106,7 +105,8 @@ def follow(request, slug, idx):
         messages.success(request, 'You are no longer following %s' % question.title)
     else:
         question.followed_by.add(request.user.get_profile())
-        messages.success(request, 'You are now following %s. We will notify you of any replies.' % question.title)
+        msg = 'You are now following %s. We will notify you of any replies.' % question.title
+        messages.success(request, msg)
     return redirect(question)
 
 @login_required
@@ -207,10 +207,17 @@ class QuestionViewSet(viewsets.ModelViewSet):
             self.check_object_permissions(request, question)
             Answer.objects.create(user=request.user, date=datetime.now(), question=question,
                                   answer=request.DATA['answer'])
-            return Response({'status': 'Answer submitted'},
-                             status=status.HTTP_200_OK)
+            return Response(
+                {'status': 'Answer submitted'},
+                status=status.HTTP_200_OK
+            )
         except Question.DoesNotExist:
-            return Response({'status': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'status': 'Not Found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except KeyError:
-            return Response({'status': 'Missing data - Please supply answer'},
-                             status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'status': 'Missing data - Please supply answer'},
+                status=status.HTTP_400_BAD_REQUEST
+            )

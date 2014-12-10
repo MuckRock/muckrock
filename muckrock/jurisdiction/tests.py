@@ -12,6 +12,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
 # pylint: disable=R0904
+# pylint: disable=bad-continuation
 
 class TestJurisdictionUnit(TestCase):
     """Unit tests for Jurisdictions"""

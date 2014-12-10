@@ -21,9 +21,11 @@ LEADING_PUNCTUATION  = ['(', '<', '&lt;']
 TRAILING_PUNCTUATION = ['.', ',', ')', '>', '\n', '&gt;']
 
 word_split_re = re.compile(r'(\s+)')
-punctuation_re = re.compile('^(?P<lead>(?:%s)*)(?P<middle>.*?)(?P<trail>(?:%s)*)$' % \
-    ('|'.join([re.escape(x) for x in LEADING_PUNCTUATION]),
-    '|'.join([re.escape(x) for x in TRAILING_PUNCTUATION])))
+punctuation_re = re.compile(
+    '^(?P<lead>(?:%s)*)(?P<middle>.*?)(?P<trail>(?:%s)*)$' % (
+        '|'.join([re.escape(x) for x in LEADING_PUNCTUATION]),
+        '|'.join([re.escape(x) for x in TRAILING_PUNCTUATION]))
+)
 simple_email_re = re.compile(r'^\S+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+$')
 
 def urlize(text, trim_url_limit=None, nofollow=False, autoescape=False):

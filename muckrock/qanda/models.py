@@ -52,14 +52,17 @@ class Question(models.Model):
         # pylint: disable=E1101
         send_data = []
         for profile in self.followed_by.all():
-            link = profile.wrap_url(reverse('question-follow',
-                                             kwargs={'slug': self.slug, 'idx': self.pk}))
+            link = profile.wrap_url(reverse(
+                'question-follow',
+                kwargs={'slug': self.slug, 'idx': self.pk}
+            ))
             msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
 
     def get_answer_users(self):
+        """Get a list of all the users who answered the question"""
         users = []
         for answer in self.answers.all():
             if answer.user not in users and answer.user != self.user:
@@ -94,5 +97,3 @@ class Answer(models.Model):
     class Meta:
         # pylint: disable=R0903
         ordering = ['date']
-
-

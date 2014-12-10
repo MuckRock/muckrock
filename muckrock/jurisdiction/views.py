@@ -38,20 +38,18 @@ def detail(request, fed_slug, state_slug, local_slug):
     foia_requests = FOIARequest.objects.get_viewable(request.user)\
                                        .filter(jurisdiction=jurisdiction)\
                                        .order_by('-date_submitted')[:5]
-                                       
+
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
             send_mail(
                 '[FLAG] %s: %s' % ('Jurisdiction', jurisdiction.name),
-                render_to_string(
-                    'text/jurisdiction/flag.txt',
-                    { 'obj': jurisdiction,
-                      'user': request.user,
-                      'type': 'jurisdiction',
-                      'reason': form.cleaned_data.get('reason')
-                    }
-                ),
+                render_to_string('text/jurisdiction/flag.txt', {
+                    'obj': jurisdiction,
+                    'user': request.user,
+                    'type': 'jurisdiction',
+                    'reason': form.cleaned_data.get('reason')
+                }),
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False
@@ -66,9 +64,9 @@ def detail(request, fed_slug, state_slug, local_slug):
         'foia_requests': foia_requests,
         'form': form
     }
-        
+
     collect_stats(jurisdiction, context)
-    
+
     return render_to_response('details/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
@@ -81,6 +79,7 @@ def list_(request):
     return render_to_response('lists/jurisdiction_list.html', context,
                               context_instance=RequestContext(request))
 
+# pylint: disable=unused-argument
 def redirect_flag(request, **kwargs):
     """Redirect flag urls to base agency"""
     # filter None from kwargs

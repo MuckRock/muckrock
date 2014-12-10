@@ -250,6 +250,7 @@ def retry_stuck_documents():
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
 
+# pylint: disable=broad-except
 @periodic_task(run_every=crontab(hour=2, minute=0), name='muckrock.foia.tasks.autoimport')
 def autoimport():
     """Auto import documents from S3"""
