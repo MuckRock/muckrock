@@ -230,6 +230,8 @@ class Detail(DetailView):
 
     def dispatch(self, request, *args, **kwargs):
         """If request is a draft, then redirect to drafting interface"""
+        if request.POST:
+            return self.post(request)
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
