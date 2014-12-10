@@ -17,7 +17,6 @@ from django.template import RequestContext, Context
 from datetime import datetime
 import logging
 import stripe
-import re
 from random import choice
 import string
 
