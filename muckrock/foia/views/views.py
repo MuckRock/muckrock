@@ -44,7 +44,7 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 class List(ListView):
     """Base list view for other list views to inherit from"""
 
-    def filter_sort_requests(self, foia_requests, update_top=False):
+    def filter_sort_requests(self, foia_requests):
         """Sorts the FOIA requests"""
         get = self.request.GET
         order = get.get('order', 'desc')
@@ -83,8 +83,6 @@ class List(ListView):
         if sort not in ['title', 'date_submitted', 'times_viewed']:
             sort = 'date_submitted'
         ob_field = '-' + sort if order == 'desc' else sort
-        if update_top: # only for MyList
-            foia_requests = foia_requests.order_by('-updated', ob_field)
         else:
             foia_requests = foia_requests.order_by(ob_field)
 
@@ -182,7 +180,7 @@ class MyList(List):
         """Get FOIAs for this view"""
         unsorted = FOIARequest.objects.filter(user=self.request.user)
         multis = FOIAMultiRequest.objects.filter(user=self.request.user)
-        sorted_requests = self.filter_sort_requests(unsorted, update_top=True)
+        sorted_requests = self.filter_sort_requests(unsorted)
         sorted_requests = self.merge_requests(sorted_requests, multis)
         return sorted_requests
 
