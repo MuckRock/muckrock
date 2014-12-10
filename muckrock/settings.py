@@ -80,7 +80,7 @@ STATICFILES_DIRS = (
 )
 
 
-COMPRESS_OFFLINE=True 
+COMPRESS_OFFLINE = True
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
@@ -122,7 +122,7 @@ else:
     # un comment out to precompress
     #BUCKET_NAME = 'muckrock'
     #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
-    #COMPRESS_ENABLED=True
+    #COMPRESS_ENABLED = True
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -134,13 +134,14 @@ AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
+if not DEBUG:
+    # List of callables that know how to import templates from various sources.
+    TEMPLATE_LOADERS = (
+        ('django.template.loaders.cached.Loader', (
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        )),
+    )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -250,11 +251,10 @@ INSTALLED_APPS = (
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)
 
-
+# pylint: disable=unused-argument
 def show_toolbar(request):
-    """show toolbar for me on the site"""
-    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False)) and
-            request.user and request.user.username == 'mitch'):
+    """show toolbar on the site"""
+    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))):
         return True
     return False
 

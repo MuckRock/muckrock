@@ -32,8 +32,10 @@ class TestNewsUnit(TestCase):
 
     def test_article_model_url(self):
         """Test the Article model's get_absolute_url method"""
-        nose.tools.eq_(self.article.get_absolute_url(), reverse('news-detail',
-            kwargs={'year': 1984, 'month': 'dec', 'day': 29, 'slug': 'test-article-1'}))
+        nose.tools.eq_(self.article.get_absolute_url(), reverse(
+            'news-detail',
+            kwargs={'year': 1984, 'month': 'dec', 'day': 29, 'slug': 'test-article-1'}
+        ))
 
     # manager
     def test_manager_get_published(self):

@@ -22,6 +22,7 @@ from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSe
 from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=R0901
+# pylint: disable=bad-continuation
 
 logger = logging.getLogger(__name__)
 

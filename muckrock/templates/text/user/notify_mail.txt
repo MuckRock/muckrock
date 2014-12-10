@@ -16,9 +16,9 @@ https://www.muckrock.com{% url 'acct-update' %}
 {% else %}Current status is {{foia.get_status_display}}
 {% endif %}https://www.muckrock.com{{foia.get_absolute_url}}
 
-{% if status == "Completed Requests" %}See ALL your completed requests here:
-https://www.muckrock.com{% url 'foia-mylist' view="completed" %}{% endif %}{% if status == "Requests Needing Action" %}See ALL request needing attention here:
-https://www.muckrock.com{% url 'foia-mylist' view="action" %}{% endif %}
+{% if status == "Completed Requests" %}See ALL your completed requests here: https://www.muckrock.com{% url 'foia-mylist' %}?status=done{% endif %}
+
+{% if status == "Requests Needing Action" %}See ALL request needing attention here: https://www.muckrock.com{% url 'foia-mylist' %}?status=fix{% endif %}
 	{% endfor %}
 {% endfor %}
 {% endautoescape %}

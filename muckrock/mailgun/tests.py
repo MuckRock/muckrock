@@ -20,6 +20,7 @@ from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 # pylint: disable=R0904
 # pylint: disable=W0142
 # pylint: disable=E1103
+# pylint: disable=bad-continuation
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""

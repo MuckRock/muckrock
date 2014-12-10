@@ -77,7 +77,19 @@ urlpatterns = patterns(
         name='acct-reset-pw-complete'
     ),
     # REDIRECT VIEWS
-    url(r'^register/free/$', RedirectView.as_view(url='/accounts/register/'), name='acct-register-free'),
-    url(r'^register/pro/$', RedirectView.as_view(url='/accounts/subscribe/'), name='acct-register-pro'),
-    url(r'^manage_subsc/$', RedirectView.as_view(url='/accounts/subscribe/'), name='acct-manage-subsc'),
+    url(
+        r'^register/free/$',
+        RedirectView.as_view(url='/accounts/register/'),
+        name='acct-register-free'
+    ),
+    url(
+        r'^register/pro/$',
+        RedirectView.as_view(url='/accounts/subscribe/'),
+        name='acct-register-pro'
+    ),
+    url(
+        r'^manage_subsc/$',
+        RedirectView.as_view(url='/accounts/subscribe/'),
+        name='acct-manage-subsc'
+    ),
 )

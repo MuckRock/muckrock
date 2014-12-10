@@ -13,7 +13,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime, date
+from datetime import datetime
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
@@ -54,7 +54,7 @@ def register(request):
                 acct_type='community',
                 monthly_requests=0,
                 date_update=datetime.now()
-            )            
+            )
             msg = 'Your account was successfully created. '
             msg += 'Welcome to MuckRock!'
             messages.success(request, msg)
@@ -98,21 +98,22 @@ def update(request):
                               context_instance=RequestContext(request))
 
 def subscribe(request):
+    #pylint: disable=too-many-statements
     """Subscribe or unsubscribe from a pro account"""
-    
-    call_to_action = 'Go Pro!' 
+
+    call_to_action = 'Go Pro!'
     description = ('Are you a journalist, activist, or just planning on filing '
                    'a lot of requests? A Pro subscription might be right for you.')
     button_text = 'Subscribe'
     can_subscribe = True
     can_unsubscribe = not can_subscribe
-    
+
     if request.user.is_authenticated():
         user_profile = request.user.get_profile()
         acct_type = user_profile.acct_type
         can_subscribe = acct_type == 'community' or acct_type == 'beta'
         can_unsubscribe = acct_type == 'pro'
-    
+
         if acct_type == 'admin':
             msg = 'You are on staff, you don\'t need a subscription.'
             messages.warning(request, msg)
@@ -131,7 +132,7 @@ def subscribe(request):
         description = ('First you will create an account, then be redirected '
                        'back to this page to subscribe.')
         button_text = 'Create Account'
-    
+
     if request.method == 'POST':
         if can_subscribe and request.POST.get('stripe_token', False):
             try:
@@ -140,7 +141,9 @@ def subscribe(request):
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
                 customer = user_profile.customer()
+                customer.card = stripe_token
                 customer.update_subscription(plan='pro')
+                customer.save()
                 user_profile.acct_type = 'pro'
                 user_profile.date_update = datetime.now()
                 user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
@@ -163,16 +166,16 @@ def subscribe(request):
             user_profile.save()
             messages.success(request, 'Your professional subscription has been cancelled.')
         return redirect('acct-my-profile')
-        
+
     context = {
         'can_subscribe': can_subscribe,
         'can_unsubscribe': can_unsubscribe,
         'call_to_action': call_to_action,
         'description': description,
-        'button_text': button_text,    
+        'button_text': button_text,
         'stripe_pk': STRIPE_PUB_KEY
     }
-    
+
     return render_to_response(
         'forms/account/subscription.html',
         context,

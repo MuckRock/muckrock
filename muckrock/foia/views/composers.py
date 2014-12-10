@@ -11,14 +11,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
-from django.template import RequestContext
+from django.template.loader import render_to_string, get_template
+from django.template import RequestContext, Context
 
 from datetime import datetime
 import logging
 import stripe
-import re
-from random import randint, choice
+from random import choice
 import string
 
 from muckrock.accounts.models import Profile
@@ -33,7 +32,6 @@ from muckrock.foia.models import \
     FOIAMultiRequest, \
     FOIACommunication, \
     STATUS
-from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
 
@@ -46,47 +44,23 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 # HELPER FUNCTIONS
 
 def get_foia(jurisdiction, jidx, slug, idx):
+    """A helper function that gets and returns a FOIA object"""
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(user, document, intro=None, waiver=None, delay=None):
-    if not intro:
-        intro = 'This is a request under the Freedom of Information Act.'
-    if not waiver:
-        waiver = ('I also request that, if appropriate, fees be waived as I '
-              'believe this request is in the public interest. '
-              'The requested documents  will be made available to the ' 
-              'general public free of charge as part of the public ' 
-              'information service at MuckRock.com, processed by a ' 
-              'representative of the news media/press and is made in the ' 
-              ' process of news gathering and not for commercial usage.')
-    if not delay:
-        delay = '20'
-    
-    regexp = re.compile(r'I hereby request the following records')
-    if regexp.search(intro) is None:
-        intro += ' I hereby request the following records:'
-    
-    prepend = [
-        'To Whom it May Concern:',
-        intro
-    ]
-    append = [
-        waiver,
-        ('In the event that fees cannot be waived, I would be '
-        'grateful if you would inform me of the total charges in '     
-        'advance of fulfilling my request. I would prefer the '
-        'request filled electronically, by e-mail attachment if ' 
-        'available or CD-ROM if not.'),
-        ('Thank you in advance for your anticipated cooperation in '
-        'this matter. I look forward to receiving your response to ' 
-        'this request within %s business days, as the statute requires.' % delay ),
-        'Sincerely, ',
-        user.get_full_name()
-    ]
-    return '\n\n'.join(prepend + [document] + append)
-        
+def _make_comm(foia):
+    """A helper function to compose the text of a communication"""
+    template = get_template('text/foia/request.txt')
+    context = Context({
+        'document_request': foia.requested_docs,
+        'jurisdiction': foia.jurisdiction,
+        'user': foia.user
+    })
+    request_text = template.render(context).split('\n', 1)[1].strip()
+    print request_text
+    return request_text
+
 def _make_new_agency(request, agency, jurisdiction):
     """Helper function to create new agency"""
     user = request.user if request.user.is_authenticated() else None
@@ -110,6 +84,7 @@ def _make_new_agency(request, agency, jurisdiction):
     return agency
 
 def _make_request(request, foia_request, parent=None):
+    """A helper function for creating request and comms objects"""
     foia = FOIARequest.objects.create(
         user=request.user,
         status='started',
@@ -123,18 +98,12 @@ def _make_request(request, foia_request, parent=None):
     )
     foia_comm = FOIACommunication.objects.create(
         foia=foia,
-        from_who=request.user.get_full_name(),             
+        from_who=request.user.get_full_name(),
         to_who=foia.get_to_who(),
         date=datetime.now(),
         response=False,
         full_html=False,
-        communication=_make_comm(
-            request.user,
-            foia.requested_docs,
-            foia.jurisdiction.get_intro(),
-            foia.jurisdiction.get_waiver(),
-            foia.jurisdiction.get_days()
-        )
+        communication=_make_comm(foia)
     )
     return foia, foia_comm
 
@@ -167,14 +136,15 @@ def _make_user(request, data):
     user.save()
     user = authenticate(username=username, password=password)
     login(request, user)
-    
+
 def _process_request_form(request):
+    """A helper function for getting info out of a request composer form"""
     form = RequestForm(request.POST, request=request)
     foia_request = {}
     if form.is_valid():
         data = form.cleaned_data
         if request.user.is_anonymous():
-            _make_user(request, data) 
+            _make_user(request, data)
         title = data['title']
         document = data['document']
         level = data['jurisdiction']
@@ -187,7 +157,7 @@ def _process_request_form(request):
         agency_query = Agency.objects.filter(name=data['agency'], jurisdiction=jurisdiction)
         agency = agency_query[0] if agency_query \
                  else _make_new_agency(request, data['agency'], jurisdiction)
-        
+
         foia_request.update({
             'title': title,
             'document': document,
@@ -201,16 +171,21 @@ def _submit_request(request, foia):
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
     if not request.user.get_profile().make_request():
-        messages.error(request, 'You do not have any requests remaining. Please purchase more requests and then resubmit.')
+        error_msg = ('You do not have any requests remaining. '
+                     'Please purchase more requests and then resubmit.')
+        messages.error(request, error_msg)
     foia.submit()
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
 
+# pylint: disable=unused-argument
 def clone_request(request, jurisdiction, jidx, slug, idx):
+    """A URL handler for cloning requests"""
     foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
+    """A very important view for composing FOIA requests"""
     initial_data = {}
     clone = False
     parent = None
@@ -246,19 +221,19 @@ def create_request(request):
             form = RequestForm(initial=initial_data, request=request)
         else:
             form = RequestForm(request=request)
-    
+
     viewable = FOIARequest.objects.get_viewable(request.user)
     featured = viewable.filter(featured=True)
-    
+
     context = {
         'form': form,
         'clone': clone,
         'featured': featured
     }
-    
+
     return render_to_response(
         'forms/foia/create.html',
-        context, 
+        context,
         context_instance=RequestContext(request)
     )
 
@@ -272,13 +247,13 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     if foia.user != request.user and not request.user.is_staff:
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
-    
+
     initial_data = {
         'title': foia.title,
         'request': foia.first_request(),
         'embargo': foia.embargo
     }
-    
+
     if request.method == 'POST':
         if request.POST.get('submit') == 'Delete':
             foia.delete()
@@ -312,14 +287,14 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         )
     else:
         form = RequestDraftForm(initial=initial_data)
-    
+
     context = {
         'action': 'Draft',
         'form': form,
         'foia': foia,
         'stripe_pk': STRIPE_PUB_KEY
     }
-    
+
     return render_to_response(
         'forms/foia/draft.html',
         context,
@@ -328,7 +303,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 
 @login_required
 def create_multirequest(request):
-    
+    """A view for composing multirequests"""
     if request.method == 'POST':
         form = MultiRequestForm(request.POST)
         if form.is_valid():
@@ -342,8 +317,8 @@ def create_multirequest(request):
             return redirect(multirequest)
     else:
         form = MultiRequestForm()
-    
-    context = { 'form': form }
+
+    context = {'form': form}
     return render_to_response(
         'forms/foia/create_multirequest.html',
         context,
@@ -354,7 +329,7 @@ def create_multirequest(request):
 def draft_multirequest(request, slug, idx):
     """Update a started FOIA MultiRequest"""
     from math import ceil
-    
+
     foia = get_object_or_404(FOIAMultiRequest, slug=slug, pk=idx)
 
     if foia.user != request.user:
@@ -413,7 +388,7 @@ def draft_multirequest(request, slug, idx):
     num_requests = len(foia.agencies.all())
     request_balance = profile.multiple_requests(num_requests)
     num_bundles = int(ceil(request_balance['extra_requests']/5.0))
-    
+
     context = {
         'action': 'Draft',
         'form': form,

@@ -62,11 +62,13 @@ class Article(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('news-detail', (), {
-                'year': self.pub_date.strftime('%Y'),
-                'month': self.pub_date.strftime('%b').lower(),
-                'day': self.pub_date.strftime('%d'),
-                'slug': self.slug})
+        kwargs = {
+            'year': self.pub_date.strftime('%Y'),
+            'month': self.pub_date.strftime('%b').lower(),
+            'day': self.pub_date.strftime('%d'),
+            'slug': self.slug
+        }
+        return ('news-detail', (), kwargs)
 
     def save(self, *args, **kwargs):
         """Save the news article"""

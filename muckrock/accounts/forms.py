@@ -8,7 +8,6 @@ from django.contrib.auth.models import User
 from django.contrib.localflavor.us.forms import USZipCodeField
 
 from muckrock.accounts.models import Profile
-from muckrock.fields import CCExpField
 
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""

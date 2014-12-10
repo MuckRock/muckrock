@@ -31,7 +31,9 @@ The message object contains:
     <section class="attachments">
         <ul class="attachment-list">
             {% for file in files %}
+                {% if file.is_public or file.get_foia.user == request.user or request.user.is_staff %}
             <li class="attachment">{% include 'lib/file.html' %}</li>
+                {% endif %}
             {% endfor %}
         </ul>
     </section>

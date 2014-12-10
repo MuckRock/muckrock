@@ -44,7 +44,7 @@ STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 class List(ListView):
     """Base list view for other list views to inherit from"""
 
-    def filter_sort_requests(self, foia_requests, update_top=False):
+    def filter_sort_requests(self, foia_requests):
         """Sorts the FOIA requests"""
         get = self.request.GET
         order = get.get('order', 'desc')
@@ -56,26 +56,26 @@ class List(ListView):
             'user': get.get('user', False),
             'tags': get.get('tags', False)
         }
-        
+
         # TODO: handle a list of tags
         for key, value in list_filter.iteritems():
             if value:
                 print value
                 if key == 'status':
                     foia_requests = foia_requests.filter(status=value)
-                elif key == 'agency': 
-                    a = get_object_or_404(Agency, id=value)
-                    foia_requests = foia_requests.filter(agency=a)
+                elif key == 'agency':
+                    agency_obj = get_object_or_404(Agency, id=value)
+                    foia_requests = foia_requests.filter(agency=agency_obj)
                 elif key == 'jurisdiction':
                     value = value.split(',')
-                    j = get_object_or_404(Jurisdiction, id=value[0])
-                    foia_requests = foia_requests.filter(jurisdiction=j)
+                    juris_obj = get_object_or_404(Jurisdiction, id=value[0])
+                    foia_requests = foia_requests.filter(jurisdiction=juris_obj)
                 elif key == 'user':
-                    u = get_object_or_404(User, username=value)
-                    foia_requests = foia_requests.filter(user=u)
-                elif key == 'tags':
-                    foia_requests = foia_requests.filter(tags__slug=value)
-                    
+                    user_obj = get_object_or_404(User, username=value)
+                    foia_requests = foia_requests.filter(user=user_obj)
+                # elif key == 'tags':
+                    # foia_requests = foia_requests.filter(tags__slug=value)
+
 
         # Handle extra cases by resorting to default values
         if order not in ['asc', 'desc']:
@@ -83,11 +83,8 @@ class List(ListView):
         if sort not in ['title', 'date_submitted', 'times_viewed']:
             sort = 'date_submitted'
         ob_field = '-' + sort if order == 'desc' else sort
-        if update_top: # only for MyList
-            foia_requests = foia_requests.order_by('-updated', ob_field)
-        else:
-            foia_requests = foia_requests.order_by(ob_field)
-        
+        foia_requests = foia_requests.order_by(ob_field)
+
         return foia_requests
 
     def get_paginate_by(self, queryset):
@@ -113,12 +110,12 @@ class List(ListView):
                 form_initials.update({key: value})
                 filter_query = '&' + str(key) + '=' + str(value)
                 filter_url += filter_query
-        
+
         context['title'] = 'FOI Requests'
         context['form'] = ListFilterForm(initial=form_initials)
         context['filter_url'] = filter_url
         return context
-    
+
     def get_queryset(self):
         query = FOIARequest.objects.get_viewable(self.request.user)
         return self.filter_sort_requests(query)
@@ -136,7 +133,7 @@ class MyList(List):
             foia.save()
 
     def post(self, request):
-        """Handle updating tags"""
+        """Handle updating read status"""
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
@@ -145,9 +142,10 @@ class MyList(List):
             elif post.get('submit') == 'Mark as Unread':
                 self.set_read_status(foia_pks, True)
             elif post.get('submit') == 'Mark All as Read':
-                all_unread = [foia.pk for foia in  FOIARequest.objects.filter(user=self.request.user, updated=True)]
+                foia_requests = FOIARequest.objects.filter(user=self.request.user, updated=True)
+                all_unread = [foia.pk for foia in foia_requests]
                 self.set_read_status(all_unread, False)
-        except (FOIARequest.DoesNotExist):
+        except FOIARequest.DoesNotExist:
             pass
         return redirect('foia-mylist')
 
@@ -181,7 +179,7 @@ class MyList(List):
         """Get FOIAs for this view"""
         unsorted = FOIARequest.objects.filter(user=self.request.user)
         multis = FOIAMultiRequest.objects.filter(user=self.request.user)
-        sorted_requests = self.filter_sort_requests(unsorted, update_top=True)
+        sorted_requests = self.filter_sort_requests(unsorted)
         sorted_requests = self.merge_requests(sorted_requests, multis)
         return sorted_requests
 
@@ -202,7 +200,7 @@ class MyList(List):
         for key, value in form_fields.iteritems():
             if value:
                 form_initials.update({key: value})
-        
+
         context['title'] = 'My FOI Requests'
         context['form'] = MyListFilterForm(initial=form_initials)
         return context
@@ -222,21 +220,25 @@ class ListFollowing(List):
         context = super(ListFollowing, self).get_context_data(**kwargs)
         return context
 
+# pylint: disable=no-self-use
 class Detail(DetailView):
     """Details of a single FOIA request as well
     as handling post actions for the request"""
 
     model = FOIARequest
     context_object_name = 'foia'
-    
+
     def dispatch(self, request, *args, **kwargs):
+        """If request is a draft, then redirect to drafting interface"""
+        if request.POST:
+            return self.post(request)
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
             self.kwargs['slug'],
             self.kwargs['idx']
         )
-        if foia.status == 'started': 
+        if foia.status == 'started':
             return redirect(
                 'foia-draft',
                 jurisdiction=self.kwargs['jurisdiction'],
@@ -271,7 +273,7 @@ class Detail(DetailView):
         user = self.request.user
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         context['all_tags'] = Tag.objects.all()
-        context['past_due'] =  is_past_due
+        context['past_due'] = is_past_due
         context['admin_actions'] = foia.admin_actions(user)
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
@@ -280,7 +282,7 @@ class Detail(DetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
-    def post(self, request, **kwargs):
+    def post(self, request):
         """Handle form submissions"""
         foia = self.get_object()
         actions = {
@@ -305,6 +307,7 @@ class Detail(DetailView):
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
+    # pylint: disable=line-too-long
     def _status(self, request, foia):
         """Handle updating status"""
         status = request.POST.get('status')
@@ -312,7 +315,7 @@ class Detail(DetailView):
         if foia.status not in ['started', 'submitted'] and ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
-            
+
             subject = '%s changed the status of "%s" to %s' % (
                 request.user.username,
                 foia.title,
@@ -361,7 +364,7 @@ class Detail(DetailView):
             messages.success(request, 'Your question has been posted.')
             question.notify_new()
             return redirect(question)
-        
+
         return redirect(foia)
 
     def _flag(self, request, foia):
