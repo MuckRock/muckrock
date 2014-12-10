@@ -481,7 +481,7 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
-        body = render_to_string('text/foia/request.txt', {'request': self})
+        body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
         msg = EmailMultiAlternatives(
             subject=subject,

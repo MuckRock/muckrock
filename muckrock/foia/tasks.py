@@ -144,7 +144,7 @@ def submit_multi_request(req_pk, **kwargs):
         for agency in agency_chunk:
             # make a copy of the foia (and its communication) for each agency
             title = '%s (%s)' % (req.title, agency.name)
-            template = get_template('request_templates/none.txt')
+            template = get_template('text/foia/request.txt')
             context = Context({'document_request': req.requested_docs,
                                'jurisdiction': agency.jurisdiction,
                                'user': req.user})

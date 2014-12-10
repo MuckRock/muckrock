@@ -83,8 +83,7 @@ class List(ListView):
         if sort not in ['title', 'date_submitted', 'times_viewed']:
             sort = 'date_submitted'
         ob_field = '-' + sort if order == 'desc' else sort
-        else:
-            foia_requests = foia_requests.order_by(ob_field)
+        foia_requests = foia_requests.order_by(ob_field)
 
         return foia_requests
 

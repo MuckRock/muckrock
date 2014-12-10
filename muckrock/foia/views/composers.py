@@ -11,8 +11,8 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
-from django.template import RequestContext
+from django.template.loader import render_to_string, get_template
+from django.template import RequestContext, Context
 
 from datetime import datetime
 import logging
@@ -50,46 +50,17 @@ def get_foia(jurisdiction, jidx, slug, idx):
     foia = get_object_or_404(FOIARequest, jurisdiction=jmodel, slug=slug, id=idx)
     return foia
 
-def _make_comm(user, document, intro=None, waiver=None, delay=None):
+def _make_comm(foia):
     """A helper function to compose the text of a communication"""
-    # TODO: Abstract this out into a template
-    if not intro:
-        intro = 'This is a request under the Freedom of Information Act.'
-    if not waiver:
-        waiver = (
-            'I also request that, if appropriate, fees be waived as I '
-            'believe this request is in the public interest. '
-            'The requested documents  will be made available to the '
-            'general public free of charge as part of the public '
-            'information service at MuckRock.com, processed by a '
-            'representative of the news media/press and is made in the '
-            'process of news gathering and not for commercial usage.'
-        )
-    if not delay:
-        delay = '20'
-
-    regexp = re.compile(r'I hereby request the following records')
-    if regexp.search(intro) is None:
-        intro += ' I hereby request the following records:'
-
-    prepend = [
-        'To Whom it May Concern:',
-        intro
-    ]
-    append = [
-        waiver,
-        ('In the event that fees cannot be waived, I would be '
-         'grateful if you would inform me of the total charges in '
-         'advance of fulfilling my request. I would prefer the '
-         'request filled electronically, by e-mail attachment if '
-         'available or CD-ROM if not.'),
-        ('Thank you in advance for your anticipated cooperation in '
-         'this matter. I look forward to receiving your response to '
-         'this request within %s business days, as the statute requires.' % delay),
-        'Sincerely, ',
-        user.get_full_name()
-    ]
-    return '\n\n'.join(prepend + [document] + append)
+    template = get_template('text/foia/request.txt')
+    context = Context({
+        'document_request': foia.requested_docs,
+        'jurisdiction': foia.jurisdiction,
+        'user': foia.user
+    })
+    request_text = template.render(context).split('\n', 1)[1].strip()
+    print request_text
+    return request_text
 
 def _make_new_agency(request, agency, jurisdiction):
     """Helper function to create new agency"""
@@ -133,13 +104,7 @@ def _make_request(request, foia_request, parent=None):
         date=datetime.now(),
         response=False,
         full_html=False,
-        communication=_make_comm(
-            request.user,
-            foia.requested_docs,
-            foia.jurisdiction.get_intro(),
-            foia.jurisdiction.get_waiver(),
-            foia.jurisdiction.get_days()
-        )
+        communication=_make_comm(foia)
     )
     return foia, foia_comm
 
