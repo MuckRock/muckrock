@@ -163,7 +163,10 @@
         input[name=#{$filter-toggle}] {
             display: none;
             & + form { display: none; }
-            &:checked + form { display: block; }
+            &:checked + form {
+                display: block;
+                clear: both;
+            }
         }
     }
     ul.list {

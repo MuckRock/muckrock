@@ -262,6 +262,7 @@
         }
         .request.controls {
             position: relative;
+            clear: both;
             .hidden-reply {
                 display: block;
                 max-width: 30em;
