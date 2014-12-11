@@ -51,10 +51,11 @@
             }
         }
         .body {
-            @include font-sizing(1.1, 1.5);
+            @include font-sizing(1.1, 1.2);
             margin: $base-margin auto;
             padding-top: 0;
             max-width: 45em;
+            ul { padding-left: $base-padding; }
         }
         // Fixes for embedded content
         div[id^='viewer'] {
