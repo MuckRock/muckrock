@@ -1,0 +1,20 @@
+{% autoescape off %}
+Request Admin: http://www.muckrock.com{% url 'admin:foia_foiarequest_change' request.pk %}
+
+Request {{ request.title }} has received a payment for ${{amount|stringformat:".2f"}} from {{request.user.username}}.
+
+Instructions:
+
+1) Find and print the communication(s) from the agency that indicate fees.
+
+2) Prepare a signed check for the fee amount indicated in the appropriate communication from the agency -- be careful to follow any applicable instructions and to make the check out to the appropriate entity (this is not necessarily the same agency as for the request).
+
+3) Prepare a basic letter to the appropriate address.
+
+3) Send an Admin Fix from MuckRock to the agency (unless it only accepts mailed correspondence) indicating that the check is on its way.
+
+4) Mail the letter and check to the appropriate address.
+
+5) Change request status appropriately -- typically either "Awaiting Response" or "Completed."
+
+{% endautoescape %}

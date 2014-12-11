@@ -1,0 +1,10 @@
+{% autoescape off %}
+{% if agency.user %}
+Submitter: http://www.muckrock.com{% url 'admin:auth_user_change' agency.user.pk %}
+{% else %}
+Anonymous Submitter
+{% endif %}
+Agency Admin: http://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}
+
+A new agency has been created.  Please verify the information and approve it.
+{% endautoescape %}

@@ -1,0 +1,40 @@
+{% extends 'lists/base_list.html' %}
+{% load tags %}
+
+{% block title %}MuckRock &bull; Questions{% endblock title %}
+{% block list-title %}<h1>Questions&ensp;&amp;&ensp;Answers</h1>{% endblock list-title %}
+{% block type %}question{% endblock type %}
+
+{% block list-item %}
+    {% with item as question %}
+    <h3>On {{ question.date | date:"F j, Y"}}, {{ question.user.get_full_name }} asked</h3>
+    <h2><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></h2>
+    {% if not question.answers.all|length_is:"0" %}
+    <h3>and got {{ question.answers.all | length }} answer{{ question.answers.all | length | pluralize }} from 
+        {% for user in question.get_answer_users %}
+            {% if forloop.first and forloop.last %}
+                {{ user.get_full_name }}.
+            {% else %}
+                {% if forloop.last %}
+                    and {{ user.get_full_name }}.
+                {% else %}
+                    {% if forloop.revcounter0 == 1 %}
+                        {{ user.get_full_name }} 
+                    {% else %}
+                        {{ user.get_full_name }}, 
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </h3>
+    {% endif %}
+    {% endwith %}
+{% endblock list-item %}
+
+{% block filters %}
+<ul>
+    <li><a href="{% url 'question-index' %}" class="{% active request "^/questions/$" %}">All</a></li>
+    <li><a href="{% url 'question-unanswered' %}" class="{% active request "^/questions/unanswered/$" %}">Unanswered</a></li>
+    <li><a href="{% url 'question-recent' %}" class="{% active request "^/questions/recent/$" %}">Recently Answered</a></li>
+</ul>
+{% endblock filters %}

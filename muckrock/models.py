@@ -4,6 +4,8 @@ from django.db import models
 
 from types import MethodType
 
+# pylint: disable=bad-continuation
+
 # This class taken from:
 # http://lazypython.blogspot.com/2009/01/building-magic-manager.html
 # and modifed by me to actually work

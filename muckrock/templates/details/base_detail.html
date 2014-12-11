@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% comment %}
+
+This is the parent style for a single object: a blog post, a FOI request, a question, an agency, a jurisdiction, a user, etc.
+
+{% endcomment %}
+{% block content %}
+    <article class="{% block type %}{% endblock type %} detail">
+        {% block image %}{% endblock image %}
+        <header class="header">
+            <div class="header-container">
+                <div class="main">
+                    {% block header %}
+                    {% endblock header %}
+                </div>
+                <div class="aside">
+                    {% block aside %}
+                    {% endblock aside %}
+                </div>
+            </div>
+        </header>    
+        {% block actions %}
+        {% endblock actions %}
+        <section class="body">
+            {% block main %}
+            {% endblock main %}
+        </section>
+    </article>
+{% endblock %}

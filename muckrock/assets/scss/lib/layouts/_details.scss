@@ -1,0 +1,293 @@
+/* Details */
+
+.detail {
+    @extend %detail;
+    &.news {
+        .main {
+            h1 {
+                font-weight: $bold;
+                @include media($small-layout) {
+                    @include font-sizing(1.75);
+                }
+                @include media($medium-layout) {
+                    @include font-sizing(2);
+                }
+                @include media($large-layout) {
+                    @include font-sizing(2.25);
+                }
+                margin-top: 0;
+            }
+            summary {
+                font-weight: $normal;
+                @include media($small-layout) {
+                    @include font-sizing(1.25);
+                }
+                @include media($large-layout) {
+                    @include font-sizing(1.5);
+                }
+            }
+        }
+        .aside {
+            padding-left: $base-padding;
+            h2, .article-date {
+                @include font-sizing(1.2);
+                font-weight: $light;
+                color: $color-black;
+            }
+            .author-name { @include font-sizing(1.275); }
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+                span { display: block; }
+            }
+            @include media($small-layout) {
+                @include row;                    
+                margin: $base-margin/2 0;
+                border-top: $base-border-width solid $color-grey;
+                border-bottom: $base-border-width solid $color-grey;
+                padding: $base-padding/2 0;
+                .half { @include span-columns(2); }
+                ul { margin-top: 0; }
+            }
+        }
+        .body {
+            @include font-sizing(1.1, 1.5);
+            margin: $base-margin auto;
+            padding-top: 0;
+            max-width: 45em;
+        }
+        // Fixes for embedded content
+        div[id^='viewer'] {
+            max-width: 90%;
+            margin: $base-margin auto;
+            @include media($large-layout) {
+                margin: $base-margin auto $base-margin 0;
+            }
+            
+        }
+        .iframe-container {
+            position: relative;
+            padding-bottom: 75%;
+            height: 0;
+            overflow: hidden;
+            & > iframe {
+                position: absolute;
+                top:0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+    &.jurisdiction {
+        h3 { font-weight: normal; }
+        h3 + table { margin-top: 0; }
+        h3 + h3 { margin-top: 1.5em; }
+    }
+    &.agency {
+        aside dl { @extend %third; }
+        aside dd + dt { margin-top: $base-margin; }
+    }
+    &.profile {
+        section.meta > header {
+            h1 { 
+                @include font-sizing(3);
+                margin-top: 0;
+                font-weight: $light;
+            }
+            dl { margin-top: $base-vertical-rhythm; }
+        }
+    }
+    &.question {
+        .messages-container {
+            @include row;
+        }
+    }
+    &.request {
+        h3 { font-size: 1.25em; }
+        .draft {
+            @include row;
+            button, .button {
+                display: block;
+                @extend %half;
+            }
+        }
+        .crowdfund {
+            @include row;
+            .crowdfund-info {
+                @include media($small-layout) {
+                    @include span-columns(4);
+                }
+                @include media($medium-layout) {
+                    @include span-columns(4);
+                }
+                @include media($large-layout) {
+                    @include span-columns(9);
+                }
+            }
+            .crowdfund-form {
+                @include media($small-layout) {
+                    @include span-columns(4);
+                }
+                @include media($medium-layout) {
+                    @include span-columns(2);
+                }
+                @include media($large-layout) {
+                    @include span-columns(3);
+                }
+            }
+            border-color: $color-success;
+            h1, h2, h3 { font-weight: $normal; }
+            h1 {
+                @include font-sizing(1.2);
+                color: $color-success;
+            }
+            h2 { @include font-sizing(1.2); }
+            h3 { @include font-sizing(0.9); }
+            input {
+                width: 100%;
+                border: $base-border-width solid $color-success;
+                @extend %border-radius;
+                padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
+                background-color: $color-white;
+                @include font-sizing(1.75);
+                font-weight: $light;
+            }
+            button {
+                display: block;
+                width: 100%;
+            }
+        }
+        .edit {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: $normal;
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1rem;
+            color: $color-primary;
+            cursor: pointer;
+            &:hover {
+                color: darken($color-primary, 10%);
+            }
+        }
+        .tag {
+            display: inline-block;
+            padding: 0 $base-vertical-rhythm/4;
+            &:first-of-type { padding-left: 0; }
+        }
+        .tag-form, .status-form {
+            display: none;
+            font-size: 0.85em;
+            background: none;
+            border: none;
+            button { margin-left: $base-vertical-rhythm/4; }
+            p { margin-top: 0; }
+        }
+        .tabs {
+            list-style-type: none;
+            overflow: hidden;
+            padding-left: $base-vertical-rhythm;
+            border-bottom: $base-border-width solid $color-grey;
+            input[type="radio"] { display: none; }
+            label {
+                display: block;
+                float: left;
+                padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+                @extend %border;
+                border-left: none;
+                border-bottom: none;
+                &:first-of-type {
+                    border-top-left-radius: $base-border-radius;
+                    border-left: $base-border-width solid $color-grey;
+                }
+                &:last-of-type {
+                    border-top-right-radius: $base-border-radius;
+                }
+                &.active {
+                    color: white;
+                    background-color: $color-grey;
+                }
+            }
+
+        }
+        .tab-section {
+            display: none;
+            &.active { display: block; }
+        }
+        .files {
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+                @include row;
+                li {
+                    @extend %half;
+                    margin-bottom: $base-vertical-rhythm/2;
+                    border: $base-border-width solid $color-primary;
+                    @extend %border-radius;
+                    padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+                    &.active {
+                        background-color: $color-primary;
+                        color: $color-white;
+                        a { color: $color-white; }
+                    }
+                }
+            }
+            .viewer {
+                position: relative;
+                width: 100%;
+                height: 66em;
+                margin: $base-vertical-rhythm auto;
+            }
+        }
+        .notes {
+            .note {
+                @include row;
+                margin: $base-margin 0 0;
+                padding: 0 0 $base-padding/2;
+                border-bottom: $base-border-width solid $color-grey;
+                .note-date {
+                    @extend %quarter;
+                    color: $color-grey;
+                    text-align: right;
+                }
+                .note-body { @extend %three-quarters; }
+            }
+
+            .button {
+                display: block;
+                width: 10em;
+                margin: 1.5em auto;
+            }
+        }
+        .request.controls {
+            position: relative;
+            .hidden-reply {
+                display: block;
+                max-width: 30em;
+                margin: 0 auto;
+                @include row;
+                h1 {
+                    @include font-sizing(1.5);
+                    @extend %half;
+                }
+                h2 {
+                    @include font-sizing(1.25);
+                    @extend %half;
+                    text-align: right;
+                }
+                textarea {
+                    @extend %full;
+                    height: 10em;
+                    overflow-y: scroll;
+                    resize: vertical;
+                    margin-bottom: $base-margin/2;
+                }
+                .buttons {
+                    @extend %full;
+                    input, span { float: left; }
+                }
+            }
+        }
+    }
+}

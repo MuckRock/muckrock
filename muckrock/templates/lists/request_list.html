@@ -1,0 +1,102 @@
+{% extends 'lists/base_list.html' %}
+{% load tags %}
+{% load mathfilters %}
+
+{% block title %}MuckRock &bull; Requests{% endblock title %}
+{% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
+{% block type %}request{% endblock type %}
+
+{% block list-item %}
+    {% with item as foia %}
+    <div class="foia-info">
+        <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
+        <h2 ><a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a></h2>
+    </div>
+    
+    <dl class="foia-info">
+        <dt>First Created</dt>
+        <dd>{{ foia.communications.all.0.date|date:"m/d/Y" }}</dd>
+        <dt>Last Updated</dt>
+        <dd>{{ foia.last_comm_date|date:"m/d/Y" }}</dd>
+    </dl>
+    <dl class="foia-info">
+        <dt>From</dt>
+        <dd><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></dd>
+        {% if foia.agency %}
+        <dt>To</dt>
+        <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
+        {% endif %}
+    </dl>
+    {% endwith %}
+{% endblock list-item %}
+
+{% block filters %}
+{% if user.is_authenticated %}
+<ul>
+    <li><a href="{% url 'foia-list' %}" class="{% active request "^/foi/list/$" %}">All</a></li>
+    <li><a href="{% url 'foia-mylist' %}" class="{% active request "^/foi/mylist/$" %}">Mine</a></li>
+    <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
+</ul>
+{% endif %}
+<label for="filter-checkbox" id="filter-checkbox-label">Show Filters</label>
+<input type="checkbox" name="filter-checkbox" id="filter-checkbox" />
+<form action="" method="get" name="request-filters">
+{% with 3 as fields_per_column %}
+    {% for field in form %}
+        {% if forloop.first %}
+        <div class="input">
+        {% endif %}
+        {{ field }}
+        {% if forloop.counter|mod:fields_per_column == 0 %}
+        </div>
+        <div class="input">
+        {% endif %}
+        {% if forloop.last and forloop.counter|mod:fields_per_column != 0 %}
+        </div>
+        {% endif %}
+    {% endfor %}
+    <input type="submit" value="Filter" class="button" />
+</form>
+{% endwith %}
+{% endblock filters %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script>
+    $.urlParam = function(name){
+        console.log(name);
+        var urlString = '[\\?&amp;]' + name + '=([^&amp;#]*)'
+        var results = new RegExp(urlString).exec(window.location.href);
+        if (results) {
+            return results[1] || 0;
+        } else {
+            return 0;
+        }
+    }
+
+    $(document).ready(function() {
+        if ($.urlParam('status') !== 0) {
+            $('#id_status').prepend('<option value>None</option>');
+        } else {
+            $('#id_status').prepend('<option disabled selected class="title-option">Status</option>');
+        }   
+        if ($.urlParam('order') !== 0) {
+            $('#id_order').prepend('<option value>Default</option>');
+        } else {
+            $('#id_order').prepend('<option disabled selected class="title-option">Order by...</option>');
+        }
+        if ($.urlParam('sort') !== 0) {
+            $('#id_sort').prepend('<option value>Default</option>');
+        } else {
+            $('#id_sort').prepend('<option disabled selected class="title-option">Sort by...</option>');
+        }
+        $('#filter-checkbox').change(function() {
+            if ($(this).is(':checked')) {
+                $('#filter-checkbox-label').text('Hide Filters');
+            } else {
+                $('#filter-checkbox-label').text('Show Filters');
+            }
+        });
+    });
+</script>
+{% endblock scripts %}

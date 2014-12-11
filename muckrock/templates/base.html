@@ -1,35 +1,120 @@
-{% extends "base_base.html" %}
+{% load static from staticfiles %}
+{% load compress %}
+<!doctype html>
 
-{% block main %}
-	<div class="main" id="main-two-columns">
-
-		<div class="left" id="main-left">
-
-			{% if messages %}
-				{% for message in messages %}
-				<div{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|safe }}</div>
-				{% endfor %}
-			{% endif %}
-
-			{% block content %} {% endblock %}
-
-		</div>
-
-		<div class="right sidebar" id="sidebar">
-
-			<form action="/search/" method="get">
-				{% csrf_token %}
-				<input type="text" name="q" id="id_q" />
-				<input type="submit" name="submit" value="Search" class="button" />
-			</form>
-
-			<div class="content-separator"></div>
-			
-			{% block sidebar %} {% endblock %}
-
-		</div>
-
-		<div class="clearer">&nbsp;</div>
-
-	</div>
-{% endblock %}
+<html>
+    <head>
+        <title>{% block title %}MuckRock{% endblock title %}</title>
+        <meta charset="utf-8" />
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1" /> 
+        <meta name="google-site-verification"
+              content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
+        <!-- Load Assets -->
+        <link rel="shortcut icon" href="{% static 'favicon.ico' %}" />
+        <link rel="apple-touch-icon"
+              href="{% static 'apple-touch-icon.png' %}" />
+        {% compress css %}
+        <style type="text/css">
+            @font-face {
+                font-family: 'Source Code Pro';
+                src: url("{% static 'fonts/sourcecodepro-regular.woff' %}") format('woff');
+                font-weight: normal;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/sourcesanspro-light.woff' %}") format('woff');
+                font-weight: 300;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/sourcesanspro-regular.woff' %}") format('woff');
+                font-weight: 400;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/sourcesanspro-it.woff' %}") format('woff');
+                font-weight: 400;
+                font-style: italic;
+            }
+            @font-face {
+                font-family: 'Source Sans Pro';
+                src: url("{% static 'fonts/sourcesanspro-semibold.woff' %}") format('woff');
+                font-weight: 500;
+                font-style: normal;
+            }
+        </style>
+        <link rel="stylesheet"
+              type="text/x-scss"
+              href="{% static 'scss/style.scss' %}" />
+        {% endcompress %}
+        <!-- Temp Font Fix until hosting issues solved
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,400italic|Source+Code+Pro:400' rel='stylesheet' type='text/css' />
+        -->
+        
+        <!-- Preloading and Prerendering -->
+        {% block preload %}
+        {% endblock preload %}
+        {% block prerender %}
+        {% endblock prerender %}
+        <!-- Facebook and Twitter Integration -->
+        <!-- http://ogp.me & https://dev.twitter.com/docs/cards -->
+        {% block open_graph %}
+        <meta property="og:title" content="MuckRock" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="{{ request.build_absolute_uri }}" />      
+        <meta property="og:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
+        <meta property="og:image" content="{{ STATIC_URL }}apple-touch-icon.png" />
+        {% endblock open_graph %}
+        {% block twitter_card %}
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:site" content="@muckrock" />
+        <meta name="twitter:title" content="MuckRock" />
+        <meta name="twitter:description" content="MuckRock gives people the tools they need to keep our government transparent and accountable." />
+        <meta name="twitter:image:src" content="{{ STATIC_URL }}apple-touch-icon.png" />
+        {% endblock twitter_card %}
+    </head>
+    <body>
+        {% if user.is_authenticated %}
+        {% include 'lib/sidebar.html' %}
+        {% else %}
+        {% include 'lib/sidebar.html' with hidden=1 %}
+        {% endif %}
+        <div class="container">
+            {% include 'lib/header.html' %}
+            {% include 'lib/notification.html' %}
+            {% block content %}
+            {% endblock content %}
+            {% include 'lib/footer.html' %}
+        </div>
+        <!-- SCRIPTS -->
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-16635809-1']);
+            _gaq.push(['_trackPageview']);
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+        {% compress js %}
+        <script type="text/javascript" 
+                src="{% static 'js/jquery.min.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.cookie.js' %}"></script>
+        <script type="text/javascript" 
+                src="{% static 'js/muckrock.js' %}"></script>
+        {% endcompress %}
+        <!--<script type="text/javascript" 
+                src="{% static 'js/jquery.hotkeys.js' %}"></script>-->
+        {% block scripts %}
+        {% endblock scripts %}
+        {% block styles %}
+        {% endblock %}
+        <!-- END SCRIPTS -->
+    </body>
+</html>

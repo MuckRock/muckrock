@@ -3,9 +3,7 @@ Admin registration for Sidebar
 """
 
 from django.contrib import admin
-
 from reversion import VersionAdmin
-
 from muckrock.sidebar.models import Sidebar
 
 # These inhereit more than the allowed number of public methods

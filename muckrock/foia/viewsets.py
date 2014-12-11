@@ -22,6 +22,7 @@ from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSe
 from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=R0901
+# pylint: disable=bad-continuation
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +149,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             foia.save()
 
             send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-                      render_to_string('foia/admin_payment.txt',
+                      render_to_string('text/foia/admin_payment.txt',
                                        {'request': foia, 'amount': amount / 100.0}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 

@@ -1,12 +1,9 @@
-
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% block title %}MuckRock &bull; Error{% endblock %}
 
 {% block content %}
 
 <h1>Error</h1>
+<p>{{ message }}</p>
 
-<p>
-{{message}}
-</p>
-
-{% endblock %}
+{% endblock content %}

@@ -1,0 +1,75 @@
+@mixin background-gradient($color) {
+    background: $color;
+    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
+}
+
+@mixin button-color($color) {
+    color: $color-white;
+    border-color: darken($color, $base-gradient-darken);
+    @include background-gradient($color);
+}
+
+@mixin button-hover($color) {
+    &:hover {
+        color: $color-white;
+        background: $color;
+    }
+    &:focus {
+        $focus-color: lighten($color, 10%);
+        color: $color-white;
+        border-color: $focus-color;
+        background: $focus-color;
+    }
+    &:active {
+        color: $color-white;
+        @include background(linear-gradient(darken($color, $base-gradient-darken), $color));
+    }
+}
+
+@mixin panel-color($color, $disabled: false) {
+    @if not $disabled {
+        color: $color-white;
+        @include background-gradient($color);
+        border-color: darken($color, 10%);
+    } @else {
+        color: $color;
+        background: none;
+    }
+}
+
+@mixin active-button {
+    color: $color-white;
+    border-color: $color-selected;
+    background: $color-selected;
+    svg { fill: $color-white; }
+}
+
+@mixin classifier($status, $color) {
+    &.#{$status} {
+        color: $color-white;
+        @include background-gradient($color);
+        border: 1px solid darken($color, 15%);
+    }
+}
+
+@mixin colorize-icon($color) {
+    .svg-icon path,
+    .svg-icon polygon,
+    .svg-icon rect {
+        fill: $color;
+    }
+    .svg-icon circle { stroke: $color; }
+}
+
+@mixin font-sizing($size-multiplier, $line-multiplier:3) {
+    $size: 1em * $size-multiplier;
+    $line: 1em + (1em / ($base-vertical-rhythm * $line-multiplier));
+    font-size: $size;
+    line-height: $line;
+    margin: $line/4 0;
+}
+
+@mixin omega-reset($nth) {
+  &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
+  &:nth-child(#{$nth}+1) { clear: none }
+}

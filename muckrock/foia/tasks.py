@@ -21,6 +21,7 @@ import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from django_mailgun import MailgunAPIError
 
 from muckrock.foia.models import FOIAFile, FOIARequest, FOIAMultiRequest, FOIACommunication
 from muckrock.foia.codes import CODES
@@ -143,7 +144,7 @@ def submit_multi_request(req_pk, **kwargs):
         for agency in agency_chunk:
             # make a copy of the foia (and its communication) for each agency
             title = '%s (%s)' % (req.title, agency.name)
-            template = get_template('request_templates/none.txt')
+            template = get_template('text/foia/request.txt')
             context = Context({'document_request': req.requested_docs,
                                'jurisdiction': agency.jurisdiction,
                                'user': req.user})
@@ -155,9 +156,9 @@ def submit_multi_request(req_pk, **kwargs):
                 requested_docs=req.requested_docs, description=req.requested_docs)
 
             FOIACommunication.objects.create(
-                    foia=new_foia, from_who=new_foia.user.get_full_name(),
-                    to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
-                    full_html=False, communication=foia_request)
+                foia=new_foia, from_who=new_foia.user.get_full_name(),
+                to_who=new_foia.get_to_who(), date=datetime.now(), response=False,
+                full_html=False, communication=foia_request)
 
             new_foia.submit()
     req.delete()
@@ -205,8 +206,11 @@ def followup_requests():
                                                    date_followup__lte=date.today(),
                                                    disable_autofollowups=False)
         for foia in foia_requests:
-            log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
-            foia.followup()
+            try:
+                foia.followup()
+                log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
+            except MailgunAPIError as exc:
+                log.append('ERROR: %s - %d - %s - %s' % (foia.status, foia.pk, foia.title, exc))
 
         send_mail('[LOG] Follow Ups', '\n'.join(log), 'info@muckrock.com',
                   ['requests@muckrock.com', 'mitch@muckrock.com'])
@@ -218,7 +222,7 @@ def embargo_warn():
     for foia in FOIARequest.objects.filter(embargo=True,
                                            date_embargo=date.today()+timedelta(1)):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
-                  render_to_string('foia/embargo.txt', {'request': foia}),
+                  render_to_string('text/foia/embargo.txt', {'request': foia}),
                   'info@muckrock.com', [foia.user.email])
 
 
@@ -238,7 +242,8 @@ def set_all_document_cloud_pages():
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
     # pylint: disable=E1101
-    docs = [doc for doc in FOIAFile.objects.filter(doc_id='') if doc.is_doccloud()]
+    docs = [doc for doc in FOIAFile.objects.filter(doc_id='')
+            if doc.is_doccloud() and doc.get_foia()]
     logger.info('Reupload documents, %d documents are stuck', len(docs))
     for doc in docs:
         upload_document_cloud.apply_async(args=[doc.pk, False])
@@ -246,6 +251,7 @@ def retry_stuck_documents():
 class SizeError(Exception):
     """Uploaded file is not the correct size"""
 
+# pylint: disable=broad-except
 @periodic_task(run_every=crontab(hour=2, minute=0), name='muckrock.foia.tasks.autoimport')
 def autoimport():
     """Auto import documents from S3"""
@@ -264,8 +270,10 @@ def autoimport():
                 if key.name == key_or_pre.name:
                     key.copy(bucket, dest_name)
                     continue
-                s3_copy(bucket, key, '%s/%s' %
-                    (dest_name, os.path.basename(os.path.normpath(key.name))))
+                s3_copy(bucket, key, '%s/%s' % (
+                    dest_name,
+                    os.path.basename(os.path.normpath(key.name))
+                ))
         else:
             key_or_pre.copy(bucket, dest_name)
 
@@ -366,10 +374,10 @@ def autoimport():
                 source = foia.agency.name if foia.agency else ''
 
                 comm = FOIACommunication.objects.create(
-                        foia=foia, from_who=source,
-                        to_who=foia.user.get_full_name(), response=True,
-                        date=file_date, full_html=False, delivered='mail',
-                        communication=body, status=status)
+                    foia=foia, from_who=source,
+                    to_who=foia.user.get_full_name(), response=True,
+                    date=file_date, full_html=False, delivered='mail',
+                    communication=body, status=status)
 
                 foia.status = status or foia.status
                 if foia.status in ['done', 'rejected', 'no_docs']:
@@ -421,7 +429,7 @@ def notify_unanswered():
     total = len(data)
 
     send_mail('[UNANSWERED REQUESTS] %s' % datetime.now(),
-              render_to_string('foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
+              render_to_string('text/foia/unanswered.txt', {'total': total, 'foias': data[:20]}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
 
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}MuckRock &bull; Acronyms{% endblock %}
+
+{% block content %}
+	<h1>Acronyms</h1>
+	<table>
+		<tr>
+			<th width="10%">Acronym</th>
+			<th width="20%">Name</th>
+			<th width="20%">Status</th>
+			<th width="50%">Description</th>
+		</tr>
+		{% for acronym, name, status, desc in codes %}
+		<tr>
+			<td>{{acronym}}</td>
+			<td>{{name}}</td>
+			{% if status %}
+			<td>{{status}}</td>
+			{% else %}
+			<td>Status Unchanged</td>
+			{% endif %}
+			<td>{{desc}}</td>
+		</tr>
+		{% endfor %}
+	</table>
+{% endblock %}

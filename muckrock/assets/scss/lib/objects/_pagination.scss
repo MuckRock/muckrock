@@ -1,0 +1,23 @@
+.pagination {
+    @include row;
+    margin: $base-vertical-rhythm 0 $base-vertical-rhythm/2;
+    .page-ref {
+        @include media($small-layout){ @include span-columns(4); }
+        @include media($medium-layout){ @include span-columns(2); }
+        @include media($large-layout){ @include span-columns(4); }
+        text-align: center;
+        @include media($medium-layout){ text-align: left; }
+    }
+    .page-set {
+        @include media($small-layout){ @include span-columns(4); }
+        @include media($medium-layout){ @include span-columns(4); }
+        @include media($large-layout){ @include span-columns(8); }
+        text-align: center;
+        @include media($medium-layout){ text-align: right; }
+    }
+    ul { margin: 0 auto; }
+    li {
+        display: block;
+        padding: 0 $base-vertical-rhythm/4;
+    }
+}

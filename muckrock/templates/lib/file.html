@@ -1,0 +1,15 @@
+<div class="file" id="{{ file.anchor }}">
+    <img src="{{ SITE_ROOT }}{{ file.get_thumbnail }}" class="thumbnail">
+    <div class="title">{{ file.title }}</div>
+    <div class="file-actions">
+        {% if file.is_doccloud %}
+        <a href="#files" class="view-file" data-doc-id="{{ file.doc_id }}" data-doc-title="{{ file.title }}" data-doc-anchor="{{ file.anchor }}">View</a>
+        <a href="#" class=" modal-button">Embed</a>
+        <div class="hidden-modal embed">
+            <h1>Embed</h1>
+            <textarea data-doc-id="{{ file.doc_id }}" readonly></textarea>
+        </div>
+        {% endif %}
+        <a href="{{file.ffile.url}}" target="_blank">Download</a>
+    </div>
+</div>

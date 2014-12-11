@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Models for the FOIA application
 """
@@ -17,7 +18,6 @@ from taggit.managers import TaggableManager
 from unidecode import unidecode
 import logging
 import os
-import re
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -73,8 +73,10 @@ class FOIARequestManager(ChainableManager):
     def get_followup(self):
         """Get requests which require us to follow up on with the agency"""
 
-        return [f for f in self.get_overdue()
-                  if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()]
+        return [
+            f for f in self.get_overdue()
+            if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()
+        ]
         # Change to this after all follow ups have been resolved
         #return self.filter(status='processed', date_followup__lte=date.today())
 
@@ -101,6 +103,20 @@ STATUS = (
     ('partial', 'Partially Completed'),
     ('abandoned', 'Withdrawn'),
 )
+
+class Action():
+    """A helper class to provide interfaces for request actions"""
+    # pylint: disable=R0913
+    def __init__(self, test=None, link=None, title=None, desc=None, class_name=None):
+        self.test = test
+        self.link = link
+        self.title = title
+        self.desc = desc
+        self.class_name = class_name
+
+    def is_possible(self):
+        """Is this action possible given the current context?"""
+        return self.test
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
@@ -133,6 +149,12 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
+    parent = models.ForeignKey('self', blank=True, null=True)
+    block_incoming = models.BooleanField(
+        default=False,
+        help_text=('Block emails incoming to this request from '
+                   'automatically being posted on the site')
+    )
 
     read_collaborators = models.ManyToManyField(User, related_name='read_access',
                                                 blank=True, null=True)
@@ -151,10 +173,12 @@ class FOIARequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
-        return ('foia-detail', [], {'jurisdiction': self.jurisdiction.slug,
-                                    'jidx': self.jurisdiction.pk,
-                                    'slug': self.slug, 'idx': self.pk})
+        return ('foia-detail', [], {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'slug': self.slug,
+            'idx': self.pk
+        })
 
     def is_editable(self):
         """Can this request be updated?"""
@@ -178,6 +202,10 @@ class FOIARequest(models.Model):
     def is_payable(self):
         """Can this request be payed for by the user?"""
         return self.status == 'payment' and self.price > 0 and not self.has_crowdfund()
+
+    def get_stripe_amount(self):
+        """Output a Stripe Checkout formatted price"""
+        return int(self.price*105)
 
     def is_deletable(self):
         """Can this request be deleted?"""
@@ -227,8 +255,7 @@ class FOIARequest(models.Model):
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
-        # pylint: disable=E1101
-        return self.files.filter(access='public').exclude(doc_id='')
+        return self.files.filter(access='public')
 
     def percent_complete(self):
         """Get percent complete for the progress bar"""
@@ -240,17 +267,19 @@ class FOIARequest(models.Model):
 
     def color_code(self):
         """Get the color code for the current status"""
-        # pylint: disable=bad-whitespace
-        processed = 'stop' if self.date_due and date.today() > self.date_due else 'go'
-        colors = {'started':   'wait', 'submitted': 'go',   'processed': processed,
-                  'fix':       'wait', 'payment':   'wait', 'rejected':  'stop',
-                  'no_docs':   'stop', 'done':      'go',   'partial': 'go',
-                  'abandoned': 'stop', 'appealing': processed, 'ack': processed}
-        return colors.get(self.status, 'go')
+        # pylint: disable=C0326
+        code_stop = 'failure'
+        code_wait = ''
+        code_go = 'success'
+        code_processed = code_stop if self.date_due and date.today() > self.date_due else code_go
+        colors = {'started':   code_wait, 'submitted': code_go,   'code_processed': code_processed,
+                  'fix':       code_wait, 'payment':   code_wait, 'rejected':  code_stop,
+                  'no_docs':   code_stop, 'done':      code_go,   'partial': code_go,
+                  'abandoned': code_stop, 'appealing': code_processed, 'ack': code_processed}
+        return colors.get(self.status, code_wait)
 
     def first_request(self):
         """Return the first request text"""
-        # pylint: disable=E1101
         try:
             return self.communications.all()[0].communication
         except IndexError:
@@ -348,9 +377,9 @@ class FOIARequest(models.Model):
 
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
-        can_email_appeal = appeal and self.agency and self.agency.appeal_agency and \
-                           self.agency.appeal_agency.email and \
-                           self.agency.appeal_agency.can_email_appeals
+        can_email_appeal = appeal and self.agency and \
+            self.agency.appeal_agency and self.agency.appeal_agency.email and \
+            self.agency.appeal_agency.can_email_appeals
 
         # update email addresses for the request
         if can_email_appeal:
@@ -379,10 +408,18 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
             notice = 'APPEAL' if appeal else notice
-            send_mail('[%s] Freedom of Information Request: %s' % (notice, self.title),
-                      render_to_string('foia/admin_mail.txt',
-                                       {'request': self, 'appeal': appeal}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            send_mail(
+                '[%s] Freedom of Information Request: %s' % (
+                    notice, self.title
+                ),
+                render_to_string(
+                    'text/foia/admin_mail.txt',
+                    {'request': self, 'appeal': appeal}
+                ),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
             comm.delivered = 'mail'
             comm.save()
         self.save()
@@ -391,14 +428,24 @@ class FOIARequest(models.Model):
         send_data = []
         for profile in self.followed_by.all():
             link = profile.wrap_url(self.get_absolute_url())
-            msg = render_to_string('foia/mail.txt',
-                {'name': profile.user.get_full_name(),
-                 'title': self.title,
-                 'status': self.get_status_display(),
-                 'link': link,
-                 'follow': self.user != profile.user})
-            send_data.append(('[MuckRock] FOI request "%s" has been updated' % self.title,
-                              msg, 'info@muckrock.com', [profile.user.email]))
+            msg = render_to_string(
+                'text/foia/mail.txt',
+                {
+                    'name': profile.user.get_full_name(),
+                    'title': self.title,
+                    'status': self.get_status_display(),
+                    'link': link,
+                    'follow': self.user != profile.user
+                }
+            )
+            send_data.append(
+                (
+                    '[MuckRock] FOI request "%s" has been updated' % self.title,
+                    msg,
+                    'info@muckrock.com',
+                    [profile.user.email]
+                )
+            )
 
         send_mass_mail(send_data, fail_silently=False)
 
@@ -409,7 +456,7 @@ class FOIARequest(models.Model):
         comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
-            communication=render_to_string('foia/followup.txt', {'request': self}))
+            communication=render_to_string('text/foia/followup.txt', {'request': self}))
 
         if not self.email and self.agency:
             self.email = self.agency.get_email()
@@ -422,7 +469,7 @@ class FOIARequest(models.Model):
             self.status = 'submitted'
             self.save()
             send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
-                      render_to_string('foia/admin_mail.txt', {'request': self}),
+                      render_to_string('text/foia/admin_mail.txt', {'request': self}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
@@ -448,15 +495,19 @@ class FOIARequest(models.Model):
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
-        body = render_to_string('foia/request.txt', {'request': self})
+        body = render_to_string('text/foia/request_email.txt', {'request': self})
         body = unidecode(body) if from_addr == 'fax' else body
-        msg = EmailMultiAlternatives(subject=subject,
-                           body=body,
-                           from_email=from_email,
-                           to=[self.email],
-                           bcc=cc_addrs + ['diagnostics@muckrock.com'],
-                           headers={'Cc': ','.join(cc_addrs),
-                                    'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk})
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=body,
+            from_email=from_email,
+            to=[self.email],
+            bcc=cc_addrs + ['diagnostics@muckrock.com'],
+            headers={
+                'Cc': ','.join(cc_addrs),
+                'X-Mailgun-Variables': '{"comm_id": %s}' % comm.pk
+            }
+        )
         if from_addr != 'fax':
             msg.attach_alternative(linebreaks(escape(body)), 'text/html')
         # atach all files from the latest communication
@@ -468,6 +519,10 @@ class FOIARequest(models.Model):
         comm.raw_email = msg.message()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
+
+        # unblock incoming messages if we send one out
+        self.block_incoming = False
+        self.save()
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
@@ -541,56 +596,124 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    def actions(self, user):
-        """What actions may the given user take on this Request"""
-        # pylint: disable=E1101
+    def admin_actions(self, user):
+        '''Provides action interfaces for admins'''
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
+        return [
+            Action(
+                test=user.is_staff,
+                link=reverse('admin:foia_foiarequest_change', args=(self.pk,)),
+                title='Admin',
+                desc='Open in admin interface',
+                class_name='default'
+            ),
+            Action(
+                test=user.is_staff,
+                link=reverse('foia-admin-fix', kwargs=kwargs),
+                title='Admin Fix',
+                desc='Open the admin fix form',
+                class_name='default'
+            ),
+        ]
 
-        kwargs = {'jurisdiction': self.jurisdiction.slug, 'jidx': self.jurisdiction.pk,
-                  'idx': self.pk, 'slug': self.slug}
+    def user_actions(self, user):
+        '''Provides action interfaces for users'''
+        is_owner = self.user == user
+        can_follow = user.is_authenticated() and not is_owner
+        is_following = user.is_authenticated() and self.followed_by.filter(user=user)
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
+        return [
+            Action(
+                test=True,
+                link=reverse('foia-clone', kwargs=kwargs),
+                title='Clone',
+                desc='Start a new request using this one as a base',
+                class_name='primary'
+            ),
+            Action(
+                test=can_follow,
+                link=reverse('foia-follow', kwargs=kwargs),
+                title=('Unfollow' if is_following else 'Follow'),
+                class_name=('default' if is_following else 'primary')
+            ),
+            Action(
+                test=True,
+                title='Report',
+                desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
+                class_name='modal'
+            ),
+        ]
 
-        side_actions = [
-            (user.is_staff,
-                reverse('admin:foia_foiarequest_change', args=(self.pk,)), 'Admin'),
-            (self.editable_by(user) and self.is_editable(),
-                reverse('foia-update', kwargs=kwargs), 'Update'),
-            (self.editable_by(user) and not self.is_editable() and user.get_profile().can_embargo(),
-                reverse('foia-embargo', kwargs=kwargs), 'Update Embargo'),
-            (self.editable_by(user) and self.is_deletable(),
-                reverse('foia-delete', kwargs=kwargs), 'Delete'),
-            (user.is_staff,
-                reverse('foia-admin-fix', kwargs=kwargs), 'Admin Fix'),
-            (self.editable_by(user) and self.is_payable(),
-                reverse('foia-pay', kwargs=kwargs), 'Pay'),
-            (self.editable_by(user) and self.is_payable(),
-                reverse('foia-crowdfund', kwargs=kwargs), 'Crowdfund'),
-            (self.public_documents(), '#', 'Embed this Document'),
-            (user.is_authenticated() and self.user != user,
-                reverse('foia-follow', kwargs=kwargs),
-                'Unfollow' if user.is_authenticated() and self.followed_by.filter(user=user)
-                           else 'Follow'),
-            (user.is_authenticated() and self.editable_by(user),
-                reverse('foia-toggle-followups', kwargs=kwargs),
-                'Enable follow ups' if self.disable_autofollowups else 'Disable follow ups'),
-            ]
+    def noncontextual_request_actions(self, user):
+        '''Provides context-insensitive action interfaces for requests'''
+        can_edit = self.editable_by(user) or user.is_staff
+        can_embargo = can_edit and user.get_profile().can_embargo()
+        can_pay = can_edit and self.is_payable()
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
+        return [
+            Action(
+                test=(not self.is_editable() and can_embargo),
+                link=reverse('foia-embargo', kwargs=kwargs),
+                title=('Unembargo' if self.embargo else 'Embargo'),
+                desc=('Make this request public' if self.embargo else 'Make this request private'),
+                class_name='default'
+            ),
+            Action(
+                test=can_pay,
+                link=reverse('foia-pay', kwargs=kwargs),
+                title='Pay',
+                desc='Pay the fee for this request',
+                class_name='success'
+            ),
+            Action(
+                test=can_pay,
+                link=reverse('foia-crowdfund', kwargs=kwargs),
+                title='Crowdfund',
+                desc='Ask the community to help pay the fee for this request',
+                class_name='success'
+            ),
+        ]
 
-        bottom_actions = [
-            (self.editable_by(user) and self.status != 'started',
-                'Follow Up', 'Send a message directly to the agency'),
-            (self.editable_by(user),
-                'Get Advice', "Get answers to your question from Muckrock's FOIA expert community"),
-            (user.is_authenticated(),
-                'Problem?', "Something broken, buggy, or off?  Let us know and we'll fix it"),
-            (self.editable_by(user) and self.is_appealable(),
-                'Appeal', 'Submit an appeal'),
-            ]
-
-        side_action_links = [{'link': link, 'label': label,
-                              'id': 'opener' if label == 'Embed this Document' else ''}
-                             for pred, link, label in side_actions if pred]
-        bottom_action_links = [{'label': label, 'title': title}
-                               for pred, label, title in bottom_actions if pred]
-
-        return {'side': side_action_links, 'bottom': bottom_action_links}
+    def contextual_request_actions(self, user):
+        '''Provides context-sensitive action interfaces for requests'''
+        can_edit = self.editable_by(user) or user.is_staff
+        can_follow_up = can_edit and self.status != 'started'
+        can_appeal = can_edit and self.is_appealable()
+        return [
+            Action(
+                test=can_edit,
+                title='Get Advice',
+                desc=u'Get your questions answered by Muckrock’s community of FOIA experts',
+                class_name='modal'
+            ),
+            Action(
+                test=can_follow_up,
+                title='Follow Up',
+                desc='Send a message directly to the agency',
+                class_name='reply'
+            ),
+            Action(
+                test=can_appeal,
+                title='Appeal',
+                desc=u'Appeal an agency’s decision',
+                class_name='reply'
+            ),
+        ]
 
     def total_pages(self):
         """Get the total number of pages for this request"""
@@ -635,7 +758,7 @@ class FOIAMultiRequest(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        return ('foia-multi-update', [], {'slug': self.slug, 'idx': self.pk})
+        return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
 
     def color_code(self):
         """Get the color code for the current status"""
@@ -662,7 +785,7 @@ class FOIACommunication(models.Model):
     to_who = models.CharField(max_length=255, blank=True)
     priv_from_who = models.CharField(max_length=255, blank=True)
     priv_to_who = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField()
+    date = models.DateTimeField(db_index=True)
     response = models.BooleanField(help_text='Is this a response (or a request)?')
     full_html = models.BooleanField()
     communication = models.TextField(blank=True)
@@ -670,6 +793,14 @@ class FOIACommunication(models.Model):
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
     opened = models.BooleanField()
+
+    # only used for orphans
+    likely_foia = models.ForeignKey(
+        FOIARequest,
+        related_name='likely_communications',
+        blank=True,
+        null=True
+    )
 
     raw_email = models.TextField(blank=True)
 
@@ -694,7 +825,7 @@ class FOIACommunication(models.Model):
 
     class Meta:
         # pylint: disable=R0903
-        ordering = ['foia', 'date']
+        ordering = ['date']
         verbose_name = 'FOIA Communication'
 
 
@@ -724,7 +855,7 @@ class FOIAFile(models.Model):
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
     title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True)
+    date = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     # for doc cloud only
@@ -745,9 +876,8 @@ class FOIAFile(models.Model):
         _, ext = os.path.splitext(self.ffile.name)
         return ext.lower() in ['.pdf', '.doc', '.docx']
 
-    def get_thumbnail(self, size='thumbnail', page=1):
+    def get_thumbnail(self):
         """Get the url to the thumbnail image"""
-        match = re.match(r'^(\d+)-(.*)$', self.doc_id)
         mimetypes = {
             'avi': 'file-video.png',
             'bmp': 'file-image.png',
@@ -765,18 +895,9 @@ class FOIAFile(models.Model):
             'xlsx': 'file-spreadsheet.png',
             'zip': 'file-archive.png',
         }
-
-        if match and self.pages > 0 and self.access == 'public':
-            return '//s3.amazonaws.com/s3.documentcloud.org/documents/'\
-                   '%s/pages/%s-p%d-%s.gif' % (match.groups() + (page, size))
-        else:
-            ext = os.path.splitext(self.name())[1][1:]
-            filename = mimetypes.get(ext, 'file-document.png')
-            return '%simg/%s' % (STATIC_URL, filename)
-
-    def get_medium_thumbnail(self):
-        """Convenient function for template"""
-        return self.get_thumbnail('small')
+        ext = os.path.splitext(self.name())[1][1:]
+        filename = mimetypes.get(ext, 'file-document.png')
+        return '%simg/%s' % (STATIC_URL, filename)
 
     def get_foia(self):
         """Get FOIA - self.foia should be refactored out"""
@@ -800,5 +921,5 @@ class FOIAFile(models.Model):
     class Meta:
         # pylint: disable=R0903
         verbose_name = 'FOIA Document File'
-        ordering = ['comm', 'date']
+        ordering = ['date']
 

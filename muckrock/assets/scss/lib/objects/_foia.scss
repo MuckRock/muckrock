@@ -1,0 +1,47 @@
+.foia-group { @include outer-container; }
+.foia-group > .foia-single { @extend %half; }
+.foia-single {
+    @include row;
+    display: block;
+    margin-bottom: $base-vertical-rhythm/2;
+    padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+    @extend %border;
+    @extend %border-radius;
+    &:first-child {
+        margin-left: 0;
+    }
+    .foia-body {
+        @extend %three-quarters;
+    }
+    h3 {
+        @include font-sizing(1.2);
+        font-weight: $normal;
+    }
+    .foia-actions {
+        @include media($small-layout){
+            @include span-columns(4);
+        }
+        @include media($medium-layout){
+            @include span-columns(6);        
+        }
+        @include media($large-layout){
+            @include span-columns(3);
+        }
+        @include row;
+        .button {
+            @include font-sizing(0.8);
+            margin-top: 0.5em;
+            margin-right: 0;
+            display: block;
+            @include media($small-layout){
+                @include span-columns(2);
+            }
+            @include media($medium-layout){
+                @include span-columns(3);        
+            }
+            @include media($large-layout){
+                @include span-columns(12);
+            }
+        }
+    }
+}

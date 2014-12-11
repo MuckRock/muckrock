@@ -1,0 +1,33 @@
+{% extends 'forms/base_form.html' %}
+
+{% load static from staticfiles %}
+
+{% block title %}MuckRock &bull; Embargo a Request{% endblock %}
+{% block form-type %}foia-embargo{% endblock %}
+
+{% block form-title %}Embargo{% endblock %}
+
+{% block form-info %}
+<p>
+    Embargoing a request keeps it private.
+    Embargoes are limited to 30 days past today’s date.
+</p>    
+{% endblock form-info %}
+
+{% block scripts %}
+<script src="{% static 'js/jquery.ui.datepicker.js' %}" type="text/javascript"></script>
+<script>
+    $(document).ready(function(){
+        $('.datepicker').datepicker({
+            maxDate: '+1m',
+            minDate: 0,
+            firstDay: 1,
+            hideIfNoPrevNext: true,
+            numberOfMonths: 1,
+            {% if foia.date_embargo %}
+            defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
+            {% endif %}
+        });
+    });
+</script>
+{% endblock scripts %}

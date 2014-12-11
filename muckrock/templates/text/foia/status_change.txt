@@ -1,0 +1,13 @@
+{% autoescape off %}
+This is an email to let you know that the user {{ user.username }} changed the status of {{ request.user.username }}'s request "{{ request.title }}":
+
+"{{ old_status}}" -> "{{ request.get_status_display }}"
+
+Here is the request:
+https://www.muckrock.com/{% url 'admin:foia_foiarequest_change' request.pk %}
+
+And users involved:
+http://www.muckrock.com{% url 'admin:auth_user_change' user.pk %}
+http://www.muckrock.com{% url 'admin:auth_user_change' request.user.pk %}
+
+{% endautoescape %}

@@ -11,3 +11,7 @@ static
 gitfix
 apache
 .webassets-cache
+.sass-cache
+dump.rdb
+.bundle
+.noseids

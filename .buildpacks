@@ -1,2 +1,2 @@
 https://github.com/ryandotsmith/nginx-buildpack.git
-https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/python.tgz
+https://github.com/heroku/heroku-buildpack-python.git

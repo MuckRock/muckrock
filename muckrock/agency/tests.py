@@ -30,10 +30,15 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
-        nose.tools.eq_(self.agency.get_absolute_url(),
-            reverse('agency-detail', kwargs={'idx': self.agency.pk, 'slug': 'test-agency',
-                                             'jurisdiction': 'cambridge-ma',
-                                             'jidx': self.agency.jurisdiction.pk}))
+        nose.tools.eq_(
+            self.agency.get_absolute_url(),
+            reverse('agency-detail', kwargs={
+                'idx': self.agency.pk,
+                'slug': 'test-agency',
+                'jurisdiction': 'cambridge-ma',
+                'jidx': self.agency.jurisdiction.pk
+            })
+        )
 
     def test_agency_normalize_fax(self):
         """Test the normalize fax method"""

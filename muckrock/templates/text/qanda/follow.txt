@@ -1,0 +1,15 @@
+{% autoescape off %}
+Hi,
+
+A question you follow on MuckRock has a new answer. Read it here:
+
+https://www.muckrock.com{% url 'question-detail' pk=question.pk slug=question.slug %}
+
+Check out other questions:
+
+https://www.muckrock.com{% url 'question-index' %}
+
+P.S.: If you'd no longer like to follow answers to this question, click here to opt out:
+
+https://www.muckrock.com{{ link }}
+{% endautoescape %}

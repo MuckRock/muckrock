@@ -1,0 +1,28 @@
+.search {
+    display: block;
+    width: 100%;
+    &.form {
+        @extend %body;
+        .top { @include row(); }
+        input[type="search"] { @extend %three-quarters; }
+        input[type="submit"] {
+            @extend %quarter;
+            display: block;
+            margin: $base-vertical-rhythm 0;
+            @include media($large-layout) { margin: 0; }
+        }
+    }
+    &.meta {  @extend %body; }
+    &.collection {
+        @extend %collection;
+        margin: $base-margin 0;
+        list-style-type: none;
+        padding-left: 0;
+        h1 {
+            @include font-sizing(1.25, 3);
+            font-weight: $normal;
+            max-width: 33em;
+        }
+        h2 { @include font-sizing(1, 2); }
+    }
+}

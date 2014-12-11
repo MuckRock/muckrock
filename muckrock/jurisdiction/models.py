@@ -9,6 +9,8 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from muckrock.business_days.models import Holiday, HolidayCalendar, Calendar
 from muckrock.tags.models import Tag
 
+# pylint: disable=bad-continuation
+
 class RequestHelper(object):
     """Helper methods for classes that have a foiarequest_set"""
     # pylint: disable=E1101
@@ -88,8 +90,7 @@ class Jurisdiction(models.Model, RequestHelper):
     level = models.CharField(max_length=1, choices=levels)
     parent = models.ForeignKey('self', related_name='children', blank=True, null=True)
     hidden = models.BooleanField(default=False)
-    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True,
-                                  resize_source={'size': (372, 233), 'crop': 'smart'})
+    image = ThumbnailerImageField(upload_to='jurisdiction_images', blank=True, null=True)
     image_attr_line = models.CharField(blank=True, max_length=255, help_text='May use html')
     public_notes = models.TextField(blank=True, help_text='May use html')
 

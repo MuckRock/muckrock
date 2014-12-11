@@ -45,7 +45,8 @@ router.register(r'user', muckrock.accounts.views.UserViewSet)
 router.register(r'news', muckrock.news.views.ArticleViewSet)
 router.register(r'sidebar', muckrock.sidebar.viewsets.SidebarViewSet)
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^$', views.front_page, name='index'),
     url(r'^accounts/', include(muckrock.accounts.urls)),
     url(r'^foi/', include(muckrock.foia.urls)),
@@ -65,18 +66,23 @@ urlpatterns = patterns('',
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
-    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
-    url(r'^sitemap-(?P<section>.+)\.xml$', 'django.contrib.sitemaps.views.sitemap',
-        {'sitemaps': sitemaps}),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
     url(r'^robots\.txt$', include('robots.urls')),
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
+    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.index', {'sitemaps': sitemaps}),
+    url(
+        r'^sitemap-(?P<section>.+)\.xml$',
+        'django.contrib.sitemaps.views.sitemap',
+        {'sitemaps': sitemaps}
+    ),
 )
 
-
 if settings.DEBUG:
-    urlpatterns += patterns('',
-        url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {
-            'document_root': settings.MEDIA_ROOT,
-        }),
+    urlpatterns += patterns(
+        '',
+        url(
+            r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT}
+        ),
     )

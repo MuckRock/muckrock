@@ -1,0 +1,17 @@
+/* Layouts */
+
+.container {
+    padding: $base-padding/2;
+    @include media($medium-layout) { padding: $base-padding; }
+}
+
+@import 'details';
+@import 'lists';
+@import 'search';
+@import 'nav';
+@import 'front-page';
+@import 'new-request';
+@import 'draft-request';
+@import 'search';
+@import 'nav';
+@import 'registration';

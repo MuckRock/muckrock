@@ -14,6 +14,8 @@ from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
+from sets import Set
+
 class Question(models.Model):
     """A question to which the community can respond"""
 
@@ -21,10 +23,11 @@ class Question(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     foia = models.ForeignKey(FOIARequest, blank=True, null=True)
-    question = models.TextField(blank=True)
+    question = models.TextField()
     date = models.DateTimeField()
     answer_date = models.DateTimeField(blank=True, null=True)
     tags = TaggableManager(through=TaggedItemBase, blank=True)
+    answer_authors = Set()
 
     def __unicode__(self):
         return self.title
@@ -39,7 +42,7 @@ class Question(models.Model):
         send_data = []
         for profile in Profile.objects.filter(follow_questions=True):
             link = profile.wrap_url(reverse('question-subscribe'))
-            msg = render_to_string('qanda/notify.txt', {'question': self, 'link': link})
+            msg = render_to_string('text/qanda/notify.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
@@ -49,12 +52,22 @@ class Question(models.Model):
         # pylint: disable=E1101
         send_data = []
         for profile in self.followed_by.all():
-            link = profile.wrap_url(reverse('question-follow',
-                                             kwargs={'slug': self.slug, 'idx': self.pk}))
-            msg = render_to_string('qanda/follow.txt', {'question': self, 'link': link})
+            link = profile.wrap_url(reverse(
+                'question-follow',
+                kwargs={'slug': self.slug, 'idx': self.pk}
+            ))
+            msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
             send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
                               'info@muckrock.com', [profile.user.email]))
         send_mass_mail(send_data, fail_silently=False)
+
+    def get_answer_users(self):
+        """Get a list of all the users who answered the question"""
+        users = []
+        for answer in self.answers.all():
+            if answer.user not in users and answer.user != self.user:
+                users.append(answer.user)
+        return users
 
     class Meta:
         # pylint: disable=R0903
@@ -67,7 +80,7 @@ class Answer(models.Model):
     user = models.ForeignKey(User)
     date = models.DateTimeField()
     question = models.ForeignKey(Question, related_name='answers')
-    answer = models.TextField(blank=True)
+    answer = models.TextField()
 
     def __unicode__(self):
         return "%s's answer to %s" % (self.user.username, self.question.title)
@@ -78,10 +91,9 @@ class Answer(models.Model):
         super(Answer, self).save(*args, **kwargs)
         question = self.question
         question.answer_date = self.date
+        question.answer_authors.update([self.user])
         question.save()
 
     class Meta:
         # pylint: disable=R0903
         ordering = ['date']
-
-

@@ -1,0 +1,107 @@
+{% extends 'forms/base_form.html' %}
+{% load static from staticfiles %}
+
+{% block title %}MuckRock &bull; {{ action|title }}{% endblock %}
+{% block form-type %}foia-draft{% endblock %}
+
+
+{% block form-title %}{{ action|title }}{% endblock %}
+
+{% block form-info %}
+{% with remaining=foia.user.get_profile.num_requests %}
+
+{% endwith %}
+{% endblock form-info %}
+
+{% block form-form %}
+
+{% if form %}
+{% with remaining=foia.user.get_profile.total_requests %}
+<form method="post" class="draft">
+    {% csrf_token %}
+    
+    <section class="info">
+        <summary>From {{ foia.user.get_full_name }} to {{ foia.agency.name }} of {% if foia.jurisdiction.name == 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}</summary>
+        {{ form.title }}
+    </section>
+    
+    <section class="request sent message">
+        <section class="meta">
+            <span class="date right">{% now "m/d/Y" %}</span>
+        </section>
+        <section class="body">
+            {{ form.request }}
+        </section>    
+    </section>
+    
+    {% if not remaining %}
+    <div class="buy-requests panel">
+        <p>You have no requests credited to your account. You must purchase requests before you can submit your request.</p>
+        <button data-amount="2000"
+                data-description="4 requests ($20.00)"
+                data-email="{{ user.email }}"
+                data-form="#buy-requests"
+                class="checkout-button success">Buy Requests</button>
+    </div>
+    {% endif %}
+    
+    <div class="bottom">
+        {% if foia.user.get_profile.can_embargo %}
+        <section class="embargo">
+            <div class="input">
+                {{ form.embargo }}
+                <label for="id_embargo">Embargo</dfn>
+            </div>
+            <small>{{ form.embargo.help_text }}</small>
+        </section>
+        {% endif %}
+    
+        <section class="buttons">
+    
+            <input type="submit"
+                name="submit"
+                value="Save"
+                class="button" />
+            <input type="submit"
+               name="submit"
+               value="Submit"
+               class="primary button"
+               {% if not remaining %}disabled{% endif %}
+            />
+
+            <input type="submit"
+                   name="submit"
+                   value="Delete"
+                   class="failure button" />
+        
+        </section>
+    </div>    
+    
+</form>
+{% if not remaining %}
+<form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+{% endif %}
+{% endwith %}
+{% endif %}
+    
+{% endblock form-form %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.form
+            );
+        });
+    });
+</script>
+{% endblock scripts %}

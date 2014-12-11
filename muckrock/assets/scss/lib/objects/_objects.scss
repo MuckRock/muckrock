@@ -1,0 +1,250 @@
+@import 'buttons';
+@import 'panels';
+@import 'messages';
+@import 'notifications';
+@import 'pagination';
+@import 'modals';
+@import 'forms';
+@import 'foia';
+
+/* Feeds */
+
+.feed-item { @extend %panel;
+    overflow: hidden;
+    @include fill-parent();
+    > header {
+        display: block;
+        width: 100%;
+        margin-bottom: $base-vertical-rhythm/2;
+        float: left;
+        div {
+            display: block;
+            & + div { 
+                @include font-sizing(0.9, 1);
+            }
+        }
+    }
+    .button {
+        @include font-sizing(0.9, 1);
+        line-height: 1.5em;
+        float: left;
+    }
+}
+
+.feed {
+    
+    ul, ol {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .feed-item {
+        margin: 0;
+        border-top: none;
+        border-radius: 0;
+    }
+    
+    li:first-child > .feed-item {
+        border-top: $base-border-width solid $color-grey;
+        @include border-top-radius($base-border-radius);
+    }
+    
+    li:last-child > .feed-item {
+        @include border-bottom-radius($base-border-radius);
+    }
+
+    @include media($large-layout) {
+        @include span-columns(6);
+        &.narrow { @include span-columns(4); }
+        &.wide { @include span-columns(8); }
+    }
+    @include fill-parent();
+
+}
+
+/* Progress Bar */
+
+$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
+$progress-animation-duration: 0.7s;
+
+.progress-bar {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: $base-vertical-rhythm/2 0;
+    @extend %border;
+    border-radius: $base-border-radius + $base-border-width;
+    background-color: $color-white;
+}
+
+.meter {
+    @include box-sizing(border-box);
+    display: block;
+    height: $base-vertical-rhythm;
+    @include background-gradient($color-default);
+    border: $progress-meter-border;
+    @extend %border-radius;
+    @include border-right-radius(0px);
+    &.completed { @include border-right-radius($base-border-radius); }
+
+    @include classifier(success, $color-success);
+    @include classifier(failure, $color-failure);
+    @include classifier(primary, $color-primary);
+    @include classifier(default, $color-default);
+    @include classifier(disabled, $color-disabled);
+}
+
+table {
+    width: 100%;
+    margin-top: $base-vertical-rhythm 0;
+    @extend %border-radius;
+    th, td { padding: 0.25em 0.5em; }
+    tr:nth-child(odd) { background-color: $color-odd-background; }
+    border: $base-border-width solid $color-grey;
+    &, th, td {
+        border-top: $base-border-width solid $color-grey;
+        border-bottom: $base-border-width solid $color-grey
+    }
+}
+
+.file {
+    overflow: hidden;
+    .thumbnail {
+        float: left;
+        max-height: 32px;
+        width: auto;
+        margin: $base-vertical-rhythm/4 $base-vertical-rhythm 0 0;
+    }
+    .file-actions a {
+        margin-left: $base-vertical-rhythm/2;
+        &:first-child { margin-left: 0; }
+    }
+}
+
+.hidden-stripe-handler { display: none; }
+
+/* SVG Icons */
+
+.svg-icon {
+    display: inline-block;
+    width: auto;
+    height: 2rem;
+    vertical-align: middle;
+    margin: 0 0.5em;
+}
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+    fill: $color-white;
+}
+.svg-icon circle {
+    stroke: $color-white;
+    stroke-width: 1;
+}
+
+/* Sharing */
+
+$color-facebook: #3b5998;
+$color-twitter: #55acee;
+$color-email: #663285;
+
+.social.sharing {
+    width: 100%;
+    margin: 0 0 $base-margin 0;
+    text-align: left;
+}
+.sharing > a {
+    @include colorize-icon($color-grey);
+    width: 33%;
+    margin: 0 $base-margin/8;
+    &:first-child { margin-left: 0; }
+    text-decoration: none;
+    .svg-icon {
+        height: 20px;
+        width: 20px;
+    }
+}
+
+.sharing > a:hover {
+    &.facebook {  @include colorize-icon($color-facebook); }
+    &.twitter { @include colorize-icon($color-twitter); }
+    &.email { @include colorize-icon($color-email); }
+}
+
+/* JQueryUI Datepicker */
+
+.ui-datepicker {
+    background: $color-white;
+    box-shadow: 1px 1px 1px $color-grey;
+    margin: 0.25em 0 0 0;
+    padding: 0.25em;
+    border: 1px solid $color-grey;
+    border-radius: 3px;
+}
+
+.ui-datepicker-header {
+    display: table;
+    width: 100%;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next, .ui-datepicker-title {
+    display: table-cell;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+    width: 25%;
+}
+
+.ui-datepicker-title {
+    width: 50%;
+}
+
+.ui-datepicker-calendar {
+    thead {
+        background-color: $color-grey;
+    }
+    tr {
+        background-color: $color-white !important;
+    }
+    td {
+        cursor: pointer;
+        background-color: $color-white;
+        text-align: center;
+        @include transition(background-color 0.25s linear);
+        a { text-decoration: none; }
+        span { color: $color-grey; }
+        &:hover {
+            background-color: lighten($color-primary, 30%);
+        }
+    }
+    
+    .ui-datepicker-unselectable {
+        cursor: default;
+        &:hover {
+            background-color: $color-white;
+        }
+    }
+    
+    .ui-datepicker-week-end {
+        background-color: darken($color-white, 5%);
+    }
+    .ui-datepicker-other-month {
+        cursor: default;
+        background-color: darken($color-white, 10%);
+        &:hover { background-color: darken($color-white, 10%); }
+    }
+    
+    .ui-datepicker-today {
+        background-color: lighten($color-primary, 30%);
+    }
+    
+    .ui-datepicker-current-day {
+        a { color: $color-white; }
+        background-color: $color-primary;
+        &:hover {
+            background-color: $color-primary;
+        }
+    }
+    
+
+}

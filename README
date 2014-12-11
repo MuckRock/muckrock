@@ -53,3 +53,11 @@ http://git-scm.com/documentation
 
 You should have a very bare MuckRock site running locally now.  Putting some documents into the database will help flesh out the site.
 
+
+# Getting set up with Postgres #
+
+Once you have Postgres installed, there should already be a `postgres` database created at `/usr/local/var/postgres`.
+If there isn't, or if you want a different database, you can use the command `initdb <path>/<database-name>`.
+
+To use Postgres, you have to connect this database to an open socket.
+Postgres takes care of this for you with the `postgres -D <path>/<database-name>` command.

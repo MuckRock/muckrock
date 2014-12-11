@@ -41,10 +41,9 @@ DOGSLOW_EMAIL_FROM = 'info@muckrock.com'
 DOGSLOW_LOGGER = 'dogslow' # can be anything, but must match `logger` below
 DOGSLOW_LOG_TO_SENTRY = True
 
-
-
 ADMINS = (
     ('Mitchell Kotler', 'mitch@muckrock.com'),
+    ('Allan Lasser', 'allan@muckrock.com'),
 )
 
 MANAGERS = ADMINS
@@ -74,42 +73,75 @@ PREPEND_WWW = boolcheck(os.environ.get('PREPEND_WWW', False))
 STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 MEDIA_ROOT = os.path.join(STATIC_ROOT, 'media')
 ASSETS_ROOT = os.path.join(SITE_ROOT, 'assets')
-
+COMPRESS_ROOT = ASSETS_ROOT
 
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
+)
+
+
+COMPRESS_OFFLINE = True
+
+COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    #'compressor.filters.csstidy.CSSTidyFilter',
+    'compressor.filters.cssmin.CSSMinFilter',
+]
+COMPRESS_PRECOMPILERS = (
+    #('text/x-scss', 'django_libsass.SassCompiler'),
+    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
 )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 if not DEBUG:
+    DEFAULT_BUCKET_NAME = 'muckrock'
+    BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', DEFAULT_BUCKET_NAME)
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'muckrock.storage.S3StaticStorage'
-    STATIC_URL = 'https://muckrock.s3.amazonaws.com/'
-    MEDIA_URL = 'https://muckrock.s3.amazonaws.com/media/'
+    STATICFILES_STORAGE = 'muckrock.storage.CachedS3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
+    STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
+    MEDIA_URL = STATIC_URL + 'media/'
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+    COMPRESS_STORAGE = STATICFILES_STORAGE
     STATIC_URL = 'https://muckrock-devel2.s3.amazonaws.com/'
+    COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
 else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
+    # un comment out to precompress
+    #BUCKET_NAME = 'muckrock'
+    #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
+    #COMPRESS_ENABLED = True
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+)
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
 AWS_S3_FILE_OVERWRITE = False
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.load_template_source',
-)
+if not DEBUG:
+    # List of callables that know how to import templates from various sources.
+    TEMPLATE_LOADERS = (
+        ('django.template.loaders.cached.Loader', (
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+        )),
+    )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -118,8 +150,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
+    'muckrock.sidebar.context_processors.sidebar_user_info',
+    'muckrock.sidebar.context_processors.sidebar_message',
 )
-
 
 MIDDLEWARE_CLASSES = (
     'djangosecure.middleware.SecurityMiddleware',
@@ -138,6 +171,7 @@ MIDDLEWARE_CLASSES = (
 MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 if DEBUG:
     MIDDLEWARE_CLASSES += ('muckrock.settings.ExceptionLoggingMiddleware',)
+    MIDDLEWARE_CLASSES += ('muckrock.middleware.ProfileMiddleware',)
 
 class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
@@ -178,30 +212,30 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.staticfiles',
     #'staticfiles',
-    'raven.contrib.django',
-    'gunicorn',
-    'south',
-    'debug_toolbar',
-    'haystack',
-    'django_assets',
-    'djcelery',
-    'filer',
-    'easy_thumbnails',
-    'pingback',
-    'taggit',
+    'autocomplete_light',
+    'compressor',
     'dbsettings',
-    'storages',
+    'debug_toolbar',
     'django_tablib',
-    'urlauth',
-    'epiceditor',
+    'djangosecure',
+    'djcelery',
+    'easy_thumbnails',
+    'filer',
+    'gunicorn',
+    'haystack',
     'markdown_deux',
+    'mathfilters',
+    'pingback',
+    'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
-    'autocomplete_light',
     'reversion',
-    'djangosecure',
     'robots',
+    'south',
+    'storages',
+    'taggit',
+    'urlauth',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -218,11 +252,10 @@ INSTALLED_APPS = (
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)
 
-
+# pylint: disable=unused-argument
 def show_toolbar(request):
-    """show toolbar for me on the site"""
-    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False)) and
-            request.user and request.user.username == 'mitch'):
+    """show toolbar on the site"""
+    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))):
         return True
     return False
 
@@ -234,13 +267,18 @@ DEBUG_TOOLBAR_CONFIG = {
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
 urlparse.uses_netloc.append('ironmq')
+
+
 if 'REDISTOGO_URL' in os.environ:
     BROKER_URL = os.environ['REDISTOGO_URL']
 elif 'IRON_MQ_PROJECT_ID' in os.environ:
     BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
                                       os.environ.get('IRON_MQ_TOKEN'))
+elif DEBUG:
+    BROKER_URL = 'redis://localhost:6379/0'
 else:
     BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
+
 
 import djcelery
 # pylint: disable=W0611
@@ -455,7 +493,11 @@ CACHES = {
 
 if 'MEMCACHIER_SERVERS' in os.environ:
     CACHES['default']['BACKEND'] = 'django.core.cache.backends.memcached.MemcachedCache'
-    CACHES['default']['LOCATION'] = '%s:11211' % os.environ.get('MEMCACHIER_SERVERS')
+    server = os.environ.get('MEMCACHIER_SERVERS')
+    if not server.endswith(':11211'):
+        server += ':11211'
+    CACHES['default']['LOCATION'] = server
+
 
 REST_FRAMEWORK = {
     'PAGINATE_BY': 20,                 # Default to 20
