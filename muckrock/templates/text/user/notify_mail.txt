@@ -15,10 +15,8 @@ https://www.muckrock.com{% url 'acct-update' %}
 {% elif foia.status == "payment" %}Agency Payment Requested: {{foia.price}}
 {% else %}Current status is {{foia.get_status_display}}
 {% endif %}https://www.muckrock.com{{foia.get_absolute_url}}
+	{% endfor %}	
+{% if status == "Completed Requests" %}See ALL your completed requests here: https://www.muckrock.com{% url 'foia-mylist' %}?status=done{% endif %}{% if status == "Requests Needing Action" %}See ALL request needing attention here: https://www.muckrock.com{% url 'foia-mylist' %}?status=fix{% endif %}
 
-{% if status == "Completed Requests" %}See ALL your completed requests here: https://www.muckrock.com{% url 'foia-mylist' %}?status=done{% endif %}
-
-{% if status == "Requests Needing Action" %}See ALL request needing attention here: https://www.muckrock.com{% url 'foia-mylist' %}?status=fix{% endif %}
-	{% endfor %}
 {% endfor %}
 {% endautoescape %}

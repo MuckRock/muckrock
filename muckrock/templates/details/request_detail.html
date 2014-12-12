@@ -194,13 +194,14 @@
     {% endwith %}
     </section>
 {% endif %}
+
 {% if foia.public_documents or foia.user == user or user.is_staff %}
 <div class="tabs">
     <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
     {% if foia.public_documents %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
-    {% if foia.user == user %}
+    {% if foia.user == user or user.is_staff %}
     <label for="notes-radio">Notes<input type="radio" name="request" id="notes-radio" /></label>
     {% endif %}
 </div>
