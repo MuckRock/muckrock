@@ -6,9 +6,9 @@ Pass a 'foia' object or 'foias' list and it'll render a group of them.
         <div class="foia-body">
             <h3><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h3>
             {% if foia.description %}
-            <p>{{ foia.description }}</p>
+            <p>{{ foia.description | truncatewords:10 }}</p>
             {% else %}
-            <p>{{ foia.requested_docs }}</p>
+            <p>{{ foia.requested_docs | truncatewords:10 }}</p>
             {% endif %}
         </div>
         <div class="foia-actions">
