@@ -67,6 +67,15 @@ fieldset {
         .visible-fields fieldset { @extend %full; }
     }
     
+    &.admin-fix {
+        .visible-fields fieldset {
+            @extend %full;
+            margin-bottom: $base-margin/2;
+            p { margin-bottom: 0; }
+        }
+        .snail.mail input { width: auto; }
+    }
+    
     &.search {
         dfn { margin: $base-margin/2 $base-margin/4; }
         .search-filters {
@@ -80,4 +89,5 @@ fieldset {
             }
         }
     }
+    
 }

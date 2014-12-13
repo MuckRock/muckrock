@@ -55,7 +55,7 @@ def orphans(request):
         except EmptyPage:
             page = paginator.page(paginator.num_pages)
         return render_to_response(
-            'foia/orphans.html',
+            'staff/orphans.html',
             {'communications': page},
             context_instance=RequestContext(request)
         )

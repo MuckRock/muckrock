@@ -37,8 +37,7 @@ class RequestForm(forms.Form):
         required=False
     )
     local = autocomplete.ModelChoiceField(
-        'LocalAutocomplete',
-        queryset=Jurisdiction.objects.filter(level='l', hidden=False).order_by('parent', 'name'),
+        'JurisdictionLocalAutocomplete',
         required=False
     )
     agency = forms.CharField(

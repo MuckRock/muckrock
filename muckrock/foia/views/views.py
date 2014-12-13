@@ -427,7 +427,7 @@ def acronyms(request):
              for acro, (name, status, desc) in CODES.iteritems()]
     codes.sort()
     return render_to_response(
-        'foia/acronyms.html',
+        'staff/acronyms.html',
         {'codes': codes},
         context_instance=RequestContext(request)
     )

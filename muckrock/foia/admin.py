@@ -222,7 +222,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
             page = paginator.page(1)
         except EmptyPage:
             page = paginator.page(paginator.num_pages)
-        return render_to_response('foia/admin_process.html',
+        return render_to_response('admin/foia/admin_process.html',
                                   {'page': page, 'action': action},
                                   context_instance=RequestContext(request))
 

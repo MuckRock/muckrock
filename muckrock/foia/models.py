@@ -149,7 +149,7 @@ class FOIARequest(models.Model):
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
     disable_autofollowups = models.BooleanField(default=False)
-    parent = models.ForeignKey('self', blank=True, null=True)
+    parent = models.ForeignKey('self', blank=True, null=True, on_delete=models.SET_NULL)
     block_incoming = models.BooleanField(
         default=False,
         help_text=('Block emails incoming to this request from '
