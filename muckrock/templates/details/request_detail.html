@@ -217,6 +217,7 @@
         {% else %}
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
+        {% include 'lib/comm_actions.html' %}
     {% endfor %}
     {% if foia.user == user or user.is_staff %}
     <form method="post" class="request controls panel">

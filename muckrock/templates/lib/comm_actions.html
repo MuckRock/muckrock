@@ -1,0 +1,39 @@
+{% if request.user.is_staff %}
+<div class="comm-actions" style="clear:both;">
+    <div style="text-align:right;">
+        <span onclick="$('#move-{{comm.pk}}-form').show();" style="cursor:pointer;">Move</span> &bull; 
+        <span onclick="$('#resend-{{comm.pk}}-form').show();" style="cursor:pointer;">Resend</span> &bull; 
+        <span onclick="$('#delete-{{comm.pk}}-form').show();" style="cursor:pointer;">Delete</span>
+    </div>
+    <form action="" method="post" style="display:none;" class="panel" id="move-{{comm.pk}}-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="move_comm" />
+        <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+        <fieldset>
+            <label for="new_foia_pk">FOIA</label>
+            <input type="text" name="new_foia_pk_{{comm.pk}}" value="" />
+        </fieldset>
+        <input type="submit" name="submit" value="Submit" class="button" />
+        <button onclick="$('#move-{{comm.pk}}-form').hide(); return false;">Close</button>
+    </form>
+    <form action="" method="post" style="display:none" class="panel" id="resend-{{comm.pk}}-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="resend_comm" />
+        <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+        <fieldset>
+            <label for="email">Email</label>
+            <input type="text" name="email" value="{{foia.email}}" />
+            <p><small>This will become this requests new email address.  Leave blank to force a manual mailing.  For faxes, enter the 10 digit fax number with a leading 1, @fax2.faxaway.com.</small></p>
+        </fieldset>
+        <input type="submit" name="submit" value="Submit" class="button" />
+        <button onclick="$('#resend-{{comm.pk}}-form').hide(); return false;">Close</button>
+    </form>
+    <form action="" method="post" style="display:none; text-align:right;" class="panel" id="delete-{{comm.pk}}-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete_comm" />
+        <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+        <input type="submit" name="submit" value="Delete - Are you sure?" class="failure button" />
+        <button onclick="$('#delete-{{comm.pk}}-form').hide(); return false;">Close</button>
+    </form>
+</div>
+{% endif %}
