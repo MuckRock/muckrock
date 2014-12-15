@@ -4,6 +4,7 @@ Forms for FOIA application
 
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.encoding import smart_text
 
 import autocomplete_light as autocomplete
 from datetime import date, timedelta
@@ -87,11 +88,10 @@ class RequestDraftForm(forms.Form):
 
 class AgencyMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
-        agency_name = obj.name
-        jurisdiction_name = obj.jurisdiction.name
-        label = u'{0} / {1}'.format(agency_name, jurisdiction_name)
-        if obj.jurisdiction.level == 'l':
-            label += ', {0}'.format(obj.jurisdiction.parent.abbrev)
+        agency_jurisdiction = obj.jurisdiction
+        label = u'{0} / {1}'.format(obj.name, agency_jurisdiction.name)
+        if agency_jurisdiction.level == 'l':
+            label += ', {0}'.format(agency_jurisdiction.parent.abbrev)
         return label
 
 class MultiRequestForm(forms.ModelForm):
