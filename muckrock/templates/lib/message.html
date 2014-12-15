@@ -30,9 +30,9 @@ The message object contains:
     {% if files %}
     <section class="attachments">
         <ul class="attachment-list">
-            {% for file in files %}
+        {% for file in files %}    
             <li class="attachment">{% include 'lib/file.html' %}</li>
-            {% endfor %}
+        {% endfor %}
         </ul>
     </section>
     {% endif %}

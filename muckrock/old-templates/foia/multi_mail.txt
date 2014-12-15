@@ -1,9 +1,0 @@
-{% autoescape off %}
-Submitter: http://www.muckrock.com{% url 'admin:auth_user_change' request.user.pk %}
-Request Admin: http://www.muckrock.com{% url 'admin:foia_foiamultirequest_change' request.pk %}
-
-Please review this multi-request and submit it.
-
-{% now "F j, Y" %}
-{{ foia.requested_docs}}
-{% endautoescape %}
