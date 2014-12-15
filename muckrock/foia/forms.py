@@ -85,6 +85,15 @@ class RequestDraftForm(forms.Form):
                   'You may change this whenever you want.'
     )
 
+class AgencyMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        agency_name = obj.name
+        jurisdiction_name = obj.jurisdiction.name
+        label = '{0} / {1}'.format(agency_name, jurisdiction_name)
+        if obj.jurisdiction.level == 'l':
+            label += ', {0}'.format(obj.jurisdiction.parent.abbrev)
+        return label
+
 class MultiRequestForm(forms.ModelForm):
     """A form for a multi-request"""
 
@@ -95,7 +104,7 @@ class MultiRequestForm(forms.ModelForm):
         label='Request',
         widget=forms.Textarea()
     )
-    agencies = forms.ModelMultipleChoiceField(
+    agencies = AgencyMultipleChoiceField(
         label='Agencies',
         queryset=Agency.objects.filter(approved=True)
     )
