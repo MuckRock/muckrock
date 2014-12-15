@@ -300,7 +300,6 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
     if request.method == 'POST':
         form = FOIAAdminFixForm(request.POST)
         formset = FOIAFileFormSet(request.POST, request.FILES)
-        print request.FILES
         if form.is_valid() and formset.is_valid():
             if form.cleaned_data['email']:
                 foia.email = form.cleaned_data['email']

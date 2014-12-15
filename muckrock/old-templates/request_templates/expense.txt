@@ -1,5 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block title %}Expense Reports for {{full_name}}{% endblock %}
-
-{% block content %}The most recent expense reports, going back for the past {{months_back}} months, for {{full_name}}, who works for {{department}}.{% endblock %}
-

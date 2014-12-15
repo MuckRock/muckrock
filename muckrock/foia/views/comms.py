@@ -72,9 +72,9 @@ def move_comm(request, next_):
         return redirect(next_)
     comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
     comm.delete()
-    msg = 'Communication moved to the following requests:<br>'
+    msg = 'Communication moved to the following requests: '
     href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-    msg += '<br>'.join(href(f) for f in new_foias)
+    msg += ', '.join(href(f) for f in new_foias)
     messages.success(request, msg)
     return redirect(next_)
 

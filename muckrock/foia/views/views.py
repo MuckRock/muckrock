@@ -60,7 +60,6 @@ class List(ListView):
         # TODO: handle a list of tags
         for key, value in list_filter.iteritems():
             if value:
-                print value
                 if key == 'status':
                     foia_requests = foia_requests.filter(status=value)
                 elif key == 'agency':

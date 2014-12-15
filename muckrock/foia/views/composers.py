@@ -58,7 +58,6 @@ def _make_comm(foia):
         'user': foia.user
     })
     request_text = template.render(context).split('\n', 1)[1].strip()
-    print request_text
     return request_text
 
 def _make_new_agency(request, agency, jurisdiction):
@@ -157,7 +156,6 @@ def _process_request_form(request):
         agency_query = Agency.objects.filter(name=data['agency'], jurisdiction=jurisdiction)
         agency = agency_query[0] if agency_query \
                  else _make_new_agency(request, data['agency'], jurisdiction)
-
         foia_request.update({
             'title': title,
             'document': document,
@@ -307,7 +305,6 @@ def create_multirequest(request):
     if request.method == 'POST':
         form = MultiRequestForm(request.POST)
         if form.is_valid():
-            print form.cleaned_data['agencies']
             multirequest = form.save(commit=False)
             multirequest.user = request.user
             multirequest.slug = slugify(multirequest.title)
@@ -348,7 +345,6 @@ def draft_multirequest(request, slug, idx):
                 foia.slug = slugify(foia.title) or 'untitled'
                 foia.save()
                 if request.POST['submit'] == 'Submit':
-                    print foia.agencies.all()
                     profile = request.user.get_profile()
                     num_requests = len(foia.agencies.all())
                     request_count = profile.multiple_requests(num_requests)
@@ -357,8 +353,6 @@ def draft_multirequest(request, slug, idx):
                         err_msg = 'Please purchase more requests, then try submitting again.'
                         messages.warning(request, err_msg)
                         return redirect(foia)
-                    print request_count
-                    print num_requests
                     profile.num_requests -= request_count['reg_requests']
                     profile.monthly_requests -= request_count['monthly_requests']
                     profile.save()
