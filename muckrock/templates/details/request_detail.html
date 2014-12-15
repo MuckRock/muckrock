@@ -206,6 +206,7 @@
     {% endif %}
 </div>
 {% endif %}
+
 <section class="tab-section communications" id="request">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
@@ -244,19 +245,21 @@
     </form>
     {% endif %}
 </section>
-{% if foia.public_documents %}
+
+{% if foia.files %}
+<!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
     <div class="viewer" id="viewer"></div>
-    {% if foia.public_documents|length > 0 %}
     <ul>
-        {% for file in foia.public_documents %}
-            <li>{% include "lib/file.html" %}</li>
-        {% endfor %}
+    {% for file in foia.files.all %}
+        <li>{% include "lib/file.html" %}</li>
+    {% endfor %}
     </ul>
-    {% endif %}
 </section>
 {% endif %}
+
 {% if foia.user == user or user.is_staff %}
+<!-- NOTES -->
 <section class="tab-section notes" id="notes">
     {% for note in foia.notes.all %}
     <div class="note">
