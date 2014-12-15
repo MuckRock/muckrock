@@ -13,6 +13,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import RequestContext, Context
+from django.utils.encoding import smart_text
 
 from datetime import datetime
 import logging
@@ -53,7 +54,7 @@ def _make_comm(foia):
     """A helper function to compose the text of a communication"""
     template = get_template('text/foia/request.txt')
     context = Context({
-        'document_request': foia.requested_docs,
+        'document_request': smart_text(foia.requested_docs),
         'jurisdiction': foia.jurisdiction,
         'user': foia.user
     })
@@ -192,7 +193,7 @@ def create_request(request):
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
         initial_data = {
             'title': foia.title,
-            'document': foia.requested_docs,
+            'document': smart_text(foia.requested_docs),
             'agency': foia.agency.name
         }
         jurisdiction = foia.jurisdiction
@@ -267,9 +268,9 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
-            foia_comm = foia.last_comm()
+            foia_comm = foia.last_comm() # DEBUG
             foia_comm.date = datetime.now()
-            foia_comm.communication = data['request']
+            foia_comm.communication = smart_text(data['request'])
             foia_comm.save()
             foia.save()
             if request.POST.get('submit') == 'Save':

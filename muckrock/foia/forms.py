@@ -89,7 +89,7 @@ class AgencyMultipleChoiceField(forms.ModelMultipleChoiceField):
     def label_from_instance(self, obj):
         agency_name = obj.name
         jurisdiction_name = obj.jurisdiction.name
-        label = '{0} / {1}'.format(agency_name, jurisdiction_name)
+        label = u'{0} / {1}'.format(agency_name, jurisdiction_name)
         if obj.jurisdiction.level == 'l':
             label += ', {0}'.format(obj.jurisdiction.parent.abbrev)
         return label
