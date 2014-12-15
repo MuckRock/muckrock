@@ -1,6 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block title %}{{title}}{% endblock %}
-
-{% block content %}{{document_request}}{% endblock %}
-
-

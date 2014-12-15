@@ -1,5 +1,0 @@
-To Whom It May Concern:
-
-I wanted to follow up on the following Freedom of Information request, copied below, and originally submitted on {{request.date_submitted|date}}. Please let me know when I can expect to receive a response, or if further clarification is needed.{% if request.tracking_id %}  You had assigned it reference number #{{request.tracking_id}}.{% endif %}
-
-Thank you for your help.
