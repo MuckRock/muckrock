@@ -318,6 +318,7 @@ class FOIAMultiRequestAdmin(VersionAdmin):
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'user', 'status')
     search_fields = ['title', 'requested_docs']
+    filter_horizontal = ['agencies']
 
     def get_urls(self):
         """Add custom URLs here"""
