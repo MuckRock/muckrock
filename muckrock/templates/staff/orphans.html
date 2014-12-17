@@ -41,6 +41,8 @@
         {% include 'lib/comm_actions.html' with muckrock_number=comm.likely_foia.pk %}
         </div>
     </div>
+    {% empty %}
+    <h2>There&rsquo;s no orphans. Nice!</h2>
     {% endfor %}
 </article>    
     {% with communications as page_obj %}
