@@ -73,3 +73,28 @@
         @include media($large-layout) { @include shift(1); }
     }
 }
+
+.comm-actions {
+    clear: both;
+    fieldset { margin-bottom: $base-margin/4; }
+    .comm-action {
+        cursor: pointer;
+        color: lighten($color-black, 20%);
+        padding-right: $base-padding/2;
+        &:hover {
+            color: $color-black;
+        }
+    }
+}
+
+.sent.message + .comm-actions {
+    text-align: right;
+    fieldset label { text-align: right; }
+    .delete-comm { text-align: right; }
+}
+
+.receieved.message + .comm-actions {
+    text-align: left;
+    fieldset label { text-align: left; }
+    .delete-comm { text-align: left; }
+}

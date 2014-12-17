@@ -2,6 +2,14 @@
 
 .detail {
     @extend %detail;
+    &.flatpage {
+        h1 {
+            font-weight: $bold;
+        }
+        @include font-sizing(1.1, 1.2);    
+        max-width: 45em;
+        ul { padding-left: $base-padding; }
+    }
     &.news {
         .main {
             h1 {

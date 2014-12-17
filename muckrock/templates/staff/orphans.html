@@ -8,34 +8,45 @@
 {% block title %}MuckRock &bull; Orphaned Communications {% endblock %}
 
 {% block content %}
-	<h1>Orphaned Communications</h1>
-    <form action="" method="post">
+<article class="orphans">
+    {% if communications %}
+    <form method="post" id="selected-orphans">
         {% csrf_token %}
+        <h1>Orphaned Communications</h1>
         <input type="hidden" name="action" value="" />
         <input type="hidden" name="comm_pk" value="" />
-        <input type="submit" name="submit" value="Delete Selected" class="button" 
-                     onclick="$('input[name=action]').val('delete_selected'); return confirm('Are you sure?');" />
-        <br \>
-        <input type="checkbox" onclick="$('input[name=comm_pks]').attr('checked', this.checked)" id="toggle_all" />
-        <label for="toggle_all">Select/Unselect All</label>
-
-    {% for comm in communications %}
-        <div class="orphan">
-            {% if comm.likely_foia %}
-            <p><a href="{% url "admin:foia_foiarequest_change" comm.likely_foia.pk %}">Likely FOIA for this comm</a></p>
-            {% endif %}
-            {% if comm.priv_to_who %}
-            <p><strong>To {{comm.priv_to_who}}</strong></p>
-            {% endif %}
-            {% if comm.full_html %}
-                {% include 'lib/message.html' with user=comm.priv_from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|safe %}
-            {% else %}
-                {% include 'lib/message.html' with user=comm.priv_from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
-            {% endif %}
-            {% include 'lib/comm_actions.html' %}
+        <div class="top controls">
+            <fieldset>
+                <input type="checkbox" id="toggle_all" />
+                <label for="toggle_all">Select/Unselect All</label>
+            </fieldset>
+            <input type="submit" name="submit" value="Delete Selected" class="button" 
+                         onclick="$('input[name=action]').val('delete_selected'); return confirm('Are you sure?');" />
         </div>
-    {% endfor %}
     </form>
+    {% endif %}
+    {% for comm in communications %}
+    <div class="orphan">
+        <div class="orphan-head">
+            <div><input name="comm_pks" type="checkbox" value="{{comm.pk}}" form="selected-orphans" /></div>
+            {% if comm.priv_to_who %}
+            <div><strong>To: {{comm.priv_to_who}}</strong></div>
+            {% endif %}
+        </div>
+        <div class="orphan-body">
+        {% if comm.full_html %}
+            {% include 'lib/message.html' with user=comm.priv_from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|safe %}
+        {% else %}
+            {% include 'lib/message.html' with user=comm.priv_from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
+        {% endif %}
+        
+        {% include 'lib/comm_actions.html' with muckrock_number=comm.likely_foia.pk %}
+        </div>
+    </div>
+    {% empty %}
+    <h2>There&rsquo;s no orphans. Nice!</h2>
+    {% endfor %}
+</article>    
     {% with communications as page_obj %}
         {% include 'lib/pagination.html' %}
     {% endwith %}
