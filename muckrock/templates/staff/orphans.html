@@ -9,6 +9,7 @@
 
 {% block content %}
 <article class="orphans">
+    {% if communications %}
     <form method="post" id="selected-orphans">
         {% csrf_token %}
         <h1>Orphaned Communications</h1>
@@ -23,6 +24,7 @@
                          onclick="$('input[name=action]').val('delete_selected'); return confirm('Are you sure?');" />
         </div>
     </form>
+    {% endif %}
     {% for comm in communications %}
     <div class="orphan">
         <div class="orphan-head">
