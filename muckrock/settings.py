@@ -79,18 +79,16 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
-
-COMPRESS_OFFLINE = True
-
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
 COMPRESS_CSS_FILTERS = [
     'compressor.filters.css_default.CssAbsoluteFilter',
     #'compressor.filters.csstidy.CSSTidyFilter',
     'compressor.filters.cssmin.CSSMinFilter',
 ]
-COMPRESS_PRECOMPILERS = (
-    #('text/x-scss', 'django_libsass.SassCompiler'),
-    ('text/x-scss', 'sass --sourcemap=none {infile} {outfile}'),
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
@@ -106,6 +104,7 @@ if not DEBUG:
     STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = STATIC_URL + 'media/'
+    COMPRESS_OFFLINE = True
 elif AWS_DEBUG:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
     THUMBNAIL_DEFAULT_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
@@ -118,17 +117,6 @@ else:
     STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
-
-    # un comment out to precompress
-    #BUCKET_NAME = 'muckrock'
-    #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
-    #COMPRESS_ENABLED = True
-
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
-)
 
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_SECURE_URLS = True
