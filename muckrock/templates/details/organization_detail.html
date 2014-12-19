@@ -1,0 +1,20 @@
+{% extends 'details/base_detail.html' %}
+{% block title %}MuckRock &bull; {{ organization.name }}{% endblock title %}
+{% block type %}organization{% endblock type %}
+
+{% block header %}
+<h1>{{ organization.name }}</h1>
+<summary>Managed by {{ organization.user.get_full_name }}</summary>
+{% endblock %}
+
+{% block aside %}
+<dl>
+    <dt>Requests Remaining</dt>
+    <dd>{{ organization.num_requests }}</dd>
+</dl>
+{% endblock %}
+
+{% block main %}
+{# Show current organization members #}
+{# Show recent requests from organization #}
+{% endblock %}

@@ -6,11 +6,16 @@ from django.conf.urls import patterns, url
 
 from muckrock.organization import views
 
-# pylint: disable=bad-whitespace
-
-urlpatterns = patterns('',
-    url(r'^$',            views.List.as_view(), name='org-index'),
-    url(r'^(?P<slug>[\w\d_-]+)$',
-                          views.Detail.as_view(), name='org-detail'),
+urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        views.List.as_view(),
+        name='org-index'
+    ),
+    url(
+        r'^(?P<slug>[\w\d_-]+)$',
+        views.Detail.as_view(),
+        name='org-detail'
+    ),
 )
-
