@@ -13,6 +13,9 @@
     .foia-body {
         @extend %three-quarters;
     }
+    p {
+        @include font-sizing(0.8);
+    }
     h3 {
         @include font-sizing(1.2);
         font-weight: $normal;
