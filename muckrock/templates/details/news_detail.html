@@ -11,7 +11,7 @@
 
 {% block image %}
 {% if article.image %}
-<img src="{% thumbnail article.image 1200x675 %}" class="header-image">
+<img src="{% thumbnail article.image 1200x400 %}" class="header-image">
 {% endif %}
 {% endblock image %}
 
@@ -45,7 +45,7 @@
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if article.image %}
-<meta property="og:image" content="{% thumbnail article.image 1200x675 %}" />
+<meta property="og:image" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
 <meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
@@ -65,7 +65,7 @@
 <meta name="twitter:title" content="{{ article.title }}" />
 <meta name="twitter:description" content="{{ article.summary }}" />
 {% if article.image %}
-<meta name="twitter:image:src" content="{% thumbnail article.image 1200x675 %}" />
+<meta name="twitter:image:src" content="{% thumbnail article.image 1200x400 %}" />
 {% else %}
 <meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
 {% endif %}
