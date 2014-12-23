@@ -56,7 +56,7 @@ def register(request):
                 user=new_user,
                 acct_type='community',
                 monthly_requests=0,
-                date_update=datetime.now()
+                date_update=datetime.now(),
                 confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
                 key_expire_date=date.today() + timedelta(2),
             )
