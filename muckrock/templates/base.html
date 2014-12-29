@@ -48,8 +48,8 @@
             }
         </style>
         <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'style.css' %}" />
+              type="text/x-scss"
+              href="{% static 'scss/style.scss' %}" />
         {% endcompress %}
         
         <!-- Preloading and Prerendering -->
@@ -103,6 +103,8 @@
                 src="{% static 'js/jquery.min.js' %}"></script>
         <script type="text/javascript"
                 src="{% static 'js/jquery.cookie.js' %}"></script>
+        <script type="text/javascript"
+                src="{% static 'js/jquery.autosize.min.js' %}"></script>
         <script type="text/javascript" 
                 src="{% static 'js/muckrock.js' %}"></script>
         {% endcompress %}

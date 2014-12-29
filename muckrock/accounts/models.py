@@ -199,7 +199,8 @@ class Profile(models.Model):
             )
             self.stripe_id = customer.id
             self.save()
-        return customer
+        finally:
+            return customer
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""

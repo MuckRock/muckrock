@@ -40,6 +40,7 @@
         <button data-amount="2000"
                 data-description="4 requests ($20.00)"
                 data-email="{{ user.email }}"
+                data-label=""
                 data-form="#buy-requests"
                 class="checkout-button success">Buy Requests</button>
     </div>
@@ -99,6 +100,7 @@
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
         });
