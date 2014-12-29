@@ -124,9 +124,8 @@ def subscribe(request):
             messages.warning(request, msg)
             return redirect('acct-my-profile')
         elif can_unsubscribe:
-            call_to_action = 'Unsubscribe'
-            description = ('Are you sure you want to unsubscribe? You will go back '
-                           'to an unpaid account and miss out on all these great features.')
+            call_to_action = 'Manage Subscription'
+            description = ''
             button_text = 'Unsubscribe'
     else:
         description = ('First you will create an account, then be redirected '
@@ -162,10 +161,30 @@ def subscribe(request):
                 logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
         elif can_unsubscribe:
             customer = user_profile.customer()
-            customer.cancel_subscription()
-            user_profile.acct_type = 'community'
-            user_profile.save()
-            messages.success(request, 'Your professional subscription has been cancelled.')
+            if request.POST.get('stripe_token', False):
+                try:
+                    stripe_token = request.POST['stripe_token']
+                    stripe_email = request.POST['stripe_email']
+                    if request.user.email != stripe_email:
+                        raise ValueError('Account email and Stripe email do not match')
+                    customer = user_profile.customer()
+                    customer.card = stripe_token
+                    customer.save()
+                except stripe.CardError as exc:
+                    msg = 'Payment error. Your card has not been charged.'
+                    messages.error(request, msg)
+                    logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+                except ValueError as exc:
+                    msg = 'Payment error. Your card has not been charged.'
+                    messages.error(request, msg)
+                    logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+                messages.success(request, 'Your payment informatino has been updated.')
+            else:
+                customer.cancel_subscription()
+                customer.save()
+                user_profile.acct_type = 'community'
+                user_profile.save()
+                messages.success(request, 'Your professional subscription has been cancelled.')
         return redirect('acct-my-profile')
 
     context = {

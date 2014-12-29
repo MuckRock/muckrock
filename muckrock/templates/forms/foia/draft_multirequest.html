@@ -79,6 +79,7 @@ and
 <button data-amount="{{ bundles|mul:'2000' }}"
         data-description="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)"
         data-email="{{ user.email }}"
+        data-label=""
         data-form="#buy-requests"
         class="checkout-button primary">Buy Requests</button>
 {% else %}
@@ -104,6 +105,7 @@ monthly request{{ profile.monthly_requests|sub:balance.monthly_requests|pluraliz
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
         });

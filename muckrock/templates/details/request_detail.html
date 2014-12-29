@@ -132,6 +132,7 @@
                     data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
                     data-email="{{ user.email }}"
                     data-form="#payment-form"
+                    data-label=""
                     class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
                 {{ action.title }}
             </button>
@@ -186,6 +187,7 @@
         <button data-amount="0"
                 data-description=""
                 data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                data-label=""
                 data-form="#crowdfund-form"
                 class="disabled checkout-button" 
                 id="crowdfund-button"
@@ -434,6 +436,7 @@
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
             return false;

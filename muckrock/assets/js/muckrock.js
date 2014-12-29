@@ -12,7 +12,7 @@ function modal(nextSelector) {
     });
 }
 
-function checkout(pk, image, description, amount, email, form, submit) {
+function checkout(pk, image, description, amount, email, label, form, submit) {
     submit = typeof submit !== 'undefined' ? submit : true;
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
@@ -30,6 +30,7 @@ function checkout(pk, image, description, amount, email, form, submit) {
         description: description,
         amount: amount,
         email: email,
+        panelLabel: label,
         token: token
     });
 }
@@ -39,10 +40,12 @@ function getCheckoutData(button) {
     var description = button.data('description');
     var email = button.data('email');
     var form = button.data('form');
+    var label = button.data('label');
     return {
         'amount': amount,
         'description': description,
         'email': email,
+        'label': label,
         'form': $(form)
     }
 }
