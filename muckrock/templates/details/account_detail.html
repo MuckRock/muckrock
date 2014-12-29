@@ -62,6 +62,7 @@
                 data-description="4 requests ($20.00)"
                 data-email="{{ request.user.email }}"
                 data-form="#buy-requests"
+                data-label=""
                 class="checkout-button primary">Buy Requests</button>
         <a href="{% url 'acct-update' %}" class="button">Settings</a>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
@@ -119,6 +120,7 @@
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
         });
