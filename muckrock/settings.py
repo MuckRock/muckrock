@@ -247,6 +247,7 @@ INSTALLED_APPS = (
     'muckrock.qanda',
     'muckrock.crowdfund',
     'muckrock.sidebar',
+    'muckrock.organization',
 )
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)
@@ -327,6 +328,7 @@ MONTHLY_REQUESTS = {
     'community': 0,
     'pro': 20,
     'proxy': 20,
+    'org': 200,
 }
 
 MARKDOWN_DEUX_STYLES = {
