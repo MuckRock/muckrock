@@ -142,6 +142,7 @@ def subscribe(request):
                     raise ValueError('Account email and Stripe email do not match')
                 customer = user_profile.customer()
                 customer.card = stripe_token
+                customer.save()
                 customer.update_subscription(plan='pro')
                 customer.save()
                 user_profile.acct_type = 'pro'
