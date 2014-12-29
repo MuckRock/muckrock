@@ -206,6 +206,7 @@
                 @extend %border;
                 border-left: none;
                 border-bottom: none;
+                cursor: pointer;
                 &:first-of-type {
                     border-top-left-radius: $base-border-radius;
                     border-left: $base-border-width solid $color-grey;
@@ -213,9 +214,13 @@
                 &:last-of-type {
                     border-top-right-radius: $base-border-radius;
                 }
-                &.active {
-                    color: white;
+                &:hover {
+                    color: $color-white;
                     background-color: $color-grey;
+                }
+                &.active {
+                    color: $color-white;
+                    background-color: $color-primary;
                 }
             }
 
