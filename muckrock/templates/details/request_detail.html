@@ -200,7 +200,7 @@
 
 {% if foia.public_documents or foia.user == user or user.is_staff %}
 <div class="tabs">
-    <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
+    <label for="request-radio" class="active">Request<input type="radio" name="request" id="request-radio" /></label>
     {% if foia.public_documents %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
@@ -210,7 +210,7 @@
 </div>
 {% endif %}
 
-<section class="tab-section communications" id="request">
+<section class="tab-section communications active" id="request">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
@@ -395,10 +395,6 @@
         });
     
         /* Tab Bar */
-
-        $('#request-radio').parent().addClass( 'active');
-        hideAllExcept($('#request'));
-    
         $('input:radio').change(function() {
             $(this).parent().addClass( 'active' );
             $(this).parent().siblings().removeClass( "active" );
