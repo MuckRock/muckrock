@@ -47,6 +47,8 @@ function getCheckoutData(button) {
     }
 }
 
+$('textarea').autosize();
+
 if (typeof $.cookie('broadcast') == 'undefined') {
     $.cookie('broadcast', 1);
 }
