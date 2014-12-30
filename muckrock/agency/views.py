@@ -5,6 +5,7 @@ Views for the Agency application
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -56,7 +57,12 @@ def detail(request, jurisdiction, jidx, slug, idx):
     else:
         form = FlagForm()
 
-    context = {'agency': agency, 'foia_requests': foia_requests, 'form': form}
+    context = {
+        'agency': agency,
+        'foia_requests': foia_requests,
+        'form': form,
+        'sidebar_admin_url': reverse('admin:agency_agency_change', args=(agency.pk,)),
+    }
 
     collect_stats(agency, context)
 

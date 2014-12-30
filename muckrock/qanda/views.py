@@ -4,6 +4,7 @@ Views for the QandA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -70,6 +71,7 @@ class Detail(DetailView):
             context['follow_label'] = 'Unfollow'
         else:
             context['follow_label'] = 'Follow'
+        context['sidebar_admin_url'] = reverse('admin:qanda_question_change', args=(context['object'].pk,))
         return context
 
 

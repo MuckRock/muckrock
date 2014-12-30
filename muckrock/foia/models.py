@@ -593,13 +593,6 @@ class FOIARequest(models.Model):
         return [
             Action(
                 test=user.is_staff,
-                link=reverse('admin:foia_foiarequest_change', args=(self.pk,)),
-                title='Admin',
-                desc='Open in admin interface',
-                class_name='default'
-            ),
-            Action(
-                test=user.is_staff,
                 link=reverse('foia-admin-fix', kwargs=kwargs),
                 title='Admin Fix',
                 desc='Open the admin fix form',

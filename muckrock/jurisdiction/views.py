@@ -4,6 +4,7 @@ Views for the Jurisdiction application
 
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -62,7 +63,8 @@ def detail(request, fed_slug, state_slug, local_slug):
     context = {
         'jurisdiction': jurisdiction,
         'foia_requests': foia_requests,
-        'form': form
+        'form': form,
+        'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk,)),
     }
 
     collect_stats(jurisdiction, context)
