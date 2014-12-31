@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from datetime import datetime
 
 from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.tasks import upload_document_cloud
 
 # pylint: disable=too-many-arguments
 def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False, snail=False):
