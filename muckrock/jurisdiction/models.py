@@ -3,6 +3,7 @@ Models for the Jurisdiction application
 """
 from django.db import models
 from django.db.models import Sum
+from django.template.defaultfilters import slugify
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
@@ -136,6 +137,12 @@ class Jurisdiction(models.Model, RequestHelper):
                                'state_slug': self.slug})
         elif self.level == 'f':
             return (view, [], {'fed_slug': self.slug})
+
+    def save(self, *args, **kwargs):
+        """Normalize fields before saving"""
+        self.slug = slugify(self.slug)
+        self.name = self.name.strip()
+        super(Jurisdiction, self).save(*args, **kwargs)
 
     def get_url_flag(self):
         """So we can call from template"""

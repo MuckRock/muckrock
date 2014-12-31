@@ -118,6 +118,7 @@ class Action():
         """Is this action possible given the current context?"""
         return self.test
 
+
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
     # pylint: disable=R0904
@@ -173,6 +174,12 @@ class FOIARequest(models.Model):
             'slug': self.slug,
             'idx': self.pk
         })
+
+    def save(self, *args, **kwargs):
+        """Normalize fields before saving"""
+        self.slug = slugify(self.slug)
+        self.title = self.title.strip()
+        super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
         """Can this request be updated?"""

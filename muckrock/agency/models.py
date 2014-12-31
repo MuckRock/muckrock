@@ -94,6 +94,7 @@ class Agency(models.Model, RequestHelper):
         """Save the agency"""
         self.email = self.email.strip()
         self.slug = slugify(self.slug)
+        self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)
 
     def normalize_fax(self):
