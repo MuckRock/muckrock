@@ -92,8 +92,6 @@ class Profile(models.Model):
     key_expire_date = models.DateField(blank=True, null=True)
 
     # extended information
-    website = models.URLField(max_length=255, blank=True, help_text='Begin with http://')
-    twitter = models.CharField(max_length=255, blank=True)
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
     public_email = models.EmailField(max_length=255, blank=True)
