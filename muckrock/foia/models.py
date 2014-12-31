@@ -8,7 +8,7 @@ from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
-from django.template.defaultfilters import escape, linebreaks
+from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
 from datetime import datetime, date, timedelta
