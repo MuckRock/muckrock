@@ -1,3 +1,6 @@
 Warning: option include-ids is deprecated and ignored.
+************* Module muckrock.foia.forms
+C: 89, 0: Missing class docstring (missing-docstring)
+W:  7, 0: Unused smart_text imported from django.utils.encoding (unused-import)
 ************* Module muckrock.foia.views.views
 W: 60, 0: TODO: handle a list of tags (fixme)

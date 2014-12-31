@@ -1,6 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block title %}Salary Data for {{jurisdiction.name}}'s {{department}} in {{year}}{% endblock %}
-
-{% block content %}A copy of the {{jurisdiction.name}}'s {{department}} annual salaries, including benefits, by position, for the year {{year}}.  We do not require names attached to the salary information, but just the titles.{% endblock %}
-
-

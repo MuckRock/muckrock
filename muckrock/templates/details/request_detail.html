@@ -60,6 +60,9 @@
     {% endif %}
     <h1>{{ foia.title }}</h1>
     <h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %}<br>It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
+    {% if foia.tracking_id and user.is_staff %}
+    <code>Tracking ID: {{ foia.tracking_id }}</code>
+    {% endif %}
     <dl>
     {% if foia.tags.all or foia.user == user or user.is_staff %}
         <dt>Tags{% if user.is_staff or foia.user == user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
@@ -129,6 +132,7 @@
                     data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
                     data-email="{{ user.email }}"
                     data-form="#payment-form"
+                    data-label=""
                     class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
                 {{ action.title }}
             </button>
@@ -183,6 +187,7 @@
         <button data-amount="0"
                 data-description=""
                 data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                data-label=""
                 data-form="#crowdfund-form"
                 class="disabled checkout-button" 
                 id="crowdfund-button"
@@ -197,7 +202,7 @@
 
 {% if foia.public_documents or foia.user == user or user.is_staff %}
 <div class="tabs">
-    <label for="request-radio">Request<input type="radio" name="request" id="request-radio" /></label>
+    <label for="request-radio" class="active">Request<input type="radio" name="request" id="request-radio" /></label>
     {% if foia.public_documents %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
@@ -206,13 +211,15 @@
     {% endif %}
 </div>
 {% endif %}
-<section class="tab-section communications" id="request">
+
+<section class="tab-section communications active" id="request">
     {% for comm in foia.communications.all %}
         {% if comm.full_html %}
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
         {% else %}
             {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
         {% endif %}
+        {% include 'lib/comm_actions.html' %}
     {% endfor %}
     {% if foia.user == user or user.is_staff %}
     <form method="post" class="request controls panel">
@@ -244,19 +251,21 @@
     </form>
     {% endif %}
 </section>
-{% if foia.public_documents %}
+
+{% if foia.files %}
+<!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
     <div class="viewer" id="viewer"></div>
-    {% if foia.public_documents|length > 0 %}
     <ul>
-        {% for file in foia.public_documents %}
-            <li>{% include "lib/file.html" %}</li>
-        {% endfor %}
+    {% for file in foia.files.all %}
+        <li>{% include "lib/file.html" %}</li>
+    {% endfor %}
     </ul>
-    {% endif %}
 </section>
 {% endif %}
+
 {% if foia.user == user or user.is_staff %}
+<!-- NOTES -->
 <section class="tab-section notes" id="notes">
     {% for note in foia.notes.all %}
     <div class="note">
@@ -388,10 +397,6 @@
         });
     
         /* Tab Bar */
-
-        $('#request-radio').parent().addClass( 'active');
-        hideAllExcept($('#request'));
-    
         $('input:radio').change(function() {
             $(this).parent().addClass( 'active' );
             $(this).parent().siblings().removeClass( "active" );
@@ -431,6 +436,7 @@
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
             return false;

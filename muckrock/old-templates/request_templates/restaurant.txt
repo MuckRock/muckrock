@@ -1,7 +1,0 @@
-{% extends "request_templates/base.txt" %}
-{% block title %}Resaurant Health Inspection for {{restaurant}}{% endblock %}
-
-{% block content %}The most recent state health inspection records for the restaurant {{restaurant}}.{% if past_records %}
-
-In addition I request the health inspection records for the above going back to the year {{year}}.{% endif %}{% endblock %}
-

@@ -96,15 +96,15 @@ def stale(request):
     """List all stale agencies"""
 
     agencies = Agency.objects.filter(stale=True)
-    paginator = Paginator(agencies, 10)
+    paginator = Paginator(agencies, 15)
     try:
         page = paginator.page(request.GET.get('page'))
     except PageNotAnInteger:
         page = paginator.page(1)
     except EmptyPage:
         page = paginator.page(paginator.num_pages)
-    return render_to_response('agency/agency_stale.html',
-                              {'stale_agencies': page},
+    return render_to_response('lists/agency_stale_list.html',
+                              {'object_list': page},
                               context_instance=RequestContext(request))
 
 

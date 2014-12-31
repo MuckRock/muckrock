@@ -370,31 +370,31 @@ th {
 html, body {
   min-height: 100%; }
 
-.form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .form.admin-fix .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+.form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
   margin-right: 0; }
   @media screen and (max-width: 500px) {
-    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .form.admin-fix .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 7.42297%;
       width: 100%; }
-      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .form.admin-fix .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 500px) {
-    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .form.admin-fix .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 4.82916%;
       width: 100%; }
-      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .form.admin-fix .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
   @media screen and (min-width: 769px) {
-    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .form.admin-fix .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
+    .form.question .visible-fields fieldset, .form.reply .visible-fields fieldset, .form.update .visible-fields fieldset, .form.password-change .visible-fields fieldset, .form.foia-embargo .visible-fields fieldset, .detail.request .request.controls .hidden-reply textarea, .detail.request .request.controls .hidden-reply .buttons, nav.sidebar .button-list li, nav.sidebar .account .options #mylist, .multirequest-create form .visible-fields fieldset, .multirequest-draft form .visible-fields fieldset {
       float: left;
       display: block;
       margin-right: 2.35765%;
       width: 100%; }
-      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .form.admin-fix .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
+      .form.question .visible-fields fieldset:last-child, .form.reply .visible-fields fieldset:last-child, .form.update .visible-fields fieldset:last-child, .form.password-change .visible-fields fieldset:last-child, .form.foia-embargo .visible-fields fieldset:last-child, .detail.request .request.controls .hidden-reply textarea:last-child, .detail.request .request.controls .hidden-reply .buttons:last-child, nav.sidebar .button-list li:last-child, nav.sidebar .account .options #mylist:last-child, .multirequest-create form .visible-fields fieldset:last-child, .multirequest-draft form .visible-fields fieldset:last-child {
         margin-right: 0; } }
 
 .form .form-title:nth-child(2n), .form .form-info:nth-child(2n), .form .visible-fields fieldset:nth-child(2n), .foia-group > .foia-single:nth-child(2n), .detail.request .draft button:nth-child(2n), .detail.request .draft .button:nth-child(2n), .detail.request .draft input[type="submit"]:nth-child(2n), .detail.request .files ul li:nth-child(2n), .detail.request .request.controls .hidden-reply h1:nth-child(2n), .detail.request .request.controls .hidden-reply h2:nth-child(2n), nav.sidebar li:nth-child(2n), .homepage .featured-article .image:nth-child(2n), .homepage .featured-article .body:nth-child(2n), .homepage .article:nth-child(2n), .new-request header h1:nth-child(2n), .new-request header summary:nth-child(2n), .subscribe.page header .heading:nth-child(2n), .subscribe.page header .subheading:nth-child(2n), .ms-container .ms-selectable:nth-child(2n), .ms-container .ms-selection:nth-child(2n) {
@@ -739,8 +739,7 @@ textarea, input[type="email"], input[type="number"], input[type="password"], inp
       .collection .filters input[name="filter-checkbox"] + form {
         display: none; }
       .collection .filters input[name="filter-checkbox"]:checked + form {
-        display: block;
-        clear: both; }
+        display: block; }
   .collection ul.list {
     margin: 1.5em 0 0;
     padding: 0;
@@ -845,6 +844,9 @@ h6, nav.sidebar .spotlight h1 {
   font-size: 1.25em;
   line-height: 1.22222em;
   margin: 0.30556em 0; }
+
+p {
+  margin: 0 0 0.75em 0; }
 
 b, strong {
   font-weight: 500; }
@@ -1178,31 +1180,6 @@ table + h3 {
       .message.sent {
         margin-left: 8.5298%; } }
 
-.comm-actions {
-  clear: both; }
-  .comm-actions fieldset {
-    margin-bottom: 0.375em; }
-  .comm-actions .comm-action {
-    cursor: pointer;
-    color: #525d6f;
-    padding-right: 0.75em; }
-    .comm-actions .comm-action:hover {
-      color: #272c35; }
-
-.sent.message + .comm-actions {
-  text-align: right; }
-  .sent.message + .comm-actions fieldset label {
-    text-align: right; }
-  .sent.message + .comm-actions .delete-comm {
-    text-align: right; }
-
-.receieved.message + .comm-actions {
-  text-align: left; }
-  .receieved.message + .comm-actions fieldset label {
-    text-align: left; }
-  .receieved.message + .comm-actions .delete-comm {
-    text-align: left; }
-
 /* Notifications */
 ul.notifications {
   display: block;
@@ -1491,12 +1468,6 @@ fieldset {
 @media screen and (min-width: 500px) {
   .login.form .form-info {
     text-align: right; } }
-.form.admin-fix .visible-fields fieldset {
-  margin-bottom: 0.75em; }
-  .form.admin-fix .visible-fields fieldset p {
-    margin-bottom: 0; }
-.form.admin-fix .snail.mail input {
-  width: auto; }
 .form.search dfn, .form.search fieldset label, fieldset .form.search label, .form.search fieldset .errorlist, fieldset .form.search .errorlist, .form.search .new-request .agency label, .new-request .agency .form.search label, .form.search .new-request .autocomplete-light-widget span.deck > span:before, .new-request .autocomplete-light-widget .form.search span.deck > span:before {
   margin: 0.75em 0.375em; }
 .form.search .search-filters {
@@ -1593,30 +1564,6 @@ fieldset {
           width: 100%; }
           .foia-single .foia-actions .button:last-child, .foia-single .foia-actions input[type="submit"]:last-child, .foia-single .foia-actions button:last-child {
             margin-right: 0; } }
-
-.orphans .top.controls {
-  overflow: hidden; }
-  .orphans .top.controls fieldset {
-    display: block;
-    margin: 0 1.5em 0.75em 0; }
-    .orphans .top.controls fieldset label, .orphans .top.controls fieldset input {
-      float: left;
-      margin: 0 0.375em 0 0; }
-.orphans .orphan {
-  display: block; }
-  .orphans .orphan:after {
-    content: "";
-    display: table;
-    clear: both; }
-  .orphans .orphan .orphan-head {
-    margin-top: 0.75em;
-    border-top: 1px solid #c4cad4;
-    padding-top: 0.75em; }
-    .orphans .orphan .orphan-head div {
-      float: left;
-      margin-right: 0.75em; }
-      .orphans .orphan .orphan-head div:last-child {
-        margin-right: 0; }
 
 /* Feeds */
 .feed-item {
@@ -1886,15 +1833,6 @@ table {
       padding: 1.5em; } }
 
 /* Details */
-.detail.flatpage {
-  font-size: 1.1em;
-  line-height: 1.55556em;
-  margin: 0.38889em 0;
-  max-width: 45em; }
-  .detail.flatpage h1 {
-    font-weight: 500; }
-  .detail.flatpage ul {
-    padding-left: 1.5em; }
 .detail.news .main h1 {
   font-weight: 500;
   margin-top: 0; }
@@ -1964,13 +1902,11 @@ table {
         margin-top: 0; } }
 .detail.news .body {
   font-size: 1.1em;
-  line-height: 1.55556em;
-  margin: 0.38889em 0;
+  line-height: 1.44444em;
+  margin: 0.36111em 0;
   margin: 1.5em auto;
   padding-top: 0;
   max-width: 45em; }
-  .detail.news .body ul {
-    padding-left: 1.5em; }
 .detail.news div[id^='viewer'] {
   max-width: 90%;
   margin: 1.5em auto; }
@@ -2169,8 +2105,6 @@ table {
       color: whitesmoke; }
       .detail.request .files ul li.active a {
         color: whitesmoke; }
-      .detail.request .files ul li.active .embed.modal {
-        color: #272c35; }
 .detail.request .files .viewer {
   position: relative;
   width: 100%;
@@ -2193,8 +2127,7 @@ table {
   width: 10em;
   margin: 1.5em auto; }
 .detail.request .request.controls {
-  position: relative;
-  clear: both; }
+  position: relative; }
   .detail.request .request.controls .hidden-reply {
     display: block;
     max-width: 30em;

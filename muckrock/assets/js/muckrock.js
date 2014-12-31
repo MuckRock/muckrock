@@ -12,7 +12,7 @@ function modal(nextSelector) {
     });
 }
 
-function checkout(pk, image, description, amount, email, form, submit) {
+function checkout(pk, image, description, amount, email, label, form, submit) {
     submit = typeof submit !== 'undefined' ? submit : true;
     var token = function(token) {
         form.append('<input type="hidden" name="stripe_token" value="' + token.id + '" />');
@@ -30,6 +30,7 @@ function checkout(pk, image, description, amount, email, form, submit) {
         description: description,
         amount: amount,
         email: email,
+        panelLabel: label,
         token: token
     });
 }
@@ -39,13 +40,17 @@ function getCheckoutData(button) {
     var description = button.data('description');
     var email = button.data('email');
     var form = button.data('form');
+    var label = button.data('label');
     return {
         'amount': amount,
         'description': description,
         'email': email,
+        'label': label,
         'form': $(form)
     }
 }
+
+$('textarea').autosize();
 
 if (typeof $.cookie('broadcast') == 'undefined') {
     $.cookie('broadcast', 1);
@@ -53,14 +58,24 @@ if (typeof $.cookie('broadcast') == 'undefined') {
 
 $(document).ready(function() {
 
+    // MODALS
     $('.modal-button').click(function(){ modal($(this).next()); });
     $('.embed.hidden-modal').each(function() {
         var textarea = $(this).children('textarea');
         var doc_id = textarea.data('docId');
         var embed = '<div class="viewer" id="viewer-' + doc_id + '"></div> <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js"><\/script> <script>DV.load("https://www.documentcloud.org/documents/' + doc_id + '.js", {width: 600, height: 600, sidebar: false, container: "#viewer-' + doc_id + '"});<\/script>';
         textarea.val(embed);
-    });    
+    });
     
+    // SELECT ALL
+    $('#toggle_all').click(function(){
+        this.checked = !this.checked;
+        $(':checkbox').each(function(){
+            this.checked = !this.checked;
+        });
+    });
+    
+    // MESSAGES
     $('.message .visibility').click(function() {
         var header = $(this).parent();
         var message = header.siblings();
@@ -76,6 +91,7 @@ $(document).ready(function() {
         }
     });
     
+    // NOTIFICATIONS
     var notificationCloseButton = $('.notification .dismiss .close');
     notificationCloseButton.click(function(){
         $(this).parent().parent().hide();

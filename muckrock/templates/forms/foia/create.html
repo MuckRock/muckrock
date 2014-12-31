@@ -158,28 +158,32 @@ $(document).ready(function(){
         }
     }
     
-    function selectChange(select) {
-        agencyByJurisdiction(select);
-        agencyToggle(select.val());
-        agencyInput.val('');
-    }
-    
+    /* Check if prefilled by cloning */
     if (localChecked.length > 0) {
         localChecked.parent().addClass('active');
         localField.show();
+        if (localSelect.val()) {
+            agencyByJurisdiction(localSelect.val());
+        }
         agencyToggle(localSelect.val());
     }
     if (stateChecked.length > 0) {
         stateChecked.parent().addClass('active');
         stateField.show();
+        if (stateSelect.val()) {
+            agencyByJurisdiction(stateSelect.val());
+        }
         agencyToggle(stateSelect.val());
     }
     if (federalChecked.length > 0) {
         federalChecked.parent().addClass('active');
         localField.hide();
         stateField.hide();
+        agencyByJurisdiction(federalRadio);
         agencyToggle(true);
     }
+    
+    /* Bind changes to actions */
     localRadio.change(function() {
         $(this).parent().addClass('active');
         $(this).parent().siblings().removeClass('active');
@@ -208,9 +212,16 @@ $(document).ready(function(){
         agencyByJurisdiction(federalRadio);
     });
     
+    function selectChange(select) {
+        agencyByJurisdiction(select);
+        agencyToggle(select.val());
+        agencyInput.val('');
+    }
+    
     localSelect.change(function(){
         selectChange($(this));
     });
+    
     stateSelect.change(function(){
         selectChange($(this));
     });

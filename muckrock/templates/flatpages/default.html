@@ -7,5 +7,7 @@
 {% block headline %} About {% endblock %}
 
 {% block content %}
-{% evaluate flatpage.content %} 
+<article class="flatpage detail">
+    {% evaluate flatpage.content %}
+</article>
 {% endblock %}
