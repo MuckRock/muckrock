@@ -372,4 +372,5 @@ class Statistics(models.Model):
     class Meta:
         # pylint: disable=R0903
         ordering = ['-date']
+        verbose_name_plural = 'statistics'
 

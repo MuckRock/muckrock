@@ -20,13 +20,17 @@ class StatisticsAdmin(VersionAdmin):
     formats = ['xls', 'csv']
 
 
-class ProfileAdmin(VersionAdmin):
+class ProfileInline(admin.StackedInline):
     """Profile admin options"""
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
+    filter_horizontal = ('follows_foia', 'follows_question', 'notifications')
+    model = Profile
+    extra = 0
+    max_num = 1
 
 admin.site.register(Statistics, StatisticsAdmin)
-admin.site.register(Profile, ProfileAdmin)
 
 UserAdmin.list_display += ('date_joined',)
+UserAdmin.inlines = [ProfileInline]
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)

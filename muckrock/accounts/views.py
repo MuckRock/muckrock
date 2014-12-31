@@ -241,7 +241,7 @@ def profile(request, user_name=None):
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
         'stripe_pk': STRIPE_PUB_KEY,
-        'sidebar_admin_url': reverse('admin:accounts_profile_change', args=(user.get_profile().pk,)),
+        'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render_to_response(
         'details/account_detail.html',

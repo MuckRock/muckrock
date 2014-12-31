@@ -4,6 +4,7 @@ Django settings for muckrock project
 
 import os
 import urlparse
+from django.core.urlresolvers import reverse
 
 
 def boolcheck(setting):
@@ -293,6 +294,9 @@ CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks', 'muckrock.ag
 
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
+ABSOLUTE_URL_OVERRIDES = {
+        'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
+}
 
 if DEBUG:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
