@@ -23,12 +23,6 @@ class Migration(SchemaMigration):
                       self.gf('django.db.models.fields.DateField')(null=True, blank=True),
                       keep_default=False)
 
-        # Adding field 'Profile.avatar'
-        #db.add_column(u'accounts_profile', 'avatar',
-        #              self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True),
-        #              keep_default=False)
-
-
     def backwards(self, orm):
         # Deleting field 'Profile.email_confirmed'
         db.delete_column(u'accounts_profile', 'email_confirmed')
@@ -38,10 +32,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Profile.key_expire_date'
         db.delete_column(u'accounts_profile', 'key_expire_date')
-
-        # Deleting field 'Profile.avatar'
-        #db.delete_column(u'accounts_profile', 'avatar')
-
 
     models = {
         u'accounts.profile': {
@@ -216,7 +206,11 @@ class Migration(SchemaMigration):
             'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['jurisdiction.Jurisdiction']"}),
             'mail_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'other_emails': ('muckrock.fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
+<<<<<<< HEAD
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIARequest']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
+=======
+            'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIARequest']", 'null': 'True', 'blank': 'True'}),
+>>>>>>> a08413a87bb18138cdcf9f503e67720360a80d2f
             'price': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '8', 'decimal_places': '2'}),
             'read_collaborators': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'read_access'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"}),
             'requested_docs': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
@@ -291,4 +285,8 @@ class Migration(SchemaMigration):
         }
     }
 
+<<<<<<< HEAD
     complete_apps = ['accounts']
+=======
+    complete_apps = ['accounts']
+>>>>>>> a08413a87bb18138cdcf9f503e67720360a80d2f

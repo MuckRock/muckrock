@@ -1,0 +1,40 @@
+{% extends 'details/base_detail.html' %}
+{% block title %}MuckRock &bull; {{ organization.name }}{% endblock title %}
+{% block type %}organization{% endblock type %}
+
+{% block header %}
+<h1>{{ organization.name }}</h1>
+<summary>Managed by {{ organization.owner.get_full_name }}</summary>
+{% endblock %}
+
+{% block aside %}
+<dl>
+    <dt>Requests Remaining</dt>
+    <dd>{{ organization.num_requests }}</dd>
+</dl>
+{% endblock %}
+
+{% block main %}
+<form method="post" id="management-form">
+    <input type="submit" value="Revoke membership" class="failure button">
+</form>
+{{ form }}
+{% if members %}
+<table class="members">
+    <thead>
+        <th width="5%"><input type="checkbox" id="toggle-all"></th>
+        <th width="95%">{{ members | length }} member{{ members | pluralize }}</th>
+    </thead>
+{% for member in members %}
+    <tr>
+        <td><input type="checkbox" form="management-form"></td>
+        <td>{{ member.username }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+{% endblock scripts %}
