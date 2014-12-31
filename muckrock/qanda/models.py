@@ -65,7 +65,7 @@ class Question(models.Model):
         """Get a list of all the users who answered the question"""
         users = []
         for answer in self.answers.all():
-            if answer.user not in users and answer.user != self.user:
+            if answer.user not in users:
                 users.append(answer.user)
         return users
 

@@ -42,7 +42,7 @@ def orphans(request):
             return redirect('foia-orphans')
     elif 'comm_id' in request.GET:
         communications = FOIACommunication.objects.filter(foia=None, pk=request.GET['comm_id'])
-        return render_to_response('foia/orphans.html',
+        return render_to_response('staff/orphans.html',
                                   {'communications': communications},
                                   context_instance=RequestContext(request))
     else:

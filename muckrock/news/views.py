@@ -2,6 +2,7 @@
 Views for the news application
 """
 
+from django.core.urlresolvers import reverse
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
@@ -32,10 +33,7 @@ class NewsDetail(DateDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
-        if self.request.user.is_anonymous():
-            context['sidebar'] = Sidebar.objects.get_text('anon_article')
-        else:
-            context['sidebar'] = Sidebar.objects.get_text('article')
+        context['sidebar_admin_url'] = reverse('admin:news_article_change', args=(context['object'].pk,))
         return context
 
 

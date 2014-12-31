@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
@@ -279,6 +280,7 @@ class Detail(DetailView):
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
         context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         context['stripe_pk'] = STRIPE_PUB_KEY
+        context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         return context
 
     def post(self, request):

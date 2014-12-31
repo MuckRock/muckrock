@@ -162,17 +162,13 @@ $(document).ready(function(){
     if (localChecked.length > 0) {
         localChecked.parent().addClass('active');
         localField.show();
-        if (localSelect.val()) {
-            agencyByJurisdiction(localSelect.val());
-        }
+        agencyByJurisdiction(localSelect);
         agencyToggle(localSelect.val());
     }
     if (stateChecked.length > 0) {
         stateChecked.parent().addClass('active');
         stateField.show();
-        if (stateSelect.val()) {
-            agencyByJurisdiction(stateSelect.val());
-        }
+        agencyByJurisdiction(stateSelect);
         agencyToggle(stateSelect.val());
     }
     if (federalChecked.length > 0) {

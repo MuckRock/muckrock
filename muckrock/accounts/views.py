@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.core.mail import send_mail, EmailMessage
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -239,7 +240,8 @@ def profile(request, user_name=None):
         'user_obj': user,
         'recent_requests': recent_requests,
         'recent_completed': recent_completed,
-        'stripe_pk': STRIPE_PUB_KEY
+        'stripe_pk': STRIPE_PUB_KEY,
+        'sidebar_admin_url': reverse('admin:accounts_profile_change', args=(user.get_profile().pk,)),
     }
     return render_to_response(
         'details/account_detail.html',
