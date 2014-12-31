@@ -4,6 +4,7 @@ Models for the Agency application
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.template.defaultfilters import slugify
 
 from datetime import date
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -92,6 +93,8 @@ class Agency(models.Model, RequestHelper):
     def save(self, *args, **kwargs):
         """Save the agency"""
         self.email = self.email.strip()
+        self.slug = slugify(self.slug)
+        self.name = self.name.strip()
         super(Agency, self).save(*args, **kwargs)
 
     def normalize_fax(self):

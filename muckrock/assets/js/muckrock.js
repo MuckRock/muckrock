@@ -134,3 +134,9 @@ $(document).ready(function() {
     */
     
 });
+
+
+// formsets
+$(function() {
+	$('.formset-container').formset();
+});

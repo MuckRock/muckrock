@@ -250,7 +250,8 @@ def _upload_file(foia, comm, file_, sender):
                          date=datetime.now(), source=source[:70], access=access)
     foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
     foia_file.save()
-    upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
+    if foia:
+        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 def _allowed_email(email, foia):
     """Is this an allowed email?"""

@@ -67,6 +67,7 @@ def move_comm(request, next_):
             new_ffile.name = file_.ffile.name
             file_.ffile = new_ffile
             file_.save()
+            upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
     if not new_foias:
         messages.error(request, 'No valid FOIA requests given')
         return redirect(next_)

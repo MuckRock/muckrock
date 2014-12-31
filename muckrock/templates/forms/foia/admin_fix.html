@@ -32,6 +32,7 @@
     {% if formset %}
         {{ formset.management_form }}
         {% for form in formset.forms %}
+			<span class="formset-container">
             {% if form.non_field_errors %}
             <div class="failure panel">
             {{ form.non_field_errors }}
@@ -52,6 +53,7 @@
                 </fieldset>
             {% endfor %}
             </div>
+		</span>
         {% endfor %}
       {% endif %}
     </div>
