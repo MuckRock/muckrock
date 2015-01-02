@@ -14,6 +14,11 @@ urlpatterns = patterns(
         name='org-index'
     ),
     url(
+        r'^create$',
+        views.create_organization,
+        name='org-create'
+    ),
+    url(
         r'^(?P<slug>[\w\d_-]+)$',
         views.Detail.as_view(),
         name='org-detail'

@@ -15,10 +15,10 @@
 {% endblock %}
 
 {% block main %}
+{% include 'lib/form.html' %}
 <form method="post" id="management-form">
-    <input type="submit" value="Revoke membership" class="failure button">
+    <button type="submit" value="remove-member" class="failure button">Revoke membership</button>
 </form>
-{{ form }}
 {% if members %}
 <table class="members">
     <thead>
