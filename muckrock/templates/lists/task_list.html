@@ -1,0 +1,33 @@
+{% extends 'lists/base_list.html' %}
+
+{% block title %}MuckRock &bull; Tasks{% endblock title %}
+{% block list-title %}<h1>Tasks</h1>{% endblock list-title %}
+{% block type %}task{% endblock type %}
+
+{% block list %}
+
+<ul>
+{% for task in tasks %}
+	<li>
+		{% if task.orphantask %}
+		  {{ task.orphantask }}
+		{% elif task.snailmailtask %}
+		  {{ task.snailmailtask }}
+		{% elif task.rejectedemailtask %}
+		  {{ task.rejectedemailtask }}
+		{% elif task.staleagencytask %}
+		  {{ task.staleagencytask }}
+		{% elif task.flaggedtask %}
+		  {{ task.flaggedtask }}
+		{% elif task.newagencytask %}
+		  {{ task.newagencytask }}
+		{% elif task.responsetask %}
+		  {{ task.responsetask }}
+		{% else %}
+		  {{ task }}
+		{% endif %}
+	</li>
+{% endfor %}
+</ul>
+
+{% endblock list %}
