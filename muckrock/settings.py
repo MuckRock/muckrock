@@ -255,7 +255,8 @@ if DEBUG:
 # pylint: disable=unused-argument
 def show_toolbar(request):
     """show toolbar on the site"""
-    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))):
+    if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))) or \
+        (request.user and request.user.username == 'mitch'):
         return True
     return False
 
