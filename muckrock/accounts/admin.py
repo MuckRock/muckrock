@@ -27,7 +27,8 @@ class ProfileAdminForm(forms.ModelForm):
     """Form to include custom choice fields"""
 
     location = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
-                                                   queryset=Jurisdiction.objects.all())
+                                                   queryset=Jurisdiction.objects.all(),
+                                                   required=False)
 
     class Meta:
         # pylint: disable=R0903
