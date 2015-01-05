@@ -25,7 +25,7 @@
 <form method="post" id="management-form">
     {% csrf_token %}
     <button name="action" value="remove_members">Revoke Membership</button>
-    <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</button>
+    <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
 </form>
 {% if members %}
 <table class="members">
