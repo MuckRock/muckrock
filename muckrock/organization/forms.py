@@ -10,14 +10,13 @@ from muckrock.organization.models import Organization
 import autocomplete_light
 
 class OrganizationForm(forms.ModelForm):
-    """A form for an Agency"""
-
+    """A form for creating an Organization"""
     class Meta:
         # pylint: disable=R0903
         model = Organization
         fields = ['name']
 
-class AddMemberForm(forms.Form):
+class AddMembersForm(forms.Form):
     add_members = forms.ModelMultipleChoiceField(
         required=True, 
         queryset=User.objects.all(), 

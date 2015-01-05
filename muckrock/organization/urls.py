@@ -23,4 +23,9 @@ urlpatterns = patterns(
         views.Detail.as_view(),
         name='org-detail'
     ),
+    url(
+        r'^(?P<slug>[\w\d_-]+)/delete$',
+        views.delete_organization,
+        name='org-delete'
+    ),
 )

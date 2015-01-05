@@ -13,7 +13,7 @@ from django.views.generic.list import ListView
 
 from muckrock.accounts.models import Profile
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationForm, AddMemberForm
+from muckrock.organization.forms import OrganizationForm, AddMembersForm
 
 from datetime import datetime
 
@@ -31,20 +31,48 @@ class Detail(DetailView):
         member_accounts = [profile.user for profile in member_profiles]
         context['is_owner'] = user == organization.owner
         context['members'] = member_accounts
-        context['form'] = AddMemberForm()
+        context['form'] = AddMembersForm()
         return context
     
     def post(self, request, **kwargs):
-        """Handle form submission"""
-        form = AddMemberForm(request.POST)
-        if form.is_valid():
-            organization = Organization.objects.get(slug=kwargs['slug'])
-            new_members = form.cleaned_data['add_members']
-            for new_member in new_members:
-                profile = new_member.get_profile()
-                profile.organization = organization
+        """Handle form submission for adding and removing users"""
+        organization = get_object_or_404(Organization, slug=kwargs['slug'])
+        action = request.POST.get('action', '')
+        if action == 'add_members':
+            form = AddMembersForm(request.POST)
+            if form.is_valid():
+                organization = Organization.objects.get(slug=kwargs['slug'])
+                new_members = form.cleaned_data['add_members']
+                added_members = 0
+                for new_member in new_members:
+                    if not organization.is_owned_by(new_member):                    
+                        profile = new_member.get_profile()
+                        profile.organization = organization
+                        profile.save()
+                        added_members += 1
+                if added_members == 1:
+                    messages.success(request, 'You granted membership to 1 person.')
+                elif added_members > 1:
+                    messages.success(request, 'You granted membership to %s people.' % added_members)
+        elif action == 'remove_members':
+            members = request.POST.getlist('members')
+            removed_members = 0
+            for uid in members:
+                user = User.objects.get(pk=uid)
+                profile = user.get_profile()
+                profile.organization = None
                 profile.save()
-            return redirect(organization)
+                removed_members += 1
+            if removed_members == 1:
+                messages.success(request, 'You revoked membership from 1 person.')
+            elif removed_members > 1:
+                messages.success(request, 'You revoked membership from %s people.' % removed_members)
+        elif action == '':
+            pass
+        else:
+            messages.error(request, 'This action is not available.')
+        return redirect(organization)
+            
 
 class List(ListView):
     """List of organizations"""
@@ -78,3 +106,14 @@ def create_organization(request):
         context,
         context_instance=RequestContext(request)
     )
+
+def delete_organization(request, **kwargs):
+    organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    if organization.is_owned_by(request.user):
+        # delete the org
+        messages.success(request, 'Your organization was deleted.')
+    elif request.user.get_profile().is_member_of(organization):
+        messages.error(request, 'Only the owner may delete this organization.')
+    else:
+        messages.error(request, 'You do not have permission to access this organization.')
+    return redirect(organization)
