@@ -15,9 +15,17 @@
 {% endblock %}
 
 {% block main %}
-{% include 'lib/form.html' %}
+<form method="post" id="add-members-form">
+    {% csrf_token %}
+    {% for field in form %}
+        {{ field }}
+    {% endfor %}
+    <button name="action" value="add_members">Grant Membership</button>
+</form>
 <form method="post" id="management-form">
-    <button type="submit" value="remove-member" class="failure button">Revoke membership</button>
+    {% csrf_token %}
+    <button name="action" value="remove_members">Revoke Membership</button>
+    <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</button>
 </form>
 {% if members %}
 <table class="members">
@@ -27,7 +35,7 @@
     </thead>
 {% for member in members %}
     <tr>
-        <td><input type="checkbox" form="management-form"></td>
+        <td><input type="checkbox" name="members" form="management-form" value="{{ member.pk }}"></td>
         <td>{{ member.username }}</td>
     </tr>
 {% endfor %}
@@ -37,4 +45,11 @@
 
 {% block scripts %}
 {% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#toggle-all').click(function(){
+            $('input[name=members]').attr('checked', this.checked);
+        });
+    });
+</script>
 {% endblock scripts %}
