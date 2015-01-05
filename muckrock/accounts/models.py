@@ -144,6 +144,10 @@ class Profile(models.Model):
         """The url for this object"""
         # pylint: disable=E1101
         return ('acct-profile', [], {'user_name': self.user.username})
+    
+    def is_member_of(self, organization):
+        """Answers whether the profile is a member of the passed organization"""
+        return self.organization == organization
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""

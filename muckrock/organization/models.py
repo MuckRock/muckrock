@@ -38,3 +38,8 @@ class Organization(models.Model):
             self.save()
 
         return self.num_requests
+
+    def is_owned_by(self, user):
+        """Answers whether the passed user owns the org"""
+        return self.owner == user
+    
