@@ -1,9 +1,9 @@
 {% extends 'details/base_detail.html' %}
-{% block title %}MuckRock &bull; {{ organization.name }}{% endblock title %}
+{% block title %}MuckRock &bull; {{ organization }}{% endblock title %}
 {% block type %}organization{% endblock type %}
 
 {% block header %}
-<h1>{{ organization.name }}</h1>
+<h1>{{ organization }}</h1>
 <summary>Managed by {{ organization.owner.get_full_name }}</summary>
 {% endblock %}
 

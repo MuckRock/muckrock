@@ -17,8 +17,9 @@ class OrganizationForm(forms.ModelForm):
         fields = ['name']
 
 class AddMembersForm(forms.Form):
+    """A form that uses autocomplete to suggest users to add to an organization"""
     add_members = forms.ModelMultipleChoiceField(
-        required=True, 
-        queryset=User.objects.all(), 
+        required=True,
+        queryset=User.objects.all(),
         widget=autocomplete_light.MultipleChoiceWidget('UserAutocomplete')
     )
