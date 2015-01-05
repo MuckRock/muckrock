@@ -7,8 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -60,9 +59,13 @@ def register(request):
                 confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
                 key_expire_date=date.today() + timedelta(2),
             )
-            send_mail('Welcome to MuckRock',
-                  render_to_string('registration/welcome.txt', {'user': new_user}),
-                  'info@muckrock.com', [new_user.email], fail_silently=False)
+            send_mail(
+                'Welcome to MuckRock',
+                render_to_string('registration/welcome.txt', {'user': new_user}),
+                'info@muckrock.com',
+                [new_user.email],
+                fail_silently=False
+            )
             msg = 'Your account was successfully created. '
             msg += 'Welcome to MuckRock!'
             messages.success(request, msg)
@@ -245,9 +248,13 @@ def confirm_email(request):
             prof.confirmation_key = ''.join(choice(string.ascii_letters) for _ in range(24))
             prof.key_expire_date = date.today() + timedelta(2)
             prof.save()
-            send_mail('Confirmation Key',
-                  render_to_string('registration/resend.txt', {'user': user}),
-                  'info@muckrock.com', [user.email], fail_silently=False)
+            send_mail(
+                'Confirmation Key',
+                render_to_string('registration/resend.txt', {'user': user}),
+                'info@muckrock.com',
+                [user.email],
+                fail_silently=False
+            )
     elif 'key' in request.GET:
         if check_key(request.GET['key']):
             return redirect(user.get_profile())
