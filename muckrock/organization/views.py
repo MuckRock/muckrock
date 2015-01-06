@@ -12,6 +12,7 @@ from django.views.generic.list import ListView
 
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import OrganizationForm, AddMembersForm
+from muckrock.settings import STRIPE_PUB_KEY
 
 from datetime import datetime
 
@@ -98,7 +99,8 @@ def create_organization(request):
         form = OrganizationForm()
 
     context = {
-        'form': form
+        'form': form,
+        'stripe_pk': STRIPE_PUB_KEY
     }
 
     return render_to_response(
