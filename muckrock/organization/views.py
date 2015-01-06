@@ -110,7 +110,6 @@ def create_organization(request):
 def delete_organization(request, **kwargs):
     """Deletes an organization by removing its users and cancelling its plan"""
     organization = get_object_or_404(Organization, slug=kwargs['slug'])
-    print organization.is_owned_by(request.user)
     if organization.is_owned_by(request.user) or request.user.is_staff:
         members = organization.get_members()
         for member in members:
