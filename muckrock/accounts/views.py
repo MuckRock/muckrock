@@ -151,7 +151,7 @@ def subscribe(request):
                 stripe_email = request.POST['stripe_email']
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
-                customer = user_profile.customer()
+                customer = request.user.get_profile().customer()
                 customer.card = stripe_token
                 customer.save()
                 customer.update_subscription(plan='pro')
@@ -162,7 +162,7 @@ def subscribe(request):
                 user_profile.save()
                 msg = 'Congratulations, you are now subscribed as a pro user!'
                 messages.success(request, msg)
-                logger.info('%s has purchased requests', request.user.username)
+                logger.info('%s has subscribed to a pro account.', request.user.username)
             except stripe.CardError as exc:
                 msg = 'Payment error. Your card has not been charged.'
                 messages.error(request, msg)
