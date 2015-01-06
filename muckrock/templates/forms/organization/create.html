@@ -12,14 +12,15 @@
 <form method="post" id="org-create-form">
     {% csrf_token %}
     {{ form }}
-</form>
-<button data-amount="45000"
+    <button data-amount=""
         data-description="Org. subscription ($450/month)"
         data-email="{{ request.user.email }}"
+        data-label="Subscribe"
         data-form="#org-create-form"
         class="checkout-button primary">
         Create Organization
-</button>
+    </button>
+</form>
 {% endblock form-form %}
 
 {% block styles %}
@@ -35,6 +36,7 @@
                 checkoutData.description,
                 checkoutData.amount,
                 checkoutData.email,
+                checkoutData.label,
                 checkoutData.form
             );
         });
