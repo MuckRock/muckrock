@@ -52,6 +52,9 @@ class Organization(models.Model):
     def is_owned_by(self, user):
         """Answers whether the passed user owns the org"""
         return self.owner == user
+    
+    def is_active(self):
+        return self.active
 
     def add_member(self, user):
         """Add a user to this organization"""
@@ -76,11 +79,12 @@ class Organization(models.Model):
         customer.save()
         self.active = True
         self.save()
+        
 
-    def stop_subscription(self):
+    def pause_subscription(self):
         """Cancel the org's subscription"""
         customer = stripe.Customer.retrieve(self.stripe_id)
-        customer.cancel_subscription(plan='org')
+        customer.cancel_subscription()
         customer.save()
         self.active = False
         self.save()

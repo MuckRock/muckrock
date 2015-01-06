@@ -10,7 +10,7 @@
 {% block aside %}
 <dl>
     <dt>Requests Remaining</dt>
-    <dd>{{ organization.num_requests }}</dd>
+    <dd>{{ organization.get_requests }}</dd>
 </dl>
 {% endblock %}
 
@@ -38,6 +38,7 @@
 <form method="post" id="management-form">
     {% csrf_token %}
     <button name="action" value="remove_members">Revoke Membership</button>
+    <button name="action" value="change_subscription">{% if organization.is_active %}Pause Subscription{% else %}Start Subscription{% endif %}</button>
     <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
 </form>
 {% else %}

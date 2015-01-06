@@ -12,7 +12,7 @@ from django.views.generic.list import ListView
 
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import OrganizationForm, AddMembersForm
-from muckrock.settings import STRIPE_PUB_KEY
+from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
 
 from datetime import datetime
 
@@ -62,6 +62,14 @@ class Detail(DetailView):
                 messages.success(request, 'You revoked membership from 1 person.')
             elif removed_members > 1:
                 messages.success(request, 'You revoked membership from %s people.' % removed_members)
+        elif action == 'change_subscription':
+            if organization.is_active():
+                organization.pause_subscription()
+                msg = 'Your subscription is paused. You may resume it at any time.'
+            else:
+                organization.start_subscription()
+                msg = 'Your subscription is reactivated.'
+            messages.success(request, msg)
         else:
             messages.error(request, 'This action is not available.')
         return redirect(organization)
@@ -75,7 +83,7 @@ class List(ListView):
 @login_required
 def create_organization(request):
     """Creates an organization, setting the user who created it as the owner"""
-    if request.method == 'POST':
+    if request.method == 'POST':        
         form = OrganizationForm(request.POST)
         if form.is_valid():
             # TODO: Add payments to org creation
@@ -88,6 +96,7 @@ def create_organization(request):
             organization.slug = slugify(organization.name)
             organization.owner = current_user
             organization.stripe_id = current_user.get_profile().stripe_id
+            organization.num_requests = MONTHLY_REQUESTS.get('org', 0)
             organization.date_update = datetime.now()
             organization.save()
             organization.start_subscription()
@@ -95,6 +104,12 @@ def create_organization(request):
             return redirect(organization)
     else:
         form = OrganizationForm()
+    
+    # check if user already owns an org
+    other_org = Organization.objects.filter(owner=request.user)
+    if other_org:
+        messages.error(request, 'You can only own one organization at a time.')
+        return redirect('org-index')
 
     context = {
         'form': form,
