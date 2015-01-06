@@ -157,6 +157,12 @@ class FOIARequest(models.Model):
                    'automatically being posted on the site')
     )
 
+    read_collaborators = models.ManyToManyField(User, related_name='read_access',
+                                                blank=True, null=True)
+    edit_collaborators = models.ManyToManyField(User, related_name='edit_access',
+                                                blank=True, null=True)
+
+
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
@@ -214,7 +220,10 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
+        # pylint: disable=unexpected-keyword-arg
         return user.is_staff or self.user == user or \
+            self.read_collaborators.filter(pk=user.pk).exists() or \
+            self.edit_collaborators.filter(pk=user.pk).exists() or \
             (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
@@ -236,6 +245,11 @@ class FOIARequest(models.Model):
             self.save()
 
         return False
+
+    def editable_by(self, user):
+        """Can this user edit this request"""
+        # pylint: disable=unexpected-keyword-arg
+        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists()
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
@@ -642,9 +656,9 @@ class FOIARequest(models.Model):
 
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
-        is_owner = self.user == user or user.is_staff
-        can_embargo = is_owner and user.get_profile().can_embargo()
-        can_pay = is_owner and self.is_payable()
+        can_edit = self.editable_by(user) or user.is_staff
+        can_embargo = can_edit and user.get_profile().can_embargo()
+        can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -677,12 +691,12 @@ class FOIARequest(models.Model):
 
     def contextual_request_actions(self, user):
         '''Provides context-sensitive action interfaces for requests'''
-        is_owner = self.user == user or user.is_staff
-        can_follow_up = is_owner and self.status != 'started'
-        can_appeal = is_owner and self.is_appealable()
+        can_edit = self.editable_by(user) or user.is_staff
+        can_follow_up = can_edit and self.status != 'started'
+        can_appeal = can_edit and self.is_appealable()
         return [
             Action(
-                test=is_owner,
+                test=can_edit,
                 title='Get Advice',
                 desc=u'Get your questions answered by Muckrock’s community of FOIA experts',
                 class_name='modal'

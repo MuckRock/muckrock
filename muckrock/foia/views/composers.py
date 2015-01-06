@@ -243,7 +243,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
     if not foia.is_editable():
         messages.error(request, 'This is not a draft.')
         return redirect(foia)
-    if foia.user != request.user and not request.user.is_staff:
+    if not foia.editable_by(request.user) and not request.user.is_staff:
         messages.error(request, 'You may only edit your own drafts.')
         return redirect(foia)
 

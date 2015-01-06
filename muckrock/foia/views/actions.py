@@ -54,7 +54,7 @@ def _foia_action(request, foia, action):
     """Generic helper for FOIA actions"""
     form_class = action.form_class(request, foia)
     # Check that the request belongs to the user
-    if action.must_own and foia.user != request.user and not request.user.is_staff:
+    if action.must_own and not foia.editable_by(request.user) and not request.user.is_staff:
         msg = 'You may only %s your own requests.' % action.msg
         messages.error(request, msg)
         return redirect(foia)
@@ -280,7 +280,8 @@ def follow(request, jurisdiction, jidx, slug, idx):
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if foia.user == request.user:
+
+    if foia.editable_by(request.user):
         foia.disable_autofollowups = not foia.disable_autofollowups
         foia.save()
         action = 'disabled' if foia.disable_autofollowups else 'enabled'

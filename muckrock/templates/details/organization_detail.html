@@ -1,0 +1,69 @@
+{% extends 'details/base_detail.html' %}
+{% block title %}MuckRock &bull; {{ organization }}{% endblock title %}
+{% block type %}organization{% endblock type %}
+
+{% block header %}
+<h1>{{ organization }}</h1>
+<summary>Managed by {{ organization.owner.get_full_name }}</summary>
+{% endblock %}
+
+{% block aside %}
+<dl>
+    <dt>Requests Remaining</dt>
+    <dd>{{ organization.num_requests }}</dd>
+</dl>
+{% endblock %}
+
+{% block main %}
+{% if is_owner or request.user.is_staff %}
+<form method="post" id="add-members-form">
+    {% csrf_token %}
+    {% for field in form %}
+        {{ field }}
+    {% endfor %}
+    <button name="action" value="add_members">Grant Membership</button>
+</form>
+<table class="members">
+    <thead>
+        <th width="5%"><input type="checkbox" id="toggle-all"></th>
+        <th width="95%">{{ members | length }} member{{ members | pluralize }}</th>
+    </thead>
+{% for member in members %}
+    <tr>
+        <td><input type="checkbox" name="members" form="management-form" value="{{ member.pk }}"></td>
+        <td>{{ member.username }}</td>
+    </tr>
+{% endfor %}
+</table>
+<form method="post" id="management-form">
+    {% csrf_token %}
+    <button name="action" value="remove_members">Revoke Membership</button>
+    <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
+</form>
+{% else %}
+<table class="members">
+    <thead>
+        <th width="100%">{{ members | length }} member{{ members | pluralize }}</th>
+    </thead>
+{% for member in members %}
+    <tr>
+        <td>{{ member.username }}</td>
+    </tr>
+{% endfor %}
+</table>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#toggle-all').click(function(){
+            $('input[name=members]').attr('checked', this.checked);
+        });
+        $('#id_add_members-autocomplete').yourlabsAutocomplete().data = {
+            orgId: {{ organization.pk }}
+        }
+    });
+</script>
+{% endblock scripts %}
