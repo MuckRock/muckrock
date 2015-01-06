@@ -68,8 +68,10 @@ class Organization(models.Model):
     def start_subscription(self):
         """Create an org subscription for the owner"""
         customer = stripe.Customer.retrieve(self.stripe_id)
-        if self.owner.get_profile().acct_type == 'pro':
-            customer.cancel_subscription(plan='pro')
+        profile = self.owner.get_profile()
+        if profile.acct_type == 'pro':
+            profile.acct_type = 'community'
+            profile.save()
         customer.update_subscription(plan='org')
         customer.save()
         self.active = True

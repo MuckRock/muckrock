@@ -81,9 +81,7 @@ def create_organization(request):
             # TODO: Add payments to org creation
             stripe_token = request.POST.get('stripe_token', None)
             current_user = request.user
-            customer = current_user.customer()
-            if not customer.card and not stripe_token:
-                raise ValueError('No payment method specified')
+            customer = current_user.get_profile().customer()
             customer.card = stripe_token
             customer.save()
             organization = form.save(commit=False)
