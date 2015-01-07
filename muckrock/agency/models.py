@@ -67,6 +67,7 @@ class Agency(models.Model, RequestHelper):
     phone = models.CharField(blank=True, max_length=30)
     fax = models.CharField(blank=True, max_length=30)
     notes = models.TextField(blank=True)
+    aliases = models.TextField(blank=True)
 
     website = models.CharField(max_length=255, blank=True)
     twitter = models.CharField(max_length=255, blank=True)
