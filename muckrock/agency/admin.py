@@ -14,6 +14,7 @@ from django.template import RequestContext
 from adaptor.model import CsvModel
 from adaptor.fields import BooleanField, CharField, DjangoModelField
 from reversion import VersionAdmin
+import autocomplete_light
 import logging
 import sys
 
@@ -34,8 +35,14 @@ class AgencyTypeAdmin(VersionAdmin):
 
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
-    user = forms.models.ModelChoiceField(queryset=User.objects.all().order_by('username'),
-                                         required=False)
+    user = autocomplete_light.ModelChoiceField('UserAdminAutocomplete',
+                                               queryset=User.objects.all(),
+                                               required=False)
+    jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
+                                                       queryset=Jurisdiction.objects.all())
+    appeal_agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
+                                                        queryset=Agency.objects.all(),
+                                                        required=False)
 
     class Meta:
         # pylint: disable=R0903
@@ -49,6 +56,7 @@ class AgencyAdmin(VersionAdmin):
     list_display = ('name', 'jurisdiction')
     list_filter = ['approved', 'jurisdiction', 'types']
     search_fields = ['name']
+    filter_horizontal = ('types',)
     form = AgencyAdminForm
     formats = ['xls', 'csv']
 
