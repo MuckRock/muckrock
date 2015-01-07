@@ -90,18 +90,21 @@ def create_organization(request):
         if form.is_valid():
             # TODO: Add payments to org creation
             stripe_token = request.POST.get('stripe_token', None)
-            current_user = request.user
-            customer = current_user.get_profile().customer()
+            user = request.user
+            profile = user.get_profile()
+            customer = profile.customer()
             customer.card = stripe_token
             customer.save()
             organization = form.save(commit=False)
             organization.slug = slugify(organization.name)
-            organization.owner = current_user
-            organization.stripe_id = current_user.get_profile().stripe_id
+            organization.owner = user
+            organization.stripe_id = profile.stripe_id
             organization.num_requests = MONTHLY_REQUESTS.get('org', 0)
             organization.date_update = datetime.now()
             organization.save()
             organization.start_subscription()
+            profile.organization = organization
+            profile.save()
             messages.success(request, 'Your organization has been created.')
             return redirect(organization)
     else:
