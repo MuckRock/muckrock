@@ -19,7 +19,7 @@
 						agencyWidgetElement.yourlabsWidget().autocomplete.data = {}
 				}
 				$('body').on('change', '.autocomplete-light-widget select[name$=jurisdiction]', function() {
-						var agencySelectElement = $('#' + $(this).attr('id').replace('jurisdiction', 'agency'));
+						var agencySelectElement = $('.autocomplete-light-widget select[name$=agency]');
 						var agencyWidgetElement = agencySelectElement.parents('.autocomplete-light-widget');
 
 						// When the country select changes
