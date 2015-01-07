@@ -141,6 +141,7 @@
         }
         .members {
             display: table;
+            margin: $base-margin 0;
             border-radius: 0;
             th {
                 font-size: 1rem;

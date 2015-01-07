@@ -1,4 +1,5 @@
 {% extends 'details/base_detail.html' %}
+{% load mathfilters %}
 {% block title %}MuckRock &bull; {{ organization }}{% endblock title %}
 {% block type %}organization{% endblock type %}
 
@@ -27,24 +28,26 @@
     <button name="action" value="add_members" class="primary">Grant Membership</button>
     {% csrf_token %}
 </form>
-    {% if members %}
+    {% if members|length > 1 %}
 <table class="members">
     <thead>
         <th><input type="checkbox" id="toggle-all"></th>
-        <th>{{ members | length }} member{{ members | pluralize }}</th>
+        <th><label for="toggle-all">{{ members | length | sub:'1' }} member{{ members | length | sub:'1' | pluralize }}</label></th>
     </thead>
         {% for member in members %}
+        {% if member != organization.owner %}
     <tr>
         <td><input type="checkbox" name="members" form="management-form" value="{{ member.pk }}"></td>
         <td><a href="{% url 'acct-profile' member.username %}" title="{{ member.get_full_name }}'s profile page">{{ member.get_full_name }}</a></td>
     </tr>
+        {% endif %}
         {% endfor %}
 </table>
     {% else %}
 <h2>This organization has no members.</h2>
     {% endif %}
 <form method="post" class="controls" id="management-form">
-    {% if members %}
+    {% if members|length > 1 %}
     <div class="user-controls">
         <button name="action" value="remove_members">Revoke Membership</button>
     </div>
@@ -58,15 +61,17 @@
     {% csrf_token %}
 </form>
 {% else %}
-    {% if members %}
+    {% if members|length > 1 %}
 <table class="members">
     <thead>
-        <th width="100%">{{ members | length }} member{{ members | pluralize }}</th>
+        <th width="100%">{{ members | length | sub:'1' }} member{{ members | length | sub:'1' | pluralize }}</th>
     </thead>
     {% for member in members %}
+    {% if member != organization.owner %}
     <tr>
         <td>{{ member.username }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
 </table>
     {% else %}

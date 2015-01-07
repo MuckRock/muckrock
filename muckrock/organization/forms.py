@@ -15,6 +15,7 @@ class OrganizationForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Organization
         fields = ['name']
+        widgets = {'name': forms.TextInput(attrs={'placeholder': 'Name your organization'})}
 
 class AddMembersForm(forms.Form):
     """A form that uses autocomplete to suggest users to add to an organization"""
