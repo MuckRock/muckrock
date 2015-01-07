@@ -30,7 +30,7 @@ urlpatterns = patterns(
         name='acct-my-profile'
     ),
     url(
-        r'^profile/(?P<user_name>[\w\d_.@ ]+)/$',
+        r'^profile/(?P<user_name>[\w\-.@ ]+)/$',
         views.profile,
         name='acct-profile'
     ),
