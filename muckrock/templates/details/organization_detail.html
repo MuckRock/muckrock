@@ -4,54 +4,74 @@
 
 {% block header %}
 <h1>{{ organization }}</h1>
-<summary>Managed by {{ organization.owner.get_full_name }}</summary>
+<summary>Managed by <a href="{% url 'acct-profile' organization.owner.username %}" title="{{ organization.owner.get_full_name }}'s profile page">{{ organization.owner.get_full_name }}</a></summary>
 {% endblock %}
 
 {% block aside %}
+{% if is_staff or is_owner or is_member %}
 <dl>
     <dt>Requests Remaining</dt>
     <dd>{{ organization.get_requests }}</dd>
+    <dt>Subscription Status</dt>
+    <dd>{% if organization.is_active %}Active{% else %}Inactive{% endif %}</dd>
 </dl>
+{% endif %}
 {% endblock %}
 
 {% block main %}
-{% if is_owner or request.user.is_staff %}
-<form method="post" id="add-members-form">
-    {% csrf_token %}
+{% if is_staff or is_owner %}
+<form method="post" class="add-members" id="add-members-form">
     {% for field in form %}
         {{ field }}
     {% endfor %}
-    <button name="action" value="add_members">Grant Membership</button>
+    <button name="action" value="add_members" class="primary">Grant Membership</button>
+    {% csrf_token %}
 </form>
+    {% if members %}
 <table class="members">
     <thead>
-        <th width="5%"><input type="checkbox" id="toggle-all"></th>
-        <th width="95%">{{ members | length }} member{{ members | pluralize }}</th>
+        <th><input type="checkbox" id="toggle-all"></th>
+        <th>{{ members | length }} member{{ members | pluralize }}</th>
     </thead>
-{% for member in members %}
+        {% for member in members %}
     <tr>
         <td><input type="checkbox" name="members" form="management-form" value="{{ member.pk }}"></td>
-        <td>{{ member.username }}</td>
+        <td><a href="{% url 'acct-profile' member.username %}" title="{{ member.get_full_name }}'s profile page">{{ member.get_full_name }}</a></td>
     </tr>
-{% endfor %}
+        {% endfor %}
 </table>
-<form method="post" id="management-form">
+    {% else %}
+<h2>This organization has no members.</h2>
+    {% endif %}
+<form method="post" class="controls" id="management-form">
+    {% if members %}
+    <div class="user-controls">
+        <button name="action" value="remove_members">Revoke Membership</button>
+    </div>
+    {% endif %}
+    <div class="org-controls">
+        <button name="action" value="change_subscription">{% if organization.is_active %}Pause Subscription{% else %}Start Subscription{% endif %}</button>
+    {% if is_staff %}
+        <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
+    {% endif %}
+    </div>
     {% csrf_token %}
-    <button name="action" value="remove_members">Revoke Membership</button>
-    <button name="action" value="change_subscription">{% if organization.is_active %}Pause Subscription{% else %}Start Subscription{% endif %}</button>
-    <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
 </form>
 {% else %}
+    {% if members %}
 <table class="members">
     <thead>
         <th width="100%">{{ members | length }} member{{ members | pluralize }}</th>
     </thead>
-{% for member in members %}
+    {% for member in members %}
     <tr>
         <td>{{ member.username }}</td>
     </tr>
-{% endfor %}
+    {% endfor %}
 </table>
+    {% else %}
+<h2>This organization has no members.</h2>
+    {% endif %}
 {% endif %}
 {% endblock %}
 
