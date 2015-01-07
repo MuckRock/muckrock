@@ -4,16 +4,16 @@
 
 {% block header %}
 <h1>{{ organization }}</h1>
-<summary>Managed by <a href="{% url 'acct-profile' organization.owner.username %}" title="{{ organization.owner.get_full_name }}'s profile page">{{ organization.owner.get_full_name }}</a></summary>
+<summary>Owned by <a href="{% url 'acct-profile' organization.owner.username %}" title="{{ organization.owner.get_full_name }}'s profile page">{{ organization.owner.get_full_name }}</a></summary>
 {% endblock %}
 
 {% block aside %}
 {% if is_staff or is_owner or is_member %}
 <dl>
+    <dt>Subscription Status</dt>
+    <dd>{% if organization.is_active %}<span class="success">Active{% else %}<span class="failure">Inactive{% endif %}</span></dd>
     <dt>Requests Remaining</dt>
     <dd>{{ organization.get_requests }}</dd>
-    <dt>Subscription Status</dt>
-    <dd>{% if organization.is_active %}Active{% else %}Inactive{% endif %}</dd>
 </dl>
 {% endif %}
 {% endblock %}

@@ -139,6 +139,19 @@
                 color: $color-white;
             }
         }
+        .members {
+            display: table;
+            border-radius: 0;
+            th {
+                font-size: 1rem;
+            }
+            th:first-child, td:first-child {
+                width: 5%;
+            }
+            th:last-child, th:last-child {
+                width: 95%;
+            }
+        }
         .controls {
             @extend %controls;
             .user-controls, .org-controls {
