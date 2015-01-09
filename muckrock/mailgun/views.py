@@ -204,9 +204,12 @@ def opened(request):
 
     comm_id = request.POST.get('comm_id')
     if comm_id:
-        comm = FOIACommunication.objects.get(pk=comm_id)
-        comm.opened = True
-        comm.save()
+        try:
+            comm = FOIACommunication.objects.get(pk=comm_id)
+            comm.opened = True
+            comm.save()
+        except FOIACommunication.DoesNotExist:
+            logger.warning('Trying to mark missing communication as opened: %s', comm_id)
 
     return HttpResponse('OK')
 
