@@ -153,6 +153,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.messages.context_processors.messages',
     'muckrock.sidebar.context_processors.sidebar_user_info',
     'muckrock.sidebar.context_processors.sidebar_message',
+    'muckrock.context_processors.google_analytics',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -205,7 +205,7 @@ class Profile(models.Model):
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
-        stripe.Charge.create(
+        return stripe.Charge.create(
             amount=amount,
             currency='usd',
             card=token,
