@@ -9,6 +9,8 @@ from django.contrib.localflavor.us.forms import USZipCodeField
 
 from muckrock.accounts.models import Profile
 
+import re
+
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
     zip_code = USZipCodeField(required=False)
@@ -57,8 +59,9 @@ class RegisterForm(UserCreationForm):
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
 
     def clean_username(self):
-        """Do a case insensitive uniqueness check"""
+        """Do a case insensitive uniqueness check and clean username input"""
         username = self.cleaned_data['username']
+        username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
         if User.objects.filter(username__iexact=username):
             raise forms.ValidationError("User with this Username already exists.")
         return username
