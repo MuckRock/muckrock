@@ -802,6 +802,7 @@ class FOIACommunication(models.Model):
         """Remove controls characters from text before saving"""
         remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))
         self.communication = unicode(self.communication).translate(remove_control)
+        self.communication = self.communication[:5000000]
         super(FOIACommunication, self).save(*args, **kwargs)
 
 
@@ -820,8 +821,6 @@ class RawEmail(models.Model):
 
     communication = models.OneToOneField(FOIACommunication, related_name='raw_email')
     raw_email = models.TextField(blank=True)
-
-
 
 
 class FOIANote(models.Model):
