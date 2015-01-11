@@ -215,6 +215,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     #'staticfiles',
     'autocomplete_light',
+    'celery_haystack',
     'compressor',
     'dbsettings',
     'debug_toolbar',
@@ -277,9 +278,9 @@ elif 'IRON_MQ_PROJECT_ID' in os.environ:
     BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
                                       os.environ.get('IRON_MQ_TOKEN'))
 elif DEBUG:
-    BROKER_URL = 'redis://localhost:6379/0'
-else:
     BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
+else:
+    BROKER_URL = 'redis://localhost:6379/0'
 
 
 import djcelery
@@ -304,9 +305,6 @@ if DEBUG:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
     SOUTH_TESTS_MIGRATE = False
 
-HAYSTACK_SITECONF = 'muckrock.search_sites'
-HAYSTACK_SEARCH_ENGINE = os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')
-
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',
     'theme_advanced_buttons1': 'bold,italic,underline,strikethrough,|,indent,outdent,blockquote,|,'
@@ -317,10 +315,26 @@ TINYMCE_DEFAULT_CONFIG = {
     'convert_urls': False,
 }
 
-if HAYSTACK_SEARCH_ENGINE == 'whoosh':
-    HAYSTACK_WHOOSH_PATH = os.path.join(SITE_ROOT, 'whoosh/mysite_index')
-elif HAYSTACK_SEARCH_ENGINE == 'solr':
-    HAYSTACK_SOLR_URL = os.environ.get('WEBSOLR_URL', '')
+haystack_connections = {
+    'solr': {
+        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+        'URL': os.environ.get('WEBSOLR_URL', ''),
+        'TIMEOUT': 60 * 5,
+        'INCLUDE_SPELLING': True,
+        'BATCH_SIZE': 100,
+    },
+    'whoosh': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
+        'STORAGE': 'file',
+        'POST_LIMIT': 128 * 1024 * 1024,
+        'INCLUDE_SPELLING': True,
+        'BATCH_SIZE': 100,
+    },
+}
+HAYSTACK_CONNECTIONS = {}
+HAYSTACK_CONNECTIONS['default'] = haystack_connections[os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
+HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
 URLAUTH_AUTHKEY_NAME = 'authkey'

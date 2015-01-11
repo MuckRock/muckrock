@@ -790,6 +790,8 @@ class FOIACommunication(models.Model):
 
     raw_email = models.TextField(blank=True)
 
+    reindex_related = ('foia',)
+
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
 
