@@ -788,8 +788,6 @@ class FOIACommunication(models.Model):
         null=True
     )
 
-    raw_email = models.TextField(blank=True)
-
     reindex_related = ('foia',)
 
     def __unicode__(self):
@@ -820,7 +818,7 @@ class FOIACommunication(models.Model):
 class RawEmail(models.Model):
     """The raw email text for a communication - stored sperately for performance"""
 
-    communication = models.OneToOneField(FOIACommunication)
+    communication = models.OneToOneField(FOIACommunication, related_name='raw_email')
     raw_email = models.TextField(blank=True)
 
 
