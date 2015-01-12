@@ -508,8 +508,10 @@ class FOIARequest(models.Model):
             msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
-        # update communication XXX
-        comm.raw_email = msg.message()
+        # update communication
+        RawEmail.objects.create(
+            communication=comm,
+            raw_email=msg.message())
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
 

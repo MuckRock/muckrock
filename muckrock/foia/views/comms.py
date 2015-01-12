@@ -123,6 +123,6 @@ def resend_comm(request, next_):
 def raw(request, idx):
     """Get the raw email for a communication"""
     comm = get_object_or_404(FOIACommunication, pk=idx)
-    if not comm.raw_email:
+    if not comm.rawemail:
         raise Http404()
-    return HttpResponse(comm.raw_email.raw_email, content_type='text/plain')
+    return HttpResponse(comm.rawemail.raw_email, content_type='text/plain')
