@@ -21,7 +21,7 @@ from datetime import datetime, date
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
 
