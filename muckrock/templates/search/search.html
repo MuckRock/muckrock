@@ -21,7 +21,7 @@
         {% if page.object_list %}
     <header class="search meta">
         <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-        {% with page.object_list as page_obj %}
+        {% with page as page_obj %}
             {% include 'lib/pagination.html' %}
         {% endwith %}
     </header>
@@ -39,7 +39,7 @@
     {% endfor %}
     </ul>
             
-            {% with page.object_list as page_obj %}
+            {% with page as page_obj %}
                 {% include 'lib/pagination.html' %}
             {% endwith %}
             
