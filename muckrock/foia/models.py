@@ -819,7 +819,7 @@ class FOIACommunication(models.Model):
 class RawEmail(models.Model):
     """The raw email text for a communication - stored sperately for performance"""
 
-    communication = models.OneToOneField(FOIACommunication, related_name='raw_email')
+    communication = models.OneToOneField(FOIACommunication)
     raw_email = models.TextField(blank=True)
 
 
