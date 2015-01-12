@@ -508,7 +508,7 @@ class FOIARequest(models.Model):
             msg.attach(file_.name(), file_.ffile.read())
         msg.send(fail_silently=False)
 
-        # update communication
+        # update communication XXX
         comm.raw_email = msg.message()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
@@ -787,6 +787,7 @@ class FOIACommunication(models.Model):
         blank=True,
         null=True
     )
+    raw_email = models.TextField(blank=True)
 
     reindex_related = ('foia',)
 
