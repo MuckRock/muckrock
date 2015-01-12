@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load tags %}
 {% block title %}MuckRock &bull; Search{% endblock title %}
 
 {% block content %}
@@ -26,15 +27,15 @@
     </header>
     <ul class="search collection">
             {% for result in page.object_list %}
-        <li>
-            <h2>{{ result.object.pub_date|date:"F m, Y" }}</h2>
-            <h1><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></h1>
-            {% if result.object.user %}
-            <h2>{{ result.object.user.get_full_name }}</h2>
-            {% else %}
-            <h2>{{ result.object.get_authors_names }}</h2>
-            {% endif %}
-        </li>
+						{% if result.model_name == "foiarequest" %}
+						  {% if result.object|foia_is_viewable:user %}
+							<li>Request: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }}</li>
+							{% endif %}
+						{% elif result.model_name == "article" %}
+							<li>Article: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.get_authors_names }} on {{ result.object.pub_date|date:"F m, Y" }}</li>
+						{% elif result.model_name == "question" %}
+							<li>Question: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }} on {{ result.object.date|date:"F m, Y" }}</li>
+						{% endif %}
     {% endfor %}
     </ul>
             
