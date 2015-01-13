@@ -509,9 +509,9 @@ class FOIARequest(models.Model):
         msg.send(fail_silently=False)
 
         # update communication
-        RawEmail.objects.create(
-            communication=comm,
-            raw_email=msg.message())
+        raw_email = RawEmail.objects.get_or_create(communication=comm)
+        raw_email.raw_email = msg.message()
+        raw_email.save()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
 
@@ -820,7 +820,7 @@ class FOIACommunication(models.Model):
 
 
 class RawEmail(models.Model):
-    """The raw email text for a communication - stored sperately for performance"""
+    """The raw email text for a communication - stored seperately for performance"""
 
     communication = models.OneToOneField(FOIACommunication)
     raw_email = models.TextField(blank=True)
