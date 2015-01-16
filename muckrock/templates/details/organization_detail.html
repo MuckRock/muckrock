@@ -31,7 +31,7 @@
     {% if members|length > 1 %}
 <table class="members">
     <thead>
-        <th><input type="checkbox" id="toggle-all" onclick="$('input[name=members]').attr('checked', this.checked);"></th>
+        <th><input type="checkbox" id="toggle-all"></th>
         <th><label for="toggle-all">{{ members | length | sub:'1' }} member{{ members | length | sub:'1' | pluralize }}</label></th>
     </thead>
         {% for member in members %}
@@ -84,6 +84,9 @@
 {% include 'autocomplete_light/static.html' %}
 <script type="text/javascript">
     $(document).ready(function(){
+        $('#toggle-all').click(function(){
+          $('input[name="members"]').trigger('click');
+        });
         $('#id_add_members-wrapper').click(function(){
             $('#id_add_members-autocomplete').focus();
         });
