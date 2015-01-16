@@ -89,6 +89,8 @@ urlpatterns = patterns(
         views.orphans, name='foia-orphans'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
+    url(r'^raw_email/(?P<idx>\d+)/$',
+        views.raw, name='foia-raw'),
 
     # Feeds
     url(r'^feeds/submitted/$',

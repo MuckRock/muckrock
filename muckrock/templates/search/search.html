@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load tags %}
 {% block title %}MuckRock &bull; Search{% endblock title %}
 
 {% block content %}
@@ -20,27 +21,45 @@
         {% if page.object_list %}
     <header class="search meta">
         <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-        {% with page.object_list as page_obj %}
-            {% include 'lib/pagination.html' %}
-        {% endwith %}
+
+{# inlined for quick hack to get this to work #}
+<nav class="pagination">    
+    <div class="page-ref">
+        Page {{ page.number }} of {{ page.paginator.num_pages }}<br>
+        Showing {{page.start_index}} to {{page.end_index}} of {{page.paginator.count}}
+    </div>
+    <ul class="page-set">
+    {% if page.has_previous %}
+        <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">&#171;&nbsp;Previous&nbsp;page</a>
+        </li>
+    {% else %}
+        <li>
+            <span class="default">&#171;&thinsp;&#171;&nbsp;First&nbsp;page&emsp;&#171;&nbsp;Previous&nbsp;page</span>
+        </li>
+    {% endif %}
+    {% if page.has_next %}
+        <li><a href="?page={{ page.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
+    {% else %}
+        <li>
+            <span class="default">Next&nbsp;page&nbsp;&#187;&emsp;Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</span>
+        </li>
+    {% endif %}
+    </ul>
+</nav>
     </header>
     <ul class="search collection">
             {% for result in page.object_list %}
-        <li>
-            <h2>{{ result.object.pub_date|date:"F m, Y" }}</h2>
-            <h1><a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a></h1>
-            {% if result.object.user %}
-            <h2>{{ result.object.user.get_full_name }}</h2>
-            {% else %}
-            <h2>{{ result.object.get_authors_names }}</h2>
-            {% endif %}
-        </li>
+						{% if result.model_name == "foiarequest" %}
+						  {% if result.object|foia_is_viewable:user %}
+							<li>Request: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }}</li>
+							{% endif %}
+						{% elif result.model_name == "article" %}
+							<li>Article: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.get_authors_names }} on {{ result.object.pub_date|date:"F m, Y" }}</li>
+						{% elif result.model_name == "question" %}
+							<li>Question: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }} on {{ result.object.date|date:"F m, Y" }}</li>
+						{% endif %}
     {% endfor %}
     </ul>
-            
-            {% with page.object_list as page_obj %}
-                {% include 'lib/pagination.html' %}
-            {% endwith %}
             
 		{% else %}
 		    <h2>No results for &ldquo;{{ request.GET.q }}&rdquo;</h2>

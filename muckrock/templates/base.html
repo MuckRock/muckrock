@@ -97,6 +97,30 @@
 
 					ga('create', 'UA-16635809-1', 'auto');
 					ga('send', 'pageview');
+
+					{% if ga %}
+					ga('require', 'ec');
+					{% endif %}
+					{% if ga.0 == "buy_requests" %}
+					ga('ec:addProduct', {               // Provide product details in an productFieldObject.
+					  'name': '4 FOI Requests',         // Product name (string).
+					  'price': '20.00',                 // Product price (currency).
+					});
+					ga('ec:setAction', 'purchase', {    // Transaction details are provided in an actionFieldObject.
+					  'id': '{{ga.1}}',                 // (Required) Transaction id (string).
+					  'revenue': '20.00',               // Revenue (currency).
+					});
+					{% endif %}
+					{% if ga.0 == "pro" %}
+					ga('ec:addProduct', {               // Provide product details in an productFieldObject.
+					  'name': 'Pro Subscription',       // Product name (string).
+					  'price': '40.00',                 // Product price (currency).
+					});
+					ga('ec:setAction', 'purchase', {    // Transaction details are provided in an actionFieldObject.
+					  'id': '{{ga.1}}',                 // (Required) Transaction id (string).
+					  'revenue': '40.00',               // Revenue (currency).
+					});
+					{% endif %}
 				</script>
 				<!-- End Google Analytics -->
         {% compress js %}

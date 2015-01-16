@@ -1,18 +1,17 @@
 """
-Search Index for the Question application
+Search Index for the FOIA application
 """
 
 from celery_haystack.indexes import CelerySearchIndex
 from haystack.indexes import CharField, Indexable
 
-from muckrock.qanda.models import Question
+from muckrock.foia.models import FOIARequest
 
-class QuestionIndex(CelerySearchIndex, Indexable):
-    """Search index for questions"""
+class FOIARequestIndex(CelerySearchIndex, Indexable):
+    """Search index for FOIA requests"""
     text = CharField(document=True, use_template=True)
     author = CharField(model_attr='user')
 
     def get_model(self):
         """Return model for index"""
-        return Question
-
+        return FOIARequest

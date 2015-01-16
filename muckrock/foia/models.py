@@ -523,7 +523,9 @@ class FOIARequest(models.Model):
         msg.send(fail_silently=False)
 
         # update communication
-        comm.raw_email = msg.message()
+        raw_email = RawEmail.objects.get_or_create(communication=comm)
+        raw_email.raw_email = msg.message()
+        raw_email.save()
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
 
@@ -801,8 +803,9 @@ class FOIACommunication(models.Model):
         blank=True,
         null=True
     )
-
     raw_email = models.TextField(blank=True)
+
+    reindex_related = ('foia',)
 
     def __unicode__(self):
         return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
@@ -816,6 +819,7 @@ class FOIACommunication(models.Model):
         """Remove controls characters from text before saving"""
         remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))
         self.communication = unicode(self.communication).translate(remove_control)
+        self.communication = self.communication[:5000000]
         super(FOIACommunication, self).save(*args, **kwargs)
 
 
@@ -827,6 +831,13 @@ class FOIACommunication(models.Model):
         # pylint: disable=R0903
         ordering = ['date']
         verbose_name = 'FOIA Communication'
+
+
+class RawEmail(models.Model):
+    """The raw email text for a communication - stored seperately for performance"""
+
+    communication = models.OneToOneField(FOIACommunication)
+    raw_email = models.TextField(blank=True)
 
 
 class FOIANote(models.Model):

@@ -82,6 +82,8 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, related_name='answers')
     answer = models.TextField()
 
+    reindex_related = ('question',)
+
     def __unicode__(self):
         return "%s's answer to %s" % (self.user.username, self.question.title)
 

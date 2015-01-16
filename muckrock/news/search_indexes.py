@@ -2,20 +2,24 @@
 Search Index for the news application
 """
 
-from haystack.indexes import SearchIndex, CharField, DateTimeField
-from haystack import site
+from celery_haystack.indexes import CelerySearchIndex
+from haystack.indexes import CharField, DateTimeField, Indexable
 
 from muckrock.news.models import Article
 
-class ArticleIndex(SearchIndex):
+class ArticleIndex(CelerySearchIndex, Indexable):
     """Search index for news articles"""
     text = CharField(document=True, use_template=True)
     authors = CharField(model_attr='authors')
     pub_date = DateTimeField(model_attr='pub_date')
 
-    def get_queryset(self):
+    def get_model(self):
+        """Return model for index"""
+        return Article
+
+    def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
         # pylint: disable=R0201
         return Article.objects.get_published()
 
-site.register(Article, ArticleIndex)
+

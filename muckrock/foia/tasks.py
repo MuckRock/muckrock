@@ -187,12 +187,6 @@ def set_top_viewed_reqs():
             pass
 
 
-@periodic_task(run_every=crontab(hour=1, minute=0), name='muckrock.foia.tasks.update_index')
-def update_index():
-    """Update the search index every day at 1AM"""
-    management.call_command('update_index')
-
-
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
     """Follow up on any requests that need following up on"""

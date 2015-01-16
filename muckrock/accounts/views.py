@@ -154,7 +154,7 @@ def subscribe(request):
                 customer = request.user.get_profile().customer()
                 customer.card = stripe_token
                 customer.save()
-                customer.update_subscription(plan='pro')
+                sub = customer.update_subscription(plan='pro')
                 customer.save()
                 user_profile.acct_type = 'pro'
                 user_profile.date_update = datetime.now()
@@ -162,6 +162,7 @@ def subscribe(request):
                 user_profile.save()
                 msg = 'Congratulations, you are now subscribed as a pro user!'
                 messages.success(request, msg)
+                request.session['ga'] = ('pro',  sub.id)
                 logger.info('%s has subscribed to a pro account.', request.user.username)
             except stripe.CardError as exc:
                 msg = 'Payment error. Your card has not been charged.'
@@ -225,11 +226,12 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise ValueError('Account email and Stripe email do not match')
-            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            charge = user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
+            request.session['ga'] = ('buy_requests',  charge.id)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'

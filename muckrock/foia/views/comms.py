@@ -6,7 +6,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email, ValidationError
-from django.shortcuts import redirect
+from django.http import HttpResponse, Http404
+from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
@@ -117,3 +118,11 @@ def resend_comm(request, next_):
     except ValidationError:
         messages.error(request, 'Not a valid email address')
     return redirect(next_)
+
+@user_passes_test(lambda u: u.is_staff)
+def raw(request, idx):
+    """Get the raw email for a communication"""
+    comm = get_object_or_404(FOIACommunication, pk=idx)
+    if not comm.rawemail:
+        raise Http404()
+    return HttpResponse(comm.rawemail.raw_email, content_type='text/plain')

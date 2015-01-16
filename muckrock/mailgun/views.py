@@ -21,7 +21,7 @@ from datetime import datetime, date
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
 
@@ -40,8 +40,10 @@ def _make_orphan_comm(from_, to_, post, files, foia):
             date=datetime.now(), full_html=False, delivered='email',
             communication='%s\n%s' %
                 (post.get('stripped-text', ''), post.get('stripped-signature')),
-            likely_foia=foia,
-            raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+            likely_foia=foia)
+    RawEmail.objects.create(
+        communication=comm,
+        raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
     # handle attachments
     for file_ in files.itervalues():
         type_ = _file_type(file_)
@@ -85,8 +87,10 @@ def handle_request(request, mail_id):
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
-                    (post.get('stripped-text', ''), post.get('stripped-signature')),
-                raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
+                    (post.get('stripped-text', ''), post.get('stripped-signature')))
+        RawEmail.objects.create(
+            communication=comm,
+            raw_email='%s\n%s' % (post.get('message-headers', ''), post.get('body-plain', '')))
 
         # handle attachments
         for file_ in request.FILES.itervalues():
@@ -204,9 +208,12 @@ def opened(request):
 
     comm_id = request.POST.get('comm_id')
     if comm_id:
-        comm = FOIACommunication.objects.get(pk=comm_id)
-        comm.opened = True
-        comm.save()
+        try:
+            comm = FOIACommunication.objects.get(pk=comm_id)
+            comm.opened = True
+            comm.save()
+        except FOIACommunication.DoesNotExist:
+            logger.warning('Trying to mark missing communication as opened: %s', comm_id)
 
     return HttpResponse('OK')
 
