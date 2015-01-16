@@ -72,7 +72,7 @@ def _add_members(request, organization):
     if form.is_valid():
         new_members = form.cleaned_data['add_members']
         new_member_count = len(new_members)
-        existing_member_count = len(organization.get_members)
+        existing_member_count = len(organization.get_members())
         # limit org membership to 50 users
         if new_member_count <= (50 - existing_member_count):
             for new_member in new_members:
