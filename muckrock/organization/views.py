@@ -16,6 +16,12 @@ from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
 
 from datetime import datetime
 
+class List(ListView):
+    """List of organizations"""
+    model = Organization
+    template_name = "lists/organization_list.html"
+    paginate_by = 25
+
 class Detail(DetailView):
     """Organization detail view"""
     model = Organization
@@ -45,18 +51,7 @@ class Detail(DetailView):
         organization = get_object_or_404(Organization, slug=kwargs['slug'])
         action = request.POST.get('action', '')
         if action == 'add_members':
-            form = AddMembersForm(request.POST)
-            if form.is_valid():
-                new_members = form.cleaned_data['add_members']
-                added_members = 0
-                for new_member in new_members:
-                    if not organization.is_owned_by(new_member):
-                        organization.add_member(new_member)
-                        added_members += 1
-                if added_members == 1:
-                    messages.success(request, 'You granted membership to 1 person.')
-                elif added_members > 1:
-                    messages.success(request, 'You granted membership to %s people.' % added_members)
+            _add_members(request, organization)
         elif action == 'remove_members':
             members = request.POST.getlist('members')
             removed_members = 0
@@ -81,11 +76,26 @@ class Detail(DetailView):
             messages.error(request, 'This action is not available.')
         return redirect(organization)
 
-class List(ListView):
-    """List of organizations"""
-    model = Organization
-    template_name = "lists/organization_list.html"
-    paginate_by = 25
+def _add_members(request, organization):
+    """A helper function to add a list of members to an organization"""
+    form = AddMembersForm(request.POST)
+    if form.is_valid():
+        new_members = form.cleaned_data['add_members']
+        new_member_count = len(new_members)
+        existing_member_count = len(organization.get_members)
+        # limit org membership to 50 users
+        if new_member_count <= (50 - existing_member_count):
+            for new_member in new_members:
+                organization.add_member(new_member)
+            msg = 'You granted membership to %s ' % new_member_count
+            msg += 'person.' if new_member_count == 1 else 'people.'
+            messages.success(request, msg)            
+        else:
+            error_msg = ('You currently have %s members in your organization '
+                         'but you are limited to 50. If you want to exceed this '
+                         'limit, please contact us at info@muckrock.com' % existing_member_count)
+            messages.error(request, error_msg);
+    return
 
 @login_required
 def create_organization(request):
