@@ -59,8 +59,10 @@ class Organization(models.Model):
     def add_member(self, user):
         """Add a user to this organization"""
         profile = user.get_profile()
-        profile.organization = self
-        profile.save()
+        if not profile.is_member_of(self): # doesn't update if already a member
+            profile.organization = self
+            profile.save()
+            # TODO notify user and log event
         return
 
     def remove_member(self, user):
@@ -69,6 +71,7 @@ class Organization(models.Model):
             profile = user.get_profile()
             profile.organization = None
             profile.save()
+            # TODO notify user and log event
         return
 
     def start_subscription(self):

@@ -53,17 +53,7 @@ class Detail(DetailView):
         if action == 'add_members':
             _add_members(request, organization)
         elif action == 'remove_members':
-            members = request.POST.getlist('members')
-            removed_members = 0
-            for uid in members:
-                user = User.objects.get(pk=uid)
-                if not organization.is_owned_by(user):
-                    organization.remove_member(user)
-                    removed_members += 1
-            if removed_members == 1:
-                messages.success(request, 'You revoked membership from 1 person.')
-            elif removed_members > 1:
-                messages.success(request, 'You revoked membership from %s people.' % removed_members)
+            _remove_members(request, organzation)
         elif action == 'change_subscription':
             if organization.is_active():
                 organization.pause_subscription()
