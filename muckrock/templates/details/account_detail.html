@@ -70,7 +70,14 @@
                 class="checkout-button primary">Buy Requests</button>
         <a href="{% url 'acct-update' %}" class="button">Settings</a>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
+    {% with user_obj.get_profile.organization as org %}
+        {% if org and org.owner == user_obj %}
+        <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
+        {% else %}
         <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
+        {% endif %}
+    {% endwith %}
+        
     </div>
 </section>
 {% endif %}
