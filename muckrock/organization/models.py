@@ -61,12 +61,15 @@ class Organization(models.Model):
         profile = user.get_profile()
         profile.organization = self
         profile.save()
+        return
 
     def remove_member(self, user):
-        """Remove a user from this organization"""
-        profile = user.get_profile()
-        profile.organization = None
-        profile.save()
+        """Remove a user (who isn't the owner) from this organization"""
+        if not self.is_owned_by(user):      
+            profile = user.get_profile()
+            profile.organization = None
+            profile.save()
+        return
 
     def start_subscription(self):
         """Create an org subscription for the owner"""
@@ -79,7 +82,7 @@ class Organization(models.Model):
         customer.save()
         self.active = True
         self.save()
-        
+        return
 
     def pause_subscription(self):
         """Cancel the org's subscription"""
@@ -88,3 +91,4 @@ class Organization(models.Model):
         customer.save()
         self.active = False
         self.save()
+        return

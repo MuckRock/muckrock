@@ -97,6 +97,17 @@ def _add_members(request, organization):
             messages.error(request, error_msg);
     return
 
+def _remove_members(request, organization):
+    """A helper function to remove a list of members from an organization"""
+    members = request.POST.getlist('members')
+    member_count = len(members)
+    for uid in members:
+        user = User.objects.get(pk=uid)
+        organization.remove_member(user)
+    msg = 'You revoked membership from %s ' % member_count
+    msg += 'person.' if member_count == 1 else 'people.'
+    messages.success(request, msg)
+
 @login_required
 def create_organization(request):
     """Creates an organization, setting the user who created it as the owner"""
