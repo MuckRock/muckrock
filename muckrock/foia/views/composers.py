@@ -291,7 +291,8 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'action': 'Draft',
         'form': form,
         'foia': foia,
-        'stripe_pk': STRIPE_PUB_KEY
+        'stripe_pk': STRIPE_PUB_KEY,
+        'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
     }
 
     return render_to_response(

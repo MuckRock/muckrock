@@ -281,6 +281,8 @@ class Detail(DetailView):
         context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
+        if foia.sidebar_html:
+            messages.info(self.request, foia.sidebar_html)
         return context
 
     def post(self, request):
