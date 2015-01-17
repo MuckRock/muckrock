@@ -25,7 +25,7 @@
     {% for field in form %}
         {{ field }}
     {% endfor %}
-    <button name="action" value="add_members" class="primary">Grant Membership</button>
+    <button name="action" value="add_members" class="disabled" disabled>Grant Membership</button>
     {% csrf_token %}
 </form>
     {% if members|length > 1 %}
@@ -49,7 +49,7 @@
 <form method="post" class="controls" id="management-form">
     {% if members|length > 1 %}
     <div class="user-controls">
-        <button name="action" value="remove_members">Revoke Membership</button>
+        <button name="action" value="remove_members" class="disabled" disabled>Revoke Membership</button>
     </div>
     {% endif %}
     <div class="org-controls">
@@ -85,7 +85,33 @@
 <script type="text/javascript">
     $(document).ready(function(){
         $('#toggle-all').click(function(){
-          $('input[name="members"]').trigger('click');
+            $('input[name="members"]').trigger('click');
+        });
+        // (de)activates the "Grant membership" button if (no) members to add
+        $('#id_add_members-deck').bind('DOMSubtreeModified', function(){
+            var button = $('button[value="add_members"]');
+            if ($(this).children().length > 0) {
+                button.attr('disabled', false)
+                      .addClass('primary')
+                      .removeClass('disabled');
+            } else {
+                button.attr('disabled', true)
+                      .addClass('disabled')
+                      .removeClass('primary');
+            }
+        });
+        // (de)activates the "Revoke membership" button if (no) members to remove
+        $('input[name="members"]').on('click', function(){
+            var button = $('button[value="remove_members"]');
+            if ($('input[name="members"]:checked').length > 0) {
+                button.attr('disabled', false)
+                      .addClass('failure')
+                      .removeClass('disabled');
+            } else {
+                button.attr('disabled', true)
+                      .addClass('disabled')
+                      .removeClass('failure');
+            }
         });
         $('#id_add_members-wrapper').click(function(){
             $('#id_add_members-autocomplete').focus();
