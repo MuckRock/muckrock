@@ -1,3 +1,7 @@
+Hi {{ member_name }},
+
 {{ organization_owner }} has cancelled your membership to {{ organization_name }}.
 From now on, any requests you submit will deducted from your personal request pool.
+
 Happy filing!
+MuckRock Staff

@@ -53,7 +53,7 @@ class Detail(DetailView):
         if action == 'add_members':
             _add_members(request, organization)
         elif action == 'remove_members':
-            _remove_members(request, organzation)
+            _remove_members(request, organization)
         elif action == 'change_subscription':
             if organization.is_active():
                 organization.pause_subscription()
