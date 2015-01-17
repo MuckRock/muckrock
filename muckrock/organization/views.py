@@ -150,6 +150,7 @@ def delete_organization(request, **kwargs):
         members = organization.get_members()
         for member in members:
             member.organization = None
+            member.save()
         organization.delete()
         messages.success(request, 'Your organization was deleted.')
     elif request.user.get_profile().is_member_of(organization):
