@@ -502,6 +502,16 @@ if url.scheme == 'postgres':
 if url.scheme == 'mysql':
     DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 
+# codeship
+if 'PG_USER' in os.environ:
+	DATABASES['default'] = {
+		'NAME': 'test',
+		'USER': os.environ.get('PG_USER'),
+		'PASSWORD': os.environ.get('PG_PASSWORD'),
+		'HOST': '127.0.0.1',
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+	}
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
