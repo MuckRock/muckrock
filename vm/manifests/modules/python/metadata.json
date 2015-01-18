@@ -1,0 +1,51 @@
+{
+  "name": "stankevich-python",
+  "version": "1.8.2",
+  "author": "stankevich",
+  "summary": "Python Module",
+  "license": "Apache License, Version 2.0",
+  "source": "git://github.com/stankevich/puppet-python.git",
+  "project_page": "https://github.com/stankevich/puppet-python",
+  "issues_url": "https://github.com/stankevich/puppet-python/issues",
+  "description": "Puppet module for Python",
+  "tags": [
+    "python",
+    "pip",
+    "virtualenv",
+    "gunicorn"
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "CentOS",
+      "operatingsystemrelease": [
+        "5",
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    },
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "10.04",
+        "12.04",
+        "14.04"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": "3.x"
+    }
+  ],
+  "dependencies": [
+    {"name":"puppetlabs/stdlib","version_requirement":">= 4.0.0"}
+  ]
+}

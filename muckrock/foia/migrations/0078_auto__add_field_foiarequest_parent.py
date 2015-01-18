@@ -4,19 +4,22 @@ from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
+# This migration is to fix the parent field which didn't get merged in correctly
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+    	pass
         # Adding field 'FOIARequest.parent'
-        db.add_column(u'foia_foiarequest', 'parent',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, on_delete=models.SET_NULL, blank=True),
-                      keep_default=False)
+        #db.add_column(u'foia_foiarequest', 'parent',
+        #              self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, on_delete=models.SET_NULL, blank=True),
+        #              keep_default=False)
 
 
     def backwards(self, orm):
+    	pass
         # Deleting field 'FOIARequest.parent'
-        db.delete_column(u'foia_foiarequest', 'parent_id')
+        #db.delete_column(u'foia_foiarequest', 'parent_id')
 
 
     models = {
