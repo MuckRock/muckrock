@@ -24,6 +24,10 @@
 	2. Navigate your web browser (from the hostt machine) to http://127.0.0.1:8000
 	3. Run `./manage.py celeryd` to start a celery process to run delayed tasks
 
+6. Install the heroku toolbelt
+	1. https://toolbelt.heroku.com/
+	2. Set up a heroku remote branch so you can deploy your code: https://devcenter.heroku.com/articles/git#creating-a-heroku-remote
+
 ----
 
 You should have a very bare MuckRock site running locally now.  Putting some documents into the database will help flesh out the site.  The code checked out from github is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine.
