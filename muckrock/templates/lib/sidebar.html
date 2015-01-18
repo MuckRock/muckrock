@@ -33,16 +33,22 @@
 			    <li><a href="{% url 'acct-logout' %}" class="button">Log Out</a></li>
 			</ul>
 			<a href="{% url 'foia-mylist' %}" class="button">My Requests</a>
-			{% if drafts %}
-            <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
-                <span class="fixes counter">{{ drafts|length }}</span>
-                Draft{{ drafts|length|pluralize }}
+            {% if payments %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=payment">
+                <span class="payments counter">{{ payments|length }}</span>
+            	Payment{{ fixes|length|pluralize }} Required
             </a>
             {% endif %}
             {% if fixes %}
             <a class="account-info" href="{% url 'foia-mylist' %}?status=fix">
                 <span class="fixes counter">{{ fixes|length }}</span>
             	Fix{{ fixes|length|pluralize:"es" }} Required
+            </a>
+            {% endif %}
+            {% if drafts %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
+                <span class="drafts counter">{{ drafts|length }}</span>
+                Draft{{ drafts|length|pluralize }}
             </a>
             {% endif %}
             {% if updates %}

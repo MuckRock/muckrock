@@ -12,9 +12,11 @@ def sidebar_user_info(request):
         updates = requests.filter(updated=True)
         fixes = requests.filter(status='fix')
         drafts = requests.filter(status='started')
+        payments = requests.filter(status='payment')
         return {
             'updates': updates,
             'fixes': fixes,
+            'payments': payments,
             'drafts': drafts,
         }
     else:

@@ -8,7 +8,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 class LocalAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking local jurisdictions"""
     attrs = {
-        'placeholder': 'City name?',
+        'placeholder': 'City or county name?',
         'data-autocomplete-minimum-characters': 3
     }
     def choices_for_request(self):
