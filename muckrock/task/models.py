@@ -85,6 +85,7 @@ class FlaggedTask(Task):
             return 'Flagged: %s' % (self.agency)
         if self.jurisdiction:
             return 'Flagged: %s' % (self.jurisdiction)
+        return 'Flagged: <None>'
 
 
 class NewAgencyTask(Task):
