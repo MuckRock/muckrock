@@ -223,8 +223,7 @@ class TestFOIAFunctional(TestCase):
         for username in ['adam', 'bob']:
             response = get_allowed(self.client,
                                    reverse('foia-list-user', kwargs={'user_name': username}),
-                                   ['foia/foiarequest_list.html', 'foia/base-single.html'],
-                                   base='base-single.html')
+                                   ['lists/request_list.html', 'lists/base_list.html'])
             user = User.objects.get(username=username)
             nose.tools.eq_(set(response.context['object_list']),
                            set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
@@ -239,8 +238,7 @@ class TestFOIAFunctional(TestCase):
 
                 response = get_allowed(self.client, reverse('foia-list') +
                                        '?field=%s&order=%s' % (field, order),
-                                       ['foia/foiarequest_list.html', 'foia/base-single.html'],
-                                       base='base-single.html')
+                                       ['lists/request_list.html', 'lists/base_list.html'])
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
                                                         key=attrgetter(attr),
@@ -254,7 +252,7 @@ class TestFOIAFunctional(TestCase):
                     reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
                                                    'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk}),
-                    ['foia/foiarequest_detail.html', 'foia/base.html'],
+                    ['details/request_detail.html', 'details/base_detail.html'],
                     context = {'foia': foia})
 
     def test_feeds(self):
@@ -278,7 +276,6 @@ class TestFOIAFunctional(TestCase):
         """Test private views while not logged in"""
 
         foia = FOIARequest.objects.get(pk=2)
-        get_post_unallowed(self.client, reverse('foia-create'))
         get_post_unallowed(self.client, reverse('foia-update',
                                            kwargs={'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk,
@@ -292,7 +289,8 @@ class TestFOIAFunctional(TestCase):
 
         # get authenticated pages
         get_allowed(self.client, reverse('foia-create'),
-                    ['foia/foiawizard_where.html', 'foia/base-submit.html'])
+                    ['forms/foia/create.html', 'base.html'] ,
+                    base='compressor/css_file.html')
 
         get_allowed(self.client, reverse('foia-update',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,

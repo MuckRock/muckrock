@@ -3,9 +3,11 @@ Django settings for muckrock project
 """
 
 import os
+import sys
 import urlparse
 from django.core.urlresolvers import reverse
 
+TEST = 'test' in sys.argv
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -80,6 +82,8 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+if TEST:
+	COMPRESS_ENABLED = False
 
 COMPRESS_OFFLINE = True
 
