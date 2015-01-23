@@ -341,7 +341,8 @@ class Detail(DetailView):
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
         text = request.POST.get('text', False)
-        if foia.user == request.user and foia.status != 'started' and text:
+        can_follow_up = foia.user == request.user or request.user.is_staff
+        if can_follow_up and foia.status != 'started' and text:
             save_foia_comm(
                 request,
                 foia,
