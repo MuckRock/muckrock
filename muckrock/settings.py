@@ -278,10 +278,6 @@ if 'REDISTOGO_URL' in os.environ:
 elif 'IRON_MQ_PROJECT_ID' in os.environ:
     BROKER_URL = 'ironmq://%s:%s@' % (os.environ.get('IRON_MQ_PROJECT_ID'),
                                       os.environ.get('IRON_MQ_TOKEN'))
-elif 'BROKER_URL' in os.environ:
-    BROKER_URL = os.environ['BROKER_URL']
-elif DEBUG:
-    BROKER_URL = 'amqp://muckrock:muckrock@localhost:5672/muckrock_vhost'
 else:
     BROKER_URL = 'redis://localhost:6379/0'
 
@@ -506,6 +502,16 @@ if url.scheme == 'postgres':
 
 if url.scheme == 'mysql':
     DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
+
+# codeship
+if 'PG_USER' in os.environ:
+	DATABASES['default'] = {
+		'NAME': 'test',
+		'USER': os.environ.get('PG_USER'),
+		'PASSWORD': os.environ.get('PG_PASSWORD'),
+		'HOST': '127.0.0.1',
+		'ENGINE': 'django.db.backends.postgresql_psycopg2',
+	}
 
 CACHES = {
     'default': {

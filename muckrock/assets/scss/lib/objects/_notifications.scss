@@ -33,6 +33,14 @@ ul.notifications {
                     margin: 0;
                     color: $color-black;
                 }
+                a {
+                    color: $color-black;
+                    opacity: .7;
+                    text-decoration: underline;
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
             }
             &.dismiss {
                 color: $color-white;
@@ -55,7 +63,7 @@ ul.notifications {
         }
         
         @mixin colorize($color) {
-            span.text, span.dismiss { background-color: $color; }
+            span.text, span.dismiss { background-color: lighten($color, 10%); }
             span.symbol {
                 color: $color;
                 @include colorize-icon($color);
