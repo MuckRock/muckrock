@@ -157,11 +157,18 @@ class FOIARequest(models.Model):
                    'automatically being posted on the site')
     )
 
-    read_collaborators = models.ManyToManyField(User, related_name='read_access',
-                                                blank=True, null=True)
-    edit_collaborators = models.ManyToManyField(User, related_name='edit_access',
-                                                blank=True, null=True)
-
+    read_collaborators = models.ManyToManyField(
+        User,
+        related_name='read_access',
+        blank=True,
+        null=True
+    )
+    edit_collaborators = models.ManyToManyField(
+        User,
+        related_name='edit_access',
+        blank=True,
+        null=True
+    )
 
     objects = FOIARequestManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
