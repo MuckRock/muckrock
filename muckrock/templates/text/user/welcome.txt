@@ -1,18 +1,16 @@
-Hi {{data.full_name}}, and welcome to MuckRock!
+Hi {{user.full_name}}, and welcome to MuckRock!
 
-Thanks for registering: You're all set to get started, and we're here to answer any questions you might have, whether you want help crafting the perfect request or just want to find some interesting stuff to follow and read.
+Your username is {{ user.username }}.
+It's associated with the email address {{ user.email }}.
+{% if password %}Your password has been temporarily set to {{ password }}. Log in and change it now: https://www.muckrock.com{{ password_link }}{% endif %}
 
-We've set your username to {{username}}, associated with the email address {{data.email}}.
+We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link }}?key={{ verification_code }}
 
-Your password has been set to {{pw}}.  Log in and change it now:
+After that, get started filing by just clicking the "Create a FOIA Request" button on the top right of any page.
 
-https://www.muckrock.com{{ link }}
+Thanks for trying MuckRock. To get in touch with staff, just reply to this email, and we'll respond as soon as we can. We're here to answer any questions you might have, whether you want help crafting the perfect request or just want to find some interesting stuff to follow and read.
 
-After that, get started filing by just clicking the blue "Create a FOIA Request" button on the top right of any page.
-
-Thanks again for trying MuckRock. To get in touch with staff, just reply to this email, and we'll respond as soon as we can.
-
-Thanks!
+Thanks again!
 
 Michael
 MuckRock.com

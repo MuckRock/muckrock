@@ -109,31 +109,48 @@ def _make_request(request, foia_request, parent=None):
 
 def _make_user(request, data):
     """Helper function to create a new user"""
+    # create unique username
     base_username = data['full_name'].replace(' ', '')
     username = base_username
     num = 1
     while User.objects.filter(username=username).exists():
         username = '%s%d' % (base_username, num)
         num += 1
+    # create random password
     password = ''.join(choice(string.ascii_letters + string.digits) for _ in range(12))
+    # create a new user
     user = User.objects.create_user(username, data['email'], password)
-    Profile.objects.create(
-        user=user,
-        acct_type='community',
-        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
-        date_update=datetime.now()
-    )
-    link = user.get_profile().wrap_url(reverse('acct-change-pw'))
-    send_mail('Welcome to MuckRock',
-              render_to_string('text/user/welcome.txt',
-                               {'data': data, 'pw': password,
-                                'username': username, 'link': link}),
-              'info@muckrock.com', [data['email']], fail_silently=False)
     if ' ' in data['full_name']:
         user.first_name, user.last_name = data['full_name'].rsplit(' ', 1)
     else:
         user.first_name = data['full_name']
     user.save()
+    # create a new profile
+    Profile.objects.create(
+        user=user,
+        acct_type='community',
+        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+        date_update=datetime.now(),
+        confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
+        key_expire_date=date.today() + timedelta(2),
+    )
+    # send the new user a welcome email
+    password_link = user.get_profile().wrap_url(reverse('acct-change-pw'))
+    verification_link = user.get_profile().wrap_url(reverse('acct-verify-email'))
+    send_mail(
+        'Welcome to MuckRock',
+        render_to_string('text/user/welcome.txt', {
+            'user': user,
+            'password': password,
+            'password_link': password_link,
+            'verification_code': user.get_profile().confirmation_key,
+            'verification_link': verification_link,
+        }),
+        'info@muckrock.com',
+        [data['email']],
+        fail_silently=False
+    )
+    # login the new user
     user = authenticate(username=username, password=password)
     login(request, user)
 
