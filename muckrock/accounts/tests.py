@@ -264,11 +264,11 @@ class TestAccountFunctional(TestCase):
 
         # bad user name
         post_allowed_bad(self.client, reverse('acct-login'),
-                         ['registration/login.html', 'registration/base.html'],
+                         ['forms/account/login.html', 'forms/base_form.html'],
                          data={'username': 'nouser', 'password': 'abc'})
         # bad pw
         post_allowed_bad(self.client, reverse('acct-login'),
-                         ['registration/login.html', 'registration/base.html'],
+                         ['forms/account/login.html', 'forms/base_form.html'],
                          data={'username': 'adam', 'password': 'bad pw'})
         # succesful login
         post_allowed(self.client, reverse('acct-login'),

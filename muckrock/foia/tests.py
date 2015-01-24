@@ -213,7 +213,7 @@ class TestFOIAFunctional(TestCase):
         """Test the foia-list view"""
 
         response = get_allowed(self.client, reverse('foia-list'),
-                ['foia/foiarequest_list.html', 'foia/base-single.html'], base='base-single.html')
+                ['lists/request_list.html', 'lists/base_list.html'])
         nose.tools.eq_(set(response.context['object_list']),
             set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:10]))
 
@@ -264,7 +264,6 @@ class TestFOIAFunctional(TestCase):
     def test_404_views(self):
         """Test views that should give a 404 error"""
 
-        get_404(self.client, reverse('foia-list-user', kwargs={'user_name': 'test3'}))
         get_404(self.client, reverse('foia-detail', kwargs={'idx': 1, 'slug': 'test-c',
                                                        'jurisdiction': 'massachusetts',
                                                        'jidx': 1}))
@@ -371,7 +370,7 @@ class TestFOIAFunctional(TestCase):
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
                                             'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
-                    ['registration/cc.html', 'registration/base.html'])
+                    ['details/request_detail.html', 'details/base_detail.html'])
 
 
 class TestFOIAIntegration(TestCase):
