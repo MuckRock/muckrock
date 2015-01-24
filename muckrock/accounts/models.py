@@ -212,7 +212,7 @@ class Profile(models.Model):
 
     def can_embargo(self):
         """Is this user allowed to embargo?"""
-        return self.acct_type in ['admin', 'beta', 'pro', 'proxy']
+        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
 
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""

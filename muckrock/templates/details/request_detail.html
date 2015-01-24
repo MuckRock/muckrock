@@ -83,7 +83,11 @@
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
+            {% if foia.is_permanently_embargoed %}
+        <dd>This request is permanently embargoed.</dd>
+            {% else %}
         <dd>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}it is completed{% endif %}.</dd>
+            {% endif %}
         {% endif %}
         {% if foia.user == user %}
             {% if foia.status == "ack" or foia.status == "processed" %}
