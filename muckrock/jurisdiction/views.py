@@ -15,6 +15,7 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
+from muckrock.task.models import FlaggedTask
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
@@ -43,18 +44,10 @@ def detail(request, fed_slug, state_slug, local_slug):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
-            send_mail(
-                '[FLAG] %s: %s' % ('Jurisdiction', jurisdiction.name),
-                render_to_string('text/jurisdiction/flag.txt', {
-                    'obj': jurisdiction,
-                    'user': request.user,
-                    'type': 'jurisdiction',
-                    'reason': form.cleaned_data.get('reason')
-                }),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=form.cleaned_data.get('reason'),
+                jurisdiction=jurisdiction)
             messages.info(request, 'Correction submitted, thanks.')
             return redirect(jurisdiction)
     else:

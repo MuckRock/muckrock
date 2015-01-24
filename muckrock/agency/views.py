@@ -21,6 +21,7 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
+from muckrock.task.models import FlaggedTask
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -38,20 +39,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
-            send_mail(
-                '[FLAG] Agency: %s' % agency.name,
-                render_to_string(
-                    'text/jurisdiction/flag.txt', {
-                        'obj': agency,
-                        'user': request.user,
-                        'type': 'agency',
-                        'reason': form.cleaned_data.get('reason')
-                    }
-                ),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=form.cleaned_data.get('reason'),
+                agency=agency)
             messages.info(request, 'Correction submitted. Thanks!')
             return redirect(agency)
     else:

@@ -34,6 +34,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
+from muckrock.task.models import FlaggedTask
 from muckrock.views import class_view_decorator
 
 # pylint: disable=R0901
@@ -374,18 +375,10 @@ class Detail(DetailView):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
         if request.user.is_authenticated() and text:
-            args = {
-                'request': foia,
-                'user': request.user,
-                'reason': text
-            }
-            send_mail(
-                '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('text/foia/flag.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=text,
+                foia=foia)
             messages.success(request, 'Problem succesfully reported')
         return redirect(foia)
 

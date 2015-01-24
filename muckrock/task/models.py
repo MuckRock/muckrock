@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 
 
@@ -29,7 +28,7 @@ class OrphanTask(Task):
 
     reasons = (('bs', 'Bad Sender'), ('ib', 'Incoming Blocked'))
     reason = models.CharField(max_length=2, choices=reasons)
-    communication = models.ForeignKey(FOIACommunication)
+    communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
         return '%s: %s' % (self.get_reason_display(), self.communication.foia)
@@ -40,7 +39,7 @@ class SnailMailTask(Task):
 
     categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'))
     category = models.CharField(max_length=1, choices=categories)
-    communication = models.ForeignKey(FOIACommunication)
+    communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
         return '%s: %s' % (self.get_category_display(), self.communication.foia)
@@ -51,7 +50,7 @@ class RejectedEmailTask(Task):
 
     categories = (('b', 'Bounced'), ('d', 'Dropped'))
     category = models.CharField(max_length=1, choices=categories)
-    foia = models.ForeignKey(FOIARequest, blank=True, null=True)
+    foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
     error = models.CharField(max_length=255, blank=True)
 
@@ -74,7 +73,7 @@ class FlaggedTask(Task):
     user = models.ForeignKey(User)
     text = models.TextField()
 
-    foia = models.ForeignKey(FOIARequest, blank=True, null=True)
+    foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     agency = models.ForeignKey(Agency, blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
 
@@ -91,7 +90,7 @@ class FlaggedTask(Task):
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
@@ -101,7 +100,7 @@ class NewAgencyTask(Task):
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
 
-    communication = models.ForeignKey(FOIACommunication)
+    communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
         return 'Response: %s' % (self.communication.foia)

@@ -6,28 +6,69 @@
 
 {% block list %}
 
-<ul>
 {% for task in tasks %}
-	<li>
 		{% if task.orphantask %}
 		  {{ task.orphantask }}
+
 		{% elif task.snailmailtask %}
-		  {{ task.snailmailtask }}
+			{% with task.snailmailtask.communication.foia as foia %}
+			<section class="received message">
+				<h1>Snail Mail</h1>
+				<h2>{{task.snailmailtask.get_category_display}} on {{task.date_created|date}}</h2>
+				<span>Acknowledged? {{foia.has_ack}}</span><br />
+				<span>Set status:
+					<a href="#" class="button">Awaiting Acknowledgement</a>
+					<a href="#" class="button">Awaiting Response</a>
+					<a href="#" class="button">Awaiting Appeal</a>
+				</span><br />
+				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> | 
+				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
+				{# agency info #}
+				<p>{{task.snailmailtask.communication.communication}}</p>
+			</section>
+			{% endwith %}
+
 		{% elif task.rejectedemailtask %}
 		  {{ task.rejectedemailtask }}
 		{% elif task.staleagencytask %}
 		  {{ task.staleagencytask }}
+
 		{% elif task.flaggedtask %}
-		  {{ task.flaggedtask }}
+			<section class="received message">
+				<h1>Flagged</h1>
+				<h2>{{task.date_created|date}}</h2>
+				<span><a href="#" class="button">Resolve</a></span><br />
+				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.flaggedtask.user.pk %}">User: {{task.flaggedtask.user}}</a></span> |
+				{% if task.flaggedtask.foia %}
+				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.flaggedtask.foia.pk %}">FOIA: {{task.flaggedtask.foia}} </a></span><br />
+				{% elif task.flaggedtask.agency %}
+				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.flaggedtask.agency.pk %}">Agency: {{task.flaggedtask.agency}}</a></span><br />
+				{% elif task.flaggedtask.jurisdiction %}
+				<span><a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.flaggedtask.jurisdiction.pk %}">Jurisdiction: {{task.flaggedtask.jurisidiction}}</a></span><br />
+				{% endif %}
+				<p>{{task.flaggedtask.text}}</p>
+			</section>
+
 		{% elif task.newagencytask %}
-		  {{ task.newagencytask }}
+			<section class="received message">
+				<h1>New Agency</h1>
+				<h2>{{task.date_created|date}}</h2>
+				<span><a href="#" class="button">Approve</a></span>
+				<span><a href="#" class="button">Reject</a></span>
+				<br \>
+				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.newagencytask.agency.pk %}">Agency: {{task.newagencytask.agency}}</a></span>
+				{% if task.newagency.user %} | <span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.newagencytask.user.pk %}">User: {{task.newagencytask.user}}</a></span>{% endif %}
+			</section>
+
 		{% elif task.responsetask %}
 		  {{ task.responsetask }}
+
 		{% else %}
-		  {{ task }}
+			<section class="received message">
+				<h1>Bare task... something went wrong</h1>
+				{{ task }}
+			</section>
 		{% endif %}
-	</li>
 {% endfor %}
-</ul>
 
 {% endblock list %}
