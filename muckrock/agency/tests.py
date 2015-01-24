@@ -75,7 +75,7 @@ class TestAgencyViews(TestCase):
                             kwargs={'jurisdiction': self.agency.jurisdiction.slug,
                                     'jidx': self.agency.jurisdiction.pk,
                                     'slug': self.agency.slug, 'idx': self.agency.pk}),
-                    ['agency/agency_detail.html', 'agency/base.html'],
+                    ['details/agency_detail.html', 'details/base_detail.html'],
                     context={'agency': self.agency})
 
         get_404(self.client,
