@@ -68,6 +68,9 @@
                 data-form="#buy-requests"
                 data-label=""
                 class="checkout-button primary">Buy Requests</button>
+        {% if not user_obj.get_profile.email_confirmed %}
+        <a href="{% url 'acct-verify-email' %}" class="button">Verify Email</a>
+        {% endif %}
         <a href="{% url 'acct-update' %}" class="button">Settings</a>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
     {% with user_obj.get_profile.organization as org %}
@@ -77,6 +80,7 @@
         <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
         {% endif %}
     {% endwith %}
+    
         
     </div>
 </section>

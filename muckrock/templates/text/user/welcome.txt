@@ -4,7 +4,7 @@ Your username is {{ user.username }}.
 It's associated with the email address {{ user.email }}.
 {% if password %}Your password has been temporarily set to {{ password }}. Log in and change it now: https://www.muckrock.com{{ password_link }}{% endif %}
 
-We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link }}?key={{ verification_code }}
+We ask that you please verify your email by following this link: https://www.muckrock.com{% url 'acct-verify-email' %}?key={{ verification_code }}
 
 After that, get started filing by just clicking the "Create a FOIA Request" button on the top right of any page.
 

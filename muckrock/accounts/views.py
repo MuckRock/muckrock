@@ -56,15 +56,13 @@ def register(request):
                 user=new_user,
                 acct_type='community',
                 monthly_requests=0,
-                date_update=datetime.now(),
-                confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
-                key_expire_date=date.today() + timedelta(2),
+                date_update=datetime.now()
             )
             send_mail(
                 'Welcome to MuckRock',
                 render_to_string('text/user/welcome.txt', {
                     'user': new_user,
-                    'verification_code': new_user.get_profile().confirmation_key,
+                    'verification_code': new_user.get_profile().generate_confirmation_key,
                     'verificaiton_link': new_user.get_profile().wrap_url(reverse('acct-verify-email'))
                 }),
                 'info@muckrock.com',
@@ -251,21 +249,31 @@ def buy_requests(request):
 def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
-    key = request.GET.get('key', '')
-    if key:
-        if key == user.confirmation_key:
-            if date.today() <= user.key_expire_date:
-                
-                user.email_confirmed = True
-                user.save()
+    profile = user.get_profile()
+    key = request.GET.get('key')
+    if not profile.email_confirmed:
+        if key:
+            if key == profile.confirmation_key:                
+                profile.email_confirmed = True
+                profile.save()
                 messages.success(request, 'Your email address has been confirmed.')
             else:
-                messages.error(request, 'Your confirmation key has expired.')
+                messages.error(request, 'Your confirmation key is invalid.')
         else:
-            messages.error(request, 'Your confirmation key is invalid.')
+            send_mail(
+                'Verify Your MuckRock Email',
+                render_to_string('text/user/verify_email.txt', {
+                    'user': user,
+                    'verification_code': profile.generate_confirmation_key()
+                }),
+                'info@muckrock.com',
+                [user.email],
+                fail_silently=False
+            )
+            messages.info(request, 'We just sent you an email containing your verification link.')
     else:
-        messages.error(request, 'No confirmation key was provided.')
-    return redirect(user.get_profile())    
+        messages.warning(request, 'Your email is already confirmed, no need to verify again!')
+    return redirect(profile)
 
 def profile(request, user_name=None):
     """View a user's profile"""

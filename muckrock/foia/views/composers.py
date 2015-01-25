@@ -130,21 +130,17 @@ def _make_user(request, data):
         user=user,
         acct_type='community',
         monthly_requests=MONTHLY_REQUESTS.get('community', 0),
-        date_update=datetime.now(),
-        confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
-        key_expire_date=date.today() + timedelta(2),
+        date_update=datetime.now()
     )
     # send the new user a welcome email
     password_link = user.get_profile().wrap_url(reverse('acct-change-pw'))
-    verification_link = user.get_profile().wrap_url(reverse('acct-verify-email'))
     send_mail(
         'Welcome to MuckRock',
         render_to_string('text/user/welcome.txt', {
             'user': user,
             'password': password,
             'password_link': password_link,
-            'verification_code': user.get_profile().confirmation_key,
-            'verification_link': verification_link,
+            'verification_code': user.get_profile().generate_confirmation_key(),
         }),
         'info@muckrock.com',
         [data['email']],

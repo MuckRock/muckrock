@@ -8,18 +8,20 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
-from easy_thumbnails.fields import ThumbnailerImageField
-from datetime import datetime
-from itertools import groupby
-from urlauth.models import AuthKey
-import dbsettings
-import stripe
-
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
+
+from easy_thumbnails.fields import ThumbnailerImageField
+from datetime import datetime
+import dbsettings
+from itertools import groupby
+from random import choice
+import string
+import stripe
+from urlauth.models import AuthKey
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -89,7 +91,6 @@ class Profile(models.Model):
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
     confirmation_key = models.CharField(max_length=24, blank=True)
-    key_expire_date = models.DateField(blank=True, null=True)
 
     # extended information
     profile = models.TextField(blank=True)
@@ -254,6 +255,12 @@ class Profile(models.Model):
             customer=customer.id,
             description=desc
         )
+    
+    def generate_confirmation_key(self):
+        key = ''.join(choice(string.ascii_letters) for _ in range(24))
+        self.confirmation_key = key
+        self.save()
+        return key
 
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later
