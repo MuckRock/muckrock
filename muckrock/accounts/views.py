@@ -56,13 +56,15 @@ def register(request):
                 user=new_user,
                 acct_type='community',
                 monthly_requests=0,
-                date_update=datetime.now(),
-                confirmation_key=''.join(choice(string.ascii_letters) for _ in range(24)),
-                key_expire_date=date.today() + timedelta(2),
+                date_update=datetime.now()
             )
             send_mail(
                 'Welcome to MuckRock',
-                render_to_string('registration/welcome.txt', {'user': new_user}),
+                render_to_string('text/user/welcome.txt', {
+                    'user': new_user,
+                    'verification_code': new_user.get_profile().generate_confirmation_key,
+                    'verificaiton_link': new_user.get_profile().wrap_url(reverse('acct-verify-email'))
+                }),
                 'info@muckrock.com',
                 [new_user.email],
                 fail_silently=False
@@ -244,50 +246,34 @@ def buy_requests(request):
     return redirect(url_redirect)
 
 @login_required
-def confirm_email(request):
-    """Confirm your email address"""
-
+def verify_email(request):
+    """Verifies a user's email address"""
     user = request.user
-
-    def check_key(key):
-        """Check to see if confirmation key is correct"""
-        if key == user.confirmation_key and date.today() <= user.key_expire_date:
-            messages.success(request, 'Your email address has been confirmed')
-            user.email_confirmed = True
-            user.save()
-            return True
+    profile = user.get_profile()
+    key = request.GET.get('key')
+    if not profile.email_confirmed:
+        if key:
+            if key == profile.confirmation_key:                
+                profile.email_confirmed = True
+                profile.save()
+                messages.success(request, 'Your email address has been confirmed.')
+            else:
+                messages.error(request, 'Your confirmation key is invalid.')
         else:
-            return False
-
-    if request.method == 'POST':
-        if request.POST['submit'] == 'Submit':
-            form = EmailConfirmForm(request.POST)
-            if form.is_valid() and check_key(form.cleaned_data['key']):
-                return redirect(user.get_profile())
-            elif form.is_valid():
-                messages.error(request, 'Sorry, that confirmation key is incorrect or expired')
-        elif request.POST['submit'] == 'Resend Key':
-            prof = user.get_profile()
-            prof.confirmation_key = ''.join(choice(string.ascii_letters) for _ in range(24))
-            prof.key_expire_date = date.today() + timedelta(2)
-            prof.save()
             send_mail(
-                'Confirmation Key',
-                render_to_string('registration/resend.txt', {'user': user}),
+                'Verify Your MuckRock Email',
+                render_to_string('text/user/verify_email.txt', {
+                    'user': user,
+                    'verification_code': profile.generate_confirmation_key()
+                }),
                 'info@muckrock.com',
                 [user.email],
                 fail_silently=False
             )
-    elif 'key' in request.GET:
-        if check_key(request.GET['key']):
-            return redirect(user.get_profile())
-        else:
-            messages.error(request, 'Sorry, that confirmation key is incorrect or expired')
+            messages.info(request, 'We just sent you an email containing your verification link.')
     else:
-        form = EmailConfirmForm()
-
-    return render_to_response('registration/confirm_email.html', {'form': form},
-                              context_instance=RequestContext(request))
+        messages.warning(request, 'Your email is already confirmed, no need to verify again!')
+    return redirect(profile)
 
 def profile(request, user_name=None):
     """View a user's profile"""
