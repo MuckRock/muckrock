@@ -14,11 +14,13 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime
+from datetime import datetime, date, timedelta
+from random import choice
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
 import logging
+import string
 import stripe
 import sys
 
@@ -55,6 +57,17 @@ def register(request):
                 acct_type='community',
                 monthly_requests=0,
                 date_update=datetime.now()
+            )
+            send_mail(
+                'Welcome to MuckRock',
+                render_to_string('text/user/welcome.txt', {
+                    'user': new_user,
+                    'verification_code': new_user.get_profile().generate_confirmation_key,
+                    'verificaiton_link': new_user.get_profile().wrap_url(reverse('acct-verify-email'))
+                }),
+                'info@muckrock.com',
+                [new_user.email],
+                fail_silently=False
             )
             msg = 'Your account was successfully created. '
             msg += 'Welcome to MuckRock!'
@@ -140,7 +153,7 @@ def subscribe(request):
                 stripe_email = request.POST['stripe_email']
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
-                customer = user_profile.customer()
+                customer = request.user.get_profile().customer()
                 customer.card = stripe_token
                 customer.save()
                 sub = customer.update_subscription(plan='pro')
@@ -152,7 +165,7 @@ def subscribe(request):
                 msg = 'Congratulations, you are now subscribed as a pro user!'
                 messages.success(request, msg)
                 request.session['ga'] = ('pro',  sub.id)
-                logger.info('%s has purchased requests', request.user.username)
+                logger.info('%s has subscribed to a pro account.', request.user.username)
             except stripe.CardError as exc:
                 msg = 'Payment error. Your card has not been charged.'
                 messages.error(request, msg)
@@ -231,6 +244,36 @@ def buy_requests(request):
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
+
+@login_required
+def verify_email(request):
+    """Verifies a user's email address"""
+    user = request.user
+    profile = user.get_profile()
+    key = request.GET.get('key')
+    if not profile.email_confirmed:
+        if key:
+            if key == profile.confirmation_key:                
+                profile.email_confirmed = True
+                profile.save()
+                messages.success(request, 'Your email address has been confirmed.')
+            else:
+                messages.error(request, 'Your confirmation key is invalid.')
+        else:
+            send_mail(
+                'Verify Your MuckRock Email',
+                render_to_string('text/user/verify_email.txt', {
+                    'user': user,
+                    'verification_code': profile.generate_confirmation_key()
+                }),
+                'info@muckrock.com',
+                [user.email],
+                fail_silently=False
+            )
+            messages.info(request, 'We just sent you an email containing your verification link.')
+    else:
+        messages.warning(request, 'Your email is already confirmed, no need to verify again!')
+    return redirect(profile)
 
 def profile(request, user_name=None):
     """View a user's profile"""

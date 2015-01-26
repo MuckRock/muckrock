@@ -21,7 +21,7 @@ autocomplete_light.autodiscover()
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
-       muckrock.crowdfund.urls
+       muckrock.crowdfund.urls, muckrock.organization.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
        muckrock.accounts.views, muckrock.sidebar.viewsets
 import muckrock.settings as settings
@@ -57,6 +57,7 @@ urlpatterns = patterns(
     url(r'^jurisdiction/', include(muckrock.jurisdiction.urls.old_urlpatterns)),
     url(r'^questions/', include(muckrock.qanda.urls)),
     url(r'^crowdfund/', include(muckrock.crowdfund.urls)),
+    url(r'^organization/', include(muckrock.organization.urls)),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^search/', include(haystack.urls)),
     url(r'^settings/', include(dbsettings.urls)),

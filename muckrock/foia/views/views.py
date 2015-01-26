@@ -306,7 +306,8 @@ class Detail(DetailView):
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        if foia.user == request.user or request.user.is_staff:
+        # pylint: disable=R0201
+        if foia.editable_by(request.user) or request.user.is_staff:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
 
@@ -315,7 +316,7 @@ class Detail(DetailView):
         """Handle updating status"""
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if foia.status not in ['started', 'submitted'] and ((foia.user == request.user and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
+        if foia.status not in ['started', 'submitted'] and ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
 
@@ -341,7 +342,8 @@ class Detail(DetailView):
     def _follow_up(self, request, foia):
         """Handle submitting follow ups"""
         text = request.POST.get('text', False)
-        if foia.user == request.user and foia.status != 'started' and text:
+        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
+        if can_follow_up and foia.status != 'started' and text:
             save_foia_comm(
                 request,
                 foia,
@@ -354,7 +356,7 @@ class Detail(DetailView):
     def _question(self, request, foia):
         """Handle asking a question"""
         text = request.POST.get('text')
-        if foia.user == request.user and text:
+        if foia.editable_by(request.user) and text:
             title = 'Question about request: %s' % foia.title
             question = Question.objects.create(
                 user=request.user,
@@ -392,7 +394,7 @@ class Detail(DetailView):
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
         text = request.POST.get('text')
-        if foia.user == request.user and foia.is_appealable() and text:
+        if foia.editable_by(request.user) and foia.is_appealable() and text:
             save_foia_comm(
                 request,
                 foia,

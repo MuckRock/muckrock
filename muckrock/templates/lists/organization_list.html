@@ -1,0 +1,14 @@
+{% extends 'lists/base_list.html' %}
+
+{% block title %}MuckRock &bull; Organizations{% endblock title %}
+{% block list-title %}<h1>Organizations</h1>{% endblock list-title %}
+{% block type %}organization{% endblock type %}
+
+{% block actions %}
+<a href="{% url 'org-create' %}" class="primary button">Create Organization</a>
+{% endblock actions %}
+
+{% block list-item %}
+<h2><a href="{{ item.get_absolute_url }}">{{ item.name }}</a></h2>
+<div>Owned by {{ item.owner }}</div>
+{% endblock list-item %}
