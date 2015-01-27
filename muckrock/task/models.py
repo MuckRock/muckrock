@@ -26,9 +26,12 @@ class Task(models.Model):
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
 
-    reasons = (('bs', 'Bad Sender'), ('ib', 'Incoming Blocked'))
+    reasons = (('bs', 'Bad Sender'),
+               ('ib', 'Incoming Blocked'),
+               ('ia', 'Invalid Address'))
     reason = models.CharField(max_length=2, choices=reasons)
     communication = models.ForeignKey('foia.FOIACommunication')
+    address = models.CharField(max_length=255)
 
     def __unicode__(self):
         return '%s: %s' % (self.get_reason_display(), self.communication.foia)
@@ -56,6 +59,19 @@ class RejectedEmailTask(Task):
 
     def __unicode__(self):
         return '%s: %s' % (self.get_category_display(), self.foia)
+
+    def agencies(self):
+        """Get the agencies who use this email address"""
+        return Agency.objects.filter(Q(email__iexact=self.email) |
+                                     Q(other_emails__icontains=self.email))
+
+    def foias(self):
+        """Get the FOIAs who use this email address"""
+        return FOIARequest.objects\
+                .filter(Q(email__iexact=recipient) |
+                        Q(other_emails__icontains=recipient))\
+                .filter(status__in=['ack', 'processed', 'appealing',
+                                    'fix', 'payment'])
 
 
 class StaleAgencyTask(Task):

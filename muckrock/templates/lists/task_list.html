@@ -7,8 +7,19 @@
 {% block list %}
 
 {% for task in tasks %}
+
 		{% if task.orphantask %}
-		  {{ task.orphantask }}
+			<section class="received message">
+				<h1>Orphan</h1>
+				<h2>{{task.orphantask.get_reason_display}} on {{task.date_created|date}}</h2>
+				<span>Sent to {{task.orphantask.address}}</span><br />
+				{% if task.orphantask.communication.likely_foia %}
+				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.orphantask.communication.likely_foia.pk %}">Probable Request</a></span><br />
+					<span><a href="#" class="button">Move to Probable Request</a></span>
+				{% endif %}
+				<span><a href="#" class="button">Delete</a></span>
+				<p>{{task.orphantask.communication.communication}}</p>
+			</section>
 
 		{% elif task.snailmailtask %}
 			{% with task.snailmailtask.communication.foia as foia %}
@@ -29,9 +40,23 @@
 			{% endwith %}
 
 		{% elif task.rejectedemailtask %}
-		  {{ task.rejectedemailtask }}
+			<section class="received message">
+				<h1>Rejected Email</h1>
+				<h2>{{task.rejectedemailtask.get_category_display}} on {{task.date_created|date}}</h2>
+				{% if task.rejectedemailtask.foia %}
+				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.rejectedemailtask.foia.pk %}">FOIA: {{task.rejectedemailtask.foia}} </a></span><br />
+				{% endif %}
+				<span>From: {{task.rejectedemailtask.email}}</span><br />
+				<span>Error: {{task.rejectedemailtask.error}}</span><br />
+				{# XXX put other agencies and foias here #}
+			</section>
+
 		{% elif task.staleagencytask %}
-		  {{ task.staleagencytask }}
+			<section class="received message">
+				<h1>Stale Agency</h1>
+				<h2>{{task.date_created|date}}</h2>
+				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.staleagencytask.agency.pk %}">Agency: {{task.staleagencytask.agency}}</a></span><br />
+			</section>
 
 		{% elif task.flaggedtask %}
 			<section class="received message">
@@ -61,11 +86,19 @@
 			</section>
 
 		{% elif task.responsetask %}
-		  {{ task.responsetask }}
+			<section class="received message">
+				<h1>Response</h1>
+				<h2>{{task.date_created|date}}</h2>
+				{% with task.responsetask.communication as comm %}
+				<span>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</span><br />
+				<span>Set status: <em>select status here</em></span><br />
+				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">FOIA: {{comm.foia}}</a></span><br />
+				<p>{{comm.communication}}</p>
+			</section>
 
 		{% else %}
 			<section class="received message">
-				<h1>Bare task... something went wrong</h1>
+				<h1>Bare task... something went wrong!</h1>
 				{{ task }}
 			</section>
 		{% endif %}
