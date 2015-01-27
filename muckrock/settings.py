@@ -3,9 +3,11 @@ Django settings for muckrock project
 """
 
 import os
+import sys
 import urlparse
 from django.core.urlresolvers import reverse
 
+TEST = 'test' in sys.argv
 
 def boolcheck(setting):
     """Turn env var into proper bool"""
@@ -80,6 +82,8 @@ STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'assets'),
 )
 
+if TEST:
+    COMPRESS_ENABLED = False
 
 COMPRESS_OFFLINE = True
 
@@ -297,7 +301,7 @@ CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks', 'muckrock.ag
 AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
 ABSOLUTE_URL_OVERRIDES = {
-        'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
+    'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
 
 if DEBUG:
@@ -332,7 +336,8 @@ haystack_connections = {
     },
 }
 HAYSTACK_CONNECTIONS = {}
-HAYSTACK_CONNECTIONS['default'] = haystack_connections[os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
+HAYSTACK_CONNECTIONS['default'] = haystack_connections[
+    os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
 HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
@@ -505,13 +510,13 @@ if url.scheme == 'mysql':
 
 # codeship
 if 'PG_USER' in os.environ:
-	DATABASES['default'] = {
-		'NAME': 'test',
-		'USER': os.environ.get('PG_USER'),
-		'PASSWORD': os.environ.get('PG_PASSWORD'),
-		'HOST': '127.0.0.1',
-		'ENGINE': 'django.db.backends.postgresql_psycopg2',
-	}
+    DATABASES['default'] = {
+        'NAME': 'test',
+        'USER': os.environ.get('PG_USER'),
+        'PASSWORD': os.environ.get('PG_PASSWORD'),
+        'HOST': '127.0.0.1',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    }
 
 CACHES = {
     'default': {
