@@ -137,6 +137,7 @@ class FOIARequest(models.Model):
     date_followup = models.DateField(blank=True, null=True)
     embargo = models.BooleanField()
     date_embargo = models.DateField(blank=True, null=True)
+    permanent_embargo = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
     description = models.TextField(blank=True)
@@ -155,6 +156,19 @@ class FOIARequest(models.Model):
         default=False,
         help_text=('Block emails incoming to this request from '
                    'automatically being posted on the site')
+    )
+
+    read_collaborators = models.ManyToManyField(
+        User,
+        related_name='read_access',
+        blank=True,
+        null=True
+    )
+    edit_collaborators = models.ManyToManyField(
+        User,
+        related_name='edit_access',
+        blank=True,
+        null=True
     )
 
     objects = FOIARequestManager()
@@ -214,7 +228,10 @@ class FOIARequest(models.Model):
 
     def is_viewable(self, user):
         """Is this request viewable?"""
+        # pylint: disable=unexpected-keyword-arg
         return user.is_staff or self.user == user or \
+            self.read_collaborators.filter(pk=user.pk).exists() or \
+            self.edit_collaborators.filter(pk=user.pk).exists() or \
             (self.status != 'started' and not self.is_embargo())
 
     def is_public(self):
@@ -226,7 +243,7 @@ class FOIARequest(models.Model):
         if not self.embargo:
             return False
 
-        if not self.embargo_date() or date.today() < self.embargo_date():
+        if self.is_permanently_embargoed() or not self.embargo_date() or date.today() < self.embargo_date():
             return True
 
         if save:
@@ -236,15 +253,25 @@ class FOIARequest(models.Model):
             self.save()
 
         return False
-
-    def has_crowdfund(self):
-        """Does this request have crowdfunding enabled?"""
-        return hasattr(self, 'crowdfund')
-
+    
     def embargo_date(self):
         """The date this request comes off of embargo"""
         if self.embargo:
             return self.date_embargo
+    
+    def is_permanently_embargoed(self):
+        """The request is permanently embargoed"""
+        if self.embargo:
+            return self.permanent_embargo
+
+    def editable_by(self, user):
+        """Can this user edit this request"""
+        # pylint: disable=unexpected-keyword-arg
+        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() or user.is_staff
+
+    def has_crowdfund(self):
+        """Does this request have crowdfunding enabled?"""
+        return hasattr(self, 'crowdfund')
 
     def public_documents(self):
         """Get a list of public documents attached to this request"""
@@ -644,9 +671,11 @@ class FOIARequest(models.Model):
 
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
-        is_owner = self.user == user or user.is_staff
-        can_embargo = is_owner and user.get_profile().can_embargo()
-        can_pay = is_owner and self.is_payable()
+        can_edit = self.editable_by(user) or user.is_staff
+        can_embargo = not self.is_editable() and can_edit and user.get_profile().can_embargo()
+        is_org_member = user == self.user and user.get_profile().organization != None
+        can_permanently_embargo = user.is_staff or is_org_member and self.is_embargo() and not self.is_permanently_embargoed() and can_embargo
+        can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
@@ -655,7 +684,14 @@ class FOIARequest(models.Model):
         }
         return [
             Action(
-                test=(not self.is_editable() and can_embargo),
+                test=can_permanently_embargo,
+                link=reverse('foia-embargo-permanent', kwargs=kwargs),
+                title='Permanently Embargo',
+                desc='Permanently embargo this request',
+                class_name='default'
+            ),
+            Action(
+                test=can_embargo,
                 link=reverse('foia-embargo', kwargs=kwargs),
                 title=('Unembargo' if self.embargo else 'Embargo'),
                 desc=('Make this request public' if self.embargo else 'Make this request private'),
@@ -679,12 +715,12 @@ class FOIARequest(models.Model):
 
     def contextual_request_actions(self, user):
         '''Provides context-sensitive action interfaces for requests'''
-        is_owner = self.user == user or user.is_staff
-        can_follow_up = is_owner and self.status != 'started'
-        can_appeal = is_owner and self.is_appealable()
+        can_edit = self.editable_by(user) or user.is_staff
+        can_follow_up = can_edit and self.status != 'started'
+        can_appeal = can_edit and self.is_appealable()
         return [
             Action(
-                test=is_owner,
+                test=can_edit,
                 title='Get Advice',
                 desc=u'Get your questions answered by Muckrock’s community of FOIA experts',
                 class_name='modal'

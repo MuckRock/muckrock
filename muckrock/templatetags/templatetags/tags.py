@@ -164,3 +164,8 @@ class EvaluateNode(template.Node):
             return tmpl.render(context)
         except (template.VariableDoesNotExist, template.TemplateSyntaxError):
             return 'Error rendering', self.variable
+
+@register.assignment_tag
+def editable_by(foia, user):
+    """Template tag to call editable by on FOIAs"""
+    return foia.editable_by(user)

@@ -54,7 +54,7 @@ def _foia_action(request, foia, action):
     """Generic helper for FOIA actions"""
     form_class = action.form_class(request, foia)
     # Check that the request belongs to the user
-    if action.must_own and foia.user != request.user and not request.user.is_staff:
+    if action.must_own and not foia.editable_by(request.user) and not request.user.is_staff:
         msg = 'You may only %s your own requests.' % action.msg
         messages.error(request, msg)
         return redirect(foia)
@@ -141,12 +141,33 @@ def delete(request, jurisdiction, jidx, slug, idx):
     return _foia_action(request, foia, action)
 
 @login_required
-def embargo(request, jurisdiction, jidx, slug, idx):
+def permanent_embargo(request, jurisdiction, jidx, slug, idx):
+    foia = _get_foia(jurisdiction, jidx, slug, idx)
+    is_org_member = request.user == foia.user and request.user.get_profile().organization != None
+    if foia.editable_by(request.user) and is_org_member or request.user.is_staff:
+        if foia.embargo == True:
+            if foia.is_permanently_embargoed():
+                foia.permanent_embargo = False
+                msg = 'The permanent embargo on this request has been lifted.'
+            else:
+                foia.permanent_embargo = True
+                msg = 'The request is now permanently embargoed.'
+            messages.success(request, msg)
+            foia.save()
+        else:
+            messages.error(request, 'You may only permanently embargo requests that already have an embargo.')
+    else:
+        messages.error(request, 'Only staff and org members may permanently embargo their requests.')
+    return redirect(foia)
+
+@login_required
+def embargo(request, jurisdiction, jidx, slug, idx, permanent=False):
     """Change the embargo on a request"""
     def form_actions(_, foia, form):
         """Update the embargo date"""
         foia.embargo = True
         foia.date_embargo = form.cleaned_data.get('date_embargo')
+        foia.permanent_embargo = False
         foia.save()
         logger.info(
             'Embargo set by user for FOI Request %d %s to %s',
@@ -158,6 +179,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
     if foia.embargo or foia.status not in finished_status:
         foia.embargo = not foia.embargo
+        foia.permanent_embargo = False
         foia.save()
         return redirect(foia)
     else:
@@ -280,7 +302,8 @@ def follow(request, jurisdiction, jidx, slug, idx):
 def toggle_autofollowups(request, jurisdiction, jidx, slug, idx):
     """Toggle autofollowups"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if foia.user == request.user:
+
+    if foia.editable_by(request.user):
         foia.disable_autofollowups = not foia.disable_autofollowups
         foia.save()
         action = 'disabled' if foia.disable_autofollowups else 'enabled'

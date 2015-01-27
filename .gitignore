@@ -19,3 +19,4 @@ dump.rdb
 .noseids
 .ruby-version
 style.*.css
+.vagrant

@@ -254,6 +254,7 @@ INSTALLED_APPS = (
     'muckrock.qanda',
     'muckrock.crowdfund',
     'muckrock.sidebar',
+    'muckrock.organization',
 )
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)

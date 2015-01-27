@@ -1,7 +1,14 @@
 /* Details */
 
 .detail {
+
     @extend %detail;
+    
+    &.agency {
+        aside dl { @extend %third; }
+        aside dd + dt { margin-top: $base-margin; }
+    }
+    
     &.flatpage {
         h1 {
             font-weight: $bold;
@@ -10,6 +17,13 @@
         max-width: 45em;
         ul { padding-left: $base-padding; }
     }
+    
+    &.jurisdiction {
+        h3 { font-weight: normal; }
+        h3 + table { margin-top: 0; }
+        h3 + h3 { margin-top: 1.5em; }
+    }
+    
     &.news {
         .main {
             h1 {
@@ -88,15 +102,74 @@
             }
         }
     }
-    &.jurisdiction {
-        h3 { font-weight: normal; }
-        h3 + table { margin-top: 0; }
-        h3 + h3 { margin-top: 1.5em; }
+    
+    &.organization {
+        .add-members, .members, .controls {
+            @include row;
+        }
+        .add-members {
+            @include row;
+            margin-bottom: $base-margin;
+            button {
+                @extend %quarter;
+                @include omega(n);
+                margin-top: 0;
+                padding: .5em 1em;
+            }
+            #id_add_members-wrapper {
+                @extend %three-quarters;
+                border: $base-border-width solid $color-grey;
+                border-radius: $base-border-radius;
+                background: white;
+                cursor: text;
+            }
+            input.autocomplete {
+                vertical-align: middle;
+                margin: .25em;
+                padding: .25em;
+                border: none;
+                border-radius: $base-border-radius;
+                background: none;
+            }
+            .deck .hilight {
+                margin: .25em;
+                border-radius: $base-border-radius;
+                padding: .25em;
+                padding-right: .75em;
+                background: $color-primary;
+                color: $color-white;
+            }
+        }
+        .members {
+            display: table;
+            margin: $base-margin 0;
+            border-radius: 0;
+            th {
+                font-size: 1rem;
+            }
+            th:first-child, td:first-child {
+                width: 5%;
+            }
+            th:last-child, th:last-child {
+                width: 95%;
+            }
+        }
+        .controls {
+            @extend %controls;
+            .user-controls, .org-controls {
+                @extend %half;
+            }
+            .user-controls {
+                text-align: left;
+            }
+            @include media($medium-layout){
+                .user-controls + .org-controls {
+                    text-align: right;
+                }
+            }
+        }
     }
-    &.agency {
-        aside dl { @extend %third; }
-        aside dd + dt { margin-top: $base-margin; }
-    }
+    
     &.profile {
         section.meta > header {
             h1 { 
@@ -107,11 +180,13 @@
             dl { margin-top: $base-vertical-rhythm; }
         }
     }
+    
     &.question {
         .messages-container {
             @include row;
         }
     }
+    
     &.request {
         h3 { font-size: 1.25em; }
         .draft {
