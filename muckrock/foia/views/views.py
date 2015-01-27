@@ -58,7 +58,6 @@ class List(ListView):
             'tags': get.get('tags', False)
         }
 
-        # TODO: handle a list of tags
         for key, value in list_filter.iteritems():
             if value:
                 if key == 'status':

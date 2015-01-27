@@ -71,7 +71,7 @@ urlpatterns = patterns(
         views.delete, name='foia-delete'),
     url(r'^%s/embargo/$' % foia_url,
         views.embargo, name='foia-embargo'),
-    url(r'^%s/embargo/permanent$' % foia_url,
+    url(r'^%s/embargo/permanent/$' % foia_url,
         views.permanent_embargo, name='foia-embargo-permanent'),
     url(r'^%s/pay/$' % foia_url,
         views.pay_request, name='foia-pay'),
