@@ -4,7 +4,6 @@ URL mappings for the accounts application
 
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.views.generic.base import RedirectView
 import django.contrib.auth.views as auth_views
 

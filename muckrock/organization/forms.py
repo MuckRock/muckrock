@@ -22,7 +22,7 @@ class OrganizationForm(forms.ModelForm):
         except ObjectDoesNotExist:
             return name
         raise forms.ValidationError('Organization already exists.')
-        
+
     class Meta:
         # pylint: disable=R0903
         model = Organization

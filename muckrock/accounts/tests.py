@@ -3,7 +3,6 @@ Tests using nose for the accounts application
 """
 
 from django.contrib.auth.models import User
-from django.contrib import admin
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
@@ -19,7 +18,7 @@ from mock import Mock, patch
 ## resolve weird django bug ##
 from django.db.models.loading import cache as model_cache
 if not model_cache.loaded:
-    model_cache.get_models() 
+    model_cache.get_models()
 ##############################
 
 from muckrock.accounts.models import Profile
@@ -188,7 +187,7 @@ class TestAccountFunctional(TestCase):
         get_allowed(self.client,
             reverse('acct-register-pro'),
             ['forms/account/subscription.html'])
-        get_allowed(self.client, 
+        get_allowed(self.client,
             reverse('acct-reset-pw'),
             ['forms/account/pw_reset_part1.html', 'forms/base_form.html'])
         get_allowed(self.client,

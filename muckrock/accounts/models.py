@@ -86,7 +86,7 @@ class Profile(models.Model):
     )
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
-    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='users')
+    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='members')
 
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
@@ -230,8 +230,8 @@ class Profile(models.Model):
             )
             self.stripe_id = customer.id
             self.save()
-        finally:
-            return customer
+
+        return customer
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
@@ -255,8 +255,9 @@ class Profile(models.Model):
             customer=customer.id,
             description=desc
         )
-    
+
     def generate_confirmation_key(self):
+        """Generate random key"""
         key = ''.join(choice(string.ascii_letters) for _ in range(24))
         self.confirmation_key = key
         self.save()

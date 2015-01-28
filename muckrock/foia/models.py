@@ -243,7 +243,8 @@ class FOIARequest(models.Model):
         if not self.embargo:
             return False
 
-        if self.is_permanently_embargoed() or not self.embargo_date() or date.today() < self.embargo_date():
+        if self.is_permanently_embargoed() or not self.embargo_date() or \
+                date.today() < self.embargo_date():
             return True
 
         if save:
@@ -253,12 +254,12 @@ class FOIARequest(models.Model):
             self.save()
 
         return False
-    
+
     def embargo_date(self):
         """The date this request comes off of embargo"""
         if self.embargo:
             return self.date_embargo
-    
+
     def is_permanently_embargoed(self):
         """The request is permanently embargoed"""
         if self.embargo:
@@ -266,8 +267,8 @@ class FOIARequest(models.Model):
 
     def editable_by(self, user):
         """Can this user edit this request"""
-        # pylint: disable=unexpected-keyword-arg
-        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() or user.is_staff
+        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() \
+                or user.is_staff
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
@@ -674,7 +675,8 @@ class FOIARequest(models.Model):
         can_edit = self.editable_by(user) or user.is_staff
         can_embargo = not self.is_editable() and can_edit and user.get_profile().can_embargo()
         is_org_member = user == self.user and user.get_profile().organization != None
-        can_permanently_embargo = user.is_staff or is_org_member and self.is_embargo() and not self.is_permanently_embargoed() and can_embargo
+        can_permanently_embargo = user.is_staff or is_org_member and self.is_embargo() \
+            and not self.is_permanently_embargoed() and can_embargo
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -860,6 +862,9 @@ class RawEmail(models.Model):
 
     communication = models.OneToOneField(FOIACommunication)
     raw_email = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return 'Raw Email: %d' % self.pk
 
 
 class FOIANote(models.Model):

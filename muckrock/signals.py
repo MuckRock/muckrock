@@ -5,6 +5,7 @@ Signal processor for haystack
 from celery_haystack.signals import CelerySignalProcessor
 
 class RelatedCelerySignalProcessor(CelerySignalProcessor):
+    """Update the index in real time using celery"""
 
     def handle_save(self, sender, instance, **kwargs):
         if hasattr(instance, 'reindex_related'):
