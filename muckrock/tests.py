@@ -28,8 +28,7 @@ def get_allowed(client, url, templates=None, base='base.html', context=None, red
         nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
 
     if templates:
-        resp_ts = [t.name for t in response.templates[:3]
-                   if t.name != 'compressor/css_file.html']
+        resp_ts = [t.name for t in response.templates[:len(templates)+1]]
         nose.tools.eq_(resp_ts, templates + [base])
 
     if context:
