@@ -27,9 +27,6 @@ from muckrock.settings import MAILGUN_ACCESS_KEY
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=bad-continuation
-# pylint: disable=broad-except
-
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
@@ -51,9 +48,27 @@ def _make_orphan_comm(from_, to_, post, files, foia):
             _upload_file(None, comm, file_, from_)
     return comm
 
+def _handle_orphan(msg, from_, to_, post, files, foia, mail_id=None):
+    """Make orphan comm and notify about it"""
+    # pylint: disable=too-many-arguments
+    logger.warning('%s: %s', msg, from_)
+    comm = _make_orphan_comm(from_, to_, post, files, foia)
+    extra_content = ['https://www.muckrock.com' + reverse('foia-orphans')]
+    if mail_id:
+        extra_content.append('Target address: %s@requests.muckrock.com' % mail_id)
+    if foia:
+        extra_content.append(
+            'Probable request: https://www.muckrock.com' +
+            reverse('admin:foia_foiarequest_change', args=(foia.pk,)))
+        extra_content.append(
+            'Move this comm to that request: https://www.muckrock.com' +
+            reverse('foia-orphans') + ('?comm_id=%s' % comm.pk))
+    _forward(post, files, msg, extra_content='\n'.join(extra_content))
+
 @csrf_exempt
 def handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
+    # pylint: disable=broad-except
 
     post = request.POST
     if not _verify(post):
@@ -70,16 +85,7 @@ def handle_request(request, mail_id):
         if foia.block_incoming:
             msg = 'Incoming Blocked'
         if not _allowed_email(from_email, foia) or foia.block_incoming:
-            logger.warning('%s: %s', msg, from_)
-            comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
-            extra_content = ['https://www.muckrock.com' + reverse('foia-orphans')]
-            extra_content.append(
-                'Probable request: https://www.muckrock.com' +
-                reverse('admin:foia_foiarequest_change', args=(foia.pk,)))
-            extra_content.append(
-                'Move this comm to that request: https://www.muckrock.com' +
-                reverse('foia-orphans') + ('?comm_id=%s' % comm.pk))
-            _forward(post, request.FILES, msg, extra_content=extra_content)
+            _handle_orphan(msg, from_, to_, post, request.FILES, foia)
             return HttpResponse('WARNING')
 
         comm = FOIACommunication.objects.create(
@@ -128,18 +134,7 @@ def handle_request(request, mail_id):
             foia = FOIARequest.objects.get(pk=mail_id.split('-')[0])
         except FOIARequest.DoesNotExist:
             pass
-        comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
-        extra_content = ['https://www.muckrock.com' + reverse('foia-orphans')]
-        extra_content.append('Target address: %s@requests.muckrock.com' % mail_id)
-        if foia:
-            extra_content.append(
-                'Probable request: https://www.muckrock.com' +
-                reverse('admin:foia_foiarequest_change', args=(foia.pk,)))
-            extra_content.append(
-                'Move this comm to that request: https://www.muckrock.com' +
-                reverse('foia-orphans') + ('?comm_id=%s' % comm.pk))
-        _forward(post, request.FILES, 'Invalid Address',
-                extra_content='\n'.join(extra_content))
+        _handle_orphan('Invalid Address', from_, to_, post, request.FILES, foia, mail_id)
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward

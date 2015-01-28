@@ -112,6 +112,8 @@ def update(request):
 
 def subscribe(request):
     #pylint: disable=too-many-statements
+    #pylint: disable=too-many-branches
+    # this needs to be refactored
     """Subscribe or unsubscribe from a pro account"""
 
     call_to_action = 'Go Pro!'
