@@ -14,17 +14,17 @@ urlpatterns = patterns(
         name='org-index'
     ),
     url(
-        r'^create$',
+        r'^create/$',
         views.create_organization,
         name='org-create'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)$',
+        r'^(?P<slug>[\w\d_-]+)/$',
         views.Detail.as_view(),
         name='org-detail'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)/delete$',
+        r'^(?P<slug>[\w\d_-]+)/delete/$',
         views.delete_organization,
         name='org-delete'
     ),

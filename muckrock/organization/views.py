@@ -32,7 +32,7 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         organization = context['organization']
         user = self.request.user
-        member_accounts = [profile.user for profile in organization.get_members()]
+        member_accounts = [profile.user for profile in organization.members.all()]
         if user.is_authenticated():
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
@@ -46,7 +46,7 @@ class Detail(DetailView):
         return context
 
     def post(self, request, **kwargs):
-        # pylint: disable=line-too-long
+        # pylint: disable=no-self-use
         """Handle form submission for adding and removing users"""
         organization = get_object_or_404(Organization, slug=kwargs['slug'])
         action = request.POST.get('action', '')
@@ -72,19 +72,19 @@ def _add_members(request, organization):
     if form.is_valid():
         new_members = form.cleaned_data['add_members']
         new_member_count = len(new_members)
-        existing_member_count = len(organization.get_members())
+        existing_member_count = organization.members.count()
         # limit org membership to 50 users
         if new_member_count <= (50 - existing_member_count):
             for new_member in new_members:
                 organization.add_member(new_member)
             msg = 'You granted membership to %s ' % new_member_count
             msg += 'person.' if new_member_count == 1 else 'people.'
-            messages.success(request, msg)            
+            messages.success(request, msg)
         else:
             error_msg = ('You currently have %s members in your organization '
                          'but you are limited to 50. If you want to exceed this '
                          'limit, please contact us at info@muckrock.com' % existing_member_count)
-            messages.error(request, error_msg);
+            messages.error(request, error_msg)
     return
 
 def _remove_members(request, organization):
@@ -101,10 +101,9 @@ def _remove_members(request, organization):
 @login_required
 def create_organization(request):
     """Creates an organization, setting the user who created it as the owner"""
-    if request.method == 'POST':        
+    if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
-            # TODO: Add payments to org creation
             stripe_token = request.POST.get('stripe_token', None)
             user = request.user
             profile = user.get_profile()
@@ -125,7 +124,7 @@ def create_organization(request):
             return redirect(organization)
     else:
         form = OrganizationForm()
-    
+
     # check if user already owns an org
     other_org = Organization.objects.filter(owner=request.user)
     if other_org:
@@ -147,7 +146,7 @@ def delete_organization(request, **kwargs):
     """Deletes an organization by removing its users and cancelling its plan"""
     organization = get_object_or_404(Organization, slug=kwargs['slug'])
     if organization.is_owned_by(request.user) or request.user.is_staff:
-        members = organization.get_members()
+        members = organization.members.all()
         for member in members:
             member.organization = None
             member.save()

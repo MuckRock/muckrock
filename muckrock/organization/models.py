@@ -45,20 +45,12 @@ class Organization(models.Model):
             self.save()
         return self.num_requests
 
-    def get_members(self):
-        """Get a queryset of profiles who are members of the organization"""
-        # TODO: fix scope bug
-        # Profile is imported here because Python says it can't find
-        # muckrock.accounts.models.Profile when the import statement
-        # is scoped at the file or class level? A bug to look into.
-        from muckrock.accounts.models import Profile
-        return Profile.objects.filter(organization=self)
-
     def is_owned_by(self, user):
         """Answers whether the passed user owns the org"""
         return self.owner == user
-    
+
     def is_active(self):
+        """Is this organization active?"""
         return self.active
 
     def add_member(self, user):
@@ -87,7 +79,7 @@ class Organization(models.Model):
 
     def remove_member(self, user):
         """Remove a user (who isn't the owner) from this organization"""
-        if not self.is_owned_by(user):      
+        if not self.is_owned_by(user):
             profile = user.get_profile()
             profile.organization = None
             profile.save()
@@ -105,7 +97,8 @@ class Organization(models.Model):
                 bcc=['diagnostics@muckrock.com']
             )
             email.send(fail_silently=False)
-            logger.info('%s was removed as a member of the %s organization', user.username, self.name)
+            logger.info('%s was removed as a member of the %s organization',
+                user.username, self.name)
         return
 
     def start_subscription(self):

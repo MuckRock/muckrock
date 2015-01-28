@@ -1,8 +1,8 @@
 """
 Context processors to ensure data is displayed in sidebar for all views
 """
-# from django.core.exceptions import DoesNotExist
 
+from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.sidebar.models import Sidebar
 
@@ -28,7 +28,7 @@ def sidebar_message(request):
     user = request.user
     try:
         user_class = user.get_profile().acct_type if user.is_authenticated() else 'anonymous'
-    except Exception:
+    except Profile.DoesNotExist:
         user_class = 'anonymous'
     message = Sidebar.objects.get_text(user_class)
     return {'broadcast': message}

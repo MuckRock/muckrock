@@ -14,13 +14,11 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime, date, timedelta
-from random import choice
+from datetime import datetime
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
 import logging
-import string
 import stripe
 import sys
 
@@ -63,7 +61,8 @@ def register(request):
                 render_to_string('text/user/welcome.txt', {
                     'user': new_user,
                     'verification_code': new_user.get_profile().generate_confirmation_key,
-                    'verificaiton_link': new_user.get_profile().wrap_url(reverse('acct-verify-email'))
+                    'verificaiton_link': new_user.get_profile().wrap_url(
+                        reverse('acct-verify-email'))
                 }),
                 'info@muckrock.com',
                 [new_user.email],
@@ -113,6 +112,8 @@ def update(request):
 
 def subscribe(request):
     #pylint: disable=too-many-statements
+    #pylint: disable=too-many-branches
+    # this needs to be refactored
     """Subscribe or unsubscribe from a pro account"""
 
     call_to_action = 'Go Pro!'
@@ -164,7 +165,7 @@ def subscribe(request):
                 user_profile.save()
                 msg = 'Congratulations, you are now subscribed as a pro user!'
                 messages.success(request, msg)
-                request.session['ga'] = ('pro',  sub.id)
+                request.session['ga'] = ('pro', sub.id)
                 logger.info('%s has subscribed to a pro account.', request.user.username)
             except stripe.CardError as exc:
                 msg = 'Payment error. Your card has not been charged.'
@@ -233,7 +234,7 @@ def buy_requests(request):
             user_profile.save()
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
-            request.session['ga'] = ('buy_requests',  charge.id)
+            request.session['ga'] = ('buy_requests', charge.id)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'
@@ -249,13 +250,13 @@ def buy_requests(request):
 def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
-    profile = user.get_profile()
+    prof = user.get_profile()
     key = request.GET.get('key')
-    if not profile.email_confirmed:
+    if not prof.email_confirmed:
         if key:
-            if key == profile.confirmation_key:                
-                profile.email_confirmed = True
-                profile.save()
+            if key == prof.confirmation_key:
+                prof.email_confirmed = True
+                prof.save()
                 messages.success(request, 'Your email address has been confirmed.')
             else:
                 messages.error(request, 'Your confirmation key is invalid.')
@@ -264,7 +265,7 @@ def verify_email(request):
                 'Verify Your MuckRock Email',
                 render_to_string('text/user/verify_email.txt', {
                     'user': user,
-                    'verification_code': profile.generate_confirmation_key()
+                    'verification_code': prof.generate_confirmation_key()
                 }),
                 'info@muckrock.com',
                 [user.email],
@@ -273,7 +274,7 @@ def verify_email(request):
             messages.info(request, 'We just sent you an email containing your verification link.')
     else:
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
-    return redirect(profile)
+    return redirect(prof)
 
 def profile(request, user_name=None):
     """View a user's profile"""

@@ -27,9 +27,9 @@ def get_allowed(client, url, templates=None, base='base.html', context=None, red
     if redirect:
         nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
 
-    # make sure first 3 match (4th one might be form.html, not important)
     if templates:
-        nose.tools.eq_([t.name for t in response.templates][:3], templates + [base])
+        resp_ts = [t.name for t in response.templates[:len(templates)+1]]
+        nose.tools.eq_(resp_ts, templates + [base])
 
     if context:
         for key, value in context.iteritems():

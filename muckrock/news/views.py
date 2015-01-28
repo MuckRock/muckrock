@@ -12,7 +12,6 @@ import django_filters
 
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
-from muckrock.sidebar.models import Sidebar
 
 # pylint: disable=R0901
 
@@ -33,7 +32,8 @@ class NewsDetail(DateDetailView):
 
     def get_context_data(self, **kwargs):
         context = super(NewsDetail, self).get_context_data(**kwargs)
-        context['sidebar_admin_url'] = reverse('admin:news_article_change', args=(context['object'].pk,))
+        context['sidebar_admin_url'] = reverse('admin:news_article_change',
+            args=(context['object'].pk,))
         return context
 
 
