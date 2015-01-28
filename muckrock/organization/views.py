@@ -104,7 +104,6 @@ def create_organization(request):
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
-            # TODO: Add payments to org creation
             stripe_token = request.POST.get('stripe_token', None)
             user = request.user
             profile = user.get_profile()
