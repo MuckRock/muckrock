@@ -1,3 +1,4 @@
+[ ![Codeship Status for MuckRock/muckrock](https://codeship.com/projects/c14392c0-630c-0132-1e4c-4ad47cf4b99f/status?branch=master)](https://codeship.com/projects/52228)
 
 1. Check out the repository from github:
 	1. Create a github account and have us give you access to the muckrock repository
