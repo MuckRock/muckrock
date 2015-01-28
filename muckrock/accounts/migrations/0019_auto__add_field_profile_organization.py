@@ -7,6 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
 
+    depends_on = (
+        ('organization', '0001_initial'),
+    )
+
     def forwards(self, orm):
         # Adding field 'Profile.organization'
         db.add_column(u'accounts_profile', 'organization',
