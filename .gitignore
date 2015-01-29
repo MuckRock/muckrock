@@ -7,6 +7,7 @@
 whoosh
 htmlcov
 static
+CACHE
 gitfix
 apache
 *.sw*
