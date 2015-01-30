@@ -19,6 +19,13 @@ class OrganizationAdminForm(forms.ModelForm):
         required=False
     )
     
+    def clean_owner(self):
+        """Ensures name is unique"""
+        owner = self.cleaned_data['owner']
+        if not owner:
+            raise forms.ValidationError('Organization must have an owner.')
+        return owner
+    
     class Meta:
         # pylint: disable=R0903
         model = Organization
