@@ -73,7 +73,7 @@ def list_(request):
     """List of popular agencies"""
     agencies = Agency.objects.annotate(num_requests=Count('foiarequest')) \
                              .order_by('-num_requests')[:10]
-    context = {'agencies': agencies}
+    context = {'object_list': agencies}
 
     return render_to_response('lists/agency_list.html', context,
                               context_instance=RequestContext(request))

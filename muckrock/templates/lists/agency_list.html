@@ -4,13 +4,18 @@
 {% block list-title %}<h1>Agencies</h1>{% endblock list-title %}
 {% block type %}agency{% endblock type %}
 
-{% block list %}
+{% block list-head %}
+<tr>
+    <th>Name</th>
+    <th>Jurisdiction</th>
+</tr>
+{% endblock list-head %}
 
-<h2>Most Popular</h2>
-<ul>
-{% for agency in agencies %}
-	<li><a href="{% url 'agency-detail' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.pk slug=agency.slug %}">{{ agency.name }}</a></li>
-{% endfor %}
-</ul>
-
-{% endblock list %}
+{% block list-item %}
+{% if item.approved %}
+<tr>
+	<td><a href="{% url 'agency-detail' jurisdiction=item.jurisdiction.slug jidx=item.jurisdiction.pk idx=item.pk slug=item.slug %}">{{ item }}</a></td>
+	<td>{{ item.jurisdiction }}</td>
+</tr>
+{% endif %}
+{% endblock list-item %}
