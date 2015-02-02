@@ -827,7 +827,6 @@ class FOIACommunication(models.Model):
         blank=True,
         null=True
     )
-    raw_email = models.TextField(blank=True)
 
     reindex_related = ('foia',)
 
