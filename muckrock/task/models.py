@@ -3,6 +3,8 @@ Models for the Task application
 """
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
+from django.db.models.loading import get_model
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -34,6 +36,7 @@ class OrphanTask(Task):
     address = models.CharField(max_length=255)
 
     def __unicode__(self):
+        # pylint: disable=no-member
         return '%s: %s' % (self.get_reason_display(), self.communication.foia)
 
 
@@ -45,6 +48,7 @@ class SnailMailTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
+        # pylint: disable=no-member
         return '%s: %s' % (self.get_category_display(), self.communication.foia)
 
 
@@ -67,9 +71,12 @@ class RejectedEmailTask(Task):
 
     def foias(self):
         """Get the FOIAs who use this email address"""
+        # to avoid circular dependencies
+        # pylint: disable=invalid-name
+        FOIARequest = get_model('foia', 'FOIARequest')
         return FOIARequest.objects\
-                .filter(Q(email__iexact=recipient) |
-                        Q(other_emails__icontains=recipient))\
+                .filter(Q(email__iexact=self.email) |
+                        Q(other_emails__icontains=self.email))\
                 .filter(status__in=['ack', 'processed', 'appealing',
                                     'fix', 'payment'])
 
@@ -119,4 +126,5 @@ class ResponseTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
+        # pylint: disable=no-member
         return 'Response: %s' % (self.communication.foia)
