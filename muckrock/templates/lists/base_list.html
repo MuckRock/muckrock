@@ -4,6 +4,7 @@
 This is the parent style for a collection of objects: a collection of blog posts, FOI requests, questions, agencies, jurisdictions, users, etc.
 
 {% endcomment %}
+
 {% block content %}
     <section class="{% block type %}item{% endblock type %} collection">
 
@@ -21,26 +22,28 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% endblock filters %}
         </section>
         
-        {% include 'lib/pagination.html' %}
+    {% include 'lib/pagination.html' %}
         
-        {% block list %}
-        <ul class="list">
-            {% for item in object_list %}
-            <li>
-                {% block list-item %}
-                <h2>
+    {% block list %}
+        <table class="list">
+            {% block list-head %}
+            {% endblock list-head %}
+        {% for item in object_list %}
+            {% block list-item %}
+            <tr>
+                <td>
                     <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
-                </h2>
-                {% endblock list-item %}
-            </li>
-            {% empty %}
-            <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
-            {% endfor %}
-        </ul>
-        {% endblock list %}
+                </td>
+            </tr>
+            {% endblock list-item %}
+        {% empty %}
+            <tr class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</tr>
+        {% endfor %}
+        </table>
+    {% endblock list %}
         
-        {% if page_obj.object_list|length > 3 %}
-            {% include 'lib/pagination.html' %}
-        {% endif %}
+    {% if object_list|length > 3 %}
+        {% include 'lib/pagination.html' %}
+    {% endif %}
     </section>
 {% endblock %}
