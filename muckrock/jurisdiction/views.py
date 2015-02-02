@@ -57,7 +57,8 @@ def detail(request, fed_slug, state_slug, local_slug):
         'jurisdiction': jurisdiction,
         'foia_requests': foia_requests,
         'form': form,
-        'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change', args=(jurisdiction.pk,)),
+        'sidebar_admin_url': reverse('admin:jurisdiction_jurisdiction_change',
+            args=(jurisdiction.pk,)),
     }
 
     collect_stats(jurisdiction, context)

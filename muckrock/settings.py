@@ -124,11 +124,6 @@ else:
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
-    # un comment out to precompress
-    #BUCKET_NAME = 'muckrock'
-    #STATIC_URL = 'https://' + BUCKET_NAME + '.s3.amazonaws.com/'
-    #COMPRESS_ENABLED = True
-
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -255,6 +250,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.organization',
 )
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)

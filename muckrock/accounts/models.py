@@ -8,17 +8,20 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
-from easy_thumbnails.fields import ThumbnailerImageField
-from datetime import datetime
-from itertools import groupby
-from urlauth.models import AuthKey
-import dbsettings
-import stripe
-
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
+
+from easy_thumbnails.fields import ThumbnailerImageField
+from datetime import datetime
+import dbsettings
+from itertools import groupby
+from random import choice
+import string
+import stripe
+from urlauth.models import AuthKey
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -83,6 +86,13 @@ class Profile(models.Model):
     )
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
+    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='members')
+
+    # email confirmation
+    email_confirmed = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=24, blank=True)
+
+    # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
     public_email = models.EmailField(max_length=255, blank=True)
@@ -136,6 +146,10 @@ class Profile(models.Model):
         # pylint: disable=E1101
         return ('acct-profile', [], {'user_name': self.user.username})
 
+    def is_member_of(self, organization):
+        """Answers whether the profile is a member of the passed organization"""
+        return self.organization == organization
+
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
         not_this_month = self.date_update.month != datetime.now().month
@@ -149,10 +163,16 @@ class Profile(models.Model):
 
     def total_requests(self):
         """Get sum of paid for requests and monthly requests"""
-        return self.num_requests + self.get_monthly_requests()
+        org_reqs = self.organization.get_requests() if self.organization else 0
+        return self.num_requests + self.get_monthly_requests() + org_reqs
 
     def make_request(self):
         """Decrement the user's request amount by one"""
+        organization = self.organization
+        if organization and organization.get_requests() > 0:
+            organization.num_requests -= 1
+            organization.save()
+            return True
         if self.get_monthly_requests() > 0:
             self.monthly_requests -= 1
         elif self.num_requests > 0:
@@ -164,7 +184,17 @@ class Profile(models.Model):
 
     def multiple_requests(self, num):
         """How many requests of each type would be used for this user to make num requests"""
-        request_dict = {'monthly_requests': 0, 'reg_requests': 0, 'extra_requests': 0}
+        request_dict = {'org_requests': 0, 'monthly_requests': 0,
+                        'reg_requests': 0, 'extra_requests': 0}
+
+        org_reqs = self.organization.get_requests()
+        if org_reqs > num:
+            request_dict['org_requests'] = num
+            return request_dict
+        else:
+            request_dict['org_requests'] = org_reqs
+            num -= org_reqs
+
         monthly = self.get_monthly_requests()
         if monthly > num:
             request_dict['monthly_requests'] = num
@@ -172,6 +202,7 @@ class Profile(models.Model):
         else:
             request_dict['monthly_requests'] = monthly
             num -= monthly
+
         if self.num_requests > num:
             request_dict['reg_requests'] = num
             return request_dict
@@ -182,7 +213,7 @@ class Profile(models.Model):
 
     def can_embargo(self):
         """Is this user allowed to embargo?"""
-        return self.acct_type in ['admin', 'beta', 'pro', 'proxy']
+        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
 
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
@@ -199,8 +230,8 @@ class Profile(models.Model):
             )
             self.stripe_id = customer.id
             self.save()
-        finally:
-            return customer
+
+        return customer
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
@@ -224,6 +255,13 @@ class Profile(models.Model):
             customer=customer.id,
             description=desc
         )
+
+    def generate_confirmation_key(self):
+        """Generate random key"""
+        key = ''.join(choice(string.ascii_letters) for _ in range(24))
+        self.confirmation_key = key
+        self.save()
+        return key
 
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later

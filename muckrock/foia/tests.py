@@ -215,7 +215,7 @@ class TestFOIAFunctional(TestCase):
         response = get_allowed(self.client, reverse('foia-list'),
                 ['lists/request_list.html', 'lists/base_list.html'])
         nose.tools.eq_(set(response.context['object_list']),
-            set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:10]))
+            set(FOIARequest.objects.get_viewable(AnonymousUser()).order_by('-date_submitted')[:12]))
 
     def test_foia_list_user(self):
         """Test the foia-list-user view"""
@@ -232,16 +232,14 @@ class TestFOIAFunctional(TestCase):
     def test_foia_sorted_list(self):
         """Test sorting on foia-list view"""
 
-        for field, attr in [('title', 'title'), ('user', 'user.username'),
-                            ('status', 'status'), ('jurisdiction', 'jurisdiction.name')]:
+        for field in ['title', 'date_submitted', 'times_viewed']:
             for order in ['asc', 'desc']:
-
                 response = get_allowed(self.client, reverse('foia-list') +
-                                       '?field=%s&order=%s' % (field, order),
+                                       '?sort=%s&order=%s' % (field, order),
                                        ['lists/request_list.html', 'lists/base_list.html'])
                 nose.tools.eq_([f.title for f in response.context['object_list']],
                                [f.title for f in sorted(response.context['object_list'],
-                                                        key=attrgetter(attr),
+                                                        key=attrgetter(field),
                                                         reverse=order=='desc')])
 
     def test_foia_detail(self):
@@ -275,7 +273,7 @@ class TestFOIAFunctional(TestCase):
         """Test private views while not logged in"""
 
         foia = FOIARequest.objects.get(pk=2)
-        get_post_unallowed(self.client, reverse('foia-update',
+        get_post_unallowed(self.client, reverse('foia-draft',
                                            kwargs={'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk,
                                                    'idx': foia.pk, 'slug': foia.slug}))
@@ -288,26 +286,19 @@ class TestFOIAFunctional(TestCase):
 
         # get authenticated pages
         get_allowed(self.client, reverse('foia-create'),
-                    ['forms/foia/create.html', 'base.html'] ,
-                    base='compressor/css_file.html')
+                    ['forms/foia/create.html'])
 
-        get_allowed(self.client, reverse('foia-update',
+        get_allowed(self.client, reverse('foia-draft',
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
                                             'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
-                    ['foia/foiarequest_form.html', 'foia/base-submit.html'])
+                    ['forms/foia/draft.html', 'forms/base_form.html'])
 
-        get_404(self.client, reverse('foia-update',
+        get_404(self.client, reverse('foia-draft',
                                 kwargs={'jurisdiction': foia.jurisdiction.slug,
                                         'jidx': foia.jurisdiction.pk,
                                         'idx': foia.pk, 'slug': 'bad_slug'}))
 
-        # post authenticated pages
-        post_allowed_bad(self.client, reverse('foia-update',
-                                         kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                                 'jidx': foia.jurisdiction.pk,
-                                                 'idx': foia.pk, 'slug': foia.slug}),
-                         ['foia/foiarequest_form.html', 'foia/base-submit.html'])
 
     def test_foia_submit_views(self):
         """Test submitting a FOIA request"""
@@ -319,18 +310,19 @@ class TestFOIAFunctional(TestCase):
         # test for submitting a foia request for enough credits
         # tests for the wizard
 
-        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit Request',
+        foia_data = {'title': 'test a', 'request': 'updated request', 'submit': 'Submit',
                      'agency': agency.pk, 'combo-name': agency.name}
 
-        post_allowed(self.client,
-                     reverse('foia-update',
-                             kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                     'jidx': foia.jurisdiction.pk,
-                                     'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data,
-                     reverse('foia-detail', kwargs={'jurisdiction': 'massachusetts',
-                                                    'jidx': foia.jurisdiction.pk,
-                                                    'idx': foia.pk, 'slug': 'test-a'}))
+        kwargs = {'jurisdiction': foia.jurisdiction.slug,
+                  'jidx': foia.jurisdiction.pk,
+                  'idx': foia.pk, 'slug': foia.slug}
+        draft = reverse('foia-draft', kwargs=kwargs)
+        kwargs = {'jurisdiction': foia.jurisdiction.slug,
+                  'jidx': foia.jurisdiction.pk,
+                  'idx': foia.pk, 'slug': 'test-a'}
+        detail = reverse('foia-detail', kwargs=kwargs)
+        post_allowed(self.client, draft, foia_data, detail)
+
         foia = FOIARequest.objects.get(title='test a')
         nose.tools.ok_(foia.first_request().startswith('updated request'))
         nose.tools.eq_(foia.status, 'submitted')
@@ -339,25 +331,23 @@ class TestFOIAFunctional(TestCase):
         """Test saving a FOIA request"""
 
         foia = FOIARequest.objects.get(pk=6)
-        agency = Agency.objects.get(pk=2)
         self.client.login(username='bob', password='abc')
 
-        foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save as Draft',
-                     'agency': agency.pk, 'combo-name': agency.name}
+        foia_data = {'title': 'Test 6', 'request': 'saved request', 'submit': 'Save'}
 
-        post_allowed(self.client,
-                     reverse('foia-update',
-                             kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                     'jidx': foia.jurisdiction.pk,
-                                     'idx': foia.pk, 'slug': foia.slug}),
-                     foia_data,
-                     reverse('foia-detail', kwargs={'jurisdiction': foia.jurisdiction.slug,
-                                                    'jidx': foia.jurisdiction.pk,
-                                                    'idx': foia.pk, 'slug': foia.slug}))
+        kwargs = {'jurisdiction': foia.jurisdiction.slug,
+                  'jidx': foia.jurisdiction.pk,
+                  'idx': foia.pk, 'slug': foia.slug}
+        draft = reverse('foia-draft', kwargs=kwargs)
+        detail = reverse('foia-detail', kwargs=kwargs)
+        chain = [('http://testserver' + url, 302) for url in (detail, draft)]
+        response = self.client.post(draft, foia_data, follow=True)
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.eq_(response.redirect_chain, chain)
+
         foia = FOIARequest.objects.get(title='Test 6')
         nose.tools.ok_(foia.first_request().startswith('saved request'))
         nose.tools.eq_(foia.status, 'started')
-        nose.tools.eq_(foia.agency.pk, 2)
 
     def test_action_views(self):
         """Test action views"""

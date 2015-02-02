@@ -4,8 +4,8 @@ URL mappings for the accounts application
 
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
-import django.contrib.auth.views as auth_views
 from django.views.generic.base import RedirectView
+import django.contrib.auth.views as auth_views
 
 import muckrock.accounts.views as views
 
@@ -37,6 +37,7 @@ urlpatterns = patterns(
     url(r'^register/$', views.register, name='acct-register'),
     url(r'^subscribe/$', views.subscribe, name='acct-subscribe'),
     url(r'^update/$', views.update, name='acct-update'),
+    url(r'^verify_email/$', views.verify_email, name='acct-verify-email'),
     url(r'^buy_requests/$', views.buy_requests, name='acct-buy-requests'),
     url(r'^stripe_webhook/$', views.stripe_webhook, name='acct-webhook'),
     url(r'^stripe_webhook_v2/$', views.stripe_webhook_v2, name='acct-webhook-v2'),

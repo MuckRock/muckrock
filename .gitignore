@@ -1,3 +1,4 @@
+.DS_Store
 .bundle
 .noseids
 .ruby-version
@@ -7,6 +8,7 @@
 whoosh
 htmlcov
 static
+CACHE
 gitfix
 apache
 *.sw*
@@ -19,3 +21,4 @@ dump.rdb
 .noseids
 .ruby-version
 style.*.css
+.vagrant

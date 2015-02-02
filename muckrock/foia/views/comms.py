@@ -122,6 +122,7 @@ def resend_comm(request, next_):
 @user_passes_test(lambda u: u.is_staff)
 def raw(request, idx):
     """Get the raw email for a communication"""
+    # pylint: disable=unused-argument
     comm = get_object_or_404(FOIACommunication, pk=idx)
     if not comm.rawemail:
         raise Http404()

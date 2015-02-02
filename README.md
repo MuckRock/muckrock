@@ -1,3 +1,4 @@
+[ ![Codeship Status for MuckRock/muckrock](https://codeship.com/projects/c14392c0-630c-0132-1e4c-4ad47cf4b99f/status?branch=master)](https://codeship.com/projects/52228)
 
 1. Check out the repository from github:
 	1. Create a github account and have us give you access to the muckrock repository
@@ -23,7 +24,7 @@
 	1. Run `./manage.py runserver 0.0.0.0:8000`
 	2. Navigate your web browser (from the hostt machine) to http://127.0.0.1:8000
 	3. Run `./manage.py celeryd` to start a celery process to run delayed tasks
-
+    4. Run `python -m smtpd -n -c DebuggingServer localhost:1025` to start a dummy email server
 6. Install the heroku toolbelt
 	1. https://toolbelt.heroku.com/
 	2. Set up a heroku remote branch so you can deploy your code: https://devcenter.heroku.com/articles/git#creating-a-heroku-remote

@@ -28,9 +28,6 @@ from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask
 
 logger = logging.getLogger(__name__)
 
-# pylint: disable=bad-continuation
-# pylint: disable=broad-except
-
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
@@ -55,6 +52,7 @@ def _make_orphan_comm(from_, to_, post, files, foia):
 @csrf_exempt
 def handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
+    # pylint: disable=broad-except
 
     post = request.POST
     if not _verify(post):
@@ -126,8 +124,6 @@ def handle_request(request, mail_id):
             reason='ia',
             communication=comm,
             address=mail_id)
-        _forward(post, request.FILES, 'Invalid Address',
-                extra_content='\n'.join(extra_content))
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward

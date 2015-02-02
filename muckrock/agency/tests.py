@@ -7,8 +7,7 @@ from django.test import TestCase
 import nose.tools
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest
-from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
+from muckrock.tests import get_allowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
@@ -95,66 +94,3 @@ class TestAgencyViews(TestCase):
                         kwargs={'jurisdiction': agency.jurisdiction.slug,
                                 'jidx': self.agency.jurisdiction.pk,
                                 'slug': agency.slug, 'idx': agency.pk}))
-
-    def test_update(self):
-        """Test the update view"""
-
-        agency = Agency.objects.get(pk=3)
-
-        get_post_unallowed(self.client,
-                           reverse('agency-update',
-                                   kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                           'jidx': agency.jurisdiction.pk,
-                                           'slug': agency.slug, 'idx': agency.pk}))
-
-        self.client.login(username='adam', password='abc')
-        get_allowed(self.client,
-                    reverse('agency-update',
-                            kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                    'jidx': agency.jurisdiction.pk,
-                                    'slug': agency.slug, 'idx': agency.pk}),
-                    ['agency/agency_form.html', 'agency/base.html'])
-
-        get_allowed(self.client,
-                    reverse('agency-update',
-                            kwargs={'jurisdiction': self.agency.jurisdiction.slug,
-                                    'jidx': self.agency.jurisdiction.pk,
-                                    'slug': self.agency.slug, 'idx': self.agency.pk}),
-                    redirect=reverse('foia-mylist', kwargs={'view': 'all'}))
-
-        get_404(self.client, reverse('agency-update',
-                                     kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                             'jidx': agency.jurisdiction.pk,
-                                             'slug': 'fake-slug', 'idx': agency.pk}))
-
-        post_allowed_bad(self.client,
-                         reverse('agency-update',
-                                 kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                         'jidx': agency.jurisdiction.pk,
-                                         'slug': agency.slug, 'idx': agency.pk}),
-                         ['agency/agency_form.html', 'agency/base.html'])
-
-        agency_data = {'name': agency.name,
-                       'jurisdiction': agency.jurisdiction.pk,
-                       'address': agency.address,
-                       'email': 'test@example.com',
-                       'url': agency.url,
-                       'phone': agency.phone,
-                       'fax': agency.fax,
-                      }
-        post_allowed(self.client,
-                     reverse('agency-update',
-                             kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                     'jidx': agency.jurisdiction.pk,
-                                     'slug': agency.slug, 'idx': agency.pk}),
-                     agency_data, reverse('foia-mylist', kwargs={'view': 'all'}))
-        foia = FOIARequest.objects.get(pk=1)
-        post_allowed(self.client,
-                     reverse('agency-update',
-                             kwargs={'jurisdiction': agency.jurisdiction.slug,
-                                     'jidx': agency.jurisdiction.pk,
-                                     'slug': agency.slug, 'idx': agency.pk})
-                     + '?foia=%d' % foia.pk,
-                     agency_data, foia.get_absolute_url())
-        agency = Agency.objects.get(pk=3)
-        nose.tools.eq_(agency.email, 'test@example.com')

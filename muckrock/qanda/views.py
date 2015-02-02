@@ -71,7 +71,8 @@ class Detail(DetailView):
             context['follow_label'] = 'Unfollow'
         else:
             context['follow_label'] = 'Follow'
-        context['sidebar_admin_url'] = reverse('admin:qanda_question_change', args=(context['object'].pk,))
+        context['sidebar_admin_url'] = reverse('admin:qanda_question_change',
+            args=(context['object'].pk,))
         return context
 
 

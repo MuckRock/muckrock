@@ -6,8 +6,12 @@
 {% block type %}profile{% endblock type %}
 
 {% block header %}
-    <h1>{{user_obj.get_full_name}}</h1>
-    <h2>{{user_obj.username}}</h2>
+    <h1>{{user_obj.get_full_name}} <small>({{user_obj.username}})</small></h1>
+    {% with user_obj.get_profile.organization as org %}
+        {% if org %}
+        <p>{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
+        {% endif %}
+    {% endwith %}
 {% endblock header %}
 
 {% block aside %}
@@ -64,9 +68,20 @@
                 data-form="#buy-requests"
                 data-label=""
                 class="checkout-button primary">Buy Requests</button>
+        {% if not user_obj.get_profile.email_confirmed %}
+        <a href="{% url 'acct-verify-email' %}" class="button">Verify Email</a>
+        {% endif %}
         <a href="{% url 'acct-update' %}" class="button">Settings</a>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
+    {% with user_obj.get_profile.organization as org %}
+        {% if org and org.owner == user_obj %}
+        <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
+        {% else %}
         <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
+        {% endif %}
+    {% endwith %}
+    
+        
     </div>
 </section>
 {% endif %}

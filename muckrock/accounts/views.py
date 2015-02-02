@@ -56,6 +56,18 @@ def register(request):
                 monthly_requests=0,
                 date_update=datetime.now()
             )
+            send_mail(
+                'Welcome to MuckRock',
+                render_to_string('text/user/welcome.txt', {
+                    'user': new_user,
+                    'verification_code': new_user.get_profile().generate_confirmation_key,
+                    'verificaiton_link': new_user.get_profile().wrap_url(
+                        reverse('acct-verify-email'))
+                }),
+                'info@muckrock.com',
+                [new_user.email],
+                fail_silently=False
+            )
             msg = 'Your account was successfully created. '
             msg += 'Welcome to MuckRock!'
             messages.success(request, msg)
@@ -100,6 +112,8 @@ def update(request):
 
 def subscribe(request):
     #pylint: disable=too-many-statements
+    #pylint: disable=too-many-branches
+    # this needs to be refactored
     """Subscribe or unsubscribe from a pro account"""
 
     call_to_action = 'Go Pro!'
@@ -140,7 +154,7 @@ def subscribe(request):
                 stripe_email = request.POST['stripe_email']
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
-                customer = user_profile.customer()
+                customer = request.user.get_profile().customer()
                 customer.card = stripe_token
                 customer.save()
                 sub = customer.update_subscription(plan='pro')
@@ -151,8 +165,8 @@ def subscribe(request):
                 user_profile.save()
                 msg = 'Congratulations, you are now subscribed as a pro user!'
                 messages.success(request, msg)
-                request.session['ga'] = ('pro',  sub.id)
-                logger.info('%s has purchased requests', request.user.username)
+                request.session['ga'] = ('pro', sub.id)
+                logger.info('%s has subscribed to a pro account.', request.user.username)
             except stripe.CardError as exc:
                 msg = 'Payment error. Your card has not been charged.'
                 messages.error(request, msg)
@@ -220,7 +234,7 @@ def buy_requests(request):
             user_profile.save()
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
-            request.session['ga'] = ('buy_requests',  charge.id)
+            request.session['ga'] = ('buy_requests', charge.id)
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'
@@ -231,6 +245,36 @@ def buy_requests(request):
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(url_redirect)
+
+@login_required
+def verify_email(request):
+    """Verifies a user's email address"""
+    user = request.user
+    prof = user.get_profile()
+    key = request.GET.get('key')
+    if not prof.email_confirmed:
+        if key:
+            if key == prof.confirmation_key:
+                prof.email_confirmed = True
+                prof.save()
+                messages.success(request, 'Your email address has been confirmed.')
+            else:
+                messages.error(request, 'Your confirmation key is invalid.')
+        else:
+            send_mail(
+                'Verify Your MuckRock Email',
+                render_to_string('text/user/verify_email.txt', {
+                    'user': user,
+                    'verification_code': prof.generate_confirmation_key()
+                }),
+                'info@muckrock.com',
+                [user.email],
+                fail_silently=False
+            )
+            messages.info(request, 'We just sent you an email containing your verification link.')
+    else:
+        messages.warning(request, 'Your email is already confirmed, no need to verify again!')
+    return redirect(prof)
 
 def profile(request, user_name=None):
     """View a user's profile"""
