@@ -6,10 +6,15 @@ from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
+from django.views.generic.list import ListView
 
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
+
+class MRListView(ListView):
+    # TODO: Customize get() method to handle a ListFilterForm
+    pass
 
 def front_page(request):
     """Get all the details needed for the front page"""
