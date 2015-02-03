@@ -55,6 +55,7 @@
     <div class="org-controls">
         <button name="action" value="change_subscription">{% if organization.is_active %}Pause Subscription{% else %}Start Subscription{% endif %}</button>
     {% if is_staff %}
+        <a href="{% url 'org-update' organization.slug %}" class="button">Update Organization</a>
         <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
     {% endif %}
     </div>

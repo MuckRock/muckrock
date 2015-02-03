@@ -19,13 +19,18 @@ urlpatterns = patterns(
         name='org-create'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)/$',
+        r'^(?P<slug>[\w-]+)/$',
         views.Detail.as_view(),
         name='org-detail'
     ),
     url(
-        r'^(?P<slug>[\w\d_-]+)/delete/$',
+        r'^(?P<slug>[\w-]+)/delete/$',
         views.delete_organization,
         name='org-delete'
+    ),
+    url(
+        r'^(?P<slug>[\w-]+)/update/$',
+        views.update_organization,
+        name='org-update'
     ),
 )

@@ -2,7 +2,7 @@
 Views for the organization application
 """
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -11,7 +11,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationForm, AddMembersForm
+from muckrock.organization.forms import OrganizationForm, OrganizationUpdateForm, AddMembersForm
 from muckrock.settings import STRIPE_PUB_KEY
 
 from datetime import datetime
@@ -157,3 +157,22 @@ def delete_organization(request, **kwargs):
     else:
         messages.error(request, 'You do not have permission to access this organization.')
     return redirect('org-index')
+
+@user_passes_test(lambda u: u.is_staff)
+def update_organization(request, **kwargs):
+    """Updates the monthly requests, monthly cost, and max users for an org"""
+    organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    if request.method == 'POST':
+        form = OrganizationUpdateForm(request.POST, instance=organization)
+        if form.is_valid():
+            organization = form.save()
+            messages.success(request, 'The organization was updated.')
+            return redirect(organization)
+    else:
+        form = OrganizationUpdateForm(instance=organization)
+    return render_to_response(
+        'forms/base_form.html',
+        {'form': form},
+        context_instance=RequestContext(request)
+    )
+        
