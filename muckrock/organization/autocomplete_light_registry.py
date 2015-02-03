@@ -33,7 +33,7 @@ class OrganizationAutocomplete(UserAutocomplete):
         if org_id: # exclude owner and members from choices
             organization = get_object_or_404(Organization, pk=org_id)
             owner = organization.owner
-            profiles = organization.get_members()
+            profiles = organization.members.all()
             exclude_pks = [owner.pk] + [profile.user.pk for profile in profiles]
             choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices
