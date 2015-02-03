@@ -107,7 +107,7 @@ class Organization(models.Model):
     def start_subscription(self):
         """Create an org subscription for the owner"""
         profile = self.owner.get_profile()
-        # if the owner has a pro account, downgrade him to a community account        
+        # if the owner has a pro account, downgrade him to a community account
         if profile.acct_type == 'pro':
             profile.acct_type = 'community'
             profile.save()
