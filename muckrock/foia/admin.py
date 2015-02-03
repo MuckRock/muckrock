@@ -96,7 +96,7 @@ class FOIACommunicationInline(NestedTabularInline):
     fk_name = 'foia'
     extra = 1
     readonly_fields = ['opened']
-    exclude = ('likely_foia', 'raw_email')
+    exclude = ('likely_foia',)
     inlines = [FOIAFileInline]
     prefetch = 'files'
 
