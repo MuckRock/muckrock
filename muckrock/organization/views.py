@@ -12,7 +12,7 @@ from django.views.generic.list import ListView
 
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import OrganizationForm, AddMembersForm
-from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
+from muckrock.settings import STRIPE_PUB_KEY
 
 from datetime import datetime
 
@@ -111,11 +111,11 @@ def create_organization(request):
             customer.card = stripe_token
             customer.save()
             organization = form.save(commit=False)
+            organization.date_update = datetime.now()
             organization.slug = slugify(organization.name)
             organization.owner = user
             organization.stripe_id = profile.stripe_id
-            organization.num_requests = MONTHLY_REQUESTS.get('org', 0)
-            organization.date_update = datetime.now()
+            organization.num_requests = organization.monthly_requests
             organization.save()
             organization.start_subscription()
             profile.organization = organization
@@ -128,7 +128,7 @@ def create_organization(request):
     # check if user already owns an org
     other_org = Organization.objects.filter(owner=request.user)
     if other_org:
-        messages.error(request, 'You can only own one organization at a time.')
+        messages.error(request, 'You may only own one organization at a time.')
         return redirect('org-index')
 
     context = {

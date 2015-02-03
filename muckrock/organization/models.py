@@ -21,11 +21,11 @@ class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     owner = models.ForeignKey(User)
+    date_update = models.DateField()
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=50)
     monthly_cost = models.IntegerField(default=45000)
     monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
-    date_update = models.DateField()
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
 
@@ -106,11 +106,16 @@ class Organization(models.Model):
 
     def start_subscription(self):
         """Create an org subscription for the owner"""
-        customer = stripe.Customer.retrieve(self.stripe_id)
         profile = self.owner.get_profile()
+        # if the owner has a pro account, downgrade him to a community account        
         if profile.acct_type == 'pro':
             profile.acct_type = 'community'
             profile.save()
+        # make sure org stripe id is same as owner stripe id
+        if not self.stripe_id == profile.stripe_id:
+            self.stripe_id = profile.stripe_id
+            self.save()
+        customer = stripe.Customer.retrieve(self.stripe_id)
         customer.update_subscription(plan='org')
         customer.save()
         self.active = True
