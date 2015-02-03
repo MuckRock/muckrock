@@ -24,7 +24,7 @@ class Organization(models.Model):
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=50)
     monthly_cost = models.IntegerField(default=45000)
-    monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS['org'])
+    monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
     date_update = models.DateField()
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
@@ -44,7 +44,7 @@ class Organization(models.Model):
         if not_this_month or not_this_year and self.active:
             # update requests if they have not yet been updated this month
             self.date_update = datetime.now()
-            self.num_requests = MONTHLY_REQUESTS.get('org', 0)
+            self.num_requests = self.monthly_requests
             self.save()
         return self.num_requests
 
