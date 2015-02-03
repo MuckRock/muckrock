@@ -114,9 +114,9 @@ def create_organization(request):
             organization.date_update = datetime.now()
             organization.slug = slugify(organization.name)
             organization.owner = user
-            organization.stripe_id = profile.stripe_id
             organization.num_requests = organization.monthly_requests
             organization.save()
+            organization.create_plan()
             organization.start_subscription()
             profile.organization = organization
             profile.save()
@@ -150,6 +150,8 @@ def delete_organization(request, **kwargs):
         for member in members:
             member.organization = None
             member.save()
+        organization.cancel_subscription()
+        organization.delete_plan()
         organization.delete()
         messages.success(request, 'Your organization was deleted.')
     elif request.user.get_profile().is_member_of(organization):
@@ -166,6 +168,7 @@ def update_organization(request, **kwargs):
         form = OrganizationUpdateForm(request.POST, instance=organization)
         if form.is_valid():
             organization = form.save()
+            organization.update_plan()
             messages.success(request, 'The organization was updated.')
             return redirect(organization)
     else:

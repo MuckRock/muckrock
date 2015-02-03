@@ -111,20 +111,43 @@ class Organization(models.Model):
                 user.username, self.name)
         return
 
+    def create_plan(self):
+        name = self.name + ' Plan'
+        id = self.slug + '-org-plan'
+        plan = stripe.Plan.create(
+            amount=self.monthly_cost,
+            interval='month',
+            name=name,
+            currency='usd',
+            id=id)
+        self.stripe_id = plan.id
+        self.save()
+    
+    def delete_plan(self):
+        plan = stripe.Plan.retrieve(self.stripe_id)
+        plan.delete()
+        self.stripe_id = None
+        self.save()
+    
+    def update_plan(self):
+        self.delete_plan()
+        self.create_plan()
+        new_plan = stripe.Plan.retrieve(self.stripe_id)
+        customer = stripe.Customer.retrieve(self.owner.get_profile().stripe_id)
+        customer.update_subscription(plan=new_plan.name)
+        customer.save()
+        
     def start_subscription(self):
         """Create an org subscription for the owner"""
         profile = self.owner.get_profile()
+        org_plan = stripe.Plan.retrieve(self.stripe_id)
+        customer = stripe.Customer.retrieve(profile.stripe_id)
+        customer.update_subscription(plan=org_plan.name)
+        customer.save()
         # if the owner has a pro account, downgrade him to a community account
         if profile.acct_type == 'pro':
             profile.acct_type = 'community'
             profile.save()
-        # make sure org stripe id is same as owner stripe id
-        if not self.stripe_id == profile.stripe_id:
-            self.stripe_id = profile.stripe_id
-            self.save()
-        customer = stripe.Customer.retrieve(self.stripe_id)
-        customer.update_subscription(plan='org')
-        customer.save()
         self.active = True
         self.save()
         return
