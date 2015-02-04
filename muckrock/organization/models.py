@@ -37,13 +37,6 @@ class Organization(models.Model):
         """The url for this object"""
         return ('org-detail', [], {'slug': self.slug})
 
-    def save(self, *args, **kwargs):
-        """Save the Organization"""
-        # TODO: add custom save code so that the Stripe plan associated with this
-        # organization is updated with the cost, just in case the cost is changed
-        # from the backend.
-        super(Organization, self).save(*args, **kwargs)
-
     def get_requests(self):
         """Get the number of requests left for this month"""
         not_this_month = self.date_update.month != datetime.now().month
