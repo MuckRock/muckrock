@@ -164,11 +164,13 @@ def delete_organization(request, **kwargs):
 def update_organization(request, **kwargs):
     """Updates the monthly requests, monthly cost, and max users for an org"""
     organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    old_cost = organization.monthly_cost
     if request.method == 'POST':
         form = OrganizationUpdateForm(request.POST, instance=organization)
         if form.is_valid():
             organization = form.save()
-            organization.update_plan()
+            if old_cost != organization.monthly_cost:
+                organization.update_plan()
             messages.success(request, 'The organization was updated.')
             return redirect(organization)
     else:
