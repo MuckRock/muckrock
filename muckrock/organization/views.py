@@ -150,7 +150,7 @@ def delete_organization(request, **kwargs):
         for member in members:
             member.organization = None
             member.save()
-        organization.cancel_subscription()
+        organization.pause_subscription()
         organization.delete_plan()
         organization.delete()
         messages.success(request, 'Your organization was deleted.')

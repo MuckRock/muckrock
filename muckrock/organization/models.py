@@ -154,7 +154,7 @@ class Organization(models.Model):
         profile = self.owner.get_profile()
         org_plan = stripe.Plan.retrieve(self.stripe_id)
         customer = stripe.Customer.retrieve(profile.stripe_id)
-        customer.update_subscription(plan=org_plan.name)
+        customer.update_subscription(plan=org_plan.id)
         customer.save()
         # if the owner has a pro account, downgrade him to a community account
         if profile.acct_type == 'pro':
