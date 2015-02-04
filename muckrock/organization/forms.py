@@ -29,6 +29,12 @@ class OrganizationForm(forms.ModelForm):
         fields = ['name']
         widgets = {'name': forms.TextInput(attrs={'placeholder': 'Name your organization'})}
 
+class OrganizationUpdateForm(forms.ModelForm):
+    """A form for tweaking the number of members, number of reqeusts, and monthly cost"""
+    class Meta:
+        model = Organization
+        fields = ['max_users', 'monthly_cost', 'monthly_requests']
+
 class AddMembersForm(forms.Form):
     """A form that uses autocomplete to suggest users to add to an organization"""
     add_members = forms.ModelMultipleChoiceField(

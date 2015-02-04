@@ -86,7 +86,12 @@ class Profile(models.Model):
     )
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
-    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='members')
+    organization = models.ForeignKey(
+        Organization,
+        blank=True,
+        null=True,
+        related_name='members',
+        on_delete=models.SET_NULL)
 
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
