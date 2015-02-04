@@ -9,7 +9,7 @@ from muckrock.accounts.models import Profile
 from muckrock.organization.models import Organization
 
 from datetime import datetime
-from mock import Mock, MagicMock, patch
+from mock import Mock, patch
 import nose.tools
 import stripe
 
@@ -51,7 +51,6 @@ class OrganizationURLTests(TestCase):
 
 # Creates mock items for testing methods that involve Stripe
 mock_customer = Mock()
-mock_customer
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
@@ -67,6 +66,7 @@ MockPlan.retrieve.return_value = mock_plan
 @patch('stripe.Plan', MockPlan)
 class OrganizationPaymentTests(TestCase):
     """Test the methods that create and destroy payments and plans"""
+    # pylint: disable=no-self-use
 
     def setUp(self):
         """Set up models for the organization"""
@@ -80,7 +80,7 @@ class OrganizationPaymentTests(TestCase):
             owner=owner,
             date_update=datetime.now(),
         )
-        profile = Profile.objects.create(
+        Profile.objects.create(
             user=owner,
             acct_type='community',
             organization=org,
@@ -92,7 +92,7 @@ class OrganizationPaymentTests(TestCase):
         org = Organization.objects.get(slug='test-organization')
         org.create_plan()
         nose.tools.assert_true(org.stripe_id)
-    
+
     def test_delete_plan(self):
         """Should delete the org's plan and set stripe_id to None"""
         org = Organization.objects.get(slug='test-organization')
@@ -114,7 +114,7 @@ class OrganizationPaymentTests(TestCase):
         org.update_plan()
         plan = stripe.Plan.retrieve(org.stripe_id)
         nose.tools.eq_(plan.amount, org.monthly_cost)
-      
+
     @nose.tools.raises(ValueError)
     def test_double_create_plan(self):
         """Should return an error after trying to create a plan twice in a row"""
@@ -135,22 +135,19 @@ class OrganizationPaymentTests(TestCase):
         org.update_plan()
 
     def test_start_subscription(self):
-        """Should subscribe owner to the organization's plan and set the org to active"""
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        org.start_subscription()
-        customer = org.owner.get_profile().customer()
-        # test if subscription was activated
-        nose.tools.assert_true(org.active)
-    
-    def test_start_subscription_cancels_pro_account(self):
-        """Should downgrade a pro owner to a community account"""
+        """
+        Should subscribe owner to the organization's plan,
+        set the org to active, and reduce pro owners to community accounts
+        """
         org = Organization.objects.get(slug='test-organization')
         profile = org.owner.get_profile()
         profile.acct_type = 'pro'
         org.create_plan()
         org.start_subscription()
+        # customer = org.owner.get_profile().customer()
+        # test if subscription was activated
         nose.tools.eq_(profile.acct_type, 'community')
+        nose.tools.assert_true(org.active)
 
     def test_pause_subscription(self):
         """Should cancel owner's subscription and set the org to inactive"""
@@ -158,6 +155,6 @@ class OrganizationPaymentTests(TestCase):
         org.create_plan()
         org.start_subscription()
         org.pause_subscription()
-        customer = org.owner.get_profile().customer()
+        # customer = org.owner.get_profile().customer()
         # test if subscription was paused
         nose.tools.assert_false(org.active)
