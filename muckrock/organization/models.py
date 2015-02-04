@@ -36,7 +36,7 @@ class Organization(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         return ('org-detail', [], {'slug': self.slug})
-    
+
     def save(self, *args, **kwargs):
         """Save the Organization"""
         # TODO: add custom save code so that the Stripe plan associated with this
@@ -112,33 +112,42 @@ class Organization(models.Model):
         return
 
     def create_plan(self):
-        name = self.name + ' Plan'
-        id = self.slug + '-org-plan'
-        plan = stripe.Plan.create(
-            amount=self.monthly_cost,
-            interval='month',
-            name=name,
-            currency='usd',
-            id=id)
-        self.stripe_id = plan.id
-        self.save()
-    
+        """Creates an organization-specific Stripe plan"""
+        if not self.stripe_id:
+            name = self.name + ' Plan'
+            id = self.slug + '-org-plan'
+            plan = stripe.Plan.create(
+                amount=self.monthly_cost,
+                interval='month',
+                name=name,
+                currency='usd',
+                id=id)
+            self.stripe_id = plan.id
+            self.save()
+
     def delete_plan(self):
-        plan = stripe.Plan.retrieve(self.stripe_id)
-        plan.delete()
-        self.stripe_id = None
-        self.save()
-    
+        """Deletes this organization's specific Stripe plan"""
+        if self.stripe_id:
+            plan = stripe.Plan.retrieve(self.stripe_id)
+            plan.delete()
+            self.stripe_id = ''
+            self.save()
+
     def update_plan(self):
+        """
+        Deletes and recreates an organization's plan.
+        Plans must be deleted and recreated because Stripe prohibits plans
+        from updating any information except their name.
+        """
         self.delete_plan()
         self.create_plan()
         new_plan = stripe.Plan.retrieve(self.stripe_id)
         customer = stripe.Customer.retrieve(self.owner.get_profile().stripe_id)
-        customer.update_subscription(plan=new_plan.name)
+        customer.update_subscription(plan=new_plan.id)
         customer.save()
-        
+
     def start_subscription(self):
-        """Create an org subscription for the owner"""
+        """Subscribes the owner to this org's plan"""
         profile = self.owner.get_profile()
         org_plan = stripe.Plan.retrieve(self.stripe_id)
         customer = stripe.Customer.retrieve(profile.stripe_id)
@@ -153,7 +162,7 @@ class Organization(models.Model):
         return
 
     def pause_subscription(self):
-        """Cancel the org's subscription"""
+        """Cancels the owner's subscription to this org's plan"""
         customer = stripe.Customer.retrieve(self.stripe_id)
         customer.cancel_subscription()
         customer.save()
