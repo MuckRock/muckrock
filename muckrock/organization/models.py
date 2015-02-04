@@ -141,10 +141,7 @@ class Organization(models.Model):
         if self.stripe_id:
             self.delete_plan()
             self.create_plan()
-            new_plan = stripe.Plan.retrieve(self.stripe_id)
-            customer = self.owner.get_profile().customer()
-            customer.update_subscription(plan=new_plan.id)
-            customer.save()
+            self.start_subscription()
         else:
             raise ValueError('This organization has no associated plan to update.')
         return
