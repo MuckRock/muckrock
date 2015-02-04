@@ -114,16 +114,19 @@ class Organization(models.Model):
     def create_plan(self):
         """Creates an organization-specific Stripe plan"""
         if not self.stripe_id:
-            name = self.name + ' Plan'
-            id = self.slug + '-org-plan'
+            plan_name = self.name + ' Plan'
+            plan_id = self.slug + '-org-plan'
             plan = stripe.Plan.create(
                 amount=self.monthly_cost,
                 interval='month',
-                name=name,
+                name=plan_name,
                 currency='usd',
-                id=id)
+                id=plan_id)
             self.stripe_id = plan.id
             self.save()
+        else:
+            raise ValueError('This organization already has an associated plan.')
+        return
 
     def delete_plan(self):
         """Deletes this organization's specific Stripe plan"""
@@ -132,6 +135,9 @@ class Organization(models.Model):
             plan.delete()
             self.stripe_id = ''
             self.save()
+        else:
+            raise ValueError('This organization has no associated plan to cancel.')
+        return
 
     def update_plan(self):
         """
@@ -139,12 +145,16 @@ class Organization(models.Model):
         Plans must be deleted and recreated because Stripe prohibits plans
         from updating any information except their name.
         """
-        self.delete_plan()
-        self.create_plan()
-        new_plan = stripe.Plan.retrieve(self.stripe_id)
-        customer = stripe.Customer.retrieve(self.owner.get_profile().stripe_id)
-        customer.update_subscription(plan=new_plan.id)
-        customer.save()
+        if self.stripe_id:
+            self.delete_plan()
+            self.create_plan()
+            new_plan = stripe.Plan.retrieve(self.stripe_id)
+            customer = stripe.Customer.retrieve(self.owner.get_profile().stripe_id)
+            customer.update_subscription(plan=new_plan.id)
+            customer.save()
+        else:
+            raise ValueError('This organization has no associated plan to update.')
+        return
 
     def start_subscription(self):
         """Subscribes the owner to this org's plan"""
