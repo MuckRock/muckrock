@@ -151,3 +151,13 @@ class OrganizationPaymentTests(TestCase):
         org.create_plan()
         org.start_subscription()
         nose.tools.eq_(profile.acct_type, 'community')
+
+    def test_pause_subscription(self):
+        """Should cancel owner's subscription and set the org to inactive"""
+        org = Organization.objects.get(slug='test-organization')
+        org.create_plan()
+        org.start_subscription()
+        org.pause_subscription()
+        customer = org.owner.get_profile().customer()
+        # test if subscription was paused
+        nose.tools.assert_false(org.active)
