@@ -36,7 +36,7 @@ class OrganizationAdmin(VersionAdmin):
     list_display = ('name', 'owner')
     search_fields = ('name', 'owner')
     form = OrganizationAdminForm
-    
+
     def save_model(self, request, obj, form, change):
         if not obj.stripe_id:
             obj.create_plan()
