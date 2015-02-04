@@ -50,9 +50,11 @@ class OrganizationURLTests(TestCase):
         self.assertEqual(response.status_code, 404)
 
 # Creates mock items for testing methods that involve Stripe
+mock_customer = Mock()
+mock_customer
 MockCustomer = Mock()
-MockCustomer.create.return_value = Mock()
-MockCustomer.retrieve.return_value = Mock()
+MockCustomer.create.return_value = mock_customer
+MockCustomer.retrieve.return_value = mock_customer
 mock_plan = Mock()
 mock_plan.amount = 45000
 mock_plan.name = 'Test Organization Plan'
@@ -131,3 +133,21 @@ class OrganizationPaymentTests(TestCase):
         """Should return an error after tying to update a plan that doesn't exist"""
         org = Organization.objects.get(slug='test-organization')
         org.update_plan()
+
+    def test_start_subscription(self):
+        """Should subscribe owner to the organization's plan and set the org to active"""
+        org = Organization.objects.get(slug='test-organization')
+        org.create_plan()
+        org.start_subscription()
+        customer = org.owner.get_profile().customer()
+        # test if subscription was activated
+        nose.tools.assert_true(org.active)
+    
+    def test_start_subscription_cancels_pro_account(self):
+        """Should downgrade a pro owner to a community account"""
+        org = Organization.objects.get(slug='test-organization')
+        profile = org.owner.get_profile()
+        profile.acct_type = 'pro'
+        org.create_plan()
+        org.start_subscription()
+        nose.tools.eq_(profile.acct_type, 'community')
