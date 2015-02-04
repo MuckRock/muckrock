@@ -142,7 +142,7 @@ class Organization(models.Model):
             self.delete_plan()
             self.create_plan()
             new_plan = stripe.Plan.retrieve(self.stripe_id)
-            customer = stripe.Customer.retrieve(self.owner.get_profile().stripe_id)
+            customer = self.owner.get_profile().customer()
             customer.update_subscription(plan=new_plan.id)
             customer.save()
         else:
@@ -153,7 +153,7 @@ class Organization(models.Model):
         """Subscribes the owner to this org's plan"""
         profile = self.owner.get_profile()
         org_plan = stripe.Plan.retrieve(self.stripe_id)
-        customer = stripe.Customer.retrieve(profile.stripe_id)
+        customer = profile.customer()
         customer.update_subscription(plan=org_plan.id)
         customer.save()
         # if the owner has a pro account, downgrade him to a community account
@@ -166,7 +166,7 @@ class Organization(models.Model):
 
     def pause_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
-        customer = stripe.Customer.retrieve(self.stripe_id)
+        customer = self.owner.get_profile().customer()
         customer.cancel_subscription()
         customer.save()
         self.active = False
