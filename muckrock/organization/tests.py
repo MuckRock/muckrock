@@ -49,7 +49,7 @@ class OrganizationURLTests(TestCase):
         response = self.client.get('/organization/test-orgainzation/delete/')
         self.assertEqual(response.status_code, 404)
 
-
+# Creates mock items for testing methods that involve Stripe
 MockCustomer = Mock()
 MockCustomer.create.return_value = Mock()
 MockCustomer.retrieve.return_value = Mock()
@@ -60,7 +60,7 @@ mock_plan.id = 'test-organization-org-plan'
 MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
-
+# Substitutes mock items for Stripe items in each test
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
 class OrganizationPaymentTests(TestCase):
@@ -90,14 +90,14 @@ class OrganizationPaymentTests(TestCase):
         org = Organization.objects.get(slug='test-organization')
         org.create_plan()
         nose.tools.assert_true(org.stripe_id)
-
+    
     def test_delete_plan(self):
         """Should delete the org's plan and set stripe_id to None"""
         org = Organization.objects.get(slug='test-organization')
         org.create_plan()
         org.delete_plan()
         nose.tools.assert_false(org.stripe_id)
-    
+
     def test_update_plan(self):
         """
         Should create an org plan at once price point, then update the org's
@@ -112,3 +112,22 @@ class OrganizationPaymentTests(TestCase):
         org.update_plan()
         plan = stripe.Plan.retrieve(org.stripe_id)
         nose.tools.eq_(plan.amount, org.monthly_cost)
+      
+    @nose.tools.raises(ValueError)
+    def test_double_create_plan(self):
+        """Should return an error after trying to create a plan twice in a row"""
+        org = Organization.objects.get(slug='test-organization')
+        org.create_plan()
+        org.create_plan()
+
+    @nose.tools.raises(ValueError)
+    def test_delete_nonexistant_plan(self):
+        """Should return an error after trying to delete a plan that doesn't exist"""
+        org = Organization.objects.get(slug='test-organization')
+        org.delete_plan()
+
+    @nose.tools.raises(ValueError)
+    def test_update_nonexistant_plan(self):
+        """Should return an error after tying to update a plan that doesn't exist"""
+        org = Organization.objects.get(slug='test-organization')
+        org.update_plan()
