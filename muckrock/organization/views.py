@@ -64,7 +64,11 @@ class Detail(DetailView):
                 organization.pause_subscription()
                 msg = 'Your subscription is paused. You may resume it at any time.'
             else:
-                organization.start_subscription()
+                try:
+                    organization.start_subscription()
+                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                    messages.error(request, exception)
+                    return redirect(organization)
                 msg = 'Your subscription is reactivated.'
             messages.success(request, msg)
         else:
