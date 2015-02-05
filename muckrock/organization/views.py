@@ -4,6 +4,7 @@ Views for the organization application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -15,6 +16,7 @@ from muckrock.organization.forms import OrganizationForm, OrganizationUpdateForm
 from muckrock.settings import STRIPE_PUB_KEY
 
 from datetime import datetime
+import stripe
 
 class List(ListView):
     """List of organizations"""
@@ -43,6 +45,9 @@ class Detail(DetailView):
             context['is_member'] = False
         context['members'] = member_accounts
         context['form'] = AddMembersForm()
+        context['sidebar_admin_url'] = reverse(
+            'admin:organization_organization_change',
+            args=(organization.pk,))
         return context
 
     def post(self, request, **kwargs):
@@ -117,7 +122,10 @@ def create_organization(request):
             organization.num_requests = organization.monthly_requests
             organization.save()
             organization.create_plan()
-            organization.start_subscription()
+            try:
+                organization.start_subscription()
+            except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                messages.error(request, exception)
             profile.organization = organization
             profile.save()
             messages.success(request, 'Your organization has been created.')
@@ -151,7 +159,11 @@ def delete_organization(request, **kwargs):
             member.organization = None
             member.save()
         organization.pause_subscription()
-        organization.delete_plan()
+        try:
+            organization.delete_plan()
+        except ValueError as exception:
+            messages.error(request, exception)
+            return redirect(organization)
         organization.delete()
         messages.success(request, 'Your organization was deleted.')
     elif request.user.get_profile().is_member_of(organization):
@@ -170,7 +182,11 @@ def update_organization(request, **kwargs):
         if form.is_valid():
             organization = form.save()
             if old_cost != organization.monthly_cost:
-                organization.update_plan()
+                try:
+                    organization.update_plan()
+                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                    messages.error(request, exception)
+                    return redirect(organization)
             messages.success(request, 'The organization was updated.')
             return redirect(organization)
     else:
