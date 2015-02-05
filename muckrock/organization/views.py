@@ -4,6 +4,7 @@ Views for the organization application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -43,6 +44,9 @@ class Detail(DetailView):
             context['is_member'] = False
         context['members'] = member_accounts
         context['form'] = AddMembersForm()
+        context['sidebar_admin_url'] = reverse(
+            'admin:organization_organization_change',
+            args=(organization.pk,))
         return context
 
     def post(self, request, **kwargs):
