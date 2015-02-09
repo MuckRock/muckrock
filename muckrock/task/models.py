@@ -1,10 +1,13 @@
 """
 Models for the Task application
 """
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from django.db.models.loading import get_model
+
+from datetime import datetime
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -24,6 +27,18 @@ class Task(models.Model):
     def __unicode__(self):
         return 'Task: %d' % (self.pk)
 
+    def handle_post(self, request):
+        """Handle form actions for this task"""
+        if request.POST.get('submit') == 'Resolve':
+            self.resolve()
+            messages.success(request, 'Resolved the task')
+
+    def resolve(self):
+        """Resolve the task"""
+        self.resolved = True
+        self.date_done = datetime.now()
+        self.save()
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
@@ -39,6 +54,21 @@ class OrphanTask(Task):
         # pylint: disable=no-member
         return '%s: %s' % (self.get_reason_display(), self.communication.foia)
 
+    def handle_post(self, request):
+        """Handle form actions for this task"""
+        # pylint: disable=no-member
+        comm = self.communication
+        submit = request.POST.get('submit')
+        if submit == 'Move':
+            foia_pks = request.POST.get('foia_pk', '').split(',')
+            comm.move(request, foia_pks)
+
+        if submit == 'Reject':
+            messages.success(request, 'Rejected the communication')
+
+        if submit in ('Move', 'Reject'):
+            self.resolve()
+
 
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
@@ -50,6 +80,26 @@ class SnailMailTask(Task):
     def __unicode__(self):
         # pylint: disable=no-member
         return '%s: %s' % (self.get_category_display(), self.communication.foia)
+
+    def handle_post(self, request):
+        """Handle form actions for this task"""
+        # pylint: disable=no-member
+        comm = self.communication
+        foia = comm.foia
+        statuses = {
+                'Awaiting Acknowledgement': 'ack',
+                'Awaiting Response': 'processed',
+                'Awaiting Appeal': 'appealing',
+                }
+        if request.POST.get('submit') in statuses:
+            foia.status = statuses[request.POST.get('submit')]
+            foia.update()
+            foia.save()
+            comm.status = foia.status
+            comm.date = datetime.now()
+            comm.save()
+            self.resolve()
+            messages.success(request, 'Set the status for the mailed request')
 
 
 class RejectedEmailTask(Task):
@@ -119,6 +169,22 @@ class NewAgencyTask(Task):
     def __unicode__(self):
         return 'New Agency: %s' % (self.agency)
 
+    def handle_post(self, request):
+        """Handle form actions for this task"""
+        submit = request.POST.get('submit')
+
+        if submit == 'Approve':
+            agency = self.agency
+            agency.approved = True
+            agency.save()
+            messages.success(request, 'Approved the agency')
+
+        if submit == 'Reject':
+            messages.error(request, 'Rejected the agency')
+
+        if submit in ('Approve', 'Reject'):
+            self.resolve()
+
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
@@ -128,3 +194,24 @@ class ResponseTask(Task):
     def __unicode__(self):
         # pylint: disable=no-member
         return 'Response: %s' % (self.communication.foia)
+
+    def handle_post(self, request):
+        """Handle form actions for this task"""
+        # pylint: disable=no-member
+        comm = self.communication
+        foia = comm.foia
+        statuses = ['fix', 'paymnet', 'rejected', 'no_docs',
+                    'done', 'partial', 'abandoned']
+        status = request.POST.get('status')
+        if status in statuses:
+            foia.status = status
+            foia.update()
+            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+                foia.date_done = comm.date
+            foia.save()
+            comm.status = foia.status
+            if status in ['ack', 'processed', 'appealing']:
+                comm.date = datetime.now()
+            comm.save()
+            self.resolve()
+            messages.success(request, 'Set the status')

@@ -260,7 +260,7 @@ def show_toolbar(request):
     """show toolbar on the site"""
     if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))) or \
         (request.user and request.user.username == 'mitch'):
-        return True
+        return False
     return False
 
 DEBUG_TOOLBAR_CONFIG = {

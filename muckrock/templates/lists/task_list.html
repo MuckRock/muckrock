@@ -15,9 +15,17 @@
 				<span>Sent to {{task.orphantask.address}}</span><br />
 				{% if task.orphantask.communication.likely_foia %}
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.orphantask.communication.likely_foia.pk %}">Probable Request</a></span><br />
-					<span><a href="#" class="button">Move to Probable Request</a></span>
 				{% endif %}
-				<span><a href="#" class="button">Delete</a></span>
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.orphantask.pk}}">
+					<input type="hidden" name="task_class" value="orphantask">
+					<label for="foia_pk">FOIA PK:</label>
+					<input type="text" name="foia_pk" value="{{task.orphantask.communication.likely_foia.pk}}">
+					<input type="submit" name="submit" value="Move" class="button">
+					<br \>
+					<input type="submit" name="submit" value="Reject" class="button">
+				</form>
 				<p>{{task.orphantask.communication.communication}}</p>
 			</section>
 
@@ -27,14 +35,19 @@
 				<h1>Snail Mail</h1>
 				<h2>{{task.snailmailtask.get_category_display}} on {{task.date_created|date}}</h2>
 				<span>Acknowledged? {{foia.has_ack}}</span><br />
-				<span>Set status:
-					<a href="#" class="button">Awaiting Acknowledgement</a>
-					<a href="#" class="button">Awaiting Response</a>
-					<a href="#" class="button">Awaiting Appeal</a>
-				</span><br />
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.snailmailtask.pk}}">
+					<input type="hidden" name="task_class" value="snailmailtask">
+					<span>Set status:</span>
+					<input type="submit" name="submit" value="Awaiting Acknowledgement" class="button">
+					<input type="submit" name="submit" value="Awaiting Response" class="button">
+					<input type="submit" name="submit" value="Awaiting Appeal" class="button">
+				</form>
 				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> | 
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
-				{# agency info #}
+				{# XXX agency info #}
+				{# XXX full letter here, hidden #}
 				<p>{{task.snailmailtask.communication.communication}}</p>
 			</section>
 			{% endwith %}
@@ -49,6 +62,12 @@
 				<span>From: {{task.rejectedemailtask.email}}</span><br />
 				<span>Error: {{task.rejectedemailtask.error}}</span><br />
 				{# XXX put other agencies and foias here #}
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.rejectedemailtask.pk}}">
+					<input type="hidden" name="task_class" value="rejectedemailtask">
+					<input type="submit" name="submit" value="Resolve" class="button">
+				</form>
 			</section>
 
 		{% elif task.staleagencytask %}
@@ -56,13 +75,24 @@
 				<h1>Stale Agency</h1>
 				<h2>{{task.date_created|date}}</h2>
 				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.staleagencytask.agency.pk %}">Agency: {{task.staleagencytask.agency}}</a></span><br />
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.staleagencytask.pk}}">
+					<input type="hidden" name="task_class" value="staleagencytask">
+					<input type="submit" name="submit" value="Resolve" class="button">
+				</form>
 			</section>
 
 		{% elif task.flaggedtask %}
 			<section class="received message">
 				<h1>Flagged</h1>
 				<h2>{{task.date_created|date}}</h2>
-				<span><a href="#" class="button">Resolve</a></span><br />
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.flaggedtask.pk}}">
+					<input type="hidden" name="task_class" value="flaggedtask">
+					<input type="submit" name="submit" value="Resolve" class="button">
+				</form>
 				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.flaggedtask.user.pk %}">User: {{task.flaggedtask.user}}</a></span> |
 				{% if task.flaggedtask.foia %}
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.flaggedtask.foia.pk %}">FOIA: {{task.flaggedtask.foia}} </a></span><br />
@@ -78,8 +108,13 @@
 			<section class="received message">
 				<h1>New Agency</h1>
 				<h2>{{task.date_created|date}}</h2>
-				<span><a href="#" class="button">Approve</a></span>
-				<span><a href="#" class="button">Reject</a></span>
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.newagencytask.pk}}">
+					<input type="hidden" name="task_class" value="newagencytask">
+					<input type="submit" name="submit" value="Approve" class="button">
+					<input type="submit" name="submit" value="Reject" class="button">
+				</form>
 				<br \>
 				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.newagencytask.agency.pk %}">Agency: {{task.newagencytask.agency}}</a></span>
 				{% if task.newagency.user %} | <span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.newagencytask.user.pk %}">User: {{task.newagencytask.user}}</a></span>{% endif %}
@@ -91,9 +126,24 @@
 				<h2>{{task.date_created|date}}</h2>
 				{% with task.responsetask.communication as comm %}
 				<span>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</span><br />
-				<span>Set status: <em>select status here</em></span><br />
+				<form method="post">
+					{% csrf_token %}
+					<input type="hidden" name="task_pk" value="{{task.responsetask.pk}}">
+					<input type="hidden" name="task_class" value="responsetask">
+					<select name="status">
+						<option value="fix">Fix Required</option>
+						<option value="payment">Payment Required</option>
+						<option value="rejected">Rejected</option>
+						<option value="no_docs">No Responsive Docs</option>
+						<option value="done">Completed</option>
+						<option value="partial">Partially Completed</option>
+						<option value="abandoned">Withdrawn</option>
+					</select>
+					<input type="submit" name="submit" value="Set Status" class="button">
+				</form>
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">FOIA: {{comm.foia}}</a></span><br />
 				<p>{{comm.communication}}</p>
+				{% endwith %}
 			</section>
 
 		{% else %}
