@@ -5,10 +5,11 @@ Admin registration for accounts models
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
-from django.contrib import admin
+from django.contrib import admin, messages
 
 import autocomplete_light
 from reversion import VersionAdmin
+import stripe
 
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.jurisdiction.models import Jurisdiction
@@ -34,19 +35,47 @@ class ProfileAdminForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Profile
 
-
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
+    model = Profile
     search_fields = ('user__username', 'user__first_name', 'user__last_name')
     exclude = ('follows_foia', 'follows_question', 'notifications')
-    model = Profile
     form = ProfileAdminForm
     extra = 0
     max_num = 1
 
-admin.site.register(Statistics, StatisticsAdmin)
+class MRUserAdmin(UserAdmin):
+    """User admin options"""
+    list_display = ('date_joined',)
+    inlines = [ProfileInline]
 
-UserAdmin.list_display += ('date_joined',)
-UserAdmin.inlines = [ProfileInline]
+    def save_related(self, request, form, formsets, change):
+        """Creates/cancels a pro subscription if changing to/from pro acct_type"""
+        obj = form.instance
+        profile = obj.get_profile()
+        before_acct_type = profile.acct_type
+        after_acct_type = formsets[0].cleaned_data[0].get('acct_type')
+        if change:
+            # we want to subscribe users when acct_type changes to 'pro'
+            # and unsubscribe users when acct_type changes from 'pro'
+            if before_acct_type != after_acct_type:
+                try:
+                    if after_acct_type == 'pro':
+                        profile.start_pro_subscription(request)
+                    elif before_acct_type == 'pro':
+                        profile.cancel_pro_subscription()
+                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                    messages.error(request, exception)
+        else:
+            # if creating a new pro from scratch, try starting their subscription
+            try:
+                if after_acct_type == 'pro':
+                    profile.start_pro_subscription(request)
+            except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                messages.error(request, exception)
+        obj.save()
+        super(MRUserAdmin, self).save_related(request, form, formsets, change)
+
+admin.site.register(Statistics, StatisticsAdmin)
 admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+admin.site.register(User, MRUserAdmin)

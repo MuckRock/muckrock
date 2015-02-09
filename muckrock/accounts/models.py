@@ -235,8 +235,26 @@ class Profile(models.Model):
             )
             self.stripe_id = customer.id
             self.save()
-
         return customer
+
+    def start_pro_subscription(self, request):
+        """Subscribe this profile to a pro plan"""
+        customer = self.customer()
+        sub = customer.update_subscription(plan='pro')
+        customer.save()
+        request.session['ga'] = ('pro', sub.id)
+        self.acct_type = 'pro'
+        self.date_update = datetime.now()
+        self.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
+        self.save()
+
+    def cancel_pro_subscription(self):
+        """Unsubscribe this profile form a pro plan"""
+        customer = self.customer()
+        customer.cancel_subscription()
+        customer.save()
+        self.acct_type = 'community'
+        self.save()
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
