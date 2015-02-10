@@ -14,7 +14,7 @@ urlpatterns = patterns(
     '',
     url(
         r'^$',
-        views.list_,
+        views.List.as_view(),
         name='jurisdiction-list'
     ),
     url(

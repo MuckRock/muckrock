@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.views.generic.list import ListView
 
 from rest_framework import viewsets
 
@@ -73,14 +74,21 @@ def detail(request, fed_slug, state_slug, local_slug):
     return render_to_response('details/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
-def list_(request):
+class List(ListView):
     """List of jurisdictions"""
-    fed_jurs = Jurisdiction.objects.filter(level='f')
-    state_jurs = Jurisdiction.objects.filter(level='s')
-    context = {'fed_jurs': fed_jurs, 'state_jurs': state_jurs}
+    template_name = 'lists/jurisdiction_list.html'
+    
+    def filter_sort_requests(self, queryset):
+        """Sorts the jurisdictions"""
+        return queryset
+    
+    def get_paginate_by(self, queryset):
+        return self.request.GET.get('per_page', 30)
+    
+    def get_queryset(self):
+        queryset = Jurisdiction.objects.filter(hidden=False)
+        return self.filter_sort_requests(queryset)
 
-    return render_to_response('lists/jurisdiction_list.html', context,
-                              context_instance=RequestContext(request))
 
 # pylint: disable=unused-argument
 def redirect_flag(request, **kwargs):
