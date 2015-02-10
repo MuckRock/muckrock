@@ -21,8 +21,11 @@ class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     owner = models.ForeignKey(User)
-    num_requests = models.IntegerField(default=0)
     date_update = models.DateField()
+    num_requests = models.IntegerField(default=0)
+    max_users = models.IntegerField(default=50)
+    monthly_cost = models.IntegerField(default=45000)
+    monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
 
@@ -41,7 +44,7 @@ class Organization(models.Model):
         if not_this_month or not_this_year and self.active:
             # update requests if they have not yet been updated this month
             self.date_update = datetime.now()
-            self.num_requests = MONTHLY_REQUESTS.get('org', 0)
+            self.num_requests = self.monthly_requests
             self.save()
         return self.num_requests
 
@@ -101,22 +104,66 @@ class Organization(models.Model):
                 user.username, self.name)
         return
 
+    def create_plan(self):
+        """Creates an organization-specific Stripe plan"""
+        if not self.stripe_id:
+            plan_name = self.name + ' Plan'
+            plan_id = self.slug + '-org-plan'
+            plan = stripe.Plan.create(
+                amount=self.monthly_cost,
+                interval='month',
+                name=plan_name,
+                currency='usd',
+                id=plan_id)
+            self.stripe_id = plan.id
+            self.save()
+        else:
+            raise ValueError('This organization already has an associated plan.')
+        return
+
+    def delete_plan(self):
+        """Deletes this organization's specific Stripe plan"""
+        if self.stripe_id:
+            plan = stripe.Plan.retrieve(self.stripe_id)
+            plan.delete()
+            self.stripe_id = ''
+            self.save()
+        else:
+            raise ValueError('This organization has no associated plan to cancel.')
+        return
+
+    def update_plan(self):
+        """
+        Deletes and recreates an organization's plan.
+        Plans must be deleted and recreated because Stripe prohibits plans
+        from updating any information except their name.
+        """
+        if self.stripe_id:
+            self.delete_plan()
+            self.create_plan()
+            self.start_subscription()
+        else:
+            raise ValueError('This organization has no associated plan to update.')
+        return
+
     def start_subscription(self):
-        """Create an org subscription for the owner"""
-        customer = stripe.Customer.retrieve(self.stripe_id)
+        """Subscribes the owner to this org's plan"""
         profile = self.owner.get_profile()
+        org_plan = stripe.Plan.retrieve(self.stripe_id)
+        customer = profile.customer()
+        customer.update_subscription(plan=org_plan.id)
+        customer.save()
+        # if the owner has a pro account, downgrade him to a community account
         if profile.acct_type == 'pro':
             profile.acct_type = 'community'
             profile.save()
-        customer.update_subscription(plan='org')
-        customer.save()
         self.active = True
         self.save()
         return
 
     def pause_subscription(self):
-        """Cancel the org's subscription"""
-        customer = stripe.Customer.retrieve(self.stripe_id)
+        """Cancels the owner's subscription to this org's plan"""
+        customer = self.owner.get_profile().customer()
         customer.cancel_subscription()
         customer.save()
         self.active = False
