@@ -3,6 +3,10 @@
 {% block list-title %}Organizations{% endblock list-title %}
 {% block list-type %}organization{% endblock list-type %}
 
+{% block list-actions %}
+<a href="{% url 'org-create' %}">Create Organization</a>
+{% endblock list-actions %}
+
 {% block list-table-head %}
 <th>Name</th>
 <th>Owner</th>
