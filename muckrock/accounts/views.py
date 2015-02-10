@@ -165,6 +165,7 @@ def subscribe(request):
                 logger_msg = '%s has updated their payment information.' % request.user.username
                 if can_subscribe:
                     user_profile.start_pro_subscription()
+                    request.session['ga'] = 'pro_started'
                     user_msg = 'Congratulations, you are now subscribed as a pro user!'
                     logger_msg = '%s has subscribed to a pro account.' % request.user.username
             except (stripe.CardError, stripe.InvalidRequestError, ValueError) as exc:
@@ -174,6 +175,7 @@ def subscribe(request):
         elif can_unsubscribe:
             try:
                 user_profile.cancel_pro_subscription()
+                request.session['ga'] = 'pro_cancelled'
                 user_msg = 'Your user_profileessional subscription has been cancelled.'
                 logger_msg = '%s has cancelled their pro subscription.' % request.user.username
             except (stripe.CardError, stripe.InvalidRequestError) as exc:
@@ -216,12 +218,13 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise ValueError('Account email and Stripe email do not match')
-            charge = user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
+            request.session['ga'] = 'buy_requests'
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
-            request.session['ga'] = ('buy_requests', charge.id)
+
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'

@@ -237,12 +237,11 @@ class Profile(models.Model):
             self.save()
         return customer
 
-    def start_pro_subscription(self, request):
+    def start_pro_subscription(self):
         """Subscribe this profile to a pro plan"""
         customer = self.customer()
-        sub = customer.update_subscription(plan='pro')
+        customer.update_subscription(plan='pro')
         customer.save()
-        request.session['ga'] = ('pro', sub.id)
         self.acct_type = 'pro'
         self.date_update = datetime.now()
         self.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
@@ -259,7 +258,7 @@ class Profile(models.Model):
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
-        return stripe.Charge.create(
+        stripe.Charge.create(
             amount=amount,
             currency='usd',
             card=token,
