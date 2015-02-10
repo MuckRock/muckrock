@@ -11,6 +11,7 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
+from django.views.generic.list import ListView
 
 from rest_framework import viewsets
 import django_filters
@@ -21,6 +22,22 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
+
+class List(ListView):
+    """List of popular agencies"""
+    
+    template_name = 'lists/agency_list.html'
+    
+    def filter_sort_requests(self, queryset):
+        """Sorts the FOIA requests"""
+        return queryset
+    
+    def get_paginate_by(self, queryset):
+        return self.request.GET.get('per_page', 30)
+    
+    def get_queryset(self):
+        queryset = Agency.objects.filter(approved=True)
+        return self.filter_sort_requests(queryset)
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -69,15 +86,8 @@ def detail(request, jurisdiction, jidx, slug, idx):
     return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
 
-def list_(request):
-    """List of popular agencies"""
-    agencies = Agency.objects.annotate(num_requests=Count('foiarequest')) \
-                             .order_by('-num_requests')[:10]
-    context = {'object_list': agencies}
 
-    return render_to_response('lists/agency_list.html', context,
-                              context_instance=RequestContext(request))
-
+    
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
     # pylint: disable=W0612
