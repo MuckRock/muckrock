@@ -47,7 +47,7 @@ class ProfileInline(admin.StackedInline):
 
 class MRUserAdmin(UserAdmin):
     """User admin options"""
-    list_display = ('username','date_joined',)
+    list_display = ('username', 'date_joined',)
     inlines = [ProfileInline]
 
     def save_related(self, request, form, formsets, change):
