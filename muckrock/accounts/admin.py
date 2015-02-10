@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 from django.contrib import admin, messages
+from django.core.exceptions import ObjectDoesNotExist
 
 import autocomplete_light
 from reversion import VersionAdmin
@@ -46,22 +47,29 @@ class ProfileInline(admin.StackedInline):
 
 class MRUserAdmin(UserAdmin):
     """User admin options"""
-    list_display = ('date_joined',)
+    list_display = ('username', 'date_joined',)
     inlines = [ProfileInline]
 
     def save_related(self, request, form, formsets, change):
         """Creates/cancels a pro subscription if changing to/from pro acct_type"""
         obj = form.instance
-        profile = obj.get_profile()
-        before_acct_type = profile.acct_type
-        after_acct_type = formsets[0].cleaned_data[0].get('acct_type')
-        if change:
+        try:
+            profile = obj.get_profile()
+            before_acct_type = profile.acct_type
+        except ObjectDoesNotExist:
+            profile = None
+            before_acct_type = None
+        try:
+            after_acct_type = formsets[0].cleaned_data[0].get('acct_type')
+        except IndexError:
+            after_acct_type = None
+        if change and profile:
             # we want to subscribe users when acct_type changes to 'pro'
             # and unsubscribe users when acct_type changes from 'pro'
             if before_acct_type != after_acct_type:
                 try:
                     if after_acct_type == 'pro':
-                        profile.start_pro_subscription(request)
+                        profile.start_pro_subscription()
                     elif before_acct_type == 'pro':
                         profile.cancel_pro_subscription()
                 except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
@@ -70,7 +78,7 @@ class MRUserAdmin(UserAdmin):
             # if creating a new pro from scratch, try starting their subscription
             try:
                 if after_acct_type == 'pro':
-                    profile.start_pro_subscription(request)
+                    profile.start_pro_subscription()
             except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
                 messages.error(request, exception)
         obj.save()
