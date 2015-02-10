@@ -1,0 +1,58 @@
+/* Lists */
+
+/*
+**  .list
+**    .list-navigation
+**      .list-head
+**        .list-title
+**        .list-subtitle
+**      .list-filters
+**    .list-content
+**      .list-table
+**        .list-table-head
+**        .list-table-body
+**          .list-table-item
+**    .list-empty
+*/
+
+.list {
+    @extend %body;
+    .list-navigation {
+        @extend %quarter;
+    }
+    .list-head {
+        @include row;
+    }
+    .list-title {
+        @extend h1;
+    }
+    .list-subtitle {
+        @extend h2;
+    }
+    .list-filters-buttons {
+        @include row;
+        button {
+            @extend %half;
+            &:hover {
+                background: $color-grey;
+            }
+        }
+    }
+    .list-content {
+        @extend %three-quarters;
+    }
+    
+    .pagination {
+        margin-top: $base-margin/2;
+    }
+    
+    .list-table {
+        border-collapse: collapse;
+    }
+    .list-table-head, .list-table-body {
+        width: 100%;
+    }
+    .list-empty {
+        @extend %full;
+    }   
+}
