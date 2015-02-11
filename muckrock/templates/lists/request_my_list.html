@@ -2,52 +2,31 @@
 {% load tags %}
 
 {% block title %}MuckRock &bull; My Requests{% endblock title %}
-{% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
-{% block type %}my request{% endblock type %}
+{% block list-title %}Requests{% endblock list-title %}
+{% block list-type %}my request{% endblock list-type %}
 
-{% block list %}
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="controls">
-        <button name="submit" value="Mark as Read">Mark as Read</button>
-	    <button name="submit" value="Mark as Unread">Mark as Unread</button>
-	    <button name="submit" value="Mark All as Read">Mark All as Read</button>
-	</div>
-    <ul class="list">
-        {% for foia in object_list %}      
-        <li {% if foia.updated %}class="unread"{% endif %}>
-            <div class="foia-info title">
-                <input type="checkbox" name="{{foia.foia_type}}" value="{{foia.pk}}" />
-                <div class="hgroup">
-                    {% if foia.foia_type == 'multi' %}
-                    <h3 class="{{ foia.color_code }}" id="request-status">{{ foia.get_status_display }} &bull; Multi-request</h3>
-                    <h2>{% if foia.status == 'started' %}<a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a>{% else %}{{ foia.title }}{% endif %}</h2>
-                    {% else %}
-                    <h3 class="{{ foia.color_code }}" id="request-status">{{ foia.get_status_display }}</h3>
-                    <h2><a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a></h2>
-                    {% endif %}
-                </div>
-            </div>
-            {% if foia.foia_type == 'foia' %}
-            <dl class="foia-info">
-                <dt>First Created</dt>
-                <dd>{{ foia.communications.all.0.date|date:"m/d/Y" }}</dd>
-                <dt>Last Updated</dt>
-                <dd>{{ foia.last_comm_date|date:"m/d/Y" }}</dd>
-            </dl>
-            <dl class="foia-info">
-                <dt>From</dt>
-                <dd><a href="{% url 'acct-profile' foia.user.username %}">Me</a></dd>
-                {% if foia.agency %}
-                <dt>To</dt>
-                <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
-                {% endif %}
-            </dl>
-            {% endif %}
-        </li>
-        {% empty %}
-        <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
-        {% endfor %}
-    </ul>
-</form>
-{% endblock list %}
+{% block list-table-head %}
+<th width="3%"><input type="checkbox"></th>
+<th>Title</th>
+<th width="20%">Status</th>
+<th width="20%">Date Created</th>
+<th width="20%">Date Updated</th>
+{% endblock list-table-head %}
+
+{% block list-table-item %}
+{% with item as foia %}
+<td><input type="checkbox"></td>
+<td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
+<td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
+    <!--<div class="request-status">{{ foia.get_status_display }}</div>
+    <div class="request-title">{{ foia.title }}</div>
+    <div class="request-from-to">From <a href="{{ foia.user.get_profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></div>-->
+
+<td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
+<td>{{ foia.last_comm_date|date:"m/d/Y" }}</td>
+
+<!--<td><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></td>
+<td><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></td>
+<td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></td>-->
+{% endwith %}
+{% endblock list-table-item %}

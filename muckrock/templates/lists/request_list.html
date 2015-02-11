@@ -1,36 +1,36 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
 {% load mathfilters %}
-
 {% block title %}MuckRock &bull; Requests{% endblock title %}
-{% block list-title %}<h1>{{ title }}</h1>{% endblock list-title %}
-{% block type %}request{% endblock type %}
+{% block list-title %}Requests{% endblock list-title %}
+{% block list-type %}request{% endblock list-type %}
 
-{% block list-item %}
-    {% with item as foia %}
-    <div class="foia-info">
-        <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}</h3>
-        <h2 ><a href="{{ foia.get_absolute_url }}" class="{{ foia.color_code }}">{{ foia.title }}</a></h2>
-    </div>
-    
-    <dl class="foia-info">
-        <dt>First Created</dt>
-        <dd>{{ foia.communications.all.0.date|date:"m/d/Y" }}</dd>
-        <dt>Last Updated</dt>
-        <dd>{{ foia.last_comm_date|date:"m/d/Y" }}</dd>
-    </dl>
-    <dl class="foia-info">
-        <dt>From</dt>
-        <dd><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></dd>
-        {% if foia.agency %}
-        <dt>To</dt>
-        <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a> of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></dd>
-        {% endif %}
-    </dl>
-    {% endwith %}
-{% endblock list-item %}
+{% block list-table-head %}
+<th>Title</th>
+<th width="20%">Status</th>
+<th width="20%">Date Created</th>
+<th width="20%">Date Updated</th>
+{% endblock list-table-head %}
 
-{% block filters %}
+{% block list-table-item %}
+{% with item as foia %}
+
+<td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
+<td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
+    <!--<div class="request-status">{{ foia.get_status_display }}</div>
+    <div class="request-title">{{ foia.title }}</div>
+    <div class="request-from-to">From <a href="{{ foia.user.get_profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></div>-->
+
+<td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
+<td>{{ foia.last_comm_date|date:"m/d/Y" }}</td>
+
+<!--<td><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></td>
+<td><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></td>
+<td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a></td>-->
+{% endwith %}
+{% endblock list-table-item %}
+
+{% block list-subtitle %}
 {% if user.is_authenticated %}
 <ul>
     <li><a href="{% url 'foia-list' %}" class="{% active request "^/foi/list/$" %}">All</a></li>
@@ -38,27 +38,7 @@
     <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
 </ul>
 {% endif %}
-<label for="filter-checkbox" id="filter-checkbox-label">Show Filters</label>
-<input type="checkbox" name="filter-checkbox" id="filter-checkbox" />
-<form action="" method="get" name="request-filters">
-{% with 3 as fields_per_column %}
-    {% for field in form %}
-        {% if forloop.first %}
-        <div class="input">
-        {% endif %}
-        {{ field }}
-        {% if forloop.counter|mod:fields_per_column == 0 %}
-        </div>
-        <div class="input">
-        {% endif %}
-        {% if forloop.last and forloop.counter|mod:fields_per_column != 0 %}
-        </div>
-        {% endif %}
-    {% endfor %}
-    <input type="submit" value="Filter" class="button" />
-</form>
-{% endwith %}
-{% endblock filters %}
+{% endblock list-subtitle %}
 
 {% block scripts %}
 {% include 'autocomplete_light/static.html' %}
