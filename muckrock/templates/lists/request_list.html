@@ -1,6 +1,7 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
 {% load mathfilters %}
+{% load static from staticfiles %}
 {% block title %}MuckRock &bull; Requests{% endblock title %}
 {% block list-title %}Requests{% endblock list-title %}
 {% block list-type %}request{% endblock list-type %}
@@ -41,6 +42,7 @@
 {% endblock list-subtitle %}
 
 {% block scripts %}
+<script src="{% static 'js/tablesaw.stackonly.js' %}" type="text/javascript"></script>
 {% include 'autocomplete_light/static.html' %}
 <script>
     $.urlParam = function(name){
