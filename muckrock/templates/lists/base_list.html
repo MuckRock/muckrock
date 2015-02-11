@@ -26,6 +26,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             </header>
             <form method="GET" class="list-filters">
             {% block list-filters %}
+                <dfn>Filters</dfn>
                 {% for filter in object_filters %}
                     <!-- Filter -->
                 {% endfor %}
