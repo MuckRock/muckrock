@@ -4,8 +4,8 @@ Admin registration for Tasks
 
 from django.contrib import admin
 
-from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, StaleAgencyTask, \
-                                 FlaggedTask, NewAgencyTask, ResponseTask
+from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 
 admin.site.register(OrphanTask)
 admin.site.register(SnailMailTask)

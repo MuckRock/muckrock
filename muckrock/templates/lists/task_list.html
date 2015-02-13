@@ -75,9 +75,47 @@
 				</form>
 				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> | 
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
-				{# XXX agency info #}
-				{# XXX full letter here, hidden #}
-				<p>{{task.snailmailtask.communication.communication}}</p>
+				{# agency info #}
+				{% if not appeal %}
+					{% if foia.agency %}
+						| <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.pk %}">Agency Admin</a>
+					{% endif %}
+					{% if foia.agency.email %}
+						| Agency Email: {{foia.agency.email}}
+					{% endif %}
+					{% if foia.agency.fax %}
+						| Agency Fax: {{foia.agency.fax}}@fax2.faxaway.com
+					{% endif %}
+					{% if foia.agency.address %}
+						<p>
+						Agency Address: {{foia.agency.address|linebreaks}}
+						</p>
+					{% endif %}
+					{% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
+						<p>
+						Notes: {{foia.agency.notes}}
+						</p>
+					{% endif %}
+
+				{% else %}
+					{% if foia.agency.appeal_agency %}
+						| <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">Appeal Agency Admin</a>
+						{% if foia.agency.appeal_agency.address %}
+							<p>
+							Address: {{foia.agency.appeal_agency.address|linebreaks}}
+							</p>
+						{% endif %}
+					{% endif %}
+				{% endif %}
+				<br />
+				<button type="button" class="button" onclick="$('#full-letter-{{task.snailmailtask.pk}}').toggle()">Show/Hide Letter</button>
+				{# full letter here, hidden #}
+				<textarea id="full-letter-{{task.snailmailtask.pk}}" style="display: none;">
+{% now "F j, Y" %}
+{% with foia as request %}
+{% include "text/foia/comms.txt" %}
+{% endwith %}
+				</textarea>
 			</section>
 			{% endwith %}
 
