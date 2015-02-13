@@ -4,6 +4,15 @@
 {% block list-title %}<h1>Tasks</h1>{% endblock list-title %}
 {% block type %}task{% endblock type %}
 
+{% block filters %}
+<ul>
+	<li><a href="{% url 'task-list' %}">All</a></li>
+	{% for user in staff_users %}
+	<li><a href="?user={{user.username}}">{{user.username}}</a></li>
+	{% endfor %}
+</ul>
+{% endblock %}
+
 {% block list %}
 
 {% for task in tasks %}
@@ -13,6 +22,16 @@
 				<h1>Orphan</h1>
 				<h2>{{task.orphantask.get_reason_display}} on {{task.date_created|date}}</h2>
 				<span>Sent to {{task.orphantask.address}}</span><br />
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				{% if task.orphantask.communication.likely_foia %}
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.orphantask.communication.likely_foia.pk %}">Probable Request</a></span><br />
 				{% endif %}
@@ -34,6 +53,16 @@
 			<section class="received message">
 				<h1>Snail Mail</h1>
 				<h2>{{task.snailmailtask.get_category_display}} on {{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				<span>Acknowledged? {{foia.has_ack}}</span><br />
 				<form method="post">
 					{% csrf_token %}
@@ -56,6 +85,16 @@
 			<section class="received message">
 				<h1>Rejected Email</h1>
 				<h2>{{task.rejectedemailtask.get_category_display}} on {{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				{% if task.rejectedemailtask.foia %}
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.rejectedemailtask.foia.pk %}">FOIA: {{task.rejectedemailtask.foia}} </a></span><br />
 				{% endif %}
@@ -74,6 +113,16 @@
 			<section class="received message">
 				<h1>Stale Agency</h1>
 				<h2>{{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.staleagencytask.agency.pk %}">Agency: {{task.staleagencytask.agency}}</a></span><br />
 				<form method="post">
 					{% csrf_token %}
@@ -87,6 +136,16 @@
 			<section class="received message">
 				<h1>Flagged</h1>
 				<h2>{{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				<form method="post">
 					{% csrf_token %}
 					<input type="hidden" name="task_pk" value="{{task.flaggedtask.pk}}">
@@ -108,6 +167,16 @@
 			<section class="received message">
 				<h1>New Agency</h1>
 				<h2>{{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				<form method="post">
 					{% csrf_token %}
 					<input type="hidden" name="task_pk" value="{{task.newagencytask.pk}}">
@@ -124,6 +193,16 @@
 			<section class="received message">
 				<h1>Response</h1>
 				<h2>{{task.date_created|date}}</h2>
+				<span>Assigned to:</span>
+				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
+						<option value="0">-None-</option>
+						{% for user in staff_users %}
+						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+						{% endfor %}
+					</select>
+					<span id="task-{{task.id}}-confirm"></span>
+				</form>
 				{% with task.responsetask.communication as comm %}
 				<span>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</span><br />
 				<form method="post">

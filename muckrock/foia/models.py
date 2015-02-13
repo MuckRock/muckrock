@@ -855,7 +855,6 @@ class FOIACommunication(models.Model):
                 messages.error(request, 'FOIA %s does not exist' % new_foia_pk)
                 continue
             new_foias.append(new_foia)
-            # does this work? XXX
             self.pk = None
             self.foia = new_foia
             self.save()
