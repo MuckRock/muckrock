@@ -138,7 +138,15 @@
 				{% endif %}
 				<span>From: {{task.rejectedemailtask.email}}</span><br />
 				<span>Error: {{task.rejectedemailtask.error}}</span><br />
-				{# XXX put other agencies and foias here #}
+				<ul>
+				{% for foia in task.rejectedemailtask.foias %}
+				<li><a href="https://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia.title}}</a></li>
+				{% endfor %}
+				</ul><ul>
+				{% for agency in task.rejectedemailtask.agencies %}
+				<li><a href="https://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}">{{agency.name}}</a></li>
+				{% endfor %}
+				</ul>
 				<form method="post">
 					{% csrf_token %}
 					<input type="hidden" name="task_pk" value="{{task.rejectedemailtask.pk}}">
