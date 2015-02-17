@@ -98,10 +98,11 @@ $progress-animation-duration: 0.7s;
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
     @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
-    tr:nth-child(odd) { background-color: $color-odd-background; }
-    border: $base-border-width solid $color-grey;
+    thead tr { background-color: $color-default; }
+    tbody tr:nth-child(odd) { background-color: $color-odd-background; }
     &, tr {
         border-top: $base-border-width solid $color-grey;
         border-bottom: $base-border-width solid $color-grey
