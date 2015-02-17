@@ -32,8 +32,8 @@ This is the parent style for a collection of objects: a collection of blog posts
                     <!-- Filter -->
                 {% endfor %}
                 <div class="list-filters-buttons">
-                    <button action="apply-filters">Apply Filters</button>
-                    <button action="clear-filters">Clear Filters</button>
+                    <button action="apply-filters">Apply</button>
+                    <button action="clear-filters">Clear</button>
                 </div>
             {% endblock list-filters %}
             </form>
@@ -44,6 +44,9 @@ This is the parent style for a collection of objects: a collection of blog posts
         <div class="list-content">
         {% block list-content %}
             {% include 'lib/pagination.html' %}
+            {% block list-description %}
+            <summary>Showing <u>all requests</u> from <u>all users</u> to <u>all agencies</u> in <u>all jurisdictions</u>.</summary>
+            {% endblock list-description %}
             <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
             {% block list-table %}
         
