@@ -41,9 +41,9 @@
 {% block list-subtitle %}
 {% if user.is_authenticated %}
 <ul>
-    <li><a href="{% url 'foia-list' %}" class="{% active request "^/foi/list/$" %}">All</a></li>
-    <li><a href="{% url 'foia-mylist' %}" class="{% active request "^/foi/mylist/$" %}">Mine</a></li>
-    <li><a href="{% url 'foia-list-following' %}" class="{% active request "^/foi/list/following/$" %}">Following</a></li>
+    <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+    <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Mine</a></li>
+    <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
 </ul>
 {% endif %}
 {% endblock list-subtitle %}

@@ -23,6 +23,22 @@
     }
     .list-head {
         @include row;
+        & ul {
+            display: table;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        & li {
+            display: table-cell;
+            padding: .25em .5em;
+            border: $base-border-width solid $color-grey;
+            text-align: center;
+            &.current-tab {
+                border-color: $color-primary;
+                background: $color-primary;
+                a { color: $color-white; }
+            }
+        }
     }
     .list-title {
         @extend h1;
