@@ -34,7 +34,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
-from muckrock.views import class_view_decorator
+from muckrock.views import class_view_decorator, MRListView
 
 # pylint: disable=R0901
 
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
-class List(ListView):
+class List(MRListView):
     """Base list view for other list views to inherit from"""
 
     def filter_sort_requests(self, foia_requests):
@@ -70,7 +70,7 @@ class List(ListView):
                     juris_obj = get_object_or_404(Jurisdiction, id=value[0])
                     foia_requests = foia_requests.filter(jurisdiction=juris_obj)
                 elif key == 'user':
-                    user_obj = get_object_or_404(User, username=value)
+                    user_obj = get_object_or_404(User, id=value)
                     foia_requests = foia_requests.filter(user=user_obj)
                 # elif key == 'tags':
                     # foia_requests = foia_requests.filter(tags__slug=value)
@@ -85,9 +85,6 @@ class List(ListView):
         foia_requests = foia_requests.order_by(ob_field)
 
         return foia_requests
-
-    def get_paginate_by(self, queryset):
-        return 15
 
     def get_context_data(self, **kwargs):
         context = super(List, self).get_context_data(**kwargs)
@@ -111,8 +108,9 @@ class List(ListView):
                 filter_url += filter_query
 
         context['title'] = 'FOI Requests'
-        context['form'] = ListFilterForm(initial=form_initials)
+        context['filter_form'] = ListFilterForm(initial=form_initials)
         context['filter_url'] = filter_url
+        context['filter_list'] = ['All Tags', 'All Users', 'All Agencies', 'All Jurisdictions', 'All Statuses']
         return context
 
     def get_queryset(self):

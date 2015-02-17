@@ -28,9 +28,10 @@ This is the parent style for a collection of objects: a collection of blog posts
             <form method="GET" class="list-filters">
             {% block list-filters %}
                 <dfn>Filters</dfn>
-                {% for filter in object_filters %}
-                    <!-- Filter -->
-                {% endfor %}
+                {{ filter_form.user }}
+                {{ filter_form.agency }}
+                {{ filter_form.jurisdiction }}
+                {{ filter_form.status }}
                 <div class="list-filters-buttons">
                     <button action="apply-filters">Apply</button>
                     <button action="clear-filters">Clear</button>
@@ -44,9 +45,6 @@ This is the parent style for a collection of objects: a collection of blog posts
         <div class="list-content">
         {% block list-content %}
             {% include 'lib/pagination.html' %}
-            {% block list-description %}
-            <summary>Showing <u>all requests</u> from <u>all users</u> to <u>all agencies</u> in <u>all jurisdictions</u>.</summary>
-            {% endblock list-description %}
             <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
             {% block list-table %}
         

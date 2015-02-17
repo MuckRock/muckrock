@@ -14,6 +14,10 @@ from muckrock.news.models import Article
 
 class MRListView(ListView):
     # TODO: Customize get() method to handle a ListFilterForm
+    
+    def get_paginate_by(self, queryset):
+        return 15
+    
     pass
 
 def front_page(request):

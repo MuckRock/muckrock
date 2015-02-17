@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 import autocomplete_light as autocomplete
 from datetime import date, timedelta
 
+from muckrock.forms import MRFilterForm
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
@@ -134,45 +135,16 @@ class MultiRequestDraftForm(forms.ModelForm):
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'embargo']
 
-class ListFilterForm(forms.Form):
+class ListFilterForm(MRFilterForm):
     """Provides options for filtering list by request characteristics"""
     status = forms.ChoiceField(
         choices=STATUS,
         required=False
     )
-    agency = forms.ModelChoiceField(
-        required=False,
-        queryset=Agency.objects.all(),
-        widget=autocomplete.ChoiceWidget('AgencyAutocomplete'))
-    jurisdiction = forms.ModelChoiceField(
-        required=False,
-        queryset=Jurisdiction.objects.all(),
-        widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete'))
 
-    order = forms.ChoiceField(
-        required=False,
-        choices=(('asc', 'Ascending'), ('desc', 'Descending'))
-    )
-    sort = forms.ChoiceField(
-        required=False,
-        choices=(
-            ('title', 'Title'),
-            ('date_submitted', 'Date'),
-            ('times_viewed', 'Popularity')
-        )
-    )
-
-class MyListFilterForm(ListFilterForm):
+class MyListFilterForm(MRFilterForm):
     """Extends ListFilterFrom with a 'read_status' sort choice"""
-    sort = forms.ChoiceField(
-        required=False,
-        choices=(
-            ('title', 'Title'),
-            ('date_submitted', 'Date'),
-            ('times_viewed', 'Popularity'),
-            ('read_status', 'Read Status')
-        )
-    )
+    
 
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
