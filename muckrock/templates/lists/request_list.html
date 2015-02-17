@@ -6,6 +6,13 @@
 {% block list-title %}Requests{% endblock list-title %}
 {% block list-type %}request{% endblock list-type %}
 
+{% block list-filters %}
+{{ filter_form.status }}
+{{ filter_form.user }}
+{{ filter_form.agency }}
+{{ filter_form.jurisdiction }}
+{% endblock list-filters %}
+
 {% block list-table-head %}
 <th>Title</th>
 <th width="20%">Status</th>

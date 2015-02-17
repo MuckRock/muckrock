@@ -33,11 +33,8 @@
     .list-filters-buttons {
         @include row;
         font-size: 0.75em;
-        button {
+        button, .button {
             @extend %half;
-            &:hover {
-                background: $color-grey;
-            }
         }
     }
     .list-content {
@@ -57,5 +54,10 @@
     }
     .list-empty {
         @extend %full;
+        @extend h2;
+        margin-top: 2em;
+        font-weight: $bold;
+        color: $color-grey;
+        text-align: center;
     }   
 }

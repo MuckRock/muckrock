@@ -11,7 +11,6 @@ This is the parent style for a collection of objects: a collection of blog posts
 
     <section class="{% block list-type %}object{% endblock %} list">
     {% block list %}
-    {% if object_list %}
         <nav class="list-navigation">
         {% block list-navigation %}
             <header class="list-head">
@@ -25,25 +24,31 @@ This is the parent style for a collection of objects: a collection of blog posts
 
             {% endblock list-head %}
             </header>
+            {% if filter_form %}
             <form method="GET" class="list-filters">
-            {% block list-filters %}
                 <dfn>Filters</dfn>
-                {{ filter_form.user }}
-                {{ filter_form.agency }}
-                {{ filter_form.jurisdiction }}
-                {{ filter_form.status }}
+                {% block list-filters %}
+                
+                {% comment %}
+                By default, no filters are shown. To add filters,
+                fill the list-filters block with calls to filter_form.
+                E.g. {{ filter_form.agency }} would add an agency filter.
+                {% endcomment %}
+                
+                {% endblock list-filters %}
                 <div class="list-filters-buttons">
                     <button action="apply-filters">Apply</button>
-                    <button action="clear-filters">Clear</button>
+                    <a class="button" href="{% url 'foia-list' %}">Clear</a>
                 </div>
-            {% endblock list-filters %}
             </form>
+            {% endif %}
             {% block list-actions %}
             {% endblock list-actions %}
         {% endblock list-navigation %}
         </nav>
         <div class="list-content">
         {% block list-content %}
+            {% if object_list %}
             {% include 'lib/pagination.html' %}
             <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
             {% block list-table %}
@@ -69,11 +74,12 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% endblock list-table %}
             </table>
             {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
+            {% else %}
+            <p class="list-empty">No Results</p>
+            {% endif %}
         {% endblock list-content %}
+       
         </div>
-    {% else %}
-        <p class="list-empty">Hmm&hellip; looks like there&rsquo;s nothing here.</p>
-    {% endif %}
     {% endblock list %}
     </section>
 
