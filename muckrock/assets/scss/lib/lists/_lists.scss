@@ -70,6 +70,7 @@
     }
     
     .list-table {
+        border: $base-border-width solid $color-grey;
         border-collapse: collapse;
         font-size: 0.9em;
     }
