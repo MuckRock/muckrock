@@ -3,6 +3,11 @@
 {% block list-title %}Jurisdictions{% endblock list-title %}
 {% block list-type %}jurisidiction{% endblock list-type %}
 
+{% block list-filters %}
+{{ filter_form.level }}
+{{ filter_form.jurisdiction }}
+{% endblock list-filters %}
+
 {% block list-table-head %}
 <th>Name</th>
 <th>Level</th>

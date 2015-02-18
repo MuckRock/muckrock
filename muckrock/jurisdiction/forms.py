@@ -2,6 +2,19 @@
 
 from django import forms
 
+from muckrock.forms import MRFilterForm
+
+class JurisdictionFilterForm(MRFilterForm):
+    levels = (
+        ('f', 'Federal'),
+        ('s', 'State'),
+        ('l', 'Local'),
+    )
+    level = forms.ChoiceField(
+        choices=levels,
+        widget=forms.RadioSelect
+    )
+
 class FlagForm(forms.Form):
     """Form to flag an agency or jurisdiction"""
     reason = forms.CharField(
