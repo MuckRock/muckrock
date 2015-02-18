@@ -49,43 +49,45 @@ class RequestList(MRFilterableListView):
     template_name = 'lists/request_list.html'
     
     def get_filters(self):
+        """Adds request-specific filter fields"""
         base_filters = super(RequestList, self).get_filters()
-        new_filters = ['status']
+        new_filters = [
+            {
+                'field': 'status',
+                'lookup': 'exact',
+            }
+        ]
         return base_filters + new_filters
-
-    def apply_filter(self, filter_key, filter_value, objects):
-        if filter_key == 'status':
-            objects = objects.filter(status=filter_value)
-        else:
-            objects = objects.filter(id=filter_value)
-        return objects
     
     def get_context_data(self, **kwargs):
+        """Changes filter_form to use RequestFilterForm instead of the default"""
         context = super(RequestList, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
         return context
 
     def get_queryset(self):
-        objects = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_list(objects)
+        """Limits requests to those visible by current user"""
+        objects = super(RequestList, self).get_queryset()
+        return objects.get_viewable(self.request.user)
 
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
     template_name = 'lists/request_my_list.html'
     def get_queryset(self):
-        objects = FOIARequest.objects.filter(user=self.request.user)
-        return self.filter_list(objects)
+        """Limits requests to just those by the current user"""
+        objects = super(MyRequestList, self).get_queryset()
+        return objects.filter(user=self.request.user)
 
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
     def get_queryset(self):
-        """Get FOIAs for this view"""
+        """Limits FOIAs to those followed by the current user"""
+        objects = super(FollowingRequestList, self).get_queryset()
         profile = self.request.user.get_profile()
-        objects = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_list(objects.filter(followed_by=profile))
+        return objects.filter(followed_by=profile)
 
 # pylint: disable=no-self-use
 class Detail(DetailView):

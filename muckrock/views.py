@@ -14,23 +14,53 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
 class MRFilterableListView(ListView):
+    """
+    The main feature of MRFilterableListView is the ability to filter
+    a set of request objects by a dynamic dictionary of filters and
+    lookup conditions. MRFilterableListView should be used in conjunction
+    with MRFilterForm, available in the `muckrock.forms` module.
+    
+    To see an example of a subclass of MRFilterableListView that adds new
+    filter fields, look at `muckrock.foia.views.RequestList`.
+    """
     
     title = ''
     template_name = 'lists/base_list.html'
 
     def get_filters(self):
-        """filters should be the same as the fields in MRFilterForm"""
-        return ['user', 'agency', 'jurisdiction']
+        """
+        Filters should be the same as the fields in MRFilterForm, or whichever
+        subclass of MRFilterForm is being used in as this class's `filter_form`.
+        Filters are an array of key-value pairs.
+        Required pairs are the field name and the [lookup condition][a].
+        
+        [a]: https://docs.djangoproject.com/en/1.7/ref/models/querysets/#field-lookups
+        """
+        return [
+            {
+                'field': 'user',
+                'lookup': 'exact',
+            },
+            {
+                'field': 'agency',
+                'lookup': 'exact',
+            },
+            {
+                'field': 'jurisdiction',
+                'lookup': 'exact',
+            }
+        ]
     
     def get_filter_data(self):
         """
         Returns a list of filter values, a url query for the filter,
-        and a list of objects that have been filtered
+        and a list of objects that have been filtered.
         """
         get = self.request.GET
         filter_initials = {}
         filter_url = ''
-        for filter_key in self.get_filters():
+        for filter in self.get_filters():
+            filter_key = filter['field']
             filter_value = get.get(filter_key, None)
             if filter_value:
                 filter_initials.update({filter_key: filter_value})
@@ -41,6 +71,7 @@ class MRFilterableListView(ListView):
         }
 
     def get_context_data(self, **kwargs):
+        """Gets basic context, including title, form, and url"""
         context = super(MRFilterableListView, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['title'] = self.title
@@ -51,21 +82,18 @@ class MRFilterableListView(ListView):
     def filter_list(self, objects):
         """Filters a list of objects"""
         get = self.request.GET
-        for filter_key in self.get_filters():
+        kwargs = {}
+        for filter in self.get_filters():
+            filter_key = filter['field']
+            filter_lookup = filter['lookup']
             filter_value = get.get(filter_key, None)
             if filter_value:
-                objects = self.apply_filter(filter_key, filter_value, objects)
-        return objects
-                
-    def apply_filter(self, filter_key, filter_value, objects):
-        """An overrideable function for determining how to filter a list"""
-        return objects.filter(id=filter)
+                kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
+        return objects.filter(**kwargs)
     
     def get_queryset(self):
         objects = super(ListView, self).get_queryset()
-        to_return = self.filter_list(objects)
-        print to_return
-        return to_return
+        return self.filter_list(objects)
     
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
