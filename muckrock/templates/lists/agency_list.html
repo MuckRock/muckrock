@@ -3,6 +3,10 @@
 {% block list-title %}Agencies{% endblock list-title %}
 {% block list-type %}agency{% endblock list-type %}
 
+{% block list-filters %}
+{{ filter_form.jurisdiction }}
+{% endblock list-filters %}
+
 {% block list-table-head %}
 <tr>
     <th>Name</th>

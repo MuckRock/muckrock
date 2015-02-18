@@ -22,22 +22,13 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
+from muckrock.views import MRFilterableListView
 
-class List(ListView):
-    """List of popular agencies"""
-    
+class List(MRFilterableListView):
+    """Filterable list of agencies"""
+    model = Agency
+    title = 'Agencies'
     template_name = 'lists/agency_list.html'
-    
-    def filter_sort_requests(self, queryset):
-        """Sorts the FOIA requests"""
-        return queryset
-    
-    def get_paginate_by(self, queryset):
-        return self.request.GET.get('per_page', 30)
-    
-    def get_queryset(self):
-        queryset = Agency.objects.filter(approved=True)
-        return self.filter_sort_requests(queryset)
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
