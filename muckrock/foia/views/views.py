@@ -51,12 +51,7 @@ class RequestList(MRFilterableListView):
     def get_filters(self):
         """Adds request-specific filter fields"""
         base_filters = super(RequestList, self).get_filters()
-        new_filters = [
-            {
-                'field': 'status',
-                'lookup': 'exact',
-            }
-        ]
+        new_filters = [{'field': 'status', 'lookup': 'exact' }]
         return base_filters + new_filters
     
     def get_context_data(self, **kwargs):
