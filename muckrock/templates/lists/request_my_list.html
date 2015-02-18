@@ -13,6 +13,12 @@
 <th width="20%">Date Updated</th>
 {% endblock list-table-head %}
 
+{% block list-filters %}
+{{ filter_form.status }}
+{{ filter_form.agency }}
+{{ filter_form.jurisdiction }}
+{% endblock list-filters %}
+
 {% block list-table-item %}
 {% with item as foia %}
 <td><input type="checkbox"></td>

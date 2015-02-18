@@ -75,6 +75,15 @@ class RequestList(MRFilterableListView):
 class MyRequestList(RequestList):
     """View requests owned by current user"""
     template_name = 'lists/request_my_list.html'
+    
+    def get_filters(self):
+        """Removes the 'users' filter, because its _my_ requests"""
+        filters = super(MyRequestList, self).get_filters()
+        for filter_dict in filters:
+            if 'user' in filter_dict.values():
+                filters.pop(filters.index(filter_dict))
+        return filters
+
     def get_queryset(self):
         """Limits requests to just those by the current user"""
         objects = super(MyRequestList, self).get_queryset()
