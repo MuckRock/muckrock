@@ -9,7 +9,7 @@ To Whom It May Concern:
 {% if jurisdiction.get_waiver %}
 {{ jurisdiction.get_waiver }}
 {% else %}
-I also request that, if appropriate, fees be waived as I believe this request is in the public interest. The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, processed by a representative of the news media/press and is made in the process of news gathering and not for commercial usage.
+The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com.  The request is not made for commercial usage.
 {% endif %}
 In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.
 {% if jurisdiction.get_days %}
