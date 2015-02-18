@@ -30,9 +30,11 @@
         }
         & li {
             display: table-cell;
-            padding: .25em .5em;
+            padding: .5em;
             border: $base-border-width solid $color-grey;
             text-align: center;
+            vertical-align: middle;
+            line-height: 1em;
             &.current-tab {
                 border-color: $color-primary;
                 background: $color-primary;
@@ -64,11 +66,9 @@
     .list-content {
         @extend %three-quarters;
     }
-    
     .pagination {
         margin-top: $base-margin/2;
     }
-    
     .list-table {
         border: $base-border-width solid $color-grey;
         border-collapse: collapse;
