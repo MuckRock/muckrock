@@ -38,7 +38,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% endblock list-filters %}
                 <div class="list-filters-buttons">
                     <button action="apply-filters">Apply</button>
-                    <a class="button" href="{% url 'foia-list' %}">Clear</a>
+                    <a class="button" href="{{ request.path }}">Clear</a>
                 </div>
             </form>
             {% endif %}
