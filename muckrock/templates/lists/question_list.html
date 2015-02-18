@@ -3,12 +3,12 @@
 {% block title %}MuckRock &bull; Q&A Forum{% endblock title %}
 {% block list-type %}question{% endblock list-type %}
 
-{% block list-subtitle %}
+{% block list-sections %}
 <ul>
     <li class="{% active request '^/questions/$' %}"><a href="{% url 'question-index' %}">All</a></li>
     <li class="{% active request '^/questions/unanswered/$' %}"><a href="{% url 'question-unanswered' %}">Unanswered</a></li>
 </ul>
-{% endblock list-subtitle %}
+{% endblock list-sections %}
 
 {% block list-filters %}
 {{ filter_form.user }}

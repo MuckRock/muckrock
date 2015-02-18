@@ -38,7 +38,7 @@
 {% endwith %}
 {% endblock list-table-item %}
 
-{% block list-subtitle %}
+{% block list-sections %}
 {% if user.is_authenticated %}
 <ul>
     <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
@@ -46,7 +46,7 @@
     <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
 </ul>
 {% endif %}
-{% endblock list-subtitle %}
+{% endblock list-sections %}
 
 {% block scripts %}
 <script src="{% static 'js/tablesaw.stackonly.js' %}" type="text/javascript"></script>
