@@ -9,16 +9,67 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
-class MRListView(ListView):
-    # TODO: Customize get() method to handle a ListFilterForm
+class MRFilterableListView(ListView):
+    
+    title = ''
+    template_name = 'lists/base_list.html'
+
+    def get_filters(self):
+        """filters should be the same as the fields in MRFilterForm"""
+        return ['user', 'agency', 'jurisdiction']
+    
+    def get_filter_data(self):
+        """
+        Returns a list of filter values, a url query for the filter,
+        and a list of objects that have been filtered
+        """
+        get = self.request.GET
+        filter_initials = {}
+        filter_url = ''
+        for filter_key in self.get_filters():
+            filter_value = get.get(filter_key, None)
+            if filter_value:
+                filter_initials.update({filter_key: filter_value})
+                filter_url += '&' + str(filter_key) + '=' + str(filter_value)
+        return {
+            'filter_initials': filter_initials,
+            'filter_url': filter_url
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super(MRFilterableListView, self).get_context_data(**kwargs)
+        filter_data = self.get_filter_data()
+        context['title'] = self.title
+        context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        context['filter_url'] = filter_data['filter_url']
+        return context
+    
+    def filter_list(self, objects):
+        """Filters a list of objects"""
+        get = self.request.GET
+        for filter_key in self.get_filters():
+            filter_value = get.get(filter_key, None)
+            if filter_value:
+                objects = self.apply_filter(filter_key, filter_value, objects)
+        return objects
+                
+    def apply_filter(self, filter_key, filter_value, objects):
+        """An overrideable function for determining how to filter a list"""
+        return objects.filter(id=filter)
+    
+    def get_queryset(self):
+        objects = super(ListView, self).get_queryset()
+        to_return = self.filter_list(objects)
+        print to_return
+        return to_return
     
     def get_paginate_by(self, queryset):
+        """Paginates list by the return value"""
         return 15
-    
-    pass
 
 def front_page(request):
     """Get all the details needed for the front page"""

@@ -22,8 +22,8 @@ import stripe
 from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
-    ListFilterForm, \
-    MyListFilterForm
+    RequestFilterForm, \
+    MyRequestFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -34,7 +34,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
-from muckrock.views import class_view_decorator, MRListView
+from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=R0901
 
@@ -42,180 +42,50 @@ logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
-class List(MRListView):
+class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
+    model = FOIARequest
+    title = 'Requests'
+    template_name = 'lists/request_list.html'
+    
+    def get_filters(self):
+        base_filters = super(RequestList, self).get_filters()
+        new_filters = ['status']
+        return base_filters + new_filters
 
-    def filter_sort_requests(self, foia_requests):
-        """Sorts the FOIA requests"""
-        get = self.request.GET
-        order = get.get('order', 'desc')
-        sort = get.get('sort', 'date_submitted')
-        list_filter = {
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-
-        for key, value in list_filter.iteritems():
-            if value:
-                if key == 'status':
-                    foia_requests = foia_requests.filter(status=value)
-                elif key == 'agency':
-                    agency_obj = get_object_or_404(Agency, id=value)
-                    foia_requests = foia_requests.filter(agency=agency_obj)
-                elif key == 'jurisdiction':
-                    value = value.split(',')
-                    juris_obj = get_object_or_404(Jurisdiction, id=value[0])
-                    foia_requests = foia_requests.filter(jurisdiction=juris_obj)
-                elif key == 'user':
-                    user_obj = get_object_or_404(User, id=value)
-                    foia_requests = foia_requests.filter(user=user_obj)
-                # elif key == 'tags':
-                    # foia_requests = foia_requests.filter(tags__slug=value)
-
-
-        # Handle extra cases by resorting to default values
-        if order not in ['asc', 'desc']:
-            order = 'desc'
-        if sort not in ['title', 'date_submitted', 'times_viewed']:
-            sort = 'date_submitted'
-        ob_field = '-' + sort if order == 'desc' else sort
-        foia_requests = foia_requests.order_by(ob_field)
-
-        return foia_requests
-
+    def apply_filter(self, filter_key, filter_value, objects):
+        if filter_key == 'status':
+            objects = objects.filter(status=filter_value)
+        else:
+            objects = objects.filter(id=filter_value)
+        return objects
+    
     def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
-        # get args to populate initial values for ListFilterForm
-        get = self.request.GET
-        form_fields = {
-            'order': get.get('order', False),
-            'sort': get.get('sort', False),
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-        form_initials = {}
-        filter_url = ''
-        for key, value in form_fields.iteritems():
-            if value:
-                form_initials.update({key: value})
-                filter_query = '&' + str(key) + '=' + str(value)
-                filter_url += filter_query
-
-        context['title'] = 'FOI Requests'
-        context['filter_form'] = ListFilterForm(initial=form_initials)
-        context['filter_url'] = filter_url
-        context['filter_list'] = ['All Tags', 'All Users', 'All Agencies', 'All Jurisdictions', 'All Statuses']
+        context = super(RequestList, self).get_context_data(**kwargs)
+        filter_data = self.get_filter_data()
+        context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
         return context
 
     def get_queryset(self):
-        query = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_sort_requests(query)
+        objects = FOIARequest.objects.get_viewable(self.request.user)
+        return self.filter_list(objects)
 
 @class_view_decorator(login_required)
-class MyList(List):
+class MyRequestList(RequestList):
     """View requests owned by current user"""
     template_name = 'lists/request_my_list.html'
-
-    def set_read_status(self, foia_pks, status):
-        """Mark requests as read or unread"""
-        for foia_pk in foia_pks:
-            foia = FOIARequest.objects.get(pk=foia_pk, user=self.request.user)
-            foia.updated = status
-            foia.save()
-
-    def post(self, request):
-        """Handle updating read status"""
-        try:
-            post = request.POST
-            foia_pks = post.getlist('foia')
-            if post.get('submit') == 'Mark as Read':
-                self.set_read_status(foia_pks, False)
-            elif post.get('submit') == 'Mark as Unread':
-                self.set_read_status(foia_pks, True)
-            elif post.get('submit') == 'Mark All as Read':
-                foia_requests = FOIARequest.objects.filter(user=self.request.user, updated=True)
-                all_unread = [foia.pk for foia in foia_requests]
-                self.set_read_status(all_unread, False)
-        except FOIARequest.DoesNotExist:
-            pass
-        return redirect('foia-mylist')
-
-    def merge_requests(self, foia_requests, multi_requests):
-        """Merges the sorted FOIA requests with the multi requests"""
-
-        get = self.request.GET
-
-        order = get.get('order', 'desc')
-        field = get.get('field', 'date_submitted')
-
-        updated_foia_requests = [f for f in foia_requests if f.updated]
-        other_foia_requests = [f for f in foia_requests if not f.updated]
-
-        if field == 'title':
-            both = list(other_foia_requests) + list(multi_requests)
-            both.sort(key=lambda x: x.title, reverse=(order != 'asc'))
-            both = updated_foia_requests + both
-        elif field == 'status':
-            both = list(other_foia_requests) + list(multi_requests)
-            both.sort(key=lambda x: x.status, reverse=(order != 'asc'))
-            both = updated_foia_requests + both
-        elif order == 'asc':
-            both = list(updated_foia_requests) + list(other_foia_requests) + list(multi_requests)
-        else:
-            both = list(updated_foia_requests) + list(multi_requests) + list(other_foia_requests)
-
-        return both
-
     def get_queryset(self):
-        """Get FOIAs for this view"""
-        unsorted = FOIARequest.objects.filter(user=self.request.user)
-        multis = FOIAMultiRequest.objects.filter(user=self.request.user)
-        sorted_requests = self.filter_sort_requests(unsorted)
-        sorted_requests = self.merge_requests(sorted_requests, multis)
-        return sorted_requests
-
-    def get_context_data(self, **kwargs):
-        context = super(MyList, self).get_context_data(**kwargs)
-
-        get = self.request.GET
-        form_fields = {
-            'order': get.get('order', False),
-            'sort': get.get('field', False),
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-        form_initials = {}
-        for key, value in form_fields.iteritems():
-            if value:
-                form_initials.update({key: value})
-
-        context['title'] = 'My FOI Requests'
-        context['form'] = MyListFilterForm(initial=form_initials)
-        return context
-
+        objects = FOIARequest.objects.filter(user=self.request.user)
+        return self.filter_list(objects)
 
 @class_view_decorator(login_required)
-class ListFollowing(List):
+class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
-
     def get_queryset(self):
         """Get FOIAs for this view"""
         profile = self.request.user.get_profile()
-        requests = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_sort_requests(requests.filter(followed_by=profile))
-
-    def get_context_data(self, **kwargs):
-        context = super(ListFollowing, self).get_context_data(**kwargs)
-        return context
+        objects = FOIARequest.objects.get_viewable(self.request.user)
+        return self.filter_list(objects.filter(followed_by=profile))
 
 # pylint: disable=no-self-use
 class Detail(DetailView):

@@ -135,14 +135,14 @@ class MultiRequestDraftForm(forms.ModelForm):
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'embargo']
 
-class ListFilterForm(MRFilterForm):
+class RequestFilterForm(MRFilterForm):
     """Provides options for filtering list by request characteristics"""
     status = forms.ChoiceField(
         choices=STATUS,
         required=False
     )
 
-class MyListFilterForm(MRFilterForm):
+class MyRequestFilterForm(MRFilterForm):
     """Extends ListFilterFrom with a 'read_status' sort choice"""
     
 
