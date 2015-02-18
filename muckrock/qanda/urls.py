@@ -3,6 +3,7 @@ URL mappings for the Q&A application
 """
 
 from django.conf.urls import patterns, url
+from django.views.generic.base import RedirectView
 
 from muckrock.qanda import views
 from muckrock.qanda.feeds import LatestQuestions
@@ -13,17 +14,18 @@ urlpatterns = patterns(
     '',
     url(
         r'^$',
-        views.List.as_view(template_name='lists/question_list.html'),
+        views.QuestionList.as_view(),
         name='question-index'
     ),
     url(
         r'^unanswered/$',
-        views.ListUnanswered.as_view(template_name='lists/question_list.html'),
+        views.UnansweredQuestionList.as_view(),
         name='question-unanswered'
     ),
+    # TODO: Redirect to all with a query of (sorted_by=date_answered, order=desc)
     url(
         r'^recent/$',
-        views.ListRecent.as_view(template_name='lists/question_list.html'),
+        RedirectView.as_view(url='/questions/'),
         name='question-recent'
     ),
     url(

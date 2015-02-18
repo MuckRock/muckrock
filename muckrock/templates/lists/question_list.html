@@ -1,11 +1,21 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
-{% block title %}MuckRock &bull; Questions{% endblock title %}
-{% block list-title %}Questions&ensp;&amp;&ensp;Answers{% endblock list-title %}
+{% block title %}MuckRock &bull; Q&A Forum{% endblock title %}
 {% block list-type %}question{% endblock list-type %}
 
+{% block list-subtitle %}
+<ul>
+    <li class="{% active request '^/questions/$' %}"><a href="{% url 'question-index' %}">All</a></li>
+    <li class="{% active request '^/questions/unanswered/$' %}"><a href="{% url 'question-unanswered' %}">Unanswered</a></li>
+</ul>
+{% endblock list-subtitle %}
+
+{% block list-filters %}
+{{ filter_form.user }}
+{% endblock list-filters %}
+
 {% block list-actions %}
-<a href="{% url 'question-create' %}">Ask a Question</a>
+<a href="{% url 'question-create' %}" class="primary button">Ask a Question</a>
 {% endblock list-actions %}
 
 {% block list-table-head %}
@@ -23,11 +33,3 @@
 <td>{{ question.answers.all | length }}</td>
 {% endwith %}
 {% endblock list-table-item %}
-
-{% block list-subtitle %}
-<ul>
-    <li><a href="{% url 'question-index' %}" class="{% active request "^/questions/$" %}">All</a></li>
-    <li><a href="{% url 'question-unanswered' %}" class="{% active request "^/questions/unanswered/$" %}">Unanswered</a></li>
-    <li><a href="{% url 'question-recent' %}" class="{% active request "^/questions/recent/$" %}">Recently Answered</a></li>
-</ul>
-{% endblock list-subtitle %}
