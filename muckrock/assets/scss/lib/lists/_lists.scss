@@ -24,11 +24,12 @@
         margin-bottom: $base-margin/2;
         .list-title {
             @extend h1;
-            @extend %three-quarters;
+            @extend %third;
         }
         .list-actions {
-            @extend %quarter;
-            line-height: 2em;
+            @extend %two-thirds;
+            margin-top: $base-margin/2;
+            font-size: .9em;
             text-align: right;
         }
     }
@@ -86,6 +87,9 @@
     }
     .list-table-head, .list-table-body {
         width: 100%;
+    }
+    .list-table-body tr.unread {
+        background: lighten($color-primary, 35%);
     }
     .list-empty {
         @extend %full;

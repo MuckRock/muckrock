@@ -71,6 +71,30 @@ class MyRequestList(RequestList):
     """View requests owned by current user"""
     template_name = 'lists/request_my_list.html'
     
+    def set_read_status(self, foia_pks, status):
+        """Mark requests as read or unread"""
+        for foia_pk in foia_pks:
+            foia = FOIARequest.objects.get(pk=foia_pk, user=self.request.user)
+            foia.updated = status
+            foia.save()
+
+    def post(self, request):
+        """Handle updating read status"""
+        try:
+            post = request.POST
+            foia_pks = post.getlist('foia')
+            if post.get('submit') == 'Mark as Read':
+                self.set_read_status(foia_pks, False)
+            elif post.get('submit') == 'Mark as Unread':
+                self.set_read_status(foia_pks, True)
+            elif post.get('submit') == 'Mark All as Read':
+                foia_requests = FOIARequest.objects.filter(user=self.request.user, updated=True)
+                all_unread = [foia.pk for foia in foia_requests]
+                self.set_read_status(all_unread, False)
+        except FOIARequest.DoesNotExist:
+            pass
+        return redirect('foia-mylist')
+    
     def get_filters(self):
         """Removes the 'users' filter, because its _my_ requests"""
         filters = super(MyRequestList, self).get_filters()
