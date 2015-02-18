@@ -9,9 +9,9 @@ class Migration(SchemaMigration):
     depends_on = (
         ('foia', '0001_initial'),
     )
-    
+
     def forwards(self, orm):
-        
+
         # Adding M2M table for field follows on 'Profile'
         db.create_table('accounts_profile_follows', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
@@ -19,14 +19,14 @@ class Migration(SchemaMigration):
             ('foiarequest', models.ForeignKey(orm['foia.foiarequest'], null=False))
         ))
         db.create_unique('accounts_profile_follows', ['profile_id', 'foiarequest_id'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Removing M2M table for field follows on 'Profile'
         db.delete_table('accounts_profile_follows')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -172,5 +172,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

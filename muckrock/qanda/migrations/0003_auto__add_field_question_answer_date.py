@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Question.answer_date'
         db.add_column('qanda_question', 'answer_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Question.answer_date'
         db.delete_column('qanda_question', 'answer_date')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -183,5 +183,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['qanda']

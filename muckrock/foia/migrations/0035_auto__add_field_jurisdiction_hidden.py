@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Jurisdiction.hidden'
         db.add_column('foia_jurisdiction', 'hidden', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Jurisdiction.hidden'
         db.delete_column('foia_jurisdiction', 'hidden')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -155,5 +155,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

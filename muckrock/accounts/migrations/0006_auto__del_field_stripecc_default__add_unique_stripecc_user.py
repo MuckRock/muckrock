@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Deleting field 'StripeCC.default'
         db.delete_column('accounts_stripecc', 'default')
 
         # Adding unique constraint on 'StripeCC', fields ['user']
         db.create_unique('accounts_stripecc', ['user_id'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Adding field 'StripeCC.default'
         db.add_column('accounts_stripecc', 'default', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
 
         # Removing unique constraint on 'StripeCC', fields ['user']
         db.delete_unique('accounts_stripecc', ['user_id'])
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -183,5 +183,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

@@ -9,17 +9,17 @@ class Migration(SchemaMigration):
     depends_on = (
         ('foia', '0038_auto__chg_field_jurisdiction_days'),
     )
-    
+
     def forwards(self, orm):
-        
+
         db.rename_table('foia_jurisdiction', 'jurisdiction_jurisdiction')
-    
-    
+
+
     def backwards(self, orm):
-        
+
         db.rename_table('jurisdiction_jurisdiction', 'foia_jurisdiction')
-    
-    
+
+
     models = {
         'jurisdiction.jurisdiction': {
             'Meta': {'object_name': 'Jurisdiction'},
@@ -33,5 +33,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['jurisdiction']

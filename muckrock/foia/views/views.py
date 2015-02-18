@@ -4,7 +4,6 @@ Views for the FOIA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import Http404
@@ -13,24 +12,19 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
 
 from datetime import datetime
 import logging
 import stripe
 
-from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import \
-    RequestFilterForm, \
-    MyRequestFilterForm
+from muckrock.foia.forms import RequestFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.views.composers import get_foia
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
@@ -47,13 +41,13 @@ class RequestList(MRFilterableListView):
     model = FOIARequest
     title = 'Requests'
     template_name = 'lists/request_list.html'
-    
+
     def get_filters(self):
         """Adds request-specific filter fields"""
         base_filters = super(RequestList, self).get_filters()
-        new_filters = [{'field': 'status', 'lookup': 'exact' }]
+        new_filters = [{'field': 'status', 'lookup': 'exact'}]
         return base_filters + new_filters
-    
+
     def get_context_data(self, **kwargs):
         """Changes filter_form to use RequestFilterForm instead of the default"""
         context = super(RequestList, self).get_context_data(**kwargs)
@@ -69,8 +63,10 @@ class RequestList(MRFilterableListView):
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
+    # TODO: Add multirequests back to my requests list view
+
     template_name = 'lists/request_my_list.html'
-    
+
     def set_read_status(self, foia_pks, status):
         """Mark requests as read or unread"""
         for foia_pk in foia_pks:
@@ -94,7 +90,7 @@ class MyRequestList(RequestList):
         except FOIARequest.DoesNotExist:
             pass
         return redirect('foia-mylist')
-    
+
     def get_filters(self):
         """Removes the 'users' filter, because its _my_ requests"""
         filters = super(MyRequestList, self).get_filters()

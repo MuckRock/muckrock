@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Tag'
         db.create_table('tags_tag', (
             ('tag_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['taggit.Tag'], unique=True, primary_key=True)),
@@ -23,17 +23,17 @@ class Migration(SchemaMigration):
             ('object_id', self.gf('django.db.models.fields.IntegerField')(db_index=True)),
         ))
         db.send_create_signal('tags', ['TaggedItemBase'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Tag'
         db.delete_table('tags_tag')
 
         # Deleting model 'TaggedItemBase'
         db.delete_table('tags_taggeditembase')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -90,5 +90,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['tags']

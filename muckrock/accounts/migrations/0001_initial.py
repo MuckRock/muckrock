@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Profile'
         db.create_table('accounts_profile', (
             ('city', self.gf('django.db.models.fields.CharField')(max_length=60, blank=True)),
@@ -22,14 +22,14 @@ class Migration(SchemaMigration):
             ('zip_code', self.gf('django.db.models.fields.CharField')(max_length=10, blank=True)),
         ))
         db.send_create_signal('accounts', ['Profile'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Profile'
         db.delete_table('accounts_profile')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -81,5 +81,5 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         }
     }
-    
+
     complete_apps = ['accounts']

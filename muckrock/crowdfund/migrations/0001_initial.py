@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'CrowdfundRequest'
         db.create_table('crowdfund_crowdfundrequest', (
             ('payment_required', self.gf('django.db.models.fields.DecimalField')(default='0.00', max_digits=8, decimal_places=2)),
@@ -16,14 +16,14 @@ class Migration(SchemaMigration):
             ('foia', self.gf('django.db.models.fields.related.OneToOneField')(related_name='crowdfund', unique=True, to=orm['foia.FOIARequest'])),
         ))
         db.send_create_signal('crowdfund', ['CrowdfundRequest'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'CrowdfundRequest'
         db.delete_table('crowdfund_crowdfundrequest')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -177,5 +177,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['crowdfund']

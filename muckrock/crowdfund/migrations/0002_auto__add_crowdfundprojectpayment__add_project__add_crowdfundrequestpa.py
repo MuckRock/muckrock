@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'CrowdfundProjectPayment'
         db.create_table('crowdfund_crowdfundprojectpayment', (
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
@@ -57,10 +57,10 @@ class Migration(SchemaMigration):
 
         # Adding field 'CrowdfundRequest.date_due'
         db.add_column('crowdfund_crowdfundrequest', 'date_due', self.gf('django.db.models.fields.DateField')(default=datetime.date(2013, 9, 14)), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'CrowdfundProjectPayment'
         db.delete_table('crowdfund_crowdfundprojectpayment')
 
@@ -78,8 +78,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'CrowdfundRequest.date_due'
         db.delete_column('crowdfund_crowdfundrequest', 'date_due')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -268,5 +268,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['crowdfund']

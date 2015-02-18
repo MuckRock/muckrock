@@ -142,10 +142,6 @@ class RequestFilterForm(MRFilterForm):
         required=False
     )
 
-class MyRequestFilterForm(MRFilterForm):
-    """Extends ListFilterFrom with a 'read_status' sort choice"""
-    
-
 class FOIAEmbargoForm(forms.ModelForm):
     """A form to update the embargo status of a FOIA Request"""
     date_embargo = forms.DateField(

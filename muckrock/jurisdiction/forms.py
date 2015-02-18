@@ -5,6 +5,7 @@ from django import forms
 from muckrock.forms import MRFilterForm
 
 class JurisdictionFilterForm(MRFilterForm):
+    """Adds a level filter to MRFilterForm"""
     levels = (
         ('f', 'Federal'),
         ('s', 'State'),

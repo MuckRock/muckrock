@@ -9,9 +9,9 @@ class Migration(SchemaMigration):
     depends_on = (
         ('business_days', '0001_initial'),
     )
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Jurisdiction.observe_sat'
         db.add_column('jurisdiction_jurisdiction', 'observe_sat', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
 
@@ -31,10 +31,10 @@ class Migration(SchemaMigration):
 
         # Changing field 'Jurisdiction.image'
         db.alter_column('jurisdiction_jurisdiction', 'image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Jurisdiction.observe_sat'
         db.delete_column('jurisdiction_jurisdiction', 'observe_sat')
 
@@ -49,8 +49,8 @@ class Migration(SchemaMigration):
 
         # Changing field 'Jurisdiction.image'
         db.alter_column('jurisdiction_jurisdiction', 'image', self.gf('django.db.models.fields.files.ImageField')())
-    
-    
+
+
     models = {
         'business_days.holiday': {
             'Meta': {'object_name': 'Holiday'},
@@ -81,5 +81,5 @@ class Migration(SchemaMigration):
             'waiver': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['jurisdiction']

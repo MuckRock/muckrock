@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding M2M table for field agencies on 'FOIAMultiRequest'
         db.create_table('foia_foiamultirequest_agencies', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
@@ -15,14 +15,14 @@ class Migration(SchemaMigration):
             ('agency', models.ForeignKey(orm['agency.agency'], null=False))
         ))
         db.create_unique('foia_foiamultirequest_agencies', ['foiamultirequest_id', 'agency_id'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Removing M2M table for field agencies on 'FOIAMultiRequest'
         db.delete_table('foia_foiamultirequest_agencies')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -212,5 +212,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

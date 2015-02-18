@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.generic.list import ListView
 
 from rest_framework import viewsets
 
@@ -80,12 +79,12 @@ class List(MRFilterableListView):
     model = Jurisdiction
     title = 'Jurisdictions'
     template_name = 'lists/jurisdiction_list.html'
-    
+
     def get_filters(self):
         base_filters = super(List, self).get_filters()
         new_filters = [{'field': 'level', 'lookup': 'exact'}]
         return base_filters + new_filters
-    
+
     def get_context_data(self, **kwargs):
         context = super(List, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()

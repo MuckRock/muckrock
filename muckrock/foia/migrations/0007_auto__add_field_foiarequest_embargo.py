@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIARequest.embargo'
         db.add_column('foia_foiarequest', 'embargo', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIARequest.embargo'
         db.delete_column('foia_foiarequest', 'embargo')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -79,5 +79,5 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         }
     }
-    
+
     complete_apps = ['foia']

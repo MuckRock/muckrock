@@ -6,12 +6,10 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.views.generic.list import ListView
 
 from rest_framework import viewsets
 import django_filters
@@ -78,7 +76,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
                               context_instance=RequestContext(request))
 
 
-    
+
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
     # pylint: disable=W0612
