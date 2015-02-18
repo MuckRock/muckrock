@@ -11,20 +11,25 @@ This is the parent style for a collection of objects: a collection of blog posts
 
     <section class="{% block list-type %}object{% endblock %} list">
     {% block list %}
+        <header class="list-head">
+        {% block list-head %}
+            <h1 class="list-title">
+            {% block list-title %}
+                {{ title }}
+            {% endblock list-title %}
+            </h1>
+            <section class="list-actions">
+                {% block list-actions %}
+                {% endblock list-actions %}
+            </section>
+        {% endblock list-head %}
+        </header>
         <nav class="list-navigation">
         {% block list-navigation %}
-            <header class="list-head">
-            {% block list-head %}
-                <h1 class="list-title">
-                {% block list-title %}
-                    {{ title }}
-                {% endblock list-title %}
-                </h1>
-                {% block list-subtitle %}
-                {% endblock list-subtitle %}
-
-            {% endblock list-head %}
-            </header>
+            <section class="list-sections">
+            {% block list-sections %}
+            {% endblock list-sections %}
+            </section>
             {% if filter_form %}
             <form method="GET" class="list-filters">
                 <dfn>Filters</dfn>
@@ -43,8 +48,6 @@ This is the parent style for a collection of objects: a collection of blog posts
                 </div>
             </form>
             {% endif %}
-            {% block list-actions %}
-            {% endblock list-actions %}
         {% endblock list-navigation %}
         </nav>
         <div class="list-content">

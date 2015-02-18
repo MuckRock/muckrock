@@ -2,10 +2,11 @@
 
 /*
 **  .list
+**    .list-head
+**      .list-title
+**      .list-actions
 **    .list-navigation
-**      .list-head
-**        .list-title
-**        .list-subtitle
+**      .list-sections
 **      .list-filters
 **        .list-filters-buttons
 **    .list-content
@@ -18,56 +19,65 @@
 
 .list {
     @extend %body;
-    .list-navigation {
-        @extend %quarter;
-    }
     .list-head {
         @include row;
-        & ul {
-            display: table;
-            width: 100%;
-            border-collapse: collapse;
+        margin-bottom: $base-margin/2;
+        .list-title {
+            @extend h1;
+            @extend %three-quarters;
         }
-        & li {
-            display: table-cell;
-            padding: .5em;
-            border: $base-border-width solid $color-grey;
-            text-align: center;
-            vertical-align: middle;
-            line-height: 1em;
-            &.current-tab {
-                border-color: $color-primary;
-                background: $color-primary;
-                a { color: $color-white; }
+        .list-actions {
+            @extend %quarter;
+            line-height: 2em;
+            text-align: right;
+        }
+    }
+    .list-navigation {
+        @extend %quarter;
+        .list-sections {
+            & ul {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            & li {
+                display: table-cell;
+                padding: .5em;
+                border: $base-border-width solid $color-grey;
+                text-align: center;
+                vertical-align: middle;
+                line-height: 1em;
+                &.current-tab {
+                    border-color: $color-primary;
+                    background: $color-primary;
+                    a { color: $color-white; }
+                }
             }
         }
-    }
-    .list-title {
-        @extend h1;
-    }
-    .list-subtitle {
-        @extend h2;
-    }
-    .list-filters {
-        margin-top: $base-margin/2;
-        & select, & input {
-            width: 100%;
-            margin-top: $base-margin/2;
+        .list-filters {
+            margin-top: $base-margin;
+            & select, & input {
+                width: 100%;
+                margin-top: $base-margin/2;
+            }
         }
-    }
-    .list-filters-buttons {
-        @include row;
-        margin-top: $base-margin/2;
-        font-size: 0.75em;
-        button, .button {
-            @extend %half;
+        .list-filters-buttons {
+            @include row;
+            margin-top: $base-margin/2;
+            font-size: 0.75em;
+            button, .button {
+                @extend %half;
+            }
         }
     }
     .list-content {
         @extend %three-quarters;
+        border-top: $base-border-width solid $color-grey;
+        padding-top: $base-padding/2;
     }
     .pagination {
-        margin-top: $base-margin/2;
+        margin-top: 0;
+        font-size: 0.9em;
     }
     .list-table {
         border: $base-border-width solid $color-grey;
