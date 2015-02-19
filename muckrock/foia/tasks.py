@@ -204,7 +204,8 @@ def followup_requests():
                 foia.followup()
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             except MailgunAPIError as exc:
-                error_log.append('ERROR: %s - %d - %s - %s' % (foia.status, foia.pk, foia.title, exc))
+                error_log.append('ERROR: %s - %d - %s - %s' %
+                        (foia.status, foia.pk, foia.title, exc))
 
         if error_log:
             subject = '[ERROR] Follow Ups'
