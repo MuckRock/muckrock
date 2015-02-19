@@ -1,5 +1,6 @@
 {% extends 'lists/base_list.html' %}
 {% load tags %}
+{% load mathfilters %}
 {% block title %}MuckRock &bull; Search{% endblock %}
 {% block list-type %}search{% endblock %}
 {% block list-title %}Search{% endblock %}
@@ -25,19 +26,48 @@
     </li>
 </ul>
 {% endblock list-navigation %}
+
+{% block list-content %}
+{% with page.object_list as object_list %}
+{% with page as page_obj %}
+    {% if object_list %}
+    {% include 'lib/pagination.html' %}
+    <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
+        <thead class="list-table-head">
+            <tr>
+                <th width="10%">Type</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody class="list-table-body">
+            {% for item in object_list %}
+            <tr class="list-table-item">
+                <td>
+                    {% if item.model_name == "foiarequest" %}
+                    Request
+                    {% elif item.model_name == "article" %}
+                    Article
+                    {% elif item.model_name == "question" %}
+                    Question
+                    {% endif %}
+                </td>
+                <td><a href="{{ item.object.get_absolute_url }}">{{ item.object }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
+    {% else %}
+    <p class="list-empty">No Results</p>
+    {% endif %}
+{% endwith %}
+{% endwith %}
+{% endblock list-content %}
+        
 {% block list-table-head %}
     <th>Type</th>
     <th>Title</th>
 {% endblock list-table-head %}
 {% block list-table-item %}
-<td>
-    {% if item.model_name == "foiarequest" %}
-    Request
-    {% elif item.model_name == "article" %}
-    Article
-    {% elif item.model_name == "question" %}
-    Question
-    {% endif %}
-</td>
-<td><a href="{{ item.get_absolute_url }}">{{ item }}</a></td>
+
 {% endblock list-table-item %}
