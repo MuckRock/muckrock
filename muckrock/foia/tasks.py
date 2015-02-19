@@ -192,6 +192,7 @@ def followup_requests():
     # change to this after all follows up have been resolved
     #for foia in FOIARequest.objects.get_followup():
     log = []
+    error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
     if options.enable_followup and (options.enable_weekend_followup or is_weekday):
@@ -203,9 +204,15 @@ def followup_requests():
                 foia.followup()
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             except MailgunAPIError as exc:
-                log.append('ERROR: %s - %d - %s - %s' % (foia.status, foia.pk, foia.title, exc))
+                error_log.append('ERROR: %s - %d - %s - %s' % (foia.status, foia.pk, foia.title, exc))
 
-        send_mail('[LOG] Follow Ups', '\n'.join(log), 'info@muckrock.com',
+        if error_log:
+            subject = '[ERROR] Follow Ups'
+            body = '\n'.join(error_log) + '\n\n' + '\n'.join(log)
+        else:
+            subject = '[LOG] Follow Ups'
+            body = '\n'.join(log)
+        send_mail(subject, body, 'info@muckrock.com',
                   ['requests@muckrock.com', 'mitch@muckrock.com'])
 
 
