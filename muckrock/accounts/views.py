@@ -27,7 +27,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest
-from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -111,8 +111,9 @@ def update(request):
                               context_instance=RequestContext(request))
 
 def subscribe(request):
-    #pylint: disable=too-many-statements
-    #pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
     # this needs to be refactored
     """Subscribe or unsubscribe from a pro account"""
 
@@ -128,7 +129,6 @@ def subscribe(request):
         acct_type = user_profile.acct_type
         can_subscribe = acct_type == 'community' or acct_type == 'beta'
         can_unsubscribe = acct_type == 'pro'
-
         if acct_type == 'admin':
             msg = 'You are on staff, you don\'t need a subscription.'
             messages.warning(request, msg)
@@ -148,59 +148,48 @@ def subscribe(request):
         button_text = 'Create Account'
 
     if request.method == 'POST':
-        if can_subscribe and request.POST.get('stripe_token', False):
+        stripe_token = request.POST.get('stripe_token')
+        stripe_email = request.POST.get('stripe_email')
+        customer = user_profile.customer()
+        error = False
+        user_msg = ''
+        logger_msg = ''
+
+        if stripe_token:
             try:
-                stripe_token = request.POST['stripe_token']
-                stripe_email = request.POST['stripe_email']
                 if request.user.email != stripe_email:
                     raise ValueError('Account email and Stripe email do not match')
-                customer = request.user.get_profile().customer()
                 customer.card = stripe_token
                 customer.save()
-                sub = customer.update_subscription(plan='pro')
-                customer.save()
-                user_profile.acct_type = 'pro'
-                user_profile.date_update = datetime.now()
-                user_profile.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
-                user_profile.save()
-                msg = 'Congratulations, you are now subscribed as a pro user!'
-                messages.success(request, msg)
-                request.session['ga'] = ('pro', sub.id)
-                logger.info('%s has subscribed to a pro account.', request.user.username)
-            except stripe.CardError as exc:
-                msg = 'Payment error. Your card has not been charged.'
-                messages.error(request, msg)
-                logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-            except ValueError as exc:
-                msg = 'Payment error. Your card has not been charged.'
-                messages.error(request, msg)
-                logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+                user_msg = 'Your payment information has been updated.'
+                logger_msg = '%s has updated their payment information.' % request.user.username
+                if can_subscribe:
+                    user_profile.start_pro_subscription()
+                    request.session['ga'] = 'pro_started'
+                    user_msg = 'Congratulations, you are now subscribed as a pro user!'
+                    logger_msg = '%s has subscribed to a pro account.' % request.user.username
+            except (stripe.CardError, stripe.InvalidRequestError, ValueError) as exc:
+                error = True
+                user_msg = 'Payment error. Your card has not been charged.'
+                logger_msg = 'Payment error: %s' % exc
         elif can_unsubscribe:
-            customer = user_profile.customer()
-            if request.POST.get('stripe_token', False):
-                try:
-                    stripe_token = request.POST['stripe_token']
-                    stripe_email = request.POST['stripe_email']
-                    if request.user.email != stripe_email:
-                        raise ValueError('Account email and Stripe email do not match')
-                    customer = user_profile.customer()
-                    customer.card = stripe_token
-                    customer.save()
-                except stripe.CardError as exc:
-                    msg = 'Payment error. Your card has not been charged.'
-                    messages.error(request, msg)
-                    logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-                except ValueError as exc:
-                    msg = 'Payment error. Your card has not been charged.'
-                    messages.error(request, msg)
-                    logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-                messages.success(request, 'Your payment informatino has been updated.')
-            else:
-                customer.cancel_subscription()
-                customer.save()
-                user_profile.acct_type = 'community'
-                user_profile.save()
-                messages.success(request, 'Your professional subscription has been cancelled.')
+            try:
+                user_profile.cancel_pro_subscription()
+                request.session['ga'] = 'pro_cancelled'
+                user_msg = 'Your user_profileessional subscription has been cancelled.'
+                logger_msg = '%s has cancelled their pro subscription.' % request.user.username
+            except (stripe.CardError, stripe.InvalidRequestError) as exc:
+                error = True
+                user_msg = exc
+                logger_msg = exc
+
+        if not error:
+            messages.success(request, user_msg)
+            logger.info(logger_msg)
+        else:
+            messages.error(request, user_msg)
+            logger.error(logger_msg, exc_info=sys.exc_info())
+
         return redirect('acct-my-profile')
 
     context = {
@@ -229,12 +218,13 @@ def buy_requests(request):
             stripe_email = request.POST['stripe_email']
             if request.user.email != stripe_email:
                 raise ValueError('Account email and Stripe email do not match')
-            charge = user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
+            request.session['ga'] = 'buy_requests'
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
-            request.session['ga'] = ('buy_requests', charge.id)
+
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'

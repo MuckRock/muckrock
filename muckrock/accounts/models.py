@@ -86,7 +86,12 @@ class Profile(models.Model):
     )
     follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
-    organization = models.ForeignKey(Organization, blank=True, null=True, related_name='members')
+    organization = models.ForeignKey(
+        Organization,
+        blank=True,
+        null=True,
+        related_name='members',
+        on_delete=models.SET_NULL)
 
     # email confirmation
     email_confirmed = models.BooleanField(default=False)
@@ -230,13 +235,30 @@ class Profile(models.Model):
             )
             self.stripe_id = customer.id
             self.save()
-
         return customer
+
+    def start_pro_subscription(self):
+        """Subscribe this profile to a pro plan"""
+        customer = self.customer()
+        customer.update_subscription(plan='pro')
+        customer.save()
+        self.acct_type = 'pro'
+        self.date_update = datetime.now()
+        self.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
+        self.save()
+
+    def cancel_pro_subscription(self):
+        """Unsubscribe this profile form a pro plan"""
+        customer = self.customer()
+        customer.cancel_subscription()
+        customer.save()
+        self.acct_type = 'community'
+        self.save()
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=E1101
-        return stripe.Charge.create(
+        stripe.Charge.create(
             amount=amount,
             currency='usd',
             card=token,
