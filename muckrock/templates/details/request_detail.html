@@ -4,6 +4,7 @@
 {% load mathfilters %}
 {% load static from staticfiles %}
 {% load tags %}
+{% load foia %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
 {% block type %}request{% endblock %}
@@ -172,36 +173,7 @@
 
 {% block main %}
 {% if foia.has_crowdfund %}
-    <section class="crowdfund panel">
-    {% with received=foia.crowdfund.payment_received required=foia.crowdfund.payment_required %}
-    <div class="crowdfund-info">
-    {% if foia.crowdfund.expired %}
-        <h1>Crowdfunding Completed</h1>
-        <h2>${{ received }} raised out of ${{ required }}</h2>
-    </div>
-    {% else %}
-            <h1>Free these docs!</h1>
-            <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
-            <h3>{{ foia.crowdfund.date_due|timeuntil }} remaining</h3>
-    </div>
-    <form method="POST" action="{% url 'foia-contribute' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="stripe-handler crowdfund-form" id="crowdfund-form">
-        {% csrf_token %}
-        <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
-        <input name="amount" id="crowdfund-amount" value="0" hidden>
-        <button data-amount="0"
-                data-description=""
-                data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
-                data-label=""
-                data-form="#crowdfund-form"
-                class="disabled checkout-button" 
-                id="crowdfund-button"
-                disabled>
-            Contribute
-        </button>
-    </form>
-    {% endif %}
-    {% endwith %}
-    </section>
+    {% crowdfund foia %}
 {% endif %}
 
 {% if foia.files or foia.user == user or user.is_staff %}
@@ -290,6 +262,9 @@
 
 {% block scripts %}
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+{% if foia.has_crowdfund %}
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>        
+{% endif %}
 <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 <script>
@@ -448,46 +423,6 @@
             );
             return false;
         });
-        
-    {% if foia.has_crowdfund %}
-        var crowdfundForm = $('#crowdfund-form');
-        var crowdfundAmountInput = $('#crowdfund-amount-input');
-        var crowdfundAmount = $('#crowdfund-amount');
-        var crowdfundButton = $('#crowdfund-button');
-        
-        crowdfundAmountInput.autoNumeric('init', {aSign:'$', pSign:'p'});        
-        crowdfundAmountInput.keyup(function(){
-            var amount = crowdfundAmountInput.autoNumeric('get');
-            var disabled = crowdfundButton.attr('disabled');
-            var enable;
-            if (amount > 0) {
-                crowdfundButton.attr('disabled', false);
-                enable = true;
-            } else {
-                crowdfundButton.attr('disabled', true);
-                enable = false;
-            }
-            if (disabled && enable) {
-                crowdfundButton.removeClass('disabled').addClass('success');
-            } else if (!disabled && !enable) {
-                crowdfundButton.removeClass('success').addClass('disabled');
-            }
-        });
-        crowdfundAmountInput.change(function(){
-            var amount = crowdfundAmountInput.autoNumeric('get');
-            amount *= 100;
-            if (amount > 0) {
-                crowdfundAmount.attr('value', amount);
-                crowdfundButton.attr('data-amount', amount);
-                var string = '$' + crowdfundAmountInput.autoNumeric('get');
-                var description = 'Contribute (' + string + ')';
-                crowdfundButton.attr('data-description', description);
-            } else {
-                crowdfundButton.attr('disabled', true);
-                crowdfundButton.removeClass('success').addClass('disabled');
-            }
-        });
-    {% endif %}
     });
 </script>
 {% endblock scripts %}
