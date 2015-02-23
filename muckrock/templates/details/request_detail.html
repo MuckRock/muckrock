@@ -123,7 +123,7 @@
                 <div class="hidden-modal">
                     <h1>{{ action.title }}</h1>
                     <h2>{{ action.desc }}</h2>
-                    <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                    <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
                     <span class="close-modal button">Close</span>
                 </div>
             {% endif %}
@@ -149,7 +149,7 @@
                     <div class="hidden-modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
-                        <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                        <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
                         <span class="close-modal button">Close</span>
                     </div>
                 {% endif %}
@@ -235,7 +235,7 @@
                     <div class="hidden-modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
-                        <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                        <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
                         <span class="close-modal button">Close</span>
                     </div>
                 {% endif %}
@@ -245,7 +245,7 @@
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
                         <div class="buttons">
-                            <input type="submit" name="action" value="{{ action.title }}" class="primary" />
+                            <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
                             <span class="close-reply button">Close</span>
                         </div>
                     </div>
@@ -296,7 +296,7 @@
     
     function textAreaModal(nextSelector) {
         modal(nextSelector);
-        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('input'));
+        $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
         $('.overlay').click(function(){
             nextSelector.children('textarea').remove();
         });

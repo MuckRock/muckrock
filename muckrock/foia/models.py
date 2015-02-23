@@ -107,10 +107,11 @@ STATUS = (
 class Action():
     """A helper class to provide interfaces for request actions"""
     # pylint: disable=R0913
-    def __init__(self, test=None, link=None, title=None, desc=None, class_name=None):
+    def __init__(self, test=None, link=None, title=None, action=None, desc=None, class_name=None):
         self.test = test
         self.link = link
         self.title = title
+        self.action = action
         self.desc = desc
         self.class_name = class_name
 
@@ -665,6 +666,7 @@ class FOIARequest(models.Model):
             Action(
                 test=True,
                 title='Report',
+                action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
                 class_name='modal'
             ),
@@ -723,18 +725,21 @@ class FOIARequest(models.Model):
             Action(
                 test=can_edit,
                 title='Get Advice',
+                action='question',
                 desc=u'Get your questions answered by Muckrock’s community of FOIA experts',
                 class_name='modal'
             ),
             Action(
                 test=can_follow_up,
                 title='Follow Up',
+                action='follow_up',
                 desc='Send a message directly to the agency',
                 class_name='reply'
             ),
             Action(
                 test=can_appeal,
                 title='Appeal',
+                action='appeal',
                 desc=u'Appeal an agency’s decision',
                 class_name='reply'
             ),
