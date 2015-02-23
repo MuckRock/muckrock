@@ -1,7 +1,8 @@
+"""This module will use the Django shell to generate some basic database entries"""
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import datetime import datetime
+from datetime import datetime
 
 from django.contrib.auth.models import User
 
@@ -43,7 +44,7 @@ local = Jurisdiction.objects.create(
     level='l',
     parent=state
 )
-   
+
 # Third, create some agencies
 
 usa_fbi = Agency.objects.create(
