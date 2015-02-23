@@ -292,7 +292,7 @@ class Detail(DetailView):
             'tags': self._tags,
             'Follow Up': self._follow_up,
             'Get Advice': self._question,
-            'Problem?': self._flag,
+            'Report': self._flag,
             'Appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
