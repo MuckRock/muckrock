@@ -3,6 +3,7 @@
 {% load thumbnail %}
 {% load static from staticfiles %}
 {% load thumbnail %}
+{% load tags %}
 
 {% with object as article %}
 
@@ -31,9 +32,9 @@
 {% endblock aside %}
 
 {% block main %}
-    {% autoescape off %}
-    {{ article.body | markdown:"trusted" }}
-	{% endautoescape %}
+    {% markdown trusted %}
+        {% evaluate article.body %}
+	{% endmarkdown %}
 	{% if article.foias.exists %}
     <dfn>Related Requests</dfn>
 	{% include 'lib/foia.html' with foias=article.foias.all %}
@@ -75,4 +76,24 @@
 
 {% block scripts %}
 <script src="{% static 'js/jquery.fitvids.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>        
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+<script type="text/javascript">
+$('.checkout-button').click(function(e){
+    e.preventDefault();
+    var checkoutData = getCheckoutData($(this));
+    checkout(
+        "{{ stripe_pk }}",
+        "{% static 'apple-touch-icon.png' %}",
+        checkoutData.description,
+        checkoutData.amount,
+        checkoutData.email,
+        checkoutData.label,
+        checkoutData.form
+    );
+    return false;
+});
+</script>
 {% endblock scripts %}

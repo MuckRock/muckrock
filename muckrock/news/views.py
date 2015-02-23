@@ -12,6 +12,7 @@ import django_filters
 
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
+from muckrock.settings import STRIPE_PUB_KEY
 
 # pylint: disable=R0901
 
@@ -34,6 +35,7 @@ class NewsDetail(DateDetailView):
         context = super(NewsDetail, self).get_context_data(**kwargs)
         context['sidebar_admin_url'] = reverse('admin:news_article_change',
             args=(context['object'].pk,))
+        context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
 

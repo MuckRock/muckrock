@@ -3,9 +3,13 @@ General temaplate tags
 """
 
 from django import template
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
+
+from muckrock.foia.models import FOIARequest
 
 import re
 
@@ -169,3 +173,18 @@ class EvaluateNode(template.Node):
 def editable_by(foia, user):
     """Template tag to call editable by on FOIAs"""
     return foia.editable_by(user)
+
+@register.inclusion_tag('tags/crowdfund.html', takes_context=True)
+def crowdfund(context, foia_pk):
+    foia = get_object_or_404(FOIARequest, pk=foia_pk)
+    endpoint = reverse('foia-contribute', kwargs={
+        'jurisdiction': foia.jurisdiction.slug,
+        'jidx': foia.jurisdiction.pk,
+        'idx': foia.id,
+        'slug': foia.slug
+    })
+    return {
+        'user': context['user'],
+        'crowdfund': foia.crowdfund,
+        'endpoint': endpoint,
+    }
