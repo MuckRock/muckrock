@@ -109,7 +109,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
             var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
             $('th:icontains(' + sort_by + ')')
-                .append('&nbsp;' + arrow)
+                .prepend('<span class="arrow">' + arrow + '</span>')
                 .data('sort-order', inverseOrder)
                 .addClass('sorted_by');
         }
@@ -124,6 +124,9 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% else %}
             var sort_url = '?';
             {% endif %}
+            if (!order) {
+                order = 'asc';
+            }
             sort_url += 'sort_by=' + sort_by + '&order=' + order;
             window.location = window.location.origin + window.location.pathname + sort_url;
         }
