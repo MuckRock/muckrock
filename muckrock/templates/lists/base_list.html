@@ -59,7 +59,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 <thead class="list-table-head">
                 {% block list-table-head %}
                     <tr>
-                        <th data-sort-by="title">Title</th>
+                        <th data-sort="title">Title</th>
                     </tr>
                 {% endblock list-table-head %}
                 </thead>
@@ -95,30 +95,30 @@ This is the parent style for a collection of objects: a collection of blog posts
 
     var identifySortable = function() {
         $('.list-table-head th').each(function(){
-            if (!!$(this).data('sort-by')) {
+            if (!!$(this).data('sort')) {
                 $(this).addClass('sortable');
             }
         });
     }
     
     var tableHeadSortIndicator = function() {
-        var sort_by = urlParam('sort_by');
-        if (!!sort_by) {
+        var sort = urlParam('sort');
+        if (!!sort) {
             // find the right title and add the right arrow to it
             var order = urlParam('order');
             var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
             var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
-            $('th:icontains(' + sort_by + ')')
+            $('th:icontains(' + sort + ')')
                 .prepend('<span class="arrow">' + arrow + '</span>')
-                .data('sort-order', inverseOrder)
+                .data('order', inverseOrder)
                 .addClass('sorted_by');
         }
     }
     
     var sortListByHeader = function() {
-        var sort_by = $(this).data('sort-by');
-        var order = $(this).data('sort-order');
-        if (!!sort_by) {
+        var sort = $(this).data('sort');
+        var order = $(this).data('order');
+        if (!!sort) {
             {% if filter_url %}
             var sort_url = {{ filter_url }} + '&';
             {% else %}
@@ -127,7 +127,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             if (!order) {
                 order = 'asc';
             }
-            sort_url += 'sort_by=' + sort_by + '&order=' + order;
+            sort_url += 'sort=' + sort + '&order=' + order;
             window.location = window.location.origin + window.location.pathname + sort_url;
         }
     }

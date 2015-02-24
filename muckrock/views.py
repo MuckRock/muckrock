@@ -97,12 +97,12 @@ class MRFilterableListView(ListView):
     def sort_list(self, objects):
         """Sorts the list of objects"""
         get = self.request.GET
-        sort_by = get.get('sort_by', None)
-        if sort_by:
+        sort = get.get('sort', None)
+        if sort:
             order = get.get('order', 'asc')
             if order != 'asc':
-                sort_by = '-' + sort_by
-            objects = objects.order_by(sort_by)
+                sort = '-' + sort
+            objects = objects.order_by(sort)
         return objects
 
     def get_context_data(self, **kwargs):
