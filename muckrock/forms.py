@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import User
 
 import autocomplete_light as autocomplete
+from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -24,3 +25,4 @@ class MRFilterForm(forms.Form):
         required=False,
         queryset=Jurisdiction.objects.all(),
         widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete'))
+    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'))

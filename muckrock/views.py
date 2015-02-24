@@ -13,6 +13,8 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
+from taggit.utils import parse_tags
+
 class MRFilterableListView(ListView):
     """
     The main feature of MRFilterableListView is the ability to filter
@@ -49,7 +51,11 @@ class MRFilterableListView(ListView):
             {
                 'field': 'jurisdiction',
                 'lookup': 'exact',
-            }
+            },
+            {
+                'field': 'tags',
+                'lookup': 'name__in',
+            },
         ]
 
     def get_filter_data(self):
@@ -90,8 +96,12 @@ class MRFilterableListView(ListView):
             filter_lookup = filter_by['lookup']
             filter_value = get.get(filter_key, None)
             if filter_value:
+                # tags need to be parsed into an array before filtering
+                if filter_key == 'tags': 
+                    filter_value = parse_tags(filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
-        return objects.filter(**kwargs)
+        # tag filtering could add duplicate items to results, so .distinct() is used
+        return objects.filter(**kwargs).distinct() 
 
     def get_queryset(self):
         objects = super(MRFilterableListView, self).get_queryset()
