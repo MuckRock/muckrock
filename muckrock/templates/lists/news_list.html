@@ -4,15 +4,15 @@
 {% block list-type %}news{% endblock list-type %}
 
 {% block list-table-head %}
-<th>Title</th>
+<th data-sort-by="title">Title</th>
+<th data-sort-by="date">Date</th>
 <th>Author(s)</th>
-<th>Date</th>
 {% endblock list-table-head %}
 
 {% block list-table-item %}
 {% with item as article %}
 <td><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></td>
-<td>{{ article.get_authors_names }}</td>
 <td>{{ article.pub_date | date:"F j, Y"}}</td>
+<td>{{ article.get_authors_names }}</td>
 {% endwith %}
 {% endblock list-table-item %}

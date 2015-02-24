@@ -15,9 +15,9 @@
 {% endblock list-filters %}
 
 {% block list-table-head %}
-<th>Title</th>
-<th width="20%">Status</th>
-<th width="20%">Date Created</th>
+<th data-sort-by="title">Title</th>
+<th width="20%" data-sort-by="status">Status</th>
+<th width="20%" data-sort-by="date_submitted">Date Created</th>
 <th width="20%">Date Updated</th>
 {% endblock list-table-head %}
 
@@ -49,44 +49,10 @@
 {% endif %}
 {% endblock list-sections %}
 
-{% block scripts %}
-<script src="{% static 'js/tablesaw.stackonly.js' %}" type="text/javascript"></script>
-{% include 'autocomplete_light/static.html' %}
-<script>
-    $.urlParam = function(name){
-        console.log(name);
-        var urlString = '[\\?&amp;]' + name + '=([^&amp;#]*)'
-        var results = new RegExp(urlString).exec(window.location.href);
-        if (results) {
-            return results[1] || 0;
-        } else {
-            return 0;
-        }
+{% block list-scripts %}
+    if (urlParam('status') !== 0) {
+        $('#id_status').prepend('<option value>None</option>');
+    } else {
+        $('#id_status').prepend('<option disabled selected class="title-option">Status</option>');
     }
-
-    $(document).ready(function() {
-        if ($.urlParam('status') !== 0) {
-            $('#id_status').prepend('<option value>None</option>');
-        } else {
-            $('#id_status').prepend('<option disabled selected class="title-option">Status</option>');
-        }   
-        if ($.urlParam('order') !== 0) {
-            $('#id_order').prepend('<option value>Default</option>');
-        } else {
-            $('#id_order').prepend('<option disabled selected class="title-option">Order by...</option>');
-        }
-        if ($.urlParam('sort') !== 0) {
-            $('#id_sort').prepend('<option value>Default</option>');
-        } else {
-            $('#id_sort').prepend('<option disabled selected class="title-option">Sort by...</option>');
-        }
-        $('#filter-checkbox').change(function() {
-            if ($(this).is(':checked')) {
-                $('#filter-checkbox-label').text('Hide Filters');
-            } else {
-                $('#filter-checkbox-label').text('Show Filters');
-            }
-        });
-    });
-</script>
-{% endblock scripts %}
+{% endblock list-scripts %}
