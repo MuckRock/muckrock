@@ -16,13 +16,13 @@ class MRFilterForm(forms.Form):
     user = forms.ModelChoiceField(
         required=False,
         queryset=User.objects.all(),
-        widget=autocomplete.ChoiceWidget('UserAutocomplete'))
+        widget=autocomplete.ChoiceWidget('UserAutocomplete', attrs={'placeholder': 'All Users'}))
     agency = forms.ModelChoiceField(
         required=False,
         queryset=Agency.objects.all(),
-        widget=autocomplete.ChoiceWidget('AgencyAutocomplete'))
+        widget=autocomplete.ChoiceWidget('AgencyAutocomplete', attrs={'placeholder': 'All Agencies'}))
     jurisdiction = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
-        widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete'))
-    tags = TaggitField(widget=TaggitWidget('TagAutocomplete'))
+        widget=autocomplete.ChoiceWidget('JurisdictionAutocomplete', attrs={'placeholder': 'All Jurisdictions'}))
+    tags = TaggitField(widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'All Tags', 'data-autocomplete-minimum-characters': 1}))

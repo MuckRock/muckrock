@@ -57,9 +57,30 @@
         }
         .list-filters {
             margin-top: $base-margin;
+            background: $color-odd-background;
+            @extend %border;
+            padding: $base-padding/2;
             & select, & input[type=text] {
                 width: 100%;
                 margin-top: $base-margin/2;
+                border-radius: 0;
+            }
+            .autocomplete-light-widget {
+                display: block;
+            }
+            .deck > span {
+                position: relative;
+                margin-top: $base-margin/2;
+                border-radius: $base-border-radius;
+                padding: .25em;
+                padding-left: 1.5em;
+                background: $color-primary;
+                color: $color-white;
+            }
+            .remove {
+                position: absolute;
+                top: .5em;
+                left: .25em;
             }
         }
         .list-filters-buttons {
@@ -73,11 +94,11 @@
     }
     .list-content {
         @extend %three-quarters;
-        border-top: $base-border-width solid $color-grey;
-        padding-top: $base-padding/2;
     }
     .pagination {
         margin-top: 0;
+        border-top: $base-border-width solid $color-grey;
+        padding-top: $base-padding/2;
         font-size: 0.9em;
     }
     .list-table {
@@ -94,13 +115,15 @@
     .list-table-head .sortable {
         cursor: pointer;
         &:hover {
-            background: $color-black;
-            color: $color-white;
+            background: lighten($color-primary, 35%);
         }
         .arrow {
             font-size: .8em;
             margin-right: $base-margin/2;
         }
+    }
+    .list-table-body tr:hover {
+        background: lighten($color-primary, 35%);
     }
     .list-table-body tr.unread {
         background: lighten($color-primary, 35%);

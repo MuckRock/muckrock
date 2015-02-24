@@ -12,7 +12,6 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
     search_fields = ['username']
     attrs = {
-        'placeholder': 'Search by username',
         'data-autocomplete-minimum-characters': 2
     }
 

@@ -43,7 +43,7 @@ class RequestForm(forms.Form):
     )
     agency = forms.CharField(
         label='Agency',
-        widget=autocomplete.TextWidget('AgencyAutocomplete')
+        widget=autocomplete.TextWidget('AgencyAutocomplete', attrs={'placeholder': 'Type the agency\'s name'})
     )
     full_name = forms.CharField()
     email = forms.EmailField()
