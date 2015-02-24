@@ -76,7 +76,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 </tbody>
             {% endblock list-table %}
             </table>
-            {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
+            {% include 'lib/pagination.html' %}
             {% else %}
             <p class="list-empty">No Results</p>
             {% endif %}
