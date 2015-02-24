@@ -184,10 +184,10 @@ class Detail(DetailView):
         actions = {
             'status': self._status,
             'tags': self._tags,
-            'Follow Up': self._follow_up,
-            'Get Advice': self._question,
-            'Problem?': self._flag,
-            'Appeal': self._appeal,
+            'follow_up': self._follow_up,
+            'question': self._question,
+            'flag': self._flag,
+            'appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm
