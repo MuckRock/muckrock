@@ -140,3 +140,19 @@ $(document).ready(function() {
 $(function() {
 	$('.formset-container').formset();
 });
+
+var urlParam = function(name){
+    var urlString = '[\\?&amp;]' + name + '=([^&amp;#]*)'
+    var results = new RegExp(urlString).exec(window.location.search);
+    if (results) {
+        return results[1] || 0;
+    } else {
+        return 0;
+    }
+}
+
+$.expr[":"].icontains = $.expr.createPseudo(function(arg) {
+    return function( elem ) {
+        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+    };
+});

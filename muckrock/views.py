@@ -76,16 +76,7 @@ class MRFilterableListView(ListView):
             'filter_initials': filter_initials,
             'filter_url': filter_url
         }
-
-    def get_context_data(self, **kwargs):
-        """Gets basic context, including title, form, and url"""
-        context = super(MRFilterableListView, self).get_context_data(**kwargs)
-        filter_data = self.get_filter_data()
-        context['title'] = self.title
-        context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
-        context['filter_url'] = filter_data['filter_url']
-        return context
-
+        
     def filter_list(self, objects):
         """Filters a list of objects"""
         # pylint: disable=star-args
@@ -101,15 +92,36 @@ class MRFilterableListView(ListView):
                     filter_value = parse_tags(filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
-        return objects.filter(**kwargs).distinct() 
+        return objects.filter(**kwargs).distinct()
+    
+    def sort_list(self, objects):
+        """Sorts the list of objects"""
+        get = self.request.GET
+        sort_by = get.get('sort_by', None)
+        if sort_by:
+            order = get.get('order', 'asc')
+            if order != 'asc':
+                sort_by = '-' + sort_by
+            objects = objects.order_by(sort_by)
+        return objects
+
+    def get_context_data(self, **kwargs):
+        """Gets basic context, including title, form, and url"""
+        context = super(MRFilterableListView, self).get_context_data(**kwargs)
+        filter_data = self.get_filter_data()
+        context['title'] = self.title
+        context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        context['filter_url'] = filter_data['filter_url']
+        return context
 
     def get_queryset(self):
         objects = super(MRFilterableListView, self).get_queryset()
+        objects = self.sort_list(objects)
         return self.filter_list(objects)
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
-        return 15
+        return self.request.GET.get('per_page', 25)
 
 def front_page(request):
     """Get all the details needed for the front page"""
