@@ -76,7 +76,7 @@ class MRFilterableListView(ListView):
             'filter_initials': filter_initials,
             'filter_url': filter_url
         }
-        
+
     def filter_list(self, objects):
         """Filters a list of objects"""
         # pylint: disable=star-args
@@ -88,12 +88,12 @@ class MRFilterableListView(ListView):
             filter_value = get.get(filter_key, None)
             if filter_value:
                 # tags need to be parsed into an array before filtering
-                if filter_key == 'tags': 
+                if filter_key == 'tags':
                     filter_value = parse_tags(filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         return objects.filter(**kwargs).distinct()
-    
+
     def sort_list(self, objects):
         """Sorts the list of objects"""
         get = self.request.GET

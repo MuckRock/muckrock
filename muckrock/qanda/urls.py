@@ -22,10 +22,9 @@ urlpatterns = patterns(
         views.UnansweredQuestionList.as_view(),
         name='question-unanswered'
     ),
-    # TODO: Redirect to all with a query of (sorted_by=date_answered, order=desc)
     url(
         r'^recent/$',
-        RedirectView.as_view(url='/questions/'),
+        RedirectView.as_view(url='/questions/?sort_by=date_answered&order=desc'),
         name='question-recent'
     ),
     url(
