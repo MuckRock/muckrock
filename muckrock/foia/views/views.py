@@ -63,7 +63,6 @@ class RequestList(MRFilterableListView):
 @class_view_decorator(login_required)
 class MyRequestList(RequestList):
     """View requests owned by current user"""
-    # TODO: Add multirequests back to my requests list view
 
     template_name = 'lists/request_my_list.html'
 
@@ -100,9 +99,12 @@ class MyRequestList(RequestList):
         return filters
 
     def get_queryset(self):
-        """Limits requests to just those by the current user"""
-        objects = super(MyRequestList, self).get_queryset()
-        return objects.filter(user=self.request.user)
+        """Gets multirequests as well, limits to just those by the current user"""
+        single_req = FOIARequest.objects.filter(user=self.request.user)
+        multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
+        single_req = self.sort_list(self.filter_list(single_req))
+        multi_req = self.sort_list(self.filter_list(multi_req))
+        return list(single_req) + list(multi_req)
 
 @class_view_decorator(login_required)
 class FollowingRequestList(RequestList):
