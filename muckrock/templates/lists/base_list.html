@@ -120,7 +120,7 @@ This is the parent style for a collection of objects: a collection of blog posts
         var order = $(this).data('order');
         if (!!sort) {
             {% if filter_url %}
-            var sort_url = {{ filter_url }} + '&';
+            var sort_url = '{{ filter_url|safe }}' + '&';
             {% else %}
             var sort_url = '?';
             {% endif %}
