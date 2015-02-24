@@ -88,6 +88,20 @@
     .list-table-head, .list-table-body {
         width: 100%;
     }
+    .list-table-head tr {
+        background: $color-white;
+    }
+    .list-table-head .sortable {
+        cursor: pointer;
+        &:hover {
+            background: $color-black;
+            color: $color-white;
+        }
+        .arrow {
+            font-size: .8em;
+            margin-right: $base-margin/2;
+        }
+    }
     .list-table-body tr.unread {
         background: lighten($color-primary, 35%);
     }
