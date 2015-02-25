@@ -26,10 +26,8 @@ This is the parent style for a collection of objects: a collection of blog posts
         </header>
         <nav class="list-navigation">
         {% block list-navigation %}
-            <section class="list-sections">
             {% block list-sections %}
             {% endblock list-sections %}
-            </section>
             {% if filter_form %}
             <form method="GET" class="list-filters">
                 <dfn>Filters</dfn>

@@ -41,11 +41,13 @@
 
 {% block list-sections %}
 {% if user.is_authenticated %}
-<ul>
-    <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
-    <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Mine</a></li>
-    <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
-</ul>
+<section class="list-sections">
+    <ul>
+        <li class="{% active request '^/foi/list/$' %}"><a href="{% url 'foia-list' %}">All</a></li>
+        <li class="{% active request '^/foi/mylist/$' %}"><a href="{% url 'foia-mylist' %}">Mine</a></li>
+        <li class="{% active request '^/foi/list/following/$' %}"><a href="{% url 'foia-list-following' %}">Following</a></li>
+    </ul>
+</section>
 {% endif %}
 {% endblock list-sections %}
 
