@@ -19,25 +19,11 @@
 
 .list {
     @extend %body;
-    .list-head {
-        @include row;
-        margin-bottom: $base-margin/2;
-        .list-title, .list-actions {
-            @include grid-columns(4, 6, 6);
-        }
-        .list-title {
-            @extend h1;
-        }
-        .list-actions {
-            margin-top: $base-margin/2;
-            font-size: .9em;
-            @include media($medium-layout) {
-                text-align: right;
-            }
-        }
-    }
     .list-navigation {
         @include grid-columns(4, 2, 3);
+        .list-head .list-title {
+            @extend h1;
+        }
         .list-sections {
             margin-bottom: $base-margin/2;
             & ul {
@@ -128,23 +114,63 @@
     }
     .list-content {
         @include grid-columns(4, 4, 9);
+        font-size: .9em;
+    }
+    .list-actions {
+        @include row;
+        display: table;
+        width: 100%;
+        margin-top: $base-margin/2;
+        text-align: left;
+        button, .button {
+            display: table-cell;
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            background: none;
+            color: $color-default;
+            text-align: left;
+            &:hover {
+                color: $color-black;
+            }
+            &:first-of-type {
+                padding-left: 0;
+            }
+        }
     }
     .pagination {
+        @include row;
         margin-top: 0;
         border-top: $base-border-width solid $color-grey;
         padding-top: $base-padding/2;
-        font-size: 0.9em;
     }
     .list-table {
+        @include row;
+        display: table;
         border: $base-border-width solid $color-grey;
+        border-radius: $base-border-radius;
         border-collapse: collapse;
-        font-size: 0.9em;
+        thead {
+            display: table-header-group;
+        }
+        tbody {
+            display: table-row-group;
+        }
+        tr {
+            display: table-row;
+        }
+        th, td {
+            display: table-cell;
+        }
     }
     .list-table-head, .list-table-body {
+        display: table-row;
         width: 100%;
     }
     .list-table-head tr {
+        display: table-row;
         background: $color-white;
+        border: none;
     }
     .list-table-head .sortable {
         cursor: pointer;
