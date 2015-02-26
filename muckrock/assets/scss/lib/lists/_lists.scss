@@ -169,7 +169,42 @@
         font-weight: $bold;
         color: $color-grey;
         text-align: center;
-    }   
+    }
+    
+    // Makes tables responsive
+    @include media($small-layout) {
+        .list-table {
+            display: block;
+            border: none;
+            border-radius: 0;
+            tr {
+                position: relative;
+                display: block;
+                width: 100%;
+                margin: $base-margin/2 0;
+                padding: $base-padding/2 0;
+                border: $base-border-width solid $color-grey;
+            }
+            th, td {
+                display: block;
+                width: 100%;
+                margin-left: $base-margin*2;
+                text-align: left;
+                line-height: 1em;
+            }
+            thead, tbody {
+                display: block;
+                margin: $base-margin/2 0;
+            }
+            .list-table-checkbox {
+                width: auto;
+                position: absolute;
+                top: $base-padding/2;
+                left: $base-margin/2;
+                margin-left: 0;
+            }
+        }
+    }
 }
 
 @import 'search';

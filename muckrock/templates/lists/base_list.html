@@ -56,7 +56,7 @@ This is the parent style for a collection of objects: a collection of blog posts
         {% block list-content %}
             {% if object_list %}
             {% include 'lib/pagination.html' %}
-            <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
+            <table class="list-table">
             {% block list-table %}
                 <thead class="list-table-head">
                 {% block list-table-head %}
