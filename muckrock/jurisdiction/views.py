@@ -82,7 +82,10 @@ class List(MRFilterableListView):
 
     def get_filters(self):
         base_filters = super(List, self).get_filters()
-        new_filters = [{'field': 'level', 'lookup': 'exact'}]
+        new_filters = [
+            {'field': 'level', 'lookup': 'exact'},
+            {'field': 'parent', 'lookup': 'exact'},
+        ]
         return base_filters + new_filters
 
     def get_context_data(self, **kwargs):
