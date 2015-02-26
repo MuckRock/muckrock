@@ -21,7 +21,7 @@
 {% endblock list-filters %}
 
 {% block list-table-head %}
-<th width="3%"><input type="checkbox"></th>
+<th width="3%" class="list-table-checkbox"><input type="checkbox" id="toggle-all" /></th>
 <th data-sort="title">Title</th>
 <th width="20%" data-sort="status">Status</th>
 <th width="20%" data-sort="date_submitted">Date Created</th>
@@ -31,7 +31,7 @@
 {% block list-table-body %}
 {% for foia in object_list %}
 <tr class="list-table-item{% if foia.updated %} unread{% endif %}">
-    <td>
+    <td class="list-table-checkbox">
         <input type="checkbox"
                name="{{foia.foia_type}}"
               value="{{foia.pk}}"

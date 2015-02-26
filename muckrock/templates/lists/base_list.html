@@ -32,7 +32,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             <form method="GET" class="list-filters">
                 <dfn>Filters</dfn>
                 <label for="list-filters-toggle" id="list-filters-toggle-label">Show</label>
-                <input type="checkbox" id="list-filters-toggle"/>
+                <input type="checkbox" data-ignore-toggle-all="true" id="list-filters-toggle"/>
                 <div class="list-filters-fields">
                 {% block list-filters %}
                 
@@ -91,7 +91,6 @@ This is the parent style for a collection of objects: a collection of blog posts
 {% endblock content %}
 
 {% block scripts %}
-<script src="{% static 'js/tablesaw.stackonly.js' %}" type="text/javascript"></script>
 {% include 'autocomplete_light/static.html' %}
 <script type="text/javascript">
 
