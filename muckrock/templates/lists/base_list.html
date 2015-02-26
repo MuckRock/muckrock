@@ -31,6 +31,9 @@ This is the parent style for a collection of objects: a collection of blog posts
             {% if filter_form %}
             <form method="GET" class="list-filters">
                 <dfn>Filters</dfn>
+                <label for="list-filters-toggle" id="list-filters-toggle-label">Show</label>
+                <input type="checkbox" id="list-filters-toggle"/>
+                <div class="list-filters-fields">
                 {% block list-filters %}
                 
                 {% comment %}
@@ -40,6 +43,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                 {% endcomment %}
                 
                 {% endblock list-filters %}
+                </div>
                 <div class="list-filters-buttons">
                     <button action="apply-filters">Apply</button>
                     <a class="button" href="{{ request.path }}">Clear</a>
@@ -133,6 +137,15 @@ This is the parent style for a collection of objects: a collection of blog posts
     identifySortable();
     tableHeadSortIndicator();
     $('.list-table-head th').click(sortListByHeader);
+    
+    $('#list-filters-toggle').change(function(){
+        var label = $('#list-filters-toggle-label')[0];
+        if (this.checked) {
+            label.innerText = 'Hide';
+        } else {
+            label.innerText = 'Show';
+        }
+    });
     
 {% block list-scripts %}
 {% endblock list-scripts %}

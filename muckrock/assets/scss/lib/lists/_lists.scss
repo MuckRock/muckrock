@@ -22,21 +22,24 @@
     .list-head {
         @include row;
         margin-bottom: $base-margin/2;
+        .list-title, .list-actions {
+            @include grid-columns(4, 6, 6);
+        }
         .list-title {
             @extend h1;
-            @extend %third;
         }
         .list-actions {
-            @extend %two-thirds;
             margin-top: $base-margin/2;
             font-size: .9em;
-            text-align: right;
+            @include media($medium-layout) {
+                text-align: right;
+            }
         }
     }
     .list-navigation {
-        @extend %quarter;
+        @include grid-columns(4, 2, 3);
         .list-sections {
-            margin-bottom: $base-margin;
+            margin-bottom: $base-margin/2;
             & ul {
                 display: table;
                 width: 100%;
@@ -58,6 +61,7 @@
         }
         .list-filters {
             background: $color-odd-background;
+            margin-bottom: $base-margin/2;
             @extend %border;
             padding: $base-padding/2;
             & select, & input[type=text] {
@@ -89,12 +93,41 @@
             margin-top: $base-margin/2;
             font-size: 0.75em;
             button, .button {
-                @extend %half;
+                @include grid-columns(2, 3, 6);
             }
         }
+        #list-filters-toggle-label, #list-filters-toggle {
+            display: none;
+        }
+        @include media($small-layout) {
+            .list-filters-fields, .list-filters-buttons {
+                display: none;
+            }
+            .list-filters {
+                overflow: hidden;
+                dfn {
+                    float: left;
+                }
+            }
+            #list-filters-toggle-label {
+                float: right;
+                display: inline-block;
+                padding: .1em $base-padding/2;
+                border-radius: $base-border-radius;
+                background: $color-black;
+                color: $color-white;
+                font-size: .9em;
+            }
+            #list-filters-toggle:checked {
+                & ~ .list-filters-fields, & ~ .list-filters-buttons {
+                    display: block;
+                }
+            }
+        }
+
     }
     .list-content {
-        @extend %three-quarters;
+        @include grid-columns(4, 4, 9);
     }
     .pagination {
         margin-top: 0;
