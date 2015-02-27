@@ -176,6 +176,7 @@ def editable_by(foia, user):
 
 @register.inclusion_tag('tags/crowdfund.html', takes_context=True)
 def crowdfund(context, foia_pk):
+    """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
     endpoint = reverse('foia-contribute', kwargs={
         'jurisdiction': foia.jurisdiction.slug,
