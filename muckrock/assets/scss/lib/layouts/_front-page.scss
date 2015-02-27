@@ -88,7 +88,6 @@
     .featured-article {
         @include row;
         padding: $base-padding/2;
-        @include media($medium-layout) { padding: $base-padding 0; }
         .image {
             @extend %half;
             @include media($small-layout) {

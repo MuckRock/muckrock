@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Agency.approved'
         db.add_column('foia_agency', 'approved', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True), keep_default=False)
 
         # Changing field 'Agency.address'
         db.alter_column('foia_agency', 'address', self.gf('django.db.models.fields.TextField')(blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Agency.approved'
         db.delete_column('foia_agency', 'approved')
 
         # Changing field 'Agency.address'
         db.alter_column('foia_agency', 'address', self.gf('django.db.models.fields.TextField')())
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -137,5 +137,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

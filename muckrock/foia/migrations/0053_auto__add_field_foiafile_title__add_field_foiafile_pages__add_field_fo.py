@@ -7,9 +7,9 @@ from django.db import models
 import os
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIAFile.title'
         db.add_column('foia_foiafile', 'title', self.gf('django.db.models.fields.CharField')(default='', max_length=70), keep_default=False)
 
@@ -26,9 +26,9 @@ class Migration(SchemaMigration):
             if not file_.title:
                 file_.title = os.path.basename(file_.ffile.name)[:70]
                 file_.save()
-    
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIAFile.title'
         db.delete_column('foia_foiafile', 'title')
 
@@ -40,8 +40,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'FOIAFile.doc_id'
         db.delete_column('foia_foiafile', 'doc_id')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -231,5 +231,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIARequest.days_until_due'
         db.add_column('foia_foiarequest', 'days_until_due', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True), keep_default=False)
 
         # Adding field 'FOIARequest.date_followup'
         db.add_column('foia_foiarequest', 'date_followup', self.gf('django.db.models.fields.DateField')(null=True, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIARequest.days_until_due'
         db.delete_column('foia_foiarequest', 'days_until_due')
 
         # Deleting field 'FOIARequest.date_followup'
         db.delete_column('foia_foiarequest', 'date_followup')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -173,5 +173,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

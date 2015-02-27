@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Article'
         db.create_table('news_article', (
             ('body', self.gf('django.db.models.fields.TextField')()),
@@ -24,17 +24,17 @@ class Migration(SchemaMigration):
 
         # Adding unique constraint on 'Article', fields ['slug', 'pub_date']
         db.create_unique('news_article', ['slug', 'pub_date'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Article'
         db.delete_table('news_article')
 
         # Removing unique constraint on 'Article', fields ['slug', 'pub_date']
         db.delete_unique('news_article', ['slug', 'pub_date'])
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -99,5 +99,5 @@ class Migration(SchemaMigration):
             'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         }
     }
-    
+
     complete_apps = ['news']

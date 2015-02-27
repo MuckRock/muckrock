@@ -5,7 +5,7 @@ from south.v2 import DataMigration
 from django.db import models
 
 class Migration(DataMigration):
-    
+
     def forwards(self, orm):
         "Write your forwards methods here."
 
@@ -43,8 +43,8 @@ class Migration(DataMigration):
                 file_.save()
             except ValueError:
                 print "Value Error for file: %d %s" % (file_.pk, file_.title)
-    
-    
+
+
     def backwards(self, orm):
         "Write your backwards methods here."
 
@@ -53,7 +53,7 @@ class Migration(DataMigration):
             file_.save()
 
         orm.FOIACommunication.objects.filter(communication='').delete()
-    
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -231,5 +231,5 @@ class Migration(DataMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

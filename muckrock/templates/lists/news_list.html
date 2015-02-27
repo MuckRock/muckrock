@@ -1,13 +1,46 @@
 {% extends 'lists/base_list.html' %}
 
-{% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-title %}<h1>Articles</h1>{% endblock list-title %}
-{% block type %}news{% endblock type %}
+{% load markdown_deux_tags %}
+{% load thumbnail %}
 
-{% block list-item %}
-    {% with item as article %}
-    <h2><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></h2>
-    <h3>by {{ article.get_authors_names }}
-        on {{ article.pub_date | date:"F j, Y"}}</h3>
-    {% endwith %}
-{% endblock list-item %}
+{% block title %}MuckRock &bull; News{% endblock title %}
+{% block list-title %}Reporting{% endblock list-title %}
+{% block list-type %}news{% endblock list-type %}
+
+{% block list-content %}
+{% if object_list %}
+    {% include 'lib/pagination.html' %}
+    <ul class="news-list-articles">
+        {% for article in object_list %}
+        <li class="news-list-article">
+            {% if article.image %}
+            <a href="{{ article.get_absolute_url }}" title="{{ article.title }}"><img class="news-list-article-image" src="{% thumbnail article.image 800x600 %}" /></a>
+            {% endif %}
+            <div class="news-list-article-copy">
+                <h2 class="news-list-article-headline">
+                    <a href="{{ article.get_absolute_url }}" title="{{ article.title}}">
+                        {{ article.title }}
+                    </a>
+                </h2>
+                <div class="news-list-article-summary">
+                    {{ article.summary|markdown }}
+                </div>
+                <div class="news-list-article-authors">
+                    by 
+                    {% for author in article.authors.all %}
+                        <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="news-list-article-read-more">
+                    <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">Read more</a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% include 'lib/pagination.html' %}
+{% else %}
+    <p class="list-empty">No Results</p>
+{% endif %}
+{% endblock list-content %}

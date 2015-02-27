@@ -1,46 +1,153 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
+{% load mathfilters %}
 {% comment %}
 
 This is the parent style for a collection of objects: a collection of blog posts, FOI requests, questions, agencies, jurisdictions, users, etc.
 
 {% endcomment %}
+
 {% block content %}
-    <section class="{% block type %}item{% endblock type %} collection">
 
-        <header>
-            <div class="hgroup">
-                {% block list-title %}{% endblock list-title %}
-                {% block list-subtitle %}{% endblock list-subtitle %}
-            </div>
-            {% block actions %}
-            {% endblock actions %}
-        </header>
-
-        <section class="filters">
-            {% block filters %}
-            {% endblock filters %}
-        </section>
+    <section class="{% block list-type %}object{% endblock %} list">
+    {% block list %}
         
-        {% include 'lib/pagination.html' %}
-        
-        {% block list %}
-        <ul class="list">
-            {% for item in object_list %}
-            <li>
-                {% block list-item %}
-                <h2>
-                    <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
-                </h2>
-                {% endblock list-item %}
-            </li>
-            {% empty %}
-            <li class="empty">Hmm&hellip; looks like there&rsquo;s nothing here.</li>
-            {% endfor %}
-        </ul>
-        {% endblock list %}
-        
-        {% if page_obj.object_list|length > 3 %}
+        <nav class="list-navigation">
+        {% block list-navigation %}
+            <header class="list-head">
+            {% block list-head %}
+            <h1 class="list-title">
+                {% block list-title %}
+                {{ title }}
+                {% endblock list-title %}
+            </h1>
+            {% endblock list-head %}
+            </header>
+            {% block list-sections %}
+            {% endblock list-sections %}
+            {% if filter_form %}
+            <form method="GET" class="list-filters">
+                <dfn>Filters</dfn>
+                <label for="list-filters-toggle" id="list-filters-toggle-label">Show</label>
+                <input type="checkbox" data-ignore-toggle-all="true" id="list-filters-toggle"/>
+                <div class="list-filters-fields">
+                {% block list-filters %}
+                
+                {% comment %}
+                By default, no filters are shown. To add filters,
+                fill the list-filters block with calls to filter_form.
+                E.g. {{ filter_form.agency }} would add an agency filter.
+                {% endcomment %}
+                
+                {% endblock list-filters %}
+                </div>
+                <div class="list-filters-buttons">
+                    <button action="apply-filters">Apply</button>
+                    <a class="button" href="{{ request.path }}">Clear</a>
+                </div>
+            </form>
+            {% endif %}
+        {% endblock list-navigation %}
+        </nav>
+        <div class="list-content">
+        {% block list-content %}
+            <section class="list-actions">
+                {% block list-actions %}
+                {% endblock list-actions %}
+            </section>
+            {% if object_list %}
             {% include 'lib/pagination.html' %}
-        {% endif %}
+            <table class="list-table">
+            {% block list-table %}
+                <thead class="list-table-head">
+                {% block list-table-head %}
+                    <tr>
+                        <th data-sort="title">Title</th>
+                    </tr>
+                {% endblock list-table-head %}
+                </thead>
+                <tbody class="list-table-body">
+                {% block list-table-body %}
+                    {% for item in object_list %}
+                    <tr class="list-table-item">
+                    {% block list-table-item %}
+                        <td><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></td>
+                    {% endblock list-table-item %}
+                    </tr>
+                    {% endfor %}
+                {% endblock list-table-body %}
+                </tbody>
+            {% endblock list-table %}
+            </table>
+            {% include 'lib/pagination.html' %}
+            {% else %}
+            <p class="list-empty">No Results</p>
+            {% endif %}
+        {% endblock list-content %}
+       
+        </div>
+    {% endblock list %}
     </section>
-{% endblock %}
+
+{% endblock content %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+
+    var identifySortable = function() {
+        $('.list-table-head th').each(function(){
+            if (!!$(this).data('sort')) {
+                $(this).addClass('sortable');
+            }
+        });
+    }
+    
+    var tableHeadSortIndicator = function() {
+        var sort = urlParam('sort');
+        if (!!sort) {
+            // find the right title and add the right arrow to it
+            var order = urlParam('order');
+            var arrow = (order == 'desc') ? '&#x25B2;' : '&#x25BC;';
+            var inverseOrder = (order == 'desc') ? 'asc' : 'desc';
+            $('th:icontains(' + sort + ')')
+                .prepend('<span class="arrow">' + arrow + '</span>')
+                .data('order', inverseOrder)
+                .addClass('sorted_by');
+        }
+    }
+    
+    var sortListByHeader = function() {
+        var sort = $(this).data('sort');
+        var order = $(this).data('order');
+        if (!!sort) {
+            {% if filter_url %}
+            var sort_url = '{{ filter_url|safe }}' + '&';
+            {% else %}
+            var sort_url = '?';
+            {% endif %}
+            if (!order) {
+                order = 'asc';
+            }
+            sort_url += 'sort=' + sort + '&order=' + order;
+            window.location = window.location.origin + window.location.pathname + sort_url;
+        }
+    }
+    
+    identifySortable();
+    tableHeadSortIndicator();
+    $('.list-table-head th').click(sortListByHeader);
+    
+    $('#list-filters-toggle').change(function(){
+        var label = $('#list-filters-toggle-label')[0];
+        if (this.checked) {
+            label.innerText = 'Hide';
+        } else {
+            label.innerText = 'Show';
+        }
+    });
+    
+{% block list-scripts %}
+{% endblock list-scripts %}
+</script>
+{% endblock scripts %}

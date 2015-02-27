@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'FOIADocTopViewed'
         db.create_table('foia_foiadoctopviewed', (
             ('doc', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIADocument'])),
@@ -15,14 +15,14 @@ class Migration(SchemaMigration):
             ('rank', self.gf('django.db.models.fields.PositiveSmallIntegerField')(unique=True)),
         ))
         db.send_create_signal('foia', ['FOIADocTopViewed'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'FOIADocTopViewed'
         db.delete_table('foia_foiadoctopviewed')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -135,5 +135,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

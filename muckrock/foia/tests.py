@@ -220,11 +220,11 @@ class TestFOIAFunctional(TestCase):
     def test_foia_list_user(self):
         """Test the foia-list-user view"""
 
-        for username in ['adam', 'bob']:
+        for user_pk in [1, 2]:
             response = get_allowed(self.client,
-                                   reverse('foia-list-user', kwargs={'user_name': username}),
+                                   reverse('foia-list-user', kwargs={'user_pk': user_pk}),
                                    ['lists/request_list.html', 'lists/base_list.html'])
-            user = User.objects.get(username=username)
+            user = User.objects.get(pk=user_pk)
             nose.tools.eq_(set(response.context['object_list']),
                            set(FOIARequest.objects.get_viewable(AnonymousUser()).filter(user=user)))
             nose.tools.ok_(all(foia.user == user for foia in response.context['object_list']))

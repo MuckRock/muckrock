@@ -7,7 +7,7 @@ from django.db import models
 import os
 
 class Migration(DataMigration):
-    
+
     def forwards(self, orm):
         "Write your forwards methods here."
 
@@ -25,8 +25,8 @@ class Migration(DataMigration):
                 )
             file_.save()
             doc.delete()
-    
-    
+
+
     def backwards(self, orm):
         "Write your backwards methods here."
 
@@ -46,7 +46,7 @@ class Migration(DataMigration):
                     )
                 doc.save()
                 file_.delete()
-    
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -236,5 +236,5 @@ class Migration(DataMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

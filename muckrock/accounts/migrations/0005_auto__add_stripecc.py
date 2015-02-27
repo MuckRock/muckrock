@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'StripeCC'
         db.create_table('accounts_stripecc', (
             ('default', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
@@ -18,14 +18,14 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
         db.send_create_signal('accounts', ['StripeCC'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'StripeCC'
         db.delete_table('accounts_stripecc')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -186,5 +186,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

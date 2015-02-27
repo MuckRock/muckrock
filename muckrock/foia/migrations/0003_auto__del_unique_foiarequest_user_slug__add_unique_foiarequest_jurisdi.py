@@ -5,27 +5,27 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
         pass
-        
+
         # Removing unique constraint on 'FOIARequest', fields ['user', 'slug']
         #db.delete_unique('foia_foiarequest', ['user_id', 'slug'])
 
         # Adding unique constraint on 'FOIARequest', fields ['jurisdiction', 'user', 'slug']
         #db.create_unique('foia_foiarequest', ['jurisdiction', 'user_id', 'slug'])
-    
-    
+
+
     def backwards(self, orm):
         pass
-        
+
         # Adding unique constraint on 'FOIARequest', fields ['user', 'slug']
         #db.create_unique('foia_foiarequest', ['user_id', 'slug'])
 
         # Removing unique constraint on 'FOIARequest', fields ['jurisdiction', 'user', 'slug']
         #db.delete_unique('foia_foiarequest', ['jurisdiction', 'user_id', 'slug'])
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -85,5 +85,5 @@ class Migration(SchemaMigration):
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         }
     }
-    
+
     complete_apps = ['foia']

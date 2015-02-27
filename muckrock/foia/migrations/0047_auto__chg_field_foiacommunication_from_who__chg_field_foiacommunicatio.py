@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'FOIACommunication.from_who'
         db.alter_column('foia_foiacommunication', 'from_who', self.gf('django.db.models.fields.CharField')(max_length=255))
 
         # Changing field 'FOIACommunication.to_who'
         db.alter_column('foia_foiacommunication', 'to_who', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'FOIACommunication.from_who'
         db.alter_column('foia_foiacommunication', 'from_who', self.gf('django.db.models.fields.CharField')(max_length=70))
 
         # Changing field 'FOIACommunication.to_who'
         db.alter_column('foia_foiacommunication', 'to_who', self.gf('django.db.models.fields.CharField')(max_length=70, blank=True))
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -193,5 +193,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

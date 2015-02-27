@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'Agency.image'
         db.alter_column('agency_agency', 'image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True))
 
@@ -16,10 +16,10 @@ class Migration(SchemaMigration):
 
         # Changing field 'Agency.phone'
         db.alter_column('agency_agency', 'phone', self.gf('django.db.models.fields.CharField')(max_length=30, blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'Agency.image'
         db.alter_column('agency_agency', 'image', self.gf('django.db.models.fields.files.ImageField')())
 
@@ -28,8 +28,8 @@ class Migration(SchemaMigration):
 
         # Changing field 'Agency.phone'
         db.alter_column('agency_agency', 'phone', self.gf('django.db.models.fields.CharField')(max_length=20, blank=True))
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -128,5 +128,5 @@ class Migration(SchemaMigration):
             'waiver': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['agency']

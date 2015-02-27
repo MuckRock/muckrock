@@ -1,4 +1,4 @@
-{% if page_obj.object_list.count > 0 %}
+{% if page_obj.object_list.count > 0 and page_obj.paginator.num_pages > 1 %}
 <nav class="pagination">    
     <div class="page-ref">
         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}<br>

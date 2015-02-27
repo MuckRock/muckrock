@@ -6,9 +6,9 @@ from django.db import models
 from django.core import management
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Jurisdiction'
         db.create_table('foia_jurisdiction', (
             ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
@@ -60,8 +60,8 @@ class Migration(SchemaMigration):
         #    foia.jurisdiction_new = orm.Jurisdiction.objects.get(slug=foia.jurisdiction)
         #    foia.agency_type = orm.AgencyType.objects.get(name=foia.agency)
         #    foia.save()
-    
-    
+
+
     def backwards(self, orm):
 
         # migrate the data
@@ -69,7 +69,7 @@ class Migration(SchemaMigration):
             foia.jurisdiction = foia.jurisdiction_new.slug
             foia.agency = foia.agency_type.name
             foia.save()
-        
+
         # Deleting model 'Jurisdiction'
         db.delete_table('foia_jurisdiction')
 
@@ -87,8 +87,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'FOIARequest.jurisdiction_new'
         db.delete_column('foia_foiarequest', 'jurisdiction_new_id')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -181,5 +181,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

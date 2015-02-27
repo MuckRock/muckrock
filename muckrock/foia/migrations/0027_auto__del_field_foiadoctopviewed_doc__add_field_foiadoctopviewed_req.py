@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Deleting field 'FOIADocTopViewed.doc'
         db.delete_column('foia_foiadoctopviewed', 'doc_id')
 
         # Adding field 'FOIADocTopViewed.req'
         db.add_column('foia_foiadoctopviewed', 'req', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Adding field 'FOIADocTopViewed.doc'
         db.add_column('foia_foiadoctopviewed', 'doc', self.gf('django.db.models.fields.related.ForeignKey')(default=0, to=orm['foia.FOIADocument']), keep_default=False)
 
         # Deleting field 'FOIADocTopViewed.req'
         db.delete_column('foia_foiadoctopviewed', 'req_id')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -149,5 +149,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

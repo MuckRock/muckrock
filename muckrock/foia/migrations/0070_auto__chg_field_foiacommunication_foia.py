@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'FOIACommunication.foia'
         raise RuntimeError("Cannot reverse this migration. 'FOIACommunication.foia' and its values cannot be restored.")
-        
+
         # The following code is provided here to aid in writing a correct migration
         # Changing field 'FOIACommunication.foia'
         db.alter_column(u'foia_foiacommunication', 'foia_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest']))

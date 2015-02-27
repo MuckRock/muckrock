@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIAFile.description'
         db.add_column('foia_foiafile', 'description', self.gf('django.db.models.fields.TextField')(default='', blank=True), keep_default=False)
 
@@ -16,10 +16,10 @@ class Migration(SchemaMigration):
 
         # Adding field 'FOIAFile.date'
         db.add_column('foia_foiafile', 'date', self.gf('django.db.models.fields.DateTimeField')(null=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIAFile.description'
         db.delete_column('foia_foiafile', 'description')
 
@@ -28,8 +28,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'FOIAFile.date'
         db.delete_column('foia_foiafile', 'date')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -173,5 +173,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']
