@@ -37,9 +37,9 @@
 {% endblock aside %}
 
 {% block main %}
-    {% markdown trusted %}
-        {% evaluate article.body %}
-	{% endmarkdown %}
+    {% with article.body|markdown as copy %}
+        {% evaluate copy %}
+    {% endwith %}
 	{% if article.foias.exists %}
     <dfn>Related Requests</dfn>
 	{% include 'lib/foia.html' with foias=article.foias.all %}
