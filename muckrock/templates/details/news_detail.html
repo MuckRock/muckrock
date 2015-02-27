@@ -12,7 +12,7 @@
 
 {% block image %}
 {% if article.image %}
-<img src="{% thumbnail article.image 1200x400 %}" class="header-image">
+<img src="{% thumbnail article.image 1200x400 crop %}" class="header-image">
 {% endif %}
 {% endblock image %}
 
@@ -27,7 +27,12 @@
     {% include 'lib/social.html' with title=article.title %}
     <div class="half">
         <div class="article-date">{{ article.pub_date | date:"F j, Y" }}</div>
-        <h2>by <span class="author-name">{{ article.get_authors_names }}</span></h2>
+        <h2>by 
+        {% for author in article.authors.all %}
+            <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+            {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        </h2>
     </div>
 {% endblock aside %}
 

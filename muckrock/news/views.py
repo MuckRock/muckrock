@@ -52,11 +52,6 @@ class List(ListView):
     paginate_by = 10
     queryset = Article.objects.get_published()
 
-    def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
-        context['years'] = [date.year for date in Article.objects.dates('pub_date', 'year')][::-1]
-        return context
-
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """API views for Article"""

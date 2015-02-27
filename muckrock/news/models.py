@@ -51,7 +51,7 @@ class Article(models.Model):
         upload_to='news_images',
         blank=True,
         null=True,
-        resize_source={'size': (1200, 400), 'crop': 'smart'}
+        resize_source={'size': (1600, 1200), 'crop': 'smart'}
     )
     objects = ArticleManager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
