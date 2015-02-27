@@ -1,68 +1,73 @@
-{% extends 'base.html' %}
+{% extends 'lists/base_list.html' %}
 {% load tags %}
-{% block title %}MuckRock &bull; Search{% endblock title %}
+{% load mathfilters %}
+{% block title %}MuckRock &bull; Search{% endblock %}
+{% block list-type %}search{% endblock %}
+{% block list-title %}Search{% endblock %}
+{% block list-actions %}
+<form method="GET" id="global-search">
+    <input type="search" name="q" value="{{ query }}" />
+    <input type="submit" value="Search" class="primary button" />
+</form>
+{% endblock list-actions %}
+{% block list-navigation %}
+<ul class="list-filters">
+    <li>
+        <input type="checkbox" name="models" value="news.article" form="global-search" id="id_models_0" checked="checked" />
+        <label for="id_models_0">News</label>
+    </li>
+    <li>
+        <input type="checkbox" name="models" value="foia.foiarequest" form="global-search" id="id_models_1" checked="checked" />
+        <label for="id_models_1">Requests</label>
+    </li>
+    <li>
+        <input type="checkbox" name="models" value="qanda.question" form="global-search" id="id_models_2" checked="checked" />
+        <label for="id_models_2">Questions</label>
+    </li>
+</ul>
+{% endblock list-navigation %}
 
-{% block content %}
-
-    <form method="get" action="." class="search form">
-        <div class="top">
-            <input type="search" name="q" value="{{query}}" />
-            <input type="submit" value="Search" class="primary button" />
-        </div>
-        <dfn>Filter</dfn>
-        <ul class="search-filters"> 
-            <li><input type="checkbox" name="models" value="news.article" id="id_models_0" /><label for="id_models_0">News</label></li> 
-            <li><input type="checkbox" name="models" value="foia.foiarequest" id="id_models_1" /><label for="id_models_1">Requests</label></li>
-            <li><input type="checkbox" name="models" value="qanda.question" id="id_models_2" /><label for="id_models_2">Questions</label></li> 
-        </ul>
-    </form>
-    
-    {% if query %}
-        {% if page.object_list %}
-    <header class="search meta">
-        <h2>{{ page.paginator.count }} result{{ page.paginator.count|pluralize }} for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-
-{# inlined for quick hack to get this to work #}
-<nav class="pagination">    
-    <div class="page-ref">
-        Page {{ page.number }} of {{ page.paginator.num_pages }}<br>
-        Showing {{page.start_index}} to {{page.end_index}} of {{page.paginator.count}}
-    </div>
-    <ul class="page-set">
-    {% if page.has_previous %}
-        <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">&#171;&nbsp;Previous&nbsp;page</a>
-        </li>
+{% block list-content %}
+{% with page.object_list as object_list %}
+{% with page as page_obj %}
+    {% if object_list %}
+    {% include 'lib/pagination.html' %}
+    <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
+        <thead class="list-table-head">
+            <tr>
+                <th width="10%">Type</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody class="list-table-body">
+            {% for item in object_list %}
+            <tr class="list-table-item">
+                <td>
+                    {% if item.model_name == "foiarequest" %}
+                    Request
+                    {% elif item.model_name == "article" %}
+                    Article
+                    {% elif item.model_name == "question" %}
+                    Question
+                    {% endif %}
+                </td>
+                <td><a href="{{ item.object.get_absolute_url }}">{{ item.object }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if object_list|length > per_page|div:2 %}{% include 'lib/pagination.html' %}{% endif %}
     {% else %}
-        <li>
-            <span class="default">&#171;&thinsp;&#171;&nbsp;First&nbsp;page&emsp;&#171;&nbsp;Previous&nbsp;page</span>
-        </li>
+    <p class="list-empty">No Results</p>
     {% endif %}
-    {% if page.has_next %}
-        <li><a href="?page={{ page.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}&q={{ query }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
-    {% else %}
-        <li>
-            <span class="default">Next&nbsp;page&nbsp;&#187;&emsp;Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</span>
-        </li>
-    {% endif %}
-    </ul>
-</nav>
-    </header>
-    <ul class="search collection">
-            {% for result in page.object_list %}
-						{% if result.model_name == "foiarequest" %}
-						  {% if result.object|foia_is_viewable:user %}
-							<li>Request: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }}</li>
-							{% endif %}
-						{% elif result.model_name == "article" %}
-							<li>Article: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.get_authors_names }} on {{ result.object.pub_date|date:"F m, Y" }}</li>
-						{% elif result.model_name == "question" %}
-							<li>Question: <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a> by {{ result.object.user.get_full_name }} on {{ result.object.date|date:"F m, Y" }}</li>
-						{% endif %}
-    {% endfor %}
-    </ul>
-            
-		{% else %}
-		    <h2>No results for &ldquo;{{ request.GET.q }}&rdquo;</h2>
-		{% endif %}
-	{% endif %}
-{% endblock content %}
+{% endwith %}
+{% endwith %}
+{% endblock list-content %}
+        
+{% block list-table-head %}
+    <th>Type</th>
+    <th>Title</th>
+{% endblock list-table-head %}
+{% block list-table-item %}
+
+{% endblock list-table-item %}

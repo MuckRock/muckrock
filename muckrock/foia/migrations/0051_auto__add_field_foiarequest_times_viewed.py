@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIARequest.times_viewed'
         db.add_column('foia_foiarequest', 'times_viewed', self.gf('django.db.models.fields.IntegerField')(default=0), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIARequest.times_viewed'
         db.delete_column('foia_foiarequest', 'times_viewed')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -189,5 +189,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

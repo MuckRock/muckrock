@@ -10,7 +10,6 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
 
 from datetime import datetime
 from rest_framework import viewsets, status
@@ -21,6 +20,19 @@ from rest_framework.response import Response
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
+from muckrock.views import MRFilterableListView
+
+class QuestionList(MRFilterableListView):
+    """List of unanswered questions"""
+    model = Question
+    title = 'Questions & Answers'
+    template_name = 'lists/question_list.html'
+
+class UnansweredQuestionList(QuestionList):
+    """List of unanswered questions"""
+    def get_queryset(self):
+        objects = super(UnansweredQuestionList, self).get_queryset()
+        return objects.annotate(num_answers=Count('answers')).filter(num_answers=0)
 
 class Detail(DetailView):
     """Question detail view"""
@@ -151,39 +163,6 @@ def subscribe(request):
     profile.save()
 
     return redirect('question-index')
-
-class List(ListView):
-    """List of unanswered questions"""
-    paginate_by = 10
-    model = Question
-
-    def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
-        context['title'] = 'Questions'
-        return context
-
-
-class ListUnanswered(ListView):
-    """List of unanswered questions"""
-    paginate_by = 10
-    queryset = Question.objects.annotate(num_answers=Count('answers')).filter(num_answers=0)
-
-    def get_context_data(self, **kwargs):
-        context = super(ListUnanswered, self).get_context_data(**kwargs)
-        context['title'] = 'Unanswered Questions'
-        return context
-
-
-class ListRecent(ListView):
-    """List of recently answered questions"""
-    paginate_by = 10
-    queryset = Question.objects.exclude(answer_date=None).order_by('-answer_date')
-
-    def get_context_data(self, **kwargs):
-        context = super(ListRecent, self).get_context_data(**kwargs)
-        context['title'] = 'Recently Answered Questions'
-        return context
-
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""

@@ -99,11 +99,12 @@ $progress-animation-duration: 0.7s;
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
     @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
-    tr:nth-child(odd) { background-color: $color-odd-background; }
-    border: $base-border-width solid $color-grey;
-    &, th, td {
+    thead tr { background-color: $color-default; }
+    tbody tr:nth-child(odd) { background-color: $color-odd-background; }
+    &, tr {
         border-top: $base-border-width solid $color-grey;
         border-bottom: $base-border-width solid $color-grey
     }
@@ -171,82 +172,4 @@ $color-email: #663285;
     &.facebook {  @include colorize-icon($color-facebook); }
     &.twitter { @include colorize-icon($color-twitter); }
     &.email { @include colorize-icon($color-email); }
-}
-
-/* JQueryUI Datepicker */
-
-.ui-datepicker {
-    background: $color-white;
-    box-shadow: 1px 1px 1px $color-grey;
-    margin: 0.25em 0 0 0;
-    padding: 0.25em;
-    border: 1px solid $color-grey;
-    border-radius: 3px;
-}
-
-.ui-datepicker-header {
-    display: table;
-    width: 100%;
-}
-
-.ui-datepicker-prev, .ui-datepicker-next, .ui-datepicker-title {
-    display: table-cell;
-}
-
-.ui-datepicker-prev, .ui-datepicker-next {
-    width: 25%;
-}
-
-.ui-datepicker-title {
-    width: 50%;
-}
-
-.ui-datepicker-calendar {
-    thead {
-        background-color: $color-grey;
-    }
-    tr {
-        background-color: $color-white !important;
-    }
-    td {
-        cursor: pointer;
-        background-color: $color-white;
-        text-align: center;
-        @include transition(background-color 0.25s linear);
-        a { text-decoration: none; }
-        span { color: $color-grey; }
-        &:hover {
-            background-color: lighten($color-primary, 30%);
-        }
-    }
-    
-    .ui-datepicker-unselectable {
-        cursor: default;
-        &:hover {
-            background-color: $color-white;
-        }
-    }
-    
-    .ui-datepicker-week-end {
-        background-color: darken($color-white, 5%);
-    }
-    .ui-datepicker-other-month {
-        cursor: default;
-        background-color: darken($color-white, 10%);
-        &:hover { background-color: darken($color-white, 10%); }
-    }
-    
-    .ui-datepicker-today {
-        background-color: lighten($color-primary, 30%);
-    }
-    
-    .ui-datepicker-current-day {
-        a { color: $color-white; }
-        background-color: $color-primary;
-        &:hover {
-            background-color: $color-primary;
-        }
-    }
-    
-
 }

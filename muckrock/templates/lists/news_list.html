@@ -1,13 +1,18 @@
 {% extends 'lists/base_list.html' %}
-
 {% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-title %}<h1>Articles</h1>{% endblock list-title %}
-{% block type %}news{% endblock type %}
+{% block list-title %}Reporting{% endblock list-title %}
+{% block list-type %}news{% endblock list-type %}
 
-{% block list-item %}
-    {% with item as article %}
-    <h2><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></h2>
-    <h3>by {{ article.get_authors_names }}
-        on {{ article.pub_date | date:"F j, Y"}}</h3>
-    {% endwith %}
-{% endblock list-item %}
+{% block list-table-head %}
+<th data-sort="title">Title</th>
+<th data-sort="date">Date</th>
+<th>Author(s)</th>
+{% endblock list-table-head %}
+
+{% block list-table-item %}
+{% with item as article %}
+<td><a href="{{ item.get_absolute_url }}">{{ article.title }}</a></td>
+<td>{{ article.pub_date | date:"F j, Y"}}</td>
+<td>{{ article.get_authors_names }}</td>
+{% endwith %}
+{% endblock list-table-item %}

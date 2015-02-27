@@ -12,9 +12,10 @@ from django.template.loader import render_to_string
 from rest_framework import viewsets
 
 from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.forms import FlagForm
+from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
+from muckrock.views import MRFilterableListView
 
 def collect_stats(obj, context):
     """Helper for collecting stats"""
@@ -73,14 +74,25 @@ def detail(request, fed_slug, state_slug, local_slug):
     return render_to_response('details/jurisdiction_detail.html', context,
                               context_instance=RequestContext(request))
 
-def list_(request):
-    """List of jurisdictions"""
-    fed_jurs = Jurisdiction.objects.filter(level='f')
-    state_jurs = Jurisdiction.objects.filter(level='s')
-    context = {'fed_jurs': fed_jurs, 'state_jurs': state_jurs}
+class List(MRFilterableListView):
+    """Filterable list of jurisdictions"""
+    model = Jurisdiction
+    title = 'Jurisdictions'
+    template_name = 'lists/jurisdiction_list.html'
 
-    return render_to_response('lists/jurisdiction_list.html', context,
-                              context_instance=RequestContext(request))
+    def get_filters(self):
+        base_filters = super(List, self).get_filters()
+        new_filters = [
+            {'field': 'level', 'lookup': 'exact'},
+            {'field': 'parent', 'lookup': 'exact'},
+        ]
+        return base_filters + new_filters
+
+    def get_context_data(self, **kwargs):
+        context = super(List, self).get_context_data(**kwargs)
+        filter_data = self.get_filter_data()
+        context['filter_form'] = JurisdictionFilterForm(initial=filter_data['filter_initials'])
+        return context
 
 # pylint: disable=unused-argument
 def redirect_flag(request, **kwargs):

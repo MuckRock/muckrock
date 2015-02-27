@@ -32,7 +32,7 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'CrowdfundProjectPayment.user'
         raise RuntimeError("Cannot reverse this migration. 'CrowdfundProjectPayment.user' and its values cannot be restored.")
-        
+
         # The following code is provided here to aid in writing a correct migration
         # Changing field 'CrowdfundProjectPayment.user'
         db.alter_column(u'crowdfund_crowdfundprojectpayment', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User']))
@@ -42,7 +42,7 @@ class Migration(SchemaMigration):
 
         # User chose to not deal with backwards NULL issues for 'CrowdfundRequestPayment.user'
         raise RuntimeError("Cannot reverse this migration. 'CrowdfundRequestPayment.user' and its values cannot be restored.")
-        
+
         # The following code is provided here to aid in writing a correct migration
         # Changing field 'CrowdfundRequestPayment.user'
         db.alter_column(u'crowdfund_crowdfundrequestpayment', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User']))

@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Agency'
         db.rename_table('foia_agency', 'agency_agency')
         db.rename_table('foia_agency_types', 'agency_agency_types')
@@ -17,15 +17,15 @@ class Migration(SchemaMigration):
             # For permissions to work properly after migrating
             orm['contenttypes.contenttype'].objects.filter(app_label='foia', model='agency').update(app_label='agency')
             orm['contenttypes.contenttype'].objects.filter(app_label='foia', model='agencytype').update(app_label='agencytype')
-    
-    
+
+
     def backwards(self, orm):
-        
+
         db.rename_table('agency_agency', 'foia_agency')
         db.rename_table('agency_agency_types', 'foia_agency_types')
         db.rename_table('agency_agencytype', 'foia_agencytype')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -103,5 +103,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['agency']

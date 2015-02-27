@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Holiday'
         db.create_table('business_days_holiday', (
             ('kind', self.gf('django.db.models.fields.CharField')(max_length=8)),
@@ -19,14 +19,14 @@ class Migration(SchemaMigration):
             ('day', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
         ))
         db.send_create_signal('business_days', ['Holiday'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Holiday'
         db.delete_table('business_days_holiday')
-    
-    
+
+
     models = {
         'business_days.holiday': {
             'Meta': {'object_name': 'Holiday'},
@@ -39,5 +39,5 @@ class Migration(SchemaMigration):
             'weekday': ('django.db.models.fields.PositiveSmallIntegerField', [], {})
         }
     }
-    
+
     complete_apps = ['business_days']

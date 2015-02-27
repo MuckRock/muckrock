@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Profile.stripe_id'
         db.add_column('accounts_profile', 'stripe_id', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Profile.stripe_id'
         db.delete_column('accounts_profile', 'stripe_id')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -178,5 +178,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

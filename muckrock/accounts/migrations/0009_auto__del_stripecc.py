@@ -5,15 +5,15 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Deleting model 'StripeCC'
         db.delete_table('accounts_stripecc')
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Adding model 'StripeCC'
         db.create_table('accounts_stripecc', (
             ('card_type', self.gf('django.db.models.fields.CharField')(max_length=255)),
@@ -22,8 +22,8 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], unique=True)),
         ))
         db.send_create_signal('accounts', ['StripeCC'])
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -176,5 +176,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

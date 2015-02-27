@@ -2,6 +2,29 @@
 
 from django import forms
 
+from muckrock.forms import MRFilterForm
+from muckrock.jurisdiction.models import Jurisdiction
+
+import autocomplete_light as autocomplete
+
+class JurisdictionFilterForm(MRFilterForm):
+    """Adds a level filter to MRFilterForm"""
+    levels = (
+        ('f', 'Federal'),
+        ('s', 'State'),
+        ('l', 'Local'),
+    )
+    level = forms.ChoiceField(
+        choices=levels,
+        widget=forms.RadioSelect
+    )
+    parent = forms.ModelChoiceField(
+        required=False,
+        queryset=Jurisdiction.objects.all(),
+        widget=autocomplete.ChoiceWidget(
+            'StateAutocomplete',
+            attrs={'placeholder': 'All States'}))
+
 class FlagForm(forms.Form):
     """Form to flag an agency or jurisdiction"""
     reason = forms.CharField(

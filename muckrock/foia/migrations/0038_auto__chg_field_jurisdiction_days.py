@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'Jurisdiction.days'
         db.alter_column('foia_jurisdiction', 'days', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'Jurisdiction.days'
         db.alter_column('foia_jurisdiction', 'days', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True))
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -156,5 +156,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

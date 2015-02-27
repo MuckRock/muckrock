@@ -7,20 +7,20 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 class Migration(DataMigration):
-    
+
     def forwards(self, orm):
         "Write your forwards methods here."
         for jurisdiction in orm.Jurisdiction.objects.filter(level='l'):
             jurisdiction.slug = slugify(jurisdiction.name)
             jurisdiction.save()
-    
-    
+
+
     def backwards(self, orm):
         "Write your backwards methods here."
         for jurisdiction in orm.Jurisdiction.objects.filter(level='l'):
             jurisdiction.slug = slugify('%s, %s' % (jurisdiction.name, jurisdiction.parent.abbrev))
             jurisdiction.save()
-    
+
     models = {
         'business_days.holiday': {
             'Meta': {'object_name': 'Holiday'},
@@ -51,5 +51,5 @@ class Migration(DataMigration):
             'waiver': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['jurisdiction']

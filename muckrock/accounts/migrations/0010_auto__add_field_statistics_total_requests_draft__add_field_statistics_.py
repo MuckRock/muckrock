@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Statistics.total_requests_draft'
         db.add_column('accounts_statistics', 'total_requests_draft', self.gf('django.db.models.fields.IntegerField')(null=True), keep_default=False)
 
@@ -55,10 +55,10 @@ class Migration(SchemaMigration):
 
         # Adding field 'Statistics.total_page_views'
         db.add_column('accounts_statistics', 'total_page_views', self.gf('django.db.models.fields.IntegerField')(null=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Statistics.total_requests_draft'
         db.delete_column('accounts_statistics', 'total_requests_draft')
 
@@ -106,8 +106,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Statistics.total_page_views'
         db.delete_column('accounts_statistics', 'total_page_views')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -298,5 +298,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'Holiday.day'
         db.alter_column('business_days_holiday', 'day', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True))
 
@@ -19,10 +19,10 @@ class Migration(SchemaMigration):
 
         # Changing field 'Holiday.month'
         db.alter_column('business_days_holiday', 'month', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'Holiday.day'
         db.alter_column('business_days_holiday', 'day', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True))
 
@@ -34,8 +34,8 @@ class Migration(SchemaMigration):
 
         # Changing field 'Holiday.month'
         db.alter_column('business_days_holiday', 'month', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True))
-    
-    
+
+
     models = {
         'business_days.holiday': {
             'Meta': {'object_name': 'Holiday'},
@@ -48,5 +48,5 @@ class Migration(SchemaMigration):
             'weekday': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['business_days']

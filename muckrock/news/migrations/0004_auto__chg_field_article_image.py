@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding M2M table for field foias on 'Article'
         db.create_table('news_article_foias', (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
@@ -23,9 +23,9 @@ class Migration(SchemaMigration):
             if article.foia:
                 article.foias.add(article.foia)
                 article.save()
-    
+
     def backwards(self, orm):
-        
+
         # Removing M2M table for field foias on 'Article'
         db.delete_table('news_article_foias')
 
@@ -36,8 +36,8 @@ class Migration(SchemaMigration):
             if article.foias.exist():
                 article.foia = article.foias.all()[0]
                 article.save()
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -197,5 +197,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['news']

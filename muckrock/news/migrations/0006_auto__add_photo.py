@@ -5,23 +5,23 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'Photo'
         db.create_table('news_photo', (
             ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100)),
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
         ))
         db.send_create_signal('news', ['Photo'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'Photo'
         db.delete_table('news_photo')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -185,5 +185,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['news']

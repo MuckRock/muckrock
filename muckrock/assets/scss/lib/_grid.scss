@@ -1,6 +1,12 @@
 /* Allows for full-height elements with CSS */
 html, body { min-height: 100%; }
 
+@mixin grid-columns($small, $medium, $large) {
+    @include media($small-layout) { @include span-columns($small); }
+    @include media($medium-layout) { @include span-columns($medium); }
+    @include media($large-layout) { @include span-columns($large); }
+}
+
 // Prototypes
 
 %full {
