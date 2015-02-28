@@ -10,7 +10,7 @@ from muckrock.organization.models import Organization
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
-    search_fields = ['username']
+    search_fields = ['^username', '^first_name', '^last_name']
     attrs = {
         'data-autocomplete-minimum-characters': 2
     }
