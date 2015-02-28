@@ -102,6 +102,8 @@ class MRFilterableListView(ListView):
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:
             objects = objects.filter(**kwargs).distinct()
+        except FieldError:
+            pass
         except ValueError:
             error_msg = "Sorry, there was a problem with your filters. Please try filtering again."
             messages.error(self.request, error_msg)
