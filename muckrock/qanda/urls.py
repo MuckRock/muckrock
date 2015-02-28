@@ -24,7 +24,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^recent/$',
-        RedirectView.as_view(url='/questions/?sort=date_answered&order=desc'),
+        RedirectView.as_view(url='/questions/?sort=answer_date&order=desc'),
         name='question-recent'
     ),
     url(
