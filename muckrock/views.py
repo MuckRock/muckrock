@@ -1,6 +1,7 @@
 """
 Views for muckrock project
 """
+from django.contrib import messages
 from django.db.models import Sum
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -70,8 +71,13 @@ class MRFilterableListView(ListView):
             filter_key = filter_by['field']
             filter_value = get.get(filter_key, None)
             if filter_value:
-                filter_initials.update({filter_key: filter_value})
-                filter_url += '&' + str(filter_key) + '=' + str(filter_value)
+                kwarg = {filter_key: filter_value}
+                try:
+                    self.model.objects.filter(**kwarg)
+                    filter_initials.update(kwarg)
+                    filter_url += '&' + str(filter_key) + '=' + str(filter_value)
+                except ValueError:
+                    pass
         return {
             'filter_initials': filter_initials,
             'filter_url': filter_url
@@ -92,7 +98,11 @@ class MRFilterableListView(ListView):
                     filter_value = parse_tags(filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
-        return objects.filter(**kwargs).distinct()
+        try:
+            objects = objects.filter(**kwargs).distinct()
+        except ValueError:
+            messages.error(self.request, "Sorry, there was a problem with your filters. Please try filtering again.")
+        return objects
 
     def sort_list(self, objects):
         """Sorts the list of objects"""
@@ -102,7 +112,10 @@ class MRFilterableListView(ListView):
             order = get.get('order', 'asc')
             if order != 'asc':
                 sort = '-' + sort
-            objects = objects.order_by(sort)
+            try:
+                objects = objects.order_by(sort)
+            except FieldError:
+                pass
         return objects
 
     def get_context_data(self, **kwargs):

@@ -94,7 +94,7 @@
             {% if request.user == user_obj %}
             <h3>My Latest Requests <small><a href="{% url 'foia-mylist' %}">See all</a></small></h3>
             {% else %}
-            <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.username}}">See all</a></small></h3>
+            <h3>Latest Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}">See all</a></small></h3>
             {% endif %}
             {% include 'lib/foia_table.html' with requests=recent_requests %}
         {% endif %}
@@ -102,7 +102,7 @@
             {% if request.user == user_obj %}
             <h3>My Recently Completed Requests <small><a href="{% url 'foia-mylist' %}?status=done">See all</a></small></h3>
             {% else %}
-            <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.username}}&status=done">See all</a></small></h3>
+            <h3>Recently Completed Requests <small><a href="{% url 'foia-list' %}?user={{user_obj.pk}}&status=done">See all</a></small></h3>
             {% endif %}
             {% include 'lib/foia_table.html' with requests=recent_completed %}
         {% endif %}

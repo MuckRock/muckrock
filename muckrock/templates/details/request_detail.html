@@ -172,7 +172,7 @@
 
 {% block main %}
 {% if foia.has_crowdfund %}
-    {% crowdfund foia %}
+    {% crowdfund foia.pk %}
 {% endif %}
 
 {% if foia.files or foia.user == user or user.is_staff %}
