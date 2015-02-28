@@ -2,6 +2,7 @@
 Views for muckrock project
 """
 from django.contrib import messages
+from django.core.exceptions import FieldError
 from django.db.models import Sum
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -73,6 +74,7 @@ class MRFilterableListView(ListView):
             if filter_value:
                 kwarg = {filter_key: filter_value}
                 try:
+                    # pylint: disable=star-args
                     self.model.objects.filter(**kwarg)
                     filter_initials.update(kwarg)
                     filter_url += '&' + str(filter_key) + '=' + str(filter_value)
@@ -101,7 +103,8 @@ class MRFilterableListView(ListView):
         try:
             objects = objects.filter(**kwargs).distinct()
         except ValueError:
-            messages.error(self.request, "Sorry, there was a problem with your filters. Please try filtering again.")
+            error_msg = "Sorry, there was a problem with your filters. Please try filtering again."
+            messages.error(self.request, error_msg)
         return objects
 
     def sort_list(self, objects):
