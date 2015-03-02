@@ -37,7 +37,7 @@
 {% endblock aside %}
 
 {% block main %}
-    {% with article.body|markdown as copy %}
+    {% with article.body|markdown:"trusted" as copy %}
         {% evaluate copy %}
     {% endwith %}
 	{% if article.foias.exists %}
