@@ -73,9 +73,8 @@ class MRFilterableListView(ListView):
             filter_value = get.get(filter_key, None)
             if filter_value:
                 kwarg = {filter_key: filter_value}
+                print kwarg
                 try:
-                    # pylint: disable=star-args
-                    self.model.objects.filter(**kwarg)
                     filter_initials.update(kwarg)
                     filter_url += '&' + str(filter_key) + '=' + str(filter_value)
                 except ValueError:
