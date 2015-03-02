@@ -34,5 +34,5 @@ class MRFilterForm(forms.Form):
     tags = TaggitField(widget=TaggitWidget(
         'TagAutocomplete',
         attrs={
-            'placeholder': 'All Tags',
+            'placeholder': 'All Tags (comma separated)',
             'data-autocomplete-minimum-characters': 1}))
