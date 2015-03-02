@@ -14,6 +14,8 @@
     <form method="GET" action="{% url 'foia-list' %}">
         {% for tag in tags %}
         <button class="tag" name="tags" value="{{tag.name}}">{{tag.name}}</button>
+        {% empty %}
+        <p>No tags. Add some!</p>
         {% endfor %}
     </form>
 </div>
