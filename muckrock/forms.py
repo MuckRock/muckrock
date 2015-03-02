@@ -38,6 +38,7 @@ class MRFilterForm(forms.Form):
             'data-autocomplete-minimum-characters': 1}))
 
 class TagManagerForm(forms.Form):
+    """A form with an autocomplete input for tags"""
     tags = TaggitField(widget=TaggitWidget(
         'TagAutocomplete',
         attrs={

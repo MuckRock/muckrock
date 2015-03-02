@@ -8,8 +8,6 @@ from django.db import models
 import autocomplete_light
 from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 
-import re
-
 # pylint: disable=model-missing-unicode
 
 class Tag(TaggitTag):

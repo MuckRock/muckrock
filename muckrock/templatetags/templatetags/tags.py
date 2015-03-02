@@ -9,7 +9,6 @@ from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 
-from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 import re
 
 from muckrock.foia.models import FOIARequest
@@ -192,14 +191,14 @@ def crowdfund(context, foia_pk):
     }
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
-def tag_manager(context, object):
+def tag_manager(context, mr_object):
     """Template tag to insert a tag manager component"""
     try:
-        tags = object.tags.all()
+        tags = mr_object.tags.all()
     except AttributeError:
         tags = None
     try:
-        owner = object.user
+        owner = mr_object.user
     except AttributeError:
         owner = None
     is_authorized = context['user'].is_staff or context['user'] == owner
@@ -208,5 +207,5 @@ def tag_manager(context, object):
         'tags': tags,
         'form': form,
         'is_authorized': is_authorized,
-        'endpoint': object.get_absolute_url()
+        'endpoint': mr_object.get_absolute_url()
     }

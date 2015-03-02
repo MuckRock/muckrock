@@ -15,8 +15,6 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
-from taggit.utils import parse_tags
-
 class MRFilterableListView(ListView):
     """
     The main feature of MRFilterableListView is the ability to filter
