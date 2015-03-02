@@ -28,6 +28,19 @@ class QuestionList(MRFilterableListView):
     title = 'Questions & Answers'
     template_name = 'lists/question_list.html'
 
+    def get_context_data(self, **kwargs):
+        """Adds an info message to the context"""
+        context = super(QuestionList, self).get_context_data(**kwargs)
+        info_msg = ('Looking for FOIA advice? Post your questions here '
+                    'to get invaluable insight from MuckRock\'s community '
+                    'of public records pros. Have a technical support '
+                    'or customer service issue? Those should be reported '
+                    'either using the "Report" button on the request page '
+                    'or simply by emailing <a href="mailto:info@muckrock.com">'
+                    'info@muckrock.com</a>.')
+        messages.info(self.request, info_msg)
+        return context
+
 class UnansweredQuestionList(QuestionList):
     """List of unanswered questions"""
     def get_queryset(self):
