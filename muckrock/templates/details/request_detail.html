@@ -74,11 +74,13 @@
             <p><small>Separate tags with commas</small></p>
         </form>
         {% endif %}
+        <form method="GET" action="{% url 'foia-list' %}">
         {% for tag in foia.tags.all %}
-		<dd class="tag"><a href="{% url 'foia-list-tag' tag_slug=tag.slug %}">{{tag.name}}</a></dd>
+		<dd class="tag"><button name="tags" value="{{tag.name}}">{{tag.name}}</button></dd>
 	    {% empty %}
 		<dd>None</dd>
 	    {% endfor %}
+	    </form>
 	{% endif %}
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
