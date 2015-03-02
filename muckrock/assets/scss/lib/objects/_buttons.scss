@@ -38,7 +38,7 @@ input:disabled, input.button:disabled {
     &, &:hover, &:active { @extend .button.disabled }
 }
 
-.tag .button, .tag.button {
+button.tag, .button.tag {
     $tag-color: lighten($color-primary, 5%);
     position: relative;
     margin: $base-margin/4;

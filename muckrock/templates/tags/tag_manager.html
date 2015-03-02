@@ -1,0 +1,20 @@
+{% if tags or is_authorized %}
+<div class="tag-manager">
+    {% if is_authorized %}
+    <dfn>Tags <span class="edit" id="edit-tags">Edit</span></dfn>
+    <form method="post" action="{{endpoint}}" class="tag-form" id="tag-form">
+        {% csrf_token %}
+        {{form.tags}}
+        <button type="submit" name="action" value="tags" class="primary button">Save</button>
+        <p><small>Separate tags with commas</small></p>
+    </form>
+    {% else %}
+    <dfn>Tags</dfn>
+    {% endif %}
+    <form method="GET" action="{% url 'foia-list' %}">
+        {% for tag in tags %}
+        <button class="tag" name="tags" value="{{tag.name}}">{{tag.name}}</button>
+        {% endfor %}
+    </form>
+</div>
+{% endif %}

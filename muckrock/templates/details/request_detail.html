@@ -63,25 +63,8 @@
     {% if foia.tracking_id and user.is_staff %}
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
+    {% tag_manager foia %}
     <dl>
-    {% if foia.tags.all or foia.user == user or user.is_staff %}
-        <dt>Tags{% if user.is_staff or foia.user == user %} <span class="edit" id="edit-tags">Change</span>{% endif %}</dt>
-        {% if foia.user == user or user.is_staff %}
-        <form method="post" class="tag-form" id="tag-form">
-            {% csrf_token %}
-            <input type="text" name="tags" value="{% for tag in foia.tags.all %}{% if forloop.first %}{{ tag }}{% else %}, {{ tag }}{% endif %}{% endfor %}" />
-            <button type="submit" name="action" value="tags" class="primary button">Save</button>
-            <p><small>Separate tags with commas</small></p>
-        </form>
-        {% endif %}
-        <form method="GET" action="{% url 'foia-list' %}">
-        {% for tag in foia.tags.all %}
-		<dd class="tag"><button name="tags" value="{{tag.name}}">{{tag.name}}</button></dd>
-	    {% empty %}
-		<dd>None</dd>
-	    {% endfor %}
-	    </form>
-	{% endif %}
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
         <dt>Embargo</dt>
@@ -262,6 +245,7 @@
 {% endblock main %}
 
 {% block scripts %}
+{% include 'autocomplete_light/static.html' %}
 {% if foia.has_crowdfund %}
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
 <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>        
