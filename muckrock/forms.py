@@ -33,4 +33,14 @@ class MRFilterForm(forms.Form):
             attrs={'placeholder': 'All Jurisdictions'}))
     tags = TaggitField(widget=TaggitWidget(
         'TagAutocomplete',
-        attrs={'placeholder': 'All Tags', 'data-autocomplete-minimum-characters': 1}))
+        attrs={
+            'placeholder': 'All Tags (comma separated)',
+            'data-autocomplete-minimum-characters': 1}))
+
+class TagManagerForm(forms.Form):
+    """A form with an autocomplete input for tags"""
+    tags = TaggitField(widget=TaggitWidget(
+        'TagAutocomplete',
+        attrs={
+            'placeholder': 'Tags',
+            'data-autocomplete-minimum-characters': 1}))

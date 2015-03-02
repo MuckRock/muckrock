@@ -37,3 +37,35 @@ input[type="submit"], button {
 input:disabled, input.button:disabled { 
     &, &:hover, &:active { @extend .button.disabled }
 }
+
+button.tag, .button.tag {
+    $tag-color: lighten($color-primary, 5%);
+    position: relative;
+    margin: $base-margin/4;
+    border: none;
+    border-radius: 0;
+    padding: $base-padding/6 $base-padding/3 $base-padding/6 $base-padding/3;
+    background: $tag-color;
+    font-size: .9em;
+    
+    &:before {
+        $triangle-width: 6px;
+        content: "";
+        position: absolute;
+        height: 0;
+        width: 0;
+        top: 0;
+        left: -1*$triangle-width;
+        border-right: $triangle-width solid $tag-color;
+        border-bottom: $base-padding*2/3 solid transparent;
+        border-top: $base-padding*2/3 solid transparent;
+    }
+    
+    &:hover {
+        $hover-color: darken($tag-color, 8%);
+        background: $hover-color;
+        &:before {
+            border-right-color: $hover-color;
+        }
+    }
+}

@@ -15,8 +15,6 @@ from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
-from taggit.utils import parse_tags
-
 class MRFilterableListView(ListView):
     """
     The main feature of MRFilterableListView is the ability to filter
@@ -73,9 +71,8 @@ class MRFilterableListView(ListView):
             filter_value = get.get(filter_key, None)
             if filter_value:
                 kwarg = {filter_key: filter_value}
+                print kwarg
                 try:
-                    # pylint: disable=star-args
-                    self.model.objects.filter(**kwarg)
                     filter_initials.update(kwarg)
                     filter_url += '&' + str(filter_key) + '=' + str(filter_value)
                 except ValueError:
@@ -97,7 +94,7 @@ class MRFilterableListView(ListView):
             if filter_value:
                 # tags need to be parsed into an array before filtering
                 if filter_key == 'tags':
-                    filter_value = parse_tags(filter_value)
+                    filter_value = filter_value.split(',')
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:

@@ -9,10 +9,10 @@ from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 
-from muckrock.foia.models import FOIARequest
-
 import re
 
+from muckrock.foia.models import FOIARequest
+from muckrock.forms import TagManagerForm
 from muckrock.settings import STATIC_URL
 
 register = Library()
@@ -188,4 +188,24 @@ def crowdfund(context, foia_pk):
         'user': context['user'],
         'crowdfund': foia.crowdfund,
         'endpoint': endpoint,
+    }
+
+@register.inclusion_tag('tags/tag_manager.html', takes_context=True)
+def tag_manager(context, mr_object):
+    """Template tag to insert a tag manager component"""
+    try:
+        tags = mr_object.tags.all()
+    except AttributeError:
+        tags = None
+    try:
+        owner = mr_object.user
+    except AttributeError:
+        owner = None
+    is_authorized = context['user'].is_staff or context['user'] == owner
+    form = TagManagerForm(initial={'tags': tags})
+    return {
+        'tags': tags,
+        'form': form,
+        'is_authorized': is_authorized,
+        'endpoint': mr_object.get_absolute_url()
     }
