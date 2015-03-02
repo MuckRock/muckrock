@@ -97,7 +97,7 @@ class MRFilterableListView(ListView):
             if filter_value:
                 # tags need to be parsed into an array before filtering
                 if filter_key == 'tags':
-                    filter_value = parse_tags(filter_value)
+                    filter_value = filter_value.split(',')
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:
