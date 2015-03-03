@@ -8,43 +8,46 @@
 {% with object as article %}
 
 {% block title %}MuckRock &bull; {{ article.title }}{% endblock title %}
-{% block type %}news{% endblock type %}
 
-{% block image %}
-{% if article.image %}
-<img src="{% thumbnail article.image 1200x400 crop %}" class="header-image">
-{% endif %}
-{% endblock image %}
-
-{% block header %}    
-    <h1>{{ article.title }}</h1>
-    {% if article.kicker %}
-    <summary>{{ article.kicker }}</summary>
+{% block content %}
+<article class="news detail">
+    {% if article.image %}
+    <img src="{% thumbnail article.image 1200x400 crop %}" class="news-article-image">
     {% endif %}
-{% endblock header %}
-
-{% block aside %}
-    {% include 'lib/social.html' with title=article.title %}
-    <div class="half">
-        <div class="article-date">{{ article.pub_date | date:"F j, Y" }}</div>
-        <h2>by 
-        {% for author in article.authors.all %}
-            <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
-            {% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        </h2>
-    </div>
-{% endblock aside %}
-
-{% block main %}
+    <header class="news-article-header">
+        <div class="left">
+            <h1 class="news-article-title">{{ article.title }}</h1>
+            {% if article.kicker %}
+            <summary class="news-article-kicker">{{ article.kicker }}</summary>
+            {% endif %}
+            <div class="news-article-meta">
+                <div class="news-article-date left">{{ article.pub_date | date:"F j, Y" }}</div>
+                <div class="news-article-authors right">by 
+                    {% for author in article.authors.all %}
+                        <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            {% include 'lib/social.html' with title=article.title %}
+            {% tag_manager article %}
+        </div>
+    </header>
+    <section class="news-article-body">
     {% with article.body|markdown:"trusted" as copy %}
         {% evaluate copy %}
     {% endwith %}
-	{% if article.foias.exists %}
-    <dfn>Related Requests</dfn>
-	{% include 'lib/foia.html' with foias=article.foias.all %}
-	{% endif %}
-{% endblock main %}	
+    </section>
+    <footer class="news-article-footer">
+    {% if article.foias.exists %}
+        <dfn>Related Requests</dfn>
+        {% include 'lib/foia.html' with foias=article.foias.all %}
+    {% endif %}
+    </footer>
+</article>
+{% endblock %}
 
 {% block open_graph %}
 <meta property="og:title" content="{{ article.title }}" />

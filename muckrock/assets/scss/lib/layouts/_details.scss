@@ -25,60 +25,79 @@
     }
     
     &.news {
-        .main {
-            h1 {
-                font-weight: $bold;
-                @include media($small-layout) {
-                    @include font-sizing(1.75);
-                }
+        @include row;
+        $article-body-width: 33em;
+    
+        .news-article-image {
+            @extend %full;
+            @include omega;
+            margin-bottom: $base-margin;
+        }
+        
+        .news-article-header {
+            @extend %full;
+            @include row;
+            @include omega;
+            margin-bottom: $base-margin;
+            @include media($medium-layout) {
+                margin-bottom: 0;
+            }
+            .left {
+                @include grid-columns(4, 4, 9);
+                padding-right: $base-padding;
+            }
+            .right {
+                @include grid-columns(4, 2, 3);
+                margin-top: $base-margin/2;
                 @include media($medium-layout) {
-                    @include font-sizing(2);
+                    margin-top: 0;
                 }
-                @include media($large-layout) {
-                    @include font-sizing(2.25);
-                }
-                margin-top: 0;
-            }
-            summary {
-                font-weight: $normal;
-                @include media($small-layout) {
-                    @include font-sizing(1.25);
-                }
-                @include media($large-layout) {
-                    @include font-sizing(1.5);
+                .sharing, .tag-manager {
+                    @include grid-columns(4, 6, 12);
                 }
             }
+            .news-article-meta {
+                @include row;
+                max-width: $article-body-width;
+                padding: $base-padding/4 0;
+                font-size: .9em;
+                .left, .right { @extend %half; }
+                @include media($medium-layout) {
+                    margin: $base-margin/2 0 $base-margin;
+                    border-top: $base-border-width solid $color-grey;
+                    border-bottom: $base-border-width solid $color-grey;
+                    .right {
+                        text-align: right;
+                    }
+                }
+            }   
         }
-        .aside {
-            padding-left: $base-padding;
-            h2, .article-date {
-                @include font-sizing(1.2);
-                font-weight: $light;
-                color: $color-black;
-            }
-            .author-name { @include font-sizing(1.275); }
-            ul {
-                list-style-type: none;
-                padding-left: 0;
-                span { display: block; }
-            }
-            @include media($small-layout) {
-                @include row;                    
-                margin: $base-margin/2 0;
-                border-top: $base-border-width solid $color-grey;
-                border-bottom: $base-border-width solid $color-grey;
-                padding: $base-padding/2 0;
-                .half { @include span-columns(2); }
-                ul { margin-top: 0; }
-            }
+        
+        .news-article-title {
+            margin-top: 0;
+            font-size: 2.0625em;
+            font-weight: $bold;
         }
-        .body {
+
+        .news-article-kicker {
+            font-size: 1.4375em;
+            margin: $base-margin/2 0;
+        }
+        
+        .news-article-authors {
+            font-size: 1em;
+            font-weight: $normal;
+        }
+        
+        .news-article-body {
+            @include row;
             @include font-sizing(1.1, 1.2);
-            margin: $base-margin auto;
+            max-width: $article-body-width;
+            margin: $base-margin 0;
             padding-top: 0;
-            max-width: 45em;
             ul { padding-left: $base-padding; }
         }
+        
         // Fixes for embedded content
         div[id^='viewer'] {
             max-width: 90%;
@@ -196,23 +215,7 @@
                 @extend %half;
             }
         }
-        .edit {
-            display: inline-block;
-            font-size: 0.8rem;
-            font-weight: $normal;
-            text-transform: none;
-            letter-spacing: 0;
-            line-height: 1rem;
-            color: $color-primary;
-            cursor: pointer;
-            &:hover {
-                color: darken($color-primary, 10%);
-            }
-        }
-        .tag {
-            display: inline-block;
-        }
-        .tag-form, .status-form {
+        .status-form {
             display: none;
             font-size: 0.85em;
             background: none;
