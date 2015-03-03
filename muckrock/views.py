@@ -2,6 +2,7 @@
 Views for muckrock project
 """
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
 from django.db.models import Sum
 from django.http import HttpResponseServerError
@@ -14,6 +15,8 @@ from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
+
+import re
 
 class MRFilterableListView(ListView):
     """
@@ -58,6 +61,18 @@ class MRFilterableListView(ListView):
             },
         ]
 
+    def clean_filter_value(self, filter_key, filter_value):
+        # tags need to be parsed into an array before filtering
+        if filter_key == 'tags':
+            filter_value = filter_value.split(',')
+        if filter_key == 'user':
+            user_lookup = re.findall(r'\D+', filter_key)
+            # if looking up by PK, then result will be empty
+            # if looking up by username, then result will have length
+            if len(user_lookup) > 0:
+                filter_value = User.objects.get(username=filter_value).pk
+        return filter_value
+
     def get_filter_data(self):
         """
         Returns a list of filter values, a url query for the filter,
@@ -70,6 +85,7 @@ class MRFilterableListView(ListView):
             filter_key = filter_by['field']
             filter_value = get.get(filter_key, None)
             if filter_value:
+                filter_value = self.clean_filter_value(filter_key, filter_value)
                 kwarg = {filter_key: filter_value}
                 print kwarg
                 try:
@@ -92,9 +108,7 @@ class MRFilterableListView(ListView):
             filter_lookup = filter_by['lookup']
             filter_value = get.get(filter_key, None)
             if filter_value:
-                # tags need to be parsed into an array before filtering
-                if filter_key == 'tags':
-                    filter_value = filter_value.split(',')
+                filter_value = self.clean_filter_value(filter_key, filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:
@@ -125,7 +139,10 @@ class MRFilterableListView(ListView):
         context = super(MRFilterableListView, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['title'] = self.title
-        context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        try:
+            context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        except ValueError:
+            context['filter_form'] = MRFilterForm()
         context['filter_url'] = filter_data['filter_url']
         return context
 
