@@ -40,8 +40,10 @@ class NewsDetail(DateDetailView):
             args=(context['object'].pk,))
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
-    
+
     def post(self, request, **kwargs):
+        """Handles POST requests on article pages"""
+        # pylint:disable=unused-argument
         tags = request.POST.get('tags')
         if tags:
             tag_set = set()
@@ -51,6 +53,7 @@ class NewsDetail(DateDetailView):
                     continue
                 new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': request.user})
                 tag_set.add(new_tag)
+            # pylint:disable=star-args
             self.get_object().tags.set(*tag_set)
             self.get_object().save()
             messages.success(request, 'Your tags have been saved to this article.')
