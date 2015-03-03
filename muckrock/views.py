@@ -2,6 +2,7 @@
 Views for muckrock project
 """
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
 from django.db.models import Sum
 from django.http import HttpResponseServerError
@@ -10,10 +11,13 @@ from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
+
+import re
 
 class MRFilterableListView(ListView):
     """
@@ -58,17 +62,53 @@ class MRFilterableListView(ListView):
             },
         ]
 
+    def clean_filter_value(self, filter_key, filter_value):
+        """Cleans filter inputs to their expected values if detected as incorrect"""
+        # pylint:disable=no-self-use
+        # pylint:disable=too-many-branches
+        if not filter_value:
+            return None
+
+        # tags need to be parsed into an array before filtering
+        if filter_key == 'tags':
+            filter_value = filter_value.split(',')
+        if filter_key == 'user':
+            # if looking up by PK, then result will be empty
+            # if looking up by username, then result will have length
+            if len(re.findall(r'\D+', filter_value)) > 0:
+                try:
+                    filter_value = User.objects.get(username=filter_value).pk
+                except User.DoesNotExist:
+                    filter_value = None
+                # username is unique so only one result should be returned by get
+        if filter_key == 'agency':
+            if len(re.findall(r'\D+', filter_value)) > 0:
+                try:
+                    filter_value = Agency.objects.get(slug=filter_value).pk
+                except Agency.DoesNotExist:
+                    filter_value = None
+                except Agency.MultipleObjectsReturned:
+                    filter_value = Agency.objects.filter(slug=filter_value)[0]
+        if filter_key == 'jurisdiction':
+            if len(re.findall(r'\D+', filter_value)) > 0:
+                try:
+                    filter_value = Jurisdiction.objects.get(slug=filter_value).pk
+                except Jurisdiction.DoesNotExist:
+                    filter_value = None
+                except Jurisdiction.MultipleObjectsReturned:
+                    filter_value = Jurisdiction.objects.filter(slug=filter_value)[0]
+
+        return filter_value
+
     def get_filter_data(self):
-        """
-        Returns a list of filter values, a url query for the filter,
-        and a list of objects that have been filtered.
-        """
+        """Returns a list of filter values and a url query for the filter."""
         get = self.request.GET
         filter_initials = {}
         filter_url = ''
         for filter_by in self.get_filters():
             filter_key = filter_by['field']
             filter_value = get.get(filter_key, None)
+            filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
                 kwarg = {filter_key: filter_value}
                 print kwarg
@@ -91,10 +131,8 @@ class MRFilterableListView(ListView):
             filter_key = filter_by['field']
             filter_lookup = filter_by['lookup']
             filter_value = get.get(filter_key, None)
+            filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
-                # tags need to be parsed into an array before filtering
-                if filter_key == 'tags':
-                    filter_value = filter_value.split(',')
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:
@@ -125,7 +163,10 @@ class MRFilterableListView(ListView):
         context = super(MRFilterableListView, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['title'] = self.title
-        context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        try:
+            context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
+        except ValueError:
+            context['filter_form'] = MRFilterForm()
         context['filter_url'] = filter_data['filter_url']
         return context
 
