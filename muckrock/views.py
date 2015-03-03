@@ -110,8 +110,12 @@ class MRFilterableListView(ListView):
             filter_value = get.get(filter_key, None)
             filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
+                if type(filter_value) == list:
+                    try:
+                        filter_value = ', '.join(filter_value)
+                    except TypeError:
+                        filter_value = str(filter_value)
                 kwarg = {filter_key: filter_value}
-                print kwarg
                 try:
                     filter_initials.update(kwarg)
                     filter_url += '&' + str(filter_key) + '=' + str(filter_value)
