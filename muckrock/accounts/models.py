@@ -192,7 +192,11 @@ class Profile(models.Model):
         request_dict = {'org_requests': 0, 'monthly_requests': 0,
                         'reg_requests': 0, 'extra_requests': 0}
 
-        org_reqs = self.organization.get_requests()
+        if self.organization:
+            org_reqs = self.organization.get_requests()
+        else:
+            org_reqs = 0
+
         if org_reqs > num:
             request_dict['org_requests'] = num
             return request_dict
