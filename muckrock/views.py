@@ -75,14 +75,14 @@ class MRFilterableListView(ListView):
         if filter_key == 'user':
             # if looking up by PK, then result will be empty
             # if looking up by username, then result will have length
-            if len(re.findall(r'\D+', filter_key)) > 0:
+            if len(re.findall(r'\D+', filter_value)) > 0:
                 try:
                     filter_value = User.objects.get(username=filter_value).pk
                 except User.DoesNotExist:
                     filter_value = None
                 # username is unique so only one result should be returned by get
         if filter_key == 'agency':
-            if len(re.findall(r'\D+', filter_key)) > 0:
+            if len(re.findall(r'\D+', filter_value)) > 0:
                 try:
                     filter_value = Agency.objects.get(slug=filter_value).pk
                 except Agency.DoesNotExist:
@@ -90,7 +90,7 @@ class MRFilterableListView(ListView):
                 except Agency.MultipleObjectsReturned:
                     filter_value = Agency.objects.filter(slug=filter_value)[0]
         if filter_key == 'jurisdiction':
-            if len(re.findall(r'\D+', filter_key)) > 0:
+            if len(re.findall(r'\D+', filter_value)) > 0:
                 try:
                     filter_value = Jurisdiction.objects.get(slug=filter_value).pk
                 except Jurisdiction.DoesNotExist:
