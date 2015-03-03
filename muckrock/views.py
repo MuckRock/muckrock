@@ -3,7 +3,7 @@ Views for muckrock project
 """
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.core.exceptions import FieldError
+from django.core.exceptions import FieldError, DoesNotExist
 from django.db.models import Sum
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -66,11 +66,13 @@ class MRFilterableListView(ListView):
         if filter_key == 'tags':
             filter_value = filter_value.split(',')
         if filter_key == 'user':
-            user_lookup = re.findall(r'\D+', filter_key)
             # if looking up by PK, then result will be empty
             # if looking up by username, then result will have length
-            if len(user_lookup) > 0:
-                filter_value = User.objects.get(username=filter_value).pk
+            if len(re.findall(r'\D+', filter_key)) > 0:
+                try:
+                    filter_value = User.objects.get(username=filter_value).pk
+                except DoesNotExist:
+                    filter_value = None
         return filter_value
 
     def get_filter_data(self):
@@ -84,8 +86,8 @@ class MRFilterableListView(ListView):
         for filter_by in self.get_filters():
             filter_key = filter_by['field']
             filter_value = get.get(filter_key, None)
+            filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
-                filter_value = self.clean_filter_value(filter_key, filter_value)
                 kwarg = {filter_key: filter_value}
                 print kwarg
                 try:
@@ -107,8 +109,8 @@ class MRFilterableListView(ListView):
             filter_key = filter_by['field']
             filter_lookup = filter_by['lookup']
             filter_value = get.get(filter_key, None)
+            filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
-                filter_value = self.clean_filter_value(filter_key, filter_value)
                 kwargs.update({'{0}__{1}'.format(filter_key, filter_lookup): filter_value})
         # tag filtering could add duplicate items to results, so .distinct() is used
         try:
