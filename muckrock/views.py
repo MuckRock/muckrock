@@ -65,10 +65,10 @@ class MRFilterableListView(ListView):
     def clean_filter_value(self, filter_key, filter_value):
         """Cleans filter inputs to their expected values if detected as incorrect"""
         # pylint:disable=no-self-use
-
+        # pylint:disable=too-many-branches
         if not filter_value:
             return None
-        
+
         # tags need to be parsed into an array before filtering
         if filter_key == 'tags':
             filter_value = filter_value.split(',')
