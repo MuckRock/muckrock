@@ -1,29 +1,27 @@
 .search.list {
-    .list-title {
-        @extend %quarter;
-    }
     .list-actions {
-        @extend %three-quarters;
-        @include row;
+        margin-bottom: $base-margin;
         #global-search {
             display: block;
             width: 100%;
             overflow: hidden;
-            @include media($large-layout) {
-                margin-left: 1em;
-            }
         }
         input[type=search] {
             width: 75%;
             float: left;
             margin: 0;
+            border-radius: $base-border-radius;
             @include border-right-radius(0);
         }
         input[type=submit] {
             width: 25%;
             float: right;
             margin: 0;
+            border: $base-border-width solid;
+            border-radius: $base-border-radius;
             @include border-left-radius(0);
+            @include button-color($color-primary);
+            @include button-hover($color-primary);
         }
     }
     .list-filters {
