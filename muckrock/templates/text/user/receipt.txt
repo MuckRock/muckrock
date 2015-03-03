@@ -8,7 +8,7 @@ https://www.muckrock.com{{ url }}
 Your Receipt Details:
 
 Name: {{user.get_full_name}}
-{% if type == "pro" %}Item: Professional Account{% endif %}{% if type == "community" %}Item: 5 Requests{% endif %}
+{% if type == "pro" %}Item: Professional Account{% endif %}{% if type == "community" %}Item: 4 Requests{% endif %}
 Payment ID: {{id}}
 Payment Date: {{date|date}}
 {% if last4 %}Payment Card: **** **** **** {{last4}}{% endif %}
