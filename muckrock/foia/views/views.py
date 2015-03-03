@@ -103,7 +103,6 @@ class MyRequestList(RequestList):
         single_req = FOIARequest.objects.filter(user=self.request.user)
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
-        multi_req = self.sort_list(self.filter_list(multi_req))
         return list(single_req) + list(multi_req)
 
 @class_view_decorator(login_required)
