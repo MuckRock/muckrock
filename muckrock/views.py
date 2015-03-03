@@ -77,8 +77,7 @@ class MRFilterableListView(ListView):
 
     def get_filter_data(self):
         """
-        Returns a list of filter values, a url query for the filter,
-        and a list of objects that have been filtered.
+        Returns a list of filter values and a url query for the filter.
         """
         get = self.request.GET
         filter_initials = {}
