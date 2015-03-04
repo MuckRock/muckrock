@@ -3,76 +3,62 @@
 .detail {
 
     @extend %detail;
-    
+
     &.agency {
         aside dl { @extend %third; }
         aside dd + dt { margin-top: $base-margin; }
     }
-    
+
     &.flatpage {
         h1 {
             font-weight: $bold;
         }
-        @include font-sizing(1.1, 1.2);    
+        @include font-sizing(1.1, 1.2);
         max-width: 45em;
         ul { padding-left: $base-padding; }
     }
-    
+
     &.jurisdiction {
         h3 { font-weight: normal; }
         h3 + table { margin-top: 0; }
         h3 + h3 { margin-top: 1.5em; }
     }
-    
+
     &.news {
-        @include row;
-        $article-body-width: 33em;
-    
-        .news-article-image {
+        @include outer-container;
+        $article-body-width: 30em;
+
+        .news-image {
             @extend %full;
             @include omega;
             margin-bottom: $base-margin;
         }
-        
-        .news-article-header {
-            @extend %full;
+        .news-article {
             @include row;
-            @include omega;
+            @include span-columns(12);
+            @include media($medium-layout) {
+                @include span-columns(4);
+            }
+            @include media($large-layout) {
+                @include span-columns(7);
+                @include shift(2);
+            }
+        }
+        .news-aside {
+            @include grid-columns(12, 2, 3);
+        }
+
+        .news-article-header, .news-article-body, .news-article-footer {
+            max-width: $article-body-width;
+        }
+
+        .news-article-header {
             margin-bottom: $base-margin;
             @include media($medium-layout) {
                 margin-bottom: 0;
             }
-            .left {
-                @include grid-columns(4, 4, 9);
-                padding-right: $base-padding;
-            }
-            .right {
-                @include grid-columns(4, 2, 3);
-                margin-top: $base-margin/2;
-                @include media($medium-layout) {
-                    margin-top: 0;
-                }
-                .sharing, .tag-manager {
-                    @include grid-columns(4, 6, 12);
-                }
-            }
-            .news-article-meta {
-                @include row;
-                max-width: $article-body-width;
-                padding: $base-padding/4 0;
-                font-size: .9em;
-                .left, .right { @extend %half; }
-                @include media($medium-layout) {
-                    margin: $base-margin/2 0 $base-margin;
-                    border-top: $base-border-width solid $color-grey;
-                    border-bottom: $base-border-width solid $color-grey;
-                    .right {
-                        text-align: right;
-                    }
-                }
-            }   
         }
-        
+
         .news-article-title {
             margin-top: 0;
             font-size: 2.0625em;
@@ -83,21 +69,26 @@
             font-size: 1.4375em;
             margin: $base-margin/2 0;
         }
-        
+
         .news-article-authors {
             font-size: 1em;
             font-weight: $normal;
+            margin-bottom: $base-margin;
         }
-        
+
         .news-article-body {
-            @include row;
             @include font-sizing(1.1, 1.2);
-            max-width: $article-body-width;
             margin: $base-margin 0;
             padding-top: 0;
             ul { padding-left: $base-padding; }
+            img, figure, .pullquote {
+                max-width: 100%;
+                @include media($medium-layout) {
+                    max-width: 160%;
+                }
+            }
         }
-        
+
         // Fixes for embedded content
         div[id^='viewer'] {
             max-width: 90%;
@@ -105,7 +96,7 @@
             @include media($large-layout) {
                 margin: $base-margin auto $base-margin 0;
             }
-            
+
         }
         .iframe-container {
             position: relative;
@@ -121,7 +112,7 @@
             }
         }
     }
-    
+
     &.organization {
         .add-members, .members, .controls {
             @include row;
@@ -188,10 +179,10 @@
             }
         }
     }
-    
+
     &.profile {
         section.meta > header {
-            h1 { 
+            h1 {
                 @include font-sizing(3);
                 margin-top: 0;
                 font-weight: $light;
@@ -199,13 +190,13 @@
             dl { margin-top: $base-vertical-rhythm; }
         }
     }
-    
+
     &.question {
         .messages-container {
             @include row;
         }
     }
-    
+
     &.request {
         h3 { font-size: 1.25em; }
         .draft {
