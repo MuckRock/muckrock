@@ -26,7 +26,7 @@
 
     &.news {
         @include outer-container;
-        $article-body-width: 30em;
+        $article-body-width: 33em;
 
         .news-image {
             @extend %full;
@@ -38,10 +38,12 @@
             @include span-columns(12);
             @include media($medium-layout) {
                 @include span-columns(4);
+                margin-top: $base-margin;
+                padding-right: $base-padding;
             }
             @include media($large-layout) {
-                @include span-columns(7);
-                @include shift(2);
+                @include span-columns(8);
+                @include shift(1);
             }
         }
         .news-aside {
@@ -67,6 +69,7 @@
 
         .news-article-kicker {
             font-size: 1.4375em;
+            line-height: 1.5em;
             margin: $base-margin/2 0;
         }
 
@@ -77,14 +80,20 @@
         }
 
         .news-article-body {
-            @include font-sizing(1.1, 1.2);
+            @include font-sizing(1, 1.2);
+            @include media($medium-layout) {
+                @include font-sizing(1.2, 1.4);
+            }
             margin: $base-margin 0;
             padding-top: 0;
+            p {
+                margin-bottom: 1.4em;
+            }
             ul { padding-left: $base-padding; }
             img, figure, .pullquote {
                 max-width: 100%;
                 @include media($medium-layout) {
-                    max-width: 160%;
+                    max-width: 140%;
                 }
             }
         }
