@@ -25,14 +25,14 @@
 {% endblock list-navigation %}
 
 {% block list-content %}
-{% with page.object_list as object_list %}
+{% with page.object_list|redact_list:request.user as object_list %}
+{% with page as page_obj %}
     <section class="list-actions">
         <form method="GET" id="global-search">
             <input type="search" name="q" value="{{ query }}" />
             <input type="submit" value="Search" class="primary button" />
         </form>
     </section>
-{% with page as page_obj %}
     {% if object_list %}
     {% include 'lib/pagination.html' %}
     <table class="list-table tablesaw tablesaw-stack" data-tablesaw-mode="stack"">
@@ -66,7 +66,7 @@
 {% endwith %}
 {% endwith %}
 {% endblock list-content %}
-        
+
 {% block list-table-head %}
     <th>Type</th>
     <th>Title</th>
