@@ -53,8 +53,8 @@
 
 {% block list-scripts %}
     if (urlParam('status') !== 0) {
-        $('#id_status').prepend('<option value>None</option>');
+        $('#id_status').prepend('<option value>All Status</option>');
     } else {
-        $('#id_status').prepend('<option disabled selected class="title-option">Status</option>');
+        $('#id_status').prepend('<option disabled selected class="title-option">All Status</option>');
     }
 {% endblock list-scripts %}

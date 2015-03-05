@@ -8,43 +8,44 @@
 {% with object as article %}
 
 {% block title %}MuckRock &bull; {{ article.title }}{% endblock title %}
-{% block type %}news{% endblock type %}
 
-{% block image %}
-{% if article.image %}
-<img src="{% thumbnail article.image 1200x400 crop %}" class="header-image">
-{% endif %}
-{% endblock image %}
-
-{% block header %}    
-    <h1>{{ article.title }}</h1>
-    {% if article.kicker %}
-    <summary>{{ article.kicker }}</summary>
+{% block content %}
+<div class="news detail">
+    {% if article.image %}
+    <img src="{% thumbnail article.image 1200x400 crop %}" class="news-image">
     {% endif %}
-{% endblock header %}
-
-{% block aside %}
-    {% include 'lib/social.html' with title=article.title %}
-    <div class="half">
-        <div class="article-date">{{ article.pub_date | date:"F j, Y" }}</div>
-        <h2>by 
-        {% for author in article.authors.all %}
-            <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
-            {% if not forloop.last %}, {% endif %}
-        {% endfor %}
-        </h2>
-    </div>
-{% endblock aside %}
-
-{% block main %}
-    {% with article.body|markdown:"trusted" as copy %}
-        {% evaluate copy %}
-    {% endwith %}
-	{% if article.foias.exists %}
-    <dfn>Related Requests</dfn>
-	{% include 'lib/foia.html' with foias=article.foias.all %}
-	{% endif %}
-{% endblock main %}	
+    <article class="news-article">
+        <header class="news-article-header">
+            <h1 class="news-article-title">{{ article.title }}</h1>
+            {% if article.kicker %}
+            <summary class="news-article-kicker">{{ article.kicker }}</summary>
+            {% endif %}
+        </header>
+        <section class="news-article-body">
+        {% with article.body|markdown:"trusted" as copy %}
+            {% evaluate copy %}
+        {% endwith %}
+        </section>
+        <footer class="news-article-footer">
+        {% if article.foias.exists %}
+            <dfn>Related Requests</dfn>
+            {% include 'lib/foia.html' with foias=article.foias.all %}
+        {% endif %}
+        </footer>
+    </article>
+    <aside class="news-aside">
+        <div class="news-article-date">{{ article.pub_date | date:"F j, Y" }}</div>
+        <div class="news-article-authors">by
+            {% for author in article.authors.all %}
+                <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+                {% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </div>
+        {% include 'lib/social.html' with title=article.title %}
+        {% tag_manager article %}
+    </aside>
+</div>
+{% endblock %}
 
 {% block open_graph %}
 <meta property="og:title" content="{{ article.title }}" />
@@ -80,9 +81,10 @@
 {% endwith %}
 
 {% block scripts %}
+{% include 'autocomplete_light/static.html' %}
 <script src="{% static 'js/jquery.fitvids.js' %}" type="text/javascript"></script>
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
-<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>        
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
 <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 <script type="text/javascript">

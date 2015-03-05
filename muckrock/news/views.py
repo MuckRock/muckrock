@@ -2,7 +2,9 @@
 Views for the news application
 """
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 from django.views.generic.list import ListView
 from django.views.generic.dates import YearArchiveView, DateDetailView
 
@@ -13,6 +15,7 @@ import django_filters
 from muckrock.news.models import Article
 from muckrock.news.serializers import ArticleSerializer
 from muckrock.settings import STRIPE_PUB_KEY
+from muckrock.tags.models import Tag
 
 # pylint: disable=R0901
 
@@ -38,6 +41,23 @@ class NewsDetail(DateDetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
+    def post(self, request, **kwargs):
+        """Handles POST requests on article pages"""
+        # pylint:disable=unused-argument
+        tags = request.POST.get('tags')
+        if tags:
+            tag_set = set()
+            for tag in tags.split(','):
+                tag = Tag.normalize(tag)
+                if not tag:
+                    continue
+                new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': request.user})
+                tag_set.add(new_tag)
+            # pylint:disable=star-args
+            self.get_object().tags.set(*tag_set)
+            self.get_object().save()
+            messages.success(request, 'Your tags have been saved to this article.')
+        return redirect(self.get_object())
 
 class NewsYear(YearArchiveView):
     """View for year archive"""

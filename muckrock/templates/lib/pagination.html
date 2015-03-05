@@ -6,7 +6,7 @@
     </div>
     <ul class="page-set">
     {% if page_obj.has_previous %}
-        <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page_obj.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">&#171;&nbsp;Previous&nbsp;page</a>
+        <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page_obj.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">&#171;&nbsp;Previous&nbsp;page</a>
         </li>
     {% else %}
         <li>
@@ -14,7 +14,7 @@
         </li>
     {% endif %}
     {% if page_obj.has_next %}
-        <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
+        <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% if query %}&amp;q={{query}}{% endif %}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
     {% else %}
         <li>
             <span class="default">Next&nbsp;page&nbsp;&#187;&emsp;Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</span>

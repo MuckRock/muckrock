@@ -78,6 +78,13 @@ $('#toggle-all').click(function(){
     });
 });
 
+// Tag Manager
+    
+$('#edit-tags').click(function() {
+    $('#tag-form').show();
+    $(this).hide();
+});
+
 // MESSAGES
 $('.message .visibility').click(function() {
     var header = $(this).parent();

@@ -66,11 +66,6 @@ def company_title(companies):
     else:
         return companies
 
-@register.filter
-def foia_is_viewable(foia, user):
-    """Make sure the FOIA is viewable before showing it to the user"""
-    return foia.is_viewable(user)
-
 class TableHeaderNode(Node):
     """Tag to create table headers"""
 
@@ -138,6 +133,21 @@ def email_redactor(match):
 def redact_emails(text):
     """Redact emails from text"""
     return email_re.sub(email_redactor, text)
+
+@register.filter
+def redact_list(obj_list, user):
+    """
+    Filters and returns a list of objects based on whether they should be visible
+    to the currently-logged in user.
+    """
+    redacted_list = []
+    for item in obj_list:
+        try:
+            if item.object.is_viewable(user):
+                redacted_list.append(item)
+        except AttributeError:
+            redacted_list.append(item)
+    return redacted_list
 
 # http://stackoverflow.com/questions/1278042/
 # in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507

@@ -8,6 +8,7 @@
 @import 'foia';
 @import 'orphan';
 @import 'crowdfund';
+@import 'tags';
 
 /* Feeds */
 
@@ -156,20 +157,31 @@ $color-email: #663285;
     margin: 0 0 $base-margin 0;
     text-align: left;
 }
+
 .sharing > a {
-    @include colorize-icon($color-grey);
+    &.facebook {  @include colorize-icon($color-facebook); }
+    &.twitter { @include colorize-icon($color-twitter); }
+    &.email { @include colorize-icon($color-email); }
     width: 33%;
     margin: 0 $base-margin/8;
-    &:first-child { margin-left: 0; }
+    &:first-of-type {
+        margin-left: 0;
+        svg { margin-left: 0; }
+    }
+    &:last-of-type {
+        margin-right: 0;
+        svg { margin-right: 0; }
+    }
     text-decoration: none;
+    text-align: left;
     .svg-icon {
-        height: 20px;
-        width: 20px;
+        height: 24px;
+        width: 24px;
     }
 }
 
 .sharing > a:hover {
-    &.facebook {  @include colorize-icon($color-facebook); }
-    &.twitter { @include colorize-icon($color-twitter); }
-    &.email { @include colorize-icon($color-email); }
+   &.facebook {  @include colorize-icon(darken($color-facebook, 20%)); }
+    &.twitter { @include colorize-icon(darken($color-twitter, 20%)); }
+    &.email { @include colorize-icon(darken($color-email, 20%)); }
 }
