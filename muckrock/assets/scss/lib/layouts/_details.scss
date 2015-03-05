@@ -32,13 +32,15 @@
             @extend %full;
             @include omega;
             margin-bottom: $base-margin;
+            @include media($medium-layout) {
+                margin-bottom: $base-margin*2;
+            }
         }
         .news-article {
             @include row;
             @include span-columns(12);
             @include media($medium-layout) {
                 @include span-columns(4);
-                margin-top: $base-margin;
                 padding-right: $base-padding;
             }
             @include media($large-layout) {
@@ -56,6 +58,7 @@
 
         .news-article-header {
             margin-bottom: $base-margin;
+            border-bottom: $base-border-width solid $color-grey;
             @include media($medium-layout) {
                 margin-bottom: 0;
             }
@@ -65,12 +68,19 @@
             margin-top: 0;
             font-size: 2.0625em;
             font-weight: $bold;
+            @include media($large-layout) {
+                max-width: 150%;
+            }
         }
 
         .news-article-kicker {
-            font-size: 1.4375em;
-            line-height: 1.5em;
             margin: $base-margin/2 0;
+            font-size: 1.4375em;
+            font-weight: $bold;
+            line-height: 1.5em;
+            @include media($large-layout) {
+                max-width: 150%;
+            }
         }
 
         .news-article-authors {
