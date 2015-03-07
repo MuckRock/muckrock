@@ -4,7 +4,6 @@ Views for the FOIA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import Http404
@@ -13,29 +12,24 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
 
 from datetime import datetime
 import logging
 import stripe
 
-from muckrock.agency.models import Agency
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import \
-    ListFilterForm, \
-    MyListFilterForm
+from muckrock.foia.forms import RequestFilterForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
     STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.views.composers import get_foia
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
 from muckrock.task.models import FlaggedTask
-from muckrock.views import class_view_decorator
+from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=R0901
 
@@ -43,86 +37,34 @@ logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
-class List(ListView):
+class RequestList(MRFilterableListView):
     """Base list view for other list views to inherit from"""
+    model = FOIARequest
+    title = 'Requests'
+    template_name = 'lists/request_list.html'
 
-    def filter_sort_requests(self, foia_requests):
-        """Sorts the FOIA requests"""
-        get = self.request.GET
-        order = get.get('order', 'desc')
-        sort = get.get('sort', 'date_submitted')
-        list_filter = {
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-
-        for key, value in list_filter.iteritems():
-            if value:
-                if key == 'status':
-                    foia_requests = foia_requests.filter(status=value)
-                elif key == 'agency':
-                    agency_obj = get_object_or_404(Agency, id=value)
-                    foia_requests = foia_requests.filter(agency=agency_obj)
-                elif key == 'jurisdiction':
-                    value = value.split(',')
-                    juris_obj = get_object_or_404(Jurisdiction, id=value[0])
-                    foia_requests = foia_requests.filter(jurisdiction=juris_obj)
-                elif key == 'user':
-                    user_obj = get_object_or_404(User, username=value)
-                    foia_requests = foia_requests.filter(user=user_obj)
-                # elif key == 'tags':
-                    # foia_requests = foia_requests.filter(tags__slug=value)
-
-
-        # Handle extra cases by resorting to default values
-        if order not in ['asc', 'desc']:
-            order = 'desc'
-        if sort not in ['title', 'date_submitted', 'times_viewed']:
-            sort = 'date_submitted'
-        ob_field = '-' + sort if order == 'desc' else sort
-        foia_requests = foia_requests.order_by(ob_field)
-
-        return foia_requests
-
-    def get_paginate_by(self, queryset):
-        return 15
+    def get_filters(self):
+        """Adds request-specific filter fields"""
+        base_filters = super(RequestList, self).get_filters()
+        new_filters = [{'field': 'status', 'lookup': 'exact'}]
+        return base_filters + new_filters
 
     def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
-        # get args to populate initial values for ListFilterForm
-        get = self.request.GET
-        form_fields = {
-            'order': get.get('order', False),
-            'sort': get.get('sort', False),
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-        form_initials = {}
-        filter_url = ''
-        for key, value in form_fields.iteritems():
-            if value:
-                form_initials.update({key: value})
-                filter_query = '&' + str(key) + '=' + str(value)
-                filter_url += filter_query
-
-        context['title'] = 'FOI Requests'
-        context['form'] = ListFilterForm(initial=form_initials)
-        context['filter_url'] = filter_url
+        """Changes filter_form to use RequestFilterForm instead of the default"""
+        context = super(RequestList, self).get_context_data(**kwargs)
+        filter_data = self.get_filter_data()
+        context['filter_form'] = RequestFilterForm(initial=filter_data['filter_initials'])
         return context
 
     def get_queryset(self):
-        query = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_sort_requests(query)
+        """Limits requests to those visible by current user"""
+        objects = super(RequestList, self).get_queryset()
+        return objects.get_viewable(self.request.user)
 
 @class_view_decorator(login_required)
-class MyList(List):
+class MyRequestList(RequestList):
     """View requests owned by current user"""
+
     template_name = 'lists/request_my_list.html'
 
     def set_read_status(self, foia_pks, status):
@@ -149,76 +91,29 @@ class MyList(List):
             pass
         return redirect('foia-mylist')
 
-    def merge_requests(self, foia_requests, multi_requests):
-        """Merges the sorted FOIA requests with the multi requests"""
-
-        get = self.request.GET
-
-        order = get.get('order', 'desc')
-        field = get.get('field', 'date_submitted')
-
-        updated_foia_requests = [f for f in foia_requests if f.updated]
-        other_foia_requests = [f for f in foia_requests if not f.updated]
-
-        if field == 'title':
-            both = list(other_foia_requests) + list(multi_requests)
-            both.sort(key=lambda x: x.title, reverse=(order != 'asc'))
-            both = updated_foia_requests + both
-        elif field == 'status':
-            both = list(other_foia_requests) + list(multi_requests)
-            both.sort(key=lambda x: x.status, reverse=(order != 'asc'))
-            both = updated_foia_requests + both
-        elif order == 'asc':
-            both = list(updated_foia_requests) + list(other_foia_requests) + list(multi_requests)
-        else:
-            both = list(updated_foia_requests) + list(multi_requests) + list(other_foia_requests)
-
-        return both
+    def get_filters(self):
+        """Removes the 'users' filter, because its _my_ requests"""
+        filters = super(MyRequestList, self).get_filters()
+        for filter_dict in filters:
+            if 'user' in filter_dict.values():
+                filters.pop(filters.index(filter_dict))
+        return filters
 
     def get_queryset(self):
-        """Get FOIAs for this view"""
-        unsorted = FOIARequest.objects.filter(user=self.request.user)
-        multis = FOIAMultiRequest.objects.filter(user=self.request.user)
-        sorted_requests = self.filter_sort_requests(unsorted)
-        sorted_requests = self.merge_requests(sorted_requests, multis)
-        return sorted_requests
-
-    def get_context_data(self, **kwargs):
-        context = super(MyList, self).get_context_data(**kwargs)
-
-        get = self.request.GET
-        form_fields = {
-            'order': get.get('order', False),
-            'sort': get.get('field', False),
-            'status': get.get('status', False),
-            'agency': get.get('agency', False),
-            'jurisdiction': get.get('jurisdiction', False),
-            'user': get.get('user', False),
-            'tags': get.get('tags', False)
-        }
-        form_initials = {}
-        for key, value in form_fields.iteritems():
-            if value:
-                form_initials.update({key: value})
-
-        context['title'] = 'My FOI Requests'
-        context['form'] = MyListFilterForm(initial=form_initials)
-        return context
-
+        """Gets multirequests as well, limits to just those by the current user"""
+        single_req = FOIARequest.objects.filter(user=self.request.user)
+        multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
+        single_req = self.sort_list(self.filter_list(single_req))
+        return list(single_req) + list(multi_req)
 
 @class_view_decorator(login_required)
-class ListFollowing(List):
+class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
-
     def get_queryset(self):
-        """Get FOIAs for this view"""
+        """Limits FOIAs to those followed by the current user"""
+        objects = super(FollowingRequestList, self).get_queryset()
         profile = self.request.user.get_profile()
-        requests = FOIARequest.objects.get_viewable(self.request.user)
-        return self.filter_sort_requests(requests.filter(followed_by=profile))
-
-    def get_context_data(self, **kwargs):
-        context = super(ListFollowing, self).get_context_data(**kwargs)
-        return context
+        return objects.filter(followed_by=profile)
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
@@ -291,10 +186,10 @@ class Detail(DetailView):
         actions = {
             'status': self._status,
             'tags': self._tags,
-            'Follow Up': self._follow_up,
-            'Get Advice': self._question,
-            'Problem?': self._flag,
-            'Appeal': self._appeal,
+            'follow_up': self._follow_up,
+            'question': self._question,
+            'flag': self._flag,
+            'appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm

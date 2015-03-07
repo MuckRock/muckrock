@@ -2,8 +2,9 @@
 Views for the organization application
 """
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -11,10 +12,11 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationForm, AddMembersForm
-from muckrock.settings import STRIPE_PUB_KEY, MONTHLY_REQUESTS
+from muckrock.organization.forms import OrganizationForm, OrganizationUpdateForm, AddMembersForm
+from muckrock.settings import STRIPE_PUB_KEY
 
 from datetime import datetime
+import stripe
 
 class List(ListView):
     """List of organizations"""
@@ -43,6 +45,9 @@ class Detail(DetailView):
             context['is_member'] = False
         context['members'] = member_accounts
         context['form'] = AddMembersForm()
+        context['sidebar_admin_url'] = reverse(
+            'admin:organization_organization_change',
+            args=(organization.pk,))
         return context
 
     def post(self, request, **kwargs):
@@ -59,7 +64,11 @@ class Detail(DetailView):
                 organization.pause_subscription()
                 msg = 'Your subscription is paused. You may resume it at any time.'
             else:
-                organization.start_subscription()
+                try:
+                    organization.start_subscription()
+                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                    messages.error(request, exception)
+                    return redirect(organization)
                 msg = 'Your subscription is reactivated.'
             messages.success(request, msg)
         else:
@@ -111,13 +120,16 @@ def create_organization(request):
             customer.card = stripe_token
             customer.save()
             organization = form.save(commit=False)
+            organization.date_update = datetime.now()
             organization.slug = slugify(organization.name)
             organization.owner = user
-            organization.stripe_id = profile.stripe_id
-            organization.num_requests = MONTHLY_REQUESTS.get('org', 0)
-            organization.date_update = datetime.now()
+            organization.num_requests = organization.monthly_requests
             organization.save()
-            organization.start_subscription()
+            organization.create_plan()
+            try:
+                organization.start_subscription()
+            except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                messages.error(request, exception)
             profile.organization = organization
             profile.save()
             messages.success(request, 'Your organization has been created.')
@@ -128,7 +140,7 @@ def create_organization(request):
     # check if user already owns an org
     other_org = Organization.objects.filter(owner=request.user)
     if other_org:
-        messages.error(request, 'You can only own one organization at a time.')
+        messages.error(request, 'You may only own one organization at a time.')
         return redirect('org-index')
 
     context = {
@@ -150,6 +162,12 @@ def delete_organization(request, **kwargs):
         for member in members:
             member.organization = None
             member.save()
+        organization.pause_subscription()
+        try:
+            organization.delete_plan()
+        except ValueError as exception:
+            messages.error(request, exception)
+            return redirect(organization)
         organization.delete()
         messages.success(request, 'Your organization was deleted.')
     elif request.user.get_profile().is_member_of(organization):
@@ -157,3 +175,29 @@ def delete_organization(request, **kwargs):
     else:
         messages.error(request, 'You do not have permission to access this organization.')
     return redirect('org-index')
+
+@user_passes_test(lambda u: u.is_staff)
+def update_organization(request, **kwargs):
+    """Updates the monthly requests, monthly cost, and max users for an org"""
+    organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    old_cost = organization.monthly_cost
+    if request.method == 'POST':
+        form = OrganizationUpdateForm(request.POST, instance=organization)
+        if form.is_valid():
+            organization = form.save()
+            if old_cost != organization.monthly_cost:
+                try:
+                    organization.update_plan()
+                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
+                    messages.error(request, exception)
+                    return redirect(organization)
+            messages.success(request, 'The organization was updated.')
+            return redirect(organization)
+    else:
+        form = OrganizationUpdateForm(instance=organization)
+    return render_to_response(
+        'forms/base_form.html',
+        {'form': form},
+        context_instance=RequestContext(request)
+    )
+        

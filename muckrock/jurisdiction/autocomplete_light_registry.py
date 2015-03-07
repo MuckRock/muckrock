@@ -19,11 +19,11 @@ class LocalAutocomplete(autocomplete_light.AutocompleteModelBase):
         state = None
         if len(query) > 1:
             state = query[1]
-            parent = Jurisdiction.objects.filter(level='s', abbrev__icontains=state)
+            parents = Jurisdiction.objects.filter(level='s', abbrev__icontains=state)
         if local:
             choices = choices.filter(name__icontains=local)
         if state:
-            choices = choices.filter(parent=parent)
+            choices = choices.filter(parent__in=parents)
         return self.order_choices(choices)[0:self.limit_choices]
 
 autocomplete_light.register(
@@ -41,7 +41,6 @@ class JurisdictionAutocomplete(autocomplete_light.AutocompleteModelBase):
     choices = Jurisdiction.objects.filter(hidden=False)
     search_fields = ['^name']
     attrs = {
-        'placeholder': 'Jurisdiction',
         'data-autocomplete-minimum-characters': 2
     }
 

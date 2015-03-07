@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'FOIADocument'
         db.create_table('foia_foiadocument', (
             ('description', self.gf('django.db.models.fields.TextField')()),
@@ -20,14 +20,14 @@ class Migration(SchemaMigration):
             ('foia', self.gf('django.db.models.fields.related.ForeignKey')(related_name='documents', to=orm['foia.FOIARequest'])),
         ))
         db.send_create_signal('foia', ['FOIADocument'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'FOIADocument'
         db.delete_table('foia_foiadocument')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -129,5 +129,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

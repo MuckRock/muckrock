@@ -3,12 +3,16 @@ General temaplate tags
 """
 
 from django import template
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 
 import re
 
+from muckrock.foia.models import FOIARequest
+from muckrock.forms import TagManagerForm
 from muckrock.settings import STATIC_URL
 
 register = Library()
@@ -61,11 +65,6 @@ def company_title(companies):
         return companies.split('\n')[0] + ', et al'
     else:
         return companies
-
-@register.filter
-def foia_is_viewable(foia, user):
-    """Make sure the FOIA is viewable before showing it to the user"""
-    return foia.is_viewable(user)
 
 class TableHeaderNode(Node):
     """Tag to create table headers"""
@@ -135,6 +134,21 @@ def redact_emails(text):
     """Redact emails from text"""
     return email_re.sub(email_redactor, text)
 
+@register.filter
+def redact_list(obj_list, user):
+    """
+    Filters and returns a list of objects based on whether they should be visible
+    to the currently-logged in user.
+    """
+    redacted_list = []
+    for item in obj_list:
+        try:
+            if item.object.is_viewable(user):
+                redacted_list.append(item)
+        except AttributeError:
+            redacted_list.append(item)
+    return redacted_list
+
 # http://stackoverflow.com/questions/1278042/
 # in-django-is-there-an-easy-way-to-render-a-text-field-as-a-template-in-a-templ/1278507#1278507
 
@@ -169,3 +183,39 @@ class EvaluateNode(template.Node):
 def editable_by(foia, user):
     """Template tag to call editable by on FOIAs"""
     return foia.editable_by(user)
+
+@register.inclusion_tag('tags/crowdfund.html', takes_context=True)
+def crowdfund(context, foia_pk):
+    """Template tag to insert a crowdfunding panel"""
+    foia = get_object_or_404(FOIARequest, pk=foia_pk)
+    endpoint = reverse('foia-contribute', kwargs={
+        'jurisdiction': foia.jurisdiction.slug,
+        'jidx': foia.jurisdiction.pk,
+        'idx': foia.id,
+        'slug': foia.slug
+    })
+    return {
+        'user': context['user'],
+        'crowdfund': foia.crowdfund,
+        'endpoint': endpoint,
+    }
+
+@register.inclusion_tag('tags/tag_manager.html', takes_context=True)
+def tag_manager(context, mr_object):
+    """Template tag to insert a tag manager component"""
+    try:
+        tags = mr_object.tags.all()
+    except AttributeError:
+        tags = None
+    try:
+        owner = mr_object.user
+    except AttributeError:
+        owner = None
+    is_authorized = context['user'].is_staff or context['user'] == owner
+    form = TagManagerForm(initial={'tags': tags})
+    return {
+        'tags': tags,
+        'form': form,
+        'is_authorized': is_authorized,
+        'endpoint': mr_object.get_absolute_url()
+    }

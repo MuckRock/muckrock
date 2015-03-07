@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'FOIARequest.other_emails'
         db.add_column('foia_foiarequest', 'other_emails', self.gf('muckrock.fields.EmailsListField')(default='', max_length=255, blank=True), keep_default=False)
 
         # Adding field 'FOIARequest.email'
         db.add_column('foia_foiarequest', 'email', self.gf('django.db.models.fields.EmailField')(default='', max_length=75, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'FOIARequest.other_emails'
         db.delete_column('foia_foiarequest', 'other_emails')
 
         # Deleting field 'FOIARequest.email'
         db.delete_column('foia_foiarequest', 'email')
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -170,5 +170,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

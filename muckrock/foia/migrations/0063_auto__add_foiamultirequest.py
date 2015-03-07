@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding model 'FOIAMultiRequest'
         db.create_table('foia_foiamultirequest', (
             ('embargo', self.gf('django.db.models.fields.BooleanField')(default=False, blank=True)),
@@ -18,14 +18,14 @@ class Migration(SchemaMigration):
             ('slug', self.gf('django.db.models.fields.SlugField')(max_length=255, db_index=True)),
         ))
         db.send_create_signal('foia', ['FOIAMultiRequest'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting model 'FOIAMultiRequest'
         db.delete_table('foia_foiamultirequest')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -214,5 +214,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

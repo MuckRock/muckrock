@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'FOIARequest.price'
         db.alter_column('foia_foiarequest', 'price', self.gf('django.db.models.fields.DecimalField')(max_digits=8, decimal_places=2))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'FOIARequest.price'
         db.alter_column('foia_foiarequest', 'price', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=8, decimal_places=2))
-    
-    
+
+
     models = {
         'auth.group': {
             'Meta': {'object_name': 'Group'},
@@ -143,5 +143,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['foia']

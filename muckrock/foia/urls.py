@@ -23,7 +23,6 @@ from muckrock.views import jurisdiction
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
-list_template = 'lists/request_list.html'
 
 register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
@@ -37,13 +36,13 @@ urlpatterns = patterns(
 
     # List Views
     url(r'^list/$',
-        views.List.as_view(template_name=list_template),
+        views.RequestList.as_view(),
         name='foia-list'),
     url(r'^mylist/$',
-        views.MyList.as_view(),
+        views.MyRequestList.as_view(),
         name='foia-mylist'),
     url(r'^list/following/$',
-        views.ListFollowing.as_view(template_name=list_template),
+        views.FollowingRequestList.as_view(),
         name='foia-list-following'),
 
     # Create and Draft Views
@@ -115,8 +114,8 @@ urlpatterns = patterns(
         RedirectView.as_view(url='/foi/list/tag-%(tag_slug)s')),
     url(r'^(?P<action>[\w_-]+)/%s/$' % old_foia_url,
         views.redirect_old),
-    url(r'^list/user-(?P<user_name>[\w\d_.@ -]+)/$',
-        RedirectView.as_view(url='/foi/list/?user=%(user_name)s'),
+    url(r'^list/user-(?P<user_pk>[\w\d_.@ -]+)/$',
+        RedirectView.as_view(url='/foi/list/?user=%(user_pk)s'),
         name='foia-list-user'),
     url(r'^list/agency-(?P<agency>[\w\d_.@ -]+)-(?P<idx>\d+)/$',
         RedirectView.as_view(url='/foi/list/?agency=%(idx)s'),

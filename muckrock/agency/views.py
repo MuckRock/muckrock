@@ -5,7 +5,6 @@ Views for the Agency application
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.db.models import Count
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -20,6 +19,14 @@ from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
 from muckrock.task.models import FlaggedTask
+from muckrock.views import MRFilterableListView
+
+class List(MRFilterableListView):
+    """Filterable list of agencies"""
+    model = Agency
+    title = 'Agencies'
+    template_name = 'lists/agency_list.html'
+
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -56,15 +63,6 @@ def detail(request, jurisdiction, jidx, slug, idx):
     collect_stats(agency, context)
 
     return render_to_response('details/agency_detail.html', context,
-                              context_instance=RequestContext(request))
-
-def list_(request):
-    """List of popular agencies"""
-    agencies = Agency.objects.annotate(num_requests=Count('foiarequest')) \
-                             .order_by('-num_requests')[:10]
-    context = {'agencies': agencies}
-
-    return render_to_response('lists/agency_list.html', context,
                               context_instance=RequestContext(request))
 
 def redirect_old(request, jurisdiction, slug, idx, action):

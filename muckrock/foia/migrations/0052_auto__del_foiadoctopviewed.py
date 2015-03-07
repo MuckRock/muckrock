@@ -5,15 +5,15 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Deleting model 'FOIADocTopViewed'
         db.delete_table('foia_foiadoctopviewed')
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Adding model 'FOIADocTopViewed'
         db.create_table('foia_foiadoctopviewed', (
             ('req', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True)),
@@ -21,8 +21,8 @@ class Migration(SchemaMigration):
             ('rank', self.gf('django.db.models.fields.PositiveSmallIntegerField')(unique=True)),
         ))
         db.send_create_signal('foia', ['FOIADocTopViewed'])
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -188,5 +188,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

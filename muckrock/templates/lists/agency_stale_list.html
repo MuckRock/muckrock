@@ -1,10 +1,4 @@
-{% extends 'lists/base_list.html' %}
-
+{% extends 'lists/agency_list.html' %}
 {% block title %}MuckRock &bull; Stale Agencies{% endblock title %}
-{% block list-title %}<h1>Stale Agencies</h1>{% endblock list-title %}
-
-{% block list-item %}
-    {% with item as agency %}
-    <a href="{% url 'agency-detail' jurisdiction=agency.jurisdiction.slug jidx=agency.jurisdiction.pk idx=agency.pk slug=agency.slug %}">{{ agency.name }}</a>
-    {% endwith %}
-{% endblock list-item %}
+{% block list-title %}Stale Agencies{% endblock list-title %}
+{% block list-type %}stale agency{% endblock list-type %}

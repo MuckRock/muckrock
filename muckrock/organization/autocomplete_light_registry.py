@@ -10,9 +10,8 @@ from muckrock.organization.models import Organization
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking agencies"""
-    search_fields = ['username']
+    search_fields = ['^username', '^first_name', '^last_name']
     attrs = {
-        'placeholder': 'Search by username',
         'data-autocomplete-minimum-characters': 2
     }
 
@@ -33,7 +32,7 @@ class OrganizationAutocomplete(UserAutocomplete):
         if org_id: # exclude owner and members from choices
             organization = get_object_or_404(Organization, pk=org_id)
             owner = organization.owner
-            profiles = organization.get_members()
+            profiles = organization.members.all()
             exclude_pks = [owner.pk] + [profile.user.pk for profile in profiles]
             choices = choices.exclude(pk__in=exclude_pks)
         # return final list of choices

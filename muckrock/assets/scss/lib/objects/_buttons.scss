@@ -37,3 +37,17 @@ input[type="submit"], button {
 input:disabled, input.button:disabled { 
     &, &:hover, &:active { @extend .button.disabled }
 }
+
+.edit {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: $normal;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1rem;
+    color: $color-primary;
+    cursor: pointer;
+    &:hover {
+        color: darken($color-primary, 10%);
+    }
+}

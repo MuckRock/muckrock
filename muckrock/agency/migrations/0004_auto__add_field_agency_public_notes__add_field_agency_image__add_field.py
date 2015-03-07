@@ -5,9 +5,9 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Agency.public_notes'
         db.add_column('agency_agency', 'public_notes', self.gf('django.db.models.fields.TextField')(default='', blank=True), keep_default=False)
 
@@ -16,10 +16,10 @@ class Migration(SchemaMigration):
 
         # Adding field 'Agency.image_attr_line'
         db.add_column('agency_agency', 'image_attr_line', self.gf('django.db.models.fields.CharField')(default='', max_length=255, blank=True), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Agency.public_notes'
         db.delete_column('agency_agency', 'public_notes')
 
@@ -28,8 +28,8 @@ class Migration(SchemaMigration):
 
         # Deleting field 'Agency.image_attr_line'
         db.delete_column('agency_agency', 'image_attr_line')
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -114,5 +114,5 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55', 'db_index': 'True'})
         }
     }
-    
+
     complete_apps = ['agency']

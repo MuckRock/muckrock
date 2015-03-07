@@ -5,19 +5,19 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding unique constraint on 'Jurisdiction', fields ['slug', 'parent']
         db.create_unique('jurisdiction_jurisdiction', ['slug', 'parent_id'])
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Removing unique constraint on 'Jurisdiction', fields ['slug', 'parent']
         db.delete_unique('jurisdiction_jurisdiction', ['slug', 'parent_id'])
-    
-    
+
+
     models = {
         'business_days.holiday': {
             'Meta': {'object_name': 'Holiday'},
@@ -48,5 +48,5 @@ class Migration(SchemaMigration):
             'waiver': ('django.db.models.fields.TextField', [], {'blank': 'True'})
         }
     }
-    
+
     complete_apps = ['jurisdiction']

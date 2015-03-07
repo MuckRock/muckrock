@@ -5,13 +5,13 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'FOIAFile.foia'
         db.alter_column('foia_foiafile', 'foia_id', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, null=True, to=orm['foia.FOIARequest']))
-    
-    
+
+
     def backwards(self, orm):
 
         db.start_transaction()
@@ -24,11 +24,11 @@ class Migration(SchemaMigration):
                 file_.foia = file_.comm.foia
                 file_.save()
         db.commit_transaction()
-        
+
         # Changing field 'FOIAFile.foia'
         db.alter_column('foia_foiafile', 'foia_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest']))
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -206,5 +206,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

@@ -9,19 +9,19 @@ class Migration(SchemaMigration):
     #depends_on = (
     #    ('jurisdiction', '0002_auto__add_jurisdiction'),
     #    )
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'FOIARequest.jurisdiction'
         db.alter_column('foia_foiarequest', 'jurisdiction_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['jurisdiction.Jurisdiction']))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'FOIARequest.jurisdiction'
         db.alter_column('foia_foiarequest', 'jurisdiction_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.Jurisdiction']))
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -191,5 +191,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Adding field 'Profile.num_requests'
         db.add_column('accounts_profile', 'num_requests', self.gf('django.db.models.fields.IntegerField')(default=0), keep_default=False)
 
         # Adding field 'Profile.acct_type'
         db.add_column('accounts_profile', 'acct_type', self.gf('django.db.models.fields.CharField')(default='beta', max_length=10), keep_default=False)
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Deleting field 'Profile.num_requests'
         db.delete_column('accounts_profile', 'num_requests')
 
         # Deleting field 'Profile.acct_type'
         db.delete_column('accounts_profile', 'acct_type')
-    
-    
+
+
     models = {
         'accounts.profile': {
             'Meta': {'object_name': 'Profile'},
@@ -175,5 +175,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['accounts']

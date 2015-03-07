@@ -7,6 +7,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 
 from reversion import VersionAdmin
+import autocomplete_light
 
 from muckrock.news.models import Article, Photo
 
@@ -30,23 +31,25 @@ class ArticleAdminForm(forms.ModelForm):
     """Form with EpicEditor"""
     # pylint: disable=too-few-public-methods
 
-    authors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'))
-    editors = forms.ModelMultipleChoiceField(queryset=User.objects.order_by('username'),
-                                             required=False)
+    authors = forms.ModelMultipleChoiceField(
+        queryset=User.objects.order_by('username'))
+    editors = forms.ModelMultipleChoiceField(
+        queryset=User.objects.order_by('username'),
+        required=False)
+    foias = autocomplete_light.ModelMultipleChoiceField(
+        'FOIARequestAdminAutocomplete',
+        required=False)
 
     class Meta:
         # pylint: disable=R0903
         model = Article
 
-
     class Media:
         css = {'all': ('css/admin/epiceditor.css',)}
-
 
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""
     # pylint: disable=R0904
-
     form = ArticleAdminForm
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'get_authors_names', 'pub_date', 'publish')

@@ -5,25 +5,25 @@ from south.v2 import SchemaMigration
 from django.db import models
 
 class Migration(SchemaMigration):
-    
+
     def forwards(self, orm):
-        
+
         # Changing field 'FOIARequest.title'
         db.alter_column('foia_foiarequest', 'title', self.gf('django.db.models.fields.CharField')(max_length=255))
 
         # Changing field 'FOIARequest.slug'
         db.alter_column('foia_foiarequest', 'slug', self.gf('django.db.models.fields.SlugField')(max_length=255))
-    
-    
+
+
     def backwards(self, orm):
-        
+
         # Changing field 'FOIARequest.title'
         db.alter_column('foia_foiarequest', 'title', self.gf('django.db.models.fields.CharField')(max_length=70))
 
         # Changing field 'FOIARequest.slug'
         db.alter_column('foia_foiarequest', 'slug', self.gf('django.db.models.fields.SlugField')(max_length=70))
-    
-    
+
+
     models = {
         'agency.agency': {
             'Meta': {'object_name': 'Agency'},
@@ -201,5 +201,5 @@ class Migration(SchemaMigration):
             'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'tags_taggeditembase_items'", 'to': "orm['tags.Tag']"})
         }
     }
-    
+
     complete_apps = ['foia']

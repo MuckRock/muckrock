@@ -1,16 +1,28 @@
 {% extends 'lists/base_list.html' %}
-
 {% block title %}MuckRock &bull; Jurisdictions{% endblock title %}
-{% block list-title %}<h1>Jurisdictions</h1>{% endblock list-title %}
-{% block type %}jurisidiction{% endblock type %}
+{% block list-type %}jurisidiction{% endblock list-type %}
 
-{% block list %}
-    {% for jur in fed_jurs %}
-    <h2><a href="{{ jur.get_absolute_url }}">{{ jur.name }}</a></h2>
-    {% endfor %}
-    <ul>
-        {% for jur in state_jurs %}
-        <li><a href="{{ jur.get_absolute_url }}">{{ jur.name }}</a></li>
-        {% endfor %}
-    </ul>
-{% endblock list %}
+{% block list-filters %}
+{{ filter_form.level }}
+{{ filter_form.parent }}
+{% endblock list-filters %}
+
+{% block list-table-head %}
+<th data-sort="name">Name</th>
+<th data-sort="level">Level</th>
+{% endblock list-table-head %}
+
+{% block list-table-item %}
+{% with item as jurisdiction %}
+<td><a href="{{ jurisdiction.get_absolute_url }}">{{ jurisdiction }}</a></td>
+{% if jurisdiction.level == 'f' %}
+<td>Federal</td>
+{% else %}
+    {% if jurisdiction.level == 's' %}
+<td>State</td>
+    {% else %}
+<td>Local</td>
+    {% endif %}
+{% endif %}
+{% endwith %}
+{% endblock list-table-item %}
