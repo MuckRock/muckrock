@@ -35,6 +35,7 @@ from muckrock.foia.models import \
     STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
+from muckrock.task.models import NewAgencyTask
 
 # pylint: disable=R0901
 
@@ -81,6 +82,9 @@ def _make_new_agency(request, agency, jurisdiction):
         ['requests@muckrock.com'],
         fail_silently=False
     )
+    NewAgencyTask.objects.create(
+            user=user,
+            agency=agency)
     return agency
 
 def _make_request(request, foia_request, parent=None):

@@ -4,7 +4,6 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
-from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
 from django.template.loader import render_to_string
@@ -24,6 +23,7 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
+from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask
 
 logger = logging.getLogger(__name__)
 
@@ -48,23 +48,6 @@ def _make_orphan_comm(from_, to_, post, files, foia):
             _upload_file(None, comm, file_, from_)
     return comm
 
-def _handle_orphan(msg, from_, to_, post, files, foia, mail_id=None):
-    """Make orphan comm and notify about it"""
-    # pylint: disable=too-many-arguments
-    logger.warning('%s: %s', msg, from_)
-    comm = _make_orphan_comm(from_, to_, post, files, foia)
-    extra_content = ['https://www.muckrock.com' + reverse('foia-orphans')]
-    if mail_id:
-        extra_content.append('Target address: %s@requests.muckrock.com' % mail_id)
-    if foia:
-        extra_content.append(
-            'Probable request: https://www.muckrock.com' +
-            reverse('admin:foia_foiarequest_change', args=(foia.pk,)))
-        extra_content.append(
-            'Move this comm to that request: https://www.muckrock.com' +
-            reverse('foia-orphans') + ('?comm_id=%s' % comm.pk))
-    _forward(post, files, msg, extra_content='\n'.join(extra_content))
-
 @csrf_exempt
 def handle_request(request, mail_id):
     """Handle incoming mailgun FOI request messages"""
@@ -81,15 +64,20 @@ def handle_request(request, mail_id):
         foia = FOIARequest.objects.get(mail_id=mail_id)
 
         if not _allowed_email(from_email, foia):
-            msg = 'Bad Sender'
+            msg, reason = ('Bad Sender', 'bs')
         if foia.block_incoming:
-            msg = 'Incoming Blocked'
+            msg, reason = ('Incoming Blocked', 'ib')
         if not _allowed_email(from_email, foia) or foia.block_incoming:
-            _handle_orphan(msg, from_, to_, post, request.FILES, foia)
+            logger.warning('%s: %s', msg, from_)
+            comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
+            OrphanTask.objects.create(
+                reason=reason,
+                communication=comm,
+                address=mail_id)
             return HttpResponse('WARNING')
 
         comm = FOIACommunication.objects.create(
-                foia=foia, from_who=from_realname[:255],
+                foia=foia, from_who=from_realname[:255], priv_from_who=from_[:255],
                 to_who=foia.user.get_full_name(), response=True,
                 date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
@@ -110,6 +98,7 @@ def handle_request(request, mail_id):
                                    {'request': foia, 'post': post,
                                     'date': date.today().toordinal()}),
                   'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+        ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
         foia.other_emails = ','.join(email for name, email
@@ -134,7 +123,11 @@ def handle_request(request, mail_id):
             foia = FOIARequest.objects.get(pk=mail_id.split('-')[0])
         except FOIARequest.DoesNotExist:
             pass
-        _handle_orphan('Invalid Address', from_, to_, post, request.FILES, foia, mail_id)
+        comm = _make_orphan_comm(from_, to_, post, request.FILES, foia)
+        OrphanTask.objects.create(
+            reason='ia',
+            communication=comm,
+            address=mail_id)
         return HttpResponse('WARNING')
     except Exception:
         # If anything I haven't accounted for happens, at the very least forward
@@ -163,12 +156,6 @@ def bounces(request):
         return HttpResponseForbidden()
 
     recipient = request.POST.get('recipient', 'none@example.com')
-    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
-                                     Q(other_emails__icontains=recipient))
-    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
-                                       Q(other_emails__icontains=recipient))\
-                               .filter(status__in=['ack', 'processed', 'appealing', 'fix',
-                                                   'payment'])
 
     event = request.POST.get('event')
     if event == 'bounced':
@@ -183,14 +170,24 @@ def bounces(request):
         _, from_email = parseaddr(from_header)
         foia_id = from_email[:from_email.index('-')]
         foia = FOIARequest.objects.get(pk=foia_id)
-    except (IndexError, ValueError, KeyError):
+    except (IndexError, ValueError, KeyError, FOIARequest.DoesNotExist):
         foia = None
 
+    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
+                                     Q(other_emails__icontains=recipient))
+    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
+                                       Q(other_emails__icontains=recipient))\
+               .filter(status__in=['ack', 'processed', 'appealing', 'payment'])
     send_mail('[%s] %s' % (event.upper(), recipient),
               render_to_string('text/foia/bounce.txt',
                                {'agencies': agencies, 'recipient': recipient,
                                 'foia': foia, 'foias': foias, 'error': error}),
               'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+    RejectedEmailTask.objects.create(
+        category=event[0],
+        foia=foia,
+        email=recipient,
+        error=error)
 
     return HttpResponse('OK')
 

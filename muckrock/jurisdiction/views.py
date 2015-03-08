@@ -15,6 +15,7 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm, JurisdictionFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.serializers import JurisdictionSerializer
+from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView
 
 def collect_stats(obj, context):
@@ -56,6 +57,10 @@ def detail(request, fed_slug, state_slug, local_slug):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=form.cleaned_data.get('reason'),
+                jurisdiction=jurisdiction)
             messages.info(request, 'Correction submitted, thanks.')
             return redirect(jurisdiction)
     else:

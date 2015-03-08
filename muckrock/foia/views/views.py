@@ -28,6 +28,7 @@ from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
+from muckrock.task.models import FlaggedTask
 from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=R0901
@@ -282,6 +283,10 @@ class Detail(DetailView):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=text,
+                foia=foia)
             messages.success(request, 'Problem succesfully reported')
         return redirect(foia)
 

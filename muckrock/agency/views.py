@@ -20,6 +20,7 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.forms import FlagForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.jurisdiction.views import collect_stats
+from muckrock.task.models import FlaggedTask
 from muckrock.views import MRFilterableListView
 
 class List(MRFilterableListView):
@@ -27,6 +28,7 @@ class List(MRFilterableListView):
     model = Agency
     title = 'Agencies'
     template_name = 'lists/agency_list.html'
+
 
 def detail(request, jurisdiction, jidx, slug, idx):
     """Details for an agency"""
@@ -58,6 +60,10 @@ def detail(request, jurisdiction, jidx, slug, idx):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
+            FlaggedTask.objects.create(
+                user=request.user,
+                text=form.cleaned_data.get('reason'),
+                agency=agency)
             messages.info(request, 'Correction submitted. Thanks!')
             return redirect(agency)
     else:
@@ -74,8 +80,6 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     return render_to_response('details/agency_detail.html', context,
                               context_instance=RequestContext(request))
-
-
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
