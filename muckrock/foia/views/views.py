@@ -271,6 +271,18 @@ class Detail(DetailView):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
         if request.user.is_authenticated() and text:
+            args = {
+                'request': foia,
+                'user': request.user,
+                'reason': text
+            }
+            send_mail(
+                '[FLAG] Freedom of Information Request: %s' % foia.title,
+                render_to_string('text/foia/flag.txt', args),
+                'info@muckrock.com',
+                ['requests@muckrock.com'],
+                fail_silently=False
+            )
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,

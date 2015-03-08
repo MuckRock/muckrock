@@ -72,6 +72,16 @@ def _make_new_agency(request, agency, jurisdiction):
         user=user,
         approved=False,
     )
+    send_mail(
+        '[AGENCY] %s' % agency.name,
+        render_to_string(
+            'text/foia/admin_agency.txt',
+            {'agency': agency}
+        ),
+        'info@muckrock.com',
+        ['requests@muckrock.com'],
+        fail_silently=False
+    )
     NewAgencyTask.objects.create(
             user=user,
             agency=agency)

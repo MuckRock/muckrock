@@ -3,7 +3,7 @@ Views for mailgun
 """
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 
@@ -90,6 +90,11 @@ def handle_request(request, mail_id):
                 _upload_file(foia, comm, file_, from_)
 
         _forward(post, request.FILES)
+        send_mail('[RESPONSE] Freedom of Information Request: %s' % foia.title,
+                  render_to_string('text/foia/admin_request.txt',
+                                   {'request': foia, 'post': post,
+                                    'date': date.today().toordinal()}),
+                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently
         ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
@@ -165,6 +170,11 @@ def bounces(request):
     except (IndexError, ValueError, KeyError, FOIARequest.DoesNotExist):
         foia = None
 
+    send_mail('[%s] %s' % (event.upper(), recipient),
+              render_to_string('text/foia/bounce.txt',
+                               {'agencies': agencies, 'recipient': recipient,
+                                'foia': foia, 'foias': foias, 'error': error}),
+              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
     RejectedEmailTask.objects.create(
         category=event[0],
         foia=foia,
