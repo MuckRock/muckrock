@@ -66,8 +66,6 @@ class List(ListView):
         return context
 
 
-# XXX set the csrf on the ajax request instead of doing this
-@csrf_exempt
 @user_passes_test(lambda u: u.is_staff)
 def assign(request):
     """Assign a user to a task, AJAX style"""
@@ -79,7 +77,7 @@ def assign(request):
         else:
             user = User.objects.get(pk=user_pk)
         task = Task.objects.get(pk=task_pk)
-    except User.DoesNotExist, Task.DoesNotExist:
+    except (User.DoesNotExist, Task.DoesNotExist):
         return HttpResponse("Error", content_type='text/plain')
 
     task.assigned = user
