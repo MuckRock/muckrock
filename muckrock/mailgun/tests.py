@@ -87,9 +87,6 @@ class TestMailgunViews(TestCase):
                                     kwargs={'mail_id': foia.get_mail_id()}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.ok_(mail.outbox[0].subject.startswith('Bad Sender'))
-
     def test_bad_addr(self):
         """Test sending to a non existent FOIA request"""
 
@@ -105,9 +102,6 @@ class TestMailgunViews(TestCase):
         response = self.client.post(reverse('mailgun-request',
                                     kwargs={'mail_id': '123-12345678'}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
-
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.ok_(mail.outbox[0].subject.startswith('Invalid Address'))
 
     def test_attachments(self):
         """Test a message with an attachment"""
