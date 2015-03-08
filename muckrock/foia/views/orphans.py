@@ -41,12 +41,13 @@ def orphans(request):
         except KeyError: # if submitting form from web page improperly
             return redirect('foia-orphans')
     elif 'comm_id' in request.GET:
-        communications = FOIACommunication.objects.filter(foia=None, pk=request.GET['comm_id'])
+        communications = FOIACommunication.objects.filter(
+                foia=None, orphantask=None, pk=request.GET['comm_id'])
         return render_to_response('staff/orphans.html',
                                   {'communications': communications},
                                   context_instance=RequestContext(request))
     else:
-        communications = FOIACommunication.objects.filter(foia=None)
+        communications = FOIACommunication.objects.filter(foia=None, orphantask=None)
         paginator = Paginator(communications, 25)
         try:
             page = paginator.page(request.GET.get('page'))

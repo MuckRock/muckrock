@@ -378,7 +378,7 @@ class TestFOIAIntegration(TestCase):
 
         mail.outbox = []
 
-        import muckrock.foia.models
+        import muckrock.foia.models.request
 
         # Replace real date and time with mock ones so we can control today's/now's value
         # Unfortunately need to monkey patch this a lot of places, and it gets rather ugly
@@ -401,8 +401,8 @@ class TestFOIAIntegration(TestCase):
         self.orig_datetime = datetime.datetime
         datetime.date = MockDate
         datetime.datetime = MockDateTime
-        muckrock.foia.models.date = datetime.date
-        muckrock.foia.models.datetime = datetime.datetime
+        muckrock.foia.models.request.date = datetime.date
+        muckrock.foia.models.request.datetime = datetime.datetime
         def save(self, *args, **kwargs):
             if self.date_followup:
                 self.date_followup = MockDateTime(self.date_followup.year,
@@ -426,8 +426,8 @@ class TestFOIAIntegration(TestCase):
         # restore the original date and datetime for other tests
         datetime.date = self.orig_date
         datetime.datetime = self.orig_datetime
-        muckrock.foia.models.date = datetime.date
-        muckrock.foia.models.datetime = datetime.datetime
+        muckrock.foia.models.request.date = datetime.date
+        muckrock.foia.models.request.datetime = datetime.datetime
         muckrock.foia.models.FOIARequest.save = self.FOIARequest_save
 
     def set_today(self, date):

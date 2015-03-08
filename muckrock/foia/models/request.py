@@ -17,13 +17,13 @@ from itertools import chain
 from taggit.managers import TaggableManager
 from unidecode import unidecode
 import logging
-import os
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
-from muckrock.settings import MAILGUN_SERVER_NAME, STATIC_URL
+from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
+from muckrock.task.models import SnailMailTask
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
@@ -442,8 +442,11 @@ class FOIARequest(models.Model):
                 ['requests@muckrock.com'],
                 fail_silently=False
             )
+            notice = 'n' if self.communications.count() == 1 else 'u'
+            notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
+            SnailMailTask.objects.create(category=notice, communication=comm)
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
@@ -474,6 +477,7 @@ class FOIARequest(models.Model):
     def followup(self):
         """Send a follow up email for this request"""
         # pylint: disable=E1101
+        from muckrock.foia.models.communication import FOIACommunication
 
         comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
@@ -538,9 +542,7 @@ class FOIARequest(models.Model):
         msg.send(fail_silently=False)
 
         # update communication
-        raw_email = RawEmail.objects.get_or_create(communication=comm)[0]
-        raw_email.raw_email = msg.message()
-        raw_email.save()
+        comm.set_raw_email(msg.message())
         comm.delivered = 'fax' if self.email.endswith('faxaway.com') else 'email'
         comm.save()
 
@@ -763,204 +765,6 @@ class FOIARequest(models.Model):
         # pylint: disable=R0903
         ordering = ['title']
         verbose_name = 'FOIA Request'
+        app_label = 'foia'
 
-
-class FOIAMultiRequest(models.Model):
-    """A Freedom of Information Act request"""
-    # pylint: disable=R0904
-    # pylint: disable=R0902
-
-    user = models.ForeignKey(User)
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS[:2])
-    embargo = models.BooleanField()
-    requested_docs = models.TextField(blank=True)
-    agencies = models.ManyToManyField(Agency, related_name='agencies', blank=True, null=True)
-
-    tags = TaggableManager(through=TaggedItemBase, blank=True)
-
-    foia_type = 'multi'
-
-    def __unicode__(self):
-        return self.title
-
-    @models.permalink
-    def get_absolute_url(self):
-        """The url for this object"""
-        return ('foia-multi-draft', [], {'slug': self.slug, 'idx': self.pk})
-
-    def color_code(self):
-        """Get the color code for the current status"""
-        colors = {'started':   'wait', 'submitted': 'go'}
-        return colors.get(self.status, 'go')
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['title']
-        verbose_name = 'FOIA Multi-Request'
-
-
-DELIVERED = (
-    ('fax', 'Fax'),
-    ('email', 'Email'),
-    ('mail', 'Mail'),
-)
-
-class FOIACommunication(models.Model):
-    """A single communication of a FOIA request"""
-
-    foia = models.ForeignKey(FOIARequest, related_name='communications', blank=True, null=True)
-    from_who = models.CharField(max_length=255)
-    to_who = models.CharField(max_length=255, blank=True)
-    priv_from_who = models.CharField(max_length=255, blank=True)
-    priv_to_who = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField(db_index=True)
-    response = models.BooleanField(help_text='Is this a response (or a request)?')
-    full_html = models.BooleanField()
-    communication = models.TextField(blank=True)
-    delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
-    # what status this communication should set the request to - used for machine learning
-    status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
-    opened = models.BooleanField()
-
-    # only used for orphans
-    likely_foia = models.ForeignKey(
-        FOIARequest,
-        related_name='likely_communications',
-        blank=True,
-        null=True
-    )
-
-    reindex_related = ('foia',)
-
-    def __unicode__(self):
-        return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
-
-    def get_absolute_url(self):
-        """The url for this object"""
-        # pylint: disable=E1101
-        return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
-
-    def save(self, *args, **kwargs):
-        """Remove controls characters from text before saving"""
-        remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))
-        self.communication = unicode(self.communication).translate(remove_control)
-        self.communication = self.communication[:5000000]
-        super(FOIACommunication, self).save(*args, **kwargs)
-
-
-    def anchor(self):
-        """Anchor name"""
-        return 'comm-%d' % self.pk
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['date']
-        verbose_name = 'FOIA Communication'
-
-
-class RawEmail(models.Model):
-    """The raw email text for a communication - stored seperately for performance"""
-
-    communication = models.OneToOneField(FOIACommunication)
-    raw_email = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return 'Raw Email: %d' % self.pk
-
-
-class FOIANote(models.Model):
-    """A private note on a FOIA request"""
-
-    foia = models.ForeignKey(FOIARequest, related_name='notes')
-    date = models.DateTimeField()
-    note = models.TextField()
-
-    def __unicode__(self):
-        return 'Note for %s on %s' % (self.foia.title, self.date)
-
-    class Meta:
-        # pylint: disable=R0903
-        ordering = ['foia', 'date']
-        verbose_name = 'FOIA Note'
-
-
-class FOIAFile(models.Model):
-    """An arbitrary file attached to a FOIA request"""
-
-    access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
-
-    # pylint: disable=E1101
-    foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
-    comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
-    ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
-    title = models.CharField(max_length=255)
-    date = models.DateTimeField(null=True, db_index=True)
-    source = models.CharField(max_length=255, blank=True)
-    description = models.TextField(blank=True)
-    # for doc cloud only
-    access = models.CharField(max_length=12, default='public', choices=access)
-    doc_id = models.SlugField(max_length=80, blank=True, editable=False)
-    pages = models.PositiveIntegerField(default=0, editable=False)
-
-    def __unicode__(self):
-        return self.title
-
-    def name(self):
-        """Return the basename of the file"""
-        return os.path.basename(self.ffile.name)
-
-    def is_doccloud(self):
-        """Is this a file doc cloud can support"""
-
-        _, ext = os.path.splitext(self.ffile.name)
-        return ext.lower() in ['.pdf', '.doc', '.docx']
-
-    def get_thumbnail(self):
-        """Get the url to the thumbnail image"""
-        mimetypes = {
-            'avi': 'file-video.png',
-            'bmp': 'file-image.png',
-            'csv': 'file-spreadsheet.png',
-            'gif': 'file-image.png',
-            'jpg': 'file-image.png',
-            'mp3': 'file-audio.png',
-            'mpg': 'file-video.png',
-            'png': 'file-image.png',
-            'ppt': 'file-presentation.png',
-            'pptx': 'file-presentation.png',
-            'tif': 'file-image.png',
-            'wav': 'file-audio.png',
-            'xls': 'file-spreadsheet.png',
-            'xlsx': 'file-spreadsheet.png',
-            'zip': 'file-archive.png',
-        }
-        ext = os.path.splitext(self.name())[1][1:]
-        filename = mimetypes.get(ext, 'file-document.png')
-        return '%simg/%s' % (STATIC_URL, filename)
-
-    def get_foia(self):
-        """Get FOIA - self.foia should be refactored out"""
-        if self.foia:
-            return self.foia
-        if self.comm and self.comm.foia:
-            return self.comm.foia
-
-    def is_viewable(self, user):
-        """Is this document viewable to user"""
-        return self.access == 'public' and self.foia.is_viewable(user)
-
-    def is_public(self):
-        """Is this document viewable to everyone"""
-        return self.is_viewable(AnonymousUser())
-
-    def anchor(self):
-        """Anchor name"""
-        return 'file-%d' % self.pk
-
-    class Meta:
-        # pylint: disable=R0903
-        verbose_name = 'FOIA Document File'
-        ordering = ['date']
 
