@@ -9,7 +9,6 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.list import ListView
 
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \

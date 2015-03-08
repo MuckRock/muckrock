@@ -4,7 +4,9 @@ Views for mailgun
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage, send_mail
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseForbidden
+from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
@@ -14,9 +16,10 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, date
 from email.utils import parseaddr, getaddresses
 
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
@@ -94,7 +97,7 @@ def handle_request(request, mail_id):
                   render_to_string('text/foia/admin_request.txt',
                                    {'request': foia, 'post': post,
                                     'date': date.today().toordinal()}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently
+                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
         ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
@@ -170,6 +173,11 @@ def bounces(request):
     except (IndexError, ValueError, KeyError, FOIARequest.DoesNotExist):
         foia = None
 
+    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
+                                     Q(other_emails__icontains=recipient))
+    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
+                                       Q(other_emails__icontains=recipient))\
+               .filter(status__in=['ack', 'processed', 'appealing', 'payment'])
     send_mail('[%s] %s' % (event.upper(), recipient),
               render_to_string('text/foia/bounce.txt',
                                {'agencies': agencies, 'recipient': recipient,
