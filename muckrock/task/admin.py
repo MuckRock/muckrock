@@ -33,7 +33,7 @@ class NewAgencyTaskAdmin(VersionAdmin):
     """New Agency Task Admin"""
     readonly_fields = ['user', 'agency']
 
-class RepsponseTaskAdmin(VersionAdmin):
+class ResponseTaskAdmin(VersionAdmin):
     """Response Task Admin"""
     readonly_fields = ['communication']
 
