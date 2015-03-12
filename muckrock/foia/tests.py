@@ -571,6 +571,7 @@ class TestFOIACrowdfunding(TestCase):
             self.foia.jurisdiction.id,
             self.foia.slug,
             self.foia.id))
+        self.client = Client()
 
     def test_crowdfund_url(self):
         expected_url = (
@@ -589,8 +590,32 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_requires_login(self):
         # client should be logged out
-        client = Client()
-        response = client.get(self.url, follow=True)
+        response = self.client.get(self.url, follow=True)
         nose.tools.ok_(response,
             'Crowdfund should return a response object when issued a GET command')
         self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+
+    def test_crowdfund_view_requires_owner(self):
+        # adam is the owner, not bob
+        self.client.login(username='bob', password='abc')
+        response = self.client.get(self.url)
+        nose.tools.eq_(response.status_code, 403,
+            ('Crowdfund should respond with a 403 Forbidden error'
+            ' if logged in user is not the owner. (Responds with %d)' % response.status_code))
+
+    def test_crowdfund_view_allows_staff(self):
+        # adam is the owner, charles is staff
+        self.client.login(username='charles', password='abc')
+        response = self.client.get(self.url)
+        nose.tools.eq_(response.status_code, 200,
+            ('Crowdfund should respond with a 200 OK if logged in user'
+            ' is a staff member. (Responds with %d)' % response.status_code))
+
+
+    def test_crowdfund_view_allows_owner(self):
+        # adam is the owner
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        nose.tools.eq_(response.status_code, 200,
+            ('Above all else crowdfund should totally respond with a 200 OK if'
+            ' logged in user owns the request. (Responds with %d)' % response.status_code))
