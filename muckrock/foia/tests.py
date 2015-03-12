@@ -3,9 +3,9 @@ Tests using nose for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, Client
 import nose.tools
 
 import datetime
@@ -551,3 +551,38 @@ class TestFOIAIntegration(TestCase):
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
 
+class TestFOIACrowdfunding(TestCase):
+    """Tests for FOIA Crowdfunding"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        """Set up tests"""
+        # pylint: disable=C0103
+        # pylint: disable=E1003
+        # pylint: disable=C0111
+
+        mail.outbox = []
+        self.foia = FOIARequest.objects.get(pk=18)
+        self.url = reverse('foia-crowdfund', args=(
+            self.foia.jurisdiction.slug,
+            self.foia.jurisdiction.id,
+            self.foia.slug,
+            self.foia.id))
+
+    def test_crowdfund_url(self):
+        expected_url = (
+            '/foi/' +
+            self.foia.jurisdiction.slug + '-' + str(self.foia.jurisdiction.id) + '/' +
+            self.foia.slug + '-' + str(self.foia.id) +
+            '/crowdfund/'
+        )
+        nose.tools.eq_(self.url, expected_url,
+            'Crowdfund URL <' + self.url + '> should match expected URL <' + expected_url + '>')
+
+    def test_crowdfund_view(self):
+        resolver = resolve(self.url)
+        nose.tools.eq_(resolver.view_name, 'foia-crowdfund',
+            'Crowdfund view name "' + resolver.view_name + '" should match "foia-crowdfund"')
