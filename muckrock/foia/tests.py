@@ -611,7 +611,6 @@ class TestFOIACrowdfunding(TestCase):
             ('Crowdfund should respond with a 200 OK if logged in user'
             ' is a staff member. (Responds with %d)' % response.status_code))
 
-
     def test_crowdfund_view_allows_owner(self):
         # adam is the owner
         self.client.login(username='adam', password='abc')
@@ -619,3 +618,11 @@ class TestFOIACrowdfunding(TestCase):
         nose.tools.eq_(response.status_code, 200,
             ('Above all else crowdfund should totally respond with a 200 OK if'
             ' logged in user owns the request. (Responds with %d)' % response.status_code))
+
+    def test_crowdfund_view_uses_correct_template(self):
+        template = 'forms/foia/crowdfund.html'
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        nose.tools.ok_(template in [template.name for template in response.templates],
+            ('Should render a form-based template for creating a crowdfund.'
+            ' (Renders %s)' % response.templates))
