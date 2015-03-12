@@ -586,3 +586,11 @@ class TestFOIACrowdfunding(TestCase):
         resolver = resolve(self.url)
         nose.tools.eq_(resolver.view_name, 'foia-crowdfund',
             'Crowdfund view name "' + resolver.view_name + '" should match "foia-crowdfund"')
+
+    def test_crowdfund_view_requires_login(self):
+        # client should be logged out
+        client = Client()
+        response = client.get(self.url, follow=True)
+        nose.tools.ok_(response,
+            'Crowdfund should return a response object when issued a GET command')
+        self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
