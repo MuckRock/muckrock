@@ -7,6 +7,8 @@ from django.db import models
 
 from datetime import date
 
+from muckrock.foia.models import FOIARequest
+
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=R0903, model-missing-unicode
@@ -43,7 +45,9 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
-    foia = models.OneToOneField('foia.FOIARequest', related_name='crowdfund')
+    name = models.CharField(max_length=255, default='Crowdfund this request')
+    description = models.TextField(blank=True)
+    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
     payments = models.ManyToManyField(User, through='CrowdfundRequestPayment')
 
     def __unicode__(self):
