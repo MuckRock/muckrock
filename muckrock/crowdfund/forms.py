@@ -11,4 +11,5 @@ class CrowdfundRequestForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundRequest
-        fields = ('date_due',)
+        fields = ('foia', 'name', 'description', 'payment_required', 'date_due')
+
