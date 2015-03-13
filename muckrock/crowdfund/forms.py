@@ -4,7 +4,11 @@ Forms for Crowdfund application
 
 from django import forms
 
-class CrowdfundEnableForm(forms.Form):
+from muckrock.crowdfund.models import CrowdfundRequest
+
+class CrowdfundRequestForm(forms.ModelForm):
     """Form to confirm enable crowdfunding on a FOIA"""
-    label = 'Enable crowdfunding on this FOIA request?'
-    confirm = forms.BooleanField(label=label)
+
+    class Meta:
+        model = CrowdfundRequest
+        fields = ('date_due',)
