@@ -328,8 +328,12 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
 
-    if not owner_or_staff or foia.has_crowdfund():
-        return HttpResponseForbidden()
+    if not owner_or_staff:
+        messages.error(request, 'You can only crowdfund your own requests.')
+        return redirect(foia)
+    if foia.has_crowdfund():
+        messages.error(request, 'You can only run one crowdfund per requests.')
+        return redirect(foia)
 
     context = {}
 

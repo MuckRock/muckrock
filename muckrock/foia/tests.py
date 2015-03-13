@@ -2,6 +2,7 @@
 Tests using nose for the FOIA application
 """
 
+from django.contrib import messages
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse, resolve
 from django.core import mail
@@ -566,6 +567,7 @@ class TestFOIACrowdfunding(TestCase):
         # pylint: disable=C0111
 
         mail.outbox = []
+        self.user = User.objects.get(pk=1)
         self.foia = FOIARequest.objects.get(pk=18)
         self.url = reverse('foia-crowdfund', args=(
             self.foia.jurisdiction.slug,
@@ -600,9 +602,9 @@ class TestFOIACrowdfunding(TestCase):
         # adam is the owner, not bob
         self.client.login(username='bob', password='abc')
         response = self.client.get(self.url)
-        nose.tools.eq_(response.status_code, 403,
-            ('Crowdfund should respond with a 403 Forbidden error'
-            ' if logged in user is not the owner. (Responds with %d)' % response.status_code))
+        nose.tools.eq_(response.status_code, 302,
+            ('Crowdfund should respond with a 302 redirect if logged in'
+            ' user is not the owner. (Responds with %d)' % response.status_code))
 
     def test_crowdfund_view_allows_staff(self):
         # adam is the owner, charles is staff
@@ -620,6 +622,15 @@ class TestFOIACrowdfunding(TestCase):
             ('Above all else crowdfund should totally respond with a 200 OK if'
             ' logged in user owns the request. (Responds with %d)' % response.status_code))
 
+    def test_crowdfund_view_crowdfund_already_exists(self):
+        date_due = datetime.datetime.now() + datetime.timedelta(30)
+        self.foia.crowdfund = CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        nose.tools.eq_(response.status_code, 302,
+            ('If a request already has a crowdfund, trying to create a new one '
+            'should respond with 302 status code. (Responds with %d)' % response.status_code))
+
     def test_crowdfund_view_uses_correct_template(self):
         template = 'forms/foia/crowdfund.html'
         self.client.login(username='adam', password='abc')
@@ -627,12 +638,3 @@ class TestFOIACrowdfunding(TestCase):
         nose.tools.ok_(template in [template.name for template in response.templates],
             ('Should render a form-based template for creating a crowdfund.'
             ' (Renders %s)' % response.templates))
-
-    def test_crowdfund_view_crowdfund_already_exists(self):
-        date_due = datetime.datetime.now() + datetime.timedelta(30)
-        self.foia.crowdfund = CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        nose.tools.eq_(response.status_code, 403,
-            ('If a request already has a crowdfund, trying to create a new one '
-            'should respond with 403 status code. (Responds with %d)', response.status_code))
