@@ -333,14 +333,23 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
         messages.error(request, 'You can only crowdfund your own requests.')
         return redirect(foia)
     if foia.has_crowdfund():
-        messages.error(request, 'You can only run one crowdfund per requests.')
+        messages.error(request, 'You can only run one crowdfund per request.')
         return redirect(foia)
 
-    default_crowdfund_length = 30
-    date_due = datetime.now() + timedelta(default_crowdfund_length)
-    crowdfund = CrowdfundRequest.objects.create(foia=foia, date_due=date_due)
+    initial_data = {}
 
-    creation_form = CrowdfundRequestForm(instance=crowdfund)
+    default_crowdfund_duration = 30
+    date_due = datetime.now() + timedelta(default_crowdfund_duration)
+    initial_data.update({'deadline': date_due})
+
+    if foia.status == 'payment':
+        initial_data.update({
+            'name': u'Crowdfund Request: %s' % unicode(foia),
+            'description': 'Help cover the request fees needed to free these docs!',
+            'amount': foia.price
+        })
+
+    creation_form = CrowdfundRequestForm(initial=initial_data)
 
     context = {
         'form': creation_form

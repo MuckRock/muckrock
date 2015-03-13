@@ -26,8 +26,12 @@ class TestCrowdfundRequestForm(TestCase):
         _assert.ok_(form)
 
     def test_prefilled_request_form(self):
-        foia = FOIARequest.objects.get(pk=1)
+        foia = FOIARequest.objects.get(pk=18)
         due = datetime.now() + timedelta(30)
-        crowdfund = CrowdfundRequest.objects.create(foia=foia, date_due=due)
-        form = forms.CrowdfundRequestForm(instance=crowdfund)
+        initial_data = {
+            'name': 'Crowdfund this Request',
+            'description': 'Let\'s "payve" the way forward!',
+            'amount': foia.price,
+            'deadline': due }
+        form = forms.CrowdfundRequestForm(initial=initial_data)
         _assert.ok_(form)

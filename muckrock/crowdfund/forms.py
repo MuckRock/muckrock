@@ -6,10 +6,9 @@ from django import forms
 
 from muckrock.crowdfund.models import CrowdfundRequest
 
-class CrowdfundRequestForm(forms.ModelForm):
+class CrowdfundRequestForm(forms.Form):
     """Form to confirm enable crowdfunding on a FOIA"""
-
-    class Meta:
-        model = CrowdfundRequest
-        fields = ('name', 'description', 'payment_required', 'date_due')
-
+    name = forms.CharField()
+    description = forms.CharField(widget=forms.Textarea())
+    amount = forms.CharField()
+    deadline = forms.CharField()

@@ -643,13 +643,13 @@ class TestFOIACrowdfunding(TestCase):
     def test_crowdfund_view_uses_correct_form(self):
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
-        form = response.context.get('form')
+        form = response.context['form']
         nose.tools.eq_(form.__class__, CrowdfundRequestForm,
             'View should use the CrowdfundRequestForm')
 
-    def test_crowdfund_view_form_loads_correct_instance(self):
+    def test_crowdfund_view_form_has_initial_data(self):
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
-        form = response.context.get('form')
-        nose.tools.eq_(hasattr(form.instance, 'pk'), True,
-            'Every CrowdfundRequestForm should also load a crowdfund instance')
+        form = response.context['form']
+        nose.tools.eq_(hasattr(form, 'initial'), True,
+            'Every CrowdfundRequestForm should have some initial data')
