@@ -19,7 +19,7 @@ import logging
 import stripe
 import sys
 
-from muckrock.crowdfund.forms import CrowdfundEnableForm
+from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.forms import \
     FOIADeleteForm, \
@@ -328,6 +328,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
 
+    # check for unauthorized access
     if not owner_or_staff:
         messages.error(request, 'You can only crowdfund your own requests.')
         return redirect(foia)
@@ -335,7 +336,15 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
         messages.error(request, 'You can only run one crowdfund per requests.')
         return redirect(foia)
 
-    context = {}
+    default_crowdfund_length = 30
+    date_due = datetime.now() + timedelta(default_crowdfund_length)
+    crowdfund = CrowdfundRequest.objects.create(foia=foia, date_due=date_due)
+
+    creation_form = CrowdfundRequestForm(instance=crowdfund)
+
+    context = {
+        'form': creation_form
+    }
 
     return render_to_response(
         'forms/foia/crowdfund.html',

@@ -15,6 +15,7 @@ from datetime import date as real_date
 from operator import attrgetter
 
 from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -624,7 +625,7 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_crowdfund_already_exists(self):
         date_due = datetime.datetime.now() + datetime.timedelta(30)
-        self.foia.crowdfund = CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
+        crowdfund = CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         nose.tools.eq_(response.status_code, 302,
@@ -638,3 +639,17 @@ class TestFOIACrowdfunding(TestCase):
         nose.tools.ok_(template in [template.name for template in response.templates],
             ('Should render a form-based template for creating a crowdfund.'
             ' (Renders %s)' % response.templates))
+
+    def test_crowdfund_view_uses_correct_form(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        form = response.context.get('form')
+        nose.tools.eq_(form.__class__, CrowdfundRequestForm,
+            'View should use the CrowdfundRequestForm')
+
+    def test_crowdfund_view_form_loads_correct_instance(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        form = response.context.get('form')
+        nose.tools.eq_(hasattr(form.instance, 'pk'), True,
+            'Every CrowdfundRequestForm should also load a crowdfund instance')
