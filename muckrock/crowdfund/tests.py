@@ -19,11 +19,10 @@ class TestCrowdfundRequestForm(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
-        pass
+        self.form = forms.CrowdfundRequestForm()
 
     def test_empty_request_form(self):
-        form = forms.CrowdfundRequestForm()
-        _assert.ok_(form)
+        _assert.ok_(self.form)
 
     def test_prefilled_request_form(self):
         foia = FOIARequest.objects.get(pk=18)
@@ -35,3 +34,6 @@ class TestCrowdfundRequestForm(TestCase):
             'deadline': due }
         form = forms.CrowdfundRequestForm(initial=initial_data)
         _assert.ok_(form)
+
+    def test_clean_form_with_expected_data(self):
+        _assert.ok_(self.form.is_valid())
