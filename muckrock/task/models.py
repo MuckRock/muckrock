@@ -25,7 +25,7 @@ class Task(models.Model):
         ordering = ['date_created']
 
     def __unicode__(self):
-        return 'Task: %d' % (self.pk)
+        return u'Task: %d' % (self.pk)
 
     def handle_post(self, request):
         """Handle form actions for this task"""
@@ -52,7 +52,7 @@ class OrphanTask(Task):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return '%s: %s' % (self.get_reason_display(), self.communication.foia)
+        return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
     def handle_post(self, request):
         """Handle form actions for this task"""
@@ -79,7 +79,7 @@ class SnailMailTask(Task):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return '%s: %s' % (self.get_category_display(), self.communication.foia)
+        return u'%s: %s' % (self.get_category_display(), self.communication.foia)
 
     def handle_post(self, request):
         """Handle form actions for this task"""
@@ -112,7 +112,7 @@ class RejectedEmailTask(Task):
     error = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return '%s: %s' % (self.get_category_display(), self.foia)
+        return u'%s: %s' % (self.get_category_display(), self.foia)
 
     def agencies(self):
         """Get the agencies who use this email address"""
@@ -137,7 +137,7 @@ class StaleAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return 'Stale Agency: %s' % (self.agency)
+        return u'Stale Agency: %s' % (self.agency)
 
 
 class FlaggedTask(Task):
@@ -152,12 +152,12 @@ class FlaggedTask(Task):
 
     def __unicode__(self):
         if self.foia:
-            return 'Flagged: %s' % (self.foia)
+            return u'Flagged: %s' % (self.foia)
         if self.agency:
-            return 'Flagged: %s' % (self.agency)
+            return u'Flagged: %s' % (self.agency)
         if self.jurisdiction:
-            return 'Flagged: %s' % (self.jurisdiction)
-        return 'Flagged: <None>'
+            return u'Flagged: %s' % (self.jurisdiction)
+        return u'Flagged: <None>'
 
 
 class NewAgencyTask(Task):
@@ -167,7 +167,7 @@ class NewAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return 'New Agency: %s' % (self.agency)
+        return u'New Agency: %s' % (self.agency)
 
     def handle_post(self, request):
         """Handle form actions for this task"""
@@ -193,7 +193,7 @@ class ResponseTask(Task):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Response: %s' % (self.communication.foia)
+        return u'Response: %s' % (self.communication.foia)
 
     def handle_post(self, request):
         """Handle form actions for this task"""
