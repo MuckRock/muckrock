@@ -7,10 +7,10 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
 from datetime import datetime
-from mock import Mock, patch
 import nose.tools as nose
 
 from muckrock import task
+from muckrock.foia.models import FOIACommunication
 from muckrock.views import MRFilterableListView
 
 class TaskTests(TestCase):
@@ -33,6 +33,20 @@ class TaskTests(TestCase):
             'Resolving task should set resolved field to True')
         nose.ok_(self.task.date_done is not None,
             'Resolving task should set date_done')
+
+class OrphanTaskTests(TestCase):
+    """Test the OrphanTask class"""
+
+    def setUp(self):
+        self.comm = FOIACommunication.objects.create(date=datetime.now(), from_who='God')
+        self.task = task.models.OrphanTask.objects.create(
+            reason='ib',
+            communication=self.comm,
+            address='Whatever Who Cares')
+
+    def test_task_creates_successfully(self):
+        nose.ok_(self.task,
+            'Orphan tasks given reason and communication arguments should create successfully')
 
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
