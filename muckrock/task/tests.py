@@ -6,16 +6,38 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
+from datetime import datetime
 from mock import Mock, patch
 import nose.tools as nose
 
-from muckrock.task import views
+from muckrock import task
 from muckrock.views import MRFilterableListView
+
+class TaskTests(TestCase):
+    """Test the Task base class"""
+
+    def setUp(self):
+        self.task = task.models.Task.objects.create()
+
+    def test_task_creates_successfully(self):
+        nose.ok_(self.task,
+            'Tasks given no arguments should create successfully')
+
+    def test_unicode(self):
+        nose.eq_(str(self.task), 'Task: %d' % self.task.pk,
+            'Unicode string should return the classname and PK of the task')
+
+    def test_resolve(self):
+        self.task.resolve()
+        nose.ok_(self.task.resolved is True,
+            'Resolving task should set resolved field to True')
+        nose.ok_(self.task.date_done is not None,
+            'Resolving task should set date_done')
 
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
 
-    fixtures = ['test_users.json']
+    fixtures = ['test_users.json', ]
 
     def setUp(self):
         self.url = reverse('task-list')
@@ -43,7 +65,7 @@ class TaskListViewTests(TestCase):
             ' Actually responds with %d' % response.status_code))
 
     def test_inherits_from_MRFilterableListView(self):
-        actual = views.TaskList.__bases__
+        actual = task.views.TaskList.__bases__
         expected = MRFilterableListView().__class__
         nose.ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
