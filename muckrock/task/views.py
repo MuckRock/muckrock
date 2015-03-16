@@ -15,15 +15,15 @@ from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailT
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
 
-class List(MRFilterableListView):
+class TaskList(MRFilterableListView):
     """List of tasks"""
-    paginate_by = 25
+    title = 'Tasks'
     template_name = 'lists/task_list.html'
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
         """Dispatch overriden to limit access"""
-        return super(List, self).dispatch(*args, **kwargs)
+        return super(TaskList, self).dispatch(*args, **kwargs)
 
     def get_queryset(self):
         """Filter by user"""
@@ -60,7 +60,7 @@ class List(MRFilterableListView):
         return redirect('task-list')
 
     def get_context_data(self, **kwargs):
-        context = super(List, self).get_context_data(**kwargs)
+        context = super(TaskList, self).get_context_data(**kwargs)
         context['staff_users'] = User.objects.filter(is_staff=True)
         return context
 

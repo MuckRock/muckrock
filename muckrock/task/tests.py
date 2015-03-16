@@ -43,7 +43,7 @@ class TaskListViewTests(TestCase):
             ' Actually responds with %d' % response.status_code))
 
     def test_inherits_from_MRFilterableListView(self):
-        actual = views.List.__bases__
+        actual = views.TaskList.__bases__
         expected = MRFilterableListView().__class__
         nose.ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
