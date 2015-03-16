@@ -2,17 +2,12 @@
 Views for the Task application
 """
 
-from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.decorators import method_decorator
-from django.views.generic.list import ListView
 
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+from muckrock.task.models import Task
 from muckrock.views import MRFilterableListView
 
 class TaskList(MRFilterableListView):
