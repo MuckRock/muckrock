@@ -13,12 +13,12 @@ from django.views.generic.list import ListView
 
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+from muckrock.views import MRFilterableListView
 
-
-class List(ListView):
+class List(MRFilterableListView):
     """List of tasks"""
     paginate_by = 25
-    context_object_name = 'tasks'
+    template_name = 'lists/task_list.html'
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):

@@ -9,6 +9,9 @@ from django.core.urlresolvers import reverse
 from mock import Mock, patch
 import nose.tools as nose
 
+from muckrock.task import views
+from muckrock.views import MRFilterableListView
+
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
 
@@ -38,3 +41,9 @@ class TaskListViewTests(TestCase):
         nose.eq_(response.status_code, 200,
             ('Should respond to staff requests for task list page with 200.'
             ' Actually responds with %d' % response.status_code))
+
+    def test_inherits_from_MRFilterableListView(self):
+        actual = views.List.__bases__
+        expected = MRFilterableListView().__class__
+        nose.ok_(expected in actual,
+            'Task list should inherit from MRFilterableListView class')
