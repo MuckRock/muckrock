@@ -26,3 +26,15 @@ class TaskListViewTests(TestCase):
         response = self.client.get(self.url, follow=True)
         print(response.status_code)
         self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+
+    def test_not_staff_not_ok(self):
+        self.client.login(username='bob', password='abc')
+        response = self.client.get(self.url, follow=True)
+        self.assertRedirects(response, '/accounts/login/?next=%s' % self.url)
+
+    def test_staff_ok(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        nose.eq_(response.status_code, 200,
+            ('Should respond to staff requests for task list page with 200.'
+            ' Actually responds with %d' % response.status_code))
