@@ -113,3 +113,22 @@ class TaskListViewOrphanTaskPOSTTests(TestCase):
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.resolved, True,
             'Orphan task should be rejected by posting any truthy value to the "reject" parameter and task ID.')
+
+class TaskListViewSnailMailTaskPOSTTests(TestCase):
+    """Tests SnailMailTask-specific POST handlers"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        self.task = task.models.SnailMailTask.objects.get(pk=3)
+        self.client = Client()
+        self.client.login(username='adam', password='abc')
+
+    def test_post_set_status(self):
+        response = self.client.post(self.url, {'status': 'ack', 'task': self.task.pk})
+        updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.resolved, True,
+            'Snail mail task should resolve itself when setting status of its communication')

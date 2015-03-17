@@ -8,7 +8,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-from muckrock.task.models import Task, OrphanTask
+from muckrock.foia.models import STATUS
+from muckrock.task.models import Task, OrphanTask, SnailMailTask
 from muckrock.views import MRFilterableListView
 
 class TaskList(MRFilterableListView):
@@ -40,6 +41,7 @@ class TaskList(MRFilterableListView):
             task.assign(user)
 
         orphan_task_post_handler(request, task_pk)
+        snail_mail_task_post_handler(request, task_pk)
 
         return redirect('task-list')
 
@@ -57,6 +59,18 @@ def orphan_task_post_handler(request, task_pk):
     if request.POST.get('reject'):
         orphan_task.reject()
 
+    return
+
+def snail_mail_task_post_handler(request, task_pk):
+    """Special post handlers exclusive to SnailMailTasks"""
+    try:
+        snail_mail_task = SnailMailTask.objects.get(pk=task_pk)
+    except SnailMailTask.DoesNotExist:
+        return
+    if request.POST.get('status'):
+        status = request.POST.get('status')
+        if status in dict(STATUS):
+            snail_mail_task.set_status(status)
     return
 
 @user_passes_test(lambda u: u.is_staff)
