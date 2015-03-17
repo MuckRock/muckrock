@@ -28,6 +28,13 @@ class TaskList(MRFilterableListView):
             task_pk = request.POST.get('resolve')
             task = get_object_or_404(Task, pk=task_pk)
             task.resolve()
+        if request.POST.get('assign'):
+            task_pk = request.POST.get('task')
+            user_pk = request.POST.get('assign')
+            task = get_object_or_404(Task, pk=task_pk)
+            user = get_object_or_404(User, pk=user_pk)
+            task.assigned = user
+            task.save()
         return redirect('task-list')
 
 @user_passes_test(lambda u: u.is_staff)

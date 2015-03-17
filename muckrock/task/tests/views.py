@@ -55,4 +55,12 @@ class TaskListViewTests(TestCase):
         # we have to get the task again if we want to see the updated value
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         nose.ok_(updated_task.resolved is True,
-            'Tasks should be resolved by posting the task ID with a "resolve" message.')
+            'Tasks should be resolved by posting the task ID with a "resolve" request.')
+
+    def test_post_assign_task(self):
+        self.client.login(username='adam', password='abc')
+        # the PK for the current user is 1
+        response = self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
+        updated_task = task.models.Task.objects.get(pk=self.task.pk)
+        nose.ok_(updated_task.assigned.pk is 1,
+            'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
