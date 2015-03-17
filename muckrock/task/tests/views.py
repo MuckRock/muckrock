@@ -95,3 +95,10 @@ class TaskListViewPOSTTests(TestCase):
         updated_orphan_task = task.models.OrphanTask.objects.get(pk=2)
         nose.eq_(updated_orphan_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
+
+    def test_post_reject_orphan_task(self):
+        orphan_task = task.models.OrphanTask.objects.get(pk=2)
+        response = self.client.post(self.url, {'reject': True, 'task': orphan_task.pk})
+        updated_orphan_task = task.models.OrphanTask.objects.get(pk=2)
+        nose.eq_(updated_orphan_task.resolved, True,
+            'Orphan task should be rejected by posting any truthy value to the "reject" parameter and task ID.')
