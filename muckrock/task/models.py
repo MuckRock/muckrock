@@ -71,25 +71,17 @@ class SnailMailTask(Task):
         # pylint: disable=no-member
         return u'%s: %s' % (self.get_category_display(), self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
+    def set_status(self, status):
+        """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
         foia = comm.foia
-        statuses = {
-                'Awaiting Acknowledgement': 'ack',
-                'Awaiting Response': 'processed',
-                'Awaiting Appeal': 'appealing',
-                }
-        if request.POST.get('submit') in statuses:
-            foia.status = statuses[request.POST.get('submit')]
-            foia.update()
-            foia.save()
-            comm.status = foia.status
-            comm.date = datetime.now()
-            comm.save()
-            self.resolve()
-            messages.success(request, 'Set the status for the mailed request')
+        foia.status = status
+        foia.update()
+        foia.save()
+        comm.status = foia.status
+        comm.date = datetime.now()
+        comm.save()
+        self.resolve()
 
 
 class RejectedEmailTask(Task):
