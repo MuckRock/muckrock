@@ -113,7 +113,7 @@ class NewAgencyTaskTests(TestCase):
 
     def test_task_creates_successfully(self):
         nose.ok_(self.task,
-            'Snail mail tasks should create successfully given a category and a communication')
+            'New agency tasks should create successfully given a category and a communication')
 
     def test_approve(self):
         self.task.approve()
