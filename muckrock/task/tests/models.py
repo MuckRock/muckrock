@@ -2,6 +2,7 @@
 Tests for Tasks models
 """
 
+from django.contrib.auth.models import User
 from django.test import TestCase
 
 from datetime import datetime
@@ -14,6 +15,8 @@ from muckrock.foia.models import FOIACommunication
 
 class TaskTests(TestCase):
     """Test the Task base class"""
+
+    fixtures = ['test_users.json']
 
     def setUp(self):
         self.task = task.models.Task.objects.create()
@@ -32,6 +35,12 @@ class TaskTests(TestCase):
             'Resolving task should set resolved field to True')
         nose.ok_(self.task.date_done is not None,
             'Resolving task should set date_done')
+
+    def test_assign(self):
+        user = User.objects.get(pk=1)
+        self.task.assign(user)
+        nose.ok_(self.task.assigned is user,
+            'Should assign the task to the specified user')
 
 class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""

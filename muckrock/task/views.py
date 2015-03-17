@@ -34,8 +34,7 @@ class TaskList(MRFilterableListView):
         if request.POST.get('assign'):
             user_pk = request.POST.get('assign')
             user = get_object_or_404(User, pk=user_pk)
-            task.assigned = user
-            task.save()
+            task.assign(user)
         return redirect('task-list')
 
 @user_passes_test(lambda u: u.is_staff)
