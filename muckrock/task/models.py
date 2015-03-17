@@ -169,23 +169,16 @@ class ResponseTask(Task):
         # pylint: disable=no-member
         return u'Response: %s' % (self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
+    def set_status(self, status):
         comm = self.communication
         foia = comm.foia
-        statuses = ['fix', 'paymnet', 'rejected', 'no_docs',
-                    'done', 'partial', 'abandoned']
-        status = request.POST.get('status')
-        if status in statuses:
-            foia.status = status
-            foia.update()
-            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                foia.date_done = comm.date
-            foia.save()
-            comm.status = foia.status
-            if status in ['ack', 'processed', 'appealing']:
-                comm.date = datetime.now()
-            comm.save()
-            self.resolve()
-            messages.success(request, 'Set the status')
+        foia.status = status
+        foia.update()
+        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+            foia.date_done = comm.date
+        foia.save()
+        comm.status = foia.status
+        if status in ['ack', 'processed', 'appealing']:
+            comm.date = datetime.now()
+        comm.save()
+        self.resolve()

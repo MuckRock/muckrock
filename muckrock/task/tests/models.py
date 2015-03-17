@@ -113,7 +113,7 @@ class NewAgencyTaskTests(TestCase):
 
     def test_task_creates_successfully(self):
         nose.ok_(self.task,
-            'New agency tasks should create successfully given a category and a communication')
+            'New agency tasks should create successfully given a user and an agency')
 
     def test_approve(self):
         self.task.approve()
@@ -128,3 +128,41 @@ class NewAgencyTaskTests(TestCase):
             'Rejecting a new agency should not approve it.')
         nose.eq_(self.task.resolved, True,
             'Rejecting a new agency should resolve the task.')
+
+class ResponseTaskTests(TestCase):
+    """Test the ResponseTask class"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
+
+    def setUp(self):
+        self.foia = FOIARequest.objects.get(pk=1)
+        self.comm = FOIACommunication.objects.create(date=datetime.now(), from_who='God', foia=self.foia)
+        self.task = task.models.ResponseTask.objects.create(
+            communication=self.comm)
+
+    def test_task_creates_successfully(self):
+        nose.ok_(self.task,
+            'Response tasks should creates successfully given a communication')
+
+    def test_set_status_to_ack(self):
+        self.task.set_status('ack')
+        nose.eq_(self.task.communication.foia.date_done, None,
+            'The FOIA should not be set to done if the status does not indicate it is done.')
+        nose.eq_(self.task.communication.status, 'ack',
+            'The communication should be set to the proper status.')
+        nose.eq_(self.task.communication.foia.status, 'ack',
+            'The FOIA should be set to the proper status.')
+        nose.eq_(self.task.resolved, True,
+            'The task should be resolved after setting the status.')
+
+    def test_set_status_to_done(self):
+        self.task.set_status('done')
+        nose.eq_(self.task.communication.foia.date_done is None, False,
+            'The FOIA should be set to done if the status indicates it is done.')
+        nose.eq_(self.task.communication.status, 'done',
+            'The communication should be set to the proper status.')
+        nose.eq_(self.task.communication.foia.status, 'done',
+            'The FOIA should be set to the proper status.')
+        nose.eq_(self.task.resolved, True,
+            'The task should be resolved after setting the status.')
