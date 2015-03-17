@@ -54,11 +54,13 @@ class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
 
-    fixtures = ['test_users.json']
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
         self.url = reverse('task-list')
-        self.task = task.models.Task.objects.create()
+        self.task = task.models.Task.objects.get(pk=1)
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
@@ -86,3 +88,10 @@ class TaskListViewPOSTTests(TestCase):
         # there is no user with a PK of 99
         response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
         nose.eq_(response.status_code, 404)
+
+    def test_post_move_orphan_task_to_foias(self):
+        orphan_task = task.models.OrphanTask.objects.get(pk=2)
+        response = self.client.post(self.url, {'move': '1, 2', 'task': orphan_task.pk})
+        updated_orphan_task = task.models.OrphanTask.objects.get(pk=2)
+        nose.eq_(updated_orphan_task.resolved, True,
+            'Orphan task should be moved by posting the FOIA pks and task ID.')

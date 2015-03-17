@@ -1,14 +1,14 @@
 """
 Views for the Task application
 """
-
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-from muckrock.task.models import Task
+from muckrock.task.models import Task, OrphanTask
 from muckrock.views import MRFilterableListView
 
 class TaskList(MRFilterableListView):
@@ -27,6 +27,9 @@ class TaskList(MRFilterableListView):
         # every request should specify the task it is updating
         task_pk = request.POST.get('task')
         task = get_object_or_404(Task, pk=task_pk)
+
+        # These actions are shared between all Task objects
+
         # resolve will either be True or None
         # the task will only resolve if True
         if request.POST.get('resolve'):
@@ -35,7 +38,24 @@ class TaskList(MRFilterableListView):
             user_pk = request.POST.get('assign')
             user = get_object_or_404(User, pk=user_pk)
             task.assign(user)
+
+        orphan_task_post_handler(request, task_pk)
+
         return redirect('task-list')
+
+def orphan_task_post_handler(request, task_pk):
+    """Special post handlers exclusive to OrphanTasks"""
+    try:
+        orphan_task = OrphanTask.objects.get(pk=task_pk)
+    except OrphanTask.DoesNotExist:
+        return
+
+    if request.POST.get('move'):
+        foia_pks = request.POST.get('move', '')
+        foia_pks = foia_pks.split(', ')
+        orphan_task.move(request, foia_pks)
+
+    return
 
 @user_passes_test(lambda u: u.is_staff)
 def assign(request):
