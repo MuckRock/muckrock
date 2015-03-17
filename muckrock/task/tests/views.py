@@ -89,16 +89,27 @@ class TaskListViewPOSTTests(TestCase):
         response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
         nose.eq_(response.status_code, 404)
 
+class TaskListViewOrphanTaskPOSTTests(TestCase):
+    """Tests OrphanTask-specific POST handlers"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        self.task = task.models.OrphanTask.objects.get(pk=2)
+        self.client = Client()
+        self.client.login(username='adam', password='abc')
+
     def test_post_move_orphan_task_to_foias(self):
-        orphan_task = task.models.OrphanTask.objects.get(pk=2)
-        response = self.client.post(self.url, {'move': '1, 2', 'task': orphan_task.pk})
-        updated_orphan_task = task.models.OrphanTask.objects.get(pk=2)
-        nose.eq_(updated_orphan_task.resolved, True,
+        response = self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
+        updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
 
     def test_post_reject_orphan_task(self):
-        orphan_task = task.models.OrphanTask.objects.get(pk=2)
-        response = self.client.post(self.url, {'reject': True, 'task': orphan_task.pk})
-        updated_orphan_task = task.models.OrphanTask.objects.get(pk=2)
-        nose.eq_(updated_orphan_task.resolved, True,
+        response = self.client.post(self.url, {'reject': True, 'task': self.task.pk})
+        updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.resolved, True,
             'Orphan task should be rejected by posting any truthy value to the "reject" parameter and task ID.')
