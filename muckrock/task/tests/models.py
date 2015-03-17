@@ -10,6 +10,7 @@ from mock import Mock
 import nose.tools as nose
 
 from muckrock import task
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
 
 # pylint: disable=missing-docstring
@@ -95,3 +96,35 @@ class SnailMailTaskTests(TestCase):
             'Setting status should update status of associated communication\'s foia request')
         nose.eq_(self.task.resolved, True,
             'Setting status should resolve the task')
+
+class NewAgencyTaskTests(TestCase):
+    """Test the NewAgencyTask class"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
+
+    def setUp(self):
+        self.user = User.objects.get(pk=1)
+        self.agency = Agency.objects.get(pk=1)
+        self.agency.approved = False
+        self.task = task.models.NewAgencyTask.objects.create(
+            user=self.user,
+            agency=self.agency)
+
+    def test_task_creates_successfully(self):
+        nose.ok_(self.task,
+            'Snail mail tasks should create successfully given a category and a communication')
+
+    def test_approve(self):
+        self.task.approve()
+        nose.eq_(self.task.agency.approved, True,
+            'Approving a new agency should actually, you know, approve the agency.')
+        nose.eq_(self.task.resolved, True,
+            'Approving a new agency should resolve the task.')
+
+    def test_reject(self):
+        self.task.reject()
+        nose.eq_(self.task.agency.approved, False,
+            'Rejecting a new agency should not approve it.')
+        nose.eq_(self.task.resolved, True,
+            'Rejecting a new agency should resolve the task.')

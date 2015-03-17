@@ -151,21 +151,13 @@ class NewAgencyTask(Task):
     def __unicode__(self):
         return u'New Agency: %s' % (self.agency)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        submit = request.POST.get('submit')
+    def approve(self):
+        self.agency.approved = True
+        self.agency.save()
+        self.resolve()
 
-        if submit == 'Approve':
-            agency = self.agency
-            agency.approved = True
-            agency.save()
-            messages.success(request, 'Approved the agency')
-
-        if submit == 'Reject':
-            messages.error(request, 'Rejected the agency')
-
-        if submit in ('Approve', 'Reject'):
-            self.resolve()
+    def reject(self):
+        self.resolve()
 
 
 class ResponseTask(Task):
