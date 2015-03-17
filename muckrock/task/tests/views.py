@@ -49,26 +49,33 @@ class TaskListViewTests(TestCase):
         nose.ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
 
-    def test_post_resolve_task(self):
+class TaskListViewPOSTTests(TestCase):
+    """Tests POST requests to the Task list view"""
+    # we have to get the task again if we want to see the updated value
+
+    fixtures = ['test_users.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        self.task = task.models.Task.objects.create()
+        self.client = Client()
         self.client.login(username='adam', password='abc')
+
+    def test_post_resolve_task(self):
         response = self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
-        # we have to get the task again if we want to see the updated value
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         nose.ok_(updated_task.resolved is True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
 
     def test_post_do_not_resolve_task(self):
-        self.client.login(username='adam', password='abc')
         response = self.client.post(self.url, {'task': self.task.pk})
-        # we have to get the task again if we want to see the updated value
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         print updated_task.resolved
         nose.ok_(updated_task.resolved is not True,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
     def test_post_assign_task(self):
-        self.client.login(username='adam', password='abc')
-        # the PK for the current user is 1
+        # the PK for 'adam' is 1
         response = self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         nose.ok_(updated_task.assigned.pk is 1,
