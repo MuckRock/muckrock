@@ -51,7 +51,7 @@ class TaskListViewTests(TestCase):
 
     def test_post_resolve_task(self):
         self.client.login(username='adam', password='abc')
-        response = self.client.post(self.url, {'resolve': self.task.pk})
+        response = self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
         # we have to get the task again if we want to see the updated value
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         nose.ok_(updated_task.resolved is True,

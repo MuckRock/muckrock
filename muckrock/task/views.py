@@ -24,14 +24,15 @@ class TaskList(MRFilterableListView):
 
     def post(self, request):
         """Handle general cases for updating Task objects"""
+        # every request should specify the task it is updating
+        task_pk = request.POST.get('task')
+        task = get_object_or_404(Task, pk=task_pk)
+        # resolve will either be True, False, or None
+        # the task will only resolve if True
         if request.POST.get('resolve'):
-            task_pk = request.POST.get('resolve')
-            task = get_object_or_404(Task, pk=task_pk)
             task.resolve()
         if request.POST.get('assign'):
-            task_pk = request.POST.get('task')
             user_pk = request.POST.get('assign')
-            task = get_object_or_404(Task, pk=task_pk)
             user = get_object_or_404(User, pk=user_pk)
             task.assigned = user
             task.save()
