@@ -163,3 +163,22 @@ class TaskListViewNewAgencyTaskPOSTTests(TestCase):
             'New agency task should not approve the agency when given a truthy value for the "reject" field')
         nose.eq_(updated_task.resolved, True,
             'New agency task should resolve when given any truthy value for the "reject" data field')
+
+class TaskListViewResponseTaskPOSTTests(TestCase):
+    """Tests ResponseTask-specific POST handlers"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        self.task = task.models.ResponseTask.objects.get(pk=8)
+        self.client = Client()
+        self.client.login(username='adam', password='abc')
+
+    def test_post_set_status(self):
+        response = self.client.post(self.url, {'status': 'done', 'task': self.task.pk})
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.resolved, True,
+            'Setting the status should resolve the task')

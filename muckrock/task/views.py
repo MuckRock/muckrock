@@ -9,7 +9,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
 from muckrock.foia.models import STATUS
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, NewAgencyTask
+from muckrock.task.models import Task, OrphanTask, SnailMailTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
 
 class TaskList(MRFilterableListView):
@@ -43,6 +43,7 @@ class TaskList(MRFilterableListView):
         orphan_task_post_handler(request, task_pk)
         snail_mail_task_post_handler(request, task_pk)
         new_agency_task_post_handler(request, task_pk)
+        response_task_post_handler(request, task_pk)
 
         return redirect('task-list')
 
@@ -84,6 +85,18 @@ def new_agency_task_post_handler(request, task_pk):
         new_agency_task.approve()
     if request.POST.get('reject'):
         new_agency_task.reject()
+    return
+
+def response_task_post_handler(request, task_pk):
+    """Special post handlers exclusive to ResponseTask"""
+    try:
+        response_task = ResponseTask.objects.get(pk=task_pk)
+    except ResponseTask.DoesNotExist:
+        return
+    if request.POST.get('status'):
+        status = request.POST.get('status')
+        if status in dict(STATUS):
+            response_task.set_status(status)
     return
 
 @user_passes_test(lambda u: u.is_staff)
