@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from datetime import datetime
+from mock import Mock
 import nose.tools as nose
 
 from muckrock import task
@@ -45,6 +46,9 @@ class TaskTests(TestCase):
 class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""
 
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
+
     def setUp(self):
         self.comm = FOIACommunication.objects.create(date=datetime.now(), from_who='God')
         self.task = task.models.OrphanTask.objects.create(
@@ -55,3 +59,13 @@ class OrphanTaskTests(TestCase):
     def test_task_creates_successfully(self):
         nose.ok_(self.task,
             'Orphan tasks given reason and communication arguments should create successfully')
+
+    def test_move(self):
+        self.task.move(Mock(), [1, 2, 3])
+        nose.eq_(self.task.resolved, True,
+            'Moving an orphan to a foia should mark it as resolved')
+
+    def test_reject(self):
+        self.task.reject()
+        nose.eq_(self.task.resolved, True,
+            'Rejecting an orphan should mark it as resolved')

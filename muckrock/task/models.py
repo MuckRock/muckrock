@@ -52,20 +52,12 @@ class OrphanTask(Task):
         # pylint: disable=no-member
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
-        comm = self.communication
-        submit = request.POST.get('submit')
-        if submit == 'Move':
-            foia_pks = request.POST.get('foia_pk', '').split(',')
-            comm.move(request, foia_pks)
+    def move(self, request, foia_pks):
+        self.communication.move(request, foia_pks)
+        self.resolve()
 
-        if submit == 'Reject':
-            messages.success(request, 'Rejected the communication')
-
-        if submit in ('Move', 'Reject'):
-            self.resolve()
+    def reject(self):
+        self.resolve()
 
 
 class SnailMailTask(Task):
