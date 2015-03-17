@@ -132,3 +132,34 @@ class TaskListViewSnailMailTaskPOSTTests(TestCase):
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.resolved, True,
             'Snail mail task should resolve itself when setting status of its communication')
+
+class TaskListViewNewAgencyTaskPOSTTests(TestCase):
+    """Tests NewAgencyTask-specific POST handlers"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        self.task = task.models.NewAgencyTask.objects.get(pk=7)
+        self.task.agency.approved = False
+        self.task.agency.save()
+        self.client = Client()
+        self.client.login(username='adam', password='abc')
+
+    def test_post_accept(self):
+        response = self.client.post(self.url, {'approve': 'truthy', 'task': self.task.pk})
+        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.agency.approved, True,
+            'New agency task should approve agency when given a truthy value for the "approve" field')
+        nose.eq_(updated_task.resolved, True,
+            'New agency task should resolve when given any truthy value for the "approve" data field')
+
+    def test_post_reject(self):
+        response = self.client.post(self.url, {'reject': 'truthy', 'task': self.task.pk})
+        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
+        nose.eq_(updated_task.agency.approved, False,
+            'New agency task should not approve the agency when given a truthy value for the "reject" field')
+        nose.eq_(updated_task.resolved, True,
+            'New agency task should resolve when given any truthy value for the "reject" data field')
