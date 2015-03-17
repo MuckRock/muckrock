@@ -2,8 +2,9 @@
 Tests for Tasks views
 """
 
-from django.test import TestCase, Client
 from django.core.urlresolvers import reverse
+from django.http import Http404
+from django.test import TestCase, Client
 
 import nose.tools as nose
 
@@ -64,19 +65,24 @@ class TaskListViewPOSTTests(TestCase):
     def test_post_resolve_task(self):
         response = self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        nose.ok_(updated_task.resolved is True,
+        nose.eq_(updated_task.resolved, True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
 
     def test_post_do_not_resolve_task(self):
         response = self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         print updated_task.resolved
-        nose.ok_(updated_task.resolved is not True,
+        nose.eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
     def test_post_assign_task(self):
         # the PK for 'adam' is 1
         response = self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        nose.ok_(updated_task.assigned.pk is 1,
+        nose.eq_(updated_task.assigned.pk, 1,
             'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
+
+    def test_post_assign_task_to_nonexistant_user(self):
+        # there is no user with a PK of 99
+        response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
+        nose.eq_(response.status_code, 404)
