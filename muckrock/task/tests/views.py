@@ -57,6 +57,15 @@ class TaskListViewTests(TestCase):
         nose.ok_(updated_task.resolved is True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
 
+    def test_post_do_not_resolve_task(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.post(self.url, {'task': self.task.pk})
+        # we have to get the task again if we want to see the updated value
+        updated_task = task.models.Task.objects.get(pk=self.task.pk)
+        print updated_task.resolved
+        nose.ok_(updated_task.resolved is not True,
+            'Tasks should not be resolved when no "resolve" data is POSTed.')
+
     def test_post_assign_task(self):
         self.client.login(username='adam', password='abc')
         # the PK for the current user is 1

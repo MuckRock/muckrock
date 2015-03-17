@@ -27,7 +27,7 @@ class TaskList(MRFilterableListView):
         # every request should specify the task it is updating
         task_pk = request.POST.get('task')
         task = get_object_or_404(Task, pk=task_pk)
-        # resolve will either be True, False, or None
+        # resolve will either be True or None
         # the task will only resolve if True
         if request.POST.get('resolve'):
             task.resolve()
