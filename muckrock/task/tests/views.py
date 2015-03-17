@@ -15,11 +15,12 @@ from muckrock.views import MRFilterableListView
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
 
-    fixtures = ['test_users.json', ]
+    fixtures = ['test_users.json']
 
     def setUp(self):
         self.url = reverse('task-list')
         self.client = Client()
+        self.task = task.models.Task.objects.create()
 
     def test_url(self):
         nose.eq_(self.url, '/task/',
@@ -47,3 +48,11 @@ class TaskListViewTests(TestCase):
         expected = MRFilterableListView().__class__
         nose.ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
+
+    def test_post_resolve_task(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.post(self.url, {'resolve': self.task.pk})
+        # we have to get the task again if we want to see the updated value
+        updated_task = task.models.Task.objects.get(pk=self.task.pk)
+        nose.ok_(updated_task.resolved is True,
+            'Tasks should be resolved by posting the task ID with a "resolve" message.')

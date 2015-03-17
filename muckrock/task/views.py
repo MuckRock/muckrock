@@ -5,6 +5,7 @@ Views for the Task application
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.http import HttpResponse
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
 from muckrock.task.models import Task
@@ -20,6 +21,14 @@ class TaskList(MRFilterableListView):
     def dispatch(self, *args, **kwargs):
         """Dispatch overriden to limit access"""
         return super(TaskList, self).dispatch(*args, **kwargs)
+
+    def post(self, request):
+        """Handle general cases for updating Task objects"""
+        if request.POST.get('resolve'):
+            task_pk = request.POST.get('resolve')
+            task = get_object_or_404(Task, pk=task_pk)
+            task.resolve()
+        return redirect('task-list')
 
 @user_passes_test(lambda u: u.is_staff)
 def assign(request):

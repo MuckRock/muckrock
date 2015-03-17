@@ -27,12 +27,6 @@ class Task(models.Model):
     def __unicode__(self):
         return u'Task: %d' % (self.pk)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        if request.POST.get('submit') == 'Resolve':
-            self.resolve()
-            messages.success(request, 'Resolved the task')
-
     def resolve(self):
         """Resolve the task"""
         self.resolved = True
