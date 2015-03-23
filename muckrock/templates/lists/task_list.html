@@ -1,7 +1,6 @@
 {% extends 'lists/base_list.html' %}
 
 {% block title %}MuckRock &bull; Tasks{% endblock title %}
-{% block list-title %}<h1>Tasks</h1>{% endblock list-title %}
 {% block type %}task{% endblock type %}
 
 {% block filters %}
@@ -13,9 +12,9 @@
 </ul>
 {% endblock %}
 
-{% block list %}
+{% block list-content %}
 
-{% for task in tasks %}
+{% for task in object_list %}
 
 		{% if task.orphantask %}
 			<section class="received message">
@@ -73,7 +72,7 @@
 					<input type="submit" name="submit" value="Awaiting Response" class="button">
 					<input type="submit" name="submit" value="Awaiting Appeal" class="button">
 				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> | 
+				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> |
 				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
 				{# agency info #}
 				{% if not appeal %}
@@ -279,7 +278,7 @@
 		{% endif %}
 {% endfor %}
 
-{% endblock list %}
+{% endblock list-content %}
 
 {% block list-scripts %}
 // using jQuery
