@@ -19,9 +19,8 @@
             margin: 0;
             border: $base-border-width solid;
             border-radius: $base-border-radius;
+            @include button($color-primary);
             @include border-left-radius(0);
-            @include button-color($color-primary);
-            @include button-hover($color-primary);
         }
     }
     .list-filters {

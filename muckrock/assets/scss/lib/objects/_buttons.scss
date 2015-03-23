@@ -1,41 +1,27 @@
 /* Buttons */
 
-.button, .button.default { @extend %button;
-    @include button-color($color-default);
-    @include button-hover($color-default);
+.button, button, input[type='submit'] {
+  @include button($color-default);
 }
 
-.button.primary { @extend %button;
-    @include button-color($color-primary);
-    @include button-hover($color-primary);
+.button.primary {
+  @include button($color-primary);
 }
 
-.button.success { @extend %button;
-    @include button-color($color-success);
-    @include button-hover($color-success);
+.button.success {
+  @include button($color-success);
 }
 
-.button.failure { @extend %button;
-    @include button-color($color-failure);
-    @include button-hover($color-failure);
+.button.failure {
+  @include button($color-failure);
 }
 
-.button.disabled { @extend %button;
-    @include button-color($color-disabled);
-    &:hover, &:active { @include button-color($color-disabled); }
+.button.warning {
+  @include button($color-warning);
 }
 
-input[type="submit"], button {
-    @extend .button;
-    .default { @extend .button.default; }
-    .primary { @extend .button.primary; }
-    .success { @extend .button.success; }
-    .failure { @extend .button.failure; }
-    .disabled { @extend .button.disabled; }
-}
-
-input:disabled, input.button:disabled { 
-    &, &:hover, &:active { @extend .button.disabled }
+.button.disabled {
+  @include button($color-disabled);
 }
 
 .edit {
