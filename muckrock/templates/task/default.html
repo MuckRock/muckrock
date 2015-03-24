@@ -28,6 +28,7 @@
     {% endblock task-assign %}
     {% block task-actions %}
     <form method="POST">
+        {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
         <button type="submit" name="resolve" value="true">Resolve</button>
     </form>
