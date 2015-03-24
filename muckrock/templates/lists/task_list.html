@@ -15,8 +15,7 @@
 {% endblock %}
 
 {% block list-content %}
-
-{% for task in object_list %}
+	{% for task in object_list %}
 		{% if task.orphantask %}
 			{% orphan task %}
 		{% elif task.snailmailtask %}
@@ -32,13 +31,9 @@
 		{% elif task.responsetask %}
 			{% response task %}
 		{% else %}
-			<section class="received message">
-				<h1>Bare task... something went wrong!</h1>
-				{{ task }}
-			</section>
+			{% default task %}
 		{% endif %}
-{% endfor %}
-
+	{% endfor %}
 {% endblock list-content %}
 
 {% block list-scripts %}

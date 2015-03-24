@@ -84,3 +84,7 @@ def response(task):
     return {
         'task': task
     }
+
+@register.inclusion_tag('task/default.html')
+def default(task):
+    return { 'task': task }
