@@ -5,13 +5,15 @@
 {% block title %}MuckRock &bull; Tasks{% endblock title %}
 {% block type %}task{% endblock type %}
 
-{% block filters %}
-<ul>
-	<li><a href="{% url 'task-list' %}">All</a></li>
-	{% for user in staff_users %}
-	<li><a href="?user={{user.username}}">{{user.username}}</a></li>
-	{% endfor %}
-</ul>
+{% block list-sections %}
+<section class="list-sections">
+    <ul>
+        <li><a href="{% url 'task-list' %}">All</a></li>
+        {% for user in staff_users %}
+        <li><a href="?user={{user.username}}">{{user.username}}</a></li>
+        {% endfor %}
+    </ul>
+</section>
 {% endblock %}
 
 {% block list-content %}
