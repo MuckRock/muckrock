@@ -1,6 +1,6 @@
 {% extends 'task/default.html' %}
 
-{% with task.communication.foia as foia %}
+
 
 {% block task-class %}
     snail-mail
@@ -11,36 +11,40 @@
 {% endblock %}
 
 {% block task-data %}
+{% with task.communication.foia as foia %}
     <p>{{task.get_category_display}}</p>
+{% if foia %}
+    {{ foia }}
     <p>Acknowledged? {{foia.has_ack}}</p>
     <a href="{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a>
     <a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a>
-{# agency info #}
-{% if not appeal %}
-    {% if foia.agency %}
+    {# agency info #}
+    {% if not appeal %}
+        {% if foia.agency %}
     <a href="{% url 'admin:agency_agency_change' foia.agency.pk %}">Agency Admin</a>
-        {% if foia.agency.email %}
+            {% if foia.agency.email %}
     <p>Agency Email: {{foia.agency.email}}</p>
-        {% endif %}
-        {% if foia.agency.fax %}
+            {% endif %}
+            {% if foia.agency.fax %}
     <p>Agency Fax: {{foia.agency.fax}}@fax2.faxaway.com</p>
-        {% endif %}
-        {% if foia.agency.address %}
+            {% endif %}
+            {% if foia.agency.address %}
     <p>Agency Address: {{foia.agency.address|linebreaks}}</p>
-        {% endif %}
-        {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
+            {% endif %}
+            {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
     <p>Notes: {{foia.agency.notes}}</p>
+            {% endif %}
         {% endif %}
-    {% endif %}
-{% else %}
-    {% if foia.agency.appeal_agency %}
+    {% else %}
+        {% if foia.agency.appeal_agency %}
     <a href="{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">Appeal Agency Admin</a>
-        {% if foia.agency.appeal_agency.address %}
+            {% if foia.agency.appeal_agency.address %}
     <p>Address: {{foia.agency.appeal_agency.address|linebreaks}}</p>
+            {% endif %}
         {% endif %}
     {% endif %}
 {% endif %}
-    {# full letter here, hidden #}
+{# full letter here, hidden #}
     <button onclick="$('#full-letter-{{task.pk}}').toggle()">Show/Hide Letter</button>
     <textarea id="full-letter-{{task.pk}}" style="display: none;">
         {% now "F j, Y" %}
@@ -48,6 +52,7 @@
         {% include "text/foia/comms.txt" %}
         {% endwith %}
     </textarea>
+{% endwith %}
 {% endblock %}
 
 {% block task-actions %}
@@ -60,5 +65,3 @@
     <button type="submit">Set Status</button>
     <button type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}
-
-{% endwith %}
