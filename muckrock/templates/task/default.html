@@ -21,9 +21,9 @@
                         .fadeOut();
                     })">
             <option value="0">Nobody</option>
-            {% for staff in staff_users %}
+            {% for staff in staff_list %}
             <option value="{{staff.pk}}" {% if task.assigned.pk == staff.pk %}selected{%endif%}>
-                {{user.username}}
+                {{staff.username}}
             </option>
             {% endfor %}
         </select>
