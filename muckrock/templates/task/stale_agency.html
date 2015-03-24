@@ -4,10 +4,10 @@
     stale-agency
 {% endblock %}
 
-{% block task-header %}
-<header>
-    <p>Stale Agency</p>
-    <p>{{task.date_created|date}}</p>
+{% block task-type %}
+    Stale Agency
+{% endblock %}
+
+{% block task-data %}
     <a href="{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
-</header>
 {% endblock %}

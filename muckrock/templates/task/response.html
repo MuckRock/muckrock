@@ -4,22 +4,19 @@
     response
 {% endblock %}
 
-{% block task-header %}
-<header>
-    <p>Response</p>
-    <p>{{task.date_created|date}}</p>
+{% block task-type %}
+    Response
+{% endblock %}
+
+{% block task-data %}
     {% with task.communication as comm %}
     <p>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</p>
     <a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">FOIA: {{comm.foia}}</a>
     <p>{{comm.communication}}</p>
     {% endwith %}
-</header>
 {% endblock %}
 
 {% block task-actions %}
-<form method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="task" value="{{task.pk}}">
     <select name="status">
         <option value="" selected>Set Status</option>
     {% for s in status %}
@@ -28,5 +25,4 @@
     </select>
     <button type="submit">Set Status</button>
     <button type="submit" name="resolve" value="true">Resolve</button>
-</form>
 {% endblock %}

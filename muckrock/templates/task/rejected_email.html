@@ -4,10 +4,12 @@
     rejected-email
 {% endblock %}
 
-{% block task-header %}
-<header>
-    <p>Rejected Email</p>
-    <p>{{task.get_category_display}} on {{task.date_created|date}}</p>
+{% block task-type %}
+    Rejected Email
+{% endblock %}
+
+{% block task-data %}
+    <p>{{task.get_category_display}}</p>
     {% if task.foia %}
     <a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}}</a>
     {% endif %}
@@ -23,5 +25,4 @@
         <li><a href="{% url 'admin:agency_agency_change' agency.pk %}">{{agency.name}}</a></li>
     {% endfor %}
     </ul>
-</header>
 {% endblock %}

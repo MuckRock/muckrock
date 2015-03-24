@@ -4,18 +4,18 @@
     flagged
 {% endblock %}
 
-{% block task-header %}
-    <header>
-        <p>Flagged</p>
-        <p>{{task.date_created|date}}</p>
-        <p>{{task.text}}</p>
-        <a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
+{% block task-type %}
+    Flagged
+{% endblock %}
+
+{% block task-data %}
+    <p>{{task.text}}</p>
+    <a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
     {% if task.foia %}
-        <a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}}</a>
+    <a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}}</a>
     {% elif task.agency %}
-        <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
+    <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
     {% elif task.jurisdiction %}
-        <a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">Jurisdiction: {{task.jurisidiction}}</a>
+    <a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">Jurisdiction: {{task.jurisidiction}}</a>
     {% endif %}
-    </header>
-{% endblock task-header %}
+{% endblock %}

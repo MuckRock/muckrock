@@ -6,10 +6,12 @@
     snail-mail
 {% endblock %}
 
-{% block task-header %}
-<header>
-    <p>Snail Mail</p>
-    <p>{{task.get_category_display}} on {{task.date_created|date}}</p>
+{% block task-type %}
+    Snail Mail
+{% endblock %}
+
+{% block task-data %}
+    <p>{{task.get_category_display}}</p>
     <p>Acknowledged? {{foia.has_ack}}</p>
     <a href="{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a>
     <a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a>
@@ -46,22 +48,17 @@
         {% include "text/foia/comms.txt" %}
         {% endwith %}
     </textarea>
-</header>
 {% endblock %}
 
 {% block task-actions %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="task" value="{{task.pk}}">
-        <select name="status">
-            <option value="" selected>Set Status</option>
-        {% for s in status %}
-            <option value="{{s|first}}">{{s|last}}</option>
-        {% endfor %}
-        </select>
-        <button type="submit">Set Status</button>
-        <button type="submit" name="resolve" value="true">Resolve</button>
-    </form>
+    <select name="status">
+        <option value="" selected>Set Status</option>
+    {% for s in status %}
+        <option value="{{s|first}}">{{s|last}}</option>
+    {% endfor %}
+    </select>
+    <button type="submit">Set Status</button>
+    <button type="submit" name="resolve" value="true">Resolve</button>
 {% endblock %}
 
 {% endwith %}

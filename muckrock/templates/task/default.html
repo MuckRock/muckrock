@@ -1,14 +1,21 @@
 <section class="{% block task-class %}default{% endblock %} task" id="{{task.pk}}-task">
   {% block task-header %}
     <header>
-        <p>Basic Task (something went wrong)</p>
-        <p>{{task.date_created}}</p>
+        <dfn class="task-type">
+            {% block task-type %}
+            Task
+            {% endblock %}
+        </dfn>
+        {% block task-date %}
+        <time class="task-date" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}">{{task.date_created|date:'m/d/Y G:i'}}</time>
+        {% endblock %}
     </header>
   {% endblock task-header %}
   {% block task-assign %}
-    <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
+    <form class="assign-task" id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
+        <span>Assigned to </span>
         <select name="assign"
                 onchange="$.post('{% url "task-assign"%}', {
                         user: $(this).val(),
@@ -23,17 +30,19 @@
             <option value="0">Nobody</option>
             {% for staff in staff_list %}
             <option value="{{staff.pk}}" {% if task.assigned.pk == staff.pk %}selected{%endif%}>
-                {{staff.username}}
+                {{staff.get_full_name}}
             </option>
             {% endfor %}
         </select>
     </form>
     {% endblock task-assign %}
-    {% block task-actions %}
-    <form method="POST">
+    {% block task-data %}
+    {% endblock %}
+    <form method="POST" class="task-actions">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
-        <button type="submit" name="resolve" value="true">Resolve</button>
-    </form>
+    {% block task-actions %}
+        <button type="submit" name="resolve" value="true" class="primary">Resolve</button>
     {% endblock task-actions %}
+    </form>
 </section>

@@ -4,22 +4,18 @@
     new-agency
 {% endblock %}
 
-{% block task-header %}
-    <header>
-        <p>New Agency</p>
-        <p>{{task.date_created|date}}</p>
-        <a href="{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
-        {% if task.newagency.user %}
-        <a href="{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
-        {% endif %}
-    </header>
-{% endblock task-header %}
+{% block task-type %}
+    New Agency
+{% endblock %}
+
+{% block task-data %}
+    <a href="{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
+    {% if task.newagency.user %}
+    <a href="{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
+    {% endif %}
+{% endblock %}
 
 {% block task-actions %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="task" value="{{task.pk}}">
-        <button type="submit" name="approve" value="true">Approve</button>
-        <button type="submit" name="reject" value="true">Reject</button>
-    </form>
+    <button type="submit" name="approve" value="true" class="success">Approve</button>
+    <button type="submit" name="reject" value="true" class="failure">Reject</button>
 {% endblock %}
