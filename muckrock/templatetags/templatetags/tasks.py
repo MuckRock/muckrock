@@ -52,3 +52,13 @@ def stale_agency(task):
     return {
         'task': task
     }
+
+@register.inclusion_tag('task/flagged.html')
+def flagged(task):
+    try:
+        task = task.flaggedtask
+    except task.DoesNotExist:
+        pass
+    return {
+        'task': task
+    }

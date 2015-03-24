@@ -27,36 +27,7 @@
 		{% elif task.staleagencytask %}
 			{% stale_agency task %}
 		{% elif task.flaggedtask %}
-			<section class="received message">
-				<h1>Flagged</h1>
-				<h2>{{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.flaggedtask.pk}}">
-					<input type="hidden" name="task_class" value="flaggedtask">
-					<input type="submit" name="submit" value="Resolve" class="button">
-				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.flaggedtask.user.pk %}">User: {{task.flaggedtask.user}}</a></span> |
-				{% if task.flaggedtask.foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.flaggedtask.foia.pk %}">FOIA: {{task.flaggedtask.foia}} </a></span><br />
-				{% elif task.flaggedtask.agency %}
-				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.flaggedtask.agency.pk %}">Agency: {{task.flaggedtask.agency}}</a></span><br />
-				{% elif task.flaggedtask.jurisdiction %}
-				<span><a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.flaggedtask.jurisdiction.pk %}">Jurisdiction: {{task.flaggedtask.jurisidiction}}</a></span><br />
-				{% endif %}
-				<p>{{task.flaggedtask.text}}</p>
-			</section>
-
+			{% flagged task %}
 		{% elif task.newagencytask %}
 			<section class="received message">
 				<h1>New Agency</h1>
