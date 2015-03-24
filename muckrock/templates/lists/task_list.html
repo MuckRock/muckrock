@@ -1,5 +1,7 @@
 {% extends 'lists/base_list.html' %}
 
+{% load tasks %}
+
 {% block title %}MuckRock &bull; Tasks{% endblock title %}
 {% block type %}task{% endblock type %}
 
@@ -17,35 +19,7 @@
 {% for task in object_list %}
 
 		{% if task.orphantask %}
-			<section class="received message">
-				<h1>Orphan</h1>
-				<h2>{{task.orphantask.get_reason_display}} on {{task.date_created|date}}</h2>
-				<span>Sent to {{task.orphantask.address}}</span><br />
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				{% if task.orphantask.communication.likely_foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.orphantask.communication.likely_foia.pk %}">Probable Request</a></span><br />
-				{% endif %}
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.orphantask.pk}}">
-					<input type="hidden" name="task_class" value="orphantask">
-					<label for="foia_pk">FOIA PK:</label>
-					<input type="text" name="foia_pk" value="{{task.orphantask.communication.likely_foia.pk}}">
-					<input type="submit" name="submit" value="Move" class="button">
-					<br \>
-					<input type="submit" name="submit" value="Reject" class="button">
-				</form>
-				<p>{{task.orphantask.communication.communication}}</p>
-			</section>
+			{% orphan task %}
 
 		{% elif task.snailmailtask %}
 			{% with task.snailmailtask.communication.foia as foia %}
