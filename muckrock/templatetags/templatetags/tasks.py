@@ -51,6 +51,7 @@ def stale_agency(task):
         task = task.staleagencytask
     except task.DoesNotExist:
         pass
+        # TODO: throw Error and return
     return {
         'task': task
     }
@@ -61,6 +62,7 @@ def flagged(task):
         task = task.flaggedtask
     except task.DoesNotExist:
         pass
+        # TODO: throw Error and return
     return {
         'task': task
     }
@@ -71,6 +73,7 @@ def new_agency(task):
         task = task.newagencytask
     except task.DoesNotExist:
         pass
+        # TODO: throw Error and return
     return {
         'task': task
     }
@@ -81,10 +84,15 @@ def response(task):
         task = task.responsetask
     except task.DoesNotExist:
         pass
+        # TODO: throw Error and return
     return {
         'task': task
     }
 
 @register.inclusion_tag('task/default.html')
 def default(task):
-    return { 'task': task }
+    staff_list = User.objects.filter(is_staff=True)
+    return {
+        'task': task,
+        'staff_list': staff_list,
+    }
