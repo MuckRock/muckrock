@@ -1,29 +1,21 @@
-<section class="received message">
-  <h1>Flagged</h1>
-  <h2>{{task.date_created|date}}</h2>
-  <span>Assigned to:</span>
-  <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-    <select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-      <option value="0">-None-</option>
-      {% for user in staff_users %}
-      <option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-      {% endfor %}
-    </select>
-    <span id="task-{{task.id}}-confirm"></span>
-  </form>
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="task_pk" value="{{task.pk}}">
-    <input type="hidden" name="task_class" value="flaggedtask">
-    <input type="submit" name="submit" value="Resolve" class="button">
-  </form>
-  <span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a></span> |
-  {% if task.foia %}
-  <span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}} </a></span><br />
-  {% elif task.agency %}
-  <span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a></span><br />
-  {% elif task.jurisdiction %}
-  <span><a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">Jurisdiction: {{task.jurisidiction}}</a></span><br />
-  {% endif %}
-  <p>{{task.text}}</p>
-</section>
+{% extends 'task/default.html' %}
+
+{% block task-class %}
+    flagged
+{% endblock %}
+
+{% block task-header %}
+    <header>
+        <p>Flagged</p>
+        <p>{{task.date_created|date}}</p>
+        <p>{{task.text}}</p>
+        <a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
+    {% if task.foia %}
+        <a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}}</a>
+    {% elif task.agency %}
+        <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
+    {% elif task.jurisdiction %}
+        <a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">Jurisdiction: {{task.jurisidiction}}</a>
+    {% endif %}
+    </header>
+{% endblock task-header %}
