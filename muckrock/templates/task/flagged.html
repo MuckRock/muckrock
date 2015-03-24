@@ -9,13 +9,24 @@
 {% endblock %}
 
 {% block task-data %}
-    <p>{{task.text}}</p>
-    <a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.user.pk %}">User: {{task.user}}</a>
-    {% if task.foia %}
-    <a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.foia.pk %}">FOIA: {{task.foia}}</a>
-    {% elif task.agency %}
-    <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
-    {% elif task.jurisdiction %}
-    <a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">Jurisdiction: {{task.jurisidiction}}</a>
+<dl class="task-data">
+    {% if task.text %}
+    <dt>Message</dt>
+    <dd>{{task.text}}</dd>
     {% endif %}
+    {% if task.user %}
+    <dt>User</dt>
+    <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
+    {% endif %}
+    {% if task.foia %}
+    <dt>Request</dt>
+    <dd><a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">{{task.foia}}</a></dd>
+    {% elif task.agency %}
+    <dt>Agency</dt>
+    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+    {% elif task.jurisdiction %}
+    <dt>Jurisdiction</dt>
+    <dd><a href="{% url 'admin:jurisdiction_jurisdiction_change' task.jurisdiction.pk %}">{{task.jurisidiction}}</a></dd>
+    {% endif %}
+</dl>
 {% endblock %}

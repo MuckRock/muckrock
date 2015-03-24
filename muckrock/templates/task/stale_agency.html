@@ -9,5 +9,8 @@
 {% endblock %}
 
 {% block task-data %}
-    <a href="{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
+<dl class="task-data">
+    <dt>Agency</dt>
+    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+</dl>
 {% endblock %}

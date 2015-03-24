@@ -9,11 +9,20 @@
 {% endblock %}
 
 {% block task-data %}
+<dl class="task-data">
     {% with task.communication as comm %}
-    <p>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</p>
-    <a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">FOIA: {{comm.foia}}</a>
-    <p>{{comm.communication}}</p>
+    {% if comm.priv_from_who %}
+    <dt>From</dt>
+    <dd>{{comm.priv_from_who}}</dd>
+    {% endif %}
+    {% if comm.foia %}
+    <dt>Request</dt>
+    <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
+    <dt>Tracking Number</dt>
+    <dd>{{comm.foia.mail_id}}</dd>
+    {% endif %}
     {% endwith %}
+</dl>
 {% endblock %}
 
 {% block task-actions %}
@@ -23,6 +32,14 @@
         <option value="{{s|first}}">{{s|last}}</option>
     {% endfor %}
     </select>
-    <button type="submit">Set Status</button>
+    <button type="submit" class="primary">Set Status</button>
     <button type="submit" name="resolve" value="true">Resolve</button>
+</dl>
+{% endblock %}
+
+{% block task-extra-context %}
+<div class="task-extra-context response-communication">
+    <p>Full Text</p>
+    <p>{{comm.communication}}</p>
+</div>
 {% endblock %}
