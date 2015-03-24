@@ -42,3 +42,13 @@ def rejected_email(task):
     return {
         'task': task,
     }
+
+@register.inclusion_tag('task/stale_agency.html')
+def stale_agency(task):
+    try:
+        task = task.staleagencytask
+    except task.DoesNotExist:
+        pass
+    return {
+        'task': task
+    }
