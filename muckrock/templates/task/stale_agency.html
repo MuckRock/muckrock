@@ -1,21 +1,13 @@
-<section class="received message">
-  <h1>Stale Agency</h1>
-  <h2>{{task.date_created|date}}</h2>
-  <span>Assigned to:</span>
-  <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-    <select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-      <option value="0">-None-</option>
-      {% for user in staff_users %}
-      <option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-      {% endfor %}
-    </select>
-    <span id="task-{{task.id}}-confirm"></span>
-  </form>
-  <span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a></span><br />
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="task_pk" value="{{task.pk}}">
-    <input type="hidden" name="task_class" value="staleagencytask">
-    <input type="submit" name="submit" value="Resolve" class="button">
-  </form>
-</section>
+{% extends 'task/default.html' %}
+
+{% block task-class %}
+    stale-agency
+{% endblock %}
+
+{% block task-header %}
+<header>
+    <p>Stale Agency</p>
+    <p>{{task.date_created|date}}</p>
+    <a href="{% url 'admin:agency_agency_change' task.agency.pk %}">Agency: {{task.agency}}</a>
+</header>
+{% endblock %}
