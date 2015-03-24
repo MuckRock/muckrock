@@ -1,6 +1,9 @@
 <section class="{% block task-class %}default{% endblock %} task" id="{{task.pk}}-task">
   {% block task-header %}
-    <p>{{task.date_created}}</p>
+    <header>
+        <p>Basic Task (something went wrong)</p>
+        <p>{{task.date_created}}</p>
+    </header>
   {% endblock task-header %}
   {% block task-assign %}
     <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
