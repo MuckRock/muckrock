@@ -51,4 +51,16 @@ $.ajaxSetup({
         }
     }
 });
+
+var tasks = $('.task');
+var resolved = $('.resolved.task');
+resolved.find(':input').attr('disabled', true).addClass('disabled');
+resolved.addClass('collapsed');
+tasks.find('header').click(function() {
+    $(this).parent().toggleClass('collapsed');
+});
+$('.permalink').click(function(e) {
+    e.stopPropagation();
+});
+
 {% endblock list-scripts %}
