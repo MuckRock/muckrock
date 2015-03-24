@@ -20,46 +20,10 @@
 
 		{% if task.orphantask %}
 			{% orphan task %}
-
 		{% elif task.snailmailtask %}
 			{% snail_mail task %}
-
 		{% elif task.rejectedemailtask %}
-			<section class="received message">
-				<h1>Rejected Email</h1>
-				<h2>{{task.rejectedemailtask.get_category_display}} on {{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				{% if task.rejectedemailtask.foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.rejectedemailtask.foia.pk %}">FOIA: {{task.rejectedemailtask.foia}} </a></span><br />
-				{% endif %}
-				<span>From: {{task.rejectedemailtask.email}}</span><br />
-				<span>Error: {{task.rejectedemailtask.error}}</span><br />
-				<ul>
-				{% for foia in task.rejectedemailtask.foias %}
-				<li><a href="https://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia.title}}</a></li>
-				{% endfor %}
-				</ul><ul>
-				{% for agency in task.rejectedemailtask.agencies %}
-				<li><a href="https://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}">{{agency.name}}</a></li>
-				{% endfor %}
-				</ul>
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.rejectedemailtask.pk}}">
-					<input type="hidden" name="task_class" value="rejectedemailtask">
-					<input type="submit" name="submit" value="Resolve" class="button">
-				</form>
-			</section>
-
+			{% rejected_email task %}
 		{% elif task.staleagencytask %}
 			<section class="received message">
 				<h1>Stale Agency</h1>
