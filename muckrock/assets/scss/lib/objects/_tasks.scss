@@ -1,5 +1,74 @@
 .task {
+    @include row;
     margin: $base-margin;
     border: 1px solid $color-black;
-    padding: $base-padding;
+    &.resolved {
+        border-color: $color-success;
+    }
+}
+
+.task header {
+    @include span-columns(12);
+    @include row;
+    background-color: $color-black;
+    color: $color-white;
+    cursor: pointer;
+
+    .task-resolved, .task-metadata {
+        @include span-columns(12);
+        @include row;
+        padding: $base-padding/4 $base-padding/2;
+        p, time {
+            @include span-columns(6);
+        }
+    }
+
+    .task-resolved {
+        background: $color-success;
+    }
+
+    .task-metadata {
+        background: $color-black;
+    }
+
+    p {
+        margin: 0;
+    }
+
+    time {
+        text-align: right;
+        a { color: $color-white; }
+    }
+}
+
+.task .task-data {
+    @include span-columns(8);
+    padding: $base-padding/2;
+}
+
+dl.task-data {
+    margin: 0;
+}
+
+.task .task-actions {
+    @include span-columns(4);
+    @include omega;
+    padding: $base-padding/2;
+    input, select, button {
+        display: block;
+        width: 100%;
+    }
+    .task-assign {
+        margin-bottom: $base-margin/2;
+    }
+}
+
+.task .task-extra-context {
+    @include span-columns(12);
+}
+
+.collapsed.task {
+    .task-data, .task-actions {
+        display: none;
+    }
 }
