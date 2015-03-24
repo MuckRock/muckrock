@@ -1,33 +1,31 @@
-{% with task.orphantask as orphan %}
-
 <section class="received message">
   <h1>Orphan</h1>
-  <h2>{{orphan.get_reason_display}} on {{orphan.date_created|date}}</h2>
-  <span>Sent to {{orphan.address}}</span><br />
+  <h2>{{task.get_reason_display}} on {{task.date_created|date}}</h2>
+  <span>Sent to {{task.address}}</span><br />
   <span>Assigned to:</span>
   <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
     <select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-      <option value="0">-None-</option>
-      {% for user in staff_users %}
-      <option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
+      <option value="0">Nobody</option>
+      {% for staff in staff_list %}
+      <option value="{{staff.pk}}" {% if task.assigned.pk == staff.pk %}selected{%endif%}>
+        {{staff.get_full_name}}
+      </option>
       {% endfor %}
     </select>
     <span id="task-{{task.id}}-confirm"></span>
   </form>
-  {% if orphan.communication.likely_foia %}
-  <span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' orphan.communication.likely_foia.pk %}">Probable Request</a></span><br />
+  {% if task.communication.likely_foia %}
+  <span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.communication.likely_foia.pk %}">Probable Request</a></span><br />
   {% endif %}
   <form method="post">
     {% csrf_token %}
-    <input type="hidden" name="task_pk" value="{{orphan.pk}}">
+    <input type="hidden" name="task_pk" value="{{task.pk}}">
     <input type="hidden" name="task_class" value="orphantask">
     <label for="foia_pk">FOIA PK:</label>
-    <input type="text" name="foia_pk" value="{{orphan.communication.likely_foia.pk}}">
+    <input type="text" name="foia_pk" value="{{task.communication.likely_foia.pk}}">
     <input type="submit" name="submit" value="Move" class="button">
     <br \>
     <input type="submit" name="submit" value="Reject" class="button">
   </form>
-  <p>{{orphan.communication.communication}}</p>
+  <p>{{task.communication.communication}}</p>
 </section>
-
-{% endwith %}
