@@ -1,69 +1,67 @@
-{% with task.communication.foia as foia %}
-<section class="received message">
-  <h1>Snail Mail</h1>
-  <h2>{{task.get_category_display}} on {{task.date_created|date}}</h2>
-  <span>Assigned to:</span>
-  <form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-    <select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-      <option value="0">-None-</option>
-      {% for user in staff_users %}
-      <option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-      {% endfor %}
-    </select>
-    <span id="task-{{task.id}}-confirm"></span>
-  </form>
-  <span>Acknowledged? {{foia.has_ack}}</span><br />
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="task_pk" value="{{task.pk}}">
-    <input type="hidden" name="task_class" value="snailmailtask">
-    <span>Set status:</span>
-    <input type="submit" name="submit" value="Awaiting Acknowledgement" class="button">
-    <input type="submit" name="submit" value="Awaiting Response" class="button">
-    <input type="submit" name="submit" value="Awaiting Appeal" class="button">
-  </form>
-  <span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> |
-  <span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
-  {# agency info #}
-  {% if not appeal %}
-    {% if foia.agency %}
-      | <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.pk %}">Agency Admin</a>
-    {% endif %}
-    {% if foia.agency.email %}
-      | Agency Email: {{foia.agency.email}}
-    {% endif %}
-    {% if foia.agency.fax %}
-      | Agency Fax: {{foia.agency.fax}}@fax2.faxaway.com
-    {% endif %}
-    {% if foia.agency.address %}
-      <p>
-      Agency Address: {{foia.agency.address|linebreaks}}
-      </p>
-    {% endif %}
-    {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
-      <p>
-      Notes: {{foia.agency.notes}}
-      </p>
-    {% endif %}
+{% extends 'task/default.html' %}
 
-  {% else %}
-    {% if foia.agency.appeal_agency %}
-      | <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">Appeal Agency Admin</a>
-      {% if foia.agency.appeal_agency.address %}
-        <p>
-        Address: {{foia.agency.appeal_agency.address|linebreaks}}
-        </p>
-      {% endif %}
+{% with task.communication.foia as foia %}
+
+{% block task-class %}
+    snail-mail
+{% endblock %}
+
+{% block task-header %}
+<header>
+    <p>Snail Mail</p>
+    <p>{{task.get_category_display}} on {{task.date_created|date}}</p>
+    <p>Acknowledged? {{foia.has_ack}}</p>
+    <a href="{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a>
+    <a href="{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a>
+{# agency info #}
+{% if not appeal %}
+    {% if foia.agency %}
+    <a href="{% url 'admin:agency_agency_change' foia.agency.pk %}">Agency Admin</a>
+        {% if foia.agency.email %}
+    <p>Agency Email: {{foia.agency.email}}</p>
+        {% endif %}
+        {% if foia.agency.fax %}
+    <p>Agency Fax: {{foia.agency.fax}}@fax2.faxaway.com</p>
+        {% endif %}
+        {% if foia.agency.address %}
+    <p>Agency Address: {{foia.agency.address|linebreaks}}</p>
+        {% endif %}
+        {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
+    <p>Notes: {{foia.agency.notes}}</p>
+        {% endif %}
     {% endif %}
-  {% endif %}
-  <br />
-  <button type="button" class="button" onclick="$('#full-letter-{{task.pk}}').toggle()">Show/Hide Letter</button>
-  {# full letter here, hidden #}
-  <textarea id="full-letter-{{task.pk}}" style="display: none;">
-{% now "F j, Y" %}
-{% with foia as request %}
-{% include "text/foia/comms.txt" %}
-{% endwith %}
-  </textarea>
-</section>
+{% else %}
+    {% if foia.agency.appeal_agency %}
+    <a href="{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">Appeal Agency Admin</a>
+        {% if foia.agency.appeal_agency.address %}
+    <p>Address: {{foia.agency.appeal_agency.address|linebreaks}}</p>
+        {% endif %}
+    {% endif %}
+{% endif %}
+    {# full letter here, hidden #}
+    <button onclick="$('#full-letter-{{task.pk}}').toggle()">Show/Hide Letter</button>
+    <textarea id="full-letter-{{task.pk}}" style="display: none;">
+        {% now "F j, Y" %}
+        {% with foia as request %}
+        {% include "text/foia/comms.txt" %}
+        {% endwith %}
+    </textarea>
+</header>
+{% endblock %}
+
+{% block task-actions %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="task" value="{{task.pk}}">
+        <select name="status">
+            <option value="" selected>Set Status</option>
+        {% for s in statuses %}
+            <option value="{{s|first}}">{{s|last}}</option>
+        {% endfor %}
+        </select>
+        <button type="submit">Set Status</button>
+        <button type="submit" name="resolve" value="true">Resolve</button>
+    </form>
+{% endblock %}
+
 {% endwith %}
