@@ -1,0 +1,9 @@
+.task {
+    margin: $base-margin;
+    border: 1px solid $color-black;
+    header {
+        padding: $base-padding;
+        background-color: $color-black;
+        color: $color-white;
+    }
+}
