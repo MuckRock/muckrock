@@ -55,7 +55,7 @@
         <input type="hidden" name="task" value="{{task.pk}}">
         <select name="status">
             <option value="" selected>Set Status</option>
-        {% for s in statuses %}
+        {% for s in status %}
             <option value="{{s|first}}">{{s|last}}</option>
         {% endfor %}
         </select>
