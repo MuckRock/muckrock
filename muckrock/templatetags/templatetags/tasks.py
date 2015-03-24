@@ -72,3 +72,13 @@ def new_agency(task):
     return {
         'task': task
     }
+
+@register.inclusion_tag('task/response.html')
+def response(task):
+    try:
+        task = task.responsetask
+    except task.DoesNotExist:
+        pass
+    return {
+        'task': task
+    }
