@@ -7,6 +7,8 @@ from django.template import Library
 
 from muckrock.foia.models import STATUS
 
+register = Library()
+
 @register.inclusion_tag('task/orphan.html')
 def orphan(task):
     try:
