@@ -8,11 +8,26 @@
 }
 
 .task header {
+    background: $color-black;
+}
+
+.resolved.task header {
+    background: $color-success;
+}
+
+.task header {
     @include span-columns(12);
     @include row;
+    position: relative;
     background-color: $color-black;
     color: $color-white;
     cursor: pointer;
+
+    .checkbox {
+        position: absolute;
+        top: $base-margin/2;
+        left: $base-margin/4;
+    }
 
     .task-resolved, .task-metadata {
         @include span-columns(12);
@@ -23,16 +38,9 @@
         }
     }
 
-    .task-resolved {
-        background: $color-success;
-    }
-
-    .task-metadata {
-        background: $color-black;
-    }
-
     p {
         margin: 0;
+        padding-left: $base-padding;
     }
 
     time {

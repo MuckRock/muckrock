@@ -41,6 +41,10 @@
     transform: translateY($shadow-normal - $shadow-active);
     box-shadow: 0px $shadow-active 0px 0px $color-dark;
   }
+  &:disabled:hover {
+    transform: none;
+    box-shadow: 0 $shadow-normal 0 0 $color-dark;
+  }
 }
 
 @mixin panel-color($color, $disabled: false) {
