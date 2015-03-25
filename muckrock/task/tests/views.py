@@ -89,6 +89,37 @@ class TaskListViewPOSTTests(TestCase):
         response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
         nose.eq_(response.status_code, 404)
 
+class TaskListViewBatchedPOSTTests(TestCase):
+    """Tests batched POST requests for all tasks"""
+    # we have to get the task again if we want to see the updated value
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
+
+    def setUp(self):
+        self.url = reverse('task-list')
+        task1 = task.models.Task.objects.get(pk=1)
+        task2 = task.models.Task.objects.get(pk=2)
+        task3 = task.models.Task.objects.get(pk=3)
+        self.tasks = [task1, task2, task3]
+        self.client = Client()
+        self.client.login(username='adam', password='abc')
+
+    def test_batch_resolve_tasks(self):
+        response = self.client.post(self.url, {'resolve': 'true', 'tasks': [1, 2, 3]})
+        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
+        for updated_task in updated_tasks:
+            nose.eq_(updated_task.resolved, True,
+                'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
+
+    def test_batch_assign_tasks(self):
+        response = self.client.post(self.url, {'assign': 1, 'tasks': [1, 2, 3]})
+        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
+        for updated_task in updated_tasks:
+            nose.eq_(updated_task.assigned.pk, 1,
+                'Task %d should be assigned when doing a batched assign' % updated_task.pk)
+
 class TaskListViewOrphanTaskPOSTTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 

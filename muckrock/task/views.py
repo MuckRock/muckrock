@@ -27,18 +27,25 @@ class TaskList(MRFilterableListView):
         """Handle general cases for updating Task objects"""
         # every request should specify the task it is updating
         task_pk = request.POST.get('task')
-        task = get_object_or_404(Task, pk=task_pk)
+        tasks_pks = request.POST.getlist('tasks')
+        if task_pk or tasks_pks:
+            if task_pk:
+                tasks = [get_object_or_404(Task, pk=task_pk)]
+            else:
+                tasks = [get_object_or_404(Task, pk=each_pk) for each_pk in tasks_pks]
+        else:
+            return redirect('task-list')
 
-        # These actions are shared between all Task objects
-
-        # resolve will either be True or None
-        # the task will only resolve if True
-        if request.POST.get('resolve'):
-            task.resolve()
-        if request.POST.get('assign'):
-            user_pk = request.POST.get('assign')
-            user = get_object_or_404(User, pk=user_pk)
-            task.assign(user)
+        for task in tasks:
+            # These actions are shared between all Task objects
+            # resolve will either be True or None
+            # the task will only resolve if True
+            if request.POST.get('resolve'):
+                task.resolve()
+            if request.POST.get('assign'):
+                user_pk = request.POST.get('assign')
+                user = get_object_or_404(User, pk=user_pk)
+                task.assign(user)
 
         orphan_task_post_handler(request, task_pk)
         snail_mail_task_post_handler(request, task_pk)
