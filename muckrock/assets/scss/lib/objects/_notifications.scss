@@ -7,7 +7,7 @@ ul.notifications {
     list-style-type: none;
     @extend %edge-to-edge;
     @include transition($menu-animation);
-    
+
     li.notification {
         display: table;
         width: 100%;
@@ -48,11 +48,10 @@ ul.notifications {
                 text-align: center;
                 width: 6em;
                 button.close {
-                    color: $color-white;
+                    @include button($color-black);
                     background: $color-black;
                     float: right;
-                    border: none;
-                    opacity: 0.7;
+                    opacity: 0.5;
                     font-size: 0.8em;
                     margin: 0 1.5em;
                     padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
@@ -61,7 +60,7 @@ ul.notifications {
                 }
             }
         }
-        
+
         @mixin colorize($color) {
             span.text, span.dismiss { background-color: lighten($color, 10%); }
             span.symbol {
@@ -69,7 +68,7 @@ ul.notifications {
                 @include colorize-icon($color);
             }
         }
-                
+
         &.success { @include colorize($color-success); }
         &.error { @include colorize($color-failure); }
         &.info { @include colorize($color-primary); }

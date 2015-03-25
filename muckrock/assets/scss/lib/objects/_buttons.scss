@@ -1,41 +1,28 @@
 /* Buttons */
 
-.button, .button.default { @extend %button;
-    @include button-color($color-default);
-    @include button-hover($color-default);
-}
+.button, button, input[type='submit'] {
 
-.button.primary { @extend %button;
-    @include button-color($color-primary);
-    @include button-hover($color-primary);
-}
+    @include button($color-default);
 
-.button.success { @extend %button;
-    @include button-color($color-success);
-    @include button-hover($color-success);
-}
+    &.primary {
+      @include button($color-primary);
+    }
 
-.button.failure { @extend %button;
-    @include button-color($color-failure);
-    @include button-hover($color-failure);
-}
+    &.success {
+      @include button($color-success);
+    }
 
-.button.disabled { @extend %button;
-    @include button-color($color-disabled);
-    &:hover, &:active { @include button-color($color-disabled); }
-}
+    &.failure {
+      @include button($color-failure);
+    }
 
-input[type="submit"], button {
-    @extend .button;
-    .default { @extend .button.default; }
-    .primary { @extend .button.primary; }
-    .success { @extend .button.success; }
-    .failure { @extend .button.failure; }
-    .disabled { @extend .button.disabled; }
-}
+    &.warning {
+      @include button($color-warning);
+    }
 
-input:disabled, input.button:disabled { 
-    &, &:hover, &:active { @extend .button.disabled }
+    &.disabled {
+      @include button($color-disabled);
+    }
 }
 
 .edit {
@@ -50,4 +37,9 @@ input:disabled, input.button:disabled {
     &:hover {
         color: darken($color-primary, 10%);
     }
+}
+
+.tag-manager .button, .status-form .button {
+    margin: 0;
+    padding: $base-padding/8 $base-padding/2;
 }
