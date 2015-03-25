@@ -29,7 +29,7 @@
     {% if task.communication.likely_foia %}
     <input type="text" name="move" value="{{task.communication.likely_foia.pk}}">
     {% else %}
-    <input type="text" name="move" placeholder="MuckRock No. to move to">
+    <input type="text" name="move" placeholder="MuckRock №">
     {% endif %}
     <button type="submit" class="primary">Move</button>
     <button type="submit" name="reject" value="true">Reject</button>
