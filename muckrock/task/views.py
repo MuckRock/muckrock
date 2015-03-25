@@ -30,7 +30,8 @@ class TaskList(MRFilterableListView):
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
-        context['inbox_count'] = Task.objects.filter(assigned=self.request.user).count()
+        context['inbox_count'] = Task.objects.filter(assigned=self.request.user,
+                                                     resolved=False).count()
         context['unassigned_count'] = Task.objects.filter(assigned=None).count()
         assigned_filter = self.request.GET.get('assigned')
         if assigned_filter:
