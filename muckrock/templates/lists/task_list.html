@@ -9,14 +9,25 @@
 <section class="list-sections">
     <ul>
         <li><a href="{% url 'task-list' %}">All</a></li>
-        {% for user in staff_users %}
-        <li><a href="?user={{user.username}}">{{user.username}}</a></li>
+        {% for staff in staff_list %}
+        <li><a href="?user={{staff.username}}">{{staff.get_full_name}}</a></li>
         {% endfor %}
     </ul>
 </section>
 {% endblock %}
 
 {% block list-content %}
+    <section class="list-actions">
+        <form method="POST" id="batched">
+            {% csrf_token %}
+            <input type="checkbox" id="toggle-all" />
+            <label for="toggle_all">Select/Unselect All</label>
+            <button type="submit" name="resolve" value="true">Resolve</button>
+
+            <button type="submit" name="assign" value="true">Assign</button>
+            <button id="collapse-all">Collapse All</button>
+        </form>
+    </section>
 	{% for task in object_list %}
 		{% if task.orphantask %}
 			{% orphan task %}
@@ -59,8 +70,24 @@ resolved.addClass('collapsed');
 tasks.find('header').click(function() {
     $(this).parent().toggleClass('collapsed');
 });
-$('.permalink').click(function(e) {
+
+$('.task .permalink').click(function(e) {
     e.stopPropagation();
+});
+
+$('.task .checkbox').click(function(e) {
+    e.stopPropagation();
+});
+
+$('#collapse-all').click(function(e){
+    e.preventDefault();
+    if ($(this).text() == "Collapse All") {
+        $(this).text("Reveal All");
+        $('.task').addClass('collapsed');
+    } else {
+        $(this).text("Collapse All");
+        $('.task').removeClass('collapsed');
+    }
 });
 
 {% endblock list-scripts %}

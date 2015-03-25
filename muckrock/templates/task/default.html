@@ -1,6 +1,7 @@
 <section class="{% block task-class %}default{% endblock %} {% if task.resolved %}resolved{% endif %} task" id="{{task.pk}}-task">
   {% block task-header %}
     <header>
+        <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox">
         {% if task.resolved %}
         <div class="task-resolved">
             <p>Resolved</p>
