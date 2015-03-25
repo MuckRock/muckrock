@@ -4,7 +4,6 @@
         #global-search {
             display: block;
             width: 100%;
-            overflow: hidden;
         }
         input[type=search] {
             width: 75%;
@@ -12,16 +11,14 @@
             margin: 0;
             border-radius: $base-border-radius;
             @include border-right-radius(0);
+            transform: translateY(1px);
         }
         input[type=submit] {
+            @include button($color-primary);
             width: 25%;
             float: right;
             margin: 0;
-            border: $base-border-width solid;
-            border-radius: $base-border-radius;
             @include border-left-radius(0);
-            @include button-color($color-primary);
-            @include button-hover($color-primary);
         }
     }
     .list-filters {
