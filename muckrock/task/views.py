@@ -4,6 +4,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
+from django.core.urlresolvers import resolve, reverse
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -73,7 +74,8 @@ class TaskList(MRFilterableListView):
         new_agency_task_post_handler(request, task_pk)
         response_task_post_handler(request, task_pk)
 
-        return redirect('task-list')
+        match = resolve(request.path)
+        return redirect(match.url_name)
 
 def orphan_task_post_handler(request, task_pk):
     """Special post handlers exclusive to OrphanTasks"""
