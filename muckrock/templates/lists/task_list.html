@@ -8,12 +8,23 @@
 {% block list-sections %}
 <section class="list-sections">
     <ul>
+        <li><a href="{% url 'task-list-inbox' %}">
+            <span class="counter">{{ inbox_count }}</span>
+            Inbox
+        </a></li>
+        <li><a href="{% url 'task-list-unassigned' %}">
+            <span class="counter">{{ unassigned_count }}</span>
+            Unassigned
+        </a></li>
+        <li><a href="{% url 'task-list-resolved' %}">Resolved</a></li>
         <li><a href="{% url 'task-list' %}">All</a></li>
-        {% for staff in staff_list %}
-        <li><a href="?user={{staff.username}}">{{staff.get_full_name}}</a></li>
-        {% endfor %}
     </ul>
 </section>
+{% endblock %}
+
+{% block list-filters %}
+<label for="id_assigned">Assigned To</label>
+{{ filter_form.assigned }}
 {% endblock %}
 
 {% block list-content %}
@@ -28,6 +39,8 @@
             <button id="collapse-all">Collapse All</button>
         </form>
     </section>
+{% if object_list %}
+    {% include 'lib/pagination.html' %}
 	{% for task in object_list %}
 		{% if task.orphantask %}
 			{% orphan task %}
@@ -47,6 +60,8 @@
 			{% default task %}
 		{% endif %}
 	{% endfor %}
+	{% include 'lib/pagination.html' %}
+{% endif %}
 {% endblock list-content %}
 
 {% block list-scripts %}

@@ -9,6 +9,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
 from muckrock.foia.models import STATUS
+from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
 
@@ -17,6 +18,25 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     template_name = 'lists/task_list.html'
     model = Task
+
+    def get_filters(self):
+        """Only uses the assigned field from TaskFilterForm"""
+        # pylint: disable=no-self-use
+        return [
+            {'field': 'assigned', 'lookup': 'exact'},
+        ]
+
+    def get_context_data(self, **kwargs):
+        """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
+        context = super(TaskList, self).get_context_data(**kwargs)
+        context['inbox_count'] = Task.objects.filter(assigned=self.request.user).count()
+        context['unassigned_count'] = Task.objects.filter(assigned=None).count()
+        assigned_filter = self.request.GET.get('assigned')
+        if assigned_filter:
+            context['filter_form'] = TaskFilterForm(initial={'assigned', assigned_filter})
+        else:
+            context['filter_form'] = TaskFilterForm()
+        return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
@@ -106,6 +126,42 @@ def response_task_post_handler(request, task_pk):
         if status in dict(STATUS):
             response_task.set_status(status)
     return
+
+class InboxTaskList(TaskList):
+    """Shows only unresolved tasks assigned to the logged-in user"""
+    def get_queryset(self):
+        """Filter only for unresolved tasks assigned to logged-in user"""
+        inbox = super(InboxTaskList, self).get_queryset()
+        inbox = inbox.filter(resolved=False, assigned=self.request.user)
+        return inbox
+
+    def get_context_data(self, **kwargs):
+        """Hide the filter form"""
+        context = super(InboxTaskList, self).get_context_data(**kwargs)
+        context['filter_form'] = None
+        return context
+
+class UnassignedTaskList(TaskList):
+    """Shows only unresolved, unassigned tasks"""
+    def get_queryset(self):
+        """Filter queryset by unresolved, unassigned tasks"""
+        unassigned = super(UnassignedTaskList, self).get_queryset()
+        unassigned = unassigned.filter(resolved=False, assigned=None)
+        return unassigned
+
+    def get_context_data(self, **kwargs):
+        """Hide the filter form"""
+        context = super(UnassignedTaskList, self).get_context_data(**kwargs)
+        context['filter_form'] = None
+        return context
+
+class ResolvedTaskList(TaskList):
+    """Shows only resolved tasks, assigned to whoever"""
+    def get_queryset(self):
+        """Filter queryset by resolved tasks"""
+        resolved = super(ResolvedTaskList, self).get_queryset()
+        resolved = resolved.filter(resolved=True)
+        return resolved
 
 @user_passes_test(lambda u: u.is_staff)
 def assign(request):
