@@ -4,7 +4,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
-from django.core.urlresolvers import resolve, reverse
+from django.core.urlresolvers import resolve
 from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
@@ -47,6 +47,7 @@ class TaskList(MRFilterableListView):
 
     def post(self, request):
         """Handle general cases for updating Task objects"""
+        # pylint: disable=no-self-use
         # every request should specify the task it is updating
         task_pk = request.POST.get('task')
         tasks_pks = request.POST.getlist('tasks')

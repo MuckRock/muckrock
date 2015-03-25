@@ -11,7 +11,8 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import *
+from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 
 # First, create some accounts
 
@@ -59,9 +60,9 @@ comm32 = FOIACommunication.objects.create(foia=foia3, from_who='Person B', to_wh
 
 # Sixth, create some tasks
 
-orphan = OrphanTask.objects.create(reason='bs', communication=comm, address='100dollars@bigmoney.biz')
+orphan = OrphanTask.objects.create(reason='bs', communication=comm21, address='100dollars@bigmoney.biz')
 
-snail_mail = SnailMailTask.objects.create(category='a', communication=comm)
+snail_mail = SnailMailTask.objects.create(category='a', communication=comm22)
 
 rejected_email = RejectedEmailTask.objects.create(category='b', foia=foia1, email='bigdog@bostondynamics.com', error='Undeliverable')
 
