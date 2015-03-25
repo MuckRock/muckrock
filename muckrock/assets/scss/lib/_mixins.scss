@@ -10,13 +10,13 @@
   $shadow-active: 2px;
   // Metrics
   display: inline-block;
-  background: $color-main;
-  margin: $base-margin/4 $base-margin/8;
+  margin: $base-margin/4 0;
   border: 1px solid $color-dark;
   border-radius: $base-border-radius;
   padding: $base-padding/4 $base-padding/2;
   box-shadow: 0px $shadow-normal 0px 0px $color-dark;
-  // Typography
+  // Type
+  background: $color-main;
   color: #FFFFFF;
   text-align: center;
   text-decoration: none;
