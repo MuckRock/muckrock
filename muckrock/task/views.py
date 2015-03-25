@@ -34,6 +34,7 @@ class TaskList(MRFilterableListView):
             else:
                 tasks = [get_object_or_404(Task, pk=each_pk) for each_pk in tasks_pks]
         else:
+            messages.warning(request, 'No tasks were selected, so there\'s nothing to do!')
             return redirect('task-list')
 
         for task in tasks:
