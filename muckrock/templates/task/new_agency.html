@@ -1,0 +1,27 @@
+{% extends 'task/default.html' %}
+
+{% block task-class %}
+    new-agency
+{% endblock %}
+
+{% block task-type %}
+    New Agency
+{% endblock %}
+
+{% block task-data %}
+<dl class="task-data">
+    {% if task.agency %}
+    <dt>Agency</dt>
+    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+    {% endif %}
+    {% if task.newagency.user %}
+    <dt>User</dt>
+    <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
+    {% endif %}
+</dl>
+{% endblock %}
+
+{% block task-actions %}
+    <button type="submit" name="approve" value="true" class="success">Approve</button>
+    <button type="submit" name="reject" value="true" class="failure">Reject</button>
+{% endblock %}

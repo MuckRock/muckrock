@@ -1,305 +1,73 @@
 {% extends 'lists/base_list.html' %}
 
+{% load tags %}
+{% load tasks %}
+
 {% block title %}MuckRock &bull; Tasks{% endblock title %}
-{% block list-title %}<h1>Tasks</h1>{% endblock list-title %}
 {% block type %}task{% endblock type %}
 
-{% block filters %}
-<ul>
-	<li><a href="{% url 'task-list' %}">All</a></li>
-	{% for user in staff_users %}
-	<li><a href="?user={{user.username}}">{{user.username}}</a></li>
-	{% endfor %}
-</ul>
+{% block list-sections %}
+<section class="list-sections">
+    <ul>
+        <li class="{% active request '^/task/$' %}"><a href="{% url 'task-list' %}">All</a></li>
+        <li class="{% active request '^/task/inbox/$' %}"><a href="{% url 'task-list-inbox' %}">
+            <span class="counter">{{ inbox_count }}</span>
+            Inbox
+        </a></li>
+        <li class="{% active request '^/task/unassigned/$' %}"><a href="{% url 'task-list-unassigned' %}">
+            <span class="counter">{{ unassigned_count }}</span>
+            Unassigned
+        </a></li>
+        <li class="{% active request '^/task/resolved/$' %}"><a href="{% url 'task-list-resolved' %}">Resolved</a></li>
+    </ul>
+</section>
 {% endblock %}
 
-{% block list %}
+{% block list-filters %}
+<label for="id_assigned">Assigned To</label>
+{{ filter_form.assigned }}
+{% endblock %}
 
-{% for task in tasks %}
-
+{% block list-content %}
+    <section class="list-actions">
+        <div>
+            <input type="checkbox" id="toggle-all" />
+            <label for="toggle_all">Select/Unselect All</label>
+        </div>
+        <form method="POST" id="batched">
+            {% csrf_token %}
+            <button type="submit" name="resolve" value="true">Resolve</button>
+            <button type="submit" name="assign" value="true">Assign</button>
+            <button id="collapse-all">Collapse All</button>
+        </form>
+    </section>
+{% if object_list %}
+    {% include 'lib/pagination.html' %}
+	{% for task in object_list %}
 		{% if task.orphantask %}
-			<section class="received message">
-				<h1>Orphan</h1>
-				<h2>{{task.orphantask.get_reason_display}} on {{task.date_created|date}}</h2>
-				<span>Sent to {{task.orphantask.address}}</span><br />
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				{% if task.orphantask.communication.likely_foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.orphantask.communication.likely_foia.pk %}">Probable Request</a></span><br />
-				{% endif %}
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.orphantask.pk}}">
-					<input type="hidden" name="task_class" value="orphantask">
-					<label for="foia_pk">FOIA PK:</label>
-					<input type="text" name="foia_pk" value="{{task.orphantask.communication.likely_foia.pk}}">
-					<input type="submit" name="submit" value="Move" class="button">
-					<br \>
-					<input type="submit" name="submit" value="Reject" class="button">
-				</form>
-				<p>{{task.orphantask.communication.communication}}</p>
-			</section>
-
+			{% orphan task %}
 		{% elif task.snailmailtask %}
-			{% with task.snailmailtask.communication.foia as foia %}
-			<section class="received message">
-				<h1>Snail Mail</h1>
-				<h2>{{task.snailmailtask.get_category_display}} on {{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				<span>Acknowledged? {{foia.has_ack}}</span><br />
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.snailmailtask.pk}}">
-					<input type="hidden" name="task_class" value="snailmailtask">
-					<span>Set status:</span>
-					<input type="submit" name="submit" value="Awaiting Acknowledgement" class="button">
-					<input type="submit" name="submit" value="Awaiting Response" class="button">
-					<input type="submit" name="submit" value="Awaiting Appeal" class="button">
-				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' foia.user.pk %}">Submitter: {{foia.user}}</a></span> | 
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">FOIA: {{foia}}</a></span>
-				{# agency info #}
-				{% if not appeal %}
-					{% if foia.agency %}
-						| <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.pk %}">Agency Admin</a>
-					{% endif %}
-					{% if foia.agency.email %}
-						| Agency Email: {{foia.agency.email}}
-					{% endif %}
-					{% if foia.agency.fax %}
-						| Agency Fax: {{foia.agency.fax}}@fax2.faxaway.com
-					{% endif %}
-					{% if foia.agency.address %}
-						<p>
-						Agency Address: {{foia.agency.address|linebreaks}}
-						</p>
-					{% endif %}
-					{% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
-						<p>
-						Notes: {{foia.agency.notes}}
-						</p>
-					{% endif %}
-
-				{% else %}
-					{% if foia.agency.appeal_agency %}
-						| <a href="http://www.muckrock.com{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">Appeal Agency Admin</a>
-						{% if foia.agency.appeal_agency.address %}
-							<p>
-							Address: {{foia.agency.appeal_agency.address|linebreaks}}
-							</p>
-						{% endif %}
-					{% endif %}
-				{% endif %}
-				<br />
-				<button type="button" class="button" onclick="$('#full-letter-{{task.snailmailtask.pk}}').toggle()">Show/Hide Letter</button>
-				{# full letter here, hidden #}
-				<textarea id="full-letter-{{task.snailmailtask.pk}}" style="display: none;">
-{% now "F j, Y" %}
-{% with foia as request %}
-{% include "text/foia/comms.txt" %}
-{% endwith %}
-				</textarea>
-			</section>
-			{% endwith %}
-
+			{% snail_mail task %}
 		{% elif task.rejectedemailtask %}
-			<section class="received message">
-				<h1>Rejected Email</h1>
-				<h2>{{task.rejectedemailtask.get_category_display}} on {{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				{% if task.rejectedemailtask.foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.rejectedemailtask.foia.pk %}">FOIA: {{task.rejectedemailtask.foia}} </a></span><br />
-				{% endif %}
-				<span>From: {{task.rejectedemailtask.email}}</span><br />
-				<span>Error: {{task.rejectedemailtask.error}}</span><br />
-				<ul>
-				{% for foia in task.rejectedemailtask.foias %}
-				<li><a href="https://www.muckrock.com{% url 'admin:foia_foiarequest_change' foia.pk %}">{{foia.title}}</a></li>
-				{% endfor %}
-				</ul><ul>
-				{% for agency in task.rejectedemailtask.agencies %}
-				<li><a href="https://www.muckrock.com{% url 'admin:agency_agency_change' agency.pk %}">{{agency.name}}</a></li>
-				{% endfor %}
-				</ul>
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.rejectedemailtask.pk}}">
-					<input type="hidden" name="task_class" value="rejectedemailtask">
-					<input type="submit" name="submit" value="Resolve" class="button">
-				</form>
-			</section>
-
+			{% rejected_email task %}
 		{% elif task.staleagencytask %}
-			<section class="received message">
-				<h1>Stale Agency</h1>
-				<h2>{{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.staleagencytask.agency.pk %}">Agency: {{task.staleagencytask.agency}}</a></span><br />
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.staleagencytask.pk}}">
-					<input type="hidden" name="task_class" value="staleagencytask">
-					<input type="submit" name="submit" value="Resolve" class="button">
-				</form>
-			</section>
-
+			{% stale_agency task %}
 		{% elif task.flaggedtask %}
-			<section class="received message">
-				<h1>Flagged</h1>
-				<h2>{{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.flaggedtask.pk}}">
-					<input type="hidden" name="task_class" value="flaggedtask">
-					<input type="submit" name="submit" value="Resolve" class="button">
-				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.flaggedtask.user.pk %}">User: {{task.flaggedtask.user}}</a></span> |
-				{% if task.flaggedtask.foia %}
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' task.flaggedtask.foia.pk %}">FOIA: {{task.flaggedtask.foia}} </a></span><br />
-				{% elif task.flaggedtask.agency %}
-				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.flaggedtask.agency.pk %}">Agency: {{task.flaggedtask.agency}}</a></span><br />
-				{% elif task.flaggedtask.jurisdiction %}
-				<span><a href="http://www.muckrock.com{% url 'admin:jurisdiction_jurisdiction_change' task.flaggedtask.jurisdiction.pk %}">Jurisdiction: {{task.flaggedtask.jurisidiction}}</a></span><br />
-				{% endif %}
-				<p>{{task.flaggedtask.text}}</p>
-			</section>
-
+			{% flagged task %}
 		{% elif task.newagencytask %}
-			<section class="received message">
-				<h1>New Agency</h1>
-				<h2>{{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.newagencytask.pk}}">
-					<input type="hidden" name="task_class" value="newagencytask">
-					<input type="submit" name="submit" value="Approve" class="button">
-					<input type="submit" name="submit" value="Reject" class="button">
-				</form>
-				<br \>
-				<span><a href="http://www.muckrock.com{% url 'admin:agency_agency_change' task.newagencytask.agency.pk %}">Agency: {{task.newagencytask.agency}}</a></span>
-				{% if task.newagency.user %} | <span><a href="http://www.muckrock.com{% url 'admin:auth_user_change' task.newagencytask.user.pk %}">User: {{task.newagencytask.user}}</a></span>{% endif %}
-			</section>
-
+			{% new_agency task %}
 		{% elif task.responsetask %}
-			<section class="received message">
-				<h1>Response</h1>
-				<h2>{{task.date_created|date}}</h2>
-				<span>Assigned to:</span>
-				<form id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-					<select name="user" onchange="$.post('{% url "task-assign"%}', {user: $(this).val(), task: '{{task.pk}}'}, function (data) {$('#task-{{task.id}}-confirm').text(data).fadeIn().delay(2000).fadeOut()})">
-						<option value="0">-None-</option>
-						{% for user in staff_users %}
-						<option value="{{user.pk}}" {% if task.assigned.pk == user.pk %}selected="selected"{%endif%}>{{user.username}}</option>
-						{% endfor %}
-					</select>
-					<span id="task-{{task.id}}-confirm"></span>
-				</form>
-				{% with task.responsetask.communication as comm %}
-				<span>Response reseived from {{comm.priv_from_who}} for request {{comm.foia.title}} - {{comm.foia.mail_id}}</span><br />
-				<form method="post">
-					{% csrf_token %}
-					<input type="hidden" name="task_pk" value="{{task.responsetask.pk}}">
-					<input type="hidden" name="task_class" value="responsetask">
-					<select name="status">
-						<option value="fix">Fix Required</option>
-						<option value="payment">Payment Required</option>
-						<option value="rejected">Rejected</option>
-						<option value="no_docs">No Responsive Docs</option>
-						<option value="done">Completed</option>
-						<option value="partial">Partially Completed</option>
-						<option value="abandoned">Withdrawn</option>
-					</select>
-					<input type="submit" name="submit" value="Set Status" class="button">
-				</form>
-				<span><a href="http://www.muckrock.com{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">FOIA: {{comm.foia}}</a></span><br />
-				<p>{{comm.communication}}</p>
-				{% endwith %}
-			</section>
-
+			{% response task %}
 		{% else %}
-			<section class="received message">
-				<h1>Bare task... something went wrong!</h1>
-				{{ task }}
-			</section>
+			{% default task %}
 		{% endif %}
-{% endfor %}
-
-{% endblock list %}
+	{% endfor %}
+	{% include 'lib/pagination.html' %}
+{% endif %}
+{% endblock list-content %}
 
 {% block list-scripts %}
-// using jQuery
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-var csrftoken = getCookie('csrftoken');
-
+var csrftoken = $.cookie('csrftoken');
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
@@ -311,4 +79,43 @@ $.ajaxSetup({
         }
     }
 });
+
+var tasks = $('.task');
+var resolved = $('.resolved.task');
+resolved.find(':input').attr('disabled', true).addClass('disabled');
+resolved.addClass('collapsed');
+tasks.find('header').click(function() {
+    $(this).parent().toggleClass('collapsed');
+});
+
+$('.task .permalink').click(function(e) {
+    e.stopPropagation();
+});
+
+$('.task .checkbox').click(function(e) {
+    e.stopPropagation();
+});
+
+var checkboxes = $('.task header').find(':checkbox');
+var batchedButtons = $('#batched button').not('#collapse-all');
+batchedButtons.attr('disabled', true);
+checkboxes.click(function(){
+    if ($('.task header').find(':checkbox:checked').length > 0) {
+        batchedButtons.attr('disabled', false);
+    } else {
+        batchedButtons.attr('disabled', true);
+    }
+});
+
+$('#collapse-all').click(function(e){
+    e.preventDefault();
+    if ($(this).text() == "Collapse All") {
+        $(this).text("Reveal All");
+        $('.task').addClass('collapsed');
+    } else {
+        $(this).text("Collapse All");
+        $('.task').removeClass('collapsed');
+    }
+});
+
 {% endblock list-scripts %}

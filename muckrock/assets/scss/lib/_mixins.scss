@@ -3,27 +3,48 @@
     @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
 }
 
-@mixin button-color($color) {
-    color: $color-white;
-    border-color: darken($color, $base-gradient-darken);
-    @include background-gradient($color);
-}
-
-@mixin button-hover($color) {
-    &:hover {
-        color: $color-white;
-        background: $color;
-    }
-    &:focus {
-        $focus-color: lighten($color, 10%);
-        color: $color-white;
-        border-color: $focus-color;
-        background: $focus-color;
-    }
-    &:active {
-        color: $color-white;
-        @include background(linear-gradient(darken($color, $base-gradient-darken), $color));
-    }
+@mixin button($color-main) {
+  $color-dark: darken($color-main, 10%);
+  $shadow-normal: 3px;
+  $shadow-hover: 5px;
+  $shadow-active: 2px;
+  // Metrics
+  display: inline-block;
+  margin: $base-margin/4 0;
+  border: 1px solid $color-dark;
+  border-radius: $base-border-radius;
+  padding: $base-padding/4 $base-padding/2;
+  box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+  // Type
+  background: $color-main;
+  color: #FFFFFF;
+  text-align: center;
+  text-decoration: none;
+  // Transitions
+  transition-property: box-shadow transform;
+  transition-duration: .15s;
+  transition-timing-function: ease;
+  // Misc
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  // State
+  &:link, &:visited {
+    box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+  }
+  &:hover {
+    transform: translateY($shadow-normal - $shadow-hover);
+    box-shadow: 0px $shadow-hover 0px 0px $color-dark;
+    text-decoration: none;
+  }
+  &:active {
+    transform: translateY($shadow-normal - $shadow-active);
+    box-shadow: 0px $shadow-active 0px 0px $color-dark;
+  }
+  &:disabled:hover {
+    transform: none;
+    box-shadow: 0 $shadow-normal 0 0 $color-dark;
+  }
 }
 
 @mixin panel-color($color, $disabled: false) {

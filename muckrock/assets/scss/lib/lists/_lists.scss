@@ -32,8 +32,7 @@
                 border-collapse: collapse;
             }
             & li {
-                display: table-cell;
-                padding: .5em;
+                display: table-row;
                 border: $base-border-width solid $color-grey;
                 text-align: center;
                 vertical-align: middle;
@@ -42,6 +41,18 @@
                     border-color: $color-primary;
                     background: $color-primary;
                     a { color: $color-white; }
+                }
+                &:hover {
+                    border-color: lighten($color-primary, 20%);
+                }
+                & a {
+                    display: table-cell;
+                    padding: $base-padding/2;
+                    &:hover {
+                        text-decoration: none;
+                        background: lighten($color-primary, 20%);
+
+                    }
                 }
             }
         }
@@ -128,10 +139,15 @@
             border: none;
             border-radius: 0;
             background: none;
+            box-shadow: none;
             color: $color-default;
             text-align: left;
             &:hover {
                 color: $color-black;
+                box-shadow: none;
+            }
+            &:disabled:hover {
+                color: $color-default;
             }
             &:first-of-type {
                 padding-left: 0;
@@ -196,7 +212,7 @@
         color: $color-grey;
         text-align: center;
     }
-    
+
     // Makes tables responsive
     @include media($small-layout) {
         .list-table {

@@ -9,7 +9,10 @@ from django.contrib.auth.models import User
 
 from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
+from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 
 # First, create some accounts
 
@@ -34,6 +37,46 @@ nj_gov = Agency.objects.create(name='Governor\'s Office', slug='nj-governors-off
 newark_mayor = Agency.objects.create(name='Mayor\'s Office', slug='nj-mayors-office', jurisdiction=local, approved=True)
 
 # Fourth, create some requests
+
+foia1 = FOIARequest.objects.create(user=user, title='Test Request', slug='test-request', status='submitted', jurisdiction=federal, agency=usa_fbi, date_submitted=datetime.now())
+
+foia2 = FOIARequest.objects.create(user=user, title='Test Request', slug='test-request', status='submitted', jurisdiction=state, agency=nj_gov, date_submitted=datetime.now())
+
+foia3 = FOIARequest.objects.create(user=user, title='Test Request', slug='test-request', status='submitted', jurisdiction=local, agency=newark_mayor, date_submitted=datetime.now())
+
 # Fifth, create some communications
-# Sixth, create some questions
-# Seventh, create some news articles
+
+comm11 = FOIACommunication.objects.create(foia=foia1, from_who='Person A', to_who='Person B', priv_from_who='Alice', priv_to_who='Bob', date=datetime.now(), response=False, communication='Lorem ipsum dolor su ament', delivered='email')
+
+comm12 = FOIACommunication.objects.create(foia=foia1, from_who='Person B', to_who='Person A', priv_from_who='Bob', priv_to_who='Alice', date=datetime.now(), response=True, communication='Lorem ipsum dolor su ament', delivered='email')
+
+comm21 = FOIACommunication.objects.create(foia=foia2, from_who='Person A', to_who='Person B', priv_from_who='Alice', priv_to_who='Bob', date=datetime.now(), response=False, communication='Lorem ipsum dolor su ament', delivered='email')
+
+comm22 = FOIACommunication.objects.create(foia=foia2, from_who='Person B', to_who='Person A', priv_from_who='Bob', priv_to_who='Alice', date=datetime.now(), response=True, communication='Lorem ipsum dolor su ament', delivered='email')
+
+comm31 = FOIACommunication.objects.create(foia=foia3, from_who='Person A', to_who='Person B', priv_from_who='Alice', priv_to_who='Bob', date=datetime.now(), response=False, communication='Lorem ipsum dolor su ament', delivered='email')
+
+comm32 = FOIACommunication.objects.create(foia=foia3, from_who='Person B', to_who='Person A', priv_from_who='Bob', priv_to_who='Alice', date=datetime.now(), response=True, communication='Lorem ipsum dolor su ament', delivered='email')
+
+# Sixth, create some tasks
+
+orphan = OrphanTask.objects.create(reason='bs', communication=comm21, address='100dollars@bigmoney.biz')
+
+snail_mail = SnailMailTask.objects.create(category='a', communication=comm22)
+
+rejected_email = RejectedEmailTask.objects.create(category='b', foia=foia1, email='bigdog@bostondynamics.com', error='Undeliverable')
+
+stale_agency = StaleAgencyTask.objects.create(agency=nj_gov)
+
+flagged_foia = FlaggedTask.objects.create(user=user, text='I hate this.', foia=foia1)
+
+flagged_agency = FlaggedTask.objects.create(user=user, text='I also hate this.', agency=nj_gov)
+
+flagged_jurisdiction = FlaggedTask.objects.create(user=user, text='I hate this the most tho', jurisdiction=local)
+
+new_agency = NewAgencyTask.objects.create(user=user, agency=newark_mayor)
+
+response = ResponseTask.objects.create(communication=comm32)
+
+# Seventh, create some questions
+# Eighth, create some news articles

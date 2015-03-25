@@ -7,6 +7,9 @@ from muckrock.task import views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', views.List.as_view(template_name='lists/task_list.html'), name='task-list'),
+    url(r'^$', views.TaskList.as_view(), name='task-list'),
+    url(r'^inbox/$', views.InboxTaskList.as_view(), name='task-list-inbox'),
+    url(r'^unassigned/$', views.UnassignedTaskList.as_view(), name='task-list-unassigned'),
+    url(r'^resolved/$', views.ResolvedTaskList.as_view(), name='task-list-resolved'),
     url(r'^assign/$', views.assign, name='task-assign'),
 )
