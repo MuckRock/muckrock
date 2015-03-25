@@ -1,27 +1,28 @@
 /* Buttons */
 
 .button, button, input[type='submit'] {
-  @include button($color-default);
-}
 
-.button.primary {
-  @include button($color-primary);
-}
+    @include button($color-default);
 
-.button.success {
-  @include button($color-success);
-}
+    &.primary {
+      @include button($color-primary);
+    }
 
-.button.failure {
-  @include button($color-failure);
-}
+    &.success {
+      @include button($color-success);
+    }
 
-.button.warning {
-  @include button($color-warning);
-}
+    &.failure {
+      @include button($color-failure);
+    }
 
-.button.disabled {
-  @include button($color-disabled);
+    &.warning {
+      @include button($color-warning);
+    }
+
+    &.disabled {
+      @include button($color-disabled);
+    }
 }
 
 .edit {
@@ -36,4 +37,9 @@
     &:hover {
         color: darken($color-primary, 10%);
     }
+}
+
+.tag-manager .button, .status-form .button {
+    margin: 0;
+    padding: $base-padding/8 $base-padding/2;
 }
