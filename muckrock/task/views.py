@@ -32,7 +32,7 @@ class TaskList(MRFilterableListView):
         context = super(TaskList, self).get_context_data(**kwargs)
         context['inbox_count'] = Task.objects.filter(assigned=self.request.user,
                                                      resolved=False).count()
-        context['unassigned_count'] = Task.objects.filter(assigned=None).count()
+        context['unassigned_count'] = Task.objects.filter(assigned=None, resolved=False).count()
         assigned_filter = self.request.GET.get('assigned')
         if assigned_filter:
             context['filter_form'] = TaskFilterForm(initial={'assigned', assigned_filter})
