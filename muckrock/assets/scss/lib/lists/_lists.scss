@@ -128,10 +128,12 @@
             border: none;
             border-radius: 0;
             background: none;
+            box-shadow: none;
             color: $color-default;
             text-align: left;
             &:hover {
                 color: $color-black;
+                box-shadow: none;
             }
             &:first-of-type {
                 padding-left: 0;
@@ -196,7 +198,7 @@
         color: $color-grey;
         text-align: center;
     }
-    
+
     // Makes tables responsive
     @include media($small-layout) {
         .list-table {
