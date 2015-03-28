@@ -35,23 +35,57 @@ admin.site.index_template = 'admin/custom_index.html'
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
 
 router = DefaultRouter()
-router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
-router.register(r'agency', muckrock.agency.views.AgencyViewSet)
-router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
-router.register(r'question', muckrock.qanda.views.QuestionViewSet)
-router.register(r'statistics', muckrock.accounts.views.StatisticsViewSet)
-router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet)
-router.register(r'user', muckrock.accounts.views.UserViewSet)
-router.register(r'news', muckrock.news.views.ArticleViewSet)
-router.register(r'sidebar', muckrock.sidebar.viewsets.SidebarViewSet)
-router.register(r'task', muckrock.task.viewsets.TaskViewSet)
-router.register(r'orphantask', muckrock.task.viewsets.OrphanTaskViewSet)
-router.register(r'snailmailtask', muckrock.task.viewsets.SnailMailTaskViewSet)
-router.register(r'rejectedemailtask', muckrock.task.viewsets.RejectedEmailTaskViewSet)
-router.register(r'staleagencytask', muckrock.task.viewsets.StaleAgencyTaskViewSet)
-router.register(r'flaggedtask', muckrock.task.viewsets.FlaggedTaskViewSet)
-router.register(r'newagencytask', muckrock.task.viewsets.NewAgencyTaskViewSet)
-router.register(r'responsetask', muckrock.task.viewsets.ResponseTaskViewSet)
+router.register(r'jurisdiction',
+        muckrock.jurisdiction.views.JurisdictionViewSet,
+        'api-jurisdiction')
+router.register(r'agency',
+        muckrock.agency.views.AgencyViewSet,
+        'api-agency')
+router.register(r'foia',
+        muckrock.foia.viewsets.FOIARequestViewSet,
+        'api-foia')
+router.register(r'question',
+        muckrock.qanda.views.QuestionViewSet,
+        'api-question')
+router.register(r'statistics',
+        muckrock.accounts.views.StatisticsViewSet,
+        'api-statistics')
+router.register(r'communication',
+        muckrock.foia.viewsets.FOIACommunicationViewSet,
+        'api-communication')
+router.register(r'user',
+        muckrock.accounts.views.UserViewSet,
+        'api-user')
+router.register(r'news',
+        muckrock.news.views.ArticleViewSet,
+        'api-news')
+router.register(r'sidebar',
+        muckrock.sidebar.viewsets.SidebarViewSet,
+        'api-sidebar')
+router.register(r'task',
+        muckrock.task.viewsets.TaskViewSet,
+        'api-task')
+router.register(r'orphantask',
+        muckrock.task.viewsets.OrphanTaskViewSet,
+        'api-orphantask')
+router.register(r'snailmailtask',
+        muckrock.task.viewsets.SnailMailTaskViewSet,
+        'api-snailmailtask')
+router.register(r'rejectedemailtask',
+        muckrock.task.viewsets.RejectedEmailTaskViewSet,
+        'api-rejectedemailtask')
+router.register(r'staleagencytask',
+        muckrock.task.viewsets.StaleAgencyTaskViewSet,
+        'api-staleagencytask')
+router.register(r'flaggedtask',
+        muckrock.task.viewsets.FlaggedTaskViewSet,
+        'api-flaggedtask')
+router.register(r'newagencytask',
+        muckrock.task.viewsets.NewAgencyTaskViewSet,
+        'api-newagencytask')
+router.register(r'responsetask',
+        muckrock.task.viewsets.ResponseTaskViewSet,
+        'api-responsetask')
 
 urlpatterns = patterns(
     '',
