@@ -14,8 +14,9 @@ from muckrock.task.serializers import (
         RejectedEmailTaskSerializer, StaleAgencyTaskSerializer,
         FlaggedTaskSerializer, NewAgencyTaskSerializer, ResponseTaskSerializer)
 
-def create_task_viewset(model, serializer, fields): 
+def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
+    # pylint: disable=invalid-name
     Meta = type('Meta', (object,),
             {
                 'model': model,
