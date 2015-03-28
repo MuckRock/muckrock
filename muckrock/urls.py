@@ -15,7 +15,7 @@ from django.views.generic.base import RedirectView
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
 import autocomplete_light
-import haystack.urls, dbsettings.urls
+import dbsettings.urls
 
 autocomplete_light.autodiscover()
 
@@ -60,7 +60,7 @@ urlpatterns = patterns(
     url(r'^task/', include(muckrock.task.urls)),
     url(r'^organization/', include(muckrock.organization.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/', include(haystack.urls)),
+    url(r'^search/$', views.MRSearchView(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),

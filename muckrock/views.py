@@ -18,6 +18,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
 
 import re
+from haystack.views import SearchView
 
 class MRFilterableListView(ListView):
     """
@@ -182,6 +183,14 @@ class MRFilterableListView(ListView):
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
         return self.request.GET.get('per_page', 25)
+
+
+class MRSearchView(SearchView):
+    """Always lower case queries for case insensitive searches"""
+
+    def get_query(self):
+        """Lower case the query"""
+        return super(MRSearchView, self).get_query().lower()
 
 def front_page(request):
     """Get all the details needed for the front page"""
