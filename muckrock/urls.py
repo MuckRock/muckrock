@@ -23,7 +23,7 @@ import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
-       muckrock.accounts.views, muckrock.sidebar.viewsets
+       muckrock.accounts.views, muckrock.sidebar.viewsets, muckrock.task.viewsets
 import muckrock.settings as settings
 import muckrock.views as views
 from muckrock.foia.sitemap import FoiaSitemap
@@ -44,6 +44,14 @@ router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSe
 router.register(r'user', muckrock.accounts.views.UserViewSet)
 router.register(r'news', muckrock.news.views.ArticleViewSet)
 router.register(r'sidebar', muckrock.sidebar.viewsets.SidebarViewSet)
+router.register(r'task', muckrock.task.viewsets.TaskViewSet)
+router.register(r'orphantask', muckrock.task.viewsets.OrphanTaskViewSet)
+router.register(r'snailmailtask', muckrock.task.viewsets.SnailMailTaskViewSet)
+router.register(r'rejectedemailtask', muckrock.task.viewsets.RejectedEmailTaskViewSet)
+router.register(r'staleagencytask', muckrock.task.viewsets.StaleAgencyTaskViewSet)
+router.register(r'flaggedtask', muckrock.task.viewsets.FlaggedTaskViewSet)
+router.register(r'newagencytask', muckrock.task.viewsets.NewAgencyTaskViewSet)
+router.register(r'responsetask', muckrock.task.viewsets.ResponseTaskViewSet)
 
 urlpatterns = patterns(
     '',
