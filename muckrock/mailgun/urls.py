@@ -19,6 +19,11 @@ urlpatterns = patterns(
         name='mailgun-fax'
     ),
     url(
+        r'^catch_all/(?P<address>.*)/$',
+        views.catch_all,
+        name='mailgun-catchall'
+    ),
+    url(
         r'^bounces/$',
         views.bounces,
         name='mailgun-bounces'
