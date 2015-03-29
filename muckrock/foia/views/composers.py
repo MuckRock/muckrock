@@ -142,9 +142,10 @@ def _make_user(request, data):
         'Welcome to MuckRock',
         render_to_string('text/user/welcome.txt', {
             'user': user,
-            'password': password,
             'password_link': password_link,
-            'verification_code': user.get_profile().generate_confirmation_key(),
+            'verification_link': user.get_profile().wrap_url(
+                reverse('acct-verify-email'),
+                key=prof.generate_confirmation_key())
         }),
         'info@muckrock.com',
         [data['email']],

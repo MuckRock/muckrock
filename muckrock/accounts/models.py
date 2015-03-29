@@ -22,6 +22,7 @@ from random import choice
 import string
 import stripe
 from urlauth.models import AuthKey
+from urllib import urlencode
 
 stripe.api_key = STRIPE_SECRET_KEY
 
@@ -387,12 +388,12 @@ class Profile(models.Model):
 
         self.notifications.clear()
 
-    def wrap_url(self, link):
+    def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         if self.use_autologin:
-            return AuthKey.objects.wrap_url(link, uid=self.user.pk)
+            return AuthKey.objects.wrap_url(link, uid=self.user.pk, **extra)
         else:
-            return link
+            return link + '?' + urlencode(extra)
 
 class Statistics(models.Model):
     """Nightly statistics"""
