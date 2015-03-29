@@ -336,6 +336,7 @@ class Profile(models.Model):
             'rejected': 'Rejected Requests',
             'fix': 'Requests Needing Action',
             'payment': 'Requests Needing Action',
+            'no_docs': 'No Responsive Documents',
         }
         status_order = ['done', 'partial', 'rejected', 'fix', 'payment',
                         'no_docs', 'abandoned', 'appealing', 'started',
