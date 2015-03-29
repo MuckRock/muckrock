@@ -145,7 +145,7 @@ def _make_user(request, data):
             'password_link': password_link,
             'verification_link': user.get_profile().wrap_url(
                 reverse('acct-verify-email'),
-                key=prof.generate_confirmation_key())
+                key=user.get_profile().generate_confirmation_key())
         }),
         'info@muckrock.com',
         [data['email']],
