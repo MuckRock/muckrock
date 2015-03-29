@@ -58,7 +58,8 @@ class FOIACommunication(models.Model):
         """Remove controls characters from text before saving"""
         remove_control = dict.fromkeys(range(0, 9) + range(11, 13) + range(14, 32))
         self.communication = unicode(self.communication).translate(remove_control)
-        self.communication = self.communication[:5000000]
+        # limit communication length to 150k
+        self.communication = self.communication[:150000]
         super(FOIACommunication, self).save(*args, **kwargs)
 
     def anchor(self):
