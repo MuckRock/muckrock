@@ -10,15 +10,13 @@
 <section class="list-sections">
     <ul>
         <li class="{% active request '^/task/$' %}"><a href="{% url 'task-list' %}">All</a></li>
-        <li class="{% active request '^/task/inbox/$' %}"><a href="{% url 'task-list-inbox' %}">
-            <span class="counter">{{ inbox_count }}</span>
-            Inbox
-        </a></li>
-        <li class="{% active request '^/task/unassigned/$' %}"><a href="{% url 'task-list-unassigned' %}">
-            <span class="counter">{{ unassigned_count }}</span>
-            Unassigned
-        </a></li>
-        <li class="{% active request '^/task/resolved/$' %}"><a href="{% url 'task-list-resolved' %}">Resolved</a></li>
+        <li class="{% active request '^/task/orphan/$' %}"><a href="{% url 'orphan-task-list' %}">Orphan</a></li>
+        <li class="{% active request '^/task/snail-mail/$' %}"><a href="{% url 'snail-mail-task-list' %}">Snail Mail</a></li>
+        <li class="{% active request '^/task/rejected-email/$' %}"><a href="{% url 'rejected-email-task-list' %}">Rejected Email</a></li>
+        <li class="{% active request '^/task/stale-agency/$' %}"><a href="{% url 'stale-agency-task-list' %}">Stale Agency</a></li>
+        <li class="{% active request '^/task/flagged/$' %}"><a href="{% url 'flagged-task-list' %}">Flagged</a></li>
+        <li class="{% active request '^/task/new-agency/$' %}"><a href="{% url 'new-agency-task-list' %}">New Agency</a></li>
+        <li class="{% active request '^/task/response/$' %}"><a href="{% url 'response-task-list' %}">Response</a></li>
     </ul>
 </section>
 {% endblock %}
