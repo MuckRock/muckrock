@@ -26,31 +26,6 @@
     {% endblock %}
 
     <div class="task-actions">
-    {% block task-assign %}
-        <form class="task-assign" id="assign-{{task.pk}}" submit="{% url 'task-assign'%}">
-            {% csrf_token %}
-            <input type="hidden" name="task" value="{{task.pk}}">
-            <span>Assigned to </span>
-            <select name="assign"
-                    onchange="$.post('{% url "task-assign"%}', {
-                            user: $(this).val(),
-                            task: '{{task.pk}}'
-                        }, function (data) {
-                            $('#task-{{task.id}}-confirm')
-                            .text(data)
-                            .fadeIn()
-                            .delay(2000)
-                            .fadeOut();
-                        })">
-                <option value="0">Nobody</option>
-                {% for staff in staff_list %}
-                <option value="{{staff.pk}}" {% if task.assigned.pk == staff.pk %}selected{%endif%}>
-                    {{staff.get_full_name}}
-                </option>
-                {% endfor %}
-            </select>
-        </form>
-    {% endblock task-assign %}
         <form method="POST" class="task-post-actions">
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">
