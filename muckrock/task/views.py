@@ -194,21 +194,3 @@ class ResponseTaskList(TaskList):
         queryset = super(ResponseTaskList, self).get_queryset()
         queryset = queryset.exclude(resolved=True)
         return queryset
-
-@user_passes_test(lambda u: u.is_staff)
-def assign(request):
-    """Assign a user to a task, AJAX style"""
-    user_pk = request.POST.get('user')
-    task_pk = request.POST.get('task')
-    try:
-        if user_pk == '0':
-            user = None
-        else:
-            user = User.objects.get(pk=user_pk)
-        task = Task.objects.get(pk=task_pk)
-    except (User.DoesNotExist, Task.DoesNotExist):
-        return HttpResponse("Error", content_type='text/plain')
-
-    task.assigned = user
-    task.save()
-    return HttpResponse("OK", content_type='text/plain')

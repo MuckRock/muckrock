@@ -15,5 +15,4 @@ urlpatterns = patterns(
     url(r'^flagged/$', views.FlaggedTaskList.as_view(), name='flagged-task-list'),
     url(r'^new-agency/$', views.NewAgencyTaskList.as_view(), name='new-agency-task-list'),
     url(r'^response/$', views.ResponseTaskList.as_view(), name='response-task-list'),
-    url(r'^assign/$', views.assign, name='task-assign'),
 )
