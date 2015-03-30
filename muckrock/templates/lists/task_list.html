@@ -22,8 +22,8 @@
 {% endblock %}
 
 {% block list-filters %}
-<label for="id_assigned">Assigned To</label>
-{{ filter_form.assigned }}
+{{ filter_form.show_resolved }}
+{{ filter_form.show_resolved.label }}
 {% endblock %}
 
 {% block list-content %}

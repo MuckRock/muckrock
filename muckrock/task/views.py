@@ -21,22 +21,18 @@ class TaskList(MRFilterableListView):
     template_name = 'lists/task_list.html'
     model = Task
 
-    def get_filters(self):
-        """Only uses the assigned field from TaskFilterForm"""
-        # pylint: disable=no-self-use
-        return [
-            {'field': 'assigned', 'lookup': 'exact'},
-        ]
+    def get_queryset(self):
+        """Remove resolved tasks unless filter says to keep them"""
+        queryset = super(TaskList, self).get_queryset()
+        if not self.request.GET.get('show_resolved'):
+            queryset = queryset.exclude(resolved=True)
+        return queryset
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
-        context['inbox_count'] = Task.objects.filter(assigned=self.request.user,
-                                                     resolved=False).count()
-        context['unassigned_count'] = Task.objects.filter(assigned=None, resolved=False).count()
-        assigned_filter = self.request.GET.get('assigned')
-        if assigned_filter:
-            context['filter_form'] = TaskFilterForm(initial={'assigned', assigned_filter})
+        if self.request.GET.get('show_resolved'):
+            context['filter_form'] = TaskFilterForm(initial={'show_resolved': True})
         else:
             context['filter_form'] = TaskFilterForm()
         return context
@@ -136,61 +132,26 @@ class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
 
-    def get_queryset(self):
-        queryset = super(OrphanTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
-
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
-
-    def get_queryset(self):
-        queryset = super(SnailMailTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
     model = RejectedEmailTask
 
-    def get_queryset(self):
-        queryset = super(RejectedEmailTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
-
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
     model = StaleAgencyTask
-
-    def get_queryset(self):
-        queryset = super(StaleAgencyTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
     model = FlaggedTask
 
-    def get_queryset(self):
-        queryset = super(FlaggedTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
-
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
 
-    def get_queryset(self):
-        queryset = super(NewAgencyTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
-
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
-
-    def get_queryset(self):
-        queryset = super(ResponseTaskList, self).get_queryset()
-        queryset = queryset.exclude(resolved=True)
-        return queryset
