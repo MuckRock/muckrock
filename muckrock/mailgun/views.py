@@ -155,12 +155,14 @@ def catch_all(request, address):
     if not _verify(request.POST):
         return HttpResponseForbidden()
 
+    post = request.POST
+
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
-    from_realname, from_email = parseaddr(from_)
+    _, from_email = parseaddr(from_)
 
     if _allowed_email(from_email):
-        comm = _make_orphan_comm(from_, to_, request.POST, request.FILES, None)
+        comm = _make_orphan_comm(from_, to_, post, request.FILES, None)
         OrphanTask.objects.create(
             reason='ia',
             communication=comm,
@@ -285,7 +287,8 @@ def _allowed_email(email, foia=None):
         '@muckrock.com',
         ] + state_tlds
 
-    if foia and foia.email and '@' in foia.email and email.endswith(foia.email.split('@')[1].lower()):
+    if foia and foia.email and '@' in foia.email and \
+            email.endswith(foia.email.split('@')[1].lower()):
         return True
     if foia and foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
         return True
