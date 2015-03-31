@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import resolve
-from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
@@ -14,6 +13,8 @@ from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
+
+# pylint:disable=missing-docstring
 
 class TaskList(MRFilterableListView):
     """List of tasks"""
