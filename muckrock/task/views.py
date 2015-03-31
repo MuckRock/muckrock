@@ -5,14 +5,16 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import resolve
-from django.http import HttpResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
 from muckrock.foia.models import STATUS
 from muckrock.task.forms import TaskFilterForm
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, NewAgencyTask, ResponseTask
+from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
+
+# pylint:disable=missing-docstring
 
 class TaskList(MRFilterableListView):
     """List of tasks"""
@@ -20,22 +22,18 @@ class TaskList(MRFilterableListView):
     template_name = 'lists/task_list.html'
     model = Task
 
-    def get_filters(self):
-        """Only uses the assigned field from TaskFilterForm"""
-        # pylint: disable=no-self-use
-        return [
-            {'field': 'assigned', 'lookup': 'exact'},
-        ]
+    def get_queryset(self):
+        """Remove resolved tasks unless filter says to keep them"""
+        queryset = super(TaskList, self).get_queryset()
+        if not self.request.GET.get('show_resolved'):
+            queryset = queryset.exclude(resolved=True)
+        return queryset
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
-        context['inbox_count'] = Task.objects.filter(assigned=self.request.user,
-                                                     resolved=False).count()
-        context['unassigned_count'] = Task.objects.filter(assigned=None, resolved=False).count()
-        assigned_filter = self.request.GET.get('assigned')
-        if assigned_filter:
-            context['filter_form'] = TaskFilterForm(initial={'assigned', assigned_filter})
+        if self.request.GET.get('show_resolved'):
+            context['filter_form'] = TaskFilterForm(initial={'show_resolved': True})
         else:
             context['filter_form'] = TaskFilterForm()
         return context
@@ -131,56 +129,30 @@ def response_task_post_handler(request, task_pk):
             response_task.set_status(status)
     return
 
-class InboxTaskList(TaskList):
-    """Shows only unresolved tasks assigned to the logged-in user"""
-    def get_queryset(self):
-        """Filter only for unresolved tasks assigned to logged-in user"""
-        inbox = super(InboxTaskList, self).get_queryset()
-        inbox = inbox.filter(resolved=False, assigned=self.request.user)
-        return inbox
+class OrphanTaskList(TaskList):
+    title = 'Orphans'
+    model = OrphanTask
 
-    def get_context_data(self, **kwargs):
-        """Hide the filter form"""
-        context = super(InboxTaskList, self).get_context_data(**kwargs)
-        context['filter_form'] = None
-        return context
+class SnailMailTaskList(TaskList):
+    title = 'Snail Mails'
+    model = SnailMailTask
 
-class UnassignedTaskList(TaskList):
-    """Shows only unresolved, unassigned tasks"""
-    def get_queryset(self):
-        """Filter queryset by unresolved, unassigned tasks"""
-        unassigned = super(UnassignedTaskList, self).get_queryset()
-        unassigned = unassigned.filter(resolved=False, assigned=None)
-        return unassigned
+class RejectedEmailTaskList(TaskList):
+    title = 'Rejected Emails'
+    model = RejectedEmailTask
 
-    def get_context_data(self, **kwargs):
-        """Hide the filter form"""
-        context = super(UnassignedTaskList, self).get_context_data(**kwargs)
-        context['filter_form'] = None
-        return context
+class StaleAgencyTaskList(TaskList):
+    title = 'Stale Agencies'
+    model = StaleAgencyTask
 
-class ResolvedTaskList(TaskList):
-    """Shows only resolved tasks, assigned to whoever"""
-    def get_queryset(self):
-        """Filter queryset by resolved tasks"""
-        resolved = super(ResolvedTaskList, self).get_queryset()
-        resolved = resolved.filter(resolved=True)
-        return resolved
+class FlaggedTaskList(TaskList):
+    title = 'Flagged'
+    model = FlaggedTask
 
-@user_passes_test(lambda u: u.is_staff)
-def assign(request):
-    """Assign a user to a task, AJAX style"""
-    user_pk = request.POST.get('user')
-    task_pk = request.POST.get('task')
-    try:
-        if user_pk == '0':
-            user = None
-        else:
-            user = User.objects.get(pk=user_pk)
-        task = Task.objects.get(pk=task_pk)
-    except (User.DoesNotExist, Task.DoesNotExist):
-        return HttpResponse("Error", content_type='text/plain')
+class NewAgencyTaskList(TaskList):
+    title = 'New Agencies'
+    model = NewAgencyTask
 
-    task.assigned = user
-    task.save()
-    return HttpResponse("OK", content_type='text/plain')
+class ResponseTaskList(TaskList):
+    title = 'Responses'
+    model = ResponseTask
