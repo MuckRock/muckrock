@@ -32,7 +32,7 @@ def snail_mail(task):
             'staff_list': User.objects.filter(is_staff=True),
             'status': STATUS
         }
-    except task.DoesNotExist:
+    except Task.DoesNotExist:
         return
 
 @register.inclusion_tag('task/rejected_email.html')
@@ -105,7 +105,7 @@ def generic(task):
             'task': task,
             'staff_list': User.objects.filter(is_staff=True),
         }
-    except task.DoesNotExist:
+    except Task.DoesNotExist:
         return
 
 @register.inclusion_tag('task/default.html')
