@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask, StaleAgencyTask,
-        FlaggedTask, NewAgencyTask, ResponseTask)
+        FlaggedTask, NewAgencyTask, ResponseTask, GenericTask)
 
 class TaskSerializer(serializers.ModelSerializer):
     """Serializer for Task model"""
@@ -66,3 +66,10 @@ class ResponseTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ResponseTask
+
+
+class GenericTaskSerializer(serializers.ModelSerializer):
+    """Serializer for GenericTask model"""
+
+    class Meta:
+        model = GenericTask

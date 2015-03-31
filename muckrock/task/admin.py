@@ -7,7 +7,8 @@ from reversion import VersionAdmin
 from django.contrib import admin
 
 from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, \
+                                 ResponseTask, GenericTask
 
 class OrphanTaskAdmin(VersionAdmin):
     """Orphan Task Admin"""
@@ -37,6 +38,9 @@ class ResponseTaskAdmin(VersionAdmin):
     """Response Task Admin"""
     readonly_fields = ['communication']
 
+class GenericTaskAdmin(VersionAdmin):
+    """Generic Task Admin"""
+
 admin.site.register(OrphanTask, OrphanTaskAdmin)
 admin.site.register(SnailMailTask, SnailMailTaskAdmin)
 admin.site.register(RejectedEmailTask, RejectedEmailTaskAdmin)
@@ -44,3 +48,4 @@ admin.site.register(StaleAgencyTask, StaleAgencyTaskAdmin)
 admin.site.register(FlaggedTask, FlaggedTaskAdmin)
 admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
+admin.site.register(GenericTask, GenericTaskAdmin)

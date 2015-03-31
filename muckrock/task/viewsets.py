@@ -8,11 +8,12 @@ import django_filters
 
 from muckrock.task.models import (
         Task, OrphanTask, SnailMailTask, RejectedEmailTask, StaleAgencyTask,
-        FlaggedTask, NewAgencyTask, ResponseTask)
+        FlaggedTask, NewAgencyTask, ResponseTask, GenericTask)
 from muckrock.task.serializers import (
         TaskSerializer, OrphanTaskSerializer, SnailMailTaskSerializer,
         RejectedEmailTaskSerializer, StaleAgencyTaskSerializer,
-        FlaggedTaskSerializer, NewAgencyTaskSerializer, ResponseTaskSerializer)
+        FlaggedTaskSerializer, NewAgencyTaskSerializer, ResponseTaskSerializer,
+        GenericTaskSerializer)
 
 def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
@@ -93,4 +94,10 @@ ResponseTaskViewSet = create_task_viewset(
         ResponseTask,
         ResponseTaskSerializer,
         ('communication',),
+        )
+
+GenericTaskViewSet = create_task_viewset(
+        GenericTask,
+        GenericTaskSerializer,
+        ('subject', 'body'),
         )

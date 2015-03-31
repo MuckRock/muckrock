@@ -38,6 +38,16 @@ class Task(models.Model):
         self.save()
 
 
+class GenericTask(Task):
+    """A generic task"""
+    # pylint: disable=no-member
+    subject = models.CharField(max_length=255)
+    body = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.subject
+
+
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
     # pylint: disable=no-member
