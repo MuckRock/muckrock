@@ -31,7 +31,8 @@ function checkout(pk, image, description, amount, email, label, form, submit) {
         amount: amount,
         email: email,
         panelLabel: label,
-        token: token
+        token: token,
+        bitcoin: true
     });
 }
 

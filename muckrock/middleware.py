@@ -6,6 +6,8 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 
 from urlauth import middleware
+from urlauth.util import load_key, InvalidKey
+from urllib import urlencode
 import hotshot, hotshot.stats
 import logging
 import os
@@ -23,10 +25,18 @@ class AuthKeyMiddleware(middleware.AuthKeyMiddleware):
     # pylint: disable=R0903
 
     def process_request(self, request):
-        """Redirect to request path without get parameters"""
+        """Redirect to remove authkey from url and put extra get params in"""
+        url = ''
+        try:
+            if settings.URLAUTH_AUTHKEY_NAME in request.GET:
+                authhash = request.GET[settings.URLAUTH_AUTHKEY_NAME]
+                authkey = load_key(authhash)
+                url = '?' + urlencode(authkey.extra)
+        except InvalidKey:
+            return
         super(AuthKeyMiddleware, self).process_request(request)
-        if settings.URLAUTH_AUTHKEY_NAME in request.REQUEST:
-            return HttpResponseRedirect(request.path)
+        if url:
+            return HttpResponseRedirect(request.path + '?' + urlencode(authkey.extra))
 
 # Orignal version taken from http://www.djangosnippets.org/snippets/186/
 # Original author: udfalkso

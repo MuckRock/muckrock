@@ -96,6 +96,18 @@ def response(task):
     except task.DoesNotExist:
         return
 
+@register.inclusion_tag('task/generic.html')
+def generic(task):
+    """Renders a generic task"""
+    try:
+        task = task.generictask
+        return {
+            'task': task,
+            'staff_list': User.objects.filter(is_staff=True),
+        }
+    except task.DoesNotExist:
+        return
+
 @register.inclusion_tag('task/default.html')
 def default(task):
     """Renders any other kinds of tasks"""

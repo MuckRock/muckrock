@@ -105,6 +105,7 @@ class Jurisdiction(models.Model, RequestHelper):
                                                                     ' (or calendar days)?')
     intro = models.TextField(blank=True, help_text='Intro paragraph for request - '
                                          'usually includes the pertinant FOI law')
+    law_name = models.CharField(blank=True, max_length=255, help_text='The pertinant FOIA law')
     waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
                               'FOI law has special line for waivers')
 
