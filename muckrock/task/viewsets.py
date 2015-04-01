@@ -18,86 +18,83 @@ from muckrock.task.serializers import (
 def create_task_viewset(model, serializer, fields):
     """Create a viewset for a task"""
     # pylint: disable=invalid-name
-    Meta = type('Meta', (object,),
-            {
-                'model': model,
-                'fields': ('min_date_created', 'max_date_created',
-                           'min_date_done', 'max_date_done', 'resolved',
-                           'assigned') + fields,
-            })
-    Filter = type('Filter', (django_filters.FilterSet,),
-            dict(
-                assigned=django_filters.CharFilter(name='assigned__username'),
-                min_date_created=django_filters.DateFilter(
-                    name='date_created', lookup_type='gte'),
-                max_date_created=django_filters.DateFilter(
-                    name='date_created', lookup_type='lte'),
-                min_date_done=django_filters.DateFilter(
-                    name='date_done', lookup_type='gte'),
-                max_date_done=django_filters.DateFilter(
-                    name='date_done', lookup_type='lte'),
-                Meta=Meta,
-                ))
+    Meta = type('Meta', (object,), {
+        'model': model,
+        'fields': (
+            'min_date_created',
+            'max_date_created',
+            'min_date_done',
+            'max_date_done',
+            'resolved',
+            'assigned') + fields
+    })
 
-    return type(model.__name__ + 'ViewSet',
-                (viewsets.ModelViewSet,),
-                {
-                    'model': model,
-                    'serializer_class': serializer,
-                    'permission_classes': (DjangoModelPermissions,),
-                    'filter_class': Filter,
-                 })
+    Filter = type('Filter', (django_filters.FilterSet,), dict(
+        assigned=django_filters.CharFilter(name='assigned__username'),
+        min_date_created=django_filters.DateFilter(name='date_created', lookup_type='gte'),
+        max_date_created=django_filters.DateFilter(name='date_created', lookup_type='lte'),
+        min_date_done=django_filters.DateFilter(name='date_done', lookup_type='gte'),
+        max_date_done=django_filters.DateFilter(name='date_done', lookup_type='lte'),
+        Meta=Meta,
+    ))
+
+    return type((model.__name__ + 'ViewSet'), (viewsets.ModelViewSet,), {
+        'model': model,
+        'serializer_class': serializer,
+        'permission_classes': (DjangoModelPermissions,),
+        'filter_class': Filter,
+    })
 
 TaskViewSet = create_task_viewset(
-        Task,
-        TaskSerializer,
-        (),
-        )
+    Task,
+    TaskSerializer,
+    (),
+)
 
 OrphanTaskViewSet = create_task_viewset(
-        OrphanTask,
-        OrphanTaskSerializer,
-        ('reason', 'communication', 'address'),
-        )
+    OrphanTask,
+    OrphanTaskSerializer,
+    ('reason', 'communication', 'address'),
+)
 
 SnailMailTaskViewSet = create_task_viewset(
-        SnailMailTask,
-        SnailMailTaskSerializer,
-        ('category', 'communication'),
-        )
+    SnailMailTask,
+    SnailMailTaskSerializer,
+    ('category', 'communication'),
+)
 
 RejectedEmailTaskViewSet = create_task_viewset(
-        RejectedEmailTask,
-        RejectedEmailTaskSerializer,
-        ('category', 'foia', 'email', 'error'),
-        )
+    RejectedEmailTask,
+    RejectedEmailTaskSerializer,
+    ('category', 'foia', 'email', 'error'),
+)
 
 StaleAgencyTaskViewSet = create_task_viewset(
-        StaleAgencyTask,
-        StaleAgencyTaskSerializer,
-        ('agency',),
-        )
+    StaleAgencyTask,
+    StaleAgencyTaskSerializer,
+    ('agency',),
+)
 
 FlaggedTaskViewSet = create_task_viewset(
-        FlaggedTask,
-        FlaggedTaskSerializer,
-        ('user', 'text', 'foia', 'agency', 'jurisdiction'),
-        )
+    FlaggedTask,
+    FlaggedTaskSerializer,
+    ('user', 'text', 'foia', 'agency', 'jurisdiction'),
+)
 
 NewAgencyTaskViewSet = create_task_viewset(
-        NewAgencyTask,
-        NewAgencyTaskSerializer,
-        ('user', 'agency'),
-        )
+    NewAgencyTask,
+    NewAgencyTaskSerializer,
+    ('user', 'agency'),
+)
 
 ResponseTaskViewSet = create_task_viewset(
-        ResponseTask,
-        ResponseTaskSerializer,
-        ('communication',),
-        )
+    ResponseTask,
+    ResponseTaskSerializer,
+    ('communication',),
+)
 
 GenericTaskViewSet = create_task_viewset(
-        GenericTask,
-        GenericTaskSerializer,
-        ('subject', 'body'),
-        )
+    GenericTask,
+    GenericTaskSerializer,
+    ('subject', 'body'),
+)
