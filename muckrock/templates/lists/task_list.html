@@ -80,7 +80,17 @@ $.ajaxSetup({
 
 var tasks = $('.task');
 var resolved = $('.resolved.task');
-resolved.find(':input').attr('disabled', true).addClass('disabled');
+
+function resolve(task) {
+    $(task).addClass('resolved');
+    $(task).find(':input').attr('disabled', true).addClass('disabled');
+    $(task).find('.task-type').text('Resolved');
+}
+
+resolved.each(function(){
+    resolve(this);
+});
+
 resolved.addClass('collapsed');
 tasks.find('header').click(function() {
     $(this).parent().toggleClass('collapsed');
