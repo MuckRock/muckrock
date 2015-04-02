@@ -154,6 +154,21 @@ class TaskListViewOrphanTaskPOSTTests(TestCase):
                 ('Orphan task should be rejected by posting any'
                 ' truthy value to the "reject" parameter and task ID.'))
 
+    def test_reject_despite_likely_foia(self):
+        likely_foia_pk = self.task.communication.likely_foia.pk
+        likely_foia = FOIARequest.objects.get(pk=likely_foia_pk)
+        likely_foia_comm_count = likely_foia.communications.all().count()
+        nose.ok_(likely_foia_pk,
+                'Communication should have a likely FOIA for this test')
+        self.client.post(self.url, {
+            'move': str(likely_foia_pk),
+            'reject': 'true',
+            'task': self.task.pk})
+        updated_likely_foia_comm_count = likely_foia.communications.all().count()
+        nose.eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
+                ('Rejecting an orphan with a likely FOIA should not move'
+                ' the communication to that FOIA'))
+
 class TaskListViewSnailMailTaskPOSTTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
