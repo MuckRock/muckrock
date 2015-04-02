@@ -84,12 +84,12 @@ def orphan_task_post_handler(request, task_pk):
     except OrphanTask.DoesNotExist:
         return
 
-    if request.POST.get('move'):
+    if request.POST.get('reject'):
+        orphan_task.reject()
+    elif request.POST.get('move'):
         foia_pks = request.POST.get('move', '')
         foia_pks = foia_pks.split(', ')
         orphan_task.move(request, foia_pks)
-    if request.POST.get('reject'):
-        orphan_task.reject()
 
     return
 
