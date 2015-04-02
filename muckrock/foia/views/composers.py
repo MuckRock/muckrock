@@ -192,6 +192,7 @@ def _submit_request(request, foia):
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
     foia.submit()
+    request.session['ga'] = 'request_submitted'
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
 
@@ -229,6 +230,7 @@ def create_request(request):
             foia, foia_comm = _make_request(request, foia_request, parent)
             foia_comm.save()
             foia.save()
+            request.session['ga'] = 'request_drafted'
             return redirect(foia)
         else:
             # form is invalid

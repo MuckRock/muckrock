@@ -221,7 +221,7 @@ def buy_requests(request):
             user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
-            request.session['ga'] = 'buy_requests'
+            request.session['ga'] = 'request_purchase'
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
 
