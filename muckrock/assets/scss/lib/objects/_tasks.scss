@@ -73,6 +73,7 @@ dl.task-data {
 
 .task .task-extra-context {
     @include span-columns(12);
+    padding: $base-padding/2;
 }
 
 .collapsed.task {

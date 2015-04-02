@@ -11,7 +11,7 @@ This is the parent style for a collection of objects: a collection of blog posts
 
     <section class="{% block list-type %}object{% endblock %} list">
     {% block list %}
-        
+
         <nav class="list-navigation">
         {% block list-navigation %}
             <header class="list-head">
@@ -32,13 +32,13 @@ This is the parent style for a collection of objects: a collection of blog posts
                 <input type="checkbox" data-ignore-toggle-all="true" id="list-filters-toggle"/>
                 <div class="list-filters-fields">
                 {% block list-filters %}
-                
+
                 {% comment %}
                 By default, no filters are shown. To add filters,
                 fill the list-filters block with calls to filter_form.
                 E.g. {{ filter_form.agency }} would add an agency filter.
                 {% endcomment %}
-                
+
                 {% endblock list-filters %}
                 </div>
                 <div class="list-filters-buttons">
@@ -84,7 +84,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             <p class="list-empty">No Results</p>
             {% endif %}
         {% endblock list-content %}
-       
+
         </div>
     {% endblock list %}
     </section>
@@ -102,7 +102,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             }
         });
     }
-    
+
     var tableHeadSortIndicator = function() {
         var sort = urlParam('sort');
         if (!!sort) {
@@ -116,28 +116,23 @@ This is the parent style for a collection of objects: a collection of blog posts
                 .addClass('sorted_by');
         }
     }
-    
+
     var sortListByHeader = function() {
         var sort = $(this).data('sort');
         var order = $(this).data('order');
         if (!!sort) {
-            {% if filter_url %}
-            var sort_url = '{{ filter_url|safe }}' + '&';
-            {% else %}
-            var sort_url = '?';
-            {% endif %}
             if (!order) {
                 order = 'asc';
             }
-            sort_url += 'sort=' + sort + '&order=' + order;
+            var sort_url = '?sort=' + sort + '&order=' + order + '{{ filter_url|safe }}';
             window.location = window.location.origin + window.location.pathname + sort_url;
         }
     }
-    
+
     identifySortable();
     tableHeadSortIndicator();
     $('.list-table-head th').click(sortListByHeader);
-    
+
     $('#list-filters-toggle').change(function(){
         var label = $('#list-filters-toggle-label')[0];
         if (this.checked) {
@@ -146,7 +141,7 @@ This is the parent style for a collection of objects: a collection of blog posts
             label.innerText = 'Show';
         }
     });
-    
+
 {% block list-scripts %}
 {% endblock list-scripts %}
 </script>
