@@ -26,7 +26,7 @@ $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 $small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
 
 /* Colors */
-@import 'colors_warm';
+@import 'colors_cool';
 
 $base-gradient-darken:  8%;
 $color-disabled:        lighten($color-grey, 10%);

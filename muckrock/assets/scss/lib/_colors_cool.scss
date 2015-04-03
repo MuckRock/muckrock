@@ -1,0 +1,87 @@
+// RAW COLORS
+
+$color-black:           rgb(11, 21, 30);
+$color-white:           rgb(251, 253, 255);
+
+$color-grey-1:          rgb(229, 238, 249);
+$color-grey-2:          rgb(207, 216, 225);
+$color-grey-3:          rgb(165, 174, 185);
+$color-grey-4:          rgb(121, 130, 140);
+$color-grey-5:          rgb(60, 68, 78);
+$color-grey:            $color-grey-3;
+$color-gray:            $color-grey;
+
+$color-red-1:           rgb(203, 97, 82);
+$color-red-2:           rgb(183, 89, 76);
+$color-red-3:           rgb(149, 74, 69);
+$color-red-4:           rgb(107, 58, 55);
+$color-red-5:           rgb(53, 36, 40);
+$color-red:             $color-red-3;
+
+$color-orange-1:        rgb(223, 124, 76);
+$color-orange-2:        rgb(200, 114, 72);
+$color-orange-3:        rgb(162, 94, 64);
+$color-orange-4:        rgb(117, 71, 53);
+$color-orange-5:        rgb(58, 43, 39);
+$color-orange:          $color-orange-3;
+
+$color-yellow-1:        rgb(197, 183, 56);
+$color-yellow-2:        rgb(178, 165, 52);
+$color-yellow-3:        rgb(143, 134, 47);
+$color-yellow-4:        rgb(104, 101, 42);
+$color-yellow-5:        rgb(53, 55, 36);
+$color-yellow:          $color-yellow-3;
+
+$color-green-1:         rgb(91, 179, 80);
+$color-green-2:         rgb(81, 162, 73);
+$color-green-3:         rgb(65, 132, 65);
+$color-green-4:         rgb(47, 99, 55);
+$color-green-5:         rgb(21, 55, 40);
+$color-green:           $color-green-3;
+
+$color-blue-1:          rgb(59, 137, 243);
+$color-blue-2:          rgb(54, 125, 222);
+$color-blue-3:          rgb(45, 103, 182);
+$color-blue-4:          rgb(34, 79, 137);
+$color-blue-5:          rgb(22, 46, 77);
+$color-blue:            $color-blue-3;
+
+$color-indigo-1:        rgb(60, 72, 243);
+$color-indigo-2:        rgb(55, 66, 222);
+$color-indigo-3:        rgb(45, 55, 181);
+$color-indigo-4:        rgb(35, 44, 137);
+$color-indigo-5:        rgb(21, 30, 77);
+$color-indigo:          $color-indigo-3;
+
+$color-violet-1:        rgb(132, 78, 243);
+$color-violet-2:        rgb(120, 70, 222);
+$color-violet-3:        rgb(97, 56, 182);
+$color-violet-4:        rgb(71, 44, 137);
+$color-violet-5:        rgb(36, 31, 77);
+$color-violet:          $color-violet-3;
+
+// UI COLORS
+
+$color-disabled-light:  $color-grey-1;
+$color-disabled:        $color-grey-2;
+$color-disabled-dark:   $color-grey-3;
+
+$color-deafult-light:   $color-grey-2;
+$color-default:         $color-grey-3;
+$color-default-dark:    $color-grey-4;
+
+$color-primary-light:   $color-blue-1;
+$color-primary:         $color-blue-3;
+$color-primary-dark:    $color-blue-5;
+
+$color-success-light:   $color-green-1;
+$color-success:         $color-green-3;
+$color-success-dark:    $color-green-5;
+
+$color-failure-light:   $color-red-1;
+$color-failure:         $color-red-3;
+$color-failure-dark:    $color-red-5;
+
+$color-warning-light:   $color-yellow-1;
+$color-warning:         $color-yellow-3;
+$color-warning-dark:    $color-yellow-5;
