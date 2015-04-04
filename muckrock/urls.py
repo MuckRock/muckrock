@@ -26,13 +26,16 @@ import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.view
        muckrock.accounts.views, muckrock.sidebar.viewsets, muckrock.task.viewsets
 import muckrock.settings as settings
 import muckrock.views as views
+from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
+from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 
 admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
 
-sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
+sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap,
+            'Agency': AgencySitemap, 'Jurisdiction': JurisdictionSitemap}
 
 router = DefaultRouter()
 router.register(r'jurisdiction',
