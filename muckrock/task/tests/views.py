@@ -8,6 +8,7 @@ from django.test import TestCase, Client
 import nose.tools as nose
 
 from muckrock import task
+from muckrock.foia.models import FOIARequest
 from muckrock.views import MRFilterableListView
 
 # pylint: disable=missing-docstring
@@ -133,10 +134,18 @@ class TaskListViewOrphanTaskPOSTTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_move(self):
+        foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
+        foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
+        updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
+        updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
+        nose.eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
+            'Communication should be added to FOIA')
+        nose.eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
+            'Communication should be added to FOIA')
 
     def test_reject(self):
         self.client.post(self.url, {'reject': True, 'task': self.task.pk})
@@ -144,6 +153,21 @@ class TaskListViewOrphanTaskPOSTTests(TestCase):
         nose.eq_(updated_task.resolved, True,
                 ('Orphan task should be rejected by posting any'
                 ' truthy value to the "reject" parameter and task ID.'))
+
+    def test_reject_despite_likely_foia(self):
+        likely_foia_pk = self.task.communication.likely_foia.pk
+        likely_foia = FOIARequest.objects.get(pk=likely_foia_pk)
+        likely_foia_comm_count = likely_foia.communications.all().count()
+        nose.ok_(likely_foia_pk,
+                'Communication should have a likely FOIA for this test')
+        self.client.post(self.url, {
+            'move': str(likely_foia_pk),
+            'reject': 'true',
+            'task': self.task.pk})
+        updated_likely_foia_comm_count = likely_foia.communications.all().count()
+        nose.eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
+                ('Rejecting an orphan with a likely FOIA should not move'
+                ' the communication to that FOIA'))
 
 class TaskListViewSnailMailTaskPOSTTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""

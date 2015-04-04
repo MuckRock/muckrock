@@ -8,8 +8,13 @@ from muckrock.task import views
 urlpatterns = patterns(
     '',
     url(r'^$', views.TaskList.as_view(), name='task-list'),
-    url(r'^inbox/$', views.InboxTaskList.as_view(), name='task-list-inbox'),
-    url(r'^unassigned/$', views.UnassignedTaskList.as_view(), name='task-list-unassigned'),
-    url(r'^resolved/$', views.ResolvedTaskList.as_view(), name='task-list-resolved'),
-    url(r'^assign/$', views.assign, name='task-assign'),
+    url(r'^orphan/$', views.OrphanTaskList.as_view(), name='orphan-task-list'),
+    url(r'^snail-mail/$', views.SnailMailTaskList.as_view(), name='snail-mail-task-list'),
+    url(r'^rejected-email/$',
+        views.RejectedEmailTaskList.as_view(),
+        name='rejected-email-task-list'),
+    url(r'^stale-agency/$', views.StaleAgencyTaskList.as_view(), name='stale-agency-task-list'),
+    url(r'^flagged/$', views.FlaggedTaskList.as_view(), name='flagged-task-list'),
+    url(r'^new-agency/$', views.NewAgencyTaskList.as_view(), name='new-agency-task-list'),
+    url(r'^response/$', views.ResponseTaskList.as_view(), name='response-task-list'),
 )

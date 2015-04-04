@@ -10,22 +10,20 @@
 <section class="list-sections">
     <ul>
         <li class="{% active request '^/task/$' %}"><a href="{% url 'task-list' %}">All</a></li>
-        <li class="{% active request '^/task/inbox/$' %}"><a href="{% url 'task-list-inbox' %}">
-            <span class="counter">{{ inbox_count }}</span>
-            Inbox
-        </a></li>
-        <li class="{% active request '^/task/unassigned/$' %}"><a href="{% url 'task-list-unassigned' %}">
-            <span class="counter">{{ unassigned_count }}</span>
-            Unassigned
-        </a></li>
-        <li class="{% active request '^/task/resolved/$' %}"><a href="{% url 'task-list-resolved' %}">Resolved</a></li>
+        <li class="{% active request '^/task/orphan/$' %}"><a href="{% url 'orphan-task-list' %}">Orphan</a></li>
+        <li class="{% active request '^/task/snail-mail/$' %}"><a href="{% url 'snail-mail-task-list' %}">Snail Mail</a></li>
+        <li class="{% active request '^/task/rejected-email/$' %}"><a href="{% url 'rejected-email-task-list' %}">Rejected Email</a></li>
+        <li class="{% active request '^/task/stale-agency/$' %}"><a href="{% url 'stale-agency-task-list' %}">Stale Agency</a></li>
+        <li class="{% active request '^/task/flagged/$' %}"><a href="{% url 'flagged-task-list' %}">Flagged</a></li>
+        <li class="{% active request '^/task/new-agency/$' %}"><a href="{% url 'new-agency-task-list' %}">New Agency</a></li>
+        <li class="{% active request '^/task/response/$' %}"><a href="{% url 'response-task-list' %}">Response</a></li>
     </ul>
 </section>
 {% endblock %}
 
 {% block list-filters %}
-<label for="id_assigned">Assigned To</label>
-{{ filter_form.assigned }}
+{{ filter_form.show_resolved }}
+{{ filter_form.show_resolved.label }}
 {% endblock %}
 
 {% block list-content %}
@@ -58,8 +56,6 @@
 			{% new_agency task %}
 		{% elif task.responsetask %}
 			{% response task %}
-		{% elif task.generictask %}
-			{% generic task %}
 		{% else %}
 			{% default task %}
 		{% endif %}
@@ -84,7 +80,32 @@ $.ajaxSetup({
 
 var tasks = $('.task');
 var resolved = $('.resolved.task');
-resolved.find(':input').attr('disabled', true).addClass('disabled');
+
+function resolve(task) {
+    $(task).addClass('resolved');
+    $(task).find(':input').attr('disabled', true).addClass('disabled');
+    $(task).find('.task-type').text('Resolved');
+}
+
+resolved.each(function(){
+    resolve(this);
+});
+
+$('button[name="resolve"]').click(function(e){
+    e.preventDefault;
+    var task_pk = $(this).siblings('[name=task]').attr('value');
+    var task_id = '#' + task_pk + '-task';
+    var task_api_url = '/api_v1/task/' + task_pk;
+    $.ajax({
+        type: 'PATCH',
+        url: task_api_url,
+        data: {'resolved': true},
+        success: resolve(task_id),
+        dataType: 'json'
+    });
+    return false;
+});
+
 resolved.addClass('collapsed');
 tasks.find('header').click(function() {
     $(this).parent().toggleClass('collapsed');
