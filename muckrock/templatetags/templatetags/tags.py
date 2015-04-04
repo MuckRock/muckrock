@@ -9,6 +9,7 @@ from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 
+from email.parser import Parser
 import re
 
 from muckrock.foia.models import FOIARequest
@@ -219,3 +220,16 @@ def tag_manager(context, mr_object):
         'is_authorized': is_authorized,
         'endpoint': mr_object.get_absolute_url()
     }
+
+@register.filter
+def display_eml(foia_file):
+    """Extract text from eml file for display"""
+    msg = Parser().parse(foia_file.ffile)
+    if msg.get_content_type() == 'text/plain':
+        return msg.get_payload(decode=True)
+    if msg.get_content_type() == 'multipart/alternative':
+        for sub_msg in msg.get_payload():
+            if sub_msg.get_content_type() == 'text/plain':
+                return sub_msg.get_payload(decode=True)
+
+
