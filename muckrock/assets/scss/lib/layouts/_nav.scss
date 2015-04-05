@@ -94,7 +94,7 @@ $small-menu-breakpoint: 540px;
         {
             width: $desktop-menu-width;
             & + .container {
-                padding-right: $desktop-menu-width;
+                padding-right: em($desktop-menu-width) + $base-padding;
             }
         }
         height: 100%;
