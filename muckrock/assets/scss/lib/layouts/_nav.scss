@@ -10,6 +10,110 @@ $color-selected: $color-primary;
 
 $small-menu-breakpoint: 540px;
 
+@mixin hidden-sidebar
+{
+    .hidden-menu ~ .container { width: 100%; }
+    .hidden-menu ~ .container nav.primary ul.right { display: table; }
+    #sidebar-menu.hidden-menu {
+        width: $mobile-menu-width;
+        margin-right: -$mobile-menu-width;
+        #new-request { display: none; }
+        &:target {
+            margin-right: 0;
+            & ~ .container, & ~ .footer {
+                width: 100%;
+                margin-left: -$mobile-menu-width;
+            }
+
+            & ~ .container header .primary #muckrock-text {
+                margin-left: $mobile-menu-width;
+            }
+        }
+        @include media($medium-layout) {
+            width: $tablet-menu-width;
+            margin-right: -$tablet-menu-width;
+            #new-request { display: none; }
+            &:target {
+                margin-right: 0;
+                & ~ .container, & ~ .footer {
+                    width: 100%;
+                    margin-left: -$tablet-menu-width;
+                }
+                & ~ .container header .primary #muckrock-text {
+                    margin-left: $tablet-menu-width;
+                }
+            }
+        }
+    }
+    #right-menu-button.hidden-menu { display: block; }
+
+    @media screen and (max-width: $menu-breakpoint) {
+        .container, .footer-container { width: 100%; }
+        #sidebar-menu {
+            width: $mobile-menu-width;
+            margin-right: -$mobile-menu-width;
+            #new-request { display: none; }
+        }
+        #right-menu-button { display: block; }
+        #sidebar-menu:target {
+            margin-right: 0;
+            & ~ .container, & ~ .footer {
+                width: 100%;
+                margin-left: -$mobile-menu-width;
+            }
+
+        }
+        nav.primary ul.right { display: table; }
+    }
+}
+
+@mixin global-sidebar
+{
+    .container
+    {
+        display: block;
+        width: 100% - $desktop-menu-width;
+        float: left;
+        @include transition($menu-animation);
+    }
+    #sidebar-menu
+    {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: $desktop-menu-width;
+        height: 100%;
+        @include transition($menu-animation);
+    }
+    #muckrock-text
+    {
+        @include transition($menu-animation);
+    }
+    #menu-button
+    {
+        display: table-cell;
+    }
+    #menu-close
+    {
+        display: none;
+    }
+    #sidebar-menu:target ~ .container nav.primary ul.right #menu-button
+    {
+        display: none;
+    }
+    #sidebar-menu:target ~ .container nav.primary ul.right #menu-close
+    {
+        display: table-cell;
+    }
+    nav.primary ul.right
+    {
+        display: none;
+    }
+    @include hidden-sidebar;
+}
+
+@include global-sidebar;
+
 nav {
     overflow: hidden;
     @include box-sizing(border-box);
@@ -186,91 +290,6 @@ nav.secondary {
     }
 }
 
-/* Global Sidebar */
-
-.container {
-    display: block;
-    width: 100% - $desktop-menu-width;
-    float: left;
-    @include transition($menu-animation);
-}
-
-#sidebar-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: $desktop-menu-width;
-    height: 100%;
-    @include transition($menu-animation);
-}
-
-#muckrock-text { @include transition($menu-animation); }
-
-#menu-button { display: table-cell; }
-#menu-close { display: none; }
-#sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
-    display: none;
-}
-#sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
-    display: table-cell;
-}
-
-nav.primary ul.right { display: none; }
-
-.hidden-menu ~ .container { width: 100%; }
-.hidden-menu ~ .container nav.primary ul.right { display: table; }
-#sidebar-menu.hidden-menu {
-    width: $mobile-menu-width;
-    margin-right: -$mobile-menu-width;
-    #new-request { display: none; }
-    &:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer {
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-
-        & ~ .container header .primary #muckrock-text {
-            margin-left: $mobile-menu-width;
-        }
-    }
-    @include media($medium-layout) {
-        width: $tablet-menu-width;
-        margin-right: -$tablet-menu-width;
-        #new-request { display: none; }
-        &:target {
-            margin-right: 0;
-            & ~ .container, & ~ .footer {
-                width: 100%;
-                margin-left: -$tablet-menu-width;
-            }
-            & ~ .container header .primary #muckrock-text {
-                margin-left: $tablet-menu-width;
-            }
-        }
-    }
-}
-#right-menu-button.hidden-menu { display: block; }
-
-@media screen and (max-width: $menu-breakpoint) {
-    .container, .footer-container { width: 100%; }
-    #sidebar-menu {
-        width: $mobile-menu-width;
-        margin-right: -$mobile-menu-width;
-        #new-request { display: none; }
-    }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer {
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-
-    }
-    nav.primary ul.right { display: table; }
-}
-
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
     $sidebar-button-background: darken($color-black, 4%);
@@ -279,7 +298,9 @@ nav.sidebar {
     height: 100%;
     width: 100%;
     padding: $base-padding/2;
-    @media screen and (min-width: 540px) { padding: $base-padding $base-padding 1em; }
+    @media screen and (min-width: 540px) {
+        padding: $base-padding $base-padding 1em;
+    }
     color: $color-white;
     background: $color-black;
 
