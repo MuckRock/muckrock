@@ -10,11 +10,39 @@ $color-selected: $color-primary;
 
 $small-menu-breakpoint: 540px;
 
+@mixin sidebar-controller
+{
+    #menu-button
+    {
+        display: table-cell;
+    }
+    #menu-close
+    {
+        display: none;
+    }
+    nav.primary ul.right
+    {
+        display: none;
+    }
+    .hidden-menu ~ .container nav.primary ul.right
+    {
+        display: table;
+    }
+    #sidebar-menu:target ~ .container nav.primary ul.right #menu-button
+    {
+        display: none;
+    }
+    #sidebar-menu:target ~ .container nav.primary ul.right #menu-close
+    {
+        display: table-cell;
+    }
+}
+
 @mixin hidden-sidebar
 {
-    .hidden-menu ~ .container { width: 100%; }
-    .hidden-menu ~ .container nav.primary ul.right { display: table; }
-    #sidebar-menu.hidden-menu {
+    @include sidebar-controller;
+    #sidebar-menu.hidden-menu
+    {
         width: $mobile-menu-width;
         margin-right: -$mobile-menu-width;
         #new-request { display: none; }
@@ -81,7 +109,16 @@ $small-menu-breakpoint: 540px;
         position: fixed;
         top: 0;
         right: 0;
-        width: $desktop-menu-width;
+        z-index: 5;
+        width: $mobile-menu-width;
+        @include media($medium-layout)
+        {
+            width: $tablet-menu-width;
+        }
+        @include media($large-layout)
+        {
+            width: $desktop-menu-width;
+        }
         height: 100%;
         @include transition($menu-animation);
     }
@@ -89,26 +126,7 @@ $small-menu-breakpoint: 540px;
     {
         @include transition($menu-animation);
     }
-    #menu-button
-    {
-        display: table-cell;
-    }
-    #menu-close
-    {
-        display: none;
-    }
-    #sidebar-menu:target ~ .container nav.primary ul.right #menu-button
-    {
-        display: none;
-    }
-    #sidebar-menu:target ~ .container nav.primary ul.right #menu-close
-    {
-        display: table-cell;
-    }
-    nav.primary ul.right
-    {
-        display: none;
-    }
+
     @include hidden-sidebar;
 }
 
