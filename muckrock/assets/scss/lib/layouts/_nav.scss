@@ -146,6 +146,7 @@ nav.primary {
     /* Logo */
 
     %logo {
+        margin: $base-margin/4 0;
         border: none;
         padding: 0 0.5em 0 0;
         svg > path, svg > g { fill: $color-black; }
