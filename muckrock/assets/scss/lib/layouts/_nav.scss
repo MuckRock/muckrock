@@ -12,13 +12,26 @@ $small-menu-breakpoint: 540px;
 
 @mixin sidebar-controller
 {
+    $on: table-cell;
+    $off: none;
     #menu-button
     {
-        display: table-cell;
+        display: $on;
     }
     #menu-close
     {
-        display: none;
+        display: $off;
+    }
+    #sidebar-menu:target ~ .container
+    {
+        #menu-button
+        {
+            display: $off;
+        }
+        #menu-close
+        {
+            display: $on;
+        }
     }
 }
 
@@ -49,6 +62,7 @@ $small-menu-breakpoint: 540px;
     {
         @include sidebar-translation($desktop-menu-width);
     }
+
 }
 
 @mixin global-sidebar
