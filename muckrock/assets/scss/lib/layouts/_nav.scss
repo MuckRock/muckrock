@@ -44,7 +44,6 @@ $small-menu-breakpoint: 540px;
             transform: translateX(0);
         }
     }
-
     #sidebar-menu:target ~ .container {
         transform: translateX(-$size);
     }
@@ -61,8 +60,11 @@ $small-menu-breakpoint: 540px;
     @include media($large-layout)
     {
         @include sidebar-translation($desktop-menu-width);
+        nav.primary ul.right
+        {
+            display: none;
+        }
     }
-
 }
 
 @mixin global-sidebar
@@ -88,6 +90,9 @@ $small-menu-breakpoint: 540px;
         @include media($large-layout)
         {
             width: $desktop-menu-width;
+            & + .container {
+                margin-right: $desktop-menu-width;
+            }
         }
         height: 100%;
         @include transition($menu-animation);
@@ -100,45 +105,21 @@ $small-menu-breakpoint: 540px;
     @include hidden-sidebar;
 }
 
-@include global-sidebar;
-
-nav {
+nav.primary {
     overflow: hidden;
-    @include box-sizing(border-box);
     ul {
         display: table;
+        list-style-type: none;
         margin: 0;
         padding-left: 0;
-        list-style-type: none;
-        .left {
-            margin-bottom: 0.75em;
+        &.left
+        {
             float: left;
         }
-        .right { float: right; }
-        .left, .right {
+        &.right
+        {
             display: table;
-            width: auto;
-        }
-        @media screen and (max-width: $small-menu-breakpoint) {
-            .left, .right {
-                width: 100%;
-                float: none;
-            }
-        }
-    }
-}
-
-nav.primary {
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding-left: 0;
-        &.left { float: left; }
-        &.right { float: right; }
-        @media screen and (min-width: $small-menu-breakpoint) {
-            &.left, &.right { width: auto; }
-            &.left { float: left; }
-            &.right { display: table; float: right; }
+            float: right;
         }
     }
     #new-request > .button {
@@ -189,6 +170,8 @@ nav.primary {
     }
 }
 
+@include global-sidebar;
+
 nav.secondary {
     ul {
         width: 100%;
@@ -219,7 +202,6 @@ nav.secondary {
 
         @include transition (all 0.2s ease-in-out);
     }
-    padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
         li {
             text-align: left;
