@@ -59,11 +59,14 @@ $small-menu-breakpoint: 540px;
     }
     @include media($large-layout)
     {
-        @include sidebar-translation($desktop-menu-width);
+        @include sidebar-translation(0);
         nav.primary ul.right
         {
             display: none;
+            opacity: 0;
+            @include transition($menu-animation);
         }
+
     }
 }
 
@@ -91,7 +94,7 @@ $small-menu-breakpoint: 540px;
         {
             width: $desktop-menu-width;
             & + .container {
-                margin-right: $desktop-menu-width;
+                padding-right: $desktop-menu-width;
             }
         }
         height: 100%;
