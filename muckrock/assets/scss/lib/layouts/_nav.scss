@@ -20,78 +20,34 @@ $small-menu-breakpoint: 540px;
     {
         display: none;
     }
-    nav.primary ul.right
+}
+
+@mixin sidebar-translation($size)
+{
+    #sidebar-menu
     {
-        display: none;
+        transform: translateX($size);
+        &:target {
+            transform: translateX(0);
+        }
     }
-    .hidden-menu ~ .container nav.primary ul.right
-    {
-        display: table;
-    }
-    #sidebar-menu:target ~ .container nav.primary ul.right #menu-button
-    {
-        display: none;
-    }
-    #sidebar-menu:target ~ .container nav.primary ul.right #menu-close
-    {
-        display: table-cell;
+
+    #sidebar-menu:target ~ .container {
+        transform: translateX(-$size);
     }
 }
 
 @mixin hidden-sidebar
 {
     @include sidebar-controller;
-    #sidebar-menu.hidden-menu
+    @include sidebar-translation($mobile-menu-width);
+    @include media($medium-layout)
     {
-        width: $mobile-menu-width;
-        margin-right: -$mobile-menu-width;
-        #new-request { display: none; }
-        &:target {
-            margin-right: 0;
-            & ~ .container, & ~ .footer {
-                width: 100%;
-                margin-left: -$mobile-menu-width;
-            }
-
-            & ~ .container header .primary #muckrock-text {
-                margin-left: $mobile-menu-width;
-            }
-        }
-        @include media($medium-layout) {
-            width: $tablet-menu-width;
-            margin-right: -$tablet-menu-width;
-            #new-request { display: none; }
-            &:target {
-                margin-right: 0;
-                & ~ .container, & ~ .footer {
-                    width: 100%;
-                    margin-left: -$tablet-menu-width;
-                }
-                & ~ .container header .primary #muckrock-text {
-                    margin-left: $tablet-menu-width;
-                }
-            }
-        }
+        @include sidebar-translation($tablet-menu-width);
     }
-    #right-menu-button.hidden-menu { display: block; }
-
-    @media screen and (max-width: $menu-breakpoint) {
-        .container, .footer-container { width: 100%; }
-        #sidebar-menu {
-            width: $mobile-menu-width;
-            margin-right: -$mobile-menu-width;
-            #new-request { display: none; }
-        }
-        #right-menu-button { display: block; }
-        #sidebar-menu:target {
-            margin-right: 0;
-            & ~ .container, & ~ .footer {
-                width: 100%;
-                margin-left: -$mobile-menu-width;
-            }
-
-        }
-        nav.primary ul.right { display: table; }
+    @include media($large-layout)
+    {
+        @include sidebar-translation($desktop-menu-width);
     }
 }
 
@@ -100,12 +56,12 @@ $small-menu-breakpoint: 540px;
     .container
     {
         display: block;
-        width: 100% - $desktop-menu-width;
-        float: left;
+        width: 100%;
         @include transition($menu-animation);
     }
     #sidebar-menu
     {
+        display: block;
         position: fixed;
         top: 0;
         right: 0;
