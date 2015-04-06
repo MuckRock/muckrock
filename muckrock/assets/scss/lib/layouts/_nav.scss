@@ -39,13 +39,15 @@ $small-menu-breakpoint: 540px;
 {
     #sidebar-menu
     {
-        transform: translateX($size);
-        &:target {
-            transform: translateX(0);
+        @include transform(translateX($size));
+        &:target
+        {
+            @include transform(translateX(0));
         }
     }
-    #sidebar-menu:target ~ .container {
-        transform: translateX(-$size);
+    #sidebar-menu:target ~ .container
+    {
+        @include transform(translateX(-$size));
     }
 }
 
