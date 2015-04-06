@@ -34,8 +34,8 @@
         </div>
         <form method="POST" id="batched">
             {% csrf_token %}
-            <button type="submit" name="resolve" value="true">Resolve</button>
-            <button type="submit" name="assign" value="true">Assign</button>
+            <button type="submit" name="resolve" value="true" id="batched-resolve">Resolve</button>
+            <button type="submit" name="assign" value="true" id="batched-assign">Assign</button>
             <button id="collapse-all">Collapse All</button>
         </form>
     </section>
@@ -81,27 +81,44 @@ $.ajaxSetup({
 var tasks = $('.task');
 var resolved = $('.resolved.task');
 
-function resolve(task) {
-    $(task).addClass('resolved');
-    $(task).find(':input').attr('disabled', true).addClass('disabled');
-    $(task).find('.task-type').text('Resolved');
-}
-
-resolved.each(function(){
-    resolve(this);
-});
-
-$('button[name="resolve"]').click(function(e){
-    e.preventDefault;
-    var task_pk = $(this).siblings('[name=task]').attr('value');
+function resolve(task_pk) {
     var task_id = '#' + task_pk + '-task';
     var task_api_url = '/api_v1/task/' + task_pk;
     $.ajax({
         type: 'PATCH',
         url: task_api_url,
         data: {'resolved': true},
-        success: resolve(task_id),
+        success: markAsResolved(task_id),
         dataType: 'json'
+    });
+}
+
+function markAsResolved(task) {
+    $(task).addClass('resolved');
+    $(task).find(':input').attr('disabled', true).addClass('disabled');
+    $(task).find('.task-type').text('Resolved');
+}
+
+resolved.each(function(){
+    markAsResolved(this);
+});
+
+$('button[name="resolve"]').click(function(e){
+    e.preventDefault;
+    // if the button clicked is the "resolve all" button,
+    // then get IDs for all the currently checked tasks
+    // else,
+    // just get the ID for the task that owns the button
+    var tasks = [];
+    if ($(this).attr('id') == 'batched-resolve') {
+        $(':checked[form=batched]').each(function() {
+            tasks.push($(this).attr('value'));
+        });
+    } else {
+        tasks.push($(this).siblings('[name=task]').attr('value'));
+    }
+    $(tasks).each(function(){
+        resolve(this);
     });
     return false;
 });
