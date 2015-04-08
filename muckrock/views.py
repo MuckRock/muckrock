@@ -29,6 +29,7 @@ import re
 import requests
 from haystack.views import SearchView
 from haystack.query import RelatedSearchQuerySet
+import stripe
 
 class MRFilterableListView(ListView):
     """
@@ -412,7 +413,6 @@ def homepage(request):
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
-<<<<<<< HEAD
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
@@ -450,6 +450,24 @@ def reset_homepage_cache(request):
     return redirect('index')
 
 def donate(request):
+    if request.method == 'POST':
+        token = request.POST.get('token', '')
+        email = request.POST.get('email', '')
+        amount = request.POST.get('amount', '')
+        try:
+            stripe.Charge.create(
+                amount=amount,
+                currency='usd',
+                source=token,
+                description='Donation from %s' % email
+            )
+            request.session['donated'] = True
+            request.session['ga'] = 'donation'
+        except:
+            pass
+        finally:
+            return redirect('donate')
+
     return HttpResponse("Hello, world!", content_type="text/plain")
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
