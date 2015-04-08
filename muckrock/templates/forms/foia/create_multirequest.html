@@ -7,36 +7,23 @@
 
 {% block scripts %}
 <script src="{% static 'js/jquery.multiselect.js' %}" type="text/javascript"></script>
-<script src="{% static 'js/jquery.quicksearch.min.js' %}" type="text/javascript"></script>
 <script>
-    $(document).ready(function(){
-        $('#id_agencies').multiSelect({
-            selectableHeader: "<label>All Agencies</label><input type='text' class='search-input' autocomplete='off' placeholder='Search for an agency'>",
-                selectionHeader: "<label>Chosen Agencies</label>",
-            afterInit: function(ms){
-                var that = this,
-                    $selectableSearch = that.$selectableUl.prev(),
-                    $selectionSearch = that.$selectionUl.prev(),
-                    selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-                    selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
-
-                that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-                .on('keydown', function(e){
-                  if (e.which === 40){
-                    that.$selectableUl.focus();
-                    return false;
-                  }
-                });
-            },
-            afterSelect: function(){
-                this.qs1.cache();
-                
-            },
-            afterDeselect: function(){
-                this.qs1.cache();
+    var agencySearch = "<input type='text' class='search-input' id='agency-search' autocomplete='off' placeholder='Search for an agency'>";
+    $('#id_agencies').multiSelect({
+            selectableHeader: "<label>All Agencies</label>" + agencySearch,
+            selectionHeader: "<label>Selected Agencies</label>",
+    });
+    $('#agency-search').keydown(function(key){
+        var currentKey = (key >= 65 && key <= 90) ? String.fromCharCode(key) : '';
+        var query = this.value + currentKey;
+        $.ajax({
+            method: 'GET',
+            data: {'query': query},
+            dataType: 'json',
+            success: function(data, status, _){
+                console.log(data);
             }
         });
-        
     });
 </script>
 {% endblock scripts %}
