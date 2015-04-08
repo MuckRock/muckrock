@@ -233,3 +233,43 @@ class TestDonations(TestCase):
         eq_(session.get('donated'), None)
         eq_(session.get('ga'), None)
         eq_(response.status_code, 302)
+
+    def test_donate_crazy_monies(self):
+        """Bad data should be handled smoothly"""
+        token = self.new_token('4242424242424242')
+        response = self.client.post(self.url, {
+            'token':token.id,
+            'email':'example@test.com',
+            'amount':54654645645465
+        })
+        session = self.client.session
+        eq_(session.get('donated'), None)
+        eq_(session.get('ga'), None)
+        eq_(response.status_code, 302)
+
+    def test_donate_zero_monies(self):
+        """Bad data should be handled smoothly"""
+        token = self.new_token('4242424242424242')
+        response = self.client.post(self.url, {
+            'token':token.id,
+            'email':'example@test.com',
+            'amount':0
+        })
+        session = self.client.session
+        eq_(session.get('donated'), None)
+        eq_(session.get('ga'), None)
+        eq_(response.status_code, 302)
+
+    def test_donate_broken_auth(self):
+        """Bad authentication should be handled smoothly"""
+        token = self.new_token('4242424242424242')
+        stripe.api_key = 'blah blah blah'
+        response = self.client.post(self.url, {
+            'token':token.id,
+            'email':'example@test.com',
+            'amount':100
+        })
+        session = self.client.session
+        eq_(session.get('donated'), None)
+        eq_(session.get('ga'), None)
+        eq_(response.status_code, 302)
