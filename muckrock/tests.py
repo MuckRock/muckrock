@@ -191,26 +191,45 @@ class TestDonations(TestCase):
     def setUp(self):
         self.client = Client()
         self.url = reverse('donate')
+        stripe.api_key = STRIPE_SECRET_KEY
+
+    # normally, the token should be generated on the frontend by Stripe Checkout
+    def new_token(self, card_number):
+        token = stripe.Token.create(card={
+            'number': card_number,
+            'exp_month': '6',
+            'exp_year': str(datetime.today().year + 1),
+            'cvc': '123',
+        })
+        ok_(token) # just checking that the token was created successfully
+        return token
 
     def test_url(self):
         ok_(self.url)
 
     def test_donate(self):
-        # normally, the token should be generated on the frontend by Stripe Checkout
-        stripe.api_key = STRIPE_SECRET_KEY
-        token = stripe.Token.create(card={
-            'number': '4242424242424242',
-            'exp_month': '6',
-            'exp_year': str(datetime.today().year + 1),
-            'cvc': '123',
+        token = self.new_token('4242424242424242')
+        response = self.client.post(self.url, {
+            'token':token.id,
+            'email':'example@test.com',
+            'amount':500
         })
-        ok_(token)
-        data = {'token':token.id, 'email':'example@test.com', 'amount':500}
-        response = self.client.post(self.url, data)
         session = self.client.session
-        eq_(response.status_code, 302,
-            'A successful donation will redirect after completion.')
         eq_(session.get('donated'), True,
             'Donating should raise a flag in session data.')
         eq_(session.get('ga'), 'donation',
             'Donating should create an analytics event.')
+        eq_(response.status_code, 302,
+            'A successful donation will redirect after completion.')
+
+    def test_donate_no_token(self):
+        """Bad data should be handled smoothly"""
+        response = self.client.post(self.url, {
+            'token':'bad_token',
+            'email':'example@test.com',
+            'amount':500
+        })
+        session = self.client.session
+        eq_(session.get('donated'), None)
+        eq_(session.get('ga'), None)
+        eq_(response.status_code, 302)

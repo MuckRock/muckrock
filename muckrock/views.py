@@ -454,6 +454,7 @@ def donate(request):
         token = request.POST.get('token', '')
         email = request.POST.get('email', '')
         amount = request.POST.get('amount', '')
+        error_msg = None
         try:
             stripe.Charge.create(
                 amount=amount,
@@ -463,9 +464,26 @@ def donate(request):
             )
             request.session['donated'] = True
             request.session['ga'] = 'donation'
-        except:
-            pass
+        # declined cards are handled by the frontend
+        except stripe.error.InvalidRequestError, e:
+            # Invalid parameters were supplied to Stripe's API
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.AuthenticationError, e:
+            # Authentication with Stripe's API failed
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.APIConnectionError, e:
+            # Network communication with Stripe failed
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
+        except stripe.error.StripeError, e:
+            # Generic error
+            error_msg = ('Oops, something went wrong on our end.'
+                        ' Sorry about that!')
         finally:
+            if error_msg:
+                messages.error(request, error_msg)
             return redirect('donate')
 
     return HttpResponse("Hello, world!", content_type="text/plain")
