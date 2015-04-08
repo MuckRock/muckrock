@@ -9,6 +9,7 @@ from django.core.cache import cache
 from django.core.cache.utils import make_template_fragment_key
 from django.core.exceptions import FieldError
 from django.db.models import Sum, FieldDoesNotExist
+from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
@@ -411,6 +412,7 @@ def homepage(request):
     return render_to_response('homepage.html', locals(),
                               context_instance=RequestContext(request))
 
+<<<<<<< HEAD
 @user_passes_test(lambda u: u.is_staff)
 def reset_homepage_cache(request):
     """Reset the homepage cache"""
@@ -446,6 +448,9 @@ def reset_homepage_cache(request):
             },
             600)
     return redirect('index')
+
+def donate(request):
+    return HttpResponse("Hello, world!", content_type="text/plain")
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
