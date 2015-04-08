@@ -6,11 +6,13 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
 
 from mock import Mock, patch
 import logging
 import nose.tools
+from nose.tools import ok_
+from nose.tools import eq_
 
 from muckrock.fields import EmailsListField
 from muckrock.forms import NewsletterSignupForm
@@ -177,3 +179,14 @@ class TestNewsletterSignupView(TestCase):
         _list = settings.MAILCHIMP_LIST_DEFAULT
         response = NewsletterSignupView().subscribe(_email, _list)
         eq_(response.status_code, 200)
+
+
+class TestDonations(TestCase):
+    """Tests donation functionality"""
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_url(self):
+        url = reverse('donate')
+        ok_(url)
