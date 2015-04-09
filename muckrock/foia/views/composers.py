@@ -21,6 +21,7 @@ import json
 import logging
 import stripe
 from random import choice
+import re
 import string
 
 from muckrock.accounts.models import Profile
@@ -327,17 +328,19 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 def create_multirequest(request):
     """A view for composing multirequests"""
     if request.method == 'GET' and request.is_ajax():
-        agency_query = request.GET.get('query', '')
+        agency_queries = request.GET.get('query', '').split(' ')
         agencies = {}
-        if (len(agency_query) > 2):
-            matching_agencies = Agency.objects.filter(approved=True).filter(
-                Q(name__icontains=agency_query)|
-                Q(aliases__icontains=agency_query)|
-                Q(jurisdiction__name__icontains=agency_query)|
-                Q(types__name__exact=agency_query)
-            )
-            for agency in matching_agencies:
-                agencies[agency.name] = agency.id
+        matching_agencies = []
+        for agency_query in agency_queries:
+            if len(agency_query) > 2:
+                matching_agencies += list(Agency.objects.filter(approved=True).filter(
+                    Q(name__icontains=agency_query)|
+                    Q(aliases__icontains=agency_query)|
+                    Q(jurisdiction__name__icontains=agency_query)|
+                    Q(types__name__exact=agency_query)
+                ))
+        for agency in matching_agencies:
+            agencies[agency.name] = agency.id
         return HttpResponse(json.dumps(agencies), content_type='application/json')
 
     if request.method == 'POST':
