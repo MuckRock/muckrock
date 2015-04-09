@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
@@ -16,9 +17,11 @@ from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
 from datetime import datetime
+import json
 import logging
 import stripe
 from random import choice
+import re
 import string
 
 from muckrock.accounts.models import Profile
@@ -324,6 +327,22 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def create_multirequest(request):
     """A view for composing multirequests"""
+    if request.method == 'GET' and request.is_ajax():
+        agency_queries = request.GET.get('query', '').split(' ')
+        agencies = {}
+        matching_agencies = []
+        for agency_query in agency_queries:
+            if len(agency_query) > 2:
+                matching_agencies += list(Agency.objects.filter(approved=True).filter(
+                    Q(name__icontains=agency_query)|
+                    Q(aliases__icontains=agency_query)|
+                    Q(jurisdiction__name__icontains=agency_query)|
+                    Q(types__name__exact=agency_query)
+                ))
+        for agency in matching_agencies:
+            agencies[agency.name] = agency.id
+        return HttpResponse(json.dumps(agencies), content_type='application/json')
+
     if request.method == 'POST':
         form = MultiRequestForm(request.POST)
         if form.is_valid():

@@ -7,36 +7,50 @@
 
 {% block scripts %}
 <script src="{% static 'js/jquery.multiselect.js' %}" type="text/javascript"></script>
-<script src="{% static 'js/jquery.quicksearch.min.js' %}" type="text/javascript"></script>
 <script>
-    $(document).ready(function(){
-        $('#id_agencies').multiSelect({
-            selectableHeader: "<label>All Agencies</label><input type='text' class='search-input' autocomplete='off' placeholder='Search for an agency'>",
-                selectionHeader: "<label>Chosen Agencies</label>",
-            afterInit: function(ms){
-                var that = this,
-                    $selectableSearch = that.$selectableUl.prev(),
-                    $selectionSearch = that.$selectionUl.prev(),
-                    selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-                    selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
+    var agencySearch = "<input type='text' class='search-input' id='agency-search' autocomplete='off' placeholder='Search for an agency'>";
+    var agencySelect = '#id_agencies';
+    $(agencySelect).multiSelect({
+        selectableHeader: "<label>All Agencies</label>",
+        selectionHeader: "<label>Selected Agencies</label>",
+        afterSelect: function(values){
+            $(values).each(function(){
+                var option = $(agencySelect).children('[value=' + this + ']');
+                $(option).attr('selected', true);
+            });
+        },
+        afterDeselect: function(values){
+            $(values).each(function(){
+                var option = $(agencySelect).children('[value=' + this + ']');
+                $(option).attr('selected', false);
+            });
+        }
+    });
+    $(agencySearch).insertBefore('#id_agencies');
+    $('#agency-search').keypress(function(key){
+        var currentKey = String.fromCharCode(key.charCode);
+        var query = this.value + currentKey;
+        console.log(query);
+        $.ajax({
+            method: 'GET',
+            data: {'query': query},
+            dataType: 'json',
+            success: function(data, status, xhr){
+                console.log(data);
 
-                that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-                .on('keydown', function(e){
-                  if (e.which === 40){
-                    that.$selectableUl.focus();
-                    return false;
-                  }
-                });
-            },
-            afterSelect: function(){
-                this.qs1.cache();
-                
-            },
-            afterDeselect: function(){
-                this.qs1.cache();
+                // first, clear all the currently unselected children
+                $(agencySelect).children('option').not(':selected').remove();
+                // then, refresh the widget
+                $(agencySelect).multiSelect('refresh');
+                // finally, load the new data into the widget
+                for (var agency in data) {
+                    $(agencySelect).multiSelect('addOption', {
+                        'text': agency,
+                        'value': data[agency],
+                    });
+                }
             }
         });
-        
     });
 </script>
 {% endblock scripts %}
