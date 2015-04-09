@@ -90,6 +90,8 @@ class RequestDraftForm(forms.Form):
 class AgencyMultipleChoiceField(forms.MultipleChoiceField):
     """Custom multiple choice field that loads without any data"""
     def clean(self, value):
+        # pylint: disable=no-self-use
+        # pylint: disable=missing-docstring
         for agency_id in value:
             try:
                 Agency.objects.get(pk=agency_id)
