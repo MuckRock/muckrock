@@ -21,7 +21,6 @@ import json
 import logging
 import stripe
 from random import choice
-import re
 import string
 
 from muckrock.accounts.models import Profile
