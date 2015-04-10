@@ -41,13 +41,24 @@
         }
     });
     // AGENCY SEARCH
+    // combines a few different solutions from Stack Overflow
+    // http://stackoverflow.com/q/4220126/4256689
     $('<input type="text" class="search-input" id="agency-search" autocomplete="off" placeholder="Search for an agency">').insertBefore(agencySelect);
-    $('#agency-search').keydown(function(key){
-        var currentKey = (65 <= key.keyCode <= 90) ? String.fromCharCode(key.keyCode) : '';
-        if (!key.shiftKey) currentKey = currentKey.toLowerCase();
-        var query = this.value + currentKey;
-        console.log(query);
-        $.ajax({
+    //setup before functions
+    var typingTimer;
+    var request;
+    var agencySearch = '#agency-search';
+    var doneTypingInterval = 1000;
+    //on keyup, start the countdown
+    $(agencySearch).keyup(function(key){
+        if (request) { request.abort(); }
+        clearTimeout(typingTimer);
+        if ($(agencySearch).val()) { typingTimer = setTimeout(doneTyping, doneTypingInterval); }
+    });
+    //user is "finished typing," do something
+    function doneTyping () {
+        var query = $(agencySearch).val();
+        request = $.ajax({
             method: 'GET',
             data: {'query': query},
             dataType: 'json',
@@ -62,6 +73,6 @@
                 }
             }
         });
-    });
+    };
 </script>
 {% endblock scripts %}
