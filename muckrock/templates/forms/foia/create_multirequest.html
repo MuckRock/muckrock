@@ -8,11 +8,25 @@
 {% block scripts %}
 <script src="{% static 'js/jquery.multiselect.js' %}" type="text/javascript"></script>
 <script>
-    var agencySearch = "<input type='text' class='search-input' id='agency-search' autocomplete='off' placeholder='Search for an agency'>";
+    // AGENCY MULTISELECT
     var agencySelect = '#id_agencies';
     $(agencySelect).multiSelect({
-        selectableHeader: "<label>All Agencies</label>",
-        selectionHeader: "<label>Selected Agencies</label>",
+        selectableHeader: '<label>Search Results</label>',
+        selectableFooter: '<button id="select-all">Select All</button>',
+        selectionHeader: '<label>Selected Agencies</label>',
+        selectionFooter: '<button id="remove-all">Remove All</button>',
+        afterInit: function(){
+            $('#select-all').click(function(e){
+                e.preventDefault();
+                $(agencySelect).multiSelect('select_all');
+                return false;
+            });
+            $('#remove-all').click(function(e){
+                e.preventDefault();
+                $(agencySelect).multiSelect('deselect_all');
+                return false;
+            });
+        },
         afterSelect: function(values){
             $(values).each(function(){
                 var option = $(agencySelect).children('[value=' + this + ']');
@@ -26,9 +40,11 @@
             });
         }
     });
-    $(agencySearch).insertBefore('#id_agencies');
-    $('#agency-search').keypress(function(key){
-        var currentKey = String.fromCharCode(key.charCode);
+    // AGENCY SEARCH
+    $('<input type="text" class="search-input" id="agency-search" autocomplete="off" placeholder="Search for an agency">').insertBefore(agencySelect);
+    $('#agency-search').keydown(function(key){
+        var currentKey = (65 <= key.keyCode <= 90) ? String.fromCharCode(key.keyCode) : '';
+        if (!key.shiftKey) currentKey = currentKey.toLowerCase();
         var query = this.value + currentKey;
         console.log(query);
         $.ajax({
@@ -36,13 +52,8 @@
             data: {'query': query},
             dataType: 'json',
             success: function(data, status, xhr){
-                console.log(data);
-
-                // first, clear all the currently unselected children
                 $(agencySelect).children('option').not(':selected').remove();
-                // then, refresh the widget
                 $(agencySelect).multiSelect('refresh');
-                // finally, load the new data into the widget
                 for (var agency in data) {
                     $(agencySelect).multiSelect('addOption', {
                         'text': agency,
