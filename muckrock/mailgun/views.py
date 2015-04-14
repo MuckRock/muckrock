@@ -181,9 +181,9 @@ def bounces(request):
 
     event = request.POST.get('event')
     if event == 'bounced':
-        error = request.POST.get('error')
+        error = request.POST.get('error', '')
     elif event == 'dropped':
-        error = request.POST.get('description')
+        error = request.POST.get('description', '')
 
     try:
         headers = request.POST['message-headers']
