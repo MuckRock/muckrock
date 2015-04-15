@@ -10,7 +10,7 @@ CODES = {
 	'RES-C': ('Cover Letter', 'done', 'A cover letter granting the request and outlining any exempted materials, if any.'),
 	'RES-P': ('Partial Responsive Documents', 'partial', 'A first set of responsive documents from the agency, with more to be sent at a specified date.'),
 	'RES': ('Responsive Documents', 'done', 'A copy of documents responsive to the request.'),
-	'FEE-R': ('Fee Waiver Rejected', 'payment', 'A letter stating the request for reduced or waived fees has been rejected.'),
+	'FEE-R': ('Fee Waiver Rejected', None, 'A letter stating the request for reduced or waived fees has been rejected.'),
 	'FEE-A': ('Fee Waiver Accepted', 'processed', 'A letter stating the request for reduced or waived fees has been accepted.'),
 	'FEE': ('Payment Required', 'payment', 'A letter stating the requester must agree to or prepay assessed or estimated fees in order for the agency to continue processing the request.'),
 	'REJ-V': ('Request Rejected', 'rejected', 'The request has been rejected as being too vague, burdensome or otherwise unprocessable.'),
