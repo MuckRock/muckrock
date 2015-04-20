@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
@@ -16,6 +17,7 @@ from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
 from datetime import datetime
+import json
 import logging
 import stripe
 from random import choice
@@ -142,9 +144,10 @@ def _make_user(request, data):
         'Welcome to MuckRock',
         render_to_string('text/user/welcome.txt', {
             'user': user,
-            'password': password,
             'password_link': password_link,
-            'verification_code': user.get_profile().generate_confirmation_key(),
+            'verification_link': user.get_profile().wrap_url(
+                reverse('acct-verify-email'),
+                key=user.get_profile().generate_confirmation_key())
         }),
         'info@muckrock.com',
         [data['email']],
@@ -191,6 +194,7 @@ def _submit_request(request, foia):
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
     foia.submit()
+    request.session['ga'] = 'request_submitted'
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
 
@@ -228,6 +232,7 @@ def create_request(request):
             foia, foia_comm = _make_request(request, foia_request, parent)
             foia_comm.save()
             foia.save()
+            request.session['ga'] = 'request_drafted'
             return redirect(foia)
         else:
             # form is invalid
@@ -321,6 +326,31 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def create_multirequest(request):
     """A view for composing multirequests"""
+    if request.method == 'GET' and request.is_ajax():
+        agency_queries = request.GET.get('query', '').split(' ')
+        agencies = {}
+        matching_agencies = []
+        # 1. get queryset
+        # 2. transform into listM
+        # 3. transform into set
+        # 4. listN.append(set(listM))
+        # 5. listN = list(reduce(set.intersection, listN))
+        for agency_query in agency_queries:
+            if len(agency_query) > 2:
+                matching_agencies.append(set(list(Agency.objects.filter(approved=True).filter(
+                    Q(name__icontains=agency_query)|
+                    Q(aliases__icontains=agency_query)|
+                    Q(jurisdiction__name__icontains=agency_query)|
+                    Q(types__name__exact=agency_query)
+                ))))
+        try:
+            matching_agencies = list(reduce(set.intersection, matching_agencies))
+        except TypeError:
+            matching_agencies = []
+        for agency in matching_agencies:
+            agencies[agency.name] = agency.id
+        return HttpResponse(json.dumps(agencies), content_type='application/json')
+
     if request.method == 'POST':
         form = MultiRequestForm(request.POST)
         if form.is_valid():

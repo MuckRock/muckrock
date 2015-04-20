@@ -7,36 +7,72 @@
 
 {% block scripts %}
 <script src="{% static 'js/jquery.multiselect.js' %}" type="text/javascript"></script>
-<script src="{% static 'js/jquery.quicksearch.min.js' %}" type="text/javascript"></script>
 <script>
-    $(document).ready(function(){
-        $('#id_agencies').multiSelect({
-            selectableHeader: "<label>All Agencies</label><input type='text' class='search-input' autocomplete='off' placeholder='Search for an agency'>",
-                selectionHeader: "<label>Chosen Agencies</label>",
-            afterInit: function(ms){
-                var that = this,
-                    $selectableSearch = that.$selectableUl.prev(),
-                    $selectionSearch = that.$selectionUl.prev(),
-                    selectableSearchString = '#'+that.$container.attr('id')+' .ms-elem-selectable:not(.ms-selected)',
-                    selectionSearchString = '#'+that.$container.attr('id')+' .ms-elem-selection.ms-selected';
-
-                that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
-                .on('keydown', function(e){
-                  if (e.which === 40){
-                    that.$selectableUl.focus();
-                    return false;
-                  }
-                });
-            },
-            afterSelect: function(){
-                this.qs1.cache();
-                
-            },
-            afterDeselect: function(){
-                this.qs1.cache();
+    // AGENCY MULTISELECT
+    var agencySelect = '#id_agencies';
+    $(agencySelect).multiSelect({
+        selectableHeader: '<label>Search Results</label>',
+        selectableFooter: '<button id="select-all">Select All</button>',
+        selectionHeader: '<label>Selected Agencies</label>',
+        selectionFooter: '<button id="remove-all">Remove All</button>',
+        afterInit: function(){
+            $('#select-all').click(function(e){
+                e.preventDefault();
+                $(agencySelect).multiSelect('select_all');
+                return false;
+            });
+            $('#remove-all').click(function(e){
+                e.preventDefault();
+                $(agencySelect).multiSelect('deselect_all');
+                return false;
+            });
+        },
+        afterSelect: function(values){
+            $(values).each(function(){
+                var option = $(agencySelect).children('[value=' + this + ']');
+                $(option).attr('selected', true);
+            });
+        },
+        afterDeselect: function(values){
+            $(values).each(function(){
+                var option = $(agencySelect).children('[value=' + this + ']');
+                $(option).attr('selected', false);
+            });
+        }
+    });
+    // AGENCY SEARCH
+    // combines a few different solutions from Stack Overflow
+    // http://stackoverflow.com/q/4220126/4256689
+    $('<input type="text" class="search-input" id="agency-search" autocomplete="off" placeholder="Search for an agency">').insertBefore(agencySelect);
+    //setup before functions
+    var typingTimer;
+    var request;
+    var agencySearch = '#agency-search';
+    var doneTypingInterval = 1000;
+    //on keyup, start the countdown
+    $(agencySearch).keyup(function(key){
+        if (request) { request.abort(); }
+        clearTimeout(typingTimer);
+        if ($(agencySearch).val()) { typingTimer = setTimeout(doneTyping, doneTypingInterval); }
+    });
+    //user is "finished typing," do something
+    function doneTyping () {
+        var query = $(agencySearch).val();
+        request = $.ajax({
+            method: 'GET',
+            data: {'query': query},
+            dataType: 'json',
+            success: function(data, status, xhr){
+                $(agencySelect).children('option').not(':selected').remove();
+                $(agencySelect).multiSelect('refresh');
+                for (var agency in data) {
+                    $(agencySelect).multiSelect('addOption', {
+                        'text': agency,
+                        'value': data[agency],
+                    });
+                }
             }
         });
-        
-    });
+    };
 </script>
 {% endblock scripts %}

@@ -87,14 +87,18 @@ class RequestDraftForm(forms.Form):
                   'You may change this whenever you want.'
     )
 
-class AgencyMultipleChoiceField(forms.ModelMultipleChoiceField):
-    """Multiple choice field with custom label for agencies"""
-    def label_from_instance(self, obj):
-        agency_jurisdiction = obj.jurisdiction
-        label = u'{0} / {1}'.format(obj.name, agency_jurisdiction.name)
-        if agency_jurisdiction.level == 'l':
-            label += ', {0}'.format(agency_jurisdiction.parent.abbrev)
-        return label
+class AgencyMultipleChoiceField(forms.MultipleChoiceField):
+    """Custom multiple choice field that loads without any data"""
+    def clean(self, value):
+        # pylint: disable=no-self-use
+        # pylint: disable=missing-docstring
+        for agency_id in value:
+            try:
+                Agency.objects.get(pk=agency_id)
+            except Agency.DoesNotExist:
+                raise forms.ValidationError
+        return value
+
 
 class MultiRequestForm(forms.ModelForm):
     """A form for a multi-request"""
@@ -108,7 +112,7 @@ class MultiRequestForm(forms.ModelForm):
     )
     agencies = AgencyMultipleChoiceField(
         label='Agencies',
-        queryset=Agency.objects.filter(approved=True)
+        choices=()
     )
 
     class Meta:

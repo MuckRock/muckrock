@@ -85,6 +85,10 @@ class FOIAFile(models.Model):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
 
+    def is_eml(self):
+        """Is this an eml file?"""
+        return self.ffile.name.endswith('.eml')
+
     def anchor(self):
         """Anchor name"""
         return 'file-%d' % self.pk

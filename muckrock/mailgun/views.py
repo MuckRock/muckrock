@@ -149,6 +149,28 @@ def fax(request):
     return HttpResponse('OK')
 
 @csrf_exempt
+def catch_all(request, address):
+    """Handle emails sent to other addresses"""
+
+    if not _verify(request.POST):
+        return HttpResponseForbidden()
+
+    post = request.POST
+
+    from_ = post.get('From')
+    to_ = post.get('To') or post.get('to')
+    _, from_email = parseaddr(from_)
+
+    if _allowed_email(from_email):
+        comm = _make_orphan_comm(from_, to_, post, request.FILES, None)
+        OrphanTask.objects.create(
+            reason='ia',
+            communication=comm,
+            address=address)
+
+    return HttpResponse('OK')
+
+@csrf_exempt
 def bounces(request):
     """Notify when an email is bounced"""
 
@@ -159,9 +181,9 @@ def bounces(request):
 
     event = request.POST.get('event')
     if event == 'bounced':
-        error = request.POST.get('error')
+        error = request.POST.get('error', '')
     elif event == 'dropped':
-        error = request.POST.get('description')
+        error = request.POST.get('description', '')
 
     try:
         headers = request.POST['message-headers']
@@ -252,7 +274,7 @@ def _upload_file(foia, comm, file_, sender):
     if foia:
         upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
-def _allowed_email(email, foia):
+def _allowed_email(email, foia=None):
     """Is this an allowed email?"""
 
     email = email.lower()
@@ -264,13 +286,23 @@ def _allowed_email(email, foia):
         '.muckrock.com',
         '@muckrock.com',
         ] + state_tlds
-    if foia.email and '@' in foia.email and email.endswith(foia.email.split('@')[1].lower()):
+
+    if foia and foia.email and '@' in foia.email and \
+            email.endswith(foia.email.split('@')[1].lower()):
         return True
-    if foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
+    if foia and foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
         return True
-    if email in [i.lower() for i in foia.get_other_emails()]:
+    if foia and email in [i.lower() for i in foia.get_other_emails()]:
         return True
-    return any(email.endswith(tld) for tld in allowed_tlds)
+
+    if any(email.endswith(tld) for tld in allowed_tlds):
+        return True
+
+    if not foia and (Agency.objects.filter(email__iexact=email).exists() or
+            Agency.objects.filter(other_emails__icontains=email).exists()):
+        return True
+
+    return False
 
 def _file_type(file_):
     """Determine the attachment's file type"""

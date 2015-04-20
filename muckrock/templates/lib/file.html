@@ -1,3 +1,4 @@
+{% load tags %}
 <div class="file" id="{{ file.anchor }}">
     <img src="{{ SITE_ROOT }}{{ file.get_thumbnail }}" class="thumbnail">
     <div class="title">{{ file.title }}</div>
@@ -11,5 +12,8 @@
         </div>
         {% endif %}
         <a href="{{file.ffile.url}}" target="_blank">Download</a>
+		{% if file.is_eml %}
+			<p>{{file|display_eml|linebreaks|urlize}}</p>
+		{% endif %}
     </div>
 </div>

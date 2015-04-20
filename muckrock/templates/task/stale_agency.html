@@ -1,0 +1,16 @@
+{% extends 'task/default.html' %}
+
+{% block task-class %}
+    stale-agency
+{% endblock %}
+
+{% block task-type %}
+    Stale Agency
+{% endblock %}
+
+{% block task-data %}
+<dl class="task-data">
+    <dt>Agency</dt>
+    <dd><a href="{% url 'admin:agency_agency_change' task.agency.pk %}">{{task.agency}}</a></dd>
+</dl>
+{% endblock %}

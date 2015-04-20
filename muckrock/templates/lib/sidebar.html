@@ -1,8 +1,4 @@
-{% if hidden %}
-<aside class="hidden-menu" id="sidebar-menu">
-{% else %}
 <aside id="sidebar-menu">
-{% endif %}
     <nav class="sidebar">
         {% if broadcast %}
         <div class="broadcast panel">
@@ -67,17 +63,17 @@
             </ul>
             {% endif %}
         </section>
-            
+
         {% else %}
         <ul class="account-links">
             <li><a href="{% url 'acct-register' %}" class="button">Sign&nbsp;Up</a></li>
             <li><a href="{% url 'acct-login' %}" class="button">Log&nbsp;In</a></li>
         </ul>
         {% endif %}
-        
+
         {% if not user.is_authenticated %}
         <dfn>Get FOIA-Informed</dfn>
-        
+
         <ul class="social-links">
             <!--
             <li><a href="https://muckrock.com/feeds">
@@ -120,7 +116,7 @@
             </span>
         </form>
         {% endif %}
-        
+
         <!--
         <section class="spotlight">
             <dfn>Community Spotlight</dfn>

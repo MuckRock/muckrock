@@ -1,10 +1,10 @@
-Hi {{user.full_name}}, and welcome to MuckRock!
+Hi {{user.get_full_name}}, and welcome to MuckRock!
+{% if password_link %}
+You're account is almost set up, but we need you to set a password. You can set it here: https://www.muckrock.com{{ password_link }}
+{% endif %}
+We ask that you please verify your email by following this link: https://www.muckrock.com{{ verification_link }}
 
-Your username is {{ user.username }}.
-It's associated with the email address {{ user.email }}.
-{% if password %}Your password has been temporarily set to {{ password }}. Log in and change it now: https://www.muckrock.com{{ password_link }}{% endif %}
-
-We ask that you please verify your email by following this link: https://www.muckrock.com{% url 'acct-verify-email' %}?key={{ verification_code }}
+Just a reminder, your username is {{ user.username }}, and the email address for your account is {{ user.email }}.
 
 After that, get started filing by just clicking the "Create a FOIA Request" button on the top right of any page.
 

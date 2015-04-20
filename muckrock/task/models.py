@@ -1,7 +1,6 @@
 """
 Models for the Task application
 """
-from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
@@ -25,13 +24,7 @@ class Task(models.Model):
         ordering = ['date_created']
 
     def __unicode__(self):
-        return 'Task: %d' % (self.pk)
-
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        if request.POST.get('submit') == 'Resolve':
-            self.resolve()
-            messages.success(request, 'Resolved the task')
+        return u'Task: %d' % (self.pk)
 
     def resolve(self):
         """Resolve the task"""
@@ -39,10 +32,25 @@ class Task(models.Model):
         self.date_done = datetime.now()
         self.save()
 
+    def assign(self, user):
+        """Assign the task"""
+        self.assigned = user
+        self.save()
+
+
+class GenericTask(Task):
+    """A generic task"""
+    # pylint: disable=no-member
+    subject = models.CharField(max_length=255)
+    body = models.TextField(blank=True)
+
+    def __unicode__(self):
+        return self.subject
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
-
+    # pylint: disable=no-member
     reasons = (('bs', 'Bad Sender'),
                ('ib', 'Incoming Blocked'),
                ('ia', 'Invalid Address'))
@@ -51,55 +59,39 @@ class OrphanTask(Task):
     address = models.CharField(max_length=255)
 
     def __unicode__(self):
-        # pylint: disable=no-member
-        return '%s: %s' % (self.get_reason_display(), self.communication.foia)
+        return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
-        comm = self.communication
-        submit = request.POST.get('submit')
-        if submit == 'Move':
-            foia_pks = request.POST.get('foia_pk', '').split(',')
-            comm.move(request, foia_pks)
+    def move(self, request, foia_pks):
+        """Moves the comm and resolves the task"""
+        self.communication.move(request, foia_pks)
+        self.resolve()
 
-        if submit == 'Reject':
-            messages.success(request, 'Rejected the communication')
-
-        if submit in ('Move', 'Reject'):
-            self.resolve()
+    def reject(self):
+        """Simply resolves the request. Should do something to spam addresses."""
+        self.resolve()
 
 
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
-
+    # pylint: disable=no-member
     categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'))
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
-        # pylint: disable=no-member
-        return '%s: %s' % (self.get_category_display(), self.communication.foia)
+        return u'%s: %s' % (self.get_category_display(), self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
+    def set_status(self, status):
+        """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
         foia = comm.foia
-        statuses = {
-                'Awaiting Acknowledgement': 'ack',
-                'Awaiting Response': 'processed',
-                'Awaiting Appeal': 'appealing',
-                }
-        if request.POST.get('submit') in statuses:
-            foia.status = statuses[request.POST.get('submit')]
-            foia.update()
-            foia.save()
-            comm.status = foia.status
-            comm.date = datetime.now()
-            comm.save()
-            self.resolve()
-            messages.success(request, 'Set the status for the mailed request')
+        foia.status = status
+        foia.update()
+        foia.save()
+        comm.status = foia.status
+        comm.date = datetime.now()
+        comm.save()
+        self.resolve()
 
 
 class RejectedEmailTask(Task):
@@ -112,7 +104,7 @@ class RejectedEmailTask(Task):
     error = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
-        return '%s: %s' % (self.get_category_display(), self.foia)
+        return u'%s: %s' % (self.get_category_display(), self.foia)
 
     def agencies(self):
         """Get the agencies who use this email address"""
@@ -137,7 +129,7 @@ class StaleAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return 'Stale Agency: %s' % (self.agency)
+        return u'Stale Agency: %s' % (self.agency)
 
 
 class FlaggedTask(Task):
@@ -152,12 +144,12 @@ class FlaggedTask(Task):
 
     def __unicode__(self):
         if self.foia:
-            return 'Flagged: %s' % (self.foia)
+            return u'Flagged: %s' % (self.foia)
         if self.agency:
-            return 'Flagged: %s' % (self.agency)
+            return u'Flagged: %s' % (self.agency)
         if self.jurisdiction:
-            return 'Flagged: %s' % (self.jurisdiction)
-        return 'Flagged: <None>'
+            return u'Flagged: %s' % (self.jurisdiction)
+        return u'Flagged: <None>'
 
 
 class NewAgencyTask(Task):
@@ -167,51 +159,41 @@ class NewAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return 'New Agency: %s' % (self.agency)
+        return u'New Agency: %s' % (self.agency)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        submit = request.POST.get('submit')
+    def approve(self):
+        """Approves agency and resolves task"""
+        self.agency.approved = True
+        self.agency.save()
+        self.resolve()
 
-        if submit == 'Approve':
-            agency = self.agency
-            agency.approved = True
-            agency.save()
-            messages.success(request, 'Approved the agency')
-
-        if submit == 'Reject':
-            messages.error(request, 'Rejected the agency')
-
-        if submit in ('Approve', 'Reject'):
-            self.resolve()
+    def reject(self):
+        """
+        Simply resolves task.
+        Should do something to the FOIAs attributed to the rejected agency.
+        """
+        self.resolve()
 
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
-
+    # pylint: disable=no-member
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
-        # pylint: disable=no-member
-        return 'Response: %s' % (self.communication.foia)
+        return u'Response: %s' % (self.communication.foia)
 
-    def handle_post(self, request):
-        """Handle form actions for this task"""
-        # pylint: disable=no-member
+    def set_status(self, status):
+        """Sets status of comm and foia; resolves task"""
         comm = self.communication
         foia = comm.foia
-        statuses = ['fix', 'paymnet', 'rejected', 'no_docs',
-                    'done', 'partial', 'abandoned']
-        status = request.POST.get('status')
-        if status in statuses:
-            foia.status = status
-            foia.update()
-            if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-                foia.date_done = comm.date
-            foia.save()
-            comm.status = foia.status
-            if status in ['ack', 'processed', 'appealing']:
-                comm.date = datetime.now()
-            comm.save()
-            self.resolve()
-            messages.success(request, 'Set the status')
+        foia.status = status
+        foia.update()
+        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+            foia.date_done = comm.date
+        foia.save()
+        comm.status = foia.status
+        if status in ['ack', 'processed', 'appealing']:
+            comm.date = datetime.now()
+        comm.save()
+        self.resolve()

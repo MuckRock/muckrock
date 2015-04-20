@@ -9,6 +9,7 @@
 @import 'orphan';
 @import 'crowdfund';
 @import 'tags';
+@import 'tasks';
 
 /* Feeds */
 
@@ -22,7 +23,7 @@
         float: left;
         div {
             display: block;
-            & + div { 
+            & + div {
                 @include font-sizing(0.9, 1);
             }
         }
@@ -35,7 +36,7 @@
 }
 
 .feed {
-    
+
     ul, ol {
         list-style-type: none;
         padding-left: 0;
@@ -46,12 +47,12 @@
         border-top: none;
         border-radius: 0;
     }
-    
+
     li:first-child > .feed-item {
         border-top: $base-border-width solid $color-grey;
         @include border-top-radius($base-border-radius);
     }
-    
+
     li:last-child > .feed-item {
         @include border-bottom-radius($base-border-radius);
     }

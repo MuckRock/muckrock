@@ -1,5 +1,5 @@
 {% if page_obj.object_list.count > 0 and page_obj.paginator.num_pages > 1 %}
-<nav class="pagination">    
+<nav class="pagination">
     <div class="page-ref">
         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}<br>
         Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}
@@ -14,7 +14,7 @@
         </li>
     {% endif %}
     {% if page_obj.has_next %}
-        <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% if query %}&amp;q={{query}}{% endif %}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
+        <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
     {% else %}
         <li>
             <span class="default">Next&nbsp;page&nbsp;&#187;&emsp;Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</span>

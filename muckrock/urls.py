@@ -15,7 +15,7 @@ from django.views.generic.base import RedirectView
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
 import autocomplete_light
-import haystack.urls, dbsettings.urls
+import dbsettings.urls
 
 autocomplete_light.autodiscover()
 
@@ -23,27 +23,72 @@ import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
-       muckrock.accounts.views, muckrock.sidebar.viewsets
+       muckrock.accounts.views, muckrock.sidebar.viewsets, muckrock.task.viewsets
 import muckrock.settings as settings
 import muckrock.views as views
+from muckrock.agency.sitemap import AgencySitemap
 from muckrock.foia.sitemap import FoiaSitemap
+from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 
 admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
 
-sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap}
+sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap,
+            'Agency': AgencySitemap, 'Jurisdiction': JurisdictionSitemap}
 
 router = DefaultRouter()
-router.register(r'jurisdiction', muckrock.jurisdiction.views.JurisdictionViewSet)
-router.register(r'agency', muckrock.agency.views.AgencyViewSet)
-router.register(r'foia', muckrock.foia.viewsets.FOIARequestViewSet)
-router.register(r'question', muckrock.qanda.views.QuestionViewSet)
-router.register(r'statistics', muckrock.accounts.views.StatisticsViewSet)
-router.register(r'communication', muckrock.foia.viewsets.FOIACommunicationViewSet)
-router.register(r'user', muckrock.accounts.views.UserViewSet)
-router.register(r'news', muckrock.news.views.ArticleViewSet)
-router.register(r'sidebar', muckrock.sidebar.viewsets.SidebarViewSet)
+router.register(r'jurisdiction',
+        muckrock.jurisdiction.views.JurisdictionViewSet,
+        'api-jurisdiction')
+router.register(r'agency',
+        muckrock.agency.views.AgencyViewSet,
+        'api-agency')
+router.register(r'foia',
+        muckrock.foia.viewsets.FOIARequestViewSet,
+        'api-foia')
+router.register(r'question',
+        muckrock.qanda.views.QuestionViewSet,
+        'api-question')
+router.register(r'statistics',
+        muckrock.accounts.views.StatisticsViewSet,
+        'api-statistics')
+router.register(r'communication',
+        muckrock.foia.viewsets.FOIACommunicationViewSet,
+        'api-communication')
+router.register(r'user',
+        muckrock.accounts.views.UserViewSet,
+        'api-user')
+router.register(r'news',
+        muckrock.news.views.ArticleViewSet,
+        'api-news')
+router.register(r'sidebar',
+        muckrock.sidebar.viewsets.SidebarViewSet,
+        'api-sidebar')
+router.register(r'task',
+        muckrock.task.viewsets.TaskViewSet,
+        'api-task')
+router.register(r'orphantask',
+        muckrock.task.viewsets.OrphanTaskViewSet,
+        'api-orphantask')
+router.register(r'snailmailtask',
+        muckrock.task.viewsets.SnailMailTaskViewSet,
+        'api-snailmailtask')
+router.register(r'rejectedemailtask',
+        muckrock.task.viewsets.RejectedEmailTaskViewSet,
+        'api-rejectedemailtask')
+router.register(r'staleagencytask',
+        muckrock.task.viewsets.StaleAgencyTaskViewSet,
+        'api-staleagencytask')
+router.register(r'flaggedtask',
+        muckrock.task.viewsets.FlaggedTaskViewSet,
+        'api-flaggedtask')
+router.register(r'newagencytask',
+        muckrock.task.viewsets.NewAgencyTaskViewSet,
+        'api-newagencytask')
+router.register(r'responsetask',
+        muckrock.task.viewsets.ResponseTaskViewSet,
+        'api-responsetask')
 
 urlpatterns = patterns(
     '',
@@ -60,7 +105,7 @@ urlpatterns = patterns(
     url(r'^task/', include(muckrock.task.urls)),
     url(r'^organization/', include(muckrock.organization.urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^search/', include(haystack.urls)),
+    url(r'^search/$', views.MRSearchView(), name='search'),
     url(r'^settings/', include(dbsettings.urls)),
     url(r'^api_v1/', include(router.urls)),
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),

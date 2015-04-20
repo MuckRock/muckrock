@@ -105,6 +105,7 @@ class Jurisdiction(models.Model, RequestHelper):
                                                                     ' (or calendar days)?')
     intro = models.TextField(blank=True, help_text='Intro paragraph for request - '
                                          'usually includes the pertinant FOI law')
+    law_name = models.CharField(blank=True, max_length=255, help_text='The pertinant FOIA law')
     waiver = models.TextField(blank=True, help_text='Optional - custom waiver paragraph if '
                               'FOI law has special line for waivers')
 
@@ -118,6 +119,9 @@ class Jurisdiction(models.Model, RequestHelper):
             return self.full_name
         else:
             return self.name
+
+    def __repr__(self):
+        return '<Jurisdiction: %d>' % self.pk
 
     def get_absolute_url(self):
         """The url for this object"""

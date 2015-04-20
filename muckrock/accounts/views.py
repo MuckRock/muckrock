@@ -60,10 +60,10 @@ def register(request):
                 'Welcome to MuckRock',
                 render_to_string('text/user/welcome.txt', {
                     'user': new_user,
-                    'verification_code': new_user.get_profile().generate_confirmation_key,
-                    'verificaiton_link': new_user.get_profile().wrap_url(
-                        reverse('acct-verify-email'))
-                }),
+                    'verification_link': new_user.get_profile().wrap_url(
+                        reverse('acct-verify-email'),
+                        key=new_user.get_profile().generate_confirmation_key())
+                    }),
                 'info@muckrock.com',
                 [new_user.email],
                 fail_silently=False
@@ -221,7 +221,7 @@ def buy_requests(request):
             user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
-            request.session['ga'] = 'buy_requests'
+            request.session['ga'] = 'request_purchase'
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
 
@@ -255,7 +255,9 @@ def verify_email(request):
                 'Verify Your MuckRock Email',
                 render_to_string('text/user/verify_email.txt', {
                     'user': user,
-                    'verification_code': prof.generate_confirmation_key()
+                    'verification_link': user.get_profile().wrap_url(
+                        reverse('acct-verify-email'),
+                        key=prof.generate_confirmation_key())
                 }),
                 'info@muckrock.com',
                 [user.email],

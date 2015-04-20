@@ -10,78 +10,143 @@ $color-selected: $color-primary;
 
 $small-menu-breakpoint: 540px;
 
-nav {
-    overflow: hidden;
-    @include box-sizing(border-box);
-    ul {
-        display: table;
-        margin: 0;
-        padding-left: 0;
-        list-style-type: none;
-        .left {
-            margin-bottom: 0.75em;
-            float: left;
+@mixin sidebar-controller
+{
+    $on: table-cell;
+    $off: none;
+    #menu-button
+    {
+        display: $on;
+    }
+    #menu-close
+    {
+        display: $off;
+    }
+    #sidebar-menu:target ~ .container
+    {
+        #menu-button
+        {
+            display: $off;
         }
-        .right { float: right; }
-        .left, .right {
-            display: table;
-            width: auto;
-        }
-        @media screen and (max-width: $small-menu-breakpoint) {
-            .left, .right {
-                width: 100%;
-                float: none;
-            }
+        #menu-close
+        {
+            display: $on;
         }
     }
 }
 
-nav.primary {
+@mixin sidebar-translation($size)
+{
+    #sidebar-menu
+    {
+        @include transform(translateX($size));
+        &:target
+        {
+            @include transform(translateX(0));
+        }
+    }
+    #sidebar-menu:target ~ .container
+    {
+        @include transform(translateX(-$size));
+    }
+}
 
+@mixin hidden-sidebar
+{
+    @include sidebar-controller;
+    @include sidebar-translation($mobile-menu-width);
+    @include media($medium-layout)
+    {
+        @include sidebar-translation($tablet-menu-width);
+    }
+    @include media($large-layout)
+    {
+        @include sidebar-translation(0);
+        nav.primary ul.right
+        {
+            display: none;
+            opacity: 0;
+            @include transition($menu-animation);
+        }
+
+    }
+}
+
+@mixin global-sidebar
+{
+    .container
+    {
+        display: block;
+        width: 100%;
+        @include transition($menu-animation);
+    }
+    #sidebar-menu
+    {
+        display: block;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 5;
+        width: $mobile-menu-width;
+        @include media($medium-layout)
+        {
+            width: $tablet-menu-width;
+        }
+        @include media($large-layout)
+        {
+            width: $desktop-menu-width;
+            & + .container {
+                padding-right: em($desktop-menu-width) + $base-padding;
+            }
+        }
+        height: 100%;
+        @include transition($menu-animation);
+    }
+    #muckrock-text
+    {
+        @include transition($menu-animation);
+    }
+
+    @include hidden-sidebar;
+}
+
+nav.primary {
+    overflow: hidden;
     ul {
+        display: table;
         list-style-type: none;
         margin: 0;
         padding-left: 0;
-        &.left { float: left; }
-        &.right { float: right; }
-        @media screen and (min-width: $small-menu-breakpoint) {
-            &.left, &.right { width: auto; }
-            &.left { float: left; }
-            &.right { display: table; float: right; }
+        &.left
+        {
+            float: left;
+        }
+        &.right
+        {
+            display: table;
+            float: right;
         }
     }
-    
-    li {
-        display: table-cell;
-        vertical-align: middle;
-        text-align: center;
-        a.button { margin: 0; }
-    }
-    li:first-child a.button {
+    #new-request > .button {
         @include border-left-radius($base-border-radius);
         @include border-right-radius(0);
         border-right: none;
     }
-    li:last-child a.button {
-        @include border-right-radius($base-border-radius);
-        @include border-left-radius(0);
-        border-left: none;
-    }    
-    #menu-button > .button {
+    #menu-button > .button, #menu-close > .button {
         @include border-right-radius($base-border-radius);
         @include border-left-radius(0);
         border-left: none;
     }
-    
     .menu-text { display: none; }
-    @media screen 
+    @media screen
     and (min-width: $small-menu-breakpoint - 200px) {
         .menu-text { display: inline; }
     }
-    
+
     /* Logo */
-    
+
     %logo {
+        margin: $base-margin/4 0;
         border: none;
         padding: 0 0.5em 0 0;
         svg > path, svg > g { fill: $color-black; }
@@ -110,6 +175,8 @@ nav.primary {
     }
 }
 
+@include global-sidebar;
+
 nav.secondary {
     ul {
         width: 100%;
@@ -137,10 +204,9 @@ nav.secondary {
         @media all and (min-width: 500px) { padding-right: 2em; }
         @media all and (min-width: 600px) { padding-right: 4em; }
         @media all and (min-width: 700px) { padding-right: 5.5em; }
-        
+
         @include transition (all 0.2s ease-in-out);
     }
-    padding: $base-vertical-rhythm 0;
     @media screen and (min-width: $small-menu-breakpoint ) {
         li {
             text-align: left;
@@ -154,7 +220,7 @@ nav.secondary {
     width: 100%;
     margin-top: $base-vertical-rhythm;
     padding-top: $base-vertical-rhythm;
-    
+
     .logo {
         display: inline-block;
         margin-bottom: $base-vertical-rhythm;
@@ -164,7 +230,7 @@ nav.secondary {
         }
 
     }
-    
+
     footer {
         @include outer-container();
         .brand {
@@ -200,91 +266,6 @@ nav.secondary {
     }
 }
 
-/* Global Sidebar */
-
-.container {
-    display: block;
-    width: 100% - $desktop-menu-width;
-    float: left;
-    @include transition($menu-animation);
-}
-
-#sidebar-menu {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: $desktop-menu-width;
-    height: 100%;
-    @include transition($menu-animation);
-}
-
-#muckrock-text { @include transition($menu-animation); }
-
-#menu-button { display: table-cell; }
-#menu-close { display: none; }
-#sidebar-menu:target ~ .container nav.primary ul.right #menu-button {
-    display: none;
-}
-#sidebar-menu:target ~ .container nav.primary ul.right #menu-close {
-    display: table-cell;
-}
-
-nav.primary ul.right { display: none; }
-
-.hidden-menu ~ .container { width: 100%; }
-.hidden-menu ~ .container nav.primary ul.right { display: table; }
-#sidebar-menu.hidden-menu {
-    width: $mobile-menu-width;
-    margin-right: -$mobile-menu-width;
-    #new-request { display: none; }
-    &:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-        
-        & ~ .container header .primary #muckrock-text {
-            margin-left: $mobile-menu-width;
-        }
-    }
-    @include media($medium-layout) {
-        width: $tablet-menu-width;
-        margin-right: -$tablet-menu-width;
-        #new-request { display: none; }
-        &:target {
-            margin-right: 0;
-            & ~ .container, & ~ .footer { 
-                width: 100%;
-                margin-left: -$tablet-menu-width;
-            }
-            & ~ .container header .primary #muckrock-text {
-                margin-left: $tablet-menu-width;
-            }
-        }
-    }
-}
-#right-menu-button.hidden-menu { display: block; }
-
-@media screen and (max-width: $menu-breakpoint) {
-    .container, .footer-container { width: 100%; }
-    #sidebar-menu {
-        width: $mobile-menu-width;
-        margin-right: -$mobile-menu-width;
-        #new-request { display: none; }
-    }
-    #right-menu-button { display: block; }
-    #sidebar-menu:target {
-        margin-right: 0;
-        & ~ .container, & ~ .footer { 
-            width: 100%;
-            margin-left: -$mobile-menu-width;
-        }
-        
-    }
-    nav.primary ul.right { display: table; }
-}
-
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
     $sidebar-button-background: darken($color-black, 4%);
@@ -293,34 +274,27 @@ nav.sidebar {
     height: 100%;
     width: 100%;
     padding: $base-padding/2;
-    @media screen and (min-width: 540px) { padding: $base-padding $base-padding 1em; }
+    @media screen and (min-width: 540px) {
+        padding: $base-padding $base-padding 1em;
+    }
     color: $color-white;
-    background: $color-black;  
-    
+    background: $color-black;
+
     dfn { padding: 1.5em 0 0.5em 0; }
-    
+
     ul { @include row; }
     li { @extend %half; }
     .button {
+        @include button($sidebar-button-background);
         display: block;
         height: $sidebar-object-height;
         width: 100%;
         margin-bottom: $base-vertical-rhythm/4;
         padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-        border: $base-border-width solid $sidebar-button-background;
-        @extend %border-radius;
-        text-align: center;
-        text-decoration: none;
-        color: $color-grey;
-        background: $sidebar-button-background;
-        &:hover {
-            background: $color-primary;
-            color: $color-white;
-        }
     }
-    
+
     .button-list {
-        display: block; 
+        display: block;
         margin-top: $base-margin/2;
         li {
             @extend %full;
@@ -337,9 +311,9 @@ nav.sidebar {
             border-radius: 0;
             border-top: $base-border-width solid $color-black;
         }
-        
-    }   
-    
+
+    }
+
     .updated a, .updated .button {
         text-align: left;
         text-align:left;
@@ -347,7 +321,7 @@ nav.sidebar {
         overflow: hidden;
         text-overflow: ellipsis;
     }
-    
+
     .broadcast {
         position: relative;
         margin-top: 0;
@@ -361,7 +335,7 @@ nav.sidebar {
         p:last-of-type {
             margin-bottom: 0;
         }
-        
+
         #close-broadcast {
             position: absolute;
             top: 5%;
@@ -374,7 +348,7 @@ nav.sidebar {
             }
         }
     }
-    
+
     .account {
         margin-top: 2 * $base-margin;
         .username {
@@ -388,8 +362,8 @@ nav.sidebar {
             @include row;
             #mylist { @extend %full; }
         }
-        
-                         
+
+
         .account-info {
             display: block;
             height: auto;
@@ -400,7 +374,7 @@ nav.sidebar {
             text-align: left;
             color: $color-white;
             text-decoration: none;
-            
+
             .counter {
                 margin-right: $base-vertical-rhythm/4;
                 padding: $base-vertical-rhythm/5 $base-vertical-rhythm/2;
@@ -417,9 +391,9 @@ nav.sidebar {
                 }
             }
         }
-        
+
     }
-    
+
     .social-links {
         a {
             svg {
@@ -434,7 +408,7 @@ nav.sidebar {
             }
         }
     }
-    
+
     .spotlight {
         margin-top: 1.5em;
         img { margin: 0; }
@@ -446,11 +420,10 @@ nav.sidebar {
         }
         p { @extend small; line-height: 1.2em; }
     }
-    
+
     form {
         display: block;
         width: 100%;
-        overflow: hidden;
         height: $sidebar-object-height;
         margin: 0 0 $base-vertical-rhythm/2;
         input {
@@ -465,20 +438,18 @@ nav.sidebar {
             @include placeholder { color: $color-grey; }
             border: $base-border-width solid lighten($color-black, 8%);
             @include border-right-radius(0);
+            transform: translateY(2px);
             &:focus, &:hover {
                 outline: none;
                 border-color: $color-selected;
             }
-            & + span.input-button { 
-                display: block;
+            & + span.input-button {
+                @include button($sidebar-button-background);
+                margin: 0;
                 float: right;
                 clear: right;
                 height: 100%;
                 width: 25%;
-                text-align: center;
-                color: $color-grey;
-                background: darken($color-black, 3%);
-                border: $base-border-width solid darken($color-black, 3%);
                 @include border-right-radius($base-border-radius);
                 @include border-left-radius(0);
                 cursor: pointer;
@@ -486,15 +457,10 @@ nav.sidebar {
                     display: inline-block;
                     height: 1.25em;
                     width: auto;
-                    margin-top: 0.3em;
-                    margin-left: -0.15em;
+                    margin-left: -.25em;
                     vertical-align: middle;
                     fill: $color-grey;
                 }
-                &:hover { @include active-button; }
-            }
-            &:focus + span.input-button, &:active + span.input-button { 
-                @include active-button;
             }
         }
     }
