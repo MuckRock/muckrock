@@ -39,6 +39,23 @@ class TestCrowdfundRequestView(TestCase):
         eq_(response.status_code, 200,
             'The crowdfund view should resolve and be visible to everyone')
 
+    def make_contribution(self):
+        data = {
+            'amount': 1000,
+            'token': ''
+        }
+        response = self.client.post(self.url, data)
+        return response;
+
+    def test_anonymous_contribution(self):
+        response = self.make_contribution()
+        ok_(False, 'Should be able to make an anonymous contribution')
+
+    def test_attributed_contribution(self):
+        self.client.login(username='adam', password='123')
+        response = self.make_contribution()
+        ok_(False, 'Should be able to make an attributed contribution')
+
 class TestCrowdfundRequestForm(TestCase):
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
