@@ -26,8 +26,9 @@ class TestCrowdfundRequestForm(TestCase):
         self.data = {
             'name': 'Crowdfund this Request',
             'description': 'Let\'s "payve" the way forward!',
-            'amount': foia.price,
-            'deadline': due
+            'payment_required': foia.price,
+            'date_due': due,
+            'foia': foia.id
         }
 
     def test_empty_request_form(self):
@@ -43,15 +44,11 @@ class TestCrowdfundRequestForm(TestCase):
 
     def test_expected_validation(self):
         form = CrowdfundRequestForm(self.data)
+        print form
         ok_(form.is_valid())
 
-    @raises(forms.ValidationError)
-    def test_unexpected_validation(self):
-        data = {
-            'name': 'Bad Data',
-            'description': 'Deadline should be a date object, not a number',
-            'amount': 1000,
-            'deadline': 1000
-        }
+    def test_missing_foia_validation(self):
+        data = self.data
+        data['foia'] = None
         form = CrowdfundRequestForm(self.data)
-        form.is_valid()
+        ok_(not form.is_valid())

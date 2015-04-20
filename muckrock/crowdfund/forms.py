@@ -4,6 +4,8 @@ Forms for Crowdfund application
 
 from django import forms
 
+from decimal import Decimal
+
 from muckrock.crowdfund.models import CrowdfundRequest
 
 class NumberInput(forms.TextInput):
@@ -11,6 +13,15 @@ class NumberInput(forms.TextInput):
 
 class CrowdfundRequestForm(forms.ModelForm):
     """Form to confirm enable crowdfunding on a FOIA"""
+
+    fee_rate = Decimal(0.1)
+
+    class Meta:
+        model = CrowdfundRequest
+        fields = ['name', 'description', 'payment_required', 'date_due', 'foia']
+        widgets = {
+            'foia': forms.HiddenInput()
+        }
 
     payment_required = forms.DecimalField(
         label='Amount',
@@ -24,9 +35,8 @@ class CrowdfundRequestForm(forms.ModelForm):
         widget=forms.DateInput()
     )
 
-    class Meta:
-        model = CrowdfundRequest
-        fields = ['name', 'description', 'payment_required', 'date_due', 'foia']
-        widgets = {
-            'foia': forms.HiddenInput()
-        }
+    def clean_payment_required(self):
+        """Add fee to the total crowdfund amount"""
+        amount = self.cleaned_data['payment_required']
+        amount += amount * self.fee_rate
+        return amount
