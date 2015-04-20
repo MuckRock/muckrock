@@ -54,6 +54,11 @@ class CrowdfundRequest(CrowdfundABC):
         # pylint: disable=E1101
         return 'Crowdfunding for %s' % self.foia.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('crowdfund-request', [], {'pk': self.pk})
+
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
     crowdfund = models.ForeignKey(CrowdfundRequest)

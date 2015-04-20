@@ -76,8 +76,6 @@ urlpatterns = patterns(
         views.pay_request, name='foia-pay'),
     url(r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request, name='foia-crowdfund'),
-    url(r'^%s/contribute/$' % foia_url,
-        crowdfund_views.contribute_request, name='foia-contribute'),
     url(r'^%s/follow/$' % foia_url,
         views.follow, name='foia-follow'),
     url(r'^%s/toggle-followups/$' % foia_url,

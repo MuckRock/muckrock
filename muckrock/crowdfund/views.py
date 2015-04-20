@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
+from django.views.generic.detail import DetailView
 
 from decimal import Decimal
 import logging
@@ -24,6 +25,38 @@ from muckrock.settings import STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
+
+class CrowdfundRequestDetail(DetailView):
+    """
+    Presents details about a crowdfunding campaign,
+    as well as providing a private endpoint for contributions
+    """
+    model = CrowdfundRequest
+    template_name = 'details/crowdfund_request_detail.html'
+
+    """
+
+    def post(self, request):
+        if request.is_ajax():
+            return HttpResponse(200)
+        else:
+            return render_to_response(self)
+
+
+    amount = request.POST.get('amount')
+    token = request.POST.get('stripe_token')
+    if amount and token:
+        form = CrowdfundRequestPaymentForm(request.POST, initial={'crowdfund': crowdfund})
+        if form.is_valid():
+            payment = form.save(commit=False)
+            if request.user.is_authenticated():
+                payment.user = request.user
+                payment.name = request.user.get_full_name()
+                payment.save()
+            try:
+                stripe.Charge.create(
+    """
+
 
 def _contribute(request, crowdfund, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""
@@ -66,38 +99,6 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
     return redirect(redirect_url)
-
-def contribute_request(request, jurisdiction, jidx, slug, idx):
-    """Contribute to a crowdfunding request"""
-    jmodel = get_object_or_404(
-        Jurisdiction,
-        slug=jurisdiction,
-        pk=jidx
-    )
-    foia = get_object_or_404(
-        FOIARequest,
-        jurisdiction=jmodel,
-        slug=slug,
-        pk=idx
-    )
-    crowdfund = get_object_or_404(CrowdfundRequest, foia=foia)
-    redirect_url = reverse(
-        'foia-detail',
-        kwargs={
-            'jurisdiction': crowdfund.foia.jurisdiction.slug,
-            'jidx': crowdfund.foia.jurisdiction.pk,
-            'slug': crowdfund.foia.slug,
-            'idx': crowdfund.foia.pk
-        }
-    )
-    if crowdfund.expired():
-        raise Http404()
-    return _contribute(
-        request,
-        crowdfund,
-        CrowdfundRequestPayment,
-        redirect_url
-    )
 
 def contribute_project(request, idx):
     """Contribute to a crowdfunding project"""

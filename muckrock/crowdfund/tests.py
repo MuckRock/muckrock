@@ -4,16 +4,40 @@ Tests for crowdfund app
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.test import TestCase
-
+from django.core.urlresolvers import reverse
+from django.test import TestCase, Client
 
 from mock import Mock
 from nose.tools import ok_, eq_, raises
 from datetime import datetime, timedelta
 
-from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
+
+class TestCrowdfundRequestView(TestCase):
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        foia = FOIARequest.objects.get(pk=18)
+        due = datetime.today() + timedelta(30)
+        self.crowdfund = CrowdfundRequest.objects.create(
+            foia=foia,
+            name='Test Crowdfund',
+            description='Testing contributions to this request',
+            payment_required=foia.price,
+            date_due=due
+        )
+        self.url = self.crowdfund.get_absolute_url()
+        self.client = Client()
+
+    def test_view(self):
+        response = self.client.get(self.url)
+        eq_(response.status_code, 200,
+            'The crowdfund view should resolve and be visible to everyone')
 
 class TestCrowdfundRequestForm(TestCase):
 
@@ -71,3 +95,5 @@ class TestCrowdfundRequestForm(TestCase):
         form = CrowdfundRequestForm(data)
         ok_(not form.is_valid(),
             'The due date for the crowdfund must come after today')
+
+
