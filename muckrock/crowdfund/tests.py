@@ -2,20 +2,19 @@
 Tests for crowdfund app
 """
 
-from django import forms
-from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-from mock import Mock
-from nose.tools import ok_, eq_, raises
+from nose.tools import ok_, eq_
 from datetime import datetime, timedelta
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
 
+# pylint: disable=missing-docstring
+
 class TestCrowdfundRequestView(TestCase):
+    """Tests the Detail view for CrowdfundRequest objects"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
@@ -45,7 +44,7 @@ class TestCrowdfundRequestView(TestCase):
             'token': ''
         }
         response = self.client.post(self.url, data)
-        return response;
+        return response
 
     def test_anonymous_contribution(self):
         response = self.make_contribution()

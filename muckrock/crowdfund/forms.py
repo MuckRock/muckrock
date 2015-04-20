@@ -5,11 +5,12 @@ Forms for Crowdfund application
 from django import forms
 
 from decimal import Decimal
-from datetime import date, timedelta
+from datetime import date
 
-from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 
 class NumberInput(forms.TextInput):
+    """Patches a NumberInput widget on top of the TextInput widget"""
     input_type = 'number'
 
 class CrowdfundRequestForm(forms.ModelForm):
@@ -52,3 +53,22 @@ class CrowdfundRequestForm(forms.ModelForm):
         if not correct_duration:
             raise forms.ValidationError('Crowdfund deadline must be after today.')
         return deadline
+
+class CrowdfundRequestPaymentForm(forms.ModelForm):
+    """Form to create a payment to a FOIA crowdfund"""
+    class Meta:
+        model = CrowdfundRequestPayment
+        fields = ['amount', 'show', 'crowdfund']
+        widgets = {
+            'amount': NumberInput(),
+            'show': forms.CheckboxInput(),
+            'crowdfund': forms.HiddenInput()
+        }
+
+    def clean_amount(self):
+        """Ensure the amount of the payment is greater than zero"""
+        amount = self.cleaned_data['amount']
+        valid_amount = amount > 0
+        if not valid_amount:
+            raise forms.ValidationError('Cannot contribute zero dollars')
+        return amount

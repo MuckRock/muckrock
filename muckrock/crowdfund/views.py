@@ -4,7 +4,6 @@ Views for the crowdfund application
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
@@ -19,8 +18,6 @@ from muckrock.crowdfund.models import \
     CrowdfundProject, \
     CrowdfundRequestPayment, \
     CrowdfundProjectPayment
-from muckrock.foia.models import FOIARequest
-from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)

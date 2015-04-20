@@ -10,7 +10,6 @@ from pingback import register_pingback
 # pylint: disable=W0611
 import muckrock.foia.signals
 # pylint: enable=W0611
-from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
                                 UserSubmittedFeed, UserDoneFeed, UserUpdateFeed

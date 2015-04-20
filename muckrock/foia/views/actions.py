@@ -7,20 +7,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from collections import namedtuple
-from datetime import datetime, date, timedelta
-from decimal import Decimal
+from datetime import datetime, timedelta
 import logging
 import stripe
 import sys
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.forms import \
     FOIADeleteForm, \
     FOIAAdminFixForm, \
@@ -323,7 +321,7 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
     )
 
 @login_required
-def crowdfund_request(request, jurisdiction, jidx, slug, idx):
+def crowdfund_request(request, idx):
     """Crowdfund a request"""
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
