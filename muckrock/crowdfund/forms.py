@@ -5,6 +5,7 @@ Forms for Crowdfund application
 from django import forms
 
 from decimal import Decimal
+from datetime import date, timedelta
 
 from muckrock.crowdfund.models import CrowdfundRequest
 
@@ -36,7 +37,18 @@ class CrowdfundRequestForm(forms.ModelForm):
     )
 
     def clean_payment_required(self):
-        """Add fee to the total crowdfund amount"""
+        """Add fee to the total crowdfund amount, make sure it isn't zero"""
         amount = self.cleaned_data['payment_required']
+        valid_amount = amount > 0
+        if not valid_amount:
+            raise forms.ValidationError('Amount to crowdfund must be greater than zero.')
         amount += amount * self.fee_rate
         return amount
+
+    def clean_date_due(self):
+        """Ensure date is not in the past"""
+        deadline = self.cleaned_data['date_due']
+        correct_duration = deadline > date.today()
+        if not correct_duration:
+            raise forms.ValidationError('Crowdfund deadline must be after today.')
+        return deadline

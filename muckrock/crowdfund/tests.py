@@ -2,8 +2,10 @@
 Tests for crowdfund app
 """
 
-from django.test import TestCase
 from django import forms
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+
 
 from mock import Mock
 from nose.tools import ok_, eq_, raises
@@ -22,12 +24,12 @@ class TestCrowdfundRequestForm(TestCase):
     def setUp(self):
         self.form = CrowdfundRequestForm()
         foia = FOIARequest.objects.get(pk=18)
-        due = datetime.now() + timedelta(30)
+        due = datetime.today() + timedelta(30)
         self.data = {
             'name': 'Crowdfund this Request',
             'description': 'Let\'s "payve" the way forward!',
             'payment_required': foia.price,
-            'date_due': due,
+            'date_due': due.strftime('%Y-%m-%d'),
             'foia': foia.id
         }
 
@@ -43,12 +45,29 @@ class TestCrowdfundRequestForm(TestCase):
             'An empty form should not validate')
 
     def test_expected_validation(self):
+        print self.data['date_due']
         form = CrowdfundRequestForm(self.data)
-        print form
-        ok_(form.is_valid())
+        ok_(form.is_valid(),
+            'Given a correct set of data, the form should validate')
 
-    def test_missing_foia_validation(self):
+    def test_zero_amount(self):
         data = self.data
-        data['foia'] = None
-        form = CrowdfundRequestForm(self.data)
-        ok_(not form.is_valid())
+        data['payment_required'] = 0
+        form = CrowdfundRequestForm(data)
+        ok_(not form.is_valid(),
+            'Payment required should not be zero')
+
+    def test_negative_amount(self):
+        data = self.data
+        data['payment_required'] = -10.00
+        form = CrowdfundRequestForm(data)
+        ok_(not form.is_valid(),
+            'Payment required should not be negative')
+
+    def test_incorrect_deadline(self):
+        data = self.data
+        yesterday = datetime.now() - timedelta(1)
+        data['date_due'] = yesterday.strftime('%Y-%m-%d')
+        form = CrowdfundRequestForm(data)
+        ok_(not form.is_valid(),
+            'The due date for the crowdfund must come after today')
