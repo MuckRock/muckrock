@@ -577,6 +577,11 @@ class TestFOIACrowdfunding(TestCase):
             self.foia.id))
         self.client = Client()
 
+    def form(self):
+        self.client.login(username='adam', password='abc')
+        response = self.client.get(self.url)
+        return response.context['form']
+
     def test_crowdfund_url(self):
         expected_url = (
             '/foi/' +
@@ -632,6 +637,15 @@ class TestFOIACrowdfunding(TestCase):
             ('If a request already has a crowdfund, trying to create a new one '
             'should respond with 302 status code. (Responds with %d)' % response.status_code))
 
+    def test_crowdfund_view_payment_not_required(self):
+        self.client.login(username='adam', password='abc')
+        self.foia.status = 'submitted'
+        self.foia.save()
+        response = self.client.get(self.url)
+        nose.tools.eq_(response.status_code, 302,
+            ('If a request does not have a "Payment Required" status, should '
+            'respond with a 302 status code. (Responds with %d)' % response.status_code))
+
     def test_crowdfund_view_uses_correct_template(self):
         template = 'forms/foia/crowdfund.html'
         self.client.login(username='adam', password='abc')
@@ -641,15 +655,12 @@ class TestFOIACrowdfunding(TestCase):
             ' (Renders %s)' % response.templates))
 
     def test_crowdfund_view_uses_correct_form(self):
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        form = response.context['form']
+        form = self.form()
         nose.tools.eq_(form.__class__, CrowdfundRequestForm,
             'View should use the CrowdfundRequestForm')
 
     def test_crowdfund_view_form_has_initial_data(self):
-        self.client.login(username='adam', password='abc')
-        response = self.client.get(self.url)
-        form = response.context['form']
+        form = self.form()
         nose.tools.eq_(hasattr(form, 'initial'), True,
             'Every CrowdfundRequestForm should have some initial data')
+

@@ -330,31 +330,29 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
 
     # check for unauthorized access
     if not owner_or_staff:
-        messages.error(request, 'You can only crowdfund your own requests.')
+        messages.error(request, 'You may only crowdfund your own requests.')
         return redirect(foia)
     if foia.has_crowdfund():
-        messages.error(request, 'You can only run one crowdfund per request.')
+        messages.error(request, 'You may only run one crowdfund per request.')
+        return redirect(foia)
+    if foia.status != 'payment':
+        messages.error(request, 'You may only crowfund when payment is required.')
         return redirect(foia)
 
-    initial_data = {}
-
+    # create crowdfund form
     default_crowdfund_duration = 30
     date_due = datetime.now() + timedelta(default_crowdfund_duration)
-    initial_data.update({'deadline': date_due})
 
-    if foia.status == 'payment':
-        initial_data.update({
-            'name': u'Crowdfund Request: %s' % unicode(foia),
-            'description': 'Help cover the request fees needed to free these docs!',
-            'amount': foia.price
-        })
-
-    creation_form = CrowdfundRequestForm(initial=initial_data)
-
-    context = {
-        'form': creation_form
+    initial = {
+        'name': u'Crowdfund Request: %s' % unicode(foia),
+        'description': 'Help cover the request fees needed to free these docs!',
+        'payment_required': foia.price,
+        'date_due': date_due,
+        'foia': foia
     }
-
+    context = {
+        'form': CrowdfundRequestForm(initial=initial)
+    }
     return render_to_response(
         'forms/foia/crowdfund.html',
         context,
