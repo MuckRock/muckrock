@@ -339,22 +339,29 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
         messages.error(request, 'You may only crowfund when payment is required.')
         return redirect(foia)
 
-    # create crowdfund form
-    default_crowdfund_duration = 30
-    date_due = datetime.now() + timedelta(default_crowdfund_duration)
+    if request.method == 'POST':
+        # save crowdfund object
+        form = CrowdfundRequestForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your crowdfund was started, now spread the word!')
+            return redirect(foia)
 
-    initial = {
-        'name': u'Crowdfund Request: %s' % unicode(foia),
-        'description': 'Help cover the request fees needed to free these docs!',
-        'payment_required': foia.price,
-        'date_due': date_due,
-        'foia': foia
-    }
-    context = {
-        'form': CrowdfundRequestForm(initial=initial)
-    }
+    elif request.method == 'GET':
+        # create crowdfund form
+        default_crowdfund_duration = 30
+        date_due = datetime.now() + timedelta(default_crowdfund_duration)
+        initial = {
+            'name': u'Crowdfund Request: %s' % unicode(foia),
+            'description': 'Help cover the request fees needed to free these docs!',
+            'payment_required': foia.price,
+            'date_due': date_due,
+            'foia': foia
+        }
+        form = CrowdfundRequestForm(initial=initial)
+
     return render_to_response(
         'forms/foia/crowdfund.html',
-        context,
+        {'form': form},
         context_instance=RequestContext(request)
     )
