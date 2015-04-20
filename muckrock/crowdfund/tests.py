@@ -44,3 +44,14 @@ class TestCrowdfundRequestForm(TestCase):
     def test_expected_validation(self):
         form = CrowdfundRequestForm(self.data)
         ok_(form.is_valid())
+
+    @raises(forms.ValidationError)
+    def test_unexpected_validation(self):
+        data = {
+            'name': 'Bad Data',
+            'description': 'Deadline should be a date object, not a number',
+            'amount': 1000,
+            'deadline': 1000
+        }
+        form = CrowdfundRequestForm(self.data)
+        form.is_valid()
