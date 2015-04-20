@@ -3,12 +3,13 @@ Tests for crowdfund app
 """
 
 from django.test import TestCase
+from django import forms
 
 from mock import Mock
-import nose.tools as _assert
+from nose.tools import ok_, eq_, raises
 from datetime import datetime, timedelta
 
-from muckrock.crowdfund import forms
+from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
 
@@ -19,21 +20,27 @@ class TestCrowdfundRequestForm(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
-        self.form = forms.CrowdfundRequestForm()
-
-    def test_empty_request_form(self):
-        _assert.ok_(self.form)
-
-    def test_prefilled_request_form(self):
+        self.form = CrowdfundRequestForm()
         foia = FOIARequest.objects.get(pk=18)
         due = datetime.now() + timedelta(30)
-        initial_data = {
+        self.data = {
             'name': 'Crowdfund this Request',
             'description': 'Let\'s "payve" the way forward!',
             'amount': foia.price,
-            'deadline': due }
-        form = forms.CrowdfundRequestForm(initial=initial_data)
-        _assert.ok_(form)
+            'deadline': due
+        }
 
-    def test_clean_form_with_expected_data(self):
-        _assert.ok_(self.form.is_valid())
+    def test_empty_request_form(self):
+        ok_(self.form)
+
+    def test_prefilled_request_form(self):
+        form = CrowdfundRequestForm(initial=self.data)
+        ok_(form)
+
+    def test_empty_validation(self):
+        ok_(not self.form.is_valid(),
+            'An empty form should not validate')
+
+    def test_expected_validation(self):
+        form = CrowdfundRequestForm(self.data)
+        ok_(form.is_valid())
