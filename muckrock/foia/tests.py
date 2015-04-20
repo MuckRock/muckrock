@@ -664,3 +664,8 @@ class TestFOIACrowdfunding(TestCase):
         nose.tools.eq_(hasattr(form, 'initial'), True,
             'Every CrowdfundRequestForm should have some initial data')
 
+    def test_crowdfund_submit_with_initial_data(self):
+        form = self.form()
+        response = self.client.post(self.url, form.data)
+        nose.tools.eq_(response.status_code, 200,
+            'The crowdfund form should be submittable with just the initial data')
