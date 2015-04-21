@@ -12,25 +12,36 @@
 {% block actions %}
 <form method="POST" class="stripe-handler crowdfund-form" id="crowdfund-form">
     {% csrf_token %}
-    <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
-    <input name="amount" id="crowdfund-amount" value="0" hidden>
-    <button data-amount="0"
-            data-description=""
-            data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
-            data-label=""
-            data-form="#crowdfund-form"
-            class="disabled checkout-button"
-            id="crowdfund-button"
-            disabled>
-        Contribute
-    </button>
+    {{ payment_form.crowdfund }}
+    <section class="anonymity">
+        {% if logged_in %}
+        <label for="id_show">Make my contribution anonymous.</label>
+        {{ payment_form.show }}
+        {% else %}
+        <p>To be listed as a contributor, please log in or sign up.</p>
+        {% endif %}
+    </section>
+    <section class="amount">
+        {{ payment_form.amount }}
+    </section>
+    <section class="action">
+        <button data-amount="0"
+                data-description=""
+                data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                data-label=""
+                data-form="#crowdfund-form"
+                class="disabled checkout-button"
+                id="crowdfund-button"
+                disabled>
+            Contribute
+        </button>
+    </section>
 </form>
 {% endblock %}
 
 {% block main %}
 
-
-{% with received=crowdfund.payment_received required=crowdfund.payment_required %}
+{% with received=crowdfundrequest.payment_received required=crowdfundrequest.payment_required %}
 <section class="left">
     <section class="description">
         {{ crowdfundrequest.description }}
@@ -41,7 +52,7 @@
 </section>
 <section class="right">
     <p class="amount-raised">${{ received|intcomma }} raised out of ${{ required|intcomma }}</p>
-    <p class="time-remaining">{{ crowdfund.date_due|timeuntil }} remaining</p>
+    <p class="time-remaining">{{ crowdfundrequest.date_due|timeuntil }} remaining</p>
 </section>
 {% endwith %}
 
@@ -49,4 +60,18 @@
     <h2>Embed the widget</h2>
     {% crowdfund crowdfundrequest.foia.pk %}
 </footer>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type="text/javascript">
+
+form = '#crowdfund-form';
+form_amount = $(form).children('#id_amount');
+
+pretty_amount_input = '<input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">';
+
+</script>
+
 {% endblock %}

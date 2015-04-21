@@ -23,18 +23,30 @@
     <footer>
         <form method="POST" action="{{ endpoint }}" class="stripe-handler crowdfund-form" id="crowdfund-form">
             {% csrf_token %}
-            <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
-            <input name="amount" id="crowdfund-amount" value="0" hidden>
-            <button data-amount="0"
-                    data-description=""
-                    data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
-                    data-label=""
-                    data-form="#crowdfund-form"
-                    class="disabled checkout-button"
-                    id="crowdfund-button"
-                    disabled>
-                Contribute
-            </button>
+            {{ payment_form.crowdfund }}
+            <section class="anonymity">
+                {% if logged_in %}
+                <label for="id_show">Make my contribution anonymous.</label>
+                {{ payment_form.show }}
+                {% else %}
+                <p>To be listed as a contributor, please log in or sign up.</p>
+                {% endif %}
+            </section>
+            <section class="amount">
+                {{ payment_form.amount }}
+            </section>
+            <section class="action">
+                <button data-amount="0"
+                        data-description=""
+                        data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                        data-label=""
+                        data-form="#crowdfund-form"
+                        class="disabled checkout-button"
+                        id="crowdfund-button"
+                        disabled>
+                    Contribute
+                </button>
+            </section>
         </form>
     </footer>
     {% endwith %}
