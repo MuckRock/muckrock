@@ -57,32 +57,29 @@ class TestCrowdfundRequestView(TestCase):
         eq_(response.status_code, 200,
             'The crowdfund view should resolve and be visible to everyone')
 
-    def test_anonymous_contribution(self):
-        """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
+    def post_form(self):
         form = CrowdfundRequestPaymentForm(self.data)
         if form.is_valid():
-            msg = '%s' % form.cleaned_data
+            msg = '%s' % form.data
         else:
             msg = '%s' % form.errors
         logging.info(msg)
         ok_(form.is_valid())
         response = self.client.post(self.url, {'payment': form.data, 'email': self.stripe_email, 'token': self.stripe_token})
-        ok_(False, 'Should be able to make an anonymous contribution')
+        ok_(response, 'The server should respond to the post request')
+        ok_(response.context.get('payment'), 'The server response should include a CrowdfundRequestPayment object')
+        return response
+
+    def test_anonymous_contribution(self):
+        """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
+        response = self.post_form()
 
     def test_attributed_contribution(self):
         """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
         self.client.login(username='adam', password='123')
         self.data['show'] = True
-        form = CrowdfundRequestPaymentForm(self.data)
-        if form.is_valid():
-            msg = '%s' % form.cleaned_data
-        else:
-            msg = '%s' % form.errors
-        logging.info(msg)
-        ok_(form.is_valid())
-        response = self.client.post(self.url, {'payment': form.data, 'email': self.stripe_email, 'token': self.stripe_token})
-        payment = response.context['payment']
-        ok_(payment)
+        response = self.post_form()
+        payment = response.context.get('payment')
         eq_(payment.user.username, 'adam',
             ('If the user is logged in and opts into attribution, the returned'
             ' payment object should reference their user account.'))
