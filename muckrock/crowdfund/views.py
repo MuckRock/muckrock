@@ -57,7 +57,7 @@ class CrowdfundRequestDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CrowdfundRequestDetail, self).get_context_data(**kwargs)
         context['logged_in'] = self.request.user.is_authenticated()
-        context['payment_form'] = CrowdfundRequestPaymentForm(initial={'crowdfund': self.model.pk})
+        context['payment_form'] = CrowdfundRequestPaymentForm(initial={'crowdfund': self.object.pk})
         return context
 
     def post(self, request, **kwargs):
