@@ -60,6 +60,8 @@ class FOIACommunication(models.Model):
         self.communication = unicode(self.communication).translate(remove_control)
         # limit communication length to 150k
         self.communication = self.communication[:150000]
+        # special handling for certain agencies
+        self._presave_special_handling()
         super(FOIACommunication, self).save(*args, **kwargs)
 
     def anchor(self):
@@ -108,6 +110,19 @@ class FOIACommunication(models.Model):
         raw_email = RawEmail.objects.get_or_create(communication=self)[0]
         raw_email.raw_email = msg
         raw_email.save()
+
+    def _presave_special_handling(self):
+        """Special handling before saving
+        For example, strip out BoP excessive quoting"""
+
+        special_cases = [
+            (lambda c: c.foia.agency.name == 'Bureau of Prisons',
+             lambda c: c.communication[:c.communication.index('>>>')]),
+        ]
+
+        for test, new_comm in special_cases:
+            if test(self):
+                self.communication = new_comm(self)
 
 
     class Meta:
