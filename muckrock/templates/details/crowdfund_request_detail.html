@@ -1,7 +1,7 @@
 {% extends 'details/base_detail.html' %}
 
 {% load humanize %}
-
+{% load static from staticfiles %}
 {% load tags %}
 
 {% block header %}
@@ -64,14 +64,23 @@
 {% endblock %}
 
 {% block scripts %}
-
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script type="text/javascript">
-
-form = '#crowdfund-form';
-form_amount = $(form).children('#id_amount');
-
-pretty_amount_input = '<input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">';
-
+$('.checkout-button').click(function(e){
+    e.preventDefault();
+    var checkoutData = getCheckoutData($(this));
+    checkout(
+        "{{ stripe_pk }}",
+        "{% static 'apple-touch-icon.png' %}",
+        checkoutData.description,
+        checkoutData.amount,
+        checkoutData.email,
+        checkoutData.label,
+        checkoutData.form
+    );
+    return false;
+});
 </script>
-
 {% endblock %}

@@ -1,36 +1,57 @@
-var crowdfundForm = $('#crowdfund-form');
-var crowdfundAmountInput = $('#crowdfund-amount-input');
-var crowdfundAmount = $('#crowdfund-amount');
-var crowdfundButton = $('#crowdfund-button');
-crowdfundAmountInput.autoNumeric('init', {aSign:'$', pSign:'p'});        
-crowdfundAmountInput.keyup(function(){
-    var amount = crowdfundAmountInput.autoNumeric('get');
-    var disabled = crowdfundButton.attr('disabled');
+//
+// Provides interface logic for the crowdfunding payment form
+//
+
+var form = '.crowdfund-form';
+var amount = 'input[name=amount]';
+var button = '.crowdfund-form .checkout-button';
+
+prettifyAmountInput(amount);
+
+function prettifyAmountInput(input) {
+    // pretty_amount_input is used as a functional wrapper for the amount input field
+    // progressive enhancement ftw!
+    var prettyInputElement = '<input name="pretty-amount-input" placeholder="$5.00" class="success" id="pretty-amount-input">';
+    var prettyInput = 'input[name=pretty-amount-input]';
+    $(input).before(prettyInputElement);
+    $(input).attr('hidden', true).hide();
+    $(prettyInput).autoNumeric('init', {aSign:'$', pSign:'p'});
+    $(prettyInput).keyup(function(){
+        toggleCrowdfundButton(prettyInput);
+    });
+    $(prettyInput).change(function(){
+        formatMonies(prettyInput);
+    });
+}
+
+function toggleCrowdfundButton(input) {
+    var value = $(input).autoNumeric('get');
+    var disabled = $(button).attr('disabled');
     var enable;
-    if (amount > 0) {
-        crowdfundButton.attr('disabled', false);
+    if (value > 0) {
+        $(button).attr('disabled', false);
         enable = true;
     } else {
-        crowdfundButton.attr('disabled', true);
+        $(button).attr('disabled', true);
         enable = false;
     }
     if (disabled && enable) {
-        crowdfundButton.removeClass('disabled').addClass('success');
+        $(button).removeClass('disabled').addClass('success');
     } else if (!disabled && !enable) {
-        crowdfundButton.removeClass('success').addClass('disabled');
+        $(button).removeClass('success').addClass('disabled');
     }
-});
-crowdfundAmountInput.change(function(){
-    var amount = crowdfundAmountInput.autoNumeric('get');
-    amount *= 100;
-    if (amount > 0) {
-        crowdfundAmount.attr('value', amount);
-        crowdfundButton.attr('data-amount', amount);
-        var string = '$' + crowdfundAmountInput.autoNumeric('get');
-        var description = 'Contribute (' + string + ')';
-        crowdfundButton.attr('data-description', description);
+}
+
+function formatMonies(input) {
+    var value = $(input).autoNumeric('get');
+    value *= 100;
+    if (value > 0) {
+        var description = 'Contribute ($' + str(value) + ')';
+        $(amount).attr('value', value);
+        $(button).attr('data-amount', value);
+        $(button).attr('data-description', description);
     } else {
-        crowdfundButton.attr('disabled', true);
-        crowdfundButton.removeClass('success').addClass('disabled');
+        $(button).attr('disabled', true);
+        $(button).removeClass('success').addClass('disabled');
     }
-});
+}
