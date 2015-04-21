@@ -78,10 +78,11 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_attributed_contribution(self):
         """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
-        self.client.login(username='adam', password='123')
+        self.client.login(username='adam', password='abc')
         self.data['show'] = True
         response = self.post_data()
         payment = response.context['payment']
+        logging.info(payment)
         ok_(payment.user,
             ('If the user is logged in and opts into attribution, the returned'
             ' payment object should reference their user account.'))

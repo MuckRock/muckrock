@@ -55,28 +55,33 @@ class CrowdfundRequestDetail(DetailView):
     template_name = 'details/crowdfund_request_detail.html'
 
     def post(self, request, **kwargs):
-        amount = request.POST.get('amount')
-        show = request.POST.get('show')
-        crowdfund = request.POST.get('crowdfund')
-        email = request.POST.get('email')
-        token = request.POST.get('token')
-        user = request.user if request.user.is_authenticated() else None
-        context = {}
-        logging.info('Amount: %s' % amount)
-        logging.info('Show: %s' % show)
-        logging.info('Crowdfund: %s' % crowdfund)
-        logging.info('Email: %s' % email)
-        logging.info('Token: %s' % token)
         """
         First we validate the payment form, so we don't charge someone's card by accident.
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
+        amount = request.POST.get('amount')
+        show = request.POST.get('show')
+        crowdfund = request.POST.get('crowdfund')
+        email = request.POST.get('email')
+        token = request.POST.get('token')
+        user = request.user if request.user.is_authenticated() and show else None
+        context = {}
+
+        logging.info('-- Crowdfund Payment --')
+        logging.info('Amount: %s' % amount)
+        logging.info('Show: %s' % show)
+        logging.info('Crowdfund: %s' % crowdfund)
+        logging.info('Email: %s' % email)
+        logging.info('Token: %s' % token)
+
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         if payment_form.is_valid() and email and token:
             if process_payment(amount, email, token):
-                payment_record = payment_form.save()
+                payment_record = payment_form.save(commit=False)
+                payment_record.user = user
+                payment_record.save()
             else:
                 payment_record = None
             context['payment'] = payment_record
