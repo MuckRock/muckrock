@@ -1,32 +1,50 @@
 {% load humanize %}
 
+{% if not crowdfund.expired %}
+
 <section class="crowdfund panel">
-{% with received=crowdfund.payment_received required=crowdfund.payment_required %}
-    <div class="crowdfund-info">
-    {% if not crowdfund.expired %}
-        <h1>Free these docs!</h1>
-        <h2>${{ received|intcomma }} raised out of ${{ required|intcomma }}</h2>
-        <h3>{{ crowdfund.date_due|timeuntil }} remaining</h3>
-    </div>
-    <form method="POST" action="{{ endpoint }}" class="stripe-handler crowdfund-form" id="crowdfund-form">
-        {% csrf_token %}
-        <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
-        <input name="amount" id="crowdfund-amount" value="0" hidden>
-        <button data-amount="0"
-                data-description=""
-                data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
-                data-label=""
-                data-form="#crowdfund-form"
-                class="disabled checkout-button" 
-                id="crowdfund-button"
-                disabled>
-            Contribute
-        </button>
-    </form> 
-    {% else %}
-        <h1>Crowdfunding Completed</h1>
-        <h2>${{ received }} raised out of ${{ required }}</h2>
-    </div>
-    {% endif %}
-{% endwith %}
+    {% with received=crowdfund.payment_received required=crowdfund.payment_required %}
+    <header>
+        <h1>{{ crowdfund.name }}</h1>
+        <a href="/help/crowdfund/">Help</a>
+    </header>
+    <section class="left">
+        <section class="description">
+            {{ crowdfund.description }}
+        </section>
+        <section class="contributors">
+            {{ crowdfund.list_contributors }}
+        </section>
+    </section>
+    <section class="right">
+        <p class="amount-raised">${{ received|intcomma }} raised out of ${{ required|intcomma }}</p>
+        <p class="time-remaining">{{ crowdfund.date_due|timeuntil }} remaining</p>
+    </section>
+    <footer>
+        <form method="POST" action="{{ endpoint }}" class="stripe-handler crowdfund-form" id="crowdfund-form">
+            {% csrf_token %}
+            <input name="amount-input" placeholder="$5.00" class="success" id="crowdfund-amount-input">
+            <input name="amount" id="crowdfund-amount" value="0" hidden>
+            <button data-amount="0"
+                    data-description=""
+                    data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                    data-label=""
+                    data-form="#crowdfund-form"
+                    class="disabled checkout-button"
+                    id="crowdfund-button"
+                    disabled>
+                Contribute
+            </button>
+        </form>
+    </footer>
+    {% endwith %}
 </section>
+
+{% else %}
+
+<section class="expired crowdfund panel">
+    <h1>This crowdfund has ended.</h1>
+    <p>It raised ${{ crowdfund.payment_received|intcomma }}.</p>
+</section>
+
+{% endif %}
