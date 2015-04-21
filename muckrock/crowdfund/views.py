@@ -3,6 +3,7 @@ Views for the crowdfund application
 """
 
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
@@ -13,6 +14,7 @@ import logging
 import stripe
 import sys
 
+from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import \
     CrowdfundRequest, \
     CrowdfundProject, \
@@ -23,6 +25,34 @@ from muckrock.settings import STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
+def process_payment(payment, email, token):
+        """
+        First we validate the payment form, so we don't charge someone's card by accident.
+        Next, we charge their card. Finally, use the validated payment form to create and
+        return a CrowdfundRequestPayment object.
+        """
+        payment_form = CrowdfundRequestPaymentForm(payment)
+        if payment_form.is_valid():
+            amount = int(payment.amount) * 100
+            try:
+                stripe.Charge.create({
+                    amount=amount,
+                    source=token,
+                    currency='usd',
+                    description='Crowdfund contribution',
+                    receipt_email=email
+                })
+            except (stripe.card_error, stripe.api_error) as exception:
+                logging.error('Processing a Stripe charge: %s' % exception)
+                messages.error(request, ('We encountered an error processing your card.'
+                                        ' Your card has not been charged.'))
+                return redirect(self)
+            payment = payment_form.save()
+            return payment
+        else:
+            logging.error('%s' % payment_form.errors)
+            raise ValidationError('The payment form was invalid.')
+
 class CrowdfundRequestDetail(DetailView):
     """
     Presents details about a crowdfunding campaign,
@@ -30,6 +60,19 @@ class CrowdfundRequestDetail(DetailView):
     """
     model = CrowdfundRequest
     template_name = 'details/crowdfund_request_detail.html'
+
+    def post(self, request):
+        payment = request.POST.get('payment')
+        email = request.POST.get('email')
+        token = request.POST.get('token')
+        user = request.user if request.user.is_authenticated() else None
+        if payment and email and token:
+            try:
+                payment_record = process_payment(payment, email, token)
+                request.context['payment'] = payment_record
+            except ValidationError:
+                pass
+        return render_to_response(request, self.template_name)
 
     """
 
