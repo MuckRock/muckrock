@@ -116,7 +116,8 @@ class FOIACommunication(models.Model):
         For example, strip out BoP excessive quoting"""
 
         special_cases = [
-            (lambda c: c.foia.agency.name == 'Bureau of Prisons',
+            (lambda c: c.foia and c.foia.agency and 
+                       c.foia.agency.name == 'Bureau of Prisons',
              lambda c: c.communication[:c.communication.index('>>>')]),
         ]
 
