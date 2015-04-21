@@ -119,7 +119,8 @@ class FOIACommunication(models.Model):
             # BoP: strip everything after '>>>'
             (lambda c: c.foia and c.foia.agency and
                        c.foia.agency.name == 'Bureau of Prisons',
-             lambda c: c.communication[:c.communication.index('>>>')]),
+             lambda c: c.communication[:c.communication.index('>>>')]
+                       if '>>>' in c.communication else c.communication),
         ]
 
         for test, new_comm in special_cases:
