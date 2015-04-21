@@ -4,12 +4,15 @@ Tests for crowdfund app
 
 from django.test import TestCase, Client
 
+import logging
 from nose.tools import ok_, eq_
 from datetime import datetime, timedelta
+import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
+from muckrock.settings import STRIPE_SECRET_KEY
 
 # pylint: disable=missing-docstring
 
@@ -21,6 +24,7 @@ class TestCrowdfundRequestView(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
+        stripe.api_key = STRIPE_SECRET_KEY
         foia = FOIARequest.objects.get(pk=18)
         due = datetime.today() + timedelta(30)
         self.crowdfund = CrowdfundRequest.objects.create(
@@ -32,28 +36,56 @@ class TestCrowdfundRequestView(TestCase):
         )
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
+        self.data = {
+            'amount': 10.00,
+            'show': False,
+            'crowdfund': self.crowdfund.pk
+        }
+        """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
+        self.stripe_email = 'test@example.com'
+        self.stripe_token = stripe.Token.create(
+            card={
+                "number": '4242424242424242',
+                "exp_month": 12,
+                "exp_year": 2016,
+                "cvc": '123'
+        })
+        ok_(self.stripe_token)
 
     def test_view(self):
         response = self.client.get(self.url)
         eq_(response.status_code, 200,
             'The crowdfund view should resolve and be visible to everyone')
 
-    def make_contribution(self):
-        data = {
-            'amount': 1000,
-            'token': ''
-        }
-        response = self.client.post(self.url, data)
-        return response
-
     def test_anonymous_contribution(self):
-        response = self.make_contribution()
+        """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
+        form = CrowdfundRequestPaymentForm(self.data)
+        if form.is_valid():
+            msg = '%s' % form.cleaned_data
+        else:
+            msg = '%s' % form.errors
+        logging.info(msg)
+        ok_(form.is_valid())
+        response = self.client.post(self.url, {'payment': form.data, 'email': self.stripe_email, 'token': self.stripe_token})
         ok_(False, 'Should be able to make an anonymous contribution')
 
     def test_attributed_contribution(self):
+        """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
         self.client.login(username='adam', password='123')
-        response = self.make_contribution()
-        ok_(False, 'Should be able to make an attributed contribution')
+        self.data['show'] = True
+        form = CrowdfundRequestPaymentForm(self.data)
+        if form.is_valid():
+            msg = '%s' % form.cleaned_data
+        else:
+            msg = '%s' % form.errors
+        logging.info(msg)
+        ok_(form.is_valid())
+        response = self.client.post(self.url, {'payment': form.data, 'email': self.stripe_email, 'token': self.stripe_token})
+        payment = response.context['payment']
+        ok_(payment)
+        eq_(payment.user.username, 'adam',
+            ('If the user is logged in and opts into attribution, the returned'
+            ' payment object should reference their user account.'))
 
 class TestCrowdfundRequestForm(TestCase):
 
@@ -111,5 +143,3 @@ class TestCrowdfundRequestForm(TestCase):
         form = CrowdfundRequestForm(data)
         ok_(not form.is_valid(),
             'The due date for the crowdfund must come after today')
-
-
