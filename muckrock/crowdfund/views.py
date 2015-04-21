@@ -54,13 +54,6 @@ class CrowdfundRequestDetail(DetailView):
     model = CrowdfundRequest
     template_name = 'details/crowdfund_request_detail.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(CrowdfundRequestDetail, self).get_context_data(**kwargs)
-        context['logged_in'] = self.request.user.is_authenticated()
-        context['payment_form'] = CrowdfundRequestPaymentForm(initial={'crowdfund': self.object.pk})
-        context['stripe_pk'] = STRIPE_PUB_KEY
-        return context
-
     def post(self, request, **kwargs):
         """
         First we validate the payment form, so we don't charge someone's card by accident.
@@ -73,7 +66,7 @@ class CrowdfundRequestDetail(DetailView):
         email = request.POST.get('email')
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() and show else None
-        context = self.get_context_data()
+        context = self.get_context_data(**kwargs)
 
         logging.info('-- Crowdfund Payment --')
         logging.info('Amount: %s' % amount)
