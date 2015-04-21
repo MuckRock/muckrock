@@ -36,11 +36,6 @@ class TestCrowdfundRequestView(TestCase):
         )
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
-        self.data = {
-            'amount': 10.00,
-            'show': False,
-            'crowdfund': self.crowdfund.pk
-        }
         """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
         self.stripe_email = 'test@example.com'
         self.stripe_token = stripe.Token.create(
@@ -51,13 +46,20 @@ class TestCrowdfundRequestView(TestCase):
                 "cvc": '123'
         })
         ok_(self.stripe_token)
+        self.data = {
+            'amount': 10.00,
+            'show': False,
+            'crowdfund': self.crowdfund.pk,
+            'token': self.stripe_token.id,
+            'email': self.stripe_email
+        }
 
     def test_view(self):
         response = self.client.get(self.url)
         eq_(response.status_code, 200,
             'The crowdfund view should resolve and be visible to everyone')
 
-    def post_form(self):
+    def post_data(self):
         form = CrowdfundRequestPaymentForm(self.data)
         if form.is_valid():
             msg = '%s' % form.data
@@ -65,24 +67,26 @@ class TestCrowdfundRequestView(TestCase):
             msg = '%s' % form.errors
         logging.info(msg)
         ok_(form.is_valid())
-        response = self.client.post(self.url, {'payment': form.data, 'email': self.stripe_email, 'token': self.stripe_token})
+        response = self.client.post(self.url, data=self.data)
         ok_(response, 'The server should respond to the post request')
-        ok_(response.context.get('payment'), 'The server response should include a CrowdfundRequestPayment object')
+        ok_(response.context['payment'], 'The server response should include a CrowdfundRequestPayment object')
         return response
 
     def test_anonymous_contribution(self):
         """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
-        response = self.post_form()
+        response = self.post_data()
 
     def test_attributed_contribution(self):
         """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
         self.client.login(username='adam', password='123')
         self.data['show'] = True
-        response = self.post_form()
-        payment = response.context.get('payment')
-        eq_(payment.user.username, 'adam',
+        response = self.post_data()
+        payment = response.context['payment']
+        ok_(payment.user,
             ('If the user is logged in and opts into attribution, the returned'
             ' payment object should reference their user account.'))
+        eq_(payment.user.username, 'adam',
+            'The logged in user should be associated with the payment.')
 
 class TestCrowdfundRequestForm(TestCase):
 

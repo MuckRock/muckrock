@@ -5,10 +5,12 @@ Views for the crowdfund application
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
+import ast
 from decimal import Decimal
 import logging
 import stripe
@@ -25,33 +27,24 @@ from muckrock.settings import STRIPE_SECRET_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def process_payment(payment, email, token):
-        """
-        First we validate the payment form, so we don't charge someone's card by accident.
-        Next, we charge their card. Finally, use the validated payment form to create and
-        return a CrowdfundRequestPayment object.
-        """
-        payment_form = CrowdfundRequestPaymentForm(payment)
-        if payment_form.is_valid():
-            amount = int(payment.amount) * 100
-            try:
-                stripe.Charge.create({
-                    amount=amount,
-                    source=token,
-                    currency='usd',
-                    description='Crowdfund contribution',
-                    receipt_email=email
-                })
-            except (stripe.card_error, stripe.api_error) as exception:
-                logging.error('Processing a Stripe charge: %s' % exception)
-                messages.error(request, ('We encountered an error processing your card.'
-                                        ' Your card has not been charged.'))
-                return redirect(self)
-            payment = payment_form.save()
-            return payment
-        else:
-            logging.error('%s' % payment_form.errors)
-            raise ValidationError('The payment form was invalid.')
+def process_payment(amount, email, token):
+    # double -> int conversion
+    # http://stackoverflow.com/a/13528445/4256689
+    amount = int(ast.literal_eval(amount)) * 100
+    try:
+        stripe.Charge.create(
+            amount=amount,
+            source=token,
+            currency='usd',
+            description='Crowdfund contribution',
+            receipt_email=email
+        )
+        return True
+    except (stripe.card_error, stripe.api_error) as exception:
+        logging.error('Processing a Stripe charge: %s' % exception)
+        messages.error(request, ('We encountered an error processing your card.'
+                                ' Your card has not been charged.'))
+        return False
 
 class CrowdfundRequestDetail(DetailView):
     """
@@ -61,42 +54,37 @@ class CrowdfundRequestDetail(DetailView):
     model = CrowdfundRequest
     template_name = 'details/crowdfund_request_detail.html'
 
-    def post(self, request):
-        payment = request.POST.get('payment')
+    def post(self, request, **kwargs):
+        amount = request.POST.get('amount')
+        show = request.POST.get('show')
+        crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() else None
-        if payment and email and token:
-            try:
-                payment_record = process_payment(payment, email, token)
-                request.context['payment'] = payment_record
-            except ValidationError:
-                pass
-        return render_to_response(request, self.template_name)
-
-    """
-
-    def post(self, request):
-        if request.is_ajax():
-            return HttpResponse(200)
-        else:
-            return render_to_response(self)
-
-
-    amount = request.POST.get('amount')
-    token = request.POST.get('stripe_token')
-    if amount and token:
-        form = CrowdfundRequestPaymentForm(request.POST, initial={'crowdfund': crowdfund})
-        if form.is_valid():
-            payment = form.save(commit=False)
-            if request.user.is_authenticated():
-                payment.user = request.user
-                payment.name = request.user.get_full_name()
-                payment.save()
-            try:
-                stripe.Charge.create(
-    """
-
+        context = {}
+        logging.info('Amount: %s' % amount)
+        logging.info('Show: %s' % show)
+        logging.info('Crowdfund: %s' % crowdfund)
+        logging.info('Email: %s' % email)
+        logging.info('Token: %s' % token)
+        """
+        First we validate the payment form, so we don't charge someone's card by accident.
+        Next, we charge their card. Finally, use the validated payment form to create and
+        return a CrowdfundRequestPayment object.
+        """
+        payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
+        payment_form = CrowdfundRequestPaymentForm(payment_data)
+        if payment_form.is_valid() and email and token:
+            if process_payment(amount, email, token):
+                payment_record = payment_form.save()
+            else:
+                payment_record = None
+            context['payment'] = payment_record
+        return render_to_response(
+            self.template_name,
+            context,
+            context_instance=RequestContext(request)
+        )
 
 def _contribute(request, crowdfund, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""
