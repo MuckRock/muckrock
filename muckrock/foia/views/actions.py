@@ -342,7 +342,7 @@ def crowdfund_request(request, jurisdiction, jidx, slug, idx):
         form = CrowdfundRequestForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Your crowdfund was started, now spread the word!')
+            messages.success(request, 'Your crowdfund has started, spread the word!')
             return redirect(foia)
 
     elif request.method == 'GET':
