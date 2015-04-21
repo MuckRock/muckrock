@@ -22,7 +22,7 @@ from muckrock.crowdfund.models import \
     CrowdfundProject, \
     CrowdfundRequestPayment, \
     CrowdfundProjectPayment
-from muckrock.settings import STRIPE_SECRET_KEY
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -58,6 +58,7 @@ class CrowdfundRequestDetail(DetailView):
         context = super(CrowdfundRequestDetail, self).get_context_data(**kwargs)
         context['logged_in'] = self.request.user.is_authenticated()
         context['payment_form'] = CrowdfundRequestPaymentForm(initial={'crowdfund': self.object.pk})
+        context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
     def post(self, request, **kwargs):

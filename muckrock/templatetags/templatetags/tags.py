@@ -15,7 +15,7 @@ import re
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.foia.models import FOIARequest
 from muckrock.forms import TagManagerForm
-from muckrock.settings import STATIC_URL
+from muckrock.settings import STATIC_URL, STRIPE_PUB_KEY
 
 register = Library()
 
@@ -198,7 +198,8 @@ def crowdfund(context, foia_pk):
         'crowdfund': foia.crowdfund,
         'endpoint': endpoint,
         'logged_in': logged_in,
-        'payment_form': payment_form
+        'payment_form': payment_form,
+        'stripe_pk': STRIPE_PUB_KEY
     }
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)

@@ -45,8 +45,9 @@ function toggleCrowdfundButton(input) {
 function formatMonies(input) {
     var value = $(input).autoNumeric('get');
     value *= 100;
+    var string_val = $(input).val();
     if (value > 0) {
-        var description = 'Contribute ($' + str(value) + ')';
+        var description = 'Contribute (' + string_val + ')';
         $(amount).attr('value', value);
         $(button).attr('data-amount', value);
         $(button).attr('data-description', description);
