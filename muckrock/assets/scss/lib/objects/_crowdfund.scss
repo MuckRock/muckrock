@@ -1,5 +1,6 @@
+$crowdfund-color: $color-success;
 $crowdfund-color-dark: darken($color-success, 25%);
-$crowdfund-color-light: lighten($color-success, 10%);
+$crowdfund-color-light: desaturate(lighten($color-success, 30%), 15%);
 
 $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
@@ -13,12 +14,15 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     a {
         color: $crowdfund-color-dark;
         text-decoration: underline;
+        &:hover {
+            color: lighten($crowdfund-color-dark, 10%);
+        }
     }
 
     header, footer {
         padding: $base-padding/2;
-        color: darken($color-success, 25%);
-        background-color: lighten($color-success, 10%);
+        color: $crowdfund-color-dark;
+        background-color: $crowdfund-color-light;
     }
     header {
         @extend %full;
@@ -86,6 +90,9 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         .action button, .amount input {
             display: block;
             width: 100%;
+        }
+        .action button {
+            @extend .success.button;
         }
         .amount input {
             @include appearance(none);
