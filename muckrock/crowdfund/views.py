@@ -54,6 +54,12 @@ class CrowdfundRequestDetail(DetailView):
     model = CrowdfundRequest
     template_name = 'details/crowdfund_request_detail.html'
 
+    def get_context_data(self, **kwargs):
+        """Adds Stripe public key to context"""
+        context = super(CrowdfundRequestDetail, self).get_context_data(**kwargs)
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        return context
+
     def post(self, request, **kwargs):
         """
         First we validate the payment form, so we don't charge someone's card by accident.
@@ -66,6 +72,7 @@ class CrowdfundRequestDetail(DetailView):
         email = request.POST.get('email')
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() and show else None
+        redirect_url = request.POST.get('redirect')
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
         logging.info('-- Crowdfund Payment --')
@@ -83,13 +90,14 @@ class CrowdfundRequestDetail(DetailView):
                 payment_object = payment_form.save(commit=False)
                 payment_object.user = user
                 payment_object.save()
+                messages.success(request, 'Thanks for your contribution!')
 
         # if AJAX, return the payment
         # else, return to the crowdfund page
         if request.is_ajax():
             return HttpResponse(json.dumps(payment_object), content_type="application/json")
         else:
-            return redirect(crowdfund_object)
+            return redirect(crowdfund_object.foia)
 
 def _contribute(request, crowdfund, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""
