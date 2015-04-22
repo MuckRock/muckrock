@@ -115,17 +115,32 @@ class FOIACommunication(models.Model):
         """Special handling before saving
         For example, strip out BoP excessive quoting"""
 
+        def test_agency_name(name):
+            """Match on agency name"""
+            return (self.foia and self.foia.agency and
+                    self.foia.agency.name == name)
+
+        def until_string(string):
+            """Cut communication off after string"""
+            def modify():
+                """Run the modification on self.communication"""
+                if string in self.communication:
+                    idx = self.communication.index(string)
+                    self.communication = self.communication[:idx]
+            return modify
+
         special_cases = [
             # BoP: strip everything after '>>>'
-            (lambda c: c.foia and c.foia.agency and
-                       c.foia.agency.name == 'Bureau of Prisons',
-             lambda c: c.communication[:c.communication.index('>>>')]
-                       if '>>>' in c.communication else c.communication),
+            (test_agency_name('Bureau of Prisons'),
+             until_string('>>>')),
+            # Phoneix Police: strip everything after '_'*32
+            (test_agency_name('Phoenix Police Department'),
+             until_string('_' * 32)),
         ]
 
-        for test, new_comm in special_cases:
-            if test(self):
-                self.communication = new_comm(self)
+        for test, modify in special_cases:
+            if test:
+                modify()
 
 
     class Meta:
