@@ -1,4 +1,5 @@
 {% load humanize %}
+{% load static from staticfiles %}
 
 {% if not crowdfund.expired %}
 
@@ -35,12 +36,9 @@
                 {{ payment_form.amount }}
             </section>
             <section class="action">
-                <button data-amount="0"
-                        data-description=""
-                        data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
-                        data-label=""
-                        data-form="#crowdfund-form"
-                        class="checkout-button"
+                <button data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                        data-icon="{% static 'apple-touch-icon.png' %}"
+                        data-key="{{ stripe_pk }}"
                         id="crowdfund-button">
                     Contribute
                 </button>
