@@ -4,7 +4,6 @@
 {% if not crowdfund.expired %}
 
 <section class="crowdfund">
-    {% with received=crowdfund.payment_received required=crowdfund.payment_required %}
     <header>
         <h1>{{ crowdfund.name }}</h1>
         <a href="/docs/crowdfund/">What is this?</a>
@@ -14,11 +13,11 @@
             <p>{{ crowdfund.description }}</p>
         </section>
         <section class="contributors">
-            {{ crowdfund.list_contributors }}
+            {{ crowdfund.contributors }}
         </section>
     </section>
     <section class="right">
-        <p class="amount-raised">${{ received|intcomma }} raised out of ${{ required|intcomma }}</p>
+        <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}</p>
         <p class="time-remaining">{{ crowdfund.date_due|timeuntil }} remaining</p>
     </section>
     <footer>
@@ -47,7 +46,6 @@
             {{ payment_form.crowdfund }}
         </form>
     </footer>
-    {% endwith %}
 </section>
 
 {% else %}

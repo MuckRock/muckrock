@@ -30,7 +30,8 @@ stripe.api_key = STRIPE_SECRET_KEY
 def process_payment(amount, email, token):
     # double -> int conversion
     # http://stackoverflow.com/a/13528445/4256689
-    amount = int(ast.literal_eval(amount)) * 100
+    amount = int(amount) * 100
+    logging.debug(amount)
     try:
         stripe.Charge.create(
             amount=amount,
@@ -67,11 +68,11 @@ class CrowdfundRequestDetail(DetailView):
         return a CrowdfundRequestPayment object.
         """
         amount = request.POST.get('amount')
-        show = request.POST.get('show')
+        show = not request.POST.get('show')
         crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
-        user = request.user if request.user.is_authenticated() and show else None
+        user = request.user if request.user.is_authenticated() else None
         redirect_url = request.POST.get('redirect')
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
@@ -82,6 +83,8 @@ class CrowdfundRequestDetail(DetailView):
         logging.info('Email: %s' % email)
         logging.info('Token: %s' % token)
 
+        amount = Decimal(float(amount)/100)
+        logging.debug(amount)
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         payment_object = None
@@ -90,8 +93,8 @@ class CrowdfundRequestDetail(DetailView):
                 payment_object = payment_form.save(commit=False)
                 payment_object.user = user
                 payment_object.save()
+                crowdfund_object.update_payment_received()
                 messages.success(request, 'Thanks for your contribution!')
-
         # if AJAX, return the payment
         # else, return to the crowdfund page
         if request.is_ajax():

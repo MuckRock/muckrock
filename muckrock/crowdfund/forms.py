@@ -68,7 +68,6 @@ class CrowdfundRequestPaymentForm(forms.ModelForm):
     def clean_amount(self):
         """Ensure the amount of the payment is greater than zero"""
         amount = self.cleaned_data['amount']
-        valid_amount = amount > 0
-        if not valid_amount:
+        if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
         return amount

@@ -2,10 +2,12 @@
 Models for the crowdfund application
 """
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
 from django.db import models
 
 from datetime import date
+from decimal import Decimal
+import logging
 
 from muckrock.foia.models import FOIARequest
 
@@ -48,11 +50,23 @@ class CrowdfundRequest(CrowdfundABC):
     name = models.CharField(max_length=255, default='Crowdfund this request')
     description = models.TextField(blank=True)
     foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
-    payments = models.ManyToManyField(User, through='CrowdfundRequestPayment')
 
     def __unicode__(self):
         # pylint: disable=E1101
         return 'Crowdfunding for %s' % self.foia.title
+
+    def update_payment_received(self):
+        """Combine the amounts of all the payments"""
+        total_amount = Decimal()
+        payments = self.payments.all()
+        logging.debug(payments)
+        for payment in payments:
+            logging.debug(payment)
+            total_amount += payment.amount
+        self.payment_received = total_amount
+        self.save()
+        logging.debug(total_amount)
+        logging.info(self.payment_received)
 
     @models.permalink
     def get_absolute_url(self):
@@ -61,7 +75,7 @@ class CrowdfundRequest(CrowdfundABC):
 
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
-    crowdfund = models.ForeignKey(CrowdfundRequest)
+    crowdfund = models.ForeignKey(CrowdfundRequest, related_name='payments')
 
     def __unicode__(self):
         # pylint: disable=E1101

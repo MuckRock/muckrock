@@ -4,9 +4,10 @@ Tests for crowdfund app
 
 from django.test import TestCase, Client
 
+from datetime import datetime, timedelta
+from decimal import Decimal
 import logging
 from nose.tools import ok_, eq_
-from datetime import datetime, timedelta
 import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
@@ -86,6 +87,19 @@ class TestCrowdfundRequestView(TestCase):
             ' payment object should reference their user account.'))
         eq_(payment.user.username, 'adam',
             'The logged in user should be associated with the payment.')
+
+    def test_correct_amount(self):
+        """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
+        amount = 1000
+        self.data['amount'] = amount
+        self.post_data()
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        amount = Decimal(float(amount)/100)
+        logging.debug(payment)
+        logging.debug(self.crowdfund.payments.all())
+        eq_(payment.amount, amount,
+            'Payment object should clean and transform the amount')
+
 
 class TestCrowdfundRequestForm(TestCase):
 
