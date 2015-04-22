@@ -68,8 +68,6 @@ class CrowdfundRequestDetail(DetailView):
         user = request.user if request.user.is_authenticated() and show else None
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
-        context = {}
-
         logging.info('-- Crowdfund Payment --')
         logging.info('Amount: %s' % amount)
         logging.info('Show: %s' % show)
@@ -79,22 +77,19 @@ class CrowdfundRequestDetail(DetailView):
 
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = CrowdfundRequestPaymentForm(payment_data)
+        payment_object = None
         if payment_form.is_valid() and email and token:
             if process_payment(amount, email, token):
-                payment_record = payment_form.save(commit=False)
-                payment_record.user = user
-                payment_record.save()
-            else:
-                payment_record = None
-            context['payment'] = payment_record
+                payment_object = payment_form.save(commit=False)
+                payment_object.user = user
+                payment_object.save()
 
-        # if AJAX, return JSON
-        # else, return template
+        # if AJAX, return the payment
+        # else, return to the crowdfund page
         if request.is_ajax():
-            return HttpResponse(json.dumps(context), content_type="application/json")
+            return HttpResponse(json.dumps(payment_object), content_type="application/json")
         else:
-            template = loader.get_template(self.template_name)
-            return HttpResponse(template.render(RequestContext(request, context)))
+            return redirect(crowdfund_object)
 
 def _contribute(request, crowdfund, payment_model, redirect_url):
     """Contribute to a crowdfunding request or project"""

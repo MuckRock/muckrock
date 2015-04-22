@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
-from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import STRIPE_SECRET_KEY
 
@@ -69,7 +69,6 @@ class TestCrowdfundRequestView(TestCase):
         ok_(form.is_valid())
         response = self.client.post(self.url, data=self.data)
         ok_(response, 'The server should respond to the post request')
-        ok_(response.context['payment'], 'The server response should include a CrowdfundRequestPayment object')
         return response
 
     def test_anonymous_contribution(self):
@@ -80,9 +79,8 @@ class TestCrowdfundRequestView(TestCase):
         """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
         self.client.login(username='adam', password='abc')
         self.data['show'] = True
-        response = self.post_data()
-        payment = response.context['payment']
-        logging.info(payment)
+        self.post_data()
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         ok_(payment.user,
             ('If the user is logged in and opts into attribution, the returned'
             ' payment object should reference their user account.'))
