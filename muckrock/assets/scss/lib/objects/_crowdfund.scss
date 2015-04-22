@@ -7,7 +7,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 .crowdfund {
     @include row;
     max-width: 60em;
-    margin: 0 auto;
+    margin: 0 auto $base-margin;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
 
@@ -53,17 +53,31 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         }
     }
 
-    .left, .right {
-        padding: 0 $base-padding/2;
+    .description, .stats {
+        @extend %full;
     }
-    .left {
-        @extend %two-thirds;
+
+    .description {
+        padding: $base-padding/2;
     }
-    .right {
-        @extend %third;
-        @include media($medium-layout) {
-            text-align: right;
-            border-left: $crowdfund-border;
+
+    .stats {
+        @include row;
+        background-color: lighten($crowdfund-color-light, 20%);
+        p {
+            @extend %third;
+            text-align: center;
+        }
+    }
+
+    .contributors p {
+        margin-bottom: $base-margin/4;
+    }
+    .contributor-list {
+        margin-top: 0;
+        li {
+            display: inline-block;
+            padding: 0 $base-padding/2 0 0;
         }
     }
 
@@ -98,6 +112,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             @include appearance(none);
             transform: translateY(4px);
             border: $crowdfund-border;
+            box-shadow: inset 0px 3px 3px 0px $color-grey;
             padding: 0.325em;
             font-size: 1.25em;
             font-weight: $bold;
