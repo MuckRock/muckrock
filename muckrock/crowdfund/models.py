@@ -55,23 +55,31 @@ class CrowdfundRequest(CrowdfundABC):
         # pylint: disable=E1101
         return 'Crowdfunding for %s' % self.foia.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('crowdfund-request', [], {'pk': self.pk})
+
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
         total_amount = Decimal()
         payments = self.payments.all()
-        logging.debug(payments)
         for payment in payments:
             logging.debug(payment)
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
-        logging.debug(total_amount)
-        logging.info(self.payment_received)
 
-    @models.permalink
-    def get_absolute_url(self):
-        """The url for this object"""
-        return ('crowdfund-request', [], {'pk': self.pk})
+    def contributors(self):
+        """Return a list of all the contributors to a crowdfund"""
+        contributors = []
+        payments = self.payments.all()
+        for payment in payments:
+            if payment.show and payment.user:
+                contributors.append(payment.user)
+            else:
+                contributors.append(AnonymousUser())
+        return contributors
 
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""

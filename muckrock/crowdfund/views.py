@@ -68,11 +68,15 @@ class CrowdfundRequestDetail(DetailView):
         return a CrowdfundRequestPayment object.
         """
         amount = request.POST.get('amount')
-        show = not request.POST.get('show')
+        show = request.POST.get('show')
         crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
-        user = request.user if request.user.is_authenticated() else None
+        if request.user.is_authenticated() and show:
+            user = request.user
+        else:
+            user = None
+        logging.debug(user)
         redirect_url = request.POST.get('redirect')
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
@@ -82,9 +86,9 @@ class CrowdfundRequestDetail(DetailView):
         logging.info('Crowdfund: %s' % crowdfund)
         logging.info('Email: %s' % email)
         logging.info('Token: %s' % token)
+        logging.info('User: %s' % user)
 
         amount = Decimal(float(amount)/100)
-        logging.debug(amount)
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         payment_object = None

@@ -2,6 +2,7 @@
 Tests for crowdfund app
 """
 
+from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
 from datetime import datetime, timedelta
@@ -38,22 +39,23 @@ class TestCrowdfundRequestView(TestCase):
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
         """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
-        self.stripe_email = 'test@example.com'
-        self.stripe_token = stripe.Token.create(
+        self.data = {
+            'amount': 1000,
+            'show': '',
+            'crowdfund': self.crowdfund.pk,
+            'email': 'test@example.com'
+        }
+
+    def get_stripe_token(self):
+        token = stripe.Token.create(
             card={
                 "number": '4242424242424242',
                 "exp_month": 12,
                 "exp_year": 2016,
                 "cvc": '123'
         })
-        ok_(self.stripe_token)
-        self.data = {
-            'amount': 10.00,
-            'show': False,
-            'crowdfund': self.crowdfund.pk,
-            'token': self.stripe_token.id,
-            'email': self.stripe_email
-        }
+        ok_(token)
+        return token.id
 
     def test_view(self):
         response = self.client.get(self.url)
@@ -61,13 +63,15 @@ class TestCrowdfundRequestView(TestCase):
             'The crowdfund view should resolve and be visible to everyone')
 
     def post_data(self):
+        # need a unique token for each POST
         form = CrowdfundRequestPaymentForm(self.data)
         if form.is_valid():
             msg = '%s' % form.data
         else:
             msg = '%s' % form.errors
-        logging.info(msg)
         ok_(form.is_valid())
+        self.data['token'] = self.get_stripe_token()
+        logging.info(self.data)
         response = self.client.post(self.url, data=self.data)
         ok_(response, 'The server should respond to the post request')
         return response
@@ -75,9 +79,22 @@ class TestCrowdfundRequestView(TestCase):
     def test_anonymous_contribution(self):
         """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
         response = self.post_data()
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        eq_(payment.user, None,
+            ('If the user is logged out, the returned payment'
+            ' object should not reference any account.'))
+
+    def test_anonymous_contribution_for_logged_in_user(self):
+        """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
+        self.client.login(username='adam', password='abc')
+        self.post_data()
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        eq_(payment.user, None,
+            ('If the user is logged in, the returned payment'
+            ' object should not reference their account.'))
 
     def test_attributed_contribution(self):
-        """An attributed contribution checks if the user is logged in, and if they are it connects the payment to their account."""
+        """An attributed contribution is opted-in by the user"""
         self.client.login(username='adam', password='abc')
         self.data['show'] = True
         self.post_data()
@@ -90,16 +107,30 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_correct_amount(self):
         """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
-        amount = 1000
-        self.data['amount'] = amount
         self.post_data()
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
-        amount = Decimal(float(amount)/100)
-        logging.debug(payment)
-        logging.debug(self.crowdfund.payments.all())
+        amount = Decimal(float(self.data['amount'])/100)
         eq_(payment.amount, amount,
             'Payment object should clean and transform the amount')
 
+    def test_contributors(self):
+        """The crowdfund can get a list of all its contibutors by parsing its list of payments."""
+        # anonymous payment
+        self.post_data()
+        # anonymous payment
+        self.client.login(username='adam', password='abc')
+        self.post_data()
+        # attributed payment
+        self.data['show'] = True
+        self.post_data()
+
+        new_crowdfund = CrowdfundRequest.objects.get(pk=self.crowdfund.pk)
+        contributors = new_crowdfund.contributors()
+        logging.info(contributors)
+        ok_(contributors, 'Crowdfund should generate a list of contributors')
+        eq_(len(contributors), 3, 'All contributions should return some kind of user')
+        eq_(sum(contributor.is_anonymous() is True for contributor in contributors), 2,
+            'There should only be two anonymous users in this list')
 
 class TestCrowdfundRequestForm(TestCase):
 
