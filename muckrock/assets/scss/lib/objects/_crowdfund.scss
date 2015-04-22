@@ -1,46 +1,97 @@
+$crowdfund-color-dark: darken($color-success, 25%);
+$crowdfund-color-light: lighten($color-success, 10%);
+
+$crowdfund-border: $base-border-width solid $crowdfund-color-dark;
+
 .crowdfund {
     @include row;
-    .crowdfund-info {
-        @include media($small-layout) {
-            @include span-columns(4);
+    max-width: 60em;
+    margin: 0 auto;
+    border: $crowdfund-border;
+    border-radius: $base-border-radius;
+    header, footer {
+        padding: $base-padding/2;
+        color: darken($color-success, 25%);
+        background-color: lighten($color-success, 10%);
+    }
+    header {
+        @extend %full;
+        overflow: hidden;
+
+        @include border-top-radius($base-border-radius);
+        border-bottom: $crowdfund-border;
+
+        h1 {
+            font-size: 1rem;
+            font-weight: $bold;
+        }
+
+        a {
+            color: $crowdfund-color-dark;
+            text-decoration: underline;
+        }
+
+        @include media($medium-layout) {
+            h1 {
+                margin: 0;
+                width: 75%;
+                float: left;
+            }
+            a {
+                display: block;
+                width: 25%;
+                float: right;
+                text-align: right;
+            }
+        }
+    }
+
+    .left, .right {
+        padding: 0 $base-padding/2;
+    }
+    .left {
+        @extend %two-thirds;
+    }
+    .right {
+        @extend %third;
+        @include media($medium-layout) {
+            text-align: right;
+            border-left: $crowdfund-border;
+        }
+    }
+
+    footer {
+        @extend %full;
+        @include border-bottom-radius($base-border-radius);
+        border-top: $crowdfund-border;
+        form { @include row; }
+        form > section {
+            @extend %third;
+            input {
+                margin-bottom: $base-margin/2;
+                @include media($medium-layout) {
+                    margin-bottom: 0;
+                }
+            }
+        }
+        .anonymity input {
+            margin: $base-padding/4;
+        }
+        .action button, .amount input {
+            display: block;
+            width: 100%;
+        }
+        .amount input {
+            @include appearance(none);
+            transform: translateY(4px);
+            border: $crowdfund-border;
+            padding: 0.325em;
+            font-size: 1.25em;
+            font-weight: $bold;
+            text-align: center;
         }
         @include media($medium-layout) {
-            @include span-columns(4);
+            .action { padding-left: $base-padding/2; }
         }
-        @include media($large-layout) {
-            @include span-columns(9);
-        }
-    }
-    .crowdfund-form {
-        @include media($small-layout) {
-            @include span-columns(4);
-        }
-        @include media($medium-layout) {
-            @include span-columns(2);
-        }
-        @include media($large-layout) {
-            @include span-columns(3);
-        }
-    }
-    border-color: $color-success;
-    h1, h2, h3 { font-weight: $normal; }
-    h1 {
-        @include font-sizing(1.2);
-        color: $color-success;
-    }
-    h2 { @include font-sizing(1.2); }
-    h3 { @include font-sizing(0.9); }
-    input {
-        width: 100%;
-        border: $base-border-width solid $color-success;
-        @extend %border-radius;
-        padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
-        background-color: $color-white;
-        @include font-sizing(1.75);
-        font-weight: $light;
-    }
-    button {
-        display: block;
-        width: 100%;
     }
 }
