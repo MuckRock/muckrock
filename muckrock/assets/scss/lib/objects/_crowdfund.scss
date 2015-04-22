@@ -9,6 +9,12 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     margin: 0 auto;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
+
+    a {
+        color: $crowdfund-color-dark;
+        text-decoration: underline;
+    }
+
     header, footer {
         padding: $base-padding/2;
         color: darken($color-success, 25%);
@@ -26,10 +32,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             font-weight: $bold;
         }
 
-        a {
-            color: $crowdfund-color-dark;
-            text-decoration: underline;
-        }
+
 
         @include media($medium-layout) {
             h1 {
@@ -73,6 +76,9 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
                     margin-bottom: 0;
                 }
             }
+        }
+        .anonymity p {
+            margin: 0;
         }
         .anonymity input {
             margin: $base-padding/4;
