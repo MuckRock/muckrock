@@ -22,12 +22,10 @@
     </section>
     <footer>
         <form method="POST" action="{{ endpoint }}" class="stripe-handler crowdfund-form" id="crowdfund-form">
-            {% csrf_token %}
-            {{ payment_form.crowdfund }}
             <section class="anonymity">
                 {% if logged_in %}
-                <label for="id_show">Make my contribution anonymous.</label>
                 {{ payment_form.show }}
+                <label for="id_show">Make my contribution anonymous.</label>
                 {% else %}
                 <p>To be listed as a contributor, please log in or sign up.</p>
                 {% endif %}
@@ -47,6 +45,8 @@
                     Contribute
                 </button>
             </section>
+            {% csrf_token %}
+            {{ payment_form.crowdfund }}
         </form>
     </footer>
     {% endwith %}

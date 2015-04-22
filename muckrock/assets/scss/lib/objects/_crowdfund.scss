@@ -5,6 +5,8 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 .crowdfund {
     @include row;
+    max-width: 60em;
+    margin: 0 auto;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
     header, footer {
@@ -43,6 +45,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             }
         }
     }
+
     .left, .right {
         padding: 0 $base-padding/2;
     }
@@ -56,12 +59,39 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             border-left: $crowdfund-border;
         }
     }
+
     footer {
         @extend %full;
         @include border-bottom-radius($base-border-radius);
         border-top: $crowdfund-border;
         form { @include row; }
-        form > input { @extend %full; }
-        form > section { @extend %third; }
+        form > section {
+            @extend %third;
+            input {
+                margin-bottom: $base-margin/2;
+                @include media($medium-layout) {
+                    margin-bottom: 0;
+                }
+            }
+        }
+        .anonymity input {
+            margin: $base-padding/4;
+        }
+        .action button, .amount input {
+            display: block;
+            width: 100%;
+        }
+        .amount input {
+            @include appearance(none);
+            transform: translateY(4px);
+            border: $crowdfund-border;
+            padding: 0.325em;
+            font-size: 1.25em;
+            font-weight: $bold;
+            text-align: center;
+        }
+        @include media($medium-layout) {
+            .action { padding-left: $base-padding/2; }
+        }
     }
 }
