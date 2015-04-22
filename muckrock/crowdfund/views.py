@@ -98,11 +98,10 @@ class CrowdfundRequestDetail(DetailView):
                 payment_object.user = user
                 payment_object.save()
                 crowdfund_object.update_payment_received()
-                messages.success(request, 'Thanks for your contribution!')
         # if AJAX, return the payment
         # else, return to the crowdfund page
         if request.is_ajax():
-            return HttpResponse(json.dumps(payment_object), content_type="application/json")
+            return HttpResponse(200)
         else:
             return redirect(crowdfund_object.foia)
 
