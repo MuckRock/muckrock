@@ -8,6 +8,33 @@ var amount = 'input[name=amount]';
 var button = '.crowdfund-form #crowdfund-button';
 var prettyInput = 'input[name=pretty-input]';
 
+function submitForm() {
+
+    var f = $(form);
+    var formFields = f.serializeArray();
+    var data = {};
+    for (var i = 0; i < formFields.length; i++) {
+      var field = formFields[i];
+      data[field.name] = field.value;
+    }
+    f.ajaxStart(function(){
+        this.parents('.crowdfund').addClass('pending');
+    }).ajaxComplete(function(){
+        this.parents('.crowdfund').removeClass('pending').addClass('complete');
+    }).ajaxError(function(){
+        this.parents('.crowdfund').removeClass('pending').addCLass('error');
+    });
+    $.ajax({
+        url: f.attr('action'),
+        type: 'post',
+        data: data,
+        success: function() {
+
+        },
+        dataType: 'json'
+    });
+}
+
 // Stripe (should figure out how to divorce this from the file
 function checkoutCrowdfund(event) {
     event.preventDefault();
@@ -24,11 +51,10 @@ function checkoutCrowdfund(event) {
     var label = 'Contribute';
     var description = 'Contribute (' + $(prettyInput).val() + ')';
     var token = function(token) {
-        $('a').click(function() { return false; });
-        $('button').click(function() { return false; });
         f.append('<input type="hidden" name="token" value="' + token.id + '" />');
         f.append('<input type="hidden" name="email" value="' + token.email + '" />');
-        f.submit();
+        submitForm();
+
     }
     StripeCheckout.open({
         key: key,
