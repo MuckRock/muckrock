@@ -5,7 +5,7 @@ Forms for Crowdfund application
 from django import forms
 
 from decimal import Decimal
-from datetime import date
+from datetime import date, timedelta
 
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 
@@ -49,9 +49,13 @@ class CrowdfundRequestForm(forms.ModelForm):
     def clean_date_due(self):
         """Ensure date is not in the past"""
         deadline = self.cleaned_data['date_due']
-        correct_duration = deadline > date.today()
-        if not correct_duration:
+        today = date.today()
+        after_today = deadline > today
+        if not after_today:
             raise forms.ValidationError('Crowdfund deadline must be after today.')
+        lte_30_days = deadline - today <= timedelta(30)
+        if not lte_30_days:
+            raise forms.ValidationError('Crowdfund duration cannot exceed 30 days.')
         return deadline
 
 class CrowdfundRequestPaymentForm(forms.ModelForm):
