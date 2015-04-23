@@ -2,6 +2,7 @@
 Tests for Tasks views
 """
 
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
@@ -67,8 +68,12 @@ class TaskListViewPOSTTests(TestCase):
     def test_post_resolve_task(self):
         self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
+        user = User.objects.get(username='adam')
         nose.eq_(updated_task.resolved, True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
+        nose.eq_(updated_task.resolved_by, user,
+            'Task should record the logged in user who resolved it.')
+
 
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})

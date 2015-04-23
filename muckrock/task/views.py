@@ -25,6 +25,7 @@ class TaskList(MRFilterableListView):
     def get_queryset(self):
         """Remove resolved tasks unless filter says to keep them"""
         queryset = super(TaskList, self).get_queryset()
+
         if not self.request.GET.get('show_resolved'):
             queryset = queryset.exclude(resolved=True)
         return queryset
@@ -63,7 +64,7 @@ class TaskList(MRFilterableListView):
             # resolve will either be True or None
             # the task will only resolve if True
             if request.POST.get('resolve'):
-                task.resolve()
+                task.resolve(request.user)
             if request.POST.get('assign'):
                 user_pk = request.POST.get('assign')
                 user = get_object_or_404(User, pk=user_pk)
