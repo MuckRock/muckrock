@@ -178,9 +178,19 @@ class TestCrowdfundRequestForm(TestCase):
             'Payment required should not be negative')
 
     def test_incorrect_deadline(self):
+        """The crowdfund deadline cannot be set in the past. That makes no sense!"""
         data = self.data
         yesterday = datetime.now() - timedelta(1)
         data['date_due'] = yesterday.strftime('%Y-%m-%d')
         form = CrowdfundRequestForm(data)
         ok_(not form.is_valid(),
-            'The due date for the crowdfund must come after today')
+            'The form should not validate given a date in the past.')
+
+    def test_incorrect_duration(self):
+        """The crowdfund duration should be capped at 30 days."""
+        data = self.data
+        too_long = datetime.now() + timedelta(45)
+        data['date_due'] = too_long.strftime('%Y-%m-%d')
+        form = CrowdfundRequestForm(data)
+        ok_(not form.is_valid(),
+            'The form should not validate, given a deadline too far in the future.')
