@@ -73,12 +73,14 @@
 {% block task-extra-context %}
 <div class="task-extra-context snail-mail-full-letter">
 {# full letter here, hidden #}
-    <button onclick="$('#full-letter-{{task.pk}}').toggle()">Show/Hide Letter</button>
-    <textarea id="full-letter-{{task.pk}}" style="display: none;">
-    {% now "F j, Y" %}
-    {% with task.communication.foia as request %}
-        {% include "text/foia/comms.txt" %}
-    {% endwith %}
-    </textarea>
+    <button class="reveal-extra-context" data-state="0">More Info</button>
+    <div class="extra-context hidden">
+        <textarea id="full-letter-{{task.pk}}">
+        {% now "F j, Y" %}
+        {% with task.communication.foia as request %}
+            {% include "text/foia/comms.txt" %}
+        {% endwith %}
+        </textarea>
+    </div>
 </div>
 {% endblock %}

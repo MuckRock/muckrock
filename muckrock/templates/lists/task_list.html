@@ -182,4 +182,19 @@ $('#collapse-all').click(function(e){
     }
 });
 
+$('.reveal-extra-context').click(function(e){
+    e.preventDefault();
+    if ($(this).data['state']) {
+        // if on, turn off
+        $(this).data['state'] = 0;
+        $(this).text("More Info");
+        $(this).next().addClass('hidden');
+    } else {
+        // if off, turn on
+        $(this).data['state'] = 1;
+        $(this).text("Less Info");
+        $(this).next().removeClass('hidden');
+    }
+});
+
 {% endblock list-scripts %}

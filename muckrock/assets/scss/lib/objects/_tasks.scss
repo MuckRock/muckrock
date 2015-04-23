@@ -74,6 +74,21 @@ dl.task-data {
 .task .task-extra-context {
     @include span-columns(12);
     padding: $base-padding/2;
+    background: $color-disabled;
+
+    button {
+        display: block;
+        width: 10em;
+        margin-bottom: $base-margin/2;
+    }
+
+    .extra-context {
+        display: block;
+    }
+    .extra-context.hidden {
+        display: none;
+    }
+
 }
 
 .collapsed.task {
