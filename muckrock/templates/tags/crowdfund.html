@@ -29,7 +29,7 @@
         <p class="time-remaining">{{ crowdfund.date_due|timeuntil }} remaining</p>
     </section>
     <footer>
-        <form method="POST" action="{{ endpoint }}" class="stripe-handler crowdfund-form" id="crowdfund-form">
+        <form method="POST" action="{{ endpoint }}" class="crowdfund-form" id="crowdfund-form">
             <section class="anonymity">
                 {% if logged_in %}
                 {{ payment_form.show }}

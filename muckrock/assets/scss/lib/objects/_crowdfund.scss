@@ -5,6 +5,7 @@ $crowdfund-color-light: desaturate(lighten($color-success, 30%), 15%);
 $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 .crowdfund {
+    overflow: hidden;
     @include row;
     max-width: 60em;
     margin: 0 auto $base-margin;
@@ -121,5 +122,41 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         @include media($medium-layout) {
             .action { padding-left: $base-padding/2; }
         }
+    }
+}
+
+/* Crowdfund state */
+
+.crowdfund {
+    position: relative;
+    &:after {
+        // Dynamic across state
+        display: none;
+        opacity: 0;
+        background-color: transparent;
+        // Static across state
+        transition: background-color .5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: 1000;
+    }
+    &.pending:after {
+        display: block;
+        opacity: .9;
+        background-color: $color-gray;
+    }
+    &.complete:after {
+        display: block;
+        opacity: .9;
+        background-color: $color-success;
+    }
+    &.error:after {
+        display: block;
+        opacity: .9;
+        background-color: $color-failure;
     }
 }
