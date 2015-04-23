@@ -2,7 +2,6 @@
 Tests for crowdfund app
 """
 
-from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
 from datetime import datetime, timedelta
@@ -17,6 +16,18 @@ from muckrock.foia.models import FOIARequest
 from muckrock.settings import STRIPE_SECRET_KEY
 
 # pylint: disable=missing-docstring
+# pylint: disable=line-too-long
+
+def get_stripe_token():
+    token = stripe.Token.create(
+        card={
+            "number": '4242424242424242',
+            "exp_month": 12,
+            "exp_year": 2016,
+            "cvc": '123'
+    })
+    ok_(token)
+    return token.id
 
 class TestCrowdfundRequestView(TestCase):
     """Tests the Detail view for CrowdfundRequest objects"""
@@ -26,6 +37,7 @@ class TestCrowdfundRequestView(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
+        """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
         stripe.api_key = STRIPE_SECRET_KEY
         foia = FOIARequest.objects.get(pk=18)
         due = datetime.today() + timedelta(30)
@@ -38,24 +50,12 @@ class TestCrowdfundRequestView(TestCase):
         )
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
-        """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
         self.data = {
             'amount': 1000,
             'show': '',
             'crowdfund': self.crowdfund.pk,
             'email': 'test@example.com'
         }
-
-    def get_stripe_token(self):
-        token = stripe.Token.create(
-            card={
-                "number": '4242424242424242',
-                "exp_month": 12,
-                "exp_year": 2016,
-                "cvc": '123'
-        })
-        ok_(token)
-        return token.id
 
     def test_view(self):
         response = self.client.get(self.url)
@@ -65,12 +65,8 @@ class TestCrowdfundRequestView(TestCase):
     def post_data(self):
         # need a unique token for each POST
         form = CrowdfundRequestPaymentForm(self.data)
-        if form.is_valid():
-            msg = '%s' % form.data
-        else:
-            msg = '%s' % form.errors
         ok_(form.is_valid())
-        self.data['token'] = self.get_stripe_token()
+        self.data['token'] = get_stripe_token()
         logging.info(self.data)
         response = self.client.post(self.url, data=self.data)
         ok_(response, 'The server should respond to the post request')
@@ -78,13 +74,13 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_anonymous_contribution(self):
         """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
-        response = self.post_data()
+        self.post_data()
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.user, None,
             ('If the user is logged out, the returned payment'
             ' object should not reference any account.'))
 
-    def test_anonymous_contribution_for_logged_in_user(self):
+    def test_anonymous_while_logged_in(self):
         """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
         self.client.login(username='adam', password='abc')
         self.post_data()

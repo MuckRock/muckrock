@@ -190,12 +190,12 @@ def editable_by(foia, user):
 def crowdfund(context, foia_pk):
     """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
-    crowdfund = foia.crowdfund
-    payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': crowdfund.pk})
+    the_crowdfund = foia.crowdfund
+    payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': the_crowdfund.pk})
     logged_in = context['user'].is_authenticated()
-    endpoint = reverse('crowdfund-request', kwargs={'pk': crowdfund.pk})
+    endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
     return {
-        'crowdfund': foia.crowdfund,
+        'crowdfund': the_crowdfund,
         'endpoint': endpoint,
         'logged_in': logged_in,
         'payment_form': payment_form,

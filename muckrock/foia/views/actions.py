@@ -321,8 +321,9 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
     )
 
 @login_required
-def crowdfund_request(request, jurisdiction, jidx, slug, idx):
+def crowdfund_request(request, idx, **kwargs):
     """Crowdfund a request"""
+    # pylint: disable=unused-argument
     foia = FOIARequest.objects.get(pk=idx)
     owner_or_staff = request.user == foia.user or request.user.is_staff
 
