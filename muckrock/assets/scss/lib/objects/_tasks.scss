@@ -77,7 +77,7 @@ dl.task-data {
 }
 
 .collapsed.task {
-    .task-data, .task-actions {
+    .task-data, .task-actions, .task-extra-context {
         display: none;
     }
 }
