@@ -11,26 +11,34 @@ var prettyInput = 'input[name=pretty-input]';
 function submitForm() {
 
     var f = $(form);
+    var c = f.parents('.crowdfund');
+    var overlay = c.children('.overlay');
     var formFields = f.serializeArray();
     var data = {};
     for (var i = 0; i < formFields.length; i++) {
       var field = formFields[i];
       data[field.name] = field.value;
     }
-    f.ajaxStart(function(){
-        this.parents('.crowdfund').addClass('pending');
+    $(document).ajaxStart(function(){
+        c.addClass('pending');
+        overlay.empty();
+        var heading = '<h1>Loading...</h1>';
+        overlay.append(heading);
     }).ajaxComplete(function(){
-        this.parents('.crowdfund').removeClass('pending').addClass('complete');
+        c.removeClass('pending').addClass('complete');
+        overlay.empty();
+        var heading = '<h1>Thank you!</h1>';
+        overlay.append(heading);
     }).ajaxError(function(){
-        this.parents('.crowdfund').removeClass('pending').addCLass('error');
+        c.removeClass('pending').addCLass('error');
+        var heading = '<h1>Oops!</h1>';
+        $(overlay).append(heading);
     });
     $.ajax({
         url: f.attr('action'),
         type: 'post',
         data: data,
-        success: function() {
-
-        },
+        success: null,
         dataType: 'json'
     });
 }
