@@ -20,6 +20,7 @@ function submitForm() {
       data[field.name] = field.value;
     }
     $(document).ajaxStart(function(){
+        overlay.removeClass('hidden');
         c.addClass('pending');
         overlay.empty();
         var heading = '<h1>Loading...</h1>';

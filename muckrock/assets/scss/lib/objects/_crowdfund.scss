@@ -129,18 +129,24 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 .crowdfund {
     position: relative;
-    & > .overlay {
-        display: none;
-        opacity: 0;
-        background-color: transparent;
-        // Static across state
-        transition: background-color .5s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    .overlay {
+        z-index: 1;
+        opacity: .9;
+        display: block;
+        background-color: $color-grey;
+        transition-property: background-color, opacity;
+        transition-duration: .5s;
+        transition-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
         position: absolute;
         top: 0;
         left: 0;
         height: 100%;
         width: 100%;
-        z-index: 1000;
+
+        &.hidden {
+            z-index: -1;
+            opacity: 0;
+        }
     }
     & > .overlay h1 {
         font-weight: $bold;
@@ -151,19 +157,12 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         transform: translateY(-50%);
     }
     &.pending > .overlay {
-        display: block;
-        opacity: .9;
-        background-color: $color-gray;
+        background-color: $color-grey;
     }
     &.complete > .overlay {
-        content: "Thank you!";
-        display: block;
-        opacity: .9;
         background-color: $color-success;
     }
     &.error > .overlay {
-        display: block;
-        opacity: .9;
         background-color: $color-failure;
     }
 }
