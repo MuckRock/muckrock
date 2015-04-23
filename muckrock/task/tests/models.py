@@ -3,7 +3,7 @@ Tests for Tasks models
 """
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import TestCase, Client
 
 from datetime import datetime
 from mock import Mock
@@ -32,11 +32,21 @@ class TaskTests(TestCase):
             'Unicode string should return the classname and PK of the task')
 
     def test_resolve(self):
+        """Tasks should be resolvable, updating their state when that happens."""
         self.task.resolve()
         nose.ok_(self.task.resolved is True,
             'Resolving task should set resolved field to True')
         nose.ok_(self.task.date_done is not None,
             'Resolving task should set date_done')
+        nose.ok_(self.task.resolved_by is None,
+            'Resolving without providing a user should leave the field blank.')
+
+    def test_resolve_with_user(self):
+        """Tasks should record the user responsible for the resolution."""
+        user = User.objects.create(username='test', password='pass')
+        self.task.resolve(user)
+        nose.eq_(self.task.resolved_by, user,
+            'The resolving user should be recorded by the task.')
 
     def test_assign(self):
         user = User.objects.get(pk=1)

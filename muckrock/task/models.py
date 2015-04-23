@@ -18,7 +18,8 @@ class Task(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_done = models.DateTimeField(blank=True, null=True)
     resolved = models.BooleanField(default=False)
-    assigned = models.ForeignKey(User, blank=True, null=True)
+    assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
+    resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
 
     class Meta:
         ordering = ['date_created']
@@ -26,9 +27,10 @@ class Task(models.Model):
     def __unicode__(self):
         return u'Task: %d' % (self.pk)
 
-    def resolve(self):
+    def resolve(self, user=None):
         """Resolve the task"""
         self.resolved = True
+        self.resolved_by = user
         self.date_done = datetime.now()
         self.save()
 
