@@ -40,12 +40,12 @@ def render_list(tasks):
                 pass
             logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
             return (c, t)
-        (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
-        (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html')
         (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
         (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
         (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
         (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
+        (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
+        (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html', {'status': STATUS})
         (C, T) = render_task(task.id, ResponseTask, 'task/response.html', {'status': STATUS})
         # render and append task
         T = template.loader.get_template(T)
