@@ -47,6 +47,14 @@ def render_list(tasks):
         except SnailMailTask.DoesNotExist:
             logging.debug('Is not snail mail task.')
             pass
+        
+        try:
+            task = NewAgencyTask.objects.get(id=task.id)
+            context = {'new_agency_form': NewAgencyForm(instance=task.agency)}
+            task_context.update(context)
+            task_template = 'task/new_agency.html'
+        except NewAgencyTask.DoesNotExist:
+            pass
 
         try:
             task = RejectedEmailTask.objects.get(id=task.id)
