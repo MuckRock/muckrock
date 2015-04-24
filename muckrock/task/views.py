@@ -165,6 +165,8 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
+        new_agency_form = NewAgencyForm(request.POST, instance=new_agency_task.agency)
+        new_agency = new_agency_form.save()
         new_agency_task.approve()
     if request.POST.get('reject'):
         new_agency_task.reject()
