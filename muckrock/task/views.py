@@ -1,6 +1,7 @@
 """
 Views for the Task application
 """
+from django import template
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -8,13 +9,49 @@ from django.core.urlresolvers import resolve
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
+import logging
+
 from muckrock.foia.models import STATUS
-from muckrock.task.forms import TaskFilterForm
+from muckrock.task.forms import TaskFilterForm, NewAgencyForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
+
+def render_list(tasks):
+    """Renders a task widget for each task in the list"""
+    rendered_tasks = []
+    for task in tasks:
+        # set up a baseline data to render and template to use
+        C = {'task': task}
+        T = 'task/default.html'
+        # customize task template and data here
+        def render_task(task_id, model, template, extra_context={}):
+            """Helper function to render a task into HTML"""
+            c = C
+            t = T
+            try:
+                task = model.objects.get(id=task_id)
+                c.update({'task': task})
+                c.update(extra_context)
+                t = template
+            except model.DoesNotExist:
+                pass
+            logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
+            return (c, t)
+        (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
+        (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
+        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
+        (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
+        (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
+        (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html', {'status': STATUS})
+        (C, T) = render_task(task.id, ResponseTask, 'task/response.html', {'status': STATUS})
+        # render and append task
+        T = template.loader.get_template(T)
+        C = template.Context(C)
+        rendered_tasks.append(T.render(C))            
+    return rendered_tasks
 
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
@@ -51,6 +88,7 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
+        context['object_list'] = render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))

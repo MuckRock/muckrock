@@ -1,6 +1,7 @@
 """
 Models for the Task application
 """
+from django import template
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
@@ -8,8 +9,10 @@ from django.db.models.loading import get_model
 
 from datetime import datetime
 
+from muckrock.foia.models import STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.forms import NewAgencyForm
 
 
 class Task(models.Model):
@@ -20,6 +23,8 @@ class Task(models.Model):
     resolved = models.BooleanField(default=False)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+    
+    template_name = 'task/default.html'
 
     class Meta:
         ordering = ['date_created']
@@ -38,7 +43,17 @@ class Task(models.Model):
         """Assign the task"""
         self.assigned = user
         self.save()
-
+    
+    def render(self, context={}):
+        """Renders the template, with context, for this task"""
+        try:
+            t = template.loader.get_template(self.template_name)
+        except template.TemplateDoesNotExist:
+            logging.error('Could not find template %s', self.template_name)
+            return ''
+        context['task'] = self
+        c = template.Context(context)
+        return t.render(c)
 
 class GenericTask(Task):
     """A generic task"""
@@ -59,6 +74,8 @@ class OrphanTask(Task):
     reason = models.CharField(max_length=2, choices=reasons)
     communication = models.ForeignKey('foia.FOIACommunication')
     address = models.CharField(max_length=255)
+    
+    template_name = 'task/orphan.html'
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
@@ -72,13 +89,14 @@ class OrphanTask(Task):
         """Simply resolves the request. Should do something to spam addresses."""
         self.resolve()
 
-
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
     categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'))
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
+    
+    template_name = 'task/snail_mail.html'
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.communication.foia)
@@ -95,15 +113,15 @@ class SnailMailTask(Task):
         comm.save()
         self.resolve()
 
-
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""
-
     categories = (('b', 'Bounced'), ('d', 'Dropped'))
     category = models.CharField(max_length=1, choices=categories)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
     error = models.CharField(max_length=255, blank=True)
+    
+    template_name = 'task/rejected_email.html'
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.foia)
@@ -127,8 +145,9 @@ class RejectedEmailTask(Task):
 
 class StaleAgencyTask(Task):
     """An agency has gone stale"""
-
     agency = models.ForeignKey(Agency)
+    
+    template_name = 'task/stale_agency.html'
 
     def __unicode__(self):
         return u'Stale Agency: %s' % (self.agency)
@@ -143,6 +162,8 @@ class FlaggedTask(Task):
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     agency = models.ForeignKey(Agency, blank=True, null=True)
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
+    
+    template_name = 'task/flagged.html'
 
     def __unicode__(self):
         if self.foia:
@@ -159,6 +180,8 @@ class NewAgencyTask(Task):
 
     user = models.ForeignKey(User, blank=True, null=True)
     agency = models.ForeignKey(Agency)
+    
+    template_name = 'task/new_agency.html'
 
     def __unicode__(self):
         return u'New Agency: %s' % (self.agency)
@@ -176,11 +199,17 @@ class NewAgencyTask(Task):
         """
         self.resolve()
 
+    def render(self, context={}):
+        """Adds a NewAgencyForm to the task"""
+        context['contact_form'] = NewAgencyForm(instance=self.agency)
+        return super(NewAgencyTask, self).render(context)
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
     # pylint: disable=no-member
     communication = models.ForeignKey('foia.FOIACommunication')
+    
+    template_name = 'task/response.html'
 
     def __unicode__(self):
         return u'Response: %s' % (self.communication.foia)
@@ -199,3 +228,7 @@ class ResponseTask(Task):
             comm.date = datetime.now()
         comm.save()
         self.resolve()
+    
+    def render(self, context={}):
+        context['status'] = STATUS
+        return super(ResponseTask, self).render(context)

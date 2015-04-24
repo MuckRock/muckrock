@@ -25,3 +25,9 @@
     <button type="submit" name="approve" value="true" class="success">Approve</button>
     <button type="submit" name="reject" value="true" class="failure">Reject</button>
 {% endblock %}
+
+{% block task-extra-context %}
+<div class="task-extra-context">
+    {{ new_agency_form }}
+</div>
+{% endblock %}
