@@ -11,6 +11,7 @@ from datetime import datetime
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.forms import NewAgencyForm
 
 
 class Task(models.Model):
@@ -197,6 +198,10 @@ class NewAgencyTask(Task):
         """
         self.resolve()
 
+    def render(self, context={}):
+        """Adds a NewAgencyForm to the task"""
+        context['contact_form'] = NewAgencyForm(instance=self.agency)
+        return super(NewAgencyTask, self).render(context)
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
