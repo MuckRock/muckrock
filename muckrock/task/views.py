@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 import logging
 
 from muckrock.foia.models import STATUS
-from muckrock.task.forms import TaskFilterForm
+from muckrock.task.forms import TaskFilterForm, NewAgencyForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -33,24 +33,25 @@ def render_list(tasks):
         
         try:
             task = OrphanTask.objects.get(id=task.id)
-            context = {'status': STATUS}
-            task_context.update(context)
+            logging.debug('Is orphan task.')
+            task_context.update({'status': STATUS})
             task_template = 'task/orphantask.html'
-        except task.DoesNotExist:
+        except OrphanTask.DoesNotExist:
+            logging.debug('Is not orphan task.')
             pass
-            
+        
         try:
             task = SnailMailTask.objects.get(id=task.id)
             logging.debug('Is snail mail task.')
             task_template = 'task/snail_mail.html'
-        except task.DoesNotExist:
+        except SnailMailTask.DoesNotExist:
             logging.debug('Is not snail mail task.')
             pass
 
         try:
             task = RejectedEmailTask.objects.get(id=task.id)
             task_template = 'task/rejected_email.html'
-        except task.DoesNotExist:
+        except RejectedEmailTask.DoesNotExist:
             pass
     
         try:
@@ -58,7 +59,7 @@ def render_list(tasks):
             context = {'status': STATUS}
             task_context.update(context)
             task_template = 'task/rejected_email.html'
-        except task.DoesNotExist:
+        except ResponseTask.DoesNotExist:
             pass
 
         # render and append
