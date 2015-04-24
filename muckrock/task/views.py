@@ -34,7 +34,7 @@ def render_list(tasks):
         try:
             task = OrphanTask.objects.get(id=task.id)
             logging.debug('Is orphan task.')
-            task_context.update({'status': STATUS})
+            task_context.update({'task': task, 'status': STATUS})
             task_template = 'task/orphantask.html'
         except OrphanTask.DoesNotExist:
             logging.debug('Is not orphan task.')
@@ -43,6 +43,7 @@ def render_list(tasks):
         try:
             task = SnailMailTask.objects.get(id=task.id)
             logging.debug('Is snail mail task.')
+            task_context.update({'task': task})
             task_template = 'task/snail_mail.html'
         except SnailMailTask.DoesNotExist:
             logging.debug('Is not snail mail task.')
@@ -50,23 +51,24 @@ def render_list(tasks):
         
         try:
             task = NewAgencyTask.objects.get(id=task.id)
-            context = {'new_agency_form': NewAgencyForm(instance=task.agency)}
+            context = {'task': task, 'new_agency_form': NewAgencyForm(instance=task.agency)}
             task_context.update(context)
             task_template = 'task/new_agency.html'
         except NewAgencyTask.DoesNotExist:
             pass
-
+            
         try:
             task = RejectedEmailTask.objects.get(id=task.id)
+            task_context.update({'task': task})
             task_template = 'task/rejected_email.html'
         except RejectedEmailTask.DoesNotExist:
             pass
     
         try:
             task = ResponseTask.objects.get(id=task.id)
-            context = {'status': STATUS}
+            context = {'task': task, 'status': STATUS}
             task_context.update(context)
-            task_template = 'task/rejected_email.html'
+            task_template = 'task/response.html'
         except ResponseTask.DoesNotExist:
             pass
 
