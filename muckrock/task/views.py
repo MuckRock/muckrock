@@ -26,63 +26,14 @@ def render_list(tasks):
         
         # set up a baseline data to render and template to use
         
-        task_context = {'task': task}
-        task_template = 'task/default.html'
+        C = {'task': task}
+        T = 'task/default.html'
         
         # customize task template and data here
-
-        try:
-            task = OrphanTask.objects.get(id=task.id)
-            logging.debug('Is orphan task.')
-            task_context.update({'task': task, 'status': STATUS})
-            task_template = 'task/orphan.html'
-        except OrphanTask.DoesNotExist:
-            logging.debug('Is not orphan task.')
-            pass
         
-        try:
-            task = SnailMailTask.objects.get(id=task.id)
-            logging.debug('Is snail mail task.')
-            task_context.update({'task': task})
-            task_template = 'task/snail_mail.html'
-        except SnailMailTask.DoesNotExist:
-            logging.debug('Is not snail mail task.')
-            pass
-        
-        try:
-            task = NewAgencyTask.objects.get(id=task.id)
-            context = {'task': task, 'new_agency_form': NewAgencyForm(instance=task.agency)}
-            task_context.update(context)
-            task_template = 'task/new_agency.html'
-        except NewAgencyTask.DoesNotExist:
-            pass
-
-        try:
-            task = StaleAgencyTask.objects.get(id=task.id)
-            context = {'task': task}
-            task_context.update(context)
-            task_template = 'task/stale_agency.html'
-        except StaleAgencyTask.DoesNotExist:
-            pass
-        
-        try:
-            task = FlaggedTask.objects.get(id=task.id)
-            context = {'task': task}
-            task_context.update(context)
-            task_template = 'task/flagged.html'
-        except FlaggedTask.DoesNotExist:
-            pass
-            
-        try:
-            task = RejectedEmailTask.objects.get(id=task.id)
-            task_context.update({'task': task})
-            task_template = 'task/rejected_email.html'
-        except RejectedEmailTask.DoesNotExist:
-            pass
-        
-        def render_task(model, task_id, template, extra_context):
-            c = task_context
-            t = task_template
+        def render_task(model, task_id, template, extra_context={}):
+            c = C
+            t = T
             try:
                 task = model.objects.get(id=task_id)
                 c.update({'task': task})
@@ -90,16 +41,22 @@ def render_list(tasks):
                 t = template
             except model.DoesNotExist:
                 pass
-            logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
+            # logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
             return (c, t)
+        
+        (C, T) = render_task(OrphanTask, task.id, 'task/orphan.html', {'status': STATUS})
+        (C, T) = render_task(SnailMailTask, task.id, 'task/snail_mail.html')
+        (C, T) = render_task(StaleAgencyTask, task.id, 'task/stale_agency.html')
+        (C, T) = render_task(FlaggedTask, task.id, 'task/flagged.html')
+        (C, T) = render_task(NewAgencyTask, task.id, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
+        (C, T) = render_task(RejectedEmailTask, task.id, 'task/rejected_email.html')
+        (C, T) = render_task(ResponseTask, task.id, 'task/response.html', {'status': STATUS})
 
-        task_context, task_template = render_task(ResponseTask, task.id, 'task/response.html', {'status': STATUS})
+        # render and append task
 
-        # render and append
-    
-        task_template = template.loader.get_template(task_template)
-        task_context = template.Context(task_context)
-        rendered_tasks.append(task_template.render(task_context))
+        T = template.loader.get_template(T)
+        C = template.Context(C)
+        rendered_tasks.append(T.render(C))
             
     return rendered_tasks
 
