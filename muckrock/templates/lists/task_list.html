@@ -66,23 +66,7 @@
 {% if object_list %}
     {% include 'lib/pagination.html' %}
 	{% for task in object_list %}
-		{% if task.orphantask %}
-			{% orphan task %}
-		{% elif task.snailmailtask %}
-			{% snail_mail task %}
-		{% elif task.rejectedemailtask %}
-			{% rejected_email task %}
-		{% elif task.staleagencytask %}
-			{% stale_agency task %}
-		{% elif task.flaggedtask %}
-			{% flagged task %}
-		{% elif task.newagencytask %}
-			{% new_agency task %}
-		{% elif task.responsetask %}
-			{% response task %}
-		{% else %}
-			{% default task %}
-		{% endif %}
+		{{ task.render }}
 	{% endfor %}
 	{% include 'lib/pagination.html' %}
 {% endif %}

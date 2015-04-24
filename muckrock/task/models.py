@@ -1,6 +1,7 @@
 """
 Models for the Task application
 """
+from django import template
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
@@ -20,6 +21,8 @@ class Task(models.Model):
     resolved = models.BooleanField(default=False)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+    
+    template_name = 'task/default.html'
 
     class Meta:
         ordering = ['date_created']
@@ -38,7 +41,17 @@ class Task(models.Model):
         """Assign the task"""
         self.assigned = user
         self.save()
-
+    
+    def render(self, context={}):
+        """Renders the template, with context, for this task"""
+        try:
+            t = template.loader.get_template(self.template_name)
+        except template.TemplateDoesNotExist:
+            logging.error('Could not find template %s', self.template_name)
+            return ''
+        context['task'] = self
+        c = template.Context(context)
+        return t.render(c)
 
 class GenericTask(Task):
     """A generic task"""
