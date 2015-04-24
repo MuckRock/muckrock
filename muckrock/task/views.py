@@ -30,7 +30,14 @@ def render_list(tasks):
         task_template = 'task/default.html'
         
         # customize task template and data here
-
+        
+        try:
+            task = OrphanTask.objects.get(id=task.id)
+            context = {'status': STATUS}
+            task_context.update(context)
+            task_template = 'task/orphantask.html'
+        except task.DoesNotExist:
+            pass
 
         # render and append
     
