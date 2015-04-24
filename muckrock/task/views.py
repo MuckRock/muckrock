@@ -56,6 +56,22 @@ def render_list(tasks):
             task_template = 'task/new_agency.html'
         except NewAgencyTask.DoesNotExist:
             pass
+        
+        try:
+            task = StaleAgencyTask.objects.get(id=task.id)
+            context = {'task': task}
+            task_context.update(context)
+            task_template = 'task/stale_agency.html'
+        except StaleAgencyTask.DoesNotExist:
+            pass
+        
+        try:
+            task = FlaggedTask.objects.get(id=task.id)
+            context = {'task': task}
+            task_context.update(context)
+            task_template = 'task/flagged.html'
+        except FlaggedTask.DoesNotExist:
+            pass
             
         try:
             task = RejectedEmailTask.objects.get(id=task.id)
@@ -64,6 +80,14 @@ def render_list(tasks):
         except RejectedEmailTask.DoesNotExist:
             pass
     
+        try:
+            task = ResponseTask.objects.get(id=task.id)
+            context = {'task': task, 'status': STATUS}
+            task_context.update(context)
+            task_template = 'task/response.html'
+        except ResponseTask.DoesNotExist:
+            pass
+        
         try:
             task = ResponseTask.objects.get(id=task.id)
             context = {'task': task, 'status': STATUS}
