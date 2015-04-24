@@ -9,6 +9,8 @@ from django.core.urlresolvers import resolve
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
+import logging
+
 from muckrock.foia.models import STATUS
 from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
@@ -21,12 +23,19 @@ def render_list(tasks):
     """Renders a task widget for each task in the list"""
     rendered_tasks = []
     for task in tasks:
-        task_context_data = {
-            'task': task
-        }
-        task_template = template.loader.get_template('task/default.html')
-        task_context = template.Context(task_context_data)
         
+        # set up a baseline data to render and template to use
+        
+        task_context = {'task': task}
+        task_template = 'task/default.html'
+        
+        # customize task template and data here
+
+
+        # render and append
+    
+        task_template = template.loader.get_template(task_template)
+        task_context = template.Context(task_context)
         rendered_tasks.append(task_template.render(task_context))
             
     return rendered_tasks
