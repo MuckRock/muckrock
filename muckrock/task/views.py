@@ -30,12 +30,12 @@ def render_list(tasks):
         task_template = 'task/default.html'
         
         # customize task template and data here
-        
+
         try:
             task = OrphanTask.objects.get(id=task.id)
             logging.debug('Is orphan task.')
             task_context.update({'task': task, 'status': STATUS})
-            task_template = 'task/orphantask.html'
+            task_template = 'task/orphan.html'
         except OrphanTask.DoesNotExist:
             logging.debug('Is not orphan task.')
             pass
@@ -56,7 +56,7 @@ def render_list(tasks):
             task_template = 'task/new_agency.html'
         except NewAgencyTask.DoesNotExist:
             pass
-        
+
         try:
             task = StaleAgencyTask.objects.get(id=task.id)
             context = {'task': task}
@@ -88,6 +88,7 @@ def render_list(tasks):
         except ResponseTask.DoesNotExist:
             pass
         
+        """
         try:
             task = ResponseTask.objects.get(id=task.id)
             context = {'task': task, 'status': STATUS}
@@ -95,6 +96,21 @@ def render_list(tasks):
             task_template = 'task/response.html'
         except ResponseTask.DoesNotExist:
             pass
+        """
+        
+        def render_task(model, task_id, template, context={}):
+            c = task_context
+            t = task_template
+            try:
+                task = model.objects.get(id=task_id)
+                c.update(context)
+                t = template
+            except model.DoesNotExist:
+                pass
+            logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
+            return (c, t)
+        
+        task_context, task_template = render_task(ResponseTask, task.id, 'task/response.html', {'task': task, 'status': STATUS})
 
         # render and append
     

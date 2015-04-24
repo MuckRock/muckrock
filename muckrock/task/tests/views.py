@@ -16,8 +16,10 @@ from muckrock.views import MRFilterableListView
 
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
-
-    fixtures = ['test_users.json']
+    
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
         self.url = reverse('task-list')
