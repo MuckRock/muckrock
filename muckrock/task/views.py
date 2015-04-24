@@ -23,15 +23,12 @@ def render_list(tasks):
     """Renders a task widget for each task in the list"""
     rendered_tasks = []
     for task in tasks:
-        
         # set up a baseline data to render and template to use
-        
         C = {'task': task}
         T = 'task/default.html'
-        
         # customize task template and data here
-        
         def render_task(model, task_id, template, extra_context={}):
+            """Helper function to render a task into HTML"""
             c = C
             t = T
             try:
@@ -41,9 +38,8 @@ def render_list(tasks):
                 t = template
             except model.DoesNotExist:
                 pass
-            # logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
+            logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
             return (c, t)
-        
         (C, T) = render_task(OrphanTask, task.id, 'task/orphan.html', {'status': STATUS})
         (C, T) = render_task(SnailMailTask, task.id, 'task/snail_mail.html')
         (C, T) = render_task(StaleAgencyTask, task.id, 'task/stale_agency.html')
@@ -51,13 +47,10 @@ def render_list(tasks):
         (C, T) = render_task(NewAgencyTask, task.id, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
         (C, T) = render_task(RejectedEmailTask, task.id, 'task/rejected_email.html')
         (C, T) = render_task(ResponseTask, task.id, 'task/response.html', {'status': STATUS})
-
         # render and append task
-
         T = template.loader.get_template(T)
         C = template.Context(C)
-        rendered_tasks.append(T.render(C))
-            
+        rendered_tasks.append(T.render(C))            
     return rendered_tasks
 
 def count_tasks():
