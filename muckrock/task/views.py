@@ -42,7 +42,7 @@ def render_list(tasks):
             return (c, t)
         (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
         (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
-        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html')
+        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
         (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
         (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
         (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html', {'status': STATUS})
