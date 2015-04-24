@@ -38,6 +38,14 @@ def render_list(tasks):
             task_template = 'task/orphantask.html'
         except task.DoesNotExist:
             pass
+            
+        try:
+            task = SnailMailTask.objects.get(id=task.id)
+            logging.debug('Is snail mail task.')
+            task_template = 'task/snail_mail.html'
+        except task.DoesNotExist:
+            logging.debug('Is not snail mail task.')
+            pass
 
         # render and append
     
