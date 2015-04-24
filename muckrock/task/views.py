@@ -52,6 +52,14 @@ def render_list(tasks):
             task_template = 'task/rejected_email.html'
         except task.DoesNotExist:
             pass
+    
+        try:
+            task = ResponseTask.objects.get(id=task.id)
+            context = {'status': STATUS}
+            task_context.update(context)
+            task_template = 'task/rejected_email.html'
+        except task.DoesNotExist:
+            pass
 
         # render and append
     
