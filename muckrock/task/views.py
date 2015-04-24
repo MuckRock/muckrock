@@ -27,7 +27,7 @@ def render_list(tasks):
         C = {'task': task}
         T = 'task/default.html'
         # customize task template and data here
-        def render_task(model, task_id, template, extra_context={}):
+        def render_task(task_id, model, template, extra_context={}):
             """Helper function to render a task into HTML"""
             c = C
             t = T
@@ -40,13 +40,13 @@ def render_list(tasks):
                 pass
             logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
             return (c, t)
-        (C, T) = render_task(OrphanTask, task.id, 'task/orphan.html', {'status': STATUS})
-        (C, T) = render_task(SnailMailTask, task.id, 'task/snail_mail.html')
-        (C, T) = render_task(StaleAgencyTask, task.id, 'task/stale_agency.html')
-        (C, T) = render_task(FlaggedTask, task.id, 'task/flagged.html')
-        (C, T) = render_task(NewAgencyTask, task.id, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
-        (C, T) = render_task(RejectedEmailTask, task.id, 'task/rejected_email.html')
-        (C, T) = render_task(ResponseTask, task.id, 'task/response.html', {'status': STATUS})
+        (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
+        (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html')
+        (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
+        (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
+        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
+        (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
+        (C, T) = render_task(task.id, ResponseTask, 'task/response.html', {'status': STATUS})
         # render and append task
         T = template.loader.get_template(T)
         C = template.Context(C)
