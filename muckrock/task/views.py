@@ -1,6 +1,7 @@
 """
 Views for the Task application
 """
+from django import template
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -19,7 +20,15 @@ from muckrock.views import MRFilterableListView
 def render_list(tasks):
     """Renders a task widget for each task in the list"""
     rendered_tasks = []
-    
+    for task in tasks:
+        task_context_data = {
+            'task': task
+        }
+        task_template = template.loader.get_template('task/default.html')
+        task_context = template.Context(task_context_data)
+        
+        rendered_tasks.append(task_template.render(task_context))
+            
     return rendered_tasks
 
 def count_tasks():

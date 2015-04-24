@@ -66,14 +66,7 @@
 {% if object_list %}
     {% include 'lib/pagination.html' %}
 	{% for task in object_list %}
-        {{ task.generictask.render }}
-        {{ task.orphantask.render }}
-        {{ task.flaggedtask.render }}
-        {{ task.rejectedemailtask.render }}
-        {{ task.staleagenytask.render }}
-		{{ task.snailmailtask.render }}
-        {{ task.newagencytask.render }}
-        {{ task.responsetask.render }}
+        {{ task }}
 	{% endfor %}
 	{% include 'lib/pagination.html' %}
 {% endif %}
