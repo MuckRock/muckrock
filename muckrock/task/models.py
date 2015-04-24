@@ -9,6 +9,7 @@ from django.db.models.loading import get_model
 
 from datetime import datetime
 
+from muckrock.foia.models import STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.forms import NewAgencyForm
@@ -227,3 +228,7 @@ class ResponseTask(Task):
             comm.date = datetime.now()
         comm.save()
         self.resolve()
+    
+    def render(self, context={}):
+        context['status'] = STATUS
+        return super(ResponseTask, self).render(context)
