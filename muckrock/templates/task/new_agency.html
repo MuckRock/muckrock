@@ -22,12 +22,26 @@
 {% endblock %}
 
 {% block task-actions %}
-    <button type="submit" name="approve" value="true" class="success">Approve</button>
-    <button type="submit" name="reject" value="true" class="failure">Reject</button>
 {% endblock %}
 
 {% block task-extra-context %}
 <div class="task-extra-context">
-    {{ new_agency_form }}
+    <form method="POST" class="new-agency approval form">
+    {% for field in new_agency_form %}
+        <fieldset>
+            <label for="{{field.id}}">{{field.label}}</label>
+            <p class="help-text"><small>{{field.help_text}}</small></p>
+            {{ field }}
+        </fieldset>
+    {% endfor %}
+        <button type="submit" name="approve" value="true" class="success">Approve</button>
+    </form>
+    <form method="POST" class="new-agency rejection form">
+        <label>Move this agency’s requests to</label>
+        <select>
+            <option>Other Agency</option>
+        </select>
+        <button type="submit" name="reject" value="true" class="failure">Reject</button>
+    </form>
 </div>
 {% endblock %}
