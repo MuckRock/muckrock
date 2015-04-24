@@ -47,6 +47,12 @@ def render_list(tasks):
             logging.debug('Is not snail mail task.')
             pass
 
+        try:
+            task = RejectedEmailTask.objects.get(id=task.id)
+            task_template = 'task/rejected_email.html'
+        except task.DoesNotExist:
+            pass
+
         # render and append
     
         task_template = template.loader.get_template(task_template)
