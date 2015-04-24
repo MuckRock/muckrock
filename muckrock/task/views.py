@@ -16,6 +16,12 @@ from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
 
+def render_list(tasks):
+    """Renders a task widget for each task in the list"""
+    rendered_tasks = []
+    
+    return rendered_tasks
+
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
     count = {}
@@ -51,6 +57,7 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
+        context['object_list'] = render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
