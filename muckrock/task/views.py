@@ -11,11 +11,13 @@ from django.utils.decorators import method_decorator
 
 import logging
 
-from muckrock.foia.models import STATUS
+from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, NewAgencyForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
+
+STATUS = foia.models.STATUS
 
 # pylint:disable=missing-docstring
 
