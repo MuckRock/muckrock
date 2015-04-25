@@ -19,40 +19,6 @@ from muckrock.views import MRFilterableListView
 
 # pylint:disable=missing-docstring
 
-def render_list(tasks):
-    """Renders a task widget for each task in the list"""
-    rendered_tasks = []
-    for task in tasks:
-        # set up a baseline data to render and template to use
-        C = {'task': task}
-        T = 'task/default.html'
-        # customize task template and data here
-        def render_task(task_id, model, template, extra_context={}):
-            """Helper function to render a task into HTML"""
-            c = C
-            t = T
-            try:
-                task = model.objects.get(id=task_id)
-                c.update({'task': task})
-                c.update(extra_context)
-                t = template
-            except model.DoesNotExist:
-                pass
-            logging.debug("\n\n context = %s \n\n template = %s \n", c, t)
-            return (c, t)
-        (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
-        (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
-        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
-        (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
-        (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
-        (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html', {'status': STATUS})
-        (C, T) = render_task(task.id, ResponseTask, 'task/response.html', {'status': STATUS})
-        # render and append task
-        T = template.loader.get_template(T)
-        C = template.Context(C)
-        rendered_tasks.append(T.render(C))            
-    return rendered_tasks
-
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
     count = {}
@@ -70,6 +36,8 @@ class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
     template_name = 'lists/task_list.html'
+    task_template = 'task/default.html'
+    task_context = {}
     model = Task
 
     def get_queryset(self):
@@ -79,6 +47,27 @@ class TaskList(MRFilterableListView):
         if not self.request.GET.get('show_resolved'):
             queryset = queryset.exclude(resolved=True)
         return queryset
+    
+    def render_list(self, tasks):
+        """Renders a list of tasks"""
+        rendered_tasks = []
+        for task in tasks:
+            rendered_task = self.render_task(task)
+            rendered_tasks.append(rendered_task)
+        return rendered_tasks
+    
+    def render_task(self, task):
+        """Renders a single task"""
+        t = self.task_template
+        c = self.task_context
+        try:
+            task = self.model.objects.get(id=task.id)
+            c.update({'task': task})
+        except self.model.DoesNotExist:
+            return ''
+        t = template.loader.get_template(t)
+        c = template.Context(c)
+        return t.render(c)
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
@@ -88,7 +77,7 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
-        context['object_list'] = render_list(context['object_list'])
+        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -185,27 +174,38 @@ def response_task_post_handler(request, task_pk):
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
+    task_template = 'task/orphan.html'
+    task_context = {'status': STATUS}
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
+    task_template = 'task/snail_mail.html'
+    task_context = {'status': STATUS}
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
     model = RejectedEmailTask
+    task_template = 'task/rejected_email.html'
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
     model = StaleAgencyTask
+    task_template = 'task/stale_agency.html'
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
     model = FlaggedTask
+    task_template = 'task/flagged.html'
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
+    task_template = 'task/new_agency.html'
+    task_context = {'new_agency_form': NewAgencyForm()}
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
+    task_template = 'task/response.html'
+    task_context = {'status': STATUS}
