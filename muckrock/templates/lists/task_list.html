@@ -65,7 +65,7 @@
     </section>
 {% if object_list %}
     {% include 'lib/pagination.html' %}
-	{% for task in object_list %}
+	{% for task in rendered_tasks %}
         {{ task }}
 	{% endfor %}
 	{% include 'lib/pagination.html' %}
