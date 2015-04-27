@@ -70,23 +70,10 @@ def resend_comm(request, next_):
     """Resend the FOI Communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.date = datetime.now()
-        comm.save()
-        foia = comm.foia
-        email = request.POST['email']
-        if email:
-            validate_email(email)
-            foia.email = email
-            foia.save()
-            snail = False
-        else:
-            snail = True
-        foia.submit(snail=snail)
-        messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-    except ValidationError:
-        messages.error(request, 'Not a valid email address')
+        return redirect(next_)
+    comm.resend(request.POST['email'])
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
