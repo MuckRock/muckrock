@@ -27,7 +27,7 @@
 {% block task-extra-context %}
 <div class="task-extra-context">
     <form method="POST" class="new-agency approval form">
-    {% for field in approve_new_agency_form %}
+    {% for field in agency_form %}
         <fieldset>
             <label for="{{field.id}}">{{field.label}}</label>
             <p class="help-text"><small>{{field.help_text}}</small></p>

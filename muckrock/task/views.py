@@ -219,17 +219,15 @@ class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
-    task_context = {
-        'approve_new_agency_form': AgencyForm()
-    }
 
     def render_task(self, task):
-        """Overrides task rendering to include agencies from same jurisdiction"""
+        """Overrides task rendering to render special forms"""
         t = self.task_template
         c = self.task_context
         try:
             task = self.model.objects.get(id=task.id)
             c.update({'task': task})
+            c.update({'agency_form': AgencyForm(instance=task.agency)})
             other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
             other_agencies = other_agencies.exclude(id=task.agency.id)
             c.update({'other_agencies': other_agencies})
