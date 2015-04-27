@@ -12,8 +12,6 @@ from datetime import datetime
 from muckrock.foia.models import STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.forms import ApproveNewAgencyForm
-
 
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
@@ -201,7 +199,7 @@ class NewAgencyTask(Task):
 
     def render(self, context={}):
         """Adds a ApproveNewAgencyForm to the task"""
-        context['contact_form'] = ApproveNewAgencyForm(instance=self.agency)
+        context['contact_form'] = agency.forms.AgencyForm(instance=self.agency)
         return super(NewAgencyTask, self).render(context)
 
 class ResponseTask(Task):

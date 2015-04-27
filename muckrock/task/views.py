@@ -11,9 +11,10 @@ from django.utils.decorators import method_decorator
 
 import logging
 
-from muckrock import agency
+from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
 from muckrock import foia
-from muckrock.task.forms import TaskFilterForm, ApproveNewAgencyForm
+from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -157,7 +158,7 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
-        new_agency_form = ApproveNewAgencyForm(request.POST, instance=new_agency_task.agency)
+        new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
         new_agency = new_agency_form.save()
         new_agency_task.approve()
         # resend all first comm of each foia associated to agency
@@ -167,7 +168,7 @@ def new_agency_task_post_handler(request, task_pk):
             # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
         replacement_agency_id = request.POST.get('replacement_agency')
-        replacement_agency = get_object_or_404(agency.models.Agency, id=replacement_agency_id)
+        replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject()
         # resend all first comm of each foia associated to agency to new agency
         for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
@@ -219,7 +220,7 @@ class NewAgencyTaskList(TaskList):
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
     task_context = {
-        'approve_new_agency_form': ApproveNewAgencyForm()
+        'approve_new_agency_form': AgencyForm()
     }
 
     def render_task(self, task):
@@ -229,7 +230,7 @@ class NewAgencyTaskList(TaskList):
         try:
             task = self.model.objects.get(id=task.id)
             c.update({'task': task})
-            other_agencies = agency.models.Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+            other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
             other_agencies = other_agencies.exclude(id=task.agency.id)
             c.update({'other_agencies': other_agencies})
         except self.model.DoesNotExist:
