@@ -23,8 +23,13 @@ class TestCommunicationActions(test.TestCase):
     def setUp(self):
         self.comm = FOIACommunication.objects.create(date=datetime.now(), from_who='Test Sender')
 
+    def test_move(self):
+        """Should make a copy of the communication and attach to all the given FOIAs"""
+        ok_(False, 'Should test the move method')
+
     def test_resend(self):
-        ok_(False, 'Scaffolding for testing communication')
+        """Should resubmit the FOIA containing the communication"""
+        ok_(False, 'Should test the resend method')
 
     def tearDown(self):
         self.comm = None
