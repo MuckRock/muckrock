@@ -10,6 +10,7 @@ from pingback import register_pingback
 # pylint: disable=W0611
 import muckrock.foia.signals
 # pylint: enable=W0611
+from muckrock.crowdfund import views as crowdfund_views
 from muckrock.foia import views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
                                 UserSubmittedFeed, UserDoneFeed, UserUpdateFeed
@@ -75,6 +76,8 @@ urlpatterns = patterns(
         views.pay_request, name='foia-pay'),
     url(r'^%s/crowdfund/$' % foia_url,
         views.crowdfund_request, name='foia-crowdfund'),
+    url(r'^%s/contribute/$' % foia_url,
+        crowdfund_views.contribute_request, name='foia-contribute'),
     url(r'^%s/follow/$' % foia_url,
         views.follow, name='foia-follow'),
     url(r'^%s/toggle-followups/$' % foia_url,

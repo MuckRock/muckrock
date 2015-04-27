@@ -12,10 +12,9 @@ from django.utils.html import escape
 from email.parser import Parser
 import re
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.foia.models import FOIARequest
 from muckrock.forms import TagManagerForm
-from muckrock.settings import STATIC_URL, STRIPE_PUB_KEY
+from muckrock.settings import STATIC_URL
 
 register = Library()
 
@@ -190,16 +189,16 @@ def editable_by(foia, user):
 def crowdfund(context, foia_pk):
     """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
-    the_crowdfund = foia.crowdfund
-    payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': the_crowdfund.pk})
-    logged_in = context['user'].is_authenticated()
-    endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
+    endpoint = reverse('foia-contribute', kwargs={
+        'jurisdiction': foia.jurisdiction.slug,
+        'jidx': foia.jurisdiction.pk,
+        'idx': foia.id,
+        'slug': foia.slug
+    })
     return {
-        'crowdfund': the_crowdfund,
+        'user': context['user'],
+        'crowdfund': foia.crowdfund,
         'endpoint': endpoint,
-        'logged_in': logged_in,
-        'payment_form': payment_form,
-        'stripe_pk': STRIPE_PUB_KEY
     }
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
