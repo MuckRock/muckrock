@@ -3,8 +3,11 @@
 Models for the FOIA application
 """
 
+import datetime
+
 from django.contrib import messages
 from django.core.files.base import ContentFile
+from django.core.validators import validate_email, ValidationError
 from django.db import models
 
 import logging
@@ -104,6 +107,26 @@ class FOIACommunication(models.Model):
             msg += ', '.join(href(f) for f in new_foias)
             logging.info(msg)
             return False
+
+    def resend(self, email=None):
+        """Resend the communication"""
+        foia = self.foia
+        if not foia:
+            logging.error('Tried resending an orphaned communication.')
+            raise ValueError('This communication has no FOIA to submit.')
+        snail = False
+        self.date = datetime.datetime.now()
+        self.save()
+        if email:
+            # responsibility for handling validation errors
+            # is on the caller of the resend method
+            validate_email(email)
+            foia.email = email
+            foia.save()
+        else:
+            snail = True
+        foia.submit(snail=snail)
+        logging.info('Communication %d was resent.', self.id)
 
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""
