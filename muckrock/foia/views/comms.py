@@ -70,10 +70,14 @@ def resend_comm(request, next_):
     """Resend the FOI Communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+        comm.resend(request.POST['email'])
+        messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-        return redirect(next_)
-    comm.resend(request.POST['email'])
+    except (ValidationError):
+        messages.error(request, 'The provided email was invalid')
+    except (ValueError):
+        messages.error(request, 'The communication is an orphan and cannot be resent.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
