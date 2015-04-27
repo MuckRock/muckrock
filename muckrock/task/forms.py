@@ -13,7 +13,7 @@ class TaskFilterForm(MRFilterForm):
         label='Show Resolved'
     )
 
-class NewAgencyForm(forms.ModelForm):
+class ApproveNewAgencyForm(forms.ModelForm):
     """Collects contact information for a new agency"""
     class Meta:
         model = Agency

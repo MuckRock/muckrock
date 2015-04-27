@@ -11,8 +11,8 @@ from django.utils.decorators import method_decorator
 
 import logging
 
-from muckrock.foia.models import STATUS
-from muckrock.task.forms import TaskFilterForm, NewAgencyForm
+from muckrock.foia.models import STATUS, FOIARequest
+from muckrock.task.forms import TaskFilterForm, ApproveNewAgencyForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -42,7 +42,7 @@ def render_list(tasks):
             return (c, t)
         (C, T) = render_task(task.id, StaleAgencyTask, 'task/stale_agency.html')
         (C, T) = render_task(task.id, FlaggedTask, 'task/flagged.html')
-        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': NewAgencyForm()})
+        (C, T) = render_task(task.id, NewAgencyTask, 'task/new_agency.html', {'new_agency_form': ApproveNewAgencyForm()})
         (C, T) = render_task(task.id, RejectedEmailTask, 'task/rejected_email.html')
         (C, T) = render_task(task.id, OrphanTask, 'task/orphan.html', {'status': STATUS})
         (C, T) = render_task(task.id, SnailMailTask, 'task/snail_mail.html', {'status': STATUS})
@@ -50,7 +50,7 @@ def render_list(tasks):
         # render and append task
         T = template.loader.get_template(T)
         C = template.Context(C)
-        rendered_tasks.append(T.render(C))            
+        rendered_tasks.append(T.render(C))
     return rendered_tasks
 
 def count_tasks():
@@ -165,11 +165,18 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
-        new_agency_form = NewAgencyForm(request.POST, instance=new_agency_task.agency)
+        new_agency_form = ApproveNewAgencyForm(request.POST, instance=new_agency_task.agency)
         new_agency = new_agency_form.save()
         new_agency_task.approve()
+        # resend all first comm of each foia associated to agency
+        for foia in FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia.communications.all()[0]
+            # first_comm.resend()
+            # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
+
         new_agency_task.reject()
+        # resend all first comm of each foia associated to agency to new agency
     return
 
 def response_task_post_handler(request, task_pk):
