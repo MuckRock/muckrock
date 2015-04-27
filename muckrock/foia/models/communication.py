@@ -76,17 +76,25 @@ class FOIACommunication(models.Model):
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
         files = self.files.all()
-        new_foias = []
-        for new_foia_pk in foia_pks:
-            # setting pk to none clones the request to a new entry in the db
+        foias = []
+        # collect the FOIAs
+        for foia_pk in foia_pks:
             try:
-                new_foia = FOIARequest.objects.get(pk=new_foia_pk)
+                foia = FOIARequest.objects.get(pk=foia_pk)
+                foias.append(foia)
             except (FOIARequest.DoesNotExist, ValueError):
-                logging.error('FOIA %s does not exist', new_foia_pk)
+                logging.error('FOIA %s does not exist', foia_pk)
                 continue
-            new_foias.append(new_foia)
+        # clone the communication and files to each FOIA
+        for foia in foias:
+            """
+            When setting self.pk to None and then calling self.save(),
+            Django will clone the communication along with all of its data
+            and give it a new primary key. On the next iteration of the loop,
+            the clone will be cloned along with its data, and so on.
+            """
             self.pk = None
-            self.foia = new_foia
+            self.foia = foia
             self.save()
             for file_ in files:
                 file_.pk = None
@@ -98,13 +106,13 @@ class FOIACommunication(models.Model):
                 file_.ffile = new_ffile
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
-        if not new_foias:
+        if not foias:
             logging.error('No valid FOIA requests given: %s', foia_pks)
             return True
         else:
             msg = 'Communication moved to the following requests: '
             href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-            msg += ', '.join(href(f) for f in new_foias)
+            msg += ', '.join(href(f) for f in foias)
             logging.info(msg)
             return False
 
