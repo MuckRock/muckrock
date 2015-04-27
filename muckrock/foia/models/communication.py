@@ -68,7 +68,7 @@ class FOIACommunication(models.Model):
         """Anchor name"""
         return 'comm-%d' % self.pk
 
-    def move(self, request, foia_pks):
+    def move(self, foia_pks):
         """Move this communication to all of the FOIAs given by their pk"""
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
@@ -79,7 +79,7 @@ class FOIACommunication(models.Model):
             try:
                 new_foia = FOIARequest.objects.get(pk=new_foia_pk)
             except (FOIARequest.DoesNotExist, ValueError):
-                messages.error(request, 'FOIA %s does not exist' % new_foia_pk)
+                logging.error('FOIA %s does not exist', new_foia_pk)
                 continue
             new_foias.append(new_foia)
             self.pk = None
@@ -96,13 +96,13 @@ class FOIACommunication(models.Model):
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
         if not new_foias:
-            messages.error(request, 'No valid FOIA requests given')
+            logging.error('No valid FOIA requests given: %s', foia_pks)
             return True
         else:
             msg = 'Communication moved to the following requests: '
             href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
             msg += ', '.join(href(f) for f in new_foias)
-            messages.success(request, msg)
+            logging.info(msg)
             return False
 
     def set_raw_email(self, msg):
