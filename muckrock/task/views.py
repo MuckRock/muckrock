@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 
 import logging
 
+from muckrock import agency
 from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ApproveNewAgencyForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
@@ -162,12 +163,16 @@ def new_agency_task_post_handler(request, task_pk):
         # resend all first comm of each foia associated to agency
         for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
             first_comm = foia.communications.all()[0]
-            # first_comm.resend()
+            # first_comm.resend(new_agency)
             # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
-
+        replacement_agency_id = request.POST.get('replacement_agency')
+        replacement_agency = get_object_or_404(agency.models.Agency, id=replacement_agency_id)
         new_agency_task.reject()
         # resend all first comm of each foia associated to agency to new agency
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia-communications.all()[0]
+            # first_comm.resend(replacement_agency)
     return
 
 def response_task_post_handler(request, task_pk):
@@ -213,7 +218,25 @@ class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
-    task_context = {'new_agency_form': NewAgencyForm()}
+    task_context = {
+        'approve_new_agency_form': ApproveNewAgencyForm()
+    }
+
+    def render_task(self, task):
+        """Overrides task rendering to include agencies from same jurisdiction"""
+        t = self.task_template
+        c = self.task_context
+        try:
+            task = self.model.objects.get(id=task.id)
+            c.update({'task': task})
+            other_agencies = agency.models.Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+            other_agencies = other_agencies.exclude(id=task.agency.id)
+            c.update({'other_agencies': other_agencies})
+        except self.model.DoesNotExist:
+            return ''
+        t = template.loader.get_template(t)
+        c = template.Context(c)
+        return t.render(c)
 
 class ResponseTaskList(TaskList):
     title = 'Responses'

@@ -27,7 +27,7 @@
 {% block task-extra-context %}
 <div class="task-extra-context">
     <form method="POST" class="new-agency approval form">
-    {% for field in new_agency_form %}
+    {% for field in approve_new_agency_form %}
         <fieldset>
             <label for="{{field.id}}">{{field.label}}</label>
             <p class="help-text"><small>{{field.help_text}}</small></p>
@@ -38,8 +38,10 @@
     </form>
     <form method="POST" class="new-agency rejection form">
         <label>Move this agency’s requests to</label>
-        <select>
-            <option>Other Agency</option>
+        <select name="replacement_agency">
+            {% for other_agency in other_agencies %}
+            <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
+            {% endfor %}
         </select>
         <button type="submit" name="reject" value="true" class="failure">Reject</button>
     </form>
