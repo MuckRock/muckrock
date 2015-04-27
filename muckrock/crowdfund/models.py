@@ -2,14 +2,10 @@
 Models for the crowdfund application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.db import models
 
 from datetime import date
-from decimal import Decimal
-import logging
-
-from muckrock.foia.models import FOIARequest
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -47,43 +43,16 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
-    name = models.CharField(max_length=255, default='Crowdfund this request')
-    description = models.TextField(blank=True)
-    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
+    foia = models.OneToOneField('foia.FOIARequest', related_name='crowdfund')
+    payments = models.ManyToManyField(User, through='CrowdfundRequestPayment')
 
     def __unicode__(self):
         # pylint: disable=E1101
         return 'Crowdfunding for %s' % self.foia.title
 
-    @models.permalink
-    def get_absolute_url(self):
-        """The url for this object"""
-        return ('crowdfund-request', [], {'pk': self.pk})
-
-    def update_payment_received(self):
-        """Combine the amounts of all the payments"""
-        total_amount = Decimal()
-        payments = self.payments.all()
-        for payment in payments:
-            logging.debug(payment)
-            total_amount += payment.amount
-        self.payment_received = total_amount
-        self.save()
-
-    def contributors(self):
-        """Return a list of all the contributors to a crowdfund"""
-        contributors = []
-        payments = self.payments.all()
-        for payment in payments:
-            if payment.show and payment.user:
-                contributors.append(payment.user)
-            else:
-                contributors.append(AnonymousUser())
-        return contributors
-
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
-    crowdfund = models.ForeignKey(CrowdfundRequest, related_name='payments')
+    crowdfund = models.ForeignKey(CrowdfundRequest)
 
     def __unicode__(self):
         # pylint: disable=E1101

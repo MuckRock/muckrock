@@ -52,9 +52,9 @@
     {% endif %}
     {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
         {% if foia.days_until_due >= 0 %}
-    <h4><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}}
+    <h4><small>Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} 
         {% else %}
-    <h4><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due
+    <h4><small>Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due 
         {% endif %}
         from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
     {% endif %}
@@ -237,7 +237,7 @@
     {% empty %}
     <p>Notes are private and can be used to store information about this request.</p>
     {% endfor %}
-    <a class="primary button"
+    <a class="primary button" 
        href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
     Add a Note</a>
 </section>
@@ -246,14 +246,14 @@
 
 {% block scripts %}
 {% include 'autocomplete_light/static.html' %}
-<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
-<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 {% if foia.has_crowdfund %}
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
-<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>        
 {% endif %}
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
 <script>
-
+    
     function textAreaModal(nextSelector) {
         modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
@@ -264,7 +264,7 @@
             nextSelector.children('textarea').remove();
         });
     }
-
+    
     function textAreaReply(nextSelector) {
         console.log(nextSelector);
         nextSelector.show();
@@ -281,19 +281,19 @@
             $('.modal-button').show();
         });
     }
-
+    
     function hideAllExcept(visible) {
         $('.tab-section').removeClass( 'active' );
         visible.addClass( 'active' );
     }
-
+    
     function get_thumbnail(doc_id) {
             var idx = doc_id.indexOf('-');
             var num = doc_id.slice(0, idx);
             var name = doc_id.slice(idx + 1);
             return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
     }
-
+    
     function displayDoc(docId, docTitle, docAnchor) {
         var title;
         if (!!docTitle) {
@@ -317,7 +317,7 @@
             }
         );
     }
-
+    
     function displayDefaultDoc() {
         var defaultDoc = $('a.view-file').first();
         if (!!defaultDoc) {
@@ -343,17 +343,17 @@
         hideAllExcept($('#files'));
         displayDoc(docId, docTitle, docAnchor);
     });
-
+    
     /* Modals */
-
+    
     $('.text-area.modal-button').click(function(e){
         e.preventDefault();
         textAreaModal($(this).next());
         return false;
     });
-
+    
     /* Replies */
-
+    
     $('.text-area.reply-button').click(function(e){
         e.preventDefault();
         console.log($(this).next());
@@ -376,16 +376,16 @@
     $('#notes-radio').change(function() {
         hideAllExcept($('#notes'));
     });
-
+    
     /* Status changer */
     $('#edit-status').click(function() {
         $('#status-form').show();
         $('#request-status').hide();
         $(this).hide();
     });
-
+    
     /* CHECKOUT */
-
+    
     $('.checkout-button').click(function(e){
         e.preventDefault();
         var checkoutData = getCheckoutData($(this));
