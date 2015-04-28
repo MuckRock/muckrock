@@ -73,7 +73,7 @@ class OrphanTaskTests(TestCase):
             'Orphan tasks given reason and communication arguments should create successfully')
 
     def test_move(self):
-        self.task.move(Mock(), [1, 2, 3])
+        self.task.move([1, 2, 3])
         nose.eq_(self.task.resolved, True,
             'Moving an orphan to a foia should mark it as resolved')
 
