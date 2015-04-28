@@ -17,8 +17,23 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
-class TestCommunicationActions(test.TestCase):
-    """Tests actions taken upon communications"""
+class TestCommunicationMove(test.TestCase):
+    """Tests the move method"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        self.comm = FOIACommunication.objects.get(id=1)
+
+    def test_move(self):
+        """Should make a copy of the communication and attach to all the given FOIAs"""
+        ok_(False, 'Should test the move method')
+
+
+class TestCommunicationResend(test.TestCase):
+    """Tests the resend method"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
@@ -29,10 +44,6 @@ class TestCommunicationActions(test.TestCase):
         self.comm = FOIACommunication.objects.get(id=1)
         self.comm.date = self.creation_date
         self.comm.save()
-
-    def test_move(self):
-        """Should make a copy of the communication and attach to all the given FOIAs"""
-        ok_(False, 'Should test the move method')
 
     def test_resend_sans_email(self):
         """Should resubmit the FOIA containing the communication as a snail mail"""
@@ -62,8 +73,3 @@ class TestCommunicationActions(test.TestCase):
         self.comm.foia = None
         self.comm.save()
         self.comm.resend('hello@world.com')
-
-    def tearDown(self):
-        self.comm = None
-
-
