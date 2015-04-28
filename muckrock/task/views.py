@@ -9,8 +9,6 @@ from django.core.urlresolvers import resolve
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-import logging
-
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -26,14 +24,14 @@ STATUS = foia.models.STATUS
 def count_tasks():
     """Counts all unresolved tasks and adds them to a dictionary"""
     count = {}
-    count['all'] =          Task.objects.exclude(resolved=True).count()
-    count['orphan'] =       OrphanTask.objects.exclude(resolved=True).count()
-    count['snail_mail'] =   SnailMailTask.objects.exclude(resolved=True).count()
-    count['rejected'] =     RejectedEmailTask.objects.exclude(resolved=True).count()
+    count['all'] = Task.objects.exclude(resolved=True).count()
+    count['orphan'] = OrphanTask.objects.exclude(resolved=True).count()
+    count['snail_mail'] = SnailMailTask.objects.exclude(resolved=True).count()
+    count['rejected'] = RejectedEmailTask.objects.exclude(resolved=True).count()
     count['stale_agency'] = StaleAgencyTask.objects.exclude(resolved=True).count()
-    count['flagged'] =      FlaggedTask.objects.exclude(resolved=True).count()
-    count['new_agency'] =   NewAgencyTask.objects.exclude(resolved=True).count()
-    count['response'] =     ResponseTask.objects.exclude(resolved=True).count()
+    count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
+    count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
+    count['response'] = ResponseTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
@@ -62,16 +60,18 @@ class TaskList(MRFilterableListView):
 
     def render_task(self, task):
         """Renders a single task"""
-        t = self.task_template
-        c = self.task_context
+        the_template = self.task_template
+        the_context = self.task_context
         try:
             task = self.model.objects.get(id=task.id)
-            c.update({'task': task})
+            the_context.update({'task': task})
         except self.model.DoesNotExist:
             return ''
-        t = template.loader.get_template(t)
-        c = template.Context(c)
-        return t.render(c)
+        return template.loader.render_to_string(
+            the_template,
+            the_context,
+            context_instance=template.RequestContext(self.request)
+        )
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
@@ -135,8 +135,10 @@ def orphan_task_post_handler(request, task_pk):
     elif request.POST.get('move'):
         foia_pks = request.POST.get('move', '')
         foia_pks = foia_pks.split(', ')
-        orphan_task.move(request, foia_pks)
-
+        try:
+            orphan_task.move(foia_pks)
+        except ValueError:
+            messages.error(request, 'No valid requests to move communication to.')
     return
 
 def snail_mail_task_post_handler(request, task_pk):
@@ -159,21 +161,12 @@ def new_agency_task_post_handler(request, task_pk):
         return
     if request.POST.get('approve'):
         new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
-        new_agency = new_agency_form.save()
+        new_agency_form.save()
         new_agency_task.approve()
-        # resend all first comm of each foia associated to agency
-        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
-            first_comm = foia.communications.all()[0]
-            # first_comm.resend(new_agency)
-            # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
-        replacement_agency_id = request.POST.get('replacement_agency')
+        replacement_agency_id = request.POST.get('replacement')
         replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
-        new_agency_task.reject()
-        # resend all first comm of each foia associated to agency to new agency
-        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
-            first_comm = foia-communications.all()[0]
-            # first_comm.resend(replacement_agency)
+        new_agency_task.reject(replacement_agency)
     return
 
 def response_task_post_handler(request, task_pk):
@@ -222,20 +215,22 @@ class NewAgencyTaskList(TaskList):
 
     def render_task(self, task):
         """Overrides task rendering to render special forms"""
-        t = self.task_template
-        c = self.task_context
+        the_template = self.task_template
+        the_context = self.task_context
         try:
             task = self.model.objects.get(id=task.id)
-            c.update({'task': task})
-            c.update({'agency_form': AgencyForm(instance=task.agency)})
+            the_context.update({'task': task})
+            the_context.update({'agency_form': AgencyForm(instance=task.agency)})
             other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
             other_agencies = other_agencies.exclude(id=task.agency.id)
-            c.update({'other_agencies': other_agencies})
+            the_context.update({'other_agencies': other_agencies})
         except self.model.DoesNotExist:
             return ''
-        t = template.loader.get_template(t)
-        c = template.Context(c)
-        return t.render(c)
+        return template.loader.render_to_string(
+            the_template,
+            the_context,
+            context_instance=template.RequestContext(self.request)
+        )
 
 class ResponseTaskList(TaskList):
     title = 'Responses'

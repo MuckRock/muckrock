@@ -9,6 +9,7 @@ from django.test import TestCase, Client
 import nose.tools as nose
 
 from muckrock import task
+from muckrock import agency
 from muckrock.foia.models import FOIARequest
 from muckrock.views import MRFilterableListView
 
@@ -16,7 +17,7 @@ from muckrock.views import MRFilterableListView
 
 class TaskListViewTests(TestCase):
     """Test that the task list view resolves and renders correctly."""
-    
+
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
                 'test_foiacommunications.json', 'test_task.json']
@@ -52,7 +53,7 @@ class TaskListViewTests(TestCase):
         expected = MRFilterableListView().__class__
         nose.ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
-    
+
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list context variable"""
         self.client.login(username='adam', password='abc')
@@ -60,7 +61,7 @@ class TaskListViewTests(TestCase):
         obj_list = response.context['object_list']
         nose.ok_(obj_list,
             'Object list should not be empty.')
-        
+
 class TaskListViewPOSTTests(TestCase):
     """Tests POST requests to the Task list view"""
     # we have to get the task again if we want to see the updated value
@@ -135,7 +136,7 @@ class TaskListViewBatchedPOSTTests(TestCase):
             nose.eq_(updated_task.assigned.pk, 1,
                 'Task %d should be assigned when doing a batched assign' % updated_task.pk)
 
-class TaskListViewOrphanTaskPOSTTests(TestCase):
+class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -203,7 +204,7 @@ class TaskListViewSnailMailTaskPOSTTests(TestCase):
         nose.eq_(updated_task.resolved, True,
             'Snail mail task should resolve itself when setting status of its communication')
 
-class TaskListViewNewAgencyTaskPOSTTests(TestCase):
+class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -219,7 +220,16 @@ class TaskListViewNewAgencyTaskPOSTTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_accept(self):
-        self.client.post(self.url, {'approve': 'truthy', 'task': self.task.pk})
+        contact_data = {
+            'name': 'Test Agency',
+            'address': '1234 Whatever Street',
+            'email': 'who.cares@whatever.com'
+        }
+        form = agency.forms.AgencyForm(contact_data, instance=self.task.agency)
+        nose.ok_(form.is_valid())
+        post_data = form.cleaned_data
+        post_data.update({'approve': 'truthy', 'task': self.task.pk})
+        self.client.post(self.url, post_data)
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.agency.approved, True,
                 ('New agency task should approve agency when'
@@ -229,8 +239,14 @@ class TaskListViewNewAgencyTaskPOSTTests(TestCase):
                 ' truthy value for the "approve" data field'))
 
     def test_post_reject(self):
-        self.client.post(self.url, {'reject': 'truthy', 'task': self.task.pk})
-        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
+        """Rejecting the agency requires a replacement agency"""
+        replacement = agency.models.Agency.objects.get(id=2)
+        self.client.post(self.url, {
+            'reject': 'truthy',
+            'task': self.task.id,
+            'replacement': replacement.id
+        })
+        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.id)
         nose.eq_(updated_task.agency.approved, False,
                 ('New agency task should not approve the agency'
                 ' when given a truthy value for the "reject" field'))
