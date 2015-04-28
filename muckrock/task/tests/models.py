@@ -3,10 +3,9 @@ Tests for Tasks models
 """
 
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.test import TestCase
 
 from datetime import datetime
-from mock import Mock
 import logging
 import nose.tools as nose
 
