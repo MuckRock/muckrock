@@ -9,9 +9,7 @@ from django.core.validators import ValidationError
 
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
-from muckrock import task
 
-import logging
 import nose
 
 ok_ = nose.tools.ok_
@@ -28,23 +26,24 @@ class TestCommunicationMove(test.TestCase):
     def setUp(self):
         self.comm = FOIACommunication.objects.get(id=1)
         self.comm_pk = self.comm.pk
-        self.f1 = FOIARequest.objects.get(id=1)
-        self.f2 = FOIARequest.objects.get(id=2)
+        self.foia1 = FOIARequest.objects.get(id=1)
+        self.foia2 = FOIARequest.objects.get(id=2)
 
     def test_move_single_foia(self):
         """Should make a copy of the communication to the request, then delete the original."""
-        eq_(self.f2.communications.count(), 1,
+        eq_(self.foia2.communications.count(), 1,
             'Request should only have one communication.')
-        self.comm.move(self.f2.id)
-        eq_(self.f2.communications.count(), 2,
+        self.comm.move(self.foia2.id)
+        eq_(self.foia2.communications.count(), 2,
             'Moving the communication should copy it to that request.')
         ok_(not FOIACommunication.objects.filter(pk=self.comm_pk),
             'Moving the communication should delete the original.')
 
+    # pylint:disable=line-too-long
     def test_move_multi_foias(self):
         """Should make a copy of the communication for each FOIA it is moved to, then delete the original."""
         comm_count = FOIACommunication.objects.count()
-        self.comm.move([self.f1.id, self.f2.id])
+        self.comm.move([self.foia1.id, self.foia2.id])
         # + 2 communications created
         # - 1 communications celeted
         eq_(FOIACommunication.objects.count(), comm_count + 2 - 1,
@@ -102,7 +101,7 @@ class TestCommunicationResend(test.TestCase):
         self.comm.resend('asdfads')
 
     @raises(ValueError)
-    def test_resend_orphan_communication(self):
+    def test_resend_orphan_comm(self):
         """Should throw and error if the communication being resent is an orphan"""
         self.comm.foia = None
         self.comm.save()

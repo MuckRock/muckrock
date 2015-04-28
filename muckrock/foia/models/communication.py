@@ -5,9 +5,8 @@ Models for the FOIA application
 
 import datetime
 
-from django.contrib import messages
 from django.core.files.base import ContentFile
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import validate_email
 from django.db import models
 
 import logging
@@ -94,6 +93,8 @@ class FOIACommunication(models.Model):
             raise ValueError('No valid request(s) provided as move destination(s).')
         # clone the communication and files to each FOIA
         for foia in foias:
+            # pylint:disable=pointless-string-statement
+
             """
             When setting self.pk to None and then calling self.save(),
             Django will clone the communication along with all of its data
@@ -105,7 +106,7 @@ class FOIACommunication(models.Model):
             self.save()
             for file_ in files:
                 file_.pk = None
-                file_.foia = new_foia
+                file_.foia = foia
                 file_.comm = self
                 # make a copy of the file on the storage backend
                 new_ffile = ContentFile(file_.ffile.read())
