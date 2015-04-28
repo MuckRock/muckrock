@@ -221,14 +221,16 @@ class NewAgencyTaskViewTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_accept(self):
-        logging.debug(self.task.agency.name)
-        form = agency.forms.AgencyForm(instance=self.task.agency)
-        logging.debug(form.fields)
-        logging.debug(form.is_valid())
-        logging.debug(form.errors)
-        logging.debug(form)
+        contact_data = {
+            'name': 'Test Agency',
+            'address': '1234 Whatever Street',
+            'email': 'who.cares@whatever.com'
+        }
+        form = agency.forms.AgencyForm(contact_data, instance=self.task.agency)
         nose.ok_(form.is_valid())
-        self.client.post(self.url, {'approve': 'truthy', 'agency_form': form.fields, 'task': self.task.pk})
+        post_data = form.cleaned_data
+        post_data.update({'approve': 'truthy', 'task': self.task.pk})
+        self.client.post(self.url, post_data)
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.agency.approved, True,
                 ('New agency task should approve agency when'

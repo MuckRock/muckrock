@@ -162,7 +162,6 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
-        logging.info(request.POST)
         new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
         new_agency = new_agency_form.save()
         new_agency_task.approve()
