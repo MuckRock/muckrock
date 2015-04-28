@@ -1,6 +1,7 @@
 """
 Views for the Task application
 """
+from django import template
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -8,26 +9,69 @@ from django.core.urlresolvers import resolve
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-from muckrock.foia.models import STATUS
+import logging
+
+from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
+from muckrock import foia
 from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
 
+STATUS = foia.models.STATUS
+
 # pylint:disable=missing-docstring
+
+def count_tasks():
+    """Counts all unresolved tasks and adds them to a dictionary"""
+    count = {}
+    count['all'] =          Task.objects.exclude(resolved=True).count()
+    count['orphan'] =       OrphanTask.objects.exclude(resolved=True).count()
+    count['snail_mail'] =   SnailMailTask.objects.exclude(resolved=True).count()
+    count['rejected'] =     RejectedEmailTask.objects.exclude(resolved=True).count()
+    count['stale_agency'] = StaleAgencyTask.objects.exclude(resolved=True).count()
+    count['flagged'] =      FlaggedTask.objects.exclude(resolved=True).count()
+    count['new_agency'] =   NewAgencyTask.objects.exclude(resolved=True).count()
+    count['response'] =     ResponseTask.objects.exclude(resolved=True).count()
+    return count
 
 class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
     template_name = 'lists/task_list.html'
+    task_template = 'task/default.html'
+    task_context = {}
     model = Task
 
     def get_queryset(self):
         """Remove resolved tasks unless filter says to keep them"""
         queryset = super(TaskList, self).get_queryset()
+
         if not self.request.GET.get('show_resolved'):
             queryset = queryset.exclude(resolved=True)
         return queryset
+
+    def render_list(self, tasks):
+        """Renders a list of tasks"""
+        rendered_tasks = []
+        for task in tasks:
+            rendered_task = self.render_task(task)
+            rendered_tasks.append(rendered_task)
+        return rendered_tasks
+
+    def render_task(self, task):
+        """Renders a single task"""
+        t = self.task_template
+        c = self.task_context
+        try:
+            task = self.model.objects.get(id=task.id)
+            c.update({'task': task})
+        except self.model.DoesNotExist:
+            return ''
+        t = template.loader.get_template(t)
+        c = template.Context(c)
+        return t.render(c)
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
@@ -36,6 +80,8 @@ class TaskList(MRFilterableListView):
             context['filter_form'] = TaskFilterForm(initial={'show_resolved': True})
         else:
             context['filter_form'] = TaskFilterForm()
+        context['counters'] = count_tasks()
+        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -63,7 +109,7 @@ class TaskList(MRFilterableListView):
             # resolve will either be True or None
             # the task will only resolve if True
             if request.POST.get('resolve'):
-                task.resolve()
+                task.resolve(request.user)
             if request.POST.get('assign'):
                 user_pk = request.POST.get('assign')
                 user = get_object_or_404(User, pk=user_pk)
@@ -112,9 +158,22 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
+        new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
+        new_agency = new_agency_form.save()
         new_agency_task.approve()
+        # resend all first comm of each foia associated to agency
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia.communications.all()[0]
+            # first_comm.resend(new_agency)
+            # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
+        replacement_agency_id = request.POST.get('replacement_agency')
+        replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject()
+        # resend all first comm of each foia associated to agency to new agency
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia-communications.all()[0]
+            # first_comm.resend(replacement_agency)
     return
 
 def response_task_post_handler(request, task_pk):
@@ -132,27 +191,54 @@ def response_task_post_handler(request, task_pk):
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
+    task_template = 'task/orphan.html'
+    task_context = {'status': STATUS}
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
+    task_template = 'task/snail_mail.html'
+    task_context = {'status': STATUS}
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
     model = RejectedEmailTask
+    task_template = 'task/rejected_email.html'
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
     model = StaleAgencyTask
+    task_template = 'task/stale_agency.html'
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
     model = FlaggedTask
+    task_template = 'task/flagged.html'
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
+    task_template = 'task/new_agency.html'
+
+    def render_task(self, task):
+        """Overrides task rendering to render special forms"""
+        t = self.task_template
+        c = self.task_context
+        try:
+            task = self.model.objects.get(id=task.id)
+            c.update({'task': task})
+            c.update({'agency_form': AgencyForm(instance=task.agency)})
+            other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+            other_agencies = other_agencies.exclude(id=task.agency.id)
+            c.update({'other_agencies': other_agencies})
+        except self.model.DoesNotExist:
+            return ''
+        t = template.loader.get_template(t)
+        c = template.Context(c)
+        return t.render(c)
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
+    task_template = 'task/response.html'
+    task_context = {'status': STATUS}

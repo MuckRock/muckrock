@@ -3,8 +3,11 @@
 Models for the FOIA application
 """
 
+import datetime
+
 from django.contrib import messages
 from django.core.files.base import ContentFile
+from django.core.validators import validate_email, ValidationError
 from django.db import models
 
 import logging
@@ -68,22 +71,37 @@ class FOIACommunication(models.Model):
         """Anchor name"""
         return 'comm-%d' % self.pk
 
-    def move(self, request, foia_pks):
+    def move(self, foia_pks):
         """Move this communication to all of the FOIAs given by their pk"""
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
+        original = self.pk
+        logging.debug(original)
         files = self.files.all()
-        new_foias = []
-        for new_foia_pk in foia_pks:
-            # setting pk to none clones the request to a new entry in the db
+        foias = []
+        # if foia_pks isn't a list (say, a single pk), then it should be made into one
+        if type(foia_pks) is not type(list()):
+            foia_pks = [foia_pks]
+        for foia_pk in foia_pks:
             try:
-                new_foia = FOIARequest.objects.get(pk=new_foia_pk)
+                foia = FOIARequest.objects.get(pk=foia_pk)
+                foias.append(foia)
             except (FOIARequest.DoesNotExist, ValueError):
-                messages.error(request, 'FOIA %s does not exist' % new_foia_pk)
+                logging.error('FOIA %s does not exist', foia_pk)
                 continue
-            new_foias.append(new_foia)
+        if not foias:
+            logging.error('No valid FOIA requests given: %s', foia_pks)
+            raise ValueError('No valid request(s) provided as move destination(s).')
+        # clone the communication and files to each FOIA
+        for foia in foias:
+            """
+            When setting self.pk to None and then calling self.save(),
+            Django will clone the communication along with all of its data
+            and give it a new primary key. On the next iteration of the loop,
+            the clone will be cloned along with its data, and so on.
+            """
             self.pk = None
-            self.foia = new_foia
+            self.foia = foia
             self.save()
             for file_ in files:
                 file_.pk = None
@@ -95,15 +113,29 @@ class FOIACommunication(models.Model):
                 file_.ffile = new_ffile
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
-        if not new_foias:
-            messages.error(request, 'No valid FOIA requests given')
-            return True
+            logging.info('Communication #%d moved to request #%d', original, self.foia.id)
+        logging.debug(original)
+        FOIACommunication.objects.get(pk=original).delete()
+
+    def resend(self, email=None):
+        """Resend the communication"""
+        foia = self.foia
+        if not foia:
+            logging.error('Tried resending an orphaned communication.')
+            raise ValueError('This communication has no FOIA to submit.')
+        snail = False
+        self.date = datetime.datetime.now()
+        self.save()
+        if email:
+            # responsibility for handling validation errors
+            # is on the caller of the resend method
+            validate_email(email)
+            foia.email = email
+            foia.save()
         else:
-            msg = 'Communication moved to the following requests: '
-            href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-            msg += ', '.join(href(f) for f in new_foias)
-            messages.success(request, msg)
-            return False
+            snail = True
+        foia.submit(snail=snail)
+        logging.info('Communication %d was resent.', self.id)
 
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""

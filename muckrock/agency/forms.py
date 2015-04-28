@@ -18,8 +18,6 @@ class AgencyForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Agency
         fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
-        widgets = {'address': forms.Textarea(attrs={'style': 'width:250px; height:80px;'}),
-                   'url': forms.TextInput(attrs={'style': 'width:250px;'})}
 
 class CSVImportForm(forms.Form):
     """Import a CSV file of models"""
