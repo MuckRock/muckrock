@@ -37,6 +37,15 @@ class TestCommunicationMove(test.TestCase):
         eq_(self.f1.communications.count(), 2,
             'Moving the communication should copy it to that request.')
 
+    def test_move_multi_foias(self):
+        """Should make a copy of the communication for each FOIA it is moved to."""
+        comm_count = FOIACommunication.objects.count()
+        f2 = FOIARequest.objects.get(id=2)
+        f3 = FOIARequest.objects.get(id=3)
+        self.comm.move([self.f1.id, f2.id, f3.id])
+        eq_(FOIACommunication.objects.count(), comm_count + 3,
+            'A new communication should be made for each request')
+
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
 
