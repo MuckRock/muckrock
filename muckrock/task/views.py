@@ -11,8 +11,10 @@ from django.utils.decorators import method_decorator
 
 import logging
 
+from muckrock.agency.forms import AgencyForm
+from muckrock.agency.models import Agency
 from muckrock import foia
-from muckrock.task.forms import TaskFilterForm, NewAgencyForm
+from muckrock.task.forms import TaskFilterForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -49,7 +51,7 @@ class TaskList(MRFilterableListView):
         if not self.request.GET.get('show_resolved'):
             queryset = queryset.exclude(resolved=True)
         return queryset
-    
+
     def render_list(self, tasks):
         """Renders a list of tasks"""
         rendered_tasks = []
@@ -57,7 +59,7 @@ class TaskList(MRFilterableListView):
             rendered_task = self.render_task(task)
             rendered_tasks.append(rendered_task)
         return rendered_tasks
-    
+
     def render_task(self, task):
         """Renders a single task"""
         t = self.task_template
@@ -156,9 +158,22 @@ def new_agency_task_post_handler(request, task_pk):
     except NewAgencyTask.DoesNotExist:
         return
     if request.POST.get('approve'):
+        new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
+        new_agency = new_agency_form.save()
         new_agency_task.approve()
+        # resend all first comm of each foia associated to agency
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia.communications.all()[0]
+            # first_comm.resend(new_agency)
+            # ^ I think I have to refactor this :(
     if request.POST.get('reject'):
+        replacement_agency_id = request.POST.get('replacement_agency')
+        replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject()
+        # resend all first comm of each foia associated to agency to new agency
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+            first_comm = foia-communications.all()[0]
+            # first_comm.resend(replacement_agency)
     return
 
 def response_task_post_handler(request, task_pk):
@@ -204,7 +219,23 @@ class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
-    task_context = {'new_agency_form': NewAgencyForm()}
+
+    def render_task(self, task):
+        """Overrides task rendering to render special forms"""
+        t = self.task_template
+        c = self.task_context
+        try:
+            task = self.model.objects.get(id=task.id)
+            c.update({'task': task})
+            c.update({'agency_form': AgencyForm(instance=task.agency)})
+            other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+            other_agencies = other_agencies.exclude(id=task.agency.id)
+            c.update({'other_agencies': other_agencies})
+        except self.model.DoesNotExist:
+            return ''
+        t = template.loader.get_template(t)
+        c = template.Context(c)
+        return t.render(c)
 
 class ResponseTaskList(TaskList):
     title = 'Responses'

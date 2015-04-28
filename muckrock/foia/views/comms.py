@@ -38,17 +38,18 @@ def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=
 def move_comm(request, next_):
     """Admin moves a communication to a different FOIA"""
     try:
-        comm_pk = request.POST['comm_pk']
-        comm = FOIACommunication.objects.get(pk=comm_pk)
+        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+        new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
+        comm.move(new_foia_pks)
+        msg = 'Communication moved to the following requests: '
+        # TODO: Link to the FOIAs indicated by the PKs
+        # href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+        msg += ', '.join(new_foia_pks)
+        messages.success(request, msg)
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-        return redirect(next_)
-
-    new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
-    invalid_foias = comm.move(request, new_foia_pks)
-    if not invalid_foias:
-        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.delete()
+    except ValueError:
+        messages.error(request, 'No move destination provided.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -70,23 +71,14 @@ def resend_comm(request, next_):
     """Resend the FOI Communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.date = datetime.now()
-        comm.save()
-        foia = comm.foia
-        email = request.POST['email']
-        if email:
-            validate_email(email)
-            foia.email = email
-            foia.save()
-            snail = False
-        else:
-            snail = True
-        foia.submit(snail=snail)
+        comm.resend(request.POST['email'])
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-    except ValidationError:
-        messages.error(request, 'Not a valid email address')
+    except (ValidationError):
+        messages.error(request, 'The provided email was invalid')
+    except (ValueError):
+        messages.error(request, 'The communication is an orphan and cannot be resent.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
