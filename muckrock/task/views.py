@@ -161,12 +161,18 @@ def new_agency_task_post_handler(request, task_pk):
         return
     if request.POST.get('approve'):
         new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
-        new_agency_form.save()
+        if new_agency_form.is_valid():
+            new_agency_form.save()
+        else:
+            messages.error(request, 'The agency info form was invalid. Sorry!')
+            return
         new_agency_task.approve()
+        new_agency_task.resolve(request.user)
     if request.POST.get('reject'):
         replacement_agency_id = request.POST.get('replacement')
         replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject(replacement_agency)
+        new_agency_task.resolve(request.user)
     return
 
 def response_task_post_handler(request, task_pk):

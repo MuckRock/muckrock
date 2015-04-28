@@ -166,7 +166,6 @@ class NewAgencyTask(Task):
             if comms.count():
                 first_comm = comms[0]
                 first_comm.resend(self.agency.email)
-        self.resolve()
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency and resolves"""
@@ -178,7 +177,6 @@ class NewAgencyTask(Task):
             if comms.count():
                 first_comm = comms[0]
                 first_comm.resend(replacement_agency.email)
-        self.resolve()
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""

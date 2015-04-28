@@ -131,8 +131,6 @@ class NewAgencyTaskTests(TestCase):
         self.task.approve()
         nose.eq_(self.task.agency.approved, True,
             'Approving a new agency should actually, you know, approve the agency.')
-        nose.eq_(self.task.resolved, True,
-            'Approving a new agency should resolve the task.')
 
     def test_reject(self):
         replacement = Agency.objects.get(id=2)
@@ -145,8 +143,6 @@ class NewAgencyTaskTests(TestCase):
         logging.debug('Count Actual: %s', FOIARequest.objects.filter(agency=replacement).count())
         nose.eq_(self.task.agency.approved, False,
             'Rejecting a new agency should not approve it.')
-        nose.eq_(self.task.resolved, True,
-            'Rejecting a new agency should resolve the task.')
         nose.eq_(
             FOIARequest.objects.filter(agency=replacement).count(),
             count_new + count_replacement,
