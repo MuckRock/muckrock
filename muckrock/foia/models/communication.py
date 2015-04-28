@@ -77,7 +77,9 @@ class FOIACommunication(models.Model):
         from muckrock.foia.tasks import upload_document_cloud
         files = self.files.all()
         foias = []
-        # collect the FOIAs
+        # if foia_pks isn't a list (say, a single pk), then it should be made into one
+        if type(foia_pks) is not type(list()):
+            foia_pks = [foia_pks]
         for foia_pk in foia_pks:
             try:
                 foia = FOIARequest.objects.get(pk=foia_pk)

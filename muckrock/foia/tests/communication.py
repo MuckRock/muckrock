@@ -8,6 +8,7 @@ from django import test
 from django.core.validators import ValidationError
 
 from muckrock.foia.models.communication import FOIACommunication
+from muckrock.foia.models.request import FOIARequest
 from muckrock import task
 
 import logging
@@ -26,11 +27,15 @@ class TestCommunicationMove(test.TestCase):
 
     def setUp(self):
         self.comm = FOIACommunication.objects.get(id=1)
+        self.f1 = FOIARequest.objects.get(id=1)
 
-    def test_move(self):
+    def test_move_single_foia(self):
         """Should make a copy of the communication and attach to all the given FOIAs"""
-        ok_(False, 'Should test the move method')
-
+        eq_(self.f1.communications.count(), 1,
+            'Request should only have one communication')
+        self.comm.move(self.f1.id)
+        eq_(self.f1.communications.count(), 2,
+            'Moving the communication should copy it to that request.')
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
