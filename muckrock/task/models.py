@@ -78,9 +78,9 @@ class OrphanTask(Task):
     def __unicode__(self):
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
-    def move(self, request, foia_pks):
+    def move(self, foia_pks):
         """Moves the comm and resolves the task"""
-        self.communication.move(request, foia_pks)
+        self.communication.move(foia_pks)
         self.resolve()
 
     def reject(self):

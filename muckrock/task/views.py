@@ -135,8 +135,10 @@ def orphan_task_post_handler(request, task_pk):
     elif request.POST.get('move'):
         foia_pks = request.POST.get('move', '')
         foia_pks = foia_pks.split(', ')
-        orphan_task.move(request, foia_pks)
-
+        try:
+            orphan_task.move(foia_pks)
+        except ValueError:
+            messages.error('No valid requests to move communication to.')
     return
 
 def snail_mail_task_post_handler(request, task_pk):
