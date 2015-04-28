@@ -9,7 +9,9 @@ from django.db.models.loading import get_model
 
 from datetime import datetime
 
-from muckrock.foia.models import STATUS
+import logging
+
+from muckrock.foia.models import STATUS, FOIARequest
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -184,17 +186,32 @@ class NewAgencyTask(Task):
     def __unicode__(self):
         return u'New Agency: %s' % (self.agency)
 
+    def pending_requests(self):
+        """Returns the requests to be acted on"""
+        return FOIARequest.objects.filter(agency=self.agency)
+
     def approve(self):
-        """Approves agency and resolves task"""
+        """Approves agency, resends pending requests, and resolves"""
         self.agency.approved = True
         self.agency.save()
+        # resend the first comm of each foia associated to this agency
+        for foia in self.pending_requests():
+            comms = foia.communications.all()
+            if comms.count():
+                first_comm = foia.comms[0]
+                first_comm.resend(self.agency.email)
         self.resolve()
 
-    def reject(self):
-        """
-        Simply resolves task.
-        Should do something to the FOIAs attributed to the rejected agency.
-        """
+    def reject(self, replacement_agency):
+        """Resends pending requests to replacement agency and resolves"""
+        for foia in self.pending_requests():
+            # first switch foia to use replacement agency
+            foia.agency = replacement_agency
+            foia.save()
+            comms = foia.communications.all()
+            if comms.count():
+                first_comm = comms[0]
+                first_comm.resend(replacement_agency.email)
         self.resolve()
 
     def render(self, context={}):

@@ -7,6 +7,7 @@ from django.test import TestCase, Client
 
 from datetime import datetime
 from mock import Mock
+import logging
 import nose.tools as nose
 
 from muckrock import task
@@ -135,11 +136,23 @@ class NewAgencyTaskTests(TestCase):
             'Approving a new agency should resolve the task.')
 
     def test_reject(self):
-        self.task.reject()
+        replacement = Agency.objects.get(id=2)
+        count_new = FOIARequest.objects.filter(agency=self.task.agency).count()
+        count_replacement = FOIARequest.objects.filter(agency=replacement).count()
+        self.task.reject(replacement)
+        logging.debug('Count New: %s', count_new)
+        logging.debug('Count Replacement: %s', count_replacement)
+        logging.debug('Count Expected: %s', count_new + count_replacement)
+        logging.debug('Count Actual: %s', FOIARequest.objects.filter(agency=replacement).count())
         nose.eq_(self.task.agency.approved, False,
             'Rejecting a new agency should not approve it.')
         nose.eq_(self.task.resolved, True,
             'Rejecting a new agency should resolve the task.')
+        nose.eq_(
+            FOIARequest.objects.filter(agency=replacement).count(),
+            count_new + count_replacement,
+            'The replacement agency should receive the requests'
+        )
 
 class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
