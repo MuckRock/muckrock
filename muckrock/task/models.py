@@ -1,17 +1,14 @@
 """
 Models for the Task application
 """
-from django import template
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
-from django.db.models.loading import get_model
 
 from datetime import datetime
 
-import logging
-
-from muckrock.foia.models import STATUS, FOIARequest
+from muckrock.foia.models import FOIARequest
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
