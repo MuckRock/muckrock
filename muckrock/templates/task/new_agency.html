@@ -30,7 +30,7 @@
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
         <label>Move this agency’s requests to</label>
-        <select name="replacement_agency">
+        <select name="replacement">
         {% for other_agency in other_agencies %}
             <option value="{{ other_agency.id }}">{{ other_agency.name }}</option>
         {% endfor %}
