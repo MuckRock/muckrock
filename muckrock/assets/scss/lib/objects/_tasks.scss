@@ -114,7 +114,7 @@ dl.task-data {
         @include omega;
     }
     fieldset {
-        @include grid-columns(4, 3, 3);
+        @include grid-columns(4, 3, 6);
         input {
             width: 100%;
         }
