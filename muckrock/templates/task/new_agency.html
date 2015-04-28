@@ -28,6 +28,7 @@
 <div class="task-extra-context">
     <form method="POST" class="new-agency approval form">
         {% csrf_token %}
+        <input type="hidden" name="task" value="{{task.pk}}">
         {% for field in agency_form %}
         <fieldset>
             <label for="{{field.id}}">{{field.label}}</label>
@@ -39,6 +40,7 @@
     </form>
     <form method="POST" class="new-agency rejection form">
         {% csrf_token %}
+        <input type="hidden" name="task" value="{{task.pk}}">
         <label>Move this agency’s requests to</label>
         <select name="replacement_agency">
         {% for other_agency in other_agencies %}

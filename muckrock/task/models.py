@@ -198,7 +198,7 @@ class NewAgencyTask(Task):
         for foia in self.pending_requests():
             comms = foia.communications.all()
             if comms.count():
-                first_comm = foia.comms[0]
+                first_comm = comms[0]
                 first_comm.resend(self.agency.email)
         self.resolve()
 

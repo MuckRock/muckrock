@@ -69,9 +69,11 @@ class TaskList(MRFilterableListView):
             c.update({'task': task})
         except self.model.DoesNotExist:
             return ''
-        t = template.loader.get_template(t)
-        c = template.Context(c)
-        return t.render(c)
+        return template.loader.render_to_string(
+            t,
+            c,
+            context_instance=template.RequestContext(self.request)
+        )
 
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
@@ -227,9 +229,11 @@ class NewAgencyTaskList(TaskList):
             c.update({'other_agencies': other_agencies})
         except self.model.DoesNotExist:
             return ''
-        t = template.loader.get_template(t)
-        c = template.Context(c)
-        return t.render(c)
+        return template.loader.render_to_string(
+            t,
+            c,
+            context_instance=template.RequestContext(self.request)
+        )
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
