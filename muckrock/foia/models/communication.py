@@ -75,6 +75,8 @@ class FOIACommunication(models.Model):
         """Move this communication to all of the FOIAs given by their pk"""
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
+        original = self.pk
+        logging.debug(original)
         files = self.files.all()
         foias = []
         # if foia_pks isn't a list (say, a single pk), then it should be made into one
@@ -87,6 +89,9 @@ class FOIACommunication(models.Model):
             except (FOIARequest.DoesNotExist, ValueError):
                 logging.error('FOIA %s does not exist', foia_pk)
                 continue
+        if not foias:
+            logging.error('No valid FOIA requests given: %s', foia_pks)
+            raise ValueError('No valid request(s) provided as move destination(s).')
         # clone the communication and files to each FOIA
         for foia in foias:
             """
@@ -108,15 +113,9 @@ class FOIACommunication(models.Model):
                 file_.ffile = new_ffile
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
-        if not foias:
-            logging.error('No valid FOIA requests given: %s', foia_pks)
-            return True
-        else:
-            msg = 'Communication moved to the following requests: '
-            href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-            msg += ', '.join(href(f) for f in foias)
-            logging.info(msg)
-            return False
+            logging.info('Communication #%d moved to request #%d', original, self.foia.id)
+        logging.debug(original)
+        FOIACommunication.objects.get(pk=original).delete()
 
     def resend(self, email=None):
         """Resend the communication"""

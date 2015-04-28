@@ -27,24 +27,44 @@ class TestCommunicationMove(test.TestCase):
 
     def setUp(self):
         self.comm = FOIACommunication.objects.get(id=1)
+        self.comm_pk = self.comm.pk
         self.f1 = FOIARequest.objects.get(id=1)
+        self.f2 = FOIARequest.objects.get(id=2)
 
     def test_move_single_foia(self):
-        """Should make a copy of the communication and attach to all the given FOIAs"""
-        eq_(self.f1.communications.count(), 1,
-            'Request should only have one communication')
-        self.comm.move(self.f1.id)
-        eq_(self.f1.communications.count(), 2,
+        """Should make a copy of the communication to the request, then delete the original."""
+        eq_(self.f2.communications.count(), 1,
+            'Request should only have one communication.')
+        self.comm.move(self.f2.id)
+        eq_(self.f2.communications.count(), 2,
             'Moving the communication should copy it to that request.')
+        ok_(not FOIACommunication.objects.filter(pk=self.comm_pk),
+            'Moving the communication should delete the original.')
 
     def test_move_multi_foias(self):
-        """Should make a copy of the communication for each FOIA it is moved to."""
+        """Should make a copy of the communication for each FOIA it is moved to, then delete the original."""
         comm_count = FOIACommunication.objects.count()
-        f2 = FOIARequest.objects.get(id=2)
-        f3 = FOIARequest.objects.get(id=3)
-        self.comm.move([self.f1.id, f2.id, f3.id])
-        eq_(FOIACommunication.objects.count(), comm_count + 3,
-            'A new communication should be made for each request')
+        self.comm.move([self.f1.id, self.f2.id])
+        # + 2 communications created
+        # - 1 communications celeted
+        eq_(FOIACommunication.objects.count(), comm_count + 2 - 1,
+            'A new communication should be made for each request.')
+        ok_(not FOIACommunication.objects.filter(pk=self.comm_pk),
+            'Moving the communication should delete the original.')
+
+    @raises(ValueError)
+    def test_move_invalid_foias(self):
+        """Should raise an error if trying to call move on invalid request pks."""
+        self.comm.move(['abc', 123])
+        ok_(FOIACommunication.objects.filter(pk=self.comm_pk),
+            'If something goes wrong, the original should not be deleted.')
+
+    @raises(ValueError)
+    def test_move_empty_list(self):
+        """Should raise an error if trying to call move on an empty list."""
+        self.comm.move([])
+        ok_(FOIACommunication.objects.filter(pk=self.comm_pk),
+            'If something goes wrong, the original should not be deleted.')
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""

@@ -38,17 +38,18 @@ def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=
 def move_comm(request, next_):
     """Admin moves a communication to a different FOIA"""
     try:
-        comm_pk = request.POST['comm_pk']
-        comm = FOIACommunication.objects.get(pk=comm_pk)
+        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+        new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
+        comm.move(new_foia_pks)
+        msg = 'Communication moved to the following requests: '
+        # TODO: Link to the FOIAs indicated by the PKs
+        # href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+        msg += ', '.join(new_foia_pks)
+        messages.success(request, msg)
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-        return redirect(next_)
-
-    new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
-    invalid_foias = comm.move(request, new_foia_pks)
-    if not invalid_foias:
-        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.delete()
+    except ValueError:
+        messages.error(request, 'No move destination provided.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
