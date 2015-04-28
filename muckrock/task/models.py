@@ -50,7 +50,6 @@ class GenericTask(Task):
     def __unicode__(self):
         return self.subject
 
-
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
     # pylint: disable=no-member
@@ -115,9 +114,6 @@ class RejectedEmailTask(Task):
 
     def foias(self):
         """Get the FOIAs who use this email address"""
-        # to avoid circular dependencies
-        # pylint: disable=invalid-name
-        FOIARequest = get_model('foia', 'FOIARequest')
         return FOIARequest.objects\
                 .filter(Q(email__iexact=self.email) |
                         Q(other_emails__icontains=self.email))\
