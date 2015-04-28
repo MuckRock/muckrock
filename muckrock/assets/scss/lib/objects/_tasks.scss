@@ -88,11 +88,39 @@ dl.task-data {
     .extra-context.hidden {
         display: none;
     }
-
+    .form {
+        margin: 0 0 $base-margin 0;
+    }
 }
 
 .collapsed.task {
     .task-data, .task-actions, .task-extra-context {
         display: none;
     }
+}
+
+.new-agency.rejection.form {
+    border-color: $color-failure;
+}
+
+.new-agency.approval.form {
+    border-color: $color-success;
+    @include row;
+    overflow: hidden;
+    .id_name, .id_aliases, .id_address {
+        @extend %full;
+    }
+    .id_address, .id_url, .id_fax {
+        @include omega;
+    }
+    fieldset {
+        @include grid-columns(4, 3, 3);
+        input {
+            width: 100%;
+        }
+        .help-text {
+            margin: $base-margin/4 0 0 0;
+        }
+    }
+
 }
