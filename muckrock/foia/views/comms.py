@@ -4,13 +4,13 @@ Comm helper functions for FOIA views
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIACommunication
+from muckrock.foia.models import FOIACommunication, FOIARequest
 
 # pylint: disable=too-many-arguments
 def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False, snail=False):
@@ -38,13 +38,13 @@ def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=
 def move_comm(request, next_):
     """Admin moves a communication to a different FOIA"""
     try:
-        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
+        comm_pk = request.POST['comm_pk']
+        comm = FOIACommunication.objects.get(pk=comm_pk)
         new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
         comm.move(new_foia_pks)
         msg = 'Communication moved to the following requests: '
-        # TODO: Link to the FOIAs indicated by the PKs
-        # href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-        msg += ', '.join(new_foia_pks)
+        href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+        msg += ', '.join(href(FOIARequest.objects.get(foia_pk)) for foia_pk in new_foia_pks)
         messages.success(request, msg)
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
@@ -75,9 +75,9 @@ def resend_comm(request, next_):
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-    except (ValidationError):
+    except ValidationError:
         messages.error(request, 'The provided email was invalid')
-    except (ValueError):
+    except ValueError:
         messages.error(request, 'The communication is an orphan and cannot be resent.')
     return redirect(next_)
 
