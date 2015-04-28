@@ -6,9 +6,11 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
+import logging
 import nose.tools as nose
 
 from muckrock import task
+from muckrock import agency
 from muckrock.foia.models import FOIARequest
 from muckrock.views import MRFilterableListView
 
@@ -219,7 +221,12 @@ class NewAgencyTaskViewTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_accept(self):
-        self.client.post(self.url, {'approve': 'truthy', 'task': self.task.pk})
+        form = agency.forms.AgencyForm(instance=self.task.agency)
+        logging.debug(form.is_valid())
+        logging.debug(form.errors)
+        logging.debug(form)
+        nose.ok_(form.is_valid())
+        self.client.post(self.url, {'approve': 'truthy', 'agency_form': form.data, 'task': self.task.pk})
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
         nose.eq_(updated_task.agency.approved, True,
                 ('New agency task should approve agency when'
@@ -229,8 +236,14 @@ class NewAgencyTaskViewTests(TestCase):
                 ' truthy value for the "approve" data field'))
 
     def test_post_reject(self):
-        self.client.post(self.url, {'reject': 'truthy', 'task': self.task.pk})
-        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
+        """Rejecting the agency requires a replacement agency"""
+        replacement = agency.models.Agency.objects.get(id=2)
+        self.client.post(self.url, {
+            'reject': 'truthy',
+            'task': self.task.id,
+            'replacement': replacement.id
+        })
+        updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.id)
         nose.eq_(updated_task.agency.approved, False,
                 ('New agency task should not approve the agency'
                 ' when given a truthy value for the "reject" field'))

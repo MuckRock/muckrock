@@ -7,6 +7,7 @@ from django.test import TestCase
 import nose.tools
 
 from muckrock.agency.models import Agency
+from muckrock.agency.forms import AgencyForm
 from muckrock.tests import get_allowed, get_404
 
 # allow methods that could be functions and too many public methods in tests
@@ -94,3 +95,16 @@ class TestAgencyViews(TestCase):
                         kwargs={'jurisdiction': agency.jurisdiction.slug,
                                 'jidx': self.agency.jurisdiction.pk,
                                 'slug': agency.slug, 'idx': agency.pk}))
+
+class TestAgencyForm(TestCase):
+    """Tests the AgencyForm"""
+    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
+                'test_agencies.json', 'test_foiarequests.json']
+
+    def setUp(self):
+        self.agency = Agency.objects.get(pk=1)
+        self.form = AgencyForm(instance=Agency)
+
+    def test_validate_empty_form(self):
+        """The form should have a name, at least"""
+        ok_(not AgencyForm().is_valid())

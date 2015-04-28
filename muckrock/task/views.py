@@ -164,7 +164,7 @@ def new_agency_task_post_handler(request, task_pk):
         new_agency = new_agency_form.save()
         new_agency_task.approve()
     if request.POST.get('reject'):
-        replacement_agency_id = request.POST.get('replacement_agency')
+        replacement_agency_id = request.POST.get('replacement')
         replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject(replacement_agency)
     return
