@@ -162,18 +162,20 @@ def new_agency_task_post_handler(request, task_pk):
         new_agency = new_agency_form.save()
         new_agency_task.approve()
         # resend all first comm of each foia associated to agency
-        for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
+        for foia in foia.models.FOIARequest.objects.get(agency=new_agency):
             first_comm = foia.communications.all()[0]
-            # first_comm.resend(new_agency)
-            # ^ I think I have to refactor this :(
+            first_comm.resend(new_agency.email)
     if request.POST.get('reject'):
         replacement_agency_id = request.POST.get('replacement_agency')
         replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
         new_agency_task.reject()
         # resend all first comm of each foia associated to agency to new agency
         for foia in foia.models.FOIARequest.objects.get(agency=new_agency_task.agency):
-            first_comm = foia-communications.all()[0]
-            # first_comm.resend(replacement_agency)
+            # first switch foia to use replacement agency
+            foia.agency = replacement_agency
+            foia.save()
+            first_comm = foia.communications.all()[0]
+            first_comm.resend(replacement_agency.email)
     return
 
 def response_task_post_handler(request, task_pk):
