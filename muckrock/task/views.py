@@ -139,6 +139,7 @@ def orphan_task_post_handler(request, task_pk):
         try:
             orphan_task.move(foia_pks)
             orphan_task.resolve(request.user)
+            messages.success(request, 'The communication was moved to the specified requests.')
         except ValueError:
             messages.error(request, 'No valid requests to move communication to.')
     return
