@@ -72,14 +72,12 @@ class OrphanTaskTests(TestCase):
             'Orphan tasks given reason and communication arguments should create successfully')
 
     def test_move(self):
+        """Should move the communication to the listed requests."""
         self.task.move([1, 2, 3])
-        nose.eq_(self.task.resolved, True,
-            'Moving an orphan to a foia should mark it as resolved')
 
     def test_reject(self):
+        """Shouldn't do anything, ATM. Revisit later."""
         self.task.reject()
-        nose.eq_(self.task.resolved, True,
-            'Rejecting an orphan should mark it as resolved')
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""

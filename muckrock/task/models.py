@@ -63,13 +63,13 @@ class OrphanTask(Task):
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
     def move(self, foia_pks):
-        """Moves the comm and resolves the task"""
+        """Moves the comm"""
         self.communication.move(foia_pks)
-        self.resolve()
+        return
 
     def reject(self):
         """Simply resolves the request. Should do something to spam addresses."""
-        self.resolve()
+        return
 
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""

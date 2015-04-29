@@ -132,11 +132,13 @@ def orphan_task_post_handler(request, task_pk):
 
     if request.POST.get('reject'):
         orphan_task.reject()
+        orphan_task.resolve(request.user)
     elif request.POST.get('move'):
         foia_pks = request.POST.get('move', '')
         foia_pks = foia_pks.split(', ')
         try:
             orphan_task.move(foia_pks)
+            orphan_task.resolve(request.user)
         except ValueError:
             messages.error(request, 'No valid requests to move communication to.')
     return
