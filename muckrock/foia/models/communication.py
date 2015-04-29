@@ -92,9 +92,9 @@ class FOIACommunication(models.Model):
             logging.error('No valid FOIA requests given: %s', foia_pks)
             raise ValueError('No valid request(s) provided as move destination(s).')
         # clone the communication and files to each FOIA
+        moved_comms = []
         for foia in foias:
             # pylint:disable=pointless-string-statement
-
             """
             When setting self.pk to None and then calling self.save(),
             Django will clone the communication along with all of its data
@@ -114,9 +114,11 @@ class FOIACommunication(models.Model):
                 file_.ffile = new_ffile
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
+            moved_comms.append(self)
             logging.info('Communication #%d moved to request #%d', original, self.foia.id)
         logging.debug(original)
         FOIACommunication.objects.get(pk=original).delete()
+        return moved_comms
 
     def resend(self, email=None):
         """Resend the communication"""
