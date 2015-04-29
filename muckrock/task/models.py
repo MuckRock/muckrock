@@ -63,8 +63,10 @@ class OrphanTask(Task):
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
 
     def move(self, foia_pks):
-        """Moves the comm"""
-        self.communication.move(foia_pks)
+        """Moves the comm and creates a ResponseTask for it"""
+        moved_comms = self.communication.move(foia_pks)
+        for moved_comm in moved_comms:
+            ResponseTask.objects.create(communication=moved_comm)
         return
 
     def reject(self):
