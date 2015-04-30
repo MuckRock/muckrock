@@ -12,7 +12,7 @@ from django.utils.decorators import method_decorator
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
-from muckrock.task.forms import TaskFilterForm
+from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -39,7 +39,6 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     template_name = 'lists/task_list.html'
     task_template = 'task/default.html'
-    task_context = {}
     model = Task
 
     def get_queryset(self):
@@ -58,13 +57,18 @@ class TaskList(MRFilterableListView):
             rendered_tasks.append(rendered_task)
         return rendered_tasks
 
+    def get_task_context(self, task):
+        """Returns a dictionary of context for the specific task"""
+        task_context = {'task': task}
+        return task_context
+
     def render_task(self, task):
         """Renders a single task"""
         the_template = self.task_template
-        the_context = self.task_context
+        the_context = {}
         try:
             task = self.model.objects.get(id=task.id)
-            the_context.update({'task': task})
+            the_context.update(self.get_task_context(task))
         except self.model.DoesNotExist:
             return ''
         return template.loader.render_to_string(
@@ -222,27 +226,22 @@ class NewAgencyTaskList(TaskList):
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
 
-    def render_task(self, task):
-        """Overrides task rendering to render special forms"""
-        the_template = self.task_template
-        the_context = self.task_context
-        try:
-            task = self.model.objects.get(id=task.id)
-            the_context.update({'task': task})
-            the_context.update({'agency_form': AgencyForm(instance=task.agency)})
-            other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
-            other_agencies = other_agencies.exclude(id=task.agency.id)
-            the_context.update({'other_agencies': other_agencies})
-        except self.model.DoesNotExist:
-            return ''
-        return template.loader.render_to_string(
-            the_template,
-            the_context,
-            context_instance=template.RequestContext(self.request)
-        )
+    def get_task_context(self, task):
+        """Adds NewAgencyTask-specific context"""
+        task_context = super(NewAgencyTaskList, self).get_task_context(task)
+        task_context.update({'agency_form': AgencyForm(instance=task.agency)})
+        other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+        other_agencies = other_agencies.exclude(id=task.agency.id)
+        task_context.update({'other_agencies': other_agencies})
+        return task_context
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
     task_template = 'task/response.html'
-    task_context = {'status': STATUS}
+
+    def get_task_context(self, task):
+        """Adds ResponseTask-specific context"""
+        task_context = super(ResponseTaskList, self).get_task_context(task)
+        task_context.update({'response_form': ResponseTaskForm()})
+        return task_context
