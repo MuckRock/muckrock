@@ -432,6 +432,27 @@ class Statistics(models.Model):
     daily_requests_beta = models.IntegerField(null=True)
     daily_articles = models.IntegerField(null=True)
 
+    # Task statistics
+    total_tasks = models.IntegerField(null=True)
+    total_unresolved_tasks = models.IntegerField(null=True)
+    total_generic_tasks = models.IntegerField(null=True)
+    total_unresolved_generic_tasks = models.IntegerField(null=True)
+    total_orphan_tasks = models.IntegerField(null=True)
+    total_unresolved_orphan_tasks = models.IntegerField(null=True)
+    total_snailmail_tasks = models.IntegerField(null=True)
+    total_unresolved_snailmail_tasks = models.IntegerField(null=True)
+    total_rejected_tasks = models.IntegerField(null=True)
+    total_unresolved_rejected_tasks = models.IntegerField(null=True)
+    total_staleagency_tasks = models.IntegerField(null=True)
+    total_unresolved_staleagency_tasks = models.IntegerField(null=True)
+    total_flagged_tasks = models.IntegerField(null=True)
+    total_unresolved_flagged_tasks = models.IntegerField(null=True)
+    total_newagency_tasks = models.IntegerField(null=True)
+    total_unresolved_newagency_tasks = models.IntegerField(null=True)
+    total_response_tasks = models.IntegerField(null=True)
+    total_unresolved_response_tasks = models.IntegerField(null=True)
+    
+
     def __unicode__(self):
         return 'Stats for %s' % self.date
 
