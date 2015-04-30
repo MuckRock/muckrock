@@ -198,3 +198,12 @@ class ResponseTask(Task):
             comm.date = datetime.now()
         comm.save()
         self.resolve()
+
+
+class FaxFailTask(Task):
+    """A fax for this communication failed"""
+    # pylint: disable=no-member
+    communication = models.ForeignKey('foia.FOIACommunication')
+
+    def __unicode__(self):
+        return u'Fax Fail: %s' % (self.communication.foia)

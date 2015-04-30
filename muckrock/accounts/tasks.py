@@ -19,7 +19,7 @@ from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 GenericTask
+                                 GenericTask, FaxFailTask
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,8 @@ def store_statstics():
         total_unresolved_newagency_tasks=NewAgencyTask.objects.filter(resolved=False).count(),
         total_response_tasks=ResponseTask.objects.count(),
         total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
+        total_faxfail_tasks=FaxFailTask.objects.count(),
+        total_unresolved_faxfail_tasks=FaxFailTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

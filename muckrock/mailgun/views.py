@@ -14,6 +14,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import sys
 import time
 from datetime import datetime, date
@@ -23,7 +24,7 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
-from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask
+from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FaxFailTask
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,30 @@ def fax(request):
 
     if not _verify(request.POST):
         return HttpResponseForbidden()
+
+    p_id = re.compile(r'MR#(\d+)-(\d+)')
+    p_faxstatus = re.compile(r'FAX STATUS: (\w+)')
+
+    post = request.POST
+    subject = post.get('subject', '')
+    m_id = re.search(subject)
+
+    if m_id:
+        try:
+            foia = FOIARequest.objects.get(pk=m_id.group(1))
+            comm = FOIACommunication.objects.get(pk=m_id.group(2))
+        except FOIARequest.DoesNotExist:
+            logger.warning('Fax FOIARequest does not exist: %s', m_id.group(1))
+        except FOIACommunication.DoesNotExist:
+            logger.warning('Fax FOIACommunication does not exist: %s', m_id.group(2))
+        else:
+            if subject.startswith('CONFIRM:'):
+                comm.opened = True
+                comm.save()
+            if subject.startswith('FAILURE:'):
+                FaxFailTask.objects.create(
+                    communication=comm,
+                )
 
     _forward(request.POST, request.FILES)
     return HttpResponse('OK')
