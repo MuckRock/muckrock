@@ -49,5 +49,6 @@ autocomplete_light.register(Jurisdiction, LocalAutocomplete)
 
 autocomplete_light.register(Jurisdiction, name='JurisdictionAdminAutocomplete',
                             choices=Jurisdiction.objects.all(),
+                            search_fields=['name', 'full_name'],
                             attrs={'placeholder': 'Jurisdiction?',
                                    'data-autocomplete-minimum-characters': 2})
