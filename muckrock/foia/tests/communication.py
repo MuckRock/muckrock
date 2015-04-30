@@ -68,6 +68,25 @@ class TestCommunicationMove(test.TestCase):
         eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
+class TestCommunicationClone(test.TestCase):
+    """Tests the clone method"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        self.comm = FOIACommunication.objects.get(id=1)
+        self.request_list = [FOIARequest.objects.get(id=1), FOIARequest.objects.get(id=2)]
+
+    def test_clone(self):
+        """Should duplicate the communication to the listed requests."""
+        comm_count = FOIACommunication.objects.count()
+        self.comm.clone(self.request_list)
+        # + 2 communications
+        eq_(FOIACommunication.objects.count(), comm_count + 2,
+            'Should clone the request twice.')
+
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
 
