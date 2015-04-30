@@ -147,11 +147,10 @@ def fax(request):
         return HttpResponseForbidden()
 
     p_id = re.compile(r'MR#(\d+)-(\d+)')
-    p_faxstatus = re.compile(r'FAX STATUS: (\w+)')
 
     post = request.POST
     subject = post.get('subject', '')
-    m_id = re.search(subject)
+    m_id = p_id.search(subject)
 
     if m_id:
         try:
