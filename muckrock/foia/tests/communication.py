@@ -32,12 +32,11 @@ class TestCommunicationMove(test.TestCase):
 
     def test_move_single_foia(self):
         """Should change the request associated with the communication."""
-        starting_request = self.comm.foia.id;
         self.comm.move(self.foia2.id)
         eq_(self.comm.foia.id, self.foia2.id,
             'Should change the FOIA associated with the communication.')
-        for file in self.comm.files.all():
-            eq_(file.foia.id, self.foia2.id,
+        for file_ in self.comm.files.all():
+            eq_(file_.foia.id, self.foia2.id,
                 'Should also change the files to reference the destination FOIA.')
 
     def test_move_multi_foias(self):
