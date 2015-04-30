@@ -10,6 +10,7 @@ from django.core.validators import ValidationError
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
 
+import logging
 import nose
 
 ok_ = nose.tools.ok_
@@ -30,40 +31,85 @@ class TestCommunicationMove(test.TestCase):
         self.foia2 = FOIARequest.objects.get(id=2)
 
     def test_move_single_foia(self):
-        """Should make a copy of the communication to the request, then delete the original."""
-        eq_(self.foia2.communications.count(), 1,
-            'Request should only have one communication.')
+        """Should change the request associated with the communication."""
         self.comm.move(self.foia2.id)
-        eq_(self.foia2.communications.count(), 2,
-            'Moving the communication should copy it to that request.')
-        ok_(not FOIACommunication.objects.filter(pk=self.comm_pk),
-            'Moving the communication should delete the original.')
+        eq_(self.comm.foia.id, self.foia2.id,
+            'Should change the FOIA associated with the communication.')
+        for file_ in self.comm.files.all():
+            eq_(file_.foia.id, self.foia2.id,
+                'Should also change the files to reference the destination FOIA.')
 
-    # pylint:disable=line-too-long
     def test_move_multi_foias(self):
-        """Should make a copy of the communication for each FOIA it is moved to, then delete the original."""
+        """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
         self.comm.move([self.foia1.id, self.foia2.id])
-        # + 2 communications created
-        # - 1 communications celeted
-        eq_(FOIACommunication.objects.count(), comm_count + 2 - 1,
-            'A new communication should be made for each request.')
-        ok_(not FOIACommunication.objects.filter(pk=self.comm_pk),
-            'Moving the communication should delete the original.')
+        # + 1 communications created
+        updated_comm = FOIACommunication.objects.get(pk=self.comm_pk)
+        logging.debug(updated_comm.foia.id)
+        eq_(updated_comm.foia.id, self.foia1.id,
+            'The communication should be moved to the first listed request.')
+        eq_(FOIACommunication.objects.count(), comm_count + 1,
+            'A clone should be made for each additional request in the list.')
 
     @raises(ValueError)
-    def test_move_invalid_foias(self):
+    def test_move_invalid_foia(self):
         """Should raise an error if trying to call move on invalid request pks."""
-        self.comm.move(['abc', 123])
-        ok_(FOIACommunication.objects.filter(pk=self.comm_pk),
-            'If something goes wrong, the original should not be deleted.')
+        original_request = self.comm.foia.id
+        self.comm.move('abc')
+        eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
+            'If something goes wrong, the move should not complete.')
 
     @raises(ValueError)
     def test_move_empty_list(self):
         """Should raise an error if trying to call move on an empty list."""
+        original_request = self.comm.foia.id
         self.comm.move([])
-        ok_(FOIACommunication.objects.filter(pk=self.comm_pk),
-            'If something goes wrong, the original should not be deleted.')
+        eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
+            'If something goes wrong, the move should not complete.')
+
+class TestCommunicationClone(test.TestCase):
+    """Tests the clone method"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        self.comm = FOIACommunication.objects.get(id=1)
+
+    def test_clone_single(self):
+        """Should duplicate the communication to the request."""
+        comm_count = FOIACommunication.objects.count()
+        self.comm.clone(2)
+        # + 1 communications
+        eq_(FOIACommunication.objects.count(), comm_count + 1,
+            'Should clone the request twice.')
+
+    def test_clone_multi(self):
+        """Should duplicate the communication to each request in the list."""
+        comm_count = FOIACommunication.objects.count()
+        self.comm.clone([2, 3, 4])
+        # + 3 communications
+        eq_(FOIACommunication.objects.count(), comm_count + 3,
+            'Should clone the request twice.')
+
+    def test_clone_files(self):
+        """Should duplicate all the files for each communication."""
+        file_count = self.comm.files.count()
+        clones = self.comm.clone([2, 3, 4])
+        for each_clone in clones:
+            eq_(each_clone.files.count(), file_count,
+                'Each clone should have its own set of files')
+
+    @raises(ValueError)
+    def test_clone_empty_list(self):
+        """Should throw a value error if given an empty list"""
+        self.comm.clone([])
+
+    @raises(ValueError)
+    def test_clone_bad_pk(self):
+        """Should throw an error if bad foia PK given"""
+        self.comm.clone('abc')
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
