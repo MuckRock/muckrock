@@ -84,7 +84,8 @@ def store_statstics():
         total_snailmail_tasks=SnailMailTask.objects.count(),
         total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
         total_rejectedemail_tasks=RejectedEmailTask.objects.count(),
-        total_unresolved_rejectedemail_tasks=RejectedEmailTask.objects.filter(resolved=False).count(),
+        total_unresolved_rejectedemail_tasks=
+            RejectedEmailTask.objects.filter(resolved=False).count(),
         total_staleagency_tasks=StaleAgencyTask.objects.count(),
         total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
         total_flagged_tasks=FlaggedTask.objects.count(),
