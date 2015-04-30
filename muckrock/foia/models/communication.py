@@ -8,6 +8,7 @@ import datetime
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email
 from django.db import models
+from django.shortcuts import get_object_or_404
 
 import logging
 
@@ -91,12 +92,11 @@ class FOIACommunication(models.Model):
         communication to the first request, then clone it across the rest of
         the requests. Returns the moved and cloned communications.
         """
-        requests = requests_from_pks(foia_pks)
-        if not requests:
-            logging.error('No valid FOIA requests given: %s', foia_pks)
-            raise ValueError('No valid request(s) provided for moving.')
-        move_to_request = requests[0]
-        clone_to_requests = requests[1:]
+        if not foia_pks:
+            raise ValueError('Expected a request to move the communication to.')
+        if type(foia_pks) is not type(list()):
+            foia_pks = [foia_pks]
+        move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
         self.foia = move_to_request
         for each_file in self.files.all():
             each_file.foia = move_to_request
@@ -105,11 +105,11 @@ class FOIACommunication(models.Model):
         logging.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         moved = [self]
         cloned = []
-        if clone_to_requests:
-            cloned = self.clone(clone_to_requests)
+        if foia_pks[1:]:
+            cloned = self.clone(foia_pks[1:])
         return moved + cloned
 
-    def clone(self, request_list):
+    def clone(self, foia_pks):
         """
         Copies the communication to each request in the list,
         then returns all the new communications.
@@ -122,6 +122,7 @@ class FOIACommunication(models.Model):
         """
         # avoid circular imports
         from muckrock.foia.tasks import upload_document_cloud
+        request_list = requests_from_pks(foia_pks)
         if not request_list:
             raise ValueError('No valid request(s) provided for cloning.')
         cloned_comms = []
