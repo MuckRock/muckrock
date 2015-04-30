@@ -53,10 +53,10 @@ class TestCommunicationMove(test.TestCase):
             'A clone should be made for each additional request in the list.')
 
     @raises(ValueError)
-    def test_move_invalid_foias(self):
+    def test_move_invalid_foia(self):
         """Should raise an error if trying to call move on invalid request pks."""
         original_request = self.comm.foia.id
-        self.comm.move(['abc', 123])
+        self.comm.move('abc')
         eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
@@ -77,15 +77,40 @@ class TestCommunicationClone(test.TestCase):
 
     def setUp(self):
         self.comm = FOIACommunication.objects.get(id=1)
-        self.request_list = [FOIARequest.objects.get(id=1), FOIARequest.objects.get(id=2)]
 
-    def test_clone(self):
-        """Should duplicate the communication to the listed requests."""
+    def test_clone_single(self):
+        """Should duplicate the communication to the request."""
         comm_count = FOIACommunication.objects.count()
-        self.comm.clone(self.request_list)
-        # + 2 communications
-        eq_(FOIACommunication.objects.count(), comm_count + 2,
+        self.comm.clone(2)
+        # + 1 communications
+        eq_(FOIACommunication.objects.count(), comm_count + 1,
             'Should clone the request twice.')
+
+    def test_clone_multi(self):
+        """Should duplicate the communication to each request in the list."""
+        comm_count = FOIACommunication.objects.count()
+        self.comm.clone([2, 3, 4])
+        # + 3 communications
+        eq_(FOIACommunication.objects.count(), comm_count + 3,
+            'Should clone the request twice.')
+
+    def test_clone_files(self):
+        """Should duplicate all the files for each communication."""
+        file_count = self.comm.files.count()
+        clones = self.comm.clone([2, 3, 4])
+        for each_clone in clones:
+            eq_(each_clone.files.count(), file_count,
+                'Each clone should have its own set of files')
+
+    @raises(ValueError)
+    def test_clone_empty_list(self):
+        """Should throw a value error if given an empty list"""
+        self.comm.clone([])
+
+    @raises(ValueError)
+    def test_clone_bad_pk(self):
+        """Should throw an error if bad foia PK given"""
+        self.comm.clone('abc')
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
