@@ -7,6 +7,7 @@ from django.db import models
 
 from datetime import date
 
+
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=R0903, model-missing-unicode

@@ -20,6 +20,7 @@ from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSerializer, \
                                       FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.models import PaymentTask
 
 # pylint: disable=R0901
 # pylint: disable=bad-continuation
@@ -152,6 +153,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                       render_to_string('text/foia/admin_payment.txt',
                                        {'request': foia, 'amount': amount / 100.0}),
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
+            PaymentTask.objects.create(
+                user=request.user,
+                amount=int(amount),
+                foia=foia)
 
             logger.info('%s has paid %0.2f for request %s',
                         request.user.username, amount / 100.0, foia.title)

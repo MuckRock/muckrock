@@ -198,3 +198,30 @@ class ResponseTask(Task):
             comm.date = datetime.now()
         comm.save()
         self.resolve()
+
+
+class PaymentTask(Task):
+    """A payment for a request fee"""
+
+    user = models.ForeignKey(User)
+    amount = models.IntegerField()
+    foia = models.ForeignKey('foia.FOIARequest')
+
+    def __unicode__(self):
+        return u'Payment: %s for %s' % (self.amount, self.foia)
+
+
+class CrowdfundPaymentTask(Task):
+    """A payment for a crowdfund"""
+
+    # one of these should be not null
+    request_payment = models.ForeignKey('crowdfund.CrowdfundRequestPayment', blank=True, null=True)
+    project_payment = models.ForeignKey('crowdfund.CrowdfundProjectPayment', blank=True, null=True)
+
+    def __unicode__(self):
+        if self.request_payment:
+            return u'Crowdfund: %s' % self.request_payment
+        elif self.project_payment:
+            return u'Crowdfund: %s' % self.project_payment
+        else:
+            return u'Crowdfund: <None>'

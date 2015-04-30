@@ -21,6 +21,7 @@ from muckrock.crowdfund.models import \
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
+from muckrock.task.models import CrowdfundPaymentTask
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -48,13 +49,19 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                 user = None
                 name = 'A visitor'
             amount = float(amount)/100
-            payment_model.objects.create(
+            payment = payment_model.objects.create(
                 user=user,
                 crowdfund=crowdfund,
                 amount=amount,
                 name=name,
                 show=False
             )
+            if isinstance(payment, CrowdfundRequestPayment):
+                CrowdfundPaymentTask.objects.create(
+                    request_payment=payment)
+            elif isinstance(payment, CrowdfundProjectPayment):
+                CrowdfundPaymentTask.objects.create(
+                    project_payment=payment)
             crowdfund.payment_received += Decimal(amount)
             crowdfund.save()
             messages.success(request, 'You contributed $%.2f. Thanks!' % amount)
