@@ -17,7 +17,7 @@ class AgencyForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Agency
-        fields = ['name', 'jurisdiction', 'address', 'email', 'url', 'phone', 'fax']
+        fields = ['name', 'aliases', 'address', 'email', 'url', 'phone', 'fax']
 
 class CSVImportForm(forms.Form):
     """Import a CSV file of models"""
