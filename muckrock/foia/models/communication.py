@@ -102,6 +102,7 @@ class FOIACommunication(models.Model):
             each_file.foia = move_to_request
             each_file.save()
         self.save()
+        logging.info('Communication #%d moved to request #%d', self.id, self.foia.id)
         moved = [self]
         cloned = []
         if clone_to_requests:
