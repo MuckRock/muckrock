@@ -198,3 +198,15 @@ class ResponseTask(Task):
             comm.date = datetime.now()
         comm.save()
         self.resolve()
+
+
+class StatusChangeTask(Task):
+    """A user has the status on a request"""
+
+    user = models.ForeignKey(User)
+    old_status = models.CharField()
+    foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
+
+    def __unicode__(self):
+        return u'StatusChange: %s' % self.foia
+
