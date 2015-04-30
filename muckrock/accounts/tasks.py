@@ -18,7 +18,8 @@ from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
+                                 GenericTask
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +83,8 @@ def store_statstics():
         total_unresolved_orphan_tasks=OrphanTask.objects.filter(resolved=False).count(),
         total_snailmail_tasks=SnailMailTask.objects.count(),
         total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
-        total_rejected_tasks=RejectedTask.objects.count(),
-        total_unresolved_rejected_tasks=RejectedTask.objects.filter(resolved=False).count(),
+        total_rejectedemail_tasks=RejectedEmailTask.objects.count(),
+        total_unresolved_rejectedemail_tasks=RejectedEmailTask.objects.filter(resolved=False).count(),
         total_staleagency_tasks=StaleAgencyTask.objects.count(),
         total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
         total_flagged_tasks=FlaggedTask.objects.count(),
