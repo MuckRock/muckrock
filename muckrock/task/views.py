@@ -243,5 +243,8 @@ class ResponseTaskList(TaskList):
     def get_task_context(self, task):
         """Adds ResponseTask-specific context"""
         task_context = super(ResponseTaskList, self).get_task_context(task)
-        task_context.update({'response_form': ResponseTaskForm()})
+        form_initial = {}
+        if task.communication.foia:
+            form_initial['status'] = task.communication.foia
+        task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         return task_context
