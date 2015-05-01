@@ -191,30 +191,45 @@ def response_task_post_handler(request, task_pk):
     except ResponseTask.DoesNotExist:
         return
 
+    """
     status = request.POST.get('status')
     move = request.POST.get('move')
     tracking_number = request.POST.get('tracking_number')
+    """
+
     error_happened = False
+
+    form = ResponseTaskForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Form is invalid')
+        return
+
+    cleaned_data = form.cleaned_data
+    logging.info(cleaned_data)
+    status = cleaned_data['status']
+    move = cleaned_data['move']
+    tracking_number = cleaned_data['tracking_number']
 
     # make sure that the move is executed first, so that the status
     # and tracking operations are applied to the correct FOIA request
-
     if move:
         try:
+            temp_comm = response_task.communication
             response_task.move(move)
+            response_task.communicaiton = temp_comm
         except ValueError:
             messages.error(request, 'No valid destination for moving the request.')
             error_happened = True
 
     if status:
         try:
-            logging.debug('STATUS TO SET: %s', status)
             response_task.set_status(status)
         except ValueError:
             messages.error(request, 'You tried to set an invalid status. How did you manage that?')
             error_happened = True
 
     if tracking_number:
+        logging.debug(response_task.communication.foia.id)
         response_task.set_tracking_id(tracking_number)
 
 
