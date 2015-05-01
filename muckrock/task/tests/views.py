@@ -289,12 +289,9 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
         new_tracking_id = 'ABC123OMGWTF'
-        logging.debug(self.task.communication.foia.tracking_id)
-        logging.debug(self.task.communication.foia)
         self.client.post(self.url, {'tracking_number': new_tracking_id, 'status': 'done', 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_tracking = updated_task.communication.foia.tracking_id
-        logging.debug(foia_tracking)
         eq_(foia_tracking, new_tracking_id,
             'The new tracking number should be saved to the associated request.')
         ok_(updated_task.resolved,
