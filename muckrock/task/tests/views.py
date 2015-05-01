@@ -306,3 +306,25 @@ class ResponseTaskListViewTests(TestCase):
             'The response should be moved to a different FOIA.')
         ok_(updated_task.resolved,
             'Moving the status should resolve the task')
+
+    def test_post_move_multiple(self):
+        """Moving the response to multiple requests should only modify the first request."""
+        move_to_ids = '2, 3, 4'
+        change_status = 'done'
+        change_tracking = 'DEADBEEF'
+        self.client.post(self.url, {
+            'move': move_to_ids,
+            'status': change_status,
+            'tracking_number': change_tracking,
+            'task': self.task.pk
+        })
+        updated_task = updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia2 = FOIARequest.objects.get(pk=2)
+        foia3 = FOIARequest.objects.get(pk=3)
+        foia4 = FOIARequest.objects.get(pk=4)
+        # foia 2 should get updated status, tracking number
+        # foia 3 & 4 should stay just the way they are
+        ok_(change_tracking is foia2.tracking_id,
+            'Tracking should update for first request in move list.')
+        ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
+            'Tracking should not update for subsequent requests in list.')
