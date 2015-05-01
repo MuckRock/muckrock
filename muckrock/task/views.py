@@ -196,6 +196,16 @@ def response_task_post_handler(request, task_pk):
     tracking_number = request.POST.get('tracking_number')
     error_happened = False
 
+    # make sure that the move is executed first, so that the status
+    # and tracking operations are applied to the correct FOIA request
+
+    if move:
+        try:
+            response_task.move(move)
+        except ValueError:
+            messages.error(request, 'No valid destination for moving the request.')
+            error_happened = True
+
     if status:
         try:
             logging.debug('STATUS TO SET: %s', status)
@@ -206,6 +216,8 @@ def response_task_post_handler(request, task_pk):
 
     if tracking_number:
         response_task.set_tracking_id(tracking_number)
+
+
 
     if move or status or tracking_number and not error_happened:
         response_task.resolve(request.user)
