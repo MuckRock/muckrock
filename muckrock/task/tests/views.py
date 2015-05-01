@@ -290,6 +290,8 @@ class ResponseTaskListViewTests(TestCase):
         foia_tracking = updated_task.communication.foia.tracking_id
         nose.eq_(foia_tracking, new_tracking_id,
             'The new tracking number should be saved to the associated request.')
+        nose.ok_(updated_task.resolved,
+            'Setting the tracking number should resolve the task')
 
     def test_post_move(self):
         """Moving the response should save it to a new request."""
@@ -299,4 +301,5 @@ class ResponseTaskListViewTests(TestCase):
         foia_id = updated_task.communication.foia.id
         nose.eq_(foia_id, move_to_id,
             'The response should be moved to a different FOIA.')
-
+        nose.ok_(updated_task.resolved,
+            'Moving the status should resolve the task')

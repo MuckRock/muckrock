@@ -204,6 +204,9 @@ def response_task_post_handler(request, task_pk):
             messages.error(request, 'You tried to set an invalid status. How did you manage that?')
             error_happened = True
 
+    if tracking_number:
+        response_task.set_tracking_id(tracking_number)
+
     if move or status or tracking_number and not error_happened:
         response_task.resolve(request.user)
 

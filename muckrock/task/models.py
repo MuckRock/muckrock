@@ -190,6 +190,15 @@ class ResponseTask(Task):
     def __unicode__(self):
         return u'Response: %s' % (self.communication.foia)
 
+    def set_tracking_id(self, tracking_id):
+        """Sets the tracking ID of the communication's request"""
+        comm = self.communication
+        if not comm.foia:
+            raise FOIARequest.DoesNotExist();
+        foia = comm.foia
+        foia.tracking_id = tracking_id
+        foia.save()
+
     def set_status(self, status):
         """Sets status of comm and foia"""
         comm = self.communication
