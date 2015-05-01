@@ -20,7 +20,9 @@ class ResponseTaskForm(forms.Form):
 
     def clean_move(self):
         move_string = self.cleaned_data['move']
+        if not move_string:
+            return []
         move_list = move_string.split(',')
         for string in move_list:
-            string.strip()
+            string = string.strip()
         return move_list
