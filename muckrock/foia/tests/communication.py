@@ -32,24 +32,30 @@ class TestCommunicationMove(test.TestCase):
 
     def test_move_single_foia(self):
         """Should change the request associated with the communication."""
-        self.comm.move(self.foia2.id)
+        comms = self.comm.move(self.foia2.id)
         eq_(self.comm.foia.id, self.foia2.id,
             'Should change the FOIA associated with the communication.')
         for file_ in self.comm.files.all():
             eq_(file_.foia.id, self.foia2.id,
                 'Should also change the files to reference the destination FOIA.')
+        eq_(self.comm, comms[0], 'Should this comm as the one operated on.')
 
     def test_move_multi_foias(self):
         """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
-        self.comm.move([self.foia1.id, self.foia2.id])
+        comms = self.comm.move([self.foia1.id, self.foia2.id])
         # + 1 communications created
         updated_comm = FOIACommunication.objects.get(pk=self.comm_pk)
-        logging.debug(updated_comm.foia.id)
         eq_(updated_comm.foia.id, self.foia1.id,
             'The communication should be moved to the first listed request.')
         eq_(FOIACommunication.objects.count(), comm_count + 1,
             'A clone should be made for each additional request in the list.')
+        eq_(len(comms), 2,
+            'Two communications should be returned, since two were operated on.')
+        eq_(updated_comm.pk, comms[0].pk,
+            'The first communication in the list should be this one.')
+        ok_(comms[1].pk is not updated_comm.pk,
+            'The second communication should be a new one, since it was cloned.')
 
     @raises(ValueError)
     def test_move_invalid_foia(self):
@@ -88,10 +94,12 @@ class TestCommunicationClone(test.TestCase):
     def test_clone_multi(self):
         """Should duplicate the communication to each request in the list."""
         comm_count = FOIACommunication.objects.count()
-        self.comm.clone([2, 3, 4])
+        clones = self.comm.clone([2, 3, 4])
         # + 3 communications
         eq_(FOIACommunication.objects.count(), comm_count + 3,
             'Should clone the request twice.')
+        ok_(clones[0].pk is not clones[1].pk is not clones[2].pk,
+            'The returned list should contain unique communcation objects.')
 
     def test_clone_files(self):
         """Should duplicate all the files for each communication."""
