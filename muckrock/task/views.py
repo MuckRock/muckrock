@@ -205,13 +205,13 @@ def response_task_post_handler(request, task_pk):
         return
 
     cleaned_data = form.cleaned_data
-    logging.info(cleaned_data)
     status = cleaned_data['status']
     move = cleaned_data['move']
     tracking_number = cleaned_data['tracking_number']
 
     # make sure that the move is executed first, so that the status
     # and tracking operations are applied to the correct FOIA request
+
     if move:
         try:
             temp_comm = response_task.communication
@@ -229,7 +229,6 @@ def response_task_post_handler(request, task_pk):
             error_happened = True
 
     if tracking_number:
-        logging.debug(response_task.communication.foia.id)
         response_task.set_tracking_id(tracking_number)
 
 
