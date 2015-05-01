@@ -520,6 +520,9 @@ class FOIARequest(models.Model):
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
 
+        if from_addr == 'fax':
+            subject = ('MR#%s-%s - %s' % self.pk, comm.pk, subject)
+
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
         body = render_to_string('text/foia/request_email.txt', {'request': self})
