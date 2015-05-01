@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-import logging
 import nose
 
 from muckrock import task
@@ -289,7 +288,11 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_tracking_number(self):
         """Setting the tracking number should save it to the response's request."""
         new_tracking_id = 'ABC123OMGWTF'
-        self.client.post(self.url, {'tracking_number': new_tracking_id, 'status': 'done', 'task': self.task.pk})
+        self.client.post(self.url, {
+            'tracking_number': new_tracking_id,
+            'status': 'done',
+            'task': self.task.pk
+        })
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_tracking = updated_task.communication.foia.tracking_id
         eq_(foia_tracking, new_tracking_id,
@@ -319,7 +322,6 @@ class ResponseTaskListViewTests(TestCase):
             'tracking_number': change_tracking,
             'task': self.task.pk
         })
-        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia2 = FOIARequest.objects.get(pk=2)
         foia3 = FOIARequest.objects.get(pk=3)
         foia4 = FOIARequest.objects.get(pk=4)

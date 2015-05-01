@@ -10,8 +10,6 @@ from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-import logging
-
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -62,6 +60,7 @@ class TaskList(MRFilterableListView):
 
     def get_task_context(self, task):
         """Returns a dictionary of context for the specific task"""
+        # pylint: disable=no-self-use
         task_context = {'task': task}
         return task_context
 
@@ -191,12 +190,6 @@ def response_task_post_handler(request, task_pk):
         response_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist:
         return
-
-    """
-    status = request.POST.get('status')
-    move = request.POST.get('move')
-    tracking_number = request.POST.get('tracking_number')
-    """
 
     error_happened = False
 

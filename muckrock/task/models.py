@@ -73,6 +73,7 @@ class OrphanTask(Task):
 
     def reject(self):
         """Simply resolves the request. Should do something to spam addresses."""
+        # pylint: disable=no-self-use
         return
 
 class SnailMailTask(Task):
@@ -200,7 +201,7 @@ class ResponseTask(Task):
             raise ValueError('Tracking ID should be a unicode string.')
         comm = self.communication
         if not comm.foia:
-            raise FOIARequest.DoesNotExist();
+            raise FOIARequest.DoesNotExist
         foia = comm.foia
         foia.tracking_id = tracking_id
         foia.save()
