@@ -8,6 +8,8 @@ from django.db.models import Q
 
 from datetime import datetime
 
+import logging
+
 from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -192,7 +194,7 @@ class ResponseTask(Task):
         """Sets status of comm and foia"""
         comm = self.communication
         # check that status is valid
-        if status not in STATUS:
+        if status not in [status_set[0] for status_set in STATUS]:
             raise ValueError('Invalid status.')
         # save comm first
         comm.status = status
@@ -206,3 +208,4 @@ class ResponseTask(Task):
             foia.date_done = comm.date
         foia.update()
         foia.save()
+        logging.info('Request #%d status changed to "%s"', foia.id, status)

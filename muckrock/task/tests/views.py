@@ -270,13 +270,14 @@ class ResponseTaskListViewTests(TestCase):
 
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
-        self.client.post(self.url, {'status': 'done', 'task': self.task.pk})
+        status_change = 'done'
+        self.client.post(self.url, {'status': status_change, 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         comm_status = updated_task.communication.status
         foia_status = updated_task.communication.foia.status
-        nose.eq_(comm_status, 'done',
+        nose.eq_(comm_status, status_change,
             'The status change should be saved to the communication.')
-        nose.eq_(foia_status, 'done',
+        nose.eq_(foia_status, status_change,
             'The status of the FOIA should be set.')
         nose.eq_(updated_task.resolved, True,
             'Setting the status should resolve the task')

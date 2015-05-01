@@ -9,6 +9,8 @@ from django.core.urlresolvers import resolve
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
+import logging
+
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -196,6 +198,7 @@ def response_task_post_handler(request, task_pk):
 
     if status:
         try:
+            logging.debug('STATUS TO SET: %s', status)
             response_task.set_status(status)
         except ValueError:
             messages.error(request, 'You tried to set an invalid status. How did you manage that?')
