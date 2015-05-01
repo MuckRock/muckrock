@@ -128,19 +128,13 @@ class FOIACommunication(models.Model):
         if not request_list:
             raise ValueError('No valid request(s) provided for cloning.')
         cloned_comms = []
-        original = self.pk
+        original_pk = self.pk
         files = self.files.all()
         for request in request_list:
-            # Comment on 2015-05-01 by allan@muckrock.com
-            # ---
-            # This causes weird issues when trying to access
-            # the communication after a clone in other areas
-            # of the codebase, because self is always changing.
-            # This cloning method should definitely be
-            # rewritten at some point.
-            self.pk = None
-            self.foia = request
-            self.save()
+            this_clone = FOIACommunication.objects.get(pk=original_pk)
+            this_clone.pk = None
+            this_clone.foia = request
+            this_clone.save()
             for file_ in files:
                 file_.pk = None
                 file_.foia = request
@@ -152,9 +146,8 @@ class FOIACommunication(models.Model):
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
             # for each clone, self gets overwritten. each clone needs to be stored explicitly.
-            this_clone = FOIACommunication.objects.get(pk=self.pk)
             cloned_comms.append(this_clone)
-            logging.info('Communication #%d cloned to request #%d', original, self.foia.id)
+            logging.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
 
     def resend(self, email=None):
