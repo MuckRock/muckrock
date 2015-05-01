@@ -129,6 +129,13 @@ class FOIACommunication(models.Model):
         original = self.pk
         files = self.files.all()
         for request in request_list:
+            # Comment on 2015-05-01 by allan@muckrock.com
+            # ---
+            # This causes weird issues when trying to access
+            # the communication after a clone in other areas
+            # of the codebase, because self is always changing.
+            # This cloning method should definitely be
+            # rewritten at some point.
             self.pk = None
             self.foia = request
             self.save()
