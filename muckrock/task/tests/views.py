@@ -321,7 +321,7 @@ class ResponseTaskListViewTests(TestCase):
             'tracking_number': change_tracking,
             'task': self.task.pk
         })
-        updated_task = updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia2 = FOIARequest.objects.get(pk=2)
         foia3 = FOIARequest.objects.get(pk=3)
         foia4 = FOIARequest.objects.get(pk=4)

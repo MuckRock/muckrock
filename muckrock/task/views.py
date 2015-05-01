@@ -214,9 +214,9 @@ def response_task_post_handler(request, task_pk):
 
     if move:
         try:
-            temp_comm = response_task.communication
-            response_task.move(move)
-            response_task.communicaiton = temp_comm
+            comms = response_task.move(move)
+            logging.debug([comm.foia.id for comm in comms])
+            logging.debug(response_task.communication.foia.id)
         except ValueError:
             messages.error(request, 'No valid destination for moving the request.')
             error_happened = True

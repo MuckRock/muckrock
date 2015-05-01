@@ -192,7 +192,7 @@ class ResponseTask(Task):
 
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
-        self.communication.move(foia_pks)
+        return self.communication.move(foia_pks)
 
     def set_tracking_id(self, tracking_id):
         """Sets the tracking ID of the communication's request"""
