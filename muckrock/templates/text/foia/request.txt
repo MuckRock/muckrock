@@ -9,7 +9,7 @@ To Whom It May Concern:
 {% if jurisdiction.get_waiver %}
 {{ jurisdiction.get_waiver }}
 {% else %}
-The requested documents will be made available to the general public free of charge as part of the public information service at MuckRock.com, and is not being made for commercial usage.
+The requested documents will be made available to the general public, and this request is not being made for commercial purposes.
 {% endif %}
 In the event that fees cannot be waived, I would be grateful if you would inform me of the total charges in advance of fulfilling my request. I would prefer the request filled electronically, by e-mail attachment if available or CD-ROM if not.
 {% if jurisdiction.get_days %}
