@@ -188,10 +188,22 @@ def response_task_post_handler(request, task_pk):
         response_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist:
         return
-    if request.POST.get('status'):
-        status = request.POST.get('status')
-        if status in dict(STATUS):
+
+    status = request.POST.get('status')
+    move = request.POST.get('move')
+    tracking_number = request.POST.get('tracking_number')
+    error_happened = False
+
+    if status:
+        try:
             response_task.set_status(status)
+        except ValueError:
+            messages.error(request, 'You tried to set an invalid status. How did you manage that?')
+            error_happened = True
+
+    if move or status or tracking_number and not error_happened:
+        response_task.resolve(request.user)
+
     return
 
 class OrphanTaskList(TaskList):
