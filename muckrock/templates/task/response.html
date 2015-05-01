@@ -26,15 +26,8 @@
 {% endblock %}
 
 {% block task-actions %}
-    <select name="status">
-        <option value="" selected>Set Status</option>
-    {% for s in status %}
-        <option value="{{s|first}}">{{s|last}}</option>
-    {% endfor %}
-    </select>
-    <button type="submit" class="primary">Set Status</button>
-    <button type="submit" name="resolve" value="true">Resolve</button>
-</dl>
+    {{ response_form }}
+    <button type="submit" name="save" value="true" class="primary">Save & Resolve</button>
 {% endblock %}
 
 {% block task-extra-context %}

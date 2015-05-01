@@ -6,12 +6,16 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-import nose.tools as nose
+import nose
 
 from muckrock import task
 from muckrock import agency
 from muckrock.foia.models import FOIARequest
 from muckrock.views import MRFilterableListView
+
+eq_ = nose.tools.eq_
+ok_ = nose.tools.ok_
+raises = nose.tools.raises
 
 # pylint: disable=missing-docstring
 
@@ -28,7 +32,7 @@ class TaskListViewTests(TestCase):
         self.task = task.models.Task.objects.create()
 
     def test_url(self):
-        nose.eq_(self.url, '/task/',
+        eq_(self.url, '/task/',
             'The task list should be the base task URL')
 
     def test_login_required(self):
@@ -43,7 +47,7 @@ class TaskListViewTests(TestCase):
     def test_staff_ok(self):
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
-        nose.eq_(response.status_code, 200,
+        eq_(response.status_code, 200,
             ('Should respond to staff requests for task list page with 200.'
             ' Actually responds with %d' % response.status_code))
 
@@ -51,7 +55,7 @@ class TaskListViewTests(TestCase):
         # pylint: disable=no-self-use
         actual = task.views.TaskList.__bases__
         expected = MRFilterableListView().__class__
-        nose.ok_(expected in actual,
+        ok_(expected in actual,
             'Task list should inherit from MRFilterableListView class')
 
     def test_render_task_list(self):
@@ -59,7 +63,7 @@ class TaskListViewTests(TestCase):
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         obj_list = response.context['object_list']
-        nose.ok_(obj_list,
+        ok_(obj_list,
             'Object list should not be empty.')
 
 class TaskListViewPOSTTests(TestCase):
@@ -80,9 +84,9 @@ class TaskListViewPOSTTests(TestCase):
         self.client.post(self.url, {'resolve': True, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         user = User.objects.get(username='adam')
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
             'Tasks should be resolved by posting the task ID with a "resolve" request.')
-        nose.eq_(updated_task.resolved_by, user,
+        eq_(updated_task.resolved_by, user,
             'Task should record the logged in user who resolved it.')
 
 
@@ -90,20 +94,20 @@ class TaskListViewPOSTTests(TestCase):
         self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         print updated_task.resolved
-        nose.eq_(updated_task.resolved, False,
+        eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
     def test_post_assign_task(self):
         # the PK for 'adam' is 1
         self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.assigned.pk, 1,
+        eq_(updated_task.assigned.pk, 1,
             'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
 
     def test_bad_assign(self):
         # there is no user with a PK of 99
         response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
-        nose.eq_(response.status_code, 404)
+        eq_(response.status_code, 404)
 
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
@@ -126,14 +130,14 @@ class TaskListViewBatchedPOSTTests(TestCase):
         self.client.post(self.url, {'resolve': 'true', 'tasks': [1, 2, 3]})
         updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
         for updated_task in updated_tasks:
-            nose.eq_(updated_task.resolved, True,
+            eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
     def test_batch_assign_tasks(self):
         self.client.post(self.url, {'assign': 1, 'tasks': [1, 2, 3]})
         updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
         for updated_task in updated_tasks:
-            nose.eq_(updated_task.assigned.pk, 1,
+            eq_(updated_task.assigned.pk, 1,
                 'Task %d should be assigned when doing a batched assign' % updated_task.pk)
 
 class OrphanTaskViewTests(TestCase):
@@ -156,17 +160,17 @@ class OrphanTaskViewTests(TestCase):
         updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
-        nose.eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
+        eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
             'Communication should be added to FOIA')
-        nose.eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
+        eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
             'Communication should be added to FOIA')
 
     def test_reject(self):
         self.client.post(self.url, {'reject': True, 'task': self.task.pk})
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
                 ('Orphan task should be rejected by posting any'
                 ' truthy value to the "reject" parameter and task ID.'))
 
@@ -174,14 +178,14 @@ class OrphanTaskViewTests(TestCase):
         likely_foia_pk = self.task.communication.likely_foia.pk
         likely_foia = FOIARequest.objects.get(pk=likely_foia_pk)
         likely_foia_comm_count = likely_foia.communications.all().count()
-        nose.ok_(likely_foia_pk,
+        ok_(likely_foia_pk,
                 'Communication should have a likely FOIA for this test')
         self.client.post(self.url, {
             'move': str(likely_foia_pk),
             'reject': 'true',
             'task': self.task.pk})
         updated_likely_foia_comm_count = likely_foia.communications.all().count()
-        nose.eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
+        eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
                 ('Rejecting an orphan with a likely FOIA should not move'
                 ' the communication to that FOIA'))
 
@@ -201,7 +205,7 @@ class TaskListViewSnailMailTaskPOSTTests(TestCase):
     def test_post_set_status(self):
         self.client.post(self.url, {'status': 'ack', 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
             'Snail mail task should resolve itself when setting status of its communication')
 
 class NewAgencyTaskViewTests(TestCase):
@@ -226,15 +230,15 @@ class NewAgencyTaskViewTests(TestCase):
             'email': 'who.cares@whatever.com'
         }
         form = agency.forms.AgencyForm(contact_data, instance=self.task.agency)
-        nose.ok_(form.is_valid())
+        ok_(form.is_valid())
         post_data = form.cleaned_data
         post_data.update({'approve': 'truthy', 'task': self.task.pk})
         self.client.post(self.url, post_data)
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.agency.approved, True,
+        eq_(updated_task.agency.approved, True,
                 ('New agency task should approve agency when'
                 ' given a truthy value for the "approve" field'))
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
                 ('New agency task should resolve when given any'
                 ' truthy value for the "approve" data field'))
 
@@ -247,14 +251,14 @@ class NewAgencyTaskViewTests(TestCase):
             'replacement': replacement.id
         })
         updated_task = task.models.NewAgencyTask.objects.get(pk=self.task.id)
-        nose.eq_(updated_task.agency.approved, False,
+        eq_(updated_task.agency.approved, False,
                 ('New agency task should not approve the agency'
                 ' when given a truthy value for the "reject" field'))
-        nose.eq_(updated_task.resolved, True,
+        eq_(updated_task.resolved, True,
                 ('New agency task should resolve when given any'
                 ' truthy value for the "reject" data field'))
 
-class TaskListViewResponseTaskPOSTTests(TestCase):
+class ResponseTaskListViewTests(TestCase):
     """Tests ResponseTask-specific POST handlers"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -268,7 +272,72 @@ class TaskListViewResponseTaskPOSTTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_set_status(self):
-        self.client.post(self.url, {'status': 'done', 'task': self.task.pk})
+        """Setting the status should save it to the response and request, then resolve task."""
+        status_change = 'done'
+        self.client.post(self.url, {'status': status_change, 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
-        nose.eq_(updated_task.resolved, True,
+        comm_status = updated_task.communication.status
+        foia_status = updated_task.communication.foia.status
+        eq_(comm_status, status_change,
+            'The status change should be saved to the communication.')
+        eq_(foia_status, status_change,
+            'The status of the FOIA should be set.')
+        eq_(updated_task.resolved, True,
             'Setting the status should resolve the task')
+
+    def test_post_tracking_number(self):
+        """Setting the tracking number should save it to the response's request."""
+        new_tracking_id = 'ABC123OMGWTF'
+        self.client.post(self.url, {
+            'tracking_number': new_tracking_id,
+            'status': 'done',
+            'task': self.task.pk
+        })
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_tracking = updated_task.communication.foia.tracking_id
+        eq_(foia_tracking, new_tracking_id,
+            'The new tracking number should be saved to the associated request.')
+        ok_(updated_task.resolved,
+            'Setting the tracking number should resolve the task')
+
+    def test_post_move(self):
+        """Moving the response should save it to a new request."""
+        move_to_id = 2
+        self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_id = updated_task.communication.foia.id
+        eq_(foia_id, move_to_id,
+            'The response should be moved to a different FOIA.')
+        ok_(updated_task.resolved,
+            'Moving the status should resolve the task')
+
+    def test_post_move_multiple(self):
+        """Moving the response to multiple requests should only modify the first request."""
+        move_to_ids = '2, 3, 4'
+        change_status = 'done'
+        change_tracking = 'DEADBEEF'
+        self.client.post(self.url, {
+            'move': move_to_ids,
+            'status': change_status,
+            'tracking_number': change_tracking,
+            'task': self.task.pk
+        })
+        foia2 = FOIARequest.objects.get(pk=2)
+        foia3 = FOIARequest.objects.get(pk=3)
+        foia4 = FOIARequest.objects.get(pk=4)
+        # foia 2 should get updated status, tracking number
+        # foia 3 & 4 should stay just the way they are
+        eq_(change_tracking, foia2.tracking_id,
+            'Tracking should update for first request in move list.')
+        ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
+            'Tracking should not update for subsequent requests in list.')
+
+    def test_terrible_data(self):
+        """Posting awful data shouldn't cause everything to collapse."""
+        response = self.client.post(self.url, {
+            'move': 'omglol, howru',
+            'status': 'notastatus',
+            'tracking_number': ['wtf'],
+            'task': self.task.pk
+        })
+        ok_(response)

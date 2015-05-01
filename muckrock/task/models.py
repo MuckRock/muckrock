@@ -8,7 +8,9 @@ from django.db.models import Q
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIARequest
+import logging
+
+from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -71,6 +73,7 @@ class OrphanTask(Task):
 
     def reject(self):
         """Simply resolves the request. Should do something to spam addresses."""
+        # pylint: disable=no-self-use
         return
 
 class SnailMailTask(Task):
@@ -188,17 +191,37 @@ class ResponseTask(Task):
     def __unicode__(self):
         return u'Response: %s' % (self.communication.foia)
 
-    def set_status(self, status):
-        """Sets status of comm and foia; resolves task"""
+    def move(self, foia_pks):
+        """Moves the associated communication to a new request"""
+        return self.communication.move(foia_pks)
+
+    def set_tracking_id(self, tracking_id):
+        """Sets the tracking ID of the communication's request"""
+        if type(tracking_id) is not type(unicode()):
+            raise ValueError('Tracking ID should be a unicode string.')
         comm = self.communication
+        if not comm.foia:
+            raise FOIARequest.DoesNotExist
         foia = comm.foia
-        foia.status = status
-        foia.update()
-        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-            foia.date_done = comm.date
+        foia.tracking_id = tracking_id
         foia.save()
-        comm.status = foia.status
+
+    def set_status(self, status):
+        """Sets status of comm and foia"""
+        comm = self.communication
+        # check that status is valid
+        if status not in [status_set[0] for status_set in STATUS]:
+            raise ValueError('Invalid status.')
+        # save comm first
+        comm.status = status
         if status in ['ack', 'processed', 'appealing']:
             comm.date = datetime.now()
         comm.save()
-        self.resolve()
+        # save foia next
+        foia = comm.foia
+        foia.status = status
+        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+            foia.date_done = comm.date
+        foia.update()
+        foia.save()
+        logging.info('Request #%d status changed to "%s"', foia.id, status)

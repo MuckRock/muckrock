@@ -3,15 +3,20 @@ Tests for Tasks models
 """
 
 from django.contrib.auth.models import User
+from django.http import Http404
 from django.test import TestCase
 
 from datetime import datetime
 import logging
-import nose.tools as nose
+import nose
 
 from muckrock import task
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
+
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+raises = nose.tools.raises
 
 # pylint: disable=missing-docstring
 
@@ -24,34 +29,34 @@ class TaskTests(TestCase):
         self.task = task.models.Task.objects.create()
 
     def test_task_creates_successfully(self):
-        nose.ok_(self.task,
+        ok_(self.task,
             'Tasks given no arguments should create successfully')
 
     def test_unicode(self):
-        nose.eq_(str(self.task), 'Task: %d' % self.task.pk,
+        eq_(str(self.task), 'Task: %d' % self.task.pk,
             'Unicode string should return the classname and PK of the task')
 
     def test_resolve(self):
         """Tasks should be resolvable, updating their state when that happens."""
         self.task.resolve()
-        nose.ok_(self.task.resolved is True,
+        ok_(self.task.resolved is True,
             'Resolving task should set resolved field to True')
-        nose.ok_(self.task.date_done is not None,
+        ok_(self.task.date_done is not None,
             'Resolving task should set date_done')
-        nose.ok_(self.task.resolved_by is None,
+        ok_(self.task.resolved_by is None,
             'Resolving without providing a user should leave the field blank.')
 
     def test_resolve_with_user(self):
         """Tasks should record the user responsible for the resolution."""
         user = User.objects.create(username='test', password='pass')
         self.task.resolve(user)
-        nose.eq_(self.task.resolved_by, user,
+        eq_(self.task.resolved_by, user,
             'The resolving user should be recorded by the task.')
 
     def test_assign(self):
         user = User.objects.get(pk=1)
         self.task.assign(user)
-        nose.ok_(self.task.assigned is user,
+        ok_(self.task.assigned is user,
             'Should assign the task to the specified user')
 
 class OrphanTaskTests(TestCase):
@@ -68,14 +73,15 @@ class OrphanTaskTests(TestCase):
             address='Whatever Who Cares')
 
     def test_task_creates_successfully(self):
-        nose.ok_(self.task,
+        ok_(self.task,
             'Orphan tasks given reason and communication arguments should create successfully')
 
     def test_move(self):
         """Should move the communication to the listed requests and create a ResponseTask for each new communication."""
+        # pylint: disable=line-too-long
         count_response_tasks = task.models.ResponseTask.objects.count()
         self.task.move([1, 2, 3])
-        nose.eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
+        eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.')
 
     def test_reject(self):
@@ -98,16 +104,16 @@ class SnailMailTaskTests(TestCase):
             communication=self.comm)
 
     def test_task_creates_successfully(self):
-        nose.ok_(self.task,
+        ok_(self.task,
             'Snail mail tasks should create successfully given a category and a communication')
 
     def test_set_status(self):
         self.task.set_status('ack')
-        nose.eq_(self.task.communication.status, 'ack',
+        eq_(self.task.communication.status, 'ack',
             'Setting status should update status of associated communication')
-        nose.eq_(self.task.communication.foia.status, 'ack',
+        eq_(self.task.communication.foia.status, 'ack',
             'Setting status should update status of associated communication\'s foia request')
-        nose.eq_(self.task.resolved, True,
+        eq_(self.task.resolved, True,
             'Setting status should resolve the task')
 
 class NewAgencyTaskTests(TestCase):
@@ -125,12 +131,12 @@ class NewAgencyTaskTests(TestCase):
             agency=self.agency)
 
     def test_task_creates_successfully(self):
-        nose.ok_(self.task,
+        ok_(self.task,
             'New agency tasks should create successfully given a user and an agency')
 
     def test_approve(self):
         self.task.approve()
-        nose.eq_(self.task.agency.approved, True,
+        eq_(self.task.agency.approved, True,
             'Approving a new agency should actually, you know, approve the agency.')
 
     def test_reject(self):
@@ -142,9 +148,9 @@ class NewAgencyTaskTests(TestCase):
         logging.debug('Count Replacement: %s', count_replacement)
         logging.debug('Count Expected: %s', count_new + count_replacement)
         logging.debug('Count Actual: %s', FOIARequest.objects.filter(agency=replacement).count())
-        nose.eq_(self.task.agency.approved, False,
+        eq_(self.task.agency.approved, False,
             'Rejecting a new agency should not approve it.')
-        nose.eq_(
+        eq_(
             FOIARequest.objects.filter(agency=replacement).count(),
             count_new + count_replacement,
             'The replacement agency should receive the requests'
@@ -161,31 +167,41 @@ class ResponseTaskTests(TestCase):
         self.comm = FOIACommunication.objects.create(date=datetime.now(),
                                                      from_who='God',
                                                      foia=self.foia)
-        self.task = task.models.ResponseTask.objects.create(
-            communication=self.comm)
+        self.task = task.models.ResponseTask.objects.create(communication=self.comm)
 
     def test_task_creates_successfully(self):
-        nose.ok_(self.task,
+        ok_(self.task,
             'Response tasks should creates successfully given a communication')
 
     def test_set_status_to_ack(self):
         self.task.set_status('ack')
-        nose.eq_(self.task.communication.foia.date_done, None,
+        eq_(self.task.communication.foia.date_done, None,
             'The FOIA should not be set to done if the status does not indicate it is done.')
-        nose.eq_(self.task.communication.status, 'ack',
+        eq_(self.task.communication.status, 'ack',
             'The communication should be set to the proper status.')
-        nose.eq_(self.task.communication.foia.status, 'ack',
+        eq_(self.task.communication.foia.status, 'ack',
             'The FOIA should be set to the proper status.')
-        nose.eq_(self.task.resolved, True,
-            'The task should be resolved after setting the status.')
 
     def test_set_status_to_done(self):
         self.task.set_status('done')
-        nose.eq_(self.task.communication.foia.date_done is None, False,
+        eq_(self.task.communication.foia.date_done is None, False,
             'The FOIA should be set to done if the status indicates it is done.')
-        nose.eq_(self.task.communication.status, 'done',
+        eq_(self.task.communication.status, 'done',
             'The communication should be set to the proper status.')
-        nose.eq_(self.task.communication.foia.status, 'done',
+        eq_(self.task.communication.foia.status, 'done',
             'The FOIA should be set to the proper status.')
-        nose.eq_(self.task.resolved, True,
-            'The task should be resolved after setting the status.')
+
+    @raises(ValueError)
+    def test_bad_status(self):
+        """Should raise an error if given a nonexistant status."""
+        self.task.set_status('foo')
+
+    @raises(ValueError)
+    def test_bad_tracking_number(self):
+        """Should raise an error if not given a string."""
+        self.task.set_tracking_id(['foo'])
+
+    @raises(Http404)
+    def test_bad_move(self):
+        """Should raise a value error if non-existant move destination."""
+        self.task.move(111111)
