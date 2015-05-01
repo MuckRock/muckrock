@@ -1,0 +1,24 @@
+.crowdfund.form {
+    @include row;
+    padding: 0;
+    margin-bottom: $base-margin;
+
+    form {
+        @include row;
+        @extend %full;
+        padding: $base-padding/2;
+    }
+
+    fieldset > p {
+        margin-top: 0;
+        color: $color-black;
+    }
+
+    fieldset.name, fieldset.description {
+        @extend %full;
+    }
+
+    fieldset.description {
+        padding: 0;
+    }
+}
