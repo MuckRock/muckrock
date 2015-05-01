@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import resolve
+from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
@@ -215,7 +216,7 @@ def response_task_post_handler(request, task_pk):
     if move:
         try:
             response_task.move(move)
-        except ValueError:
+        except (Http404, ValueError):
             messages.error(request, 'No valid destination for moving the request.')
             error_happened = True
 
