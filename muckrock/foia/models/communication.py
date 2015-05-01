@@ -103,7 +103,9 @@ class FOIACommunication(models.Model):
             each_file.save()
         self.save()
         logging.info('Communication #%d moved to request #%d', self.id, self.foia.id)
-        moved = [self]
+        # if cloning happens, self gets overwritten. so we save it to a variable here
+        this_comm = FOIACommunication.objects.get(pk=self.pk)
+        moved = [this_comm]
         cloned = []
         if foia_pks[1:]:
             cloned = self.clone(foia_pks[1:])
@@ -142,7 +144,9 @@ class FOIACommunication(models.Model):
                 file_.ffile = new_ffile
                 file_.save()
                 upload_document_cloud.apply_async(args=[file_.pk, False], countdown=3)
-            cloned_comms.append(self)
+            # for each clone, self gets overwritten. each clone needs to be stored explicitly.
+            this_clone = FOIACommunication.objects.get(pk=self.pk)
+            cloned_comms.append(this_clone)
             logging.info('Communication #%d cloned to request #%d', original, self.foia.id)
         return cloned_comms
 
