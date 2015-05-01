@@ -279,3 +279,22 @@ class ResponseTaskListViewTests(TestCase):
             'The status of the FOIA should be set.')
         nose.eq_(updated_task.resolved, True,
             'Setting the status should resolve the task')
+
+    def test_post_tracking_number(self):
+        """Setting the tracking number should save it to the response's request."""
+        new_tracking_id = 'ABC123OMGWTF'
+        self.client.post(self.url, {'tracking_number': new_tracking_id, 'task': self.task.pk})
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_tracking = updated_task.communication.foia.tracking_id
+        nose.eq_(foia_tracking, new_tracking_id,
+            'The new tracking number should be saved to the associated request.')
+
+    def test_post_move(self):
+        """Moving the response should save it to a new request."""
+        move_to_id = 2
+        self.client.post(self.url, {'move': move_to_id, 'task': self.task.pk})
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_id = updated_task.communication.foia.id
+        nose.eq_(foia_id, move_to_id,
+            'The response should be moved to a different FOIA.')
+
