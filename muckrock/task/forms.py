@@ -14,8 +14,8 @@ class TaskFilterForm(MRFilterForm):
     )
 
 class ResponseTaskForm(forms.Form):
-    move = forms.CharField()
-    tracking_number = forms.CharField()
+    move = forms.CharField(required=False)
+    tracking_number = forms.CharField(required=False)
     status = forms.ChoiceField(choices=foia.models.STATUS)
 
     def clean_move(self):
