@@ -327,7 +327,7 @@ class ResponseTaskListViewTests(TestCase):
         foia4 = FOIARequest.objects.get(pk=4)
         # foia 2 should get updated status, tracking number
         # foia 3 & 4 should stay just the way they are
-        ok_(change_tracking is foia2.tracking_id,
+        eq_(change_tracking, foia2.tracking_id,
             'Tracking should update for first request in move list.')
         ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
             'Tracking should not update for subsequent requests in list.')
