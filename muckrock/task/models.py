@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -189,16 +189,20 @@ class ResponseTask(Task):
         return u'Response: %s' % (self.communication.foia)
 
     def set_status(self, status):
-        """Sets status of comm and foia; resolves task"""
+        """Sets status of comm and foia"""
         comm = self.communication
-        foia = comm.foia
-        foia.status = status
-        foia.update()
-        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
-            foia.date_done = comm.date
-        foia.save()
-        comm.status = foia.status
+        # check that status is valid
+        if status not in STATUS:
+            raise ValueError('Invalid status.')
+        # save comm first
+        comm.status = status
         if status in ['ack', 'processed', 'appealing']:
             comm.date = datetime.now()
         comm.save()
-        self.resolve()
+        # save foia next
+        foia = comm.foia
+        foia.status = status
+        if status in ['rejected', 'no_docs', 'done', 'abandoned']:
+            foia.date_done = comm.date
+        foia.update()
+        foia.save()
