@@ -21,6 +21,10 @@
     <dt>Tracking Number</dt>
     <dd>{{comm.foia.mail_id}}</dd>
     {% endif %}
+    <dt>Attachments</dt>
+    {% for file in attachments %}
+    <dd>{% include "lib/file.html" %}</dd>
+    {% endfor %}
     {% endwith %}
 </dl>
 {% endblock %}
@@ -34,5 +38,16 @@
 <dl class="task-extra-context response-communication">
     <dt>Full Text</dt>
     <dd>{{task.communication.communication}}</dd>
+    <dt>Previous Communications</dt>
+    {% for comm in all_comms %}
+    <dd>
+        <dl class="communication">
+            <dt>From</dt>
+            <dd>{{ comm.from_who }}</dd>
+            <dt>Body</dt>
+            <dd>{{ comm.communication }}</dd>
+        </dl>
+    </dd>
+    {% endfor %}
 </dl>
 {% endblock %}
