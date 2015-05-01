@@ -196,6 +196,8 @@ class ResponseTask(Task):
 
     def set_tracking_id(self, tracking_id):
         """Sets the tracking ID of the communication's request"""
+        if type(tracking_id) is not type(str()):
+            raise ValueError('Tracking ID should be a string.')
         comm = self.communication
         if not comm.foia:
             raise FOIARequest.DoesNotExist();

@@ -227,7 +227,12 @@ def response_task_post_handler(request, task_pk):
             error_happened = True
 
     if tracking_number:
-        response_task.set_tracking_id(tracking_number)
+        try:
+            response_task.set_tracking_id(tracking_number)
+        except ValueError:
+            messages.error(request,
+                'You tried to set an invalid tracking id. Just use a string of characters.')
+            error_happened = True
 
     if move or status or tracking_number and not error_happened:
         response_task.resolve(request.user)

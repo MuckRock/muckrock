@@ -16,6 +16,7 @@ from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_
 ok_ = nose.tools.ok_
+raises = nose.tools.raises
 
 # pylint: disable=missing-docstring
 
@@ -331,3 +332,13 @@ class ResponseTaskListViewTests(TestCase):
             'Tracking should update for first request in move list.')
         ok_(change_tracking is not foia3.tracking_id and change_tracking is not foia4.tracking_id,
             'Tracking should not update for subsequent requests in list.')
+
+    def test_terrible_data(self):
+        """Posting awful data shouldn't cause everything to collapse."""
+        response = self.client.post(self.url, {
+            'move': 'omglol, howru',
+            'status': 'notastatus',
+            'tracking_number': ['wtf'],
+            'task': self.task.pk
+        })
+        ok_(response)
