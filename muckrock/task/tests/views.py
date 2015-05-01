@@ -302,7 +302,7 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_move(self):
         """Moving the response should save it to a new request."""
         move_to_id = 2
-        self.client.post(self.url, {'move': move_to_id, 'task': self.task.pk})
+        self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_id = updated_task.communication.foia.id
         eq_(foia_id, move_to_id,
