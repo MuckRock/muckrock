@@ -37,29 +37,31 @@
 {% endblock %}
 
 {% block task-extra-context %}
-<dl class="task-extra-context response-communication">
-    <dt>Full Text</dt>
-    <dd>{{task.communication.communication}}</dd>
-    {% if all_comms %}
-    <dt>Previous Communications</dt>
-        {% for comm in all_comms %}
+<div class="task-extra-context response-communication">
+    <button class="reveal-extra-context" data-state="0">More Info</button>
+    <dl class="extra-context hidden">
+        <dt>Full Text</dt>
+        <dd>{{task.communication.communication}}</dd>
+        {% if all_comms %}
+        <dt>Previous Communications</dt>
+            {% for comm in all_comms %}
         <dd>
-            <dl class="communication">
-                {% if comm.from_who %}
-                <dt>From</dt>
-                <dd>{{ comm.from_who }}</dd>
-                {% endif %}
-                {% if comm.date %}
-                <dt>Date</dt>
-                <dd>{{ comm.date|date:"m/d/Y" }}</dd>
-                {% endif %}
+            <div class="communication">
+                <header>
+                    {% if comm.from_who %}
+                    <p>From: {{ comm.from_who }}</p>
+                    {% endif %}
+                    {% if comm.date %}
+                    <time datetime="{{comm.date}}">{{ comm.date|date:"m/d/Y" }}</time>
+                    {% endif %}
+                </header>
                 {% if comm.communication %}
-                <dt>Body</dt>
-                <dd>{{ comm.communication }}</dd>
+                    <p>{{ comm.communication }}</p>
                 {% endif %}
-            </dl>
+            </div>
         </dd>
-        {% endfor %}
-    {% endif %}
-</dl>
+            {% endfor %}
+        {% endif %}
+    </dl>
+</div>
 {% endblock %}
