@@ -263,6 +263,7 @@ class NewAgencyTaskList(TaskList):
         other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
         other_agencies = other_agencies.exclude(id=task.agency.id)
         task_context.update({'other_agencies': other_agencies})
+        task_context.update({'foias': foia.models.FOIARequest.objects.filter(agency=task.agency)})
         return task_context
 
 class ResponseTaskList(TaskList):

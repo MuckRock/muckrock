@@ -18,6 +18,12 @@
     <dt>User</dt>
     <dd><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a></dd>
     {% endif %}
+    {% if foias %}
+    <dt>Pending Requests</dt>
+    {% for foia in foias %}
+    <dd><a href="{{ foia.get_absolute_url }}">{{ foia }}</a></dd>
+    {% endfor %}
+    {% endif %}
 </dl>
 {% endblock %}
 
