@@ -10,6 +10,8 @@ from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
+import logging
+
 from muckrock.foia.models.request import FOIARequest, STATUS
 
 logger = logging.getLogger(__name__)

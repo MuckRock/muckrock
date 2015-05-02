@@ -11,7 +11,9 @@
             <textarea data-doc-id="{{ file.doc_id }}" readonly></textarea>
         </div>
         {% endif %}
+        {% if file.ffile %}
         <a href="{{file.ffile.url}}" target="_blank">Download</a>
+        {% endif %}
 		{% if file.is_eml %}
 			<p>{{file|display_eml|linebreaks|urlize}}</p>
 		{% endif %}

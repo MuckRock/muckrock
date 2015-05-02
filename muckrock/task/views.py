@@ -190,36 +190,29 @@ def response_task_post_handler(request, task_pk):
         response_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist:
         return
-
     error_happened = False
-
     form = ResponseTaskForm(request.POST)
     if not form.is_valid():
         messages.error(request, 'Form is invalid')
         return
-
     cleaned_data = form.cleaned_data
     status = cleaned_data['status']
     move = cleaned_data['move']
     tracking_number = cleaned_data['tracking_number']
-
     # make sure that the move is executed first, so that the status
     # and tracking operations are applied to the correct FOIA request
-
     if move:
         try:
             response_task.move(move)
         except (Http404, ValueError):
             messages.error(request, 'No valid destination for moving the request.')
             error_happened = True
-
     if status:
         try:
             response_task.set_status(status)
         except ValueError:
             messages.error(request, 'You tried to set an invalid status. How did you manage that?')
             error_happened = True
-
     if tracking_number:
         try:
             response_task.set_tracking_id(tracking_number)
@@ -227,10 +220,8 @@ def response_task_post_handler(request, task_pk):
             messages.error(request,
                 'You tried to set an invalid tracking id. Just use a string of characters.')
             error_happened = True
-
     if move or status or tracking_number and not error_happened:
         response_task.resolve(request.user)
-
     return
 
 class OrphanTaskList(TaskList):
@@ -284,6 +275,9 @@ class ResponseTaskList(TaskList):
         task_context = super(ResponseTaskList, self).get_task_context(task)
         form_initial = {}
         if task.communication.foia:
-            form_initial['status'] = task.communication.foia
+            foia = task.communication.foia
+            form_initial['status'] = foia.status
+            task_context.update({'all_comms': foia.communications.all().order_by('-date')})
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
+        task_context.update({'attachments': task.communication.files.all()})
         return task_context

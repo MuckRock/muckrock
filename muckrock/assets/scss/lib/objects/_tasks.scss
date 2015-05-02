@@ -7,15 +7,11 @@
     }
 }
 
-.task header {
-    background: $color-black;
-}
-
-.resolved.task header {
+.resolved.task-header {
     background: $color-success;
 }
 
-.task header {
+.task-header {
     @include span-columns(12);
     @include row;
     position: relative;
@@ -84,6 +80,9 @@ dl.task-data {
 
     .extra-context {
         display: block;
+        margin-top: $base-margin;
+        padding-top: $base-padding;
+        border-top: 1px solid $color-grey;
     }
     .extra-context.hidden {
         display: none;
@@ -98,6 +97,8 @@ dl.task-data {
         display: none;
     }
 }
+
+/* New Agency Task */
 
 .new-agency.rejection.form {
     border-color: $color-failure;
@@ -123,4 +124,40 @@ dl.task-data {
         }
     }
 
+}
+
+/* Response Task */
+
+.response.task {
+    #id_status {
+        margin-bottom: $base-margin;
+    }
+    .file {
+        margin-bottom: $base-margin/4;
+        border: 1px solid $color-grey;
+        padding: $base-padding/4;
+    }
+    .task-extra-context {
+        margin: 0;
+    }
+    .task-extra-context dd {
+        margin-bottom: $base-margin;
+        &:last-child { margin-bottom: 0; }
+    }
+    .communication {
+        // margin: $base-margin/2 0;
+        border: 1px solid $color-grey;
+        border-left-width: 9px;
+        padding: $base-padding/2;
+        header {
+            @include row;
+            @extend dfn;
+            p, time { @extend %half; }
+            p { margin: 0; }
+            @include media($medium-layout) {
+                time { text-align: right; }
+            }
+        }
+        p { margin-bottom: 0; }
+    }
 }
