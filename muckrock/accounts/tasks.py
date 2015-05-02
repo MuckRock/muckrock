@@ -17,6 +17,9 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
+from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
+                                 GenericTask
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +75,25 @@ def store_statstics():
         orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
         unapproved_agencies=Agency.objects.filter(approved=False).count(),
+        total_tasks=Task.objects.count(),
+        total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
+        total_generic_tasks=GenericTask.objects.count(),
+        total_unresolved_generic_tasks=GenericTask.objects.filter(resolved=False).count(),
+        total_orphan_tasks=OrphanTask.objects.count(),
+        total_unresolved_orphan_tasks=OrphanTask.objects.filter(resolved=False).count(),
+        total_snailmail_tasks=SnailMailTask.objects.count(),
+        total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
+        total_rejectedemail_tasks=RejectedEmailTask.objects.count(),
+        total_unresolved_rejectedemail_tasks=
+            RejectedEmailTask.objects.filter(resolved=False).count(),
+        total_staleagency_tasks=StaleAgencyTask.objects.count(),
+        total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
+        total_flagged_tasks=FlaggedTask.objects.count(),
+        total_unresolved_flagged_tasks=FlaggedTask.objects.filter(resolved=False).count(),
+        total_newagency_tasks=NewAgencyTask.objects.count(),
+        total_unresolved_newagency_tasks=NewAgencyTask.objects.filter(resolved=False).count(),
+        total_response_tasks=ResponseTask.objects.count(),
+        total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

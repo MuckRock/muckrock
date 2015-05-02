@@ -168,7 +168,7 @@ class FOIACommunication(models.Model):
         else:
             snail = True
         foia.submit(snail=snail)
-        logging.info('Communication %d was resent.', self.id)
+        logging.info('Communication #%d resent.', self.id)
 
     def set_raw_email(self, msg):
         """Set the raw email for this communication"""

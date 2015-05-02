@@ -499,6 +499,7 @@ class FOIARequest(models.Model):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
+            task.models.SnailMailTask.objects.create(category='f', communication=comm)
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
@@ -518,6 +519,9 @@ class FOIARequest(models.Model):
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
+
+        if from_addr == 'fax':
+            subject = ('MR#%s-%s - %s' % self.pk, comm.pk, subject)
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)

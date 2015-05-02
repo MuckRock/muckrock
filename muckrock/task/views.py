@@ -6,13 +6,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import resolve
+from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
-from muckrock.task.forms import TaskFilterForm
+from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
 from muckrock.views import MRFilterableListView
@@ -39,7 +40,6 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     template_name = 'lists/task_list.html'
     task_template = 'task/default.html'
-    task_context = {}
     model = Task
 
     def get_queryset(self):
@@ -58,13 +58,19 @@ class TaskList(MRFilterableListView):
             rendered_tasks.append(rendered_task)
         return rendered_tasks
 
+    def get_task_context(self, task):
+        """Returns a dictionary of context for the specific task"""
+        # pylint: disable=no-self-use
+        task_context = {'task': task}
+        return task_context
+
     def render_task(self, task):
         """Renders a single task"""
         the_template = self.task_template
-        the_context = self.task_context
+        the_context = {}
         try:
             task = self.model.objects.get(id=task.id)
-            the_context.update({'task': task})
+            the_context.update(self.get_task_context(task))
         except self.model.DoesNotExist:
             return ''
         return template.loader.render_to_string(
@@ -184,10 +190,38 @@ def response_task_post_handler(request, task_pk):
         response_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist:
         return
-    if request.POST.get('status'):
-        status = request.POST.get('status')
-        if status in dict(STATUS):
+    error_happened = False
+    form = ResponseTaskForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, 'Form is invalid')
+        return
+    cleaned_data = form.cleaned_data
+    status = cleaned_data['status']
+    move = cleaned_data['move']
+    tracking_number = cleaned_data['tracking_number']
+    # make sure that the move is executed first, so that the status
+    # and tracking operations are applied to the correct FOIA request
+    if move:
+        try:
+            response_task.move(move)
+        except (Http404, ValueError):
+            messages.error(request, 'No valid destination for moving the request.')
+            error_happened = True
+    if status:
+        try:
             response_task.set_status(status)
+        except ValueError:
+            messages.error(request, 'You tried to set an invalid status. How did you manage that?')
+            error_happened = True
+    if tracking_number:
+        try:
+            response_task.set_tracking_id(tracking_number)
+        except ValueError:
+            messages.error(request,
+                'You tried to set an invalid tracking id. Just use a string of characters.')
+            error_happened = True
+    if move or status or tracking_number and not error_happened:
+        response_task.resolve(request.user)
     return
 
 class OrphanTaskList(TaskList):
@@ -222,27 +256,29 @@ class NewAgencyTaskList(TaskList):
     model = NewAgencyTask
     task_template = 'task/new_agency.html'
 
-    def render_task(self, task):
-        """Overrides task rendering to render special forms"""
-        the_template = self.task_template
-        the_context = self.task_context
-        try:
-            task = self.model.objects.get(id=task.id)
-            the_context.update({'task': task})
-            the_context.update({'agency_form': AgencyForm(instance=task.agency)})
-            other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
-            other_agencies = other_agencies.exclude(id=task.agency.id)
-            the_context.update({'other_agencies': other_agencies})
-        except self.model.DoesNotExist:
-            return ''
-        return template.loader.render_to_string(
-            the_template,
-            the_context,
-            context_instance=template.RequestContext(self.request)
-        )
+    def get_task_context(self, task):
+        """Adds NewAgencyTask-specific context"""
+        task_context = super(NewAgencyTaskList, self).get_task_context(task)
+        task_context.update({'agency_form': AgencyForm(instance=task.agency)})
+        other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+        other_agencies = other_agencies.exclude(id=task.agency.id)
+        task_context.update({'other_agencies': other_agencies})
+        task_context.update({'foias': foia.models.FOIARequest.objects.filter(agency=task.agency)})
+        return task_context
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
     task_template = 'task/response.html'
-    task_context = {'status': STATUS}
+
+    def get_task_context(self, task):
+        """Adds ResponseTask-specific context"""
+        task_context = super(ResponseTaskList, self).get_task_context(task)
+        form_initial = {}
+        if task.communication.foia:
+            the_foia = task.communication.foia
+            form_initial['status'] = the_foia.status
+            task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
+        task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
+        task_context.update({'attachments': task.communication.files.all()})
+        return task_context
