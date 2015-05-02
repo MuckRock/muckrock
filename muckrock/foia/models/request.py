@@ -23,7 +23,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
-from muckrock.task.models import SnailMailTask
+from muckrock import task
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
@@ -446,7 +446,7 @@ class FOIARequest(models.Model):
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
-            SnailMailTask.objects.create(category=notice, communication=comm)
+            task.models.SnailMailTask.objects.create(category=notice, communication=comm)
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
