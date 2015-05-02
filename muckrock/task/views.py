@@ -276,9 +276,9 @@ class ResponseTaskList(TaskList):
         task_context = super(ResponseTaskList, self).get_task_context(task)
         form_initial = {}
         if task.communication.foia:
-            foia = task.communication.foia
-            form_initial['status'] = foia.status
-            task_context.update({'all_comms': foia.communications.all().order_by('-date')})
+            the_foia = task.communication.foia
+            form_initial['status'] = the_foia.status
+            task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         task_context.update({'attachments': task.communication.files.all()})
         return task_context

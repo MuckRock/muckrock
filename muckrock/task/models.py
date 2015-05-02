@@ -201,7 +201,7 @@ class ResponseTask(Task):
             raise ValueError('Tracking ID should be a unicode string.')
         comm = self.communication
         if not comm.foia:
-            raise FOIARequest.DoesNotExist
+            raise ValueError('The task communication is an orphan.')
         foia = comm.foia
         foia.tracking_id = tracking_id
         foia.save()

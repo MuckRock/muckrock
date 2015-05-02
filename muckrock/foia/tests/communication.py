@@ -10,7 +10,6 @@ from django.core.validators import ValidationError
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
 
-import logging
 import nose
 
 ok_ = nose.tools.ok_

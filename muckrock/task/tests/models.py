@@ -19,6 +19,7 @@ eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
 # pylint: disable=missing-docstring
+# pylint: disable=line-too-long
 
 class TaskTests(TestCase):
     """Test the Task base class"""
@@ -78,7 +79,6 @@ class OrphanTaskTests(TestCase):
 
     def test_move(self):
         """Should move the communication to the listed requests and create a ResponseTask for each new communication."""
-        # pylint: disable=line-too-long
         count_response_tasks = task.models.ResponseTask.objects.count()
         self.task.move([1, 2, 3])
         eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
