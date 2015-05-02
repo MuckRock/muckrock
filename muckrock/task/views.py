@@ -227,6 +227,7 @@ class NewAgencyTaskList(TaskList):
             task = self.model.objects.get(id=task.id)
             the_context.update({'task': task})
             the_context.update({'agency_form': AgencyForm(instance=task.agency)})
+            the_context.update({'foias': foia.models.FOIARequest.objects.filter(agency=task.agency)})
             other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
             other_agencies = other_agencies.exclude(id=task.agency.id)
             the_context.update({'other_agencies': other_agencies})
