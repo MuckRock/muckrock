@@ -89,7 +89,9 @@ class TestCommunicationClone(test.TestCase):
         self.comm.clone(2)
         # + 1 communications
         eq_(FOIACommunication.objects.count(), comm_count + 1,
-            'Should clone the request twice.')
+            'Should clone the request once.')
+        eq_(self.comm.pk, 1,
+            'The identity of the communication that calls clone should not change.')
 
     def test_clone_multi(self):
         """Should duplicate the communication to each request in the list."""
