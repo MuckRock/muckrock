@@ -499,7 +499,7 @@ class FOIARequest(models.Model):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
-            SnailMailTask.objects.create(category='f', communication=comm)
+            task.models.SnailMailTask.objects.create(category='f', communication=comm)
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
