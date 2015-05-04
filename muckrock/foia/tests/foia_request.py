@@ -2,10 +2,11 @@
 Tests using nose for the FOIA application
 """
 
+from django.contrib import messages
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, resolve
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, Client
 import nose.tools
 
 import datetime
@@ -13,6 +14,8 @@ import re
 from datetime import date as real_date
 from operator import attrgetter
 
+from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction

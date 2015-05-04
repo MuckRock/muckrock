@@ -13,14 +13,12 @@ from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from collections import namedtuple
-from datetime import datetime, date, timedelta
-from decimal import Decimal
+from datetime import datetime, timedelta
 import logging
 import stripe
 import sys
 
-from muckrock.crowdfund.forms import CrowdfundEnableForm
-from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.forms import \
     FOIADeleteForm, \
     FOIAAdminFixForm, \
@@ -247,48 +245,6 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     return redirect(foia)
 
 @login_required
-def crowdfund_request(request, jurisdiction, jidx, slug, idx):
-    """Enable crowdfunding on the request, and send an email announcing it."""
-    def form_actions(request, foia, _):
-        """Helper class, passed to generic function"""
-        crowdfund = CrowdfundRequest.objects.create(
-            foia=foia,
-            payment_required=foia.price * Decimal('1.05'),
-            date_due=date.today() + timedelta(30)
-        )
-        success_msg = 'You started a crowdfunding campaign, now get the word out!'
-        messages.success(request, success_msg)
-        send_mail(
-            '%s has launched a crowdfunding campaign' % request.user.username,
-            render_to_string(
-                'text/crowdfund/notify.txt',
-                {'crowdfund': crowdfund, 'user': request.user}
-            ),
-            'info@muckrock.com',
-            ['requests@muckrock.com'],
-            fail_silently=False
-        )
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = RequestAction(
-        form_actions=form_actions,
-        msg='enabled crowdfunding for',
-        tests=[(
-            lambda f: f.is_payable(),
-            'You can only start a crowdfund for a request requiring payment.'
-        )],
-        form_class=lambda r, f: CrowdfundEnableForm,
-        return_url=lambda r, f: f.get_absolute_url(),
-        heading='Enable Crowdfunding for Your Request',
-        value='Crowdfund',
-        must_own=True,
-        template=action_template,
-        extra_context=lambda f: {'desc': ('With crowdfunding, others will '
-                                          'be able to contribute the money '
-                                          'needed to fufill this request.')}
-    )
-    return _foia_action(request, foia, action)
-
-@login_required
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -366,5 +322,50 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
     return render_to_response(
         'forms/foia/admin_fix.html',
         context,
+        context_instance=RequestContext(request)
+    )
+
+@login_required
+def crowdfund_request(request, idx, **kwargs):
+    """Crowdfund a request"""
+    # pylint: disable=unused-argument
+    foia = FOIARequest.objects.get(pk=idx)
+    owner_or_staff = request.user == foia.user or request.user.is_staff
+
+    # check for unauthorized access
+    if not owner_or_staff:
+        messages.error(request, 'You may only crowdfund your own requests.')
+        return redirect(foia)
+    if foia.has_crowdfund():
+        messages.error(request, 'You may only run one crowdfund per request.')
+        return redirect(foia)
+    if foia.status != 'payment':
+        messages.error(request, 'You may only crowfund when payment is required.')
+        return redirect(foia)
+
+    if request.method == 'POST':
+        # save crowdfund object
+        form = CrowdfundRequestForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your crowdfund has started, spread the word!')
+            return redirect(foia)
+
+    elif request.method == 'GET':
+        # create crowdfund form
+        default_crowdfund_duration = 30
+        date_due = datetime.now() + timedelta(default_crowdfund_duration)
+        initial = {
+            'name': u'Crowdfund Request: %s' % unicode(foia),
+            'description': 'Help cover the request fees needed to free these docs!',
+            'payment_required': foia.price,
+            'date_due': date_due,
+            'foia': foia
+        }
+        form = CrowdfundRequestForm(initial=initial)
+
+    return render_to_response(
+        'forms/foia/crowdfund.html',
+        {'form': form},
         context_instance=RequestContext(request)
     )
