@@ -146,12 +146,6 @@ def _contribute(request, crowdfund, payment_model, redirect_url):
                 name=name,
                 show=False
             )
-            if isinstance(payment, CrowdfundRequestPayment):
-                CrowdfundPaymentTask.objects.create(
-                    request_payment=payment)
-            elif isinstance(payment, CrowdfundProjectPayment):
-                CrowdfundPaymentTask.objects.create(
-                    project_payment=payment)
             crowdfund.payment_received += Decimal(amount)
             crowdfund.save()
             messages.success(request, 'You contributed $%.2f. Thanks!' % amount)
