@@ -58,6 +58,8 @@ class TaskList(MRFilterableListView):
             show_resolved = True
         if not show_resolved:
             queryset = queryset.exclude(resolved=True)
+        # order queryset
+        queryset = queryset.order_by('-date_done', '-date_created')
         return queryset
 
     def render_list(self, tasks):
