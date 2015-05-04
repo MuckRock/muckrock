@@ -550,4 +550,3 @@ class TestFOIAIntegration(TestCase):
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
-
