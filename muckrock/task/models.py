@@ -229,8 +229,7 @@ class ResponseTask(Task):
 
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
-
-    amount = models.IntegerField()
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
     user = models.ForeignKey(User)
     foia = models.ForeignKey('foia.FOIARequest')
 
@@ -239,7 +238,6 @@ class PaymentTask(Task):
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
-
     crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
 
     def __unicode__(self):
