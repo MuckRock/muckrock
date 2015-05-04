@@ -242,7 +242,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         )
         PaymentTask.objects.create(
             user=request.user,
-            amount=int(amount),
+            amount=int(amount)/100,
             foia=foia)
     return redirect(foia)
 
