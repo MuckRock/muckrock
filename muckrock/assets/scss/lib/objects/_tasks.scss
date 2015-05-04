@@ -7,7 +7,7 @@
     }
 }
 
-.resolved.task-header {
+.resolved .task-header {
     background: $color-success;
 }
 
@@ -160,4 +160,11 @@ dl.task-data {
         }
         p { margin-bottom: 0; }
     }
+}
+
+/* Snail Mail Task */
+
+.extra-context textarea {
+    height: 15em;
+    overflow: none;
 }

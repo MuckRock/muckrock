@@ -15,7 +15,7 @@
                 {% endblock %}
             </p>
             {% block task-date %}
-            <time class="task-date-done" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="#{{task.pk}}-task">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
+            <time class="task-date-done" datetime="{{task.date_created|date:'Y-m-d G:i::s'}}"><a class="permalink" href="?id={{task.id}}">{{task.date_created|date:'m/d/Y G:i'}}</a></time>
             {% endblock %}
         </div>
         {% endif %}
