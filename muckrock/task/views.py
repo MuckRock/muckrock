@@ -228,13 +228,17 @@ class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
     task_template = 'task/orphan.html'
-    task_context = {'status': STATUS}
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
     task_template = 'task/snail_mail.html'
-    task_context = {'status': STATUS}
+
+    def get_task_context(self, task):
+        """Adds SnailMailTask-specific context"""
+        task_context = super(SnailMailTaskList, self).get_task_context(task)
+        task_context['status'] = STATUS
+        return task_context
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
