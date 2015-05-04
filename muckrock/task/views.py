@@ -292,6 +292,7 @@ class ResponseTaskList(TaskList):
         if task.communication.foia:
             the_foia = task.communication.foia
             form_initial['status'] = the_foia.status
+            form_initial['tracking_number'] = the_foia.tracking_id
             task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         task_context.update({'attachments': task.communication.files.all()})
