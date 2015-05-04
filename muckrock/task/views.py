@@ -35,6 +35,7 @@ def count_tasks():
     count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
+    count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
@@ -310,4 +311,4 @@ class PaymentTaskList(TaskList):
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     model = CrowdfundTask
-    task_template = 'task/default.html'
+    task_template = 'task/crowdfund.html'
