@@ -43,10 +43,20 @@ class TaskList(MRFilterableListView):
     model = Task
 
     def get_queryset(self):
-        """Remove resolved tasks unless filter says to keep them"""
+        """Apply query parameters to the queryset"""
         queryset = super(TaskList, self).get_queryset()
-
-        if not self.request.GET.get('show_resolved'):
+        filter_ids = self.request.GET.getlist('id')
+        show_resolved = self.request.GET.get('show_resolved')
+        # first we have to check the integrity of the id values
+        for filter_id in filter_ids:
+            try:
+                filter_id = int(filter_id)
+            except ValueError:
+                filter_ids.remove(filter_id)
+        if filter_ids:
+            queryset = queryset.filter(id__in=filter_ids)
+            show_resolved = True
+        if not show_resolved:
             queryset = queryset.exclude(resolved=True)
         return queryset
 
