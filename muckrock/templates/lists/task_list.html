@@ -40,6 +40,10 @@
             <span class="counter">{{ counters.response }}</span>
             <a href="{% url 'response-task-list' %}">Response</a>
         </li>
+        <li class="{% active request '^/task/payment/$' %}">
+            <span class="counter">{{ counters.payment }}</span>
+            <a href="{% url 'payment-task-list' %}">Payment</a>
+        </li>
     </ul>
 </section>
 {% endblock %}
