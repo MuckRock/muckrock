@@ -17,4 +17,6 @@ urlpatterns = patterns(
     url(r'^flagged/$', views.FlaggedTaskList.as_view(), name='flagged-task-list'),
     url(r'^new-agency/$', views.NewAgencyTaskList.as_view(), name='new-agency-task-list'),
     url(r'^response/$', views.ResponseTaskList.as_view(), name='response-task-list'),
+    url(r'^payment/$', views.PaymentTaskList.as_view(), name='payment-task-list'),
+    url(r'^crowdfund/$', views.CrowdfundTaskList.as_view(), name='crowdfund-task-list')
 )

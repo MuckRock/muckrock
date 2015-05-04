@@ -228,26 +228,19 @@ class ResponseTask(Task):
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
 class PaymentTask(Task):
-    """A payment for a request fee"""
+    """Created when the fee for a request has been paid"""
 
-    user = models.ForeignKey(User)
     amount = models.IntegerField()
+    user = models.ForeignKey(User)
     foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
         return u'Payment: %s for %s' % (self.amount, self.foia)
 
-class CrowdfundPaymentTask(Task):
-    """A payment for a crowdfund"""
+class CrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
 
-    # one of these should be not null
-    request_payment = models.ForeignKey('crowdfund.CrowdfundRequestPayment', blank=True, null=True)
-    project_payment = models.ForeignKey('crowdfund.CrowdfundProjectPayment', blank=True, null=True)
+    crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
 
     def __unicode__(self):
-        if self.request_payment:
-            return u'Crowdfund: %s' % self.request_payment
-        elif self.project_payment:
-            return u'Crowdfund: %s' % self.project_payment
-        else:
-            return u'Crowdfund: <None>'
+        return u'Crowdfund: %s' % self.crowdfund
