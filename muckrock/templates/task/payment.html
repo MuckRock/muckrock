@@ -9,14 +9,16 @@
 {% endblock %}
 
 {% block task-data %}
-<summary>
-    <p><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a> paid {{task.amount}} for <a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">{{task.foia}}</a>.</p>
+<summary class="task-data">
+    <p><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a> paid ${{task.amount}} for <a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">{{task.foia}}</a>.</p>
+    {% if task.foia.amount %}
     {% if task.amount > task.foia.amount %}
     <p>The payment is more than the full price of the request, which is {{task.foia.amount}}.</p>
     {% elif task.amount < task.foia.amount %}
     <p>The payment is not the full price of the request, which is {{task.foia.amount}}.</p>
     {% else %}
     <p>The payment is the exact price of the request!</p>
+    {% endif %}
     {% endif %}
 </summary>
 {% endblock %}
