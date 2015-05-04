@@ -155,7 +155,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             PaymentTask.objects.create(
                 user=request.user,
-                amount=int(amount),
+                amount=int(amount)/100.0,
                 foia=foia)
 
             logger.info('%s has paid %0.2f for request %s',
