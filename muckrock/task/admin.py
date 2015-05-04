@@ -8,7 +8,7 @@ from django.contrib import admin
 
 from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, \
-                                 ResponseTask, GenericTask
+                                 ResponseTask, GenericTask, PaymentTask
 
 class OrphanTaskAdmin(VersionAdmin):
     """Orphan Task Admin"""
@@ -41,6 +41,10 @@ class ResponseTaskAdmin(VersionAdmin):
 class GenericTaskAdmin(VersionAdmin):
     """Generic Task Admin"""
 
+class PaymentTaskAdmin(VersionAdmin):
+    """Payment Task Admin"""
+    readonly_fields = ['foia', 'user', 'amount']
+
 admin.site.register(OrphanTask, OrphanTaskAdmin)
 admin.site.register(SnailMailTask, SnailMailTaskAdmin)
 admin.site.register(RejectedEmailTask, RejectedEmailTaskAdmin)
@@ -49,3 +53,4 @@ admin.site.register(FlaggedTask, FlaggedTaskAdmin)
 admin.site.register(NewAgencyTask, NewAgencyTaskAdmin)
 admin.site.register(ResponseTask, ResponseTaskAdmin)
 admin.site.register(GenericTask, GenericTaskAdmin)
+admin.site.register(PaymentTask, PaymentTaskAdmin)
