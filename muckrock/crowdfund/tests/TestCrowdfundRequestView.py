@@ -134,4 +134,9 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_limit_amount(self):
         """No more than the amount required should be paid."""
-
+        data = self.data
+        data['amount'] = 20000
+        self.post(data)
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        eq_(payment.amount, self.crowdfund.payment_required,
+            'The amount should be capped at the crowdfund\'s required payment.')
