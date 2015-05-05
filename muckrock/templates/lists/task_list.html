@@ -48,6 +48,10 @@
             <span class="counter">{{ counters.crowdfund }}</span>
             <a href="{% url 'crowdfund-task-list' %}">Crowdfund</a>
         </li>
+        <li class="{% active request '^/task/multirequest/$' %}">
+            <span class="counter">{{ counters.multirequest }}</span>
+            <a href="{% url 'multirequest-task-list' %}">Multi-Request</a>
+        </li>
     </ul>
 </section>
 {% endblock %}

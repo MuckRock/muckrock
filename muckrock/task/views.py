@@ -36,6 +36,7 @@ def count_tasks():
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
     count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
+    count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
