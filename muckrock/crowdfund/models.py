@@ -31,6 +31,10 @@ class CrowdfundABC(models.Model):
         """Has this crowdfuning run out of time?"""
         return date.today() >= self.date_due
 
+    def amount_remaining(self):
+        """Reports the amount still needed to be raised"""
+        return self.payment_required - self.payment_receieved
+
     class Meta:
         abstract = True
 
