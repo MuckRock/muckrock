@@ -4,7 +4,7 @@ Tests for crowdfund app
 
 from django.test import TestCase, Client
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 import logging
 from nose.tools import ok_, eq_
@@ -13,6 +13,7 @@ import stripe
 from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 from muckrock.foia.models import FOIARequest
+from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
 
 # pylint: disable=missing-docstring
@@ -140,3 +141,15 @@ class TestCrowdfundRequestView(TestCase):
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.amount, self.crowdfund.payment_required,
             'The amount should be capped at the crowdfund\'s required payment.')
+
+    def test_completion(self):
+        """The crowdfund should fast-forward its due date and create a task when completed."""
+        crowdfund_task_count = CrowdfundTask.objects.count()
+        data = self.data
+        data['amount'] = int(self.crowdfund.payment_required)*100
+        self.post(data)
+        updated_crowdfund = CrowdfundRequest.objects.get(pk=self.crowdfund.pk)
+        eq_(updated_crowdfund.date_due, date.today(),
+            'The due date should be the same as today.')
+        eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
+            'A new crowdfund task should be created.')
