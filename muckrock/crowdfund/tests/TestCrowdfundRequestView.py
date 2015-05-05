@@ -66,19 +66,19 @@ class TestCrowdfundRequestView(TestCase):
         eq_(response.status_code, 200,
             'The crowdfund view should resolve and be visible to everyone')
 
-    def post_data(self):
+    def post(self, data):
         # need a unique token for each POST
-        form = CrowdfundRequestPaymentForm(self.data)
+        form = CrowdfundRequestPaymentForm(data)
         ok_(form.is_valid())
-        self.data['token'] = get_stripe_token()
-        logging.info(self.data)
-        response = self.client.post(self.url, data=self.data)
+        data['token'] = get_stripe_token()
+        logging.info(data)
+        response = self.client.post(self.url, data=data)
         ok_(response, 'The server should respond to the post request')
         return response
 
     def test_anonymous_contribution(self):
         """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
-        self.post_data()
+        self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.user, None,
             ('If the user is logged out, the returned payment'
@@ -87,7 +87,7 @@ class TestCrowdfundRequestView(TestCase):
     def test_anonymous_while_logged_in(self):
         """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
         self.client.login(username='adam', password='abc')
-        self.post_data()
+        self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.user, None,
             ('If the user is logged in, the returned payment'
@@ -97,7 +97,7 @@ class TestCrowdfundRequestView(TestCase):
         """An attributed contribution is opted-in by the user"""
         self.client.login(username='adam', password='abc')
         self.data['show'] = True
-        self.post_data()
+        self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         ok_(payment.user,
             ('If the user is logged in and opts into attribution, the returned'
@@ -107,7 +107,7 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_correct_amount(self):
         """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
-        self.post_data()
+        self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         amount = Decimal(float(self.data['amount'])/100)
         eq_(payment.amount, amount,
@@ -116,13 +116,13 @@ class TestCrowdfundRequestView(TestCase):
     def test_contributors(self):
         """The crowdfund can get a list of all its contibutors by parsing its list of payments."""
         # anonymous payment
-        self.post_data()
+        self.post(self.data)
         # anonymous payment
         self.client.login(username='adam', password='abc')
-        self.post_data()
+        self.post(self.data)
         # attributed payment
         self.data['show'] = True
-        self.post_data()
+        self.post(self.data)
 
         new_crowdfund = CrowdfundRequest.objects.get(pk=self.crowdfund.pk)
         contributors = new_crowdfund.contributors()
@@ -131,3 +131,7 @@ class TestCrowdfundRequestView(TestCase):
         eq_(len(contributors), 3, 'All contributions should return some kind of user')
         eq_(sum(contributor.is_anonymous() is True for contributor in contributors), 2,
             'There should only be two anonymous users in this list')
+
+    def test_limit_amount(self):
+        """No more than the amount required should be paid."""
+
