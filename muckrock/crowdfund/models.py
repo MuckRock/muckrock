@@ -9,6 +9,7 @@ from datetime import date
 from decimal import Decimal
 import logging
 
+from muckrock.foia.models import FOIARequest
 from muckrock import task
 
 class CrowdfundABC(models.Model):
@@ -53,7 +54,7 @@ class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
     name = models.CharField(max_length=255, default='Crowdfund this request')
     description = models.TextField(blank=True)
-    foia = models.OneToOneField('foia.FOIARequest', related_name='crowdfund')
+    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
 
     def __unicode__(self):
         # pylint: disable=E1101
@@ -109,7 +110,7 @@ class Project(models.Model):
     slug = models.SlugField(max_length=255)
     description = models.TextField(blank=True)
     foias = models.ManyToManyField(
-        'foia.FOIARequest',
+        FOIARequest,
         related_name='foias',
         blank=True,
         null=True
