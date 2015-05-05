@@ -121,6 +121,8 @@ urlpatterns = patterns(
         'django.contrib.sitemaps.views.sitemap',
         {'sitemaps': sitemaps}
     ),
+    url(r'^news-sitemaps/', include('news_sitemaps.urls')),
+
 )
 
 if settings.DEBUG:

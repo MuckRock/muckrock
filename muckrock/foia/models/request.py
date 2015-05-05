@@ -23,7 +23,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
-from muckrock.task.models import SnailMailTask
+from muckrock import task
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
@@ -446,7 +446,7 @@ class FOIARequest(models.Model):
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
-            SnailMailTask.objects.create(category=notice, communication=comm)
+            task.models.SnailMailTask.objects.create(category=notice, communication=comm)
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
@@ -499,7 +499,7 @@ class FOIARequest(models.Model):
                       'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
-            SnailMailTask.objects.create(category='f', communication=comm)
+            task.models.SnailMailTask.objects.create(category='f', communication=comm)
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
@@ -519,6 +519,9 @@ class FOIARequest(models.Model):
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
+
+        if from_addr == 'fax':
+            subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)
