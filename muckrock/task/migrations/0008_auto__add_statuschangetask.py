@@ -13,7 +13,7 @@ class Migration(SchemaMigration):
             (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
             ('old_status', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('foia', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, blank=True)),
+            ('foia', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'])),
         ))
         db.send_create_signal(u'task', ['StatusChangeTask'])
 
@@ -293,7 +293,7 @@ class Migration(SchemaMigration):
         },
         u'task.statuschangetask': {
             'Meta': {'ordering': "['date_created']", 'object_name': 'StatusChangeTask', '_ormbases': [u'task.Task']},
-            'foia': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.FOIARequest']", 'null': 'True', 'blank': 'True'}),
+            'foia': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.FOIARequest']"}),
             'old_status': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})

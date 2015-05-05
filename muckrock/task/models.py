@@ -232,7 +232,7 @@ class StatusChangeTask(Task):
 
     user = models.ForeignKey(User)
     old_status = models.CharField(max_length=255)
-    foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
+    foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
         return u'StatusChange: %s' % self.foia
