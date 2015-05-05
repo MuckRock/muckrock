@@ -37,7 +37,7 @@
             {% endif %}
             {% if foia.agency.address %}
     <dt>Agency Address</dt>
-    <dd>Agency Address: {{foia.agency.address|linebreaks}}</dd>
+    <dd>{{foia.agency.address|linebreaks}}</dd>
             {% endif %}
             {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
     <dt>Agency Notes</dt>
@@ -50,7 +50,7 @@
     <dd><a href="{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">{{foia.agency.appeal_agency}}</a></dd>
             {% if foia.agency.appeal_agency.address %}
     <dt>Appeal Agency Address</dt>
-    <dd>Address: {{foia.agency.appeal_agency.address|linebreaks}}</dd>
+    <dd>{{foia.agency.appeal_agency.address|linebreaks}}</dd>
             {% endif %}
         {% endif %}
     {% endif %}
@@ -76,10 +76,10 @@
     <button class="reveal-extra-context" data-state="0">More Info</button>
     <div class="extra-context hidden">
         <textarea id="full-letter-{{task.pk}}">
-        {% now "F j, Y" %}
-        {% with task.communication.foia as request %}
-            {% include "text/foia/comms.txt" %}
-        {% endwith %}
+{{task.communication.foia.agency.address}}
+
+{% now "F j, Y" %}
+{% with task.communication.foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
         </textarea>
     </div>
 </div>

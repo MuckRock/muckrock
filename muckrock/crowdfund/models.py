@@ -10,6 +10,7 @@ from decimal import Decimal
 import logging
 
 from muckrock.foia.models import FOIARequest
+from muckrock import task
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -29,6 +30,10 @@ class CrowdfundABC(models.Model):
     def expired(self):
         """Has this crowdfuning run out of time?"""
         return date.today() >= self.date_due
+
+    def amount_remaining(self):
+        """Reports the amount still needed to be raised"""
+        return self.payment_required - self.payment_received
 
     class Meta:
         abstract = True
@@ -69,6 +74,15 @@ class CrowdfundRequest(CrowdfundABC):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
+        if self.payment_received >= self.payment_required:
+            self.complete_crowdfund()
+
+    def complete_crowdfund(self):
+        """Once the crowdfund reaches its goal: expire it, log it, and create a new task for it."""
+        self.date_due = date.today()
+        self.save()
+        logging.info('Crowdfund %d reached its goal.', self.id)
+        task.models.CrowdfundTask.objects.create(crowdfund=self)
 
     def contributors(self):
         """Return a list of all the contributors to a crowdfund"""
@@ -79,6 +93,8 @@ class CrowdfundRequest(CrowdfundABC):
                 contributors.append(payment.user)
             else:
                 contributors.append(AnonymousUser())
+        logging.debug(payments)
+        logging.debug(contributors)
         return contributors
 
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
@@ -96,7 +112,7 @@ class Project(models.Model):
     slug = models.SlugField(max_length=255)
     description = models.TextField(blank=True)
     foias = models.ManyToManyField(
-        'foia.FOIARequest',
+        FOIARequest,
         related_name='foias',
         blank=True,
         null=True

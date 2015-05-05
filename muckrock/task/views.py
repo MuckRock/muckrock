@@ -15,7 +15,9 @@ from muckrock.agency.models import Agency
 from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
+                                 PaymentTask, CrowdfundTask, MultiRequestTask, StatusChangeTask, \
+                                 FailedFaxTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
@@ -33,6 +35,11 @@ def count_tasks():
     count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
     count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
+    count['status_change'] = StatusChangeTask.objects.exclude(resolved=True).count()
+    count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
+    count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
+    count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
+    count['failed_fax'] = FailedFaxTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
@@ -43,11 +50,23 @@ class TaskList(MRFilterableListView):
     model = Task
 
     def get_queryset(self):
-        """Remove resolved tasks unless filter says to keep them"""
+        """Apply query parameters to the queryset"""
         queryset = super(TaskList, self).get_queryset()
-
-        if not self.request.GET.get('show_resolved'):
+        filter_ids = self.request.GET.getlist('id')
+        show_resolved = self.request.GET.get('show_resolved')
+        # first we have to check the integrity of the id values
+        for filter_id in filter_ids:
+            try:
+                filter_id = int(filter_id)
+            except ValueError:
+                filter_ids.remove(filter_id)
+        if filter_ids:
+            queryset = queryset.filter(id__in=filter_ids)
+            show_resolved = True
+        if not show_resolved:
             queryset = queryset.exclude(resolved=True)
+        # order queryset
+        queryset = queryset.order_by('date_done', 'date_created')
         return queryset
 
     def render_list(self, tasks):
@@ -228,13 +247,17 @@ class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
     task_template = 'task/orphan.html'
-    task_context = {'status': STATUS}
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
     task_template = 'task/snail_mail.html'
-    task_context = {'status': STATUS}
+
+    def get_task_context(self, task):
+        """Adds SnailMailTask-specific context"""
+        task_context = super(SnailMailTaskList, self).get_task_context(task)
+        task_context['status'] = STATUS
+        return task_context
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
@@ -278,7 +301,33 @@ class ResponseTaskList(TaskList):
         if task.communication.foia:
             the_foia = task.communication.foia
             form_initial['status'] = the_foia.status
+            form_initial['tracking_number'] = the_foia.tracking_id
             task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         task_context.update({'attachments': task.communication.files.all()})
         return task_context
+
+class StatusChangeTaskList(TaskList):
+    title = 'Status Change'
+    model = StatusChangeTask
+    task_template = 'task/status_change.html'
+
+class PaymentTaskList(TaskList):
+    title = 'Payments'
+    model = PaymentTask
+    task_template = 'task/payment.html'
+
+class CrowdfundTaskList(TaskList):
+    title = 'Crowdfunds'
+    model = CrowdfundTask
+    task_template = 'task/crowdfund.html'
+
+class MultiRequestTaskList(TaskList):
+    title = 'Multi-Requests'
+    model = MultiRequestTask
+    task_template = 'task/multirequest.html'
+
+class FailedFaxTaskList(TaskList):
+    title = 'Failed Faxes'
+    model = FailedFaxTask
+    task_template = 'task/failed_fax.html'

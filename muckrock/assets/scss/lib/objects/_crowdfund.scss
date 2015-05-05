@@ -4,7 +4,7 @@ $crowdfund-color-light: desaturate(lighten($color-success, 30%), 15%);
 
 $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
-.crowdfund {
+.crowdfund.widget {
     overflow: hidden;
     @include row;
     max-width: 60em;
@@ -127,7 +127,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 /* Crowdfund state */
 
-.crowdfund {
+.crowdfund.widget {
     position: relative;
     .overlay {
         z-index: 1;
