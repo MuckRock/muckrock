@@ -227,6 +227,14 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
+class FailedFaxTask(Task):
+    """A fax for this communication failed"""
+    # pylint: disable=no-member
+    communication = models.ForeignKey('foia.FOIACommunication')
+
+    def __unicode__(self):
+        return u'Failed Fax: %s' % (self.communication.foia)
+
 class StatusChangeTask(Task):
     """A user has the status on a request"""
 

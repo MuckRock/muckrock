@@ -19,7 +19,7 @@ from muckrock.news.models import Article
 from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 GenericTask, PaymentTask, CrowdfundTask
+                                 GenericTask, PaymentTask, CrowdfundTask, FailedFaxTask
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +94,8 @@ def store_statstics():
         total_unresolved_newagency_tasks=NewAgencyTask.objects.filter(resolved=False).count(),
         total_response_tasks=ResponseTask.objects.count(),
         total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
+        total_faxfail_tasks=FailedFaxTask.objects.count(),
+        total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
         total_payment=PaymentTask.objects.count(),
         total_unresolved_payment=PaymentTask.objects.filter(resolved=False).count(),
         total_crowdfundpayment=CrowdfundTask.objects.count(),
