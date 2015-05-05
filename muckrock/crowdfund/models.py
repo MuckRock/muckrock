@@ -9,8 +9,7 @@ from datetime import date
 from decimal import Decimal
 import logging
 
-from muckrock.foia.models import FOIARequest
-
+from muckrock import task
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -54,7 +53,7 @@ class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
     name = models.CharField(max_length=255, default='Crowdfund this request')
     description = models.TextField(blank=True)
-    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
+    foia = models.OneToOneField('foia.FOIARequest', related_name='crowdfund')
 
     def __unicode__(self):
         # pylint: disable=E1101
@@ -74,6 +73,15 @@ class CrowdfundRequest(CrowdfundABC):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
+        if self.payment_received >= self.payment_required:
+            self.complete_crowdfund()
+
+    def complete_crowdfund(self):
+        """Once the crowdfund reaches its goal: expire it, log it, and create a new task for it."""
+        self.date_due = date.today()
+        self.save()
+        logging.info('Crowdfund %d reached its goal.', self.id)
+        task.models.CrowdfundTask.objects.create(crowdfund=self)
 
     def contributors(self):
         """Return a list of all the contributors to a crowdfund"""
