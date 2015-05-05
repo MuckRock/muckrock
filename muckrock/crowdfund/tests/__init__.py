@@ -2,5 +2,5 @@
 Tests for the crowdfund application
 """
 
-from testCrowdfundRequestForm import *
-from testCrowdfundRequestView import *
+from TestCrowdfundRequestForm import *
+from TestCrowdfundRequestView import *
