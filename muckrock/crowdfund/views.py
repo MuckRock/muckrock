@@ -97,6 +97,11 @@ class CrowdfundRequestDetail(DetailView):
         logging.info(log_msg, amount, email, token, show, crowdfund, user)
 
         amount = Decimal(float(amount)/100)
+        # check if the amount is greater than the amount required
+        # if it is, only charge the amount required
+        if amount > crowdfund_object.amount_remaining():
+            amount = crowdfund_object.amount_remaining()
+
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         payment_object = None
@@ -106,7 +111,7 @@ class CrowdfundRequestDetail(DetailView):
                 payment_object.user = user
                 payment_object.save()
                 crowdfund_object.update_payment_received()
-        # if AJAX, return the payment
+        # if AJAX, return HTTP 200 OK
         # else, return to the crowdfund page
         if request.is_ajax():
             return HttpResponse(200)
