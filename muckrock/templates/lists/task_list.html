@@ -52,6 +52,10 @@
             <span class="counter">{{ counters.multirequest }}</span>
             <a href="{% url 'multirequest-task-list' %}">Multi-Request</a>
         </li>
+        <li class="{% active request '^/task/status-change/$' %}">
+            <span class="counter">{{ counters.status_change }}</span>
+            <a href="{% url 'status-change-task-list' %}">Status Change</a>
+        </li>
     </ul>
 </section>
 {% endblock %}

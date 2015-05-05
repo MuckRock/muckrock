@@ -34,6 +34,7 @@ def count_tasks():
     count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
     count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
+    count['status_change'] = StatusChangeTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
     count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
     count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
