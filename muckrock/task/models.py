@@ -226,3 +226,44 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
+
+class FailedFaxTask(Task):
+    """A fax for this communication failed"""
+    # pylint: disable=no-member
+    communication = models.ForeignKey('foia.FOIACommunication')
+
+    def __unicode__(self):
+        return u'Failed Fax: %s' % (self.communication.foia)
+
+class StatusChangeTask(Task):
+    """A user has the status on a request"""
+
+    user = models.ForeignKey(User)
+    old_status = models.CharField(max_length=255)
+    foia = models.ForeignKey('foia.FOIARequest')
+
+    def __unicode__(self):
+        return u'StatusChange: %s' % self.foia
+
+class PaymentTask(Task):
+    """Created when the fee for a request has been paid"""
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    user = models.ForeignKey(User)
+    foia = models.ForeignKey('foia.FOIARequest')
+
+    def __unicode__(self):
+        return u'Payment: %s for %s' % (self.amount, self.foia)
+
+class CrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
+    crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
+
+    def __unicode__(self):
+        return u'Crowdfund: %s' % self.crowdfund
+
+class MultiRequestTask(Task):
+    """Created when a multirequest is created and needs approval."""
+    multirequest = models.ForeignKey('foia.FOIAMultiRequest')
+
+    def __unicode__(self):
+        return u'Multi-Request: %s' % self.multirequest

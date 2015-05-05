@@ -7,7 +7,7 @@
     }
 }
 
-.resolved.task-header {
+.resolved .task-header {
     background: $color-success;
 }
 
@@ -48,10 +48,16 @@
 .task .task-data {
     @include span-columns(8);
     padding: $base-padding/2;
+    li {
+        margin-left: $base-padding;
+    }
 }
 
 dl.task-data {
     margin: 0;
+    p {
+        margin: 0;
+    }
 }
 
 .task .task-actions {
@@ -160,4 +166,11 @@ dl.task-data {
         }
         p { margin-bottom: 0; }
     }
+}
+
+/* Snail Mail Task */
+
+.extra-context textarea {
+    height: 15em;
+    overflow: none;
 }

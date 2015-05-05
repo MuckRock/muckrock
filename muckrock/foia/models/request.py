@@ -521,7 +521,7 @@ class FOIARequest(models.Model):
         comm = self.communications.reverse()[0]
 
         if from_addr == 'fax':
-            subject = ('MR#%s-%s - %s' % self.pk, comm.pk, subject)
+            subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)

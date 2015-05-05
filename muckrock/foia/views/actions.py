@@ -29,6 +29,7 @@ from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
+from muckrock.task.models import PaymentTask
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -237,6 +238,10 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             ['requests@muckrock.com'],
             fail_silently=False
         )
+        PaymentTask.objects.create(
+            user=request.user,
+            amount=int(amount)/100.0,
+            foia=foia)
     return redirect(foia)
 
 @login_required

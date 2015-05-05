@@ -1,7 +1,5 @@
-{% autoescape off %}
-{% for comm in request.communications.reverse %}
-{% if not forloop.first %}On {{ comm.date|date }}:
-{% endif %}
+{% autoescape off %}{% for comm in request.communications.reverse %}
+{% if not forloop.first %}On {{ comm.date|date }}:{% endif %}
 {{ comm.communication }}
 {% if forloop.last %}
 Filed via MuckRock.com
@@ -13,7 +11,4 @@ DEPT MR {{ request.pk }}
 PO Box 55819
 Boston, MA 02205-5819
 
-PLEASE NOTE the new address as well as the fact that improperly addressed (i.e., with the requester's name rather than MuckRock News) requests might be returned by the USPS as undeliverable.{% endif %}
-{% if not forloop.last %}---{% endif %}
-{% endfor %}
-{% endautoescape %}
+PLEASE NOTE the new address as well as the fact that improperly addressed (i.e., with the requester's name rather than MuckRock News) requests might be returned by the USPS as undeliverable.{% endif %}{% if not forloop.last %}---{% endif %}{% endfor %}{% endautoescape %}

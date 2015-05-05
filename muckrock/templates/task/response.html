@@ -19,7 +19,7 @@
     <dt>Request</dt>
     <dd><a href="{% url 'admin:foia_foiarequest_change' comm.foia.pk %}">{{comm.foia}}</a></dd>
     <dt>Tracking Number</dt>
-    <dd>{{comm.foia.mail_id}}</dd>
+    <dd>{{comm.foia.tracking_id}}</dd>
     {% endif %}
     {% if attachments %}
     <dt>Attachments</dt>
