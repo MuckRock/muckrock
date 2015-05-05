@@ -227,6 +227,7 @@ INSTALLED_APPS = (
     'haystack',
     'markdown_deux',
     'mathfilters',
+    'news_sitemaps',
     'pingback',
     'raven.contrib.django',
     'rest_framework',
@@ -478,6 +479,8 @@ DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
+
+PUBLICATION_NAME = 'MuckRock'
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')

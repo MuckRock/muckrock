@@ -37,7 +37,7 @@ from muckrock.foia.models import \
     STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
-from muckrock.task.models import NewAgencyTask
+from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
 # pylint: disable=R0901
 
@@ -418,6 +418,7 @@ def draft_multirequest(request, slug, idx):
                         ['requests@muckrock.com'],
                         fail_silently=False
                     )
+                    MultiRequestTask.objects.create(multirequest=foia)
                     return redirect('foia-mylist')
                 messages.success(request, 'Updates to this request were saved.')
                 return redirect(foia)

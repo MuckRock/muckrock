@@ -7,7 +7,12 @@ from django.test import TestCase
 import nose.tools
 
 from muckrock.agency.models import Agency
+from muckrock.agency.forms import AgencyForm
 from muckrock.tests import get_allowed, get_404
+
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+raises = nose.tools.raises
 
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=R0201
@@ -25,11 +30,11 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_unicode(self):
         """Test Agency model's __unicode__ method"""
-        nose.tools.eq_(unicode(self.agency), u'Test Agency')
+        eq_(unicode(self.agency), u'Test Agency')
 
     def test_agency_url(self):
         """Test Agency model's get_absolute_url method"""
-        nose.tools.eq_(
+        eq_(
             self.agency.get_absolute_url(),
             reverse('agency-detail', kwargs={
                 'idx': self.agency.pk,
@@ -41,19 +46,19 @@ class TestAgencyUnit(TestCase):
 
     def test_agency_normalize_fax(self):
         """Test the normalize fax method"""
-        nose.tools.eq_(Agency.objects.get(pk=1).normalize_fax(), '19876543210')
-        nose.tools.eq_(Agency.objects.get(pk=2).normalize_fax(), '19876543210')
-        nose.tools.eq_(Agency.objects.get(pk=3).normalize_fax(), None)
+        eq_(Agency.objects.get(pk=1).normalize_fax(), '19876543210')
+        eq_(Agency.objects.get(pk=2).normalize_fax(), '19876543210')
+        eq_(Agency.objects.get(pk=3).normalize_fax(), None)
 
     def test_agency_get_email(self):
         """Test the get email method"""
-        nose.tools.eq_(Agency.objects.get(pk=1).get_email(), 'test@agency1.gov')
-        nose.tools.eq_(Agency.objects.get(pk=2).get_email(), '19876543210@fax2.faxaway.com')
-        nose.tools.eq_(Agency.objects.get(pk=3).get_email(), '')
+        eq_(Agency.objects.get(pk=1).get_email(), 'test@agency1.gov')
+        eq_(Agency.objects.get(pk=2).get_email(), '19876543210@fax2.faxaway.com')
+        eq_(Agency.objects.get(pk=3).get_email(), '')
 
     def test_agency_get_other_emails(self):
         """Test get other emails method"""
-        nose.tools.eq_(self.agency.get_other_emails(),
+        eq_(self.agency.get_other_emails(),
                        ['other_a@agency1.gov', 'other_b@agency1.gov'])
 
 class TestAgencyViews(TestCase):
@@ -94,3 +99,21 @@ class TestAgencyViews(TestCase):
                         kwargs={'jurisdiction': agency.jurisdiction.slug,
                                 'jidx': self.agency.jurisdiction.pk,
                                 'slug': agency.slug, 'idx': agency.pk}))
+
+class TestAgencyForm(TestCase):
+    """Tests the AgencyForm"""
+    fixtures = ['test_users.json', 'holidays.json', 'jurisdictions.json', 'agency_types.json',
+                'test_agencies.json', 'test_foiarequests.json']
+
+    def setUp(self):
+        self.agency = Agency.objects.get(pk=1)
+        self.form = AgencyForm({'name': 'Test Agency'}, instance=self.agency)
+
+    def test_validate_empty_form(self):
+        """The form should have a name, at least"""
+        ok_(not AgencyForm().is_valid(),
+            'Empty AgencyForm should not validate.')
+
+    def test_instance_form(self):
+        """The form should validate given only instance data"""
+        ok_(self.form.is_valid())
