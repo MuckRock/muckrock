@@ -28,7 +28,7 @@ from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
-from muckrock.task.models import FlaggedTask
+from muckrock.task.models import FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=R0901
@@ -203,7 +203,9 @@ class Detail(DetailView):
         """Handle updating status"""
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if foia.status not in ['started', 'submitted'] and ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
+        if foia.status not in ['started', 'submitted'] and \
+                ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or
+                 (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
 
@@ -223,6 +225,11 @@ class Detail(DetailView):
                 'info@muckrock.com',
                 ['requests@muckrock.com'],
                 fail_silently=False
+            )
+            StatusChangeTask.objects.create(
+                user=request.user,
+                old_status=old_status,
+                foia=foia,
             )
         return redirect(foia)
 

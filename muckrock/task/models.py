@@ -227,6 +227,16 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
+class StatusChangeTask(Task):
+    """A user has the status on a request"""
+
+    user = models.ForeignKey(User)
+    old_status = models.CharField(max_length=255)
+    foia = models.ForeignKey('foia.FOIARequest')
+
+    def __unicode__(self):
+        return u'StatusChange: %s' % self.foia
+
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
     amount = models.DecimalField(max_digits=8, decimal_places=2)

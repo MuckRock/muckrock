@@ -16,7 +16,7 @@ from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 PaymentTask, CrowdfundTask, MultiRequestTask
+                                 PaymentTask, CrowdfundTask, MultiRequestTask, StatusChangeTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
@@ -34,6 +34,7 @@ def count_tasks():
     count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
     count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
+    count['status_change'] = StatusChangeTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
     count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
     count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
@@ -303,6 +304,11 @@ class ResponseTaskList(TaskList):
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         task_context.update({'attachments': task.communication.files.all()})
         return task_context
+
+class StatusChangeTaskList(TaskList):
+    title = 'Status Change'
+    model = StatusChangeTask
+    task_template = 'task/status_change.html'
 
 class PaymentTaskList(TaskList):
     title = 'Payments'
