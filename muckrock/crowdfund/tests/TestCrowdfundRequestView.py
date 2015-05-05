@@ -55,7 +55,7 @@ class TestCrowdfundRequestView(TestCase):
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
         self.data = {
-            'amount': 1000,
+            'amount': 200,
             'show': '',
             'crowdfund': self.crowdfund.pk,
             'email': 'test@example.com'

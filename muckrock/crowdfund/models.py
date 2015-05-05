@@ -93,6 +93,8 @@ class CrowdfundRequest(CrowdfundABC):
                 contributors.append(payment.user)
             else:
                 contributors.append(AnonymousUser())
+        logging.debug(payments)
+        logging.debug(contributors)
         return contributors
 
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
