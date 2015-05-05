@@ -2,24 +2,19 @@
 Tests for crowdfund app
 """
 
-from django.test import TestCase, Client
+from django.test import TestCase
 
 from datetime import datetime, timedelta
-from decimal import Decimal
-import logging
 import nose
-import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest
-
-# pylint: disable=missing-docstring
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
 class TestCrowdfundRequestForm(TestCase):
+    """Tests the form used to create a crowdfund campaign."""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
@@ -49,21 +44,21 @@ class TestCrowdfundRequestForm(TestCase):
     def test_expected_validation(self):
         """Given a correct set of data, the form should validate."""
         form = CrowdfundRequestForm(self.data)
-        ok_(form.is_valid())
+        ok_(form.is_valid(), 'The form should validate.')
 
     def test_zero_amount(self):
+        """Payment required should not be zero."""
         data = self.data
         data['payment_required'] = 0
         form = CrowdfundRequestForm(data)
-        ok_(not form.is_valid(),
-            'Payment required should not be zero')
+        ok_(not form.is_valid(), 'The form should not validate.')
 
     def test_negative_amount(self):
+        """Payment required should not be negative."""
         data = self.data
         data['payment_required'] = -10.00
         form = CrowdfundRequestForm(data)
-        ok_(not form.is_valid(),
-            'Payment required should not be negative')
+        ok_(not form.is_valid(), 'The form should not validate.')
 
     def test_incorrect_deadline(self):
         """The crowdfund deadline cannot be set in the past. That makes no sense!"""
@@ -71,8 +66,7 @@ class TestCrowdfundRequestForm(TestCase):
         yesterday = datetime.now() - timedelta(1)
         data['date_due'] = yesterday.strftime('%Y-%m-%d')
         form = CrowdfundRequestForm(data)
-        ok_(not form.is_valid(),
-            'The form should not validate given a date in the past.')
+        ok_(not form.is_valid(), 'The form should not validate.')
 
     def test_incorrect_duration(self):
         """The crowdfund duration should be capped at 30 days."""
@@ -80,5 +74,4 @@ class TestCrowdfundRequestForm(TestCase):
         too_long = datetime.now() + timedelta(45)
         data['date_due'] = too_long.strftime('%Y-%m-%d')
         form = CrowdfundRequestForm(data)
-        ok_(not form.is_valid(),
-            'The form should not validate, given a deadline too far in the future.')
+        ok_(not form.is_valid(), 'The form should not validate.')

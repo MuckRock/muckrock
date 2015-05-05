@@ -10,13 +10,12 @@ import logging
 from nose.tools import ok_, eq_
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
+from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 from muckrock.foia.models import FOIARequest
 from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
 
-# pylint: disable=missing-docstring
 # pylint: disable=line-too-long
 
 def get_stripe_token():
@@ -42,7 +41,6 @@ class TestCrowdfundRequestView(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
-        """Form submission will only happen after Stripe Checkout verifies the purchase on the front end. Assume the presence of the Stripe token and email address."""
         stripe.api_key = STRIPE_SECRET_KEY
         foia = FOIARequest.objects.get(pk=18)
         due = datetime.today() + timedelta(30)
@@ -63,18 +61,19 @@ class TestCrowdfundRequestView(TestCase):
         }
 
     def test_view(self):
+        """The crowdfund view should resolve and be visible to everyone."""
         response = self.client.get(self.url)
-        eq_(response.status_code, 200,
-            'The crowdfund view should resolve and be visible to everyone')
+        eq_(response.status_code, 200, 'The response should be 200 OK.')
 
     def post(self, data):
+        """Helper function to post the data."""
         # need a unique token for each POST
         form = CrowdfundRequestPaymentForm(data)
         ok_(form.is_valid())
         data['token'] = get_stripe_token()
         logging.info(data)
         response = self.client.post(self.url, data=data)
-        ok_(response, 'The server should respond to the post request')
+        ok_(response, 'There should be a response.')
         return response
 
     def test_anonymous_contribution(self):

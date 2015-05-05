@@ -98,7 +98,7 @@ def store_statstics():
         total_unresolved_payment=PaymentTask.objects.filter(resolved=False).count(),
         total_crowdfundpayment=CrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment=
-            CrowdfundPaymentTask.objects.filter(resolved=False).count(),
+            CrowdfundTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

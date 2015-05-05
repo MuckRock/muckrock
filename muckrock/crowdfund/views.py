@@ -3,20 +3,16 @@ Views for the crowdfund application
 """
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic.detail import DetailView
 
 from decimal import Decimal
 import logging
 import stripe
-import sys
 
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
