@@ -52,7 +52,8 @@ class FOIACommunication(models.Model):
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
-    opened = models.BooleanField()
+    opened = models.BooleanField(help_text='If emailed, did we receive an open notification? '
+                                           'If faxed, did we recieve a confirmation?')
 
     # only used for orphans
     likely_foia = models.ForeignKey(
