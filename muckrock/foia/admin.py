@@ -126,7 +126,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     """FOIA Request admin options"""
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'user', 'status')
+    list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
     list_filter = ['status']
     list_select_related = True
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']

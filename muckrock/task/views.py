@@ -15,7 +15,8 @@ from muckrock.agency.models import Agency
 from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
+                                 PaymentTask, CrowdfundTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
@@ -33,6 +34,8 @@ def count_tasks():
     count['flagged'] = FlaggedTask.objects.exclude(resolved=True).count()
     count['new_agency'] = NewAgencyTask.objects.exclude(resolved=True).count()
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
+    count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
+    count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
@@ -299,3 +302,13 @@ class ResponseTaskList(TaskList):
         task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
         task_context.update({'attachments': task.communication.files.all()})
         return task_context
+
+class PaymentTaskList(TaskList):
+    title = 'Payments'
+    model = PaymentTask
+    task_template = 'task/payment.html'
+
+class CrowdfundTaskList(TaskList):
+    title = 'Crowdfunds'
+    model = CrowdfundTask
+    task_template = 'task/crowdfund.html'

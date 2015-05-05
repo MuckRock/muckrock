@@ -79,7 +79,8 @@ class OrphanTask(Task):
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
-    categories = (('a', 'Appeal'), ('n', 'New'), ('u', 'Update'))
+    categories = (('a', 'Appeal'), ('n', 'New'),
+                  ('u', 'Update'), ('f', 'Followup'))
     category = models.CharField(max_length=1, choices=categories)
     communication = models.ForeignKey('foia.FOIACommunication')
 
@@ -225,3 +226,19 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
+
+class PaymentTask(Task):
+    """Created when the fee for a request has been paid"""
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    user = models.ForeignKey(User)
+    foia = models.ForeignKey('foia.FOIARequest')
+
+    def __unicode__(self):
+        return u'Payment: %s for %s' % (self.amount, self.foia)
+
+class CrowdfundTask(Task):
+    """Created when a crowdfund is finished"""
+    crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
+
+    def __unicode__(self):
+        return u'Crowdfund: %s' % self.crowdfund
