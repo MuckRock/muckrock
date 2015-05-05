@@ -205,21 +205,3 @@ class ResponseTaskTests(TestCase):
     def test_bad_move(self):
         """Should raise a value error if non-existant move destination."""
         self.task.move(111111)
-
-class PaymentTaskTests(TestCase):
-    """Payment tasks are created after the fee for a request has been fulfilled."""
-
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
-    def setUp(self):
-       pass
-
-    def test_creation(self):
-        """Should create given an amount and a request."""
-        ok_(False, 'Should test task creation.')
-
-    def test_creation_bad_input(self):
-        """Should fail in a predictable way if created with bad data."""
-        ok_(False, 'Should test failed task creation.')
-
