@@ -154,7 +154,7 @@ def fax(request):
 
     if m_id:
         try:
-            foia = FOIARequest.objects.get(pk=m_id.group(1))
+            FOIARequest.objects.get(pk=m_id.group(1))
             comm = FOIACommunication.objects.get(pk=m_id.group(2))
         except FOIARequest.DoesNotExist:
             logger.warning('Fax FOIARequest does not exist: %s', m_id.group(1))
