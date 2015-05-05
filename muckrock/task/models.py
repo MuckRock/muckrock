@@ -267,4 +267,3 @@ class MultiRequestTask(Task):
 
     def __unicode__(self):
         return u'Multi-Request: %s' % self.multirequest
->>>>>>> tasks
