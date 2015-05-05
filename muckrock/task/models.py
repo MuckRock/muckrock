@@ -242,3 +242,10 @@ class CrowdfundTask(Task):
 
     def __unicode__(self):
         return u'Crowdfund: %s' % self.crowdfund
+
+class MultiRequestTask(Task):
+    """Created when a multirequest is created and needs approval."""
+    multirequest = models.ForeignKey('foia.FOIAMultiRequest')
+
+    def __unicode__(self):
+        return u'Multi-Request: %s' % self.multirequest
