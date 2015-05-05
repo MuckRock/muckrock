@@ -33,7 +33,7 @@ class CrowdfundABC(models.Model):
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised"""
-        return self.payment_required - self.payment_receieved
+        return self.payment_required - self.payment_received
 
     class Meta:
         abstract = True
