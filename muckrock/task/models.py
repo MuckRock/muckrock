@@ -204,7 +204,7 @@ class StatusChangeTask(Task):
     """A user has the status on a request"""
 
     user = models.ForeignKey(User)
-    old_status = models.CharField()
+    old_status = models.CharField(max_length=255)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
 
     def __unicode__(self):
