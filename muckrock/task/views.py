@@ -16,7 +16,7 @@ from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 PaymentTask, CrowdfundTask
+                                 PaymentTask, CrowdfundTask, MultiRequestTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
@@ -36,6 +36,7 @@ def count_tasks():
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
     count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
+    count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
     return count
 
 class TaskList(MRFilterableListView):
@@ -312,3 +313,8 @@ class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     model = CrowdfundTask
     task_template = 'task/crowdfund.html'
+
+class MultiRequestTaskList(TaskList):
+    title = 'Multi-Requests'
+    model = MultiRequestTask
+    task_template = 'task/multirequest.html'

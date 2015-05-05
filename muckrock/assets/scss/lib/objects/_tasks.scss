@@ -48,6 +48,9 @@
 .task .task-data {
     @include span-columns(8);
     padding: $base-padding/2;
+    li {
+        margin-left: $base-padding;
+    }
 }
 
 dl.task-data {
