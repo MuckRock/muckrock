@@ -317,4 +317,4 @@ class CrowdfundTaskList(TaskList):
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'
     model = MultiRequestTask
-    task_template = 'task/default.html'
+    task_template = 'task/multirequest.html'
