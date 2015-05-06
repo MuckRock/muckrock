@@ -69,35 +69,6 @@ class TaskList(MRFilterableListView):
         queryset = queryset.order_by('date_done', 'date_created')
         return queryset
 
-    def render_list(self, tasks):
-        """Renders a list of tasks"""
-        rendered_tasks = []
-        for task in tasks:
-            rendered_task = self.render_task(task)
-            rendered_tasks.append(rendered_task)
-        return rendered_tasks
-
-    def get_task_context(self, task):
-        """Returns a dictionary of context for the specific task"""
-        # pylint: disable=no-self-use
-        task_context = {'task': task}
-        return task_context
-
-    def render_task(self, task):
-        """Renders a single task"""
-        the_template = self.task_template
-        the_context = {}
-        try:
-            task = self.model.objects.get(id=task.id)
-            the_context.update(self.get_task_context(task))
-        except self.model.DoesNotExist:
-            return ''
-        return template.loader.render_to_string(
-            the_template,
-            the_context,
-            context_instance=template.RequestContext(self.request)
-        )
-
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
@@ -106,7 +77,6 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
-        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
