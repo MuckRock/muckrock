@@ -206,6 +206,9 @@ class MRSearchView(SearchView):
 
     def build_page(self):
         """Circumvents the hard-coded haystack per page value."""
+        # pylint: disable=pointless-statement
+        # disabled pylint because this is not really my code
+        # also, this should only be temporary (see issue #383)
         try:
             page_no = int(self.request.GET.get('page', 1))
         except (TypeError, ValueError):
