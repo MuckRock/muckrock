@@ -28,7 +28,7 @@ def active(request, pattern):
     return ''
 
 @register.simple_tag
-def link_to_page(request, page_num):
+def page_link(request, page_num):
     """Generates a pagination link that preserves context"""
     query = request.GET
     href = '?page=' + str(page_num)

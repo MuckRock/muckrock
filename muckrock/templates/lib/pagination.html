@@ -6,30 +6,21 @@
         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}<br>
         Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}
     </div>
-    <ul class="page-set">
+    <div class="page-set">
     {% if page_obj.has_previous %}
-        <li>
-            <a href="{% link_to_page request page_obj.previous_page_number %}">Previous</a>
-            <a href="{% link_to_page request 1 %}">First</a>
-        </li>
-
+        <a href="{% page_link request 1 %}">First</a>
+        <a href="{% page_link request page_obj.previous_page_number %}">Previous</a>
     {% else %}
-        <li>
-            <span>Previous</span>
-            <span>First</span>
-        </li>
+        <span>Previous</span>
+        <span>First</span>
     {% endif %}
     {% if page_obj.has_next %}
-        <li>
-            <a href="{% link_to_page request page_obj.next_page_number %}">Next</a>
-            <a href="{% link_to_page request page_obj.paginator.num_pages %}">Last</a>
-        </li>
+        <a href="{% page_link request page_obj.next_page_number %}">Next</a>
+        <a href="{% page_link request page_obj.paginator.num_pages %}">Last</a>
     {% else %}
-        <li>
-            <span>Next</span>
-            <span>Last</span>
-        </li>
+        <span>Next</span>
+        <span>Last</span>
     {% endif %}
-    </ul>
+    </div>
 </nav>
 {% endif %}
