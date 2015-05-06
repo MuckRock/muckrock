@@ -1,6 +1,7 @@
 from django import template
 
 from muckrock import task
+from muckrock import foia
 
 import logging
 
@@ -37,6 +38,17 @@ class OrphanTaskNode(TaskNode):
     model = task.models.OrphanTask
     task_template = 'task/orphan.html'
 
+class SnailMailTaskNode(TaskNode):
+    """Renders a snail mail task."""
+    model = task.models.SnailMailTask
+    task_template = 'task/snail_mail.html'
+
+    def get_extra_context(self, task):
+        """Adds status to the context"""
+        extra_context = super(SnailMailTaskNode, self).get_extra_context(task)
+        extra_context['status'] = foia.models.STATUS
+        return extra_context
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_id(token):
@@ -56,3 +68,8 @@ def default_task(parser, token):
 def orphan_task(parser, token):
     """Returns an OrphanTaskNode"""
     return OrphanTaskNode(get_id(token))
+
+@register.tag
+def snail_mail_task(parser, token):
+    """Returns a SnailMailTaskNode"""
+    return SnailMailTaskNode(get_id(token))

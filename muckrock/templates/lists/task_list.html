@@ -89,6 +89,8 @@
         {% for task in object_list %}
             {% if task.orphantask %}
                 {% orphan_task task.id %}
+            {% elif task.snailmailtask %}
+                {% snail_mail_task task.id %}
             {% else %}
                 {% default_task task.id %}
             {% endif %}
