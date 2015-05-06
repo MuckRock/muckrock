@@ -9,9 +9,9 @@ class TaskNode(template.Node):
     model = Task
     task_template = 'task/default.html'
 
-    def __init__(self, task):
+    def __init__(self, task_id):
         """The node should be initialized with a task object"""
-        self.task = self.model.objects.get(pk=task.pk)
+        self.task = self.model.objects.get(id=task_id)
 
     def render(self, context):
         """Render the table headers"""
@@ -27,8 +27,14 @@ class TaskNode(template.Node):
         extra_context = {'task': self.task}
         return extra_context
 
-
 @register.tag
-def task(task_obj):
-    """Returns the correct task node given a task object"""
-    return TaskNode(task_obj)
+def task(parser, token):
+    """Returns the correct task node given a task ID"""
+    try:
+        task_id = token[1:]
+        return TaskNode(task_id)
+    except IndexError:
+        logging.error('No argument provided to task tag.')
+    except Task.DoesNotExist:
+        logging.error('The task does not exist.')
+    return None

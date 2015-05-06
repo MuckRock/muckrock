@@ -18,4 +18,4 @@ class TaskTagsFunctionalTests(TestCase):
 
     def test_basic_tag(self):
         """The basic tag should render without issue."""
-        ok_(task_tags.task(self.task))
+        ok_(task_tags.task(self.task.id))
