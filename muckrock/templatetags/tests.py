@@ -25,20 +25,6 @@ class TestTemplatetagsFunctional(TestCase):
         nose.tools.eq_(tags.active(mock_request, '/test1/{{user}}/'), 'current-tab')
         nose.tools.eq_(tags.active(mock_request, '/test2/{{user}}/'), '')
 
-    def test_page_links(self):
-        """Test the page_links template tag"""
-        mock_page_obj = Mock()
-        mock_page_obj.number = 5
-        mock_page_obj.paginator.num_pages = 10
-
-        links = '&hellip;&nbsp;' + \
-                ''.join('<a href="?page=%d">%d</a>&nbsp;&nbsp;' % (i, i) for i in range(2, 5)) + \
-                '5' + \
-                ''.join('&nbsp;&nbsp;<a href="?page=%d">%d</a>' % (i, i) for i in range(6, 9)) + \
-                '&nbsp;&hellip;'
-
-        nose.tools.eq_(tags.page_links(mock_page_obj, None, None), links)
-
     def test_company_title(self):
         """Test the company_title template tag"""
 

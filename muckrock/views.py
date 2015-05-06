@@ -4,8 +4,9 @@ Views for muckrock project
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import FieldError
+from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Sum
-from django.http import HttpResponseServerError
+from django.http import HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
@@ -168,6 +169,7 @@ class MRFilterableListView(ListView):
         context = super(MRFilterableListView, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['title'] = self.title
+        context['per_page'] = int(self.get_paginate_by(context['object_list']))
         try:
             context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
         except ValueError:
@@ -191,6 +193,39 @@ class MRSearchView(SearchView):
     def get_query(self):
         """Lower case the query"""
         return super(MRSearchView, self).get_query().lower()
+
+    def extra_context(self):
+        """Adds per_page to context data"""
+        context = super(MRSearchView, self).extra_context()
+        context['per_page'] = int(self.request.GET.get('per_page', 25))
+        return context
+
+    def get_paginate_by(self):
+        """Gets per_page the right way"""
+        return int(self.request.GET.get('per_page', 25))
+
+    def build_page(self):
+        """Circumvents the hard-coded haystack per page value."""
+        # pylint: disable=pointless-statement
+        # disabled pylint because this is not really my code
+        # also, this should only be temporary (see issue #383)
+        try:
+            page_no = int(self.request.GET.get('page', 1))
+        except (TypeError, ValueError):
+            raise Http404("Not a valid number for page.")
+
+        if page_no < 1:
+            raise Http404("Pages should be 1 or greater.")
+
+        start_offset = (page_no - 1) * self.results_per_page
+        self.results[start_offset:start_offset + self.results_per_page]
+
+        paginator = Paginator(self.results, self.get_paginate_by())
+        try:
+            page = paginator.page(page_no)
+        except InvalidPage:
+            raise Http404("No such page!")
+        return (paginator, page)
 
 def front_page(request):
     """Get all the details needed for the front page"""
