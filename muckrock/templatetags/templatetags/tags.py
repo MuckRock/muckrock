@@ -50,6 +50,16 @@ def page_links_common(page_obj, option_dict):
     return links
 
 @register.simple_tag
+def link_to_page(request, page_num):
+    """Generates a pagination link that preserves context"""
+    query = request.GET
+    href = '?page=' + str(page_num)
+    for key, value in query.iteritems():
+        if value and key != u'page':
+            href += '&%s=%s' % (key, escape(value))
+    return href
+
+@register.simple_tag
 def page_links(page_obj, order=None, field=None, per_page=None):
     """Page links for list displays"""
     return page_links_common(page_obj, {'order': order, 'field': field, 'per_page': per_page})
