@@ -5,7 +5,7 @@ Tests the Task templatetags
 from django.test import TestCase
 import logging
 from muckrock.task.models import Task
-from muckrock.task.templatetags import tasks as task_tags
+from muckrock.task.templatetags import task_tags
 import nose
 
 ok_ = nose.tools.ok_
