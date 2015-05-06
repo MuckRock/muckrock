@@ -168,7 +168,7 @@ class MRFilterableListView(ListView):
         context = super(MRFilterableListView, self).get_context_data(**kwargs)
         filter_data = self.get_filter_data()
         context['title'] = self.title
-        context['per_page'] = self.get_paginate_by(context['object_list'])
+        context['per_page'] = int(self.get_paginate_by(context['object_list']))
         try:
             context['filter_form'] = MRFilterForm(initial=filter_data['filter_initials'])
         except ValueError:
