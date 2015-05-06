@@ -27,28 +27,6 @@ def active(request, pattern):
         return 'current-tab'
     return ''
 
-def page_links_common(page_obj, option_dict):
-    """Return page links for surrounding pages"""
-
-    def make_link(num, skip):
-        """Make a link to page num"""
-        options = ''.join('&amp;%s=%s' % (k, escape(v)) for k, v in option_dict.iteritems() if v)
-        if num != skip:
-            return '<a href="?page=%d%s">%d</a>' % (num, options, num)
-        else:
-            return str(num)
-
-    pages = range(max(page_obj.number - 3, 1),
-                  min(page_obj.number + 3, page_obj.paginator.num_pages) + 1)
-    links = '&nbsp;&nbsp;'.join(make_link(n, page_obj.number) for n in pages)
-
-    if pages[0] != 1:
-        links = '&hellip;&nbsp;' + links
-    if pages[-1] != page_obj.paginator.num_pages:
-        links += '&nbsp;&hellip;'
-
-    return links
-
 @register.simple_tag
 def link_to_page(request, page_num):
     """Generates a pagination link that preserves context"""
@@ -58,16 +36,6 @@ def link_to_page(request, page_num):
         if value and key != u'page':
             href += '&%s=%s' % (key, escape(value))
     return href
-
-@register.simple_tag
-def page_links(page_obj, order=None, field=None, per_page=None):
-    """Page links for list displays"""
-    return page_links_common(page_obj, {'order': order, 'field': field, 'per_page': per_page})
-
-@register.simple_tag
-def search_page_links(page_obj, query=None):
-    """Page links for list displays"""
-    return page_links_common(page_obj, {'q': query})
 
 @register.filter
 @stringfilter
