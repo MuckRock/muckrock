@@ -1,6 +1,6 @@
 from django import template
 
-from muckrock.task.models import Task
+from muckrock import task
 
 import logging
 
@@ -8,7 +8,7 @@ register = template.Library()
 
 class TaskNode(template.Node):
     """A base class for rendering a task into a template."""
-    model = Task
+    model = task.models.Task
     task_template = 'task/default.html'
 
     def __init__(self, task_id):
@@ -32,11 +32,27 @@ class TaskNode(template.Node):
         extra_context = {'task': task}
         return extra_context
 
-@register.tag
-def task(parser, token):
-    """Returns the correct task node given a task ID"""
+class OrphanTaskNode(TaskNode):
+    """Renders an orphan task."""
+    model = task.models.OrphanTask
+    task_template = 'task/orphan.html'
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+def get_id(token):
+    """Helper function to check token has correct arguments and return the task_id."""
     try:
         tag_name, task_id = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%s tag requires a single argument." % token.contents.split()[0])
-    return TaskNode(task_id)
+    return task_id
+
+@register.tag
+def default_task(parser, token):
+    """Returns the correct task node given a task ID"""
+    return TaskNode(get_id(token))
+
+@register.tag
+def orphan_task(parser, token):
+    """Returns an OrphanTaskNode"""
+    return OrphanTaskNode(get_id(token))

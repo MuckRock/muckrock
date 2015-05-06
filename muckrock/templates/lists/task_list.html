@@ -86,8 +86,12 @@
     </section>
     {% if object_list %}
         {% include 'lib/pagination.html' %}
-        {% for each_task in object_list %}
-            {% task each_task.id %}
+        {% for task in object_list %}
+            {% if task.orphantask %}
+                {% orphan_task task.id %}
+            {% else %}
+                {% default_task task.id %}
+            {% endif %}
         {% endfor %}
         {% include 'lib/pagination.html' %}
     {% endif %}
