@@ -1,3 +1,5 @@
+{% load tags %}
+
 {% if page_obj.object_list.count > 0 and page_obj.paginator.num_pages > 1 %}
 <nav class="pagination">
     <div class="page-ref">
@@ -6,18 +8,26 @@
     </div>
     <ul class="page-set">
     {% if page_obj.has_previous %}
-        <li><a href="?page=1{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">&#171;&thinsp;&#171;&nbsp;First&nbsp;page</a>&emsp;<a href="?page={{ page_obj.previous_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">&#171;&nbsp;Previous&nbsp;page</a>
+        <li>
+            <a href="{% link_to_page request page_obj.previous_page_number %}">Previous</a>
+            <a href="{% link_to_page request 1 %}">First</a>
         </li>
+
     {% else %}
         <li>
-            <span class="default">&#171;&thinsp;&#171;&nbsp;First&nbsp;page&emsp;&#171;&nbsp;Previous&nbsp;page</span>
+            <span>Previous</span>
+            <span>First</span>
         </li>
     {% endif %}
     {% if page_obj.has_next %}
-        <li><a href="?page={{ page_obj.next_page_number }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Next&nbsp;page&nbsp;&#187;</a>&emsp;<a href="?page={{ paginator.num_pages }}{% if per_page %}&amp;per_page={{ per_page }}{% endif %}{% if query %}&amp;q={{query}}{% endif %}{{ filter_url }}">Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</a></li>
+        <li>
+            <a href="{% link_to_page request page_obj.next_page_number %}">Next</a>
+            <a href="{% link_to_page request page_obj.paginator.num_pages %}">Last</a>
+        </li>
     {% else %}
         <li>
-            <span class="default">Next&nbsp;page&nbsp;&#187;&emsp;Last&nbsp;page&nbsp;&#187;&thinsp;&#187;</span>
+            <span>Next</span>
+            <span>Last</span>
         </li>
     {% endif %}
     </ul>
