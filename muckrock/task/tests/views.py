@@ -1,6 +1,7 @@
 """
 Tests for Tasks views
 """
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -189,7 +190,7 @@ class OrphanTaskViewTests(TestCase):
                 ('Rejecting an orphan with a likely FOIA should not move'
                 ' the communication to that FOIA'))
 
-class TaskListViewSnailMailTaskPOSTTests(TestCase):
+class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -203,10 +204,24 @@ class TaskListViewSnailMailTaskPOSTTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_set_status(self):
-        self.client.post(self.url, {'status': 'ack', 'task': self.task.pk})
+        """Should update the status of the task's communication and associated request."""
+        new_status = 'ack'
+        self.client.post(self.url, {'status': new_status, 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.resolved, True,
-            'Snail mail task should resolve itself when setting status of its communication')
+        eq_(updated_task.communication.status, new_status,
+            'Should update status of the communication.')
+        eq_(updated_task.communication.foia.status, new_status,
+            'Should update the status of the communication\'s associated request.')
+
+    def test_post_update_date(self):
+        """Should update the date of the communication to today."""
+        comm_date = self.task.communication.date
+        self.client.post(self.url, {'update_date': 'true', 'task': self.task.pk})
+        updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
+        ok_(updated_task.communication.date > comm_date,
+            'Should update the communication date.')
+        eq_(updated_task.communication.date.day, datetime.now().day,
+            'Should update teh communication to today\'s date.')
 
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
