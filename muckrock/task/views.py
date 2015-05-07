@@ -46,6 +46,7 @@ class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
     template_name = 'lists/task_list.html'
+    model = Task
 
     def get_queryset(self):
         """Apply query parameters to the queryset"""
@@ -213,21 +214,27 @@ def response_task_post_handler(request, task_pk):
 
 class OrphanTaskList(TaskList):
     title = 'Orphans'
+    model = OrphanTask
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
+    model = SnailMailTask
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
+    model = RejectedEmailTask
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
+    model = StaleAgencyTask
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
+    model = FlaggedTask
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
+    model = NewAgencyTask
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
