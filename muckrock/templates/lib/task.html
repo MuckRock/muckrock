@@ -13,6 +13,8 @@
     {% new_agency_task task.id %}
 {% elif task.responsetask %}
     {% response_task task.id %}
+{% elif task.statuschangetask %}
+    {% status_change_task task.id %}
 {% else %}
     {% default_task task.id %}
 {% endif %}

@@ -243,7 +243,6 @@ class ResponseTaskList(TaskList):
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
     model = StatusChangeTask
-    task_template = 'task/status_change.html'
 
 class PaymentTaskList(TaskList):
     title = 'Payments'

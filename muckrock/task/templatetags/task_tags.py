@@ -66,6 +66,11 @@ class FlaggedTaskNode(TaskNode):
     model = task.models.FlaggedTask
     task_template = 'task/flagged.html'
 
+class StatusChangeTaskNode(TaskNode):
+    """Renders a status change task."""
+    model = task.models.StatusChangeTask
+    task_template = 'task/status_change.html'
+
 class NewAgencyTaskNode(TaskNode):
     """Renders a new agency task."""
     model = task.models.NewAgencyTask
@@ -148,3 +153,8 @@ def new_agency_task(parser, token):
 def response_task(parser, token):
     """Returns a ResponseTaskNode"""
     return ResponseTaskNode(get_id(token))
+
+@register.tag
+def status_change_task(parser, token):
+    """Returns a StatusChangeTaskNode"""
+    return StatusChangeTaskNode(get_id(token))
