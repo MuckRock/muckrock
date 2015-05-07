@@ -247,7 +247,6 @@ class StatusChangeTaskList(TaskList):
 class PaymentTaskList(TaskList):
     title = 'Payments'
     model = PaymentTask
-    task_template = 'task/payment.html'
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'

@@ -71,6 +71,11 @@ class StatusChangeTaskNode(TaskNode):
     model = task.models.StatusChangeTask
     task_template = 'task/status_change.html'
 
+class PaymentTaskNode(TaskNode):
+    """Renders a payment task."""
+    model = task.models.PaymentTask
+    task_template = 'task/payment.html'
+
 class NewAgencyTaskNode(TaskNode):
     """Renders a new agency task."""
     model = task.models.NewAgencyTask
@@ -158,3 +163,8 @@ def response_task(parser, token):
 def status_change_task(parser, token):
     """Returns a StatusChangeTaskNode"""
     return StatusChangeTaskNode(get_id(token))
+
+@register.tag
+def payment_task(parser, token):
+    """Returns a PaymentTaskNode"""
+    return PaymentTaskNode(get_id(token))
