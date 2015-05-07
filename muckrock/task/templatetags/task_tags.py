@@ -56,8 +56,14 @@ class RejectedEmailTaskNode(TaskNode):
 
 class StaleAgencyTaskNode(TaskNode):
     """Renders a stale agency task."""
-    model = StaleAgencyTask
+    model = task.models.StaleAgencyTask
     task_template = 'task/stale_agency.html'
+
+class FlaggedTaskNode(TaskNode):
+    """Renders a flagged task."""
+    model = task.models.FlaggedTask
+    task_template = 'task/flagged.html'
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -93,3 +99,8 @@ def rejected_email_task(parser, token):
 def stale_agency_task(parser, token):
     """Returns a StaleAgencyTaskNode"""
     return StaleAgencyTaskNode(get_id(token))
+
+@register.tag
+def flagged_task(parser, token):
+    """Returns a FlaggedTaskNode"""
+    return FlaggedTaskNode(get_id(token))
