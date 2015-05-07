@@ -100,7 +100,7 @@ class ResponseTaskNode(TaskNode):
             form_initial['status'] = the_foia.status
             form_initial['tracking_number'] = the_foia.tracking_id
             extra_context['all_comms'] = the_foia.communications.all().order_by('-date')
-        extra_context['response_form'] = ResponseTaskForm(initial=form_initial)
+        extra_context['response_form'] = task.forms.ResponseTaskForm(initial=form_initial)
         extra_context['attachments'] = task.communication.files.all()
         return extra_context
 
