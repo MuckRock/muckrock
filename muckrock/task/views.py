@@ -46,8 +46,6 @@ class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
     template_name = 'lists/task_list.html'
-    task_template = 'task/default.html'
-    model = Task
 
     def get_queryset(self):
         """Apply query parameters to the queryset"""
@@ -215,34 +213,18 @@ def response_task_post_handler(request, task_pk):
 
 class OrphanTaskList(TaskList):
     title = 'Orphans'
-    model = OrphanTask
-    task_template = 'task/orphan.html'
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
-    model = SnailMailTask
-    task_template = 'task/snail_mail.html'
-
-    def get_task_context(self, task):
-        """Adds SnailMailTask-specific context"""
-        task_context = super(SnailMailTaskList, self).get_task_context(task)
-        task_context['status'] = STATUS
-        return task_context
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
-    model = RejectedEmailTask
-    task_template = 'task/rejected_email.html'
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
-    model = StaleAgencyTask
-    task_template = 'task/stale_agency.html'
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
-    model = FlaggedTask
-    task_template = 'task/flagged.html'
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
