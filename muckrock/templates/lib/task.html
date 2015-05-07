@@ -4,6 +4,8 @@
     {% snail_mail_task task.id %}
 {% elif task.rejectedemailtask %}
     {% rejected_email_task task.id %}
+{% elif task.staleagencytask %}
+    {% stale_agency_task task.id %}
 {% else %}
     {% default_task task.id %}
 {% endif %}

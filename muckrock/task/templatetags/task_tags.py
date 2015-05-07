@@ -54,6 +54,11 @@ class RejectedEmailTaskNode(TaskNode):
     model = task.models.RejectedEmailTask
     task_template = 'task/rejected_email.html'
 
+class StaleAgencyTaskNode(TaskNode):
+    """Renders a stale agency task."""
+    model = StaleAgencyTask
+    task_template = 'task/stale_agency.html'
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_id(token):
@@ -83,3 +88,8 @@ def snail_mail_task(parser, token):
 def rejected_email_task(parser, token):
     """Returns a RejectedEmailTaskNode"""
     return RejectedEmailTaskNode(get_id(token))
+
+@register.tag
+def stale_agency_task(parser, token):
+    """Returns a StaleAgencyTaskNode"""
+    return StaleAgencyTaskNode(get_id(token))
