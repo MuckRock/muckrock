@@ -239,20 +239,6 @@ class NewAgencyTaskList(TaskList):
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
-    task_template = 'task/response.html'
-
-    def get_task_context(self, task):
-        """Adds ResponseTask-specific context"""
-        task_context = super(ResponseTaskList, self).get_task_context(task)
-        form_initial = {}
-        if task.communication.foia:
-            the_foia = task.communication.foia
-            form_initial['status'] = the_foia.status
-            form_initial['tracking_number'] = the_foia.tracking_id
-            task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
-        task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
-        task_context.update({'attachments': task.communication.files.all()})
-        return task_context
 
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'

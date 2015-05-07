@@ -81,6 +81,24 @@ class NewAgencyTaskNode(TaskNode):
         extra_context['foias'] = foia.models.FOIARequest.objects.filter(agency=task.agency)
         return extra_context
 
+class ResponseTaskNode(TaskNode):
+    """Renders a response task."""
+    mdoel = task.models.ResponseTask
+    task_template = 'task/response.html'
+
+    def get_extra_context(self, task):
+        """Adds ResponseTask-specific context"""
+        extra_context = super(ResponseTaskNode, self).get_extra_context(task)
+        form_initial = {}
+        if task.communication.foia:
+            the_foia = task.communication.foia
+            form_initial['status'] = the_foia.status
+            form_initial['tracking_number'] = the_foia.tracking_id
+            extra_context['all_comms'] = the_foia.communications.all().order_by('-date')
+        extra_context['response_form'] = ResponseTaskForm(initial=form_initial)
+        extra_context['attachments'] = task.communication.files.all()
+        return extra_context
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_id(token):
@@ -125,3 +143,8 @@ def flagged_task(parser, token):
 def new_agency_task(parser, token):
     """Returns a NewAgencyTaskNode"""
     return NewAgencyTaskNode(get_id(token))
+
+@register.tag
+def response_task(parser, token):
+    """Returns a ResponseTaskNode"""
+    return ResponseTaskNode(get_id(token))
