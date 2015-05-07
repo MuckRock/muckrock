@@ -13,6 +13,11 @@ class TaskFilterForm(MRFilterForm):
         label='Show Resolved'
     )
 
+class SnailMailTaskForm(forms.Form):
+    """Simple form for acting on a SnailMailTask"""
+    status = forms.ChoiceField(choices=foia.models.STATUS)
+    update_date = forms.BooleanField(default=True)
+
 class ResponseTaskForm(forms.Form):
     """Simple form for acting on a ResponseTask"""
     move = forms.CharField(required=False)
