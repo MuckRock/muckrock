@@ -251,7 +251,6 @@ class PaymentTaskList(TaskList):
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     model = CrowdfundTask
-    task_template = 'task/crowdfund.html'
 
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'

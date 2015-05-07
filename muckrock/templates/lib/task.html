@@ -17,6 +17,8 @@
     {% status_change_task task.id %}
 {% elif task.paymenttask %}
     {% payment_task task.id %}
+{% elif task.crowdfundtask %}
+    {% crowdfund_task task.id %}
 {% else %}
     {% default_task task.id %}
 {% endif %}
