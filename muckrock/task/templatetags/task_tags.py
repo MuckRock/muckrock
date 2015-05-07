@@ -1,7 +1,9 @@
 from django import template
 
-from muckrock import task
+from muckrock import agency
 from muckrock import foia
+from muckrock import task
+
 
 import logging
 
@@ -64,6 +66,20 @@ class FlaggedTaskNode(TaskNode):
     model = task.models.FlaggedTask
     task_template = 'task/flagged.html'
 
+class NewAgencyTaskNode(TaskNode):
+    """Renders a new agency task."""
+    model = task.models.NewAgencyTask
+    task_template = 'task/new_agency.html'
+
+    def get_extra_context(self, task):
+        """Adds an approval form, other agencies, and relevant requests to context"""
+        extra_context = super(NewAgencyTaskNode, self).get_extra_context(task)
+        other_agencies = agency.models.Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
+        other_agencies = other_agencies.exclude(id=task.agency.id)
+        extra_context['agency_form'] = agency.forms.AgencyForm(instance=task.agency)
+        extra_context['other_agencies'] = other_agencies
+        extra_context['foias'] = foia.models.FOIARequest.objects.filter(agency=task.agency)
+        return extra_context
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -104,3 +120,8 @@ def stale_agency_task(parser, token):
 def flagged_task(parser, token):
     """Returns a FlaggedTaskNode"""
     return FlaggedTaskNode(get_id(token))
+
+@register.tag
+def new_agency_task(parser, token):
+    """Returns a NewAgencyTaskNode"""
+    return NewAgencyTaskNode(get_id(token))

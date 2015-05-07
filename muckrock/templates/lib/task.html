@@ -9,6 +9,8 @@
     {% stale_agency_task task.id %}
 {% elif task.flaggedtask %}
     {% flagged_task task.id %}
+{% elif task.newagencytask %}
+    {% new_agency_task task.id %}
 {% else %}
     {% default_task task.id %}
 {% endif %}

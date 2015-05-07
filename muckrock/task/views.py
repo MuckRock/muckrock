@@ -228,18 +228,6 @@ class FlaggedTaskList(TaskList):
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
-    model = NewAgencyTask
-    task_template = 'task/new_agency.html'
-
-    def get_task_context(self, task):
-        """Adds NewAgencyTask-specific context"""
-        task_context = super(NewAgencyTaskList, self).get_task_context(task)
-        task_context.update({'agency_form': AgencyForm(instance=task.agency)})
-        other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
-        other_agencies = other_agencies.exclude(id=task.agency.id)
-        task_context.update({'other_agencies': other_agencies})
-        task_context.update({'foias': foia.models.FOIARequest.objects.filter(agency=task.agency)})
-        return task_context
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
