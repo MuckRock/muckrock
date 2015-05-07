@@ -198,6 +198,18 @@ class ResponseTaskTests(TestCase):
         eq_(self.task.communication.foia.status, 'done',
             'The FOIA should be set to the proper status.')
 
+    def test_set_tracking_id(self):
+        new_tracking = u'dogs-r-cool'
+        self.task.set_tracking_id(new_tracking)
+        eq_(self.task.communication.foia.tracking_id, new_tracking,
+            'Should update the tracking number on the request.')
+
+    def test_move(self):
+        move_to = 2
+        self.task.move(2)
+        eq_(self.task.communication.foia.id, move_to,
+            'Should move the communication to a different request.')
+
     @raises(ValueError)
     def test_bad_status(self):
         """Should raise an error if given a nonexistant status."""
@@ -210,5 +222,5 @@ class ResponseTaskTests(TestCase):
 
     @raises(Http404)
     def test_bad_move(self):
-        """Should raise a value error if non-existant move destination."""
+        """Should raise a 404 if non-existant move destination."""
         self.task.move(111111)
