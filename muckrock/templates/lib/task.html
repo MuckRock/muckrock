@@ -21,6 +21,8 @@
     {% crowdfund_task task.id %}
 {% elif task.multirequesttask %}
     {% multi_request_task task.id %}
+{% elif task.failedfaxtask %}
+    {% failed_fax_task task.id %}
 {% else %}
     {% default_task task.id %}
 {% endif %}

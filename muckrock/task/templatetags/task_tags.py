@@ -86,6 +86,11 @@ class MultiRequestTaskNode(TaskNode):
     model = task.models.MultiRequestTask
     task_template = 'task/multirequest.html'
 
+class FailedFaxTaskNode(TaskNode):
+    """Renders a failed fax task."""
+    model = task.models.FailedFaxTask
+    task_template = 'task/failed_fax.html'
+
 class NewAgencyTaskNode(TaskNode):
     """Renders a new agency task."""
     model = task.models.NewAgencyTask
@@ -188,3 +193,8 @@ def crowdfund_task(parser, token):
 def multi_request_task(parser, token):
     """Returns a MultiRequestTaskNode"""
     return MultiRequestTaskNode(get_id(token))
+
+@register.tag
+def failed_fax_task(parser, token):
+    """Returns a FailedFaxTaskNode"""
+    return FailedFaxTaskNode(get_id(token))

@@ -259,4 +259,3 @@ class MultiRequestTaskList(TaskList):
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
     model = FailedFaxTask
-    task_template = 'task/failed_fax.html'
