@@ -66,8 +66,9 @@
         <option value="{{s|first}}">{{s|last}}</option>
     {% endfor %}
     </select>
-    <button type="submit" class="primary">Set Status</button>
-    <button type="submit" name="resolve" value="true">Resolve</button>
+    <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked>
+    <label for="update-date-{{task.pk}}">Save the communication with today's date.</label>
+    <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
 {% endblock %}
 
 {% block task-extra-context %}

@@ -179,6 +179,8 @@ def snail_mail_task_post_handler(request, task_pk):
         status = request.POST.get('status')
         if status in dict(STATUS):
             snail_mail_task.set_status(status)
+    if request.POST.get('update_date'):
+        snail_mail_task.update_date()
     return
 
 def new_agency_task_post_handler(request, task_pk):

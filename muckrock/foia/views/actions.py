@@ -297,14 +297,13 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             else:
                 from_who = foia.user.get_full_name()
             save_foia_comm(
-                request,
                 foia,
                 from_who,
                 form.cleaned_data['comm'],
-                'Admin Fix submitted',
                 formset,
                 snail=form.cleaned_data['snail_mail']
             )
+            messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
         else:
             messages.error(request, 'Could not apply admin fix.')

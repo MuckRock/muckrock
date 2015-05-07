@@ -238,13 +238,8 @@ class Detail(DetailView):
         text = request.POST.get('text', False)
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Your follow up has been sent.'
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text)
+            messages.success(request, 'Your follow up has been sent.')
         return redirect(foia)
 
     def _question(self, request, foia):
@@ -293,14 +288,8 @@ class Detail(DetailView):
         """Handle submitting an appeal"""
         text = request.POST.get('text')
         if foia.editable_by(request.user) and foia.is_appealable() and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Appeal succesfully sent',
-                appeal=True
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
+            messages.success(request, 'Appeal successfully sent.')
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
