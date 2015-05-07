@@ -78,8 +78,13 @@ class PaymentTaskNode(TaskNode):
 
 class CrowdfundTaskNode(TaskNode):
     """Renders a crowdfund task."""
-    modle = task.models.CrowdfundTask
+    model = task.models.CrowdfundTask
     task_template = 'task/crowdfund.html'
+
+class MultiRequestTaskNode(TaskNode):
+    """Renders a multi-request task."""
+    model = task.models.MultiRequestTask
+    task_template = 'task/multirequest.html'
 
 class NewAgencyTaskNode(TaskNode):
     """Renders a new agency task."""
@@ -178,3 +183,8 @@ def payment_task(parser, token):
 def crowdfund_task(parser, token):
     """Returns a CrowdfundTaskNode"""
     return CrowdfundTaskNode(get_id(token))
+
+@register.tag
+def multi_request_task(parser, token):
+    """Returns a MultiRequestTaskNode"""
+    return MultiRequestTaskNode(get_id(token))
