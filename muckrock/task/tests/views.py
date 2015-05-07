@@ -12,6 +12,7 @@ import nose
 from muckrock import task
 from muckrock import agency
 from muckrock.foia.models import FOIARequest
+from muckrock.foia.views import save_foia_comm
 from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_
@@ -356,3 +357,24 @@ class ResponseTaskListViewTests(TestCase):
             'task': self.task.pk
         })
         ok_(response)
+
+    def test_foia_integrity(self):
+        """
+        Updating a request through a task should maintain integrity of that request's data.
+        This is in response to issue #387.
+        """
+        # first saving a comm
+        foia = self.task.communication.foia
+        num_comms = foia.communications.count()
+        save_foia_comm(foia, 'Testman', 'Just testing, u no')
+        eq_(foia.communications.count(), num_comms + 1,
+            'Should add a new communication to the FOIA.')
+        num_comms = foia.communications.count()
+        # next try resolving the task with a tracking number set
+        self.client.post(self.url, {
+            'resolve': 'true',
+            'tracking_number': u'12345',
+            'task': self.task.pk
+        })
+        eq_(foia.communications.count(), num_comms,
+            'The number of communications should not have changed from before.')
