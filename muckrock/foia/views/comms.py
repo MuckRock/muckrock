@@ -14,6 +14,7 @@ from muckrock.foia.models import FOIACommunication, FOIARequest
 
 def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False):
     """Save the FOI Communication"""
+    #pylint:disable=too-many-arguments
     comm = FOIACommunication.objects.create(
         foia=foia,
         from_who=from_who,
