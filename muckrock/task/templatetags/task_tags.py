@@ -49,6 +49,11 @@ class SnailMailTaskNode(TaskNode):
         extra_context['status'] = foia.models.STATUS
         return extra_context
 
+class RejectedEmailTaskNode(TaskNode):
+    """Renders a rejected email task."""
+    model = task.models.RejectedEmailTask
+    task_template = 'task/rejected_email.html'
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_id(token):
@@ -73,3 +78,8 @@ def orphan_task(parser, token):
 def snail_mail_task(parser, token):
     """Returns a SnailMailTaskNode"""
     return SnailMailTaskNode(get_id(token))
+
+@register.tag
+def rejected_email_task(parser, token):
+    """Returns a RejectedEmailTaskNode"""
+    return RejectedEmailTaskNode(get_id(token))
