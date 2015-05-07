@@ -108,13 +108,20 @@ class SnailMailTaskTests(TestCase):
             'Snail mail tasks should create successfully given a category and a communication')
 
     def test_set_status(self):
-        self.task.set_status('ack')
-        eq_(self.task.communication.status, 'ack',
+        new_status = 'ack'
+        self.task.set_status(new_status)
+        eq_(self.task.communication.status, new_status,
             'Setting status should update status of associated communication')
-        eq_(self.task.communication.foia.status, 'ack',
+        eq_(self.task.communication.foia.status, new_status,
             'Setting status should update status of associated communication\'s foia request')
-        eq_(self.task.resolved, True,
-            'Setting status should resolve the task')
+
+    def test_update_date(self):
+        old_date = self.task.communication.date
+        self.task.update_date()
+        ok_(self.task.communication.date > old_date,
+            'Date should be moved foward.')
+        eq_(self.task.communication.date.day, datetime.now().day,
+            'Should update the date to today.')
 
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""
