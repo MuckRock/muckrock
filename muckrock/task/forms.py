@@ -15,7 +15,7 @@ class TaskFilterForm(MRFilterForm):
 
 class SnailMailTaskForm(forms.Form):
     """Simple form for acting on a SnailMailTask"""
-    status = forms.ChoiceField(choices=foia.models.STATUS)
+    status = forms.ChoiceField(choices=foia.models.STATUS, required=False)
     update_date = forms.BooleanField(default=True)
 
 class ResponseTaskForm(forms.Form):
