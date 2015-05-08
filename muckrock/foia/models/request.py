@@ -4,7 +4,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
+from django.core.mail import send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum

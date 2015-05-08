@@ -3,10 +3,8 @@ Views for mailgun
 """
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
-from django.core.mail import EmailMessage, send_mail
-from django.db.models import Q
+from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
-from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
@@ -17,7 +15,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, date
+from datetime import datetime
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
@@ -214,11 +212,6 @@ def bounces(request):
     except (IndexError, ValueError, KeyError, FOIARequest.DoesNotExist):
         foia = None
 
-    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
-                                     Q(other_emails__icontains=recipient))
-    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
-                                       Q(other_emails__icontains=recipient))\
-               .filter(status__in=['ack', 'processed', 'appealing', 'payment'])
     RejectedEmailTask.objects.create(
         category=event[0],
         foia=foia,
