@@ -224,14 +224,32 @@ $('.task .checkbox').click(function(e) {
 
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
-batchedButtons.attr('disabled', true);
-checkboxes.click(function(){
+function toggleBatchedButtons() {
     if ($('.task header').find(':checkbox:checked').length > 0) {
         batchedButtons.attr('disabled', false);
     } else {
         batchedButtons.attr('disabled', true);
     }
+}
+batchedButtons.attr('disabled', true);
+checkboxes.click(function(){
+    toggleBatchedButtons();
 });
+// Rebinds the toggle all checkbox to only select checkboxes in task headers
+$('#toggle-all').unbind('click');
+$('#toggle-all').click(function(){
+    var toggleAll = this;
+    $('.task header :checkbox').not('#toggle-all').not('.list-filters-fields').each(function(){
+        $(this).click(function(){
+            toggleAll.checked = false;
+        });
+        if (!$(this).data('ignore-toggle-all')) {
+            this.checked = toggleAll.checked;
+            toggleBatchedButtons();
+        }
+    });
+});
+
 
 $('#collapse-all').click(function(e){
     e.preventDefault();
