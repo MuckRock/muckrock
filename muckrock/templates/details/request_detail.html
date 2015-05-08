@@ -160,10 +160,10 @@
     {% crowdfund foia.pk %}
 {% endif %}
 
-{% if foia.files or foia.user == user or user.is_staff %}
+{% if foia.files.all or foia.user == user or user.is_staff %}
 <div class="tabs">
     <label for="request-radio" class="active">Request<input type="radio" name="request" id="request-radio" /></label>
-    {% if foia.files %}
+    {% if foia.files.all %}
     <label for="files-radio">Files<input type="radio" name="request" id="files-radio" /></label>
     {% endif %}
     {% if foia.user == user or user.is_staff %}
@@ -212,7 +212,7 @@
     {% endif %}
 </section>
 
-{% if foia.files %}
+{% if foia.files.all %}
 <!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
     {% if not foia.is_embargo %}
