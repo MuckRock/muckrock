@@ -411,6 +411,8 @@ class FOIARequest(models.Model):
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
 
+        # if agency isnt approved, do not email or snail mail
+        # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.approved
         can_email = self.email and not appeal
         comm = self.last_comm()
@@ -425,7 +427,7 @@ class FOIARequest(models.Model):
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
-        else:
+        elif approved_agency:
             # snail mail it
             self.status = 'submitted'
             notice = 'n' if self.communications.count() == 1 else 'u'
