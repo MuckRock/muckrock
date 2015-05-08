@@ -110,9 +110,11 @@ var resolved = $('.resolved.task');
 
 function resolve(taskForm) {
     taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    taskData = $(taskForm).serialize() + '&resolve=true'
+    console.log(taskData);
     $.ajax({
         type: 'POST',
-        data: $(taskForm).serialize(),
+        data: taskData,
         success: markAsResolved(taskID)
     });
 }
@@ -138,6 +140,15 @@ resolved.each(function(){
     markAsResolved(this);
 });
 
+function hasResolveAction(taskForm) {
+    // checks whether the task form has a 'Resolve' action or not
+    var resolveActionExists = false;
+    if (!!$(taskForm).children('button[name="resolve"]').length) {
+        resolveActionExists = true;
+    }
+    return resolveActionExists;
+}
+
 $('button[name="resolve"]').click(function(e){
     e.preventDefault;
     // if the button clicked is the "resolve all" button,
@@ -147,9 +158,11 @@ $('button[name="resolve"]').click(function(e){
     var forms = [];
     if ($(this).attr('id') == 'batched-resolve') {
         $(':checked[form=batched]').each(function() {
-            console.log(this);
-            console.log($(this).closest('form');
-            forms.push($(this).closest('form'));
+            var taskForm = $(this).closest('.task').find('form');
+            // the form needs to have a resolve action in order to be added
+            if (hasResolveAction(taskForm)) {
+                forms.push(taskForm);
+            }
         });
     } else {
         forms.push($(this).closest('form'));
