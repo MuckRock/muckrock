@@ -337,10 +337,7 @@
         var docId = $(this).data('docId');
         var docTitle = $(this).data('docTitle');
         var docAnchor = $(this).data('docAnchor');
-        var docsTab = $('#files-radio').parent();
-        docsTab.addClass( 'active' );
-        docsTab.siblings().removeClass( 'active' );
-        hideAllExcept($('#files'));
+        $('#files-radio').trigger('click');
         displayDoc(docId, docTitle, docAnchor);
     });
 
