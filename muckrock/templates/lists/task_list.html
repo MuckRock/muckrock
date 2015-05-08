@@ -77,8 +77,11 @@
         </div>
         <form method="POST" id="batched">
             {% csrf_token %}
-            <button type="submit" name="resolve" value="true" id="batched-resolve">Resolve</button>
-            <button type="submit" name="assign" value="true" id="batched-assign">Assign</button>
+            {% if bulk_actions %}
+                {% for bulk_action in bulk_actions %}
+            <button type="submit" name="{{bulk_action}}" value="true" id="batched-{{bulk_action}}">{{bulk_action|title}}</button>
+                {% endfor %}
+            {% endif %}
             <button id="collapse-all">Collapse All</button>
         </form>
     </section>
@@ -152,13 +155,14 @@ resolved.each(function(){
     markAsResolved(this);
 });
 
-function hasResolveAction(taskForm) {
+function formHasAction(taskForm, action) {
     // checks whether the task form has a 'Resolve' action or not
-    var resolveActionExists = false;
-    if (!!$(taskForm).children('button[name="resolve"]').length) {
-        resolveActionExists = true;
+    var actionExists = false;
+    var actionButton = 'button[name="' + action + '"]';
+    if (!!$(taskForm).children(actionButton).length) {
+        actionExists = true;
     }
-    return resolveActionExists;
+    return actionExists;
 }
 
 $('button[name="resolve"]').click(function(e){
@@ -172,7 +176,7 @@ $('button[name="resolve"]').click(function(e){
         $(':checked[form=batched]').each(function() {
             var taskForm = $(this).closest('.task').find('form');
             // the form needs to have a resolve action in order to be added
-            if (hasResolveAction(taskForm)) {
+            if (formHasAction(taskForm, 'resolve')) {
                 forms.push(taskForm);
             }
         });
@@ -187,7 +191,21 @@ $('button[name="resolve"]').click(function(e){
 
 $('button[name="reject"]').click(function(e){
     e.preventDefault;
-    reject($(this).closest('form'));
+    var forms = [];
+    if ($(this).attr('id') == 'batched-reject') {
+        $(':checked[form=batched]').each(function() {
+            var taskForm = $(this).closest('.task').find('form');
+            if (formHasAction(taskForm, 'reject')) {
+                forms.push(taskForm);
+            }
+        });
+    } else {
+        forms.push($(this).closest('form'));
+    }
+    $(forms).each(function(){
+        console.log($(this));
+        reject(this);
+    });
     return false;
 });
 
