@@ -216,6 +216,7 @@
 <!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
     {% if not foia.is_embargo and foia.total_pages > 0 %}
+    <h2 id="doc-title"></h2>
     <div class="viewer" id="viewer"></div>
     {% endif %}
     <ul>
@@ -308,12 +309,11 @@
         } else {
             title = 'Untitled';
         }
-        $('#doc-title').remove();
-        $('<h2 id="doc-title">' + title + '</h2>').insertBefore('#viewer');
+        $('#doc-title').empty().text(title);
         $('.file').parent('li').removeClass('active');
         if (!!docAnchor) {
-            var idWithAnchor = '#files ul li .file#' + docAnchor;
-            $(idWithAnchor).parent('li').addClass('active');
+            var fileListItem = $('#files ul li > #' + docAnchor).parent('li');
+            $(fileListItem).addClass('active');
         }
         DV.load(
             'https://www.documentcloud.org/documents/' + docId + '.js',
