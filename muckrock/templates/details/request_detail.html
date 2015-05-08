@@ -254,6 +254,13 @@
 {% endif %}
 <script>
 
+    var target = window.location.hash;
+    var n = target.indexOf('-');
+    target = target.substring(0, n != -1 ? n : target.length);
+
+    $('.hidden-reply').hide();
+    $('.embed textarea').trigger('autosize.destroy');
+
     function textAreaModal(nextSelector) {
         modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
@@ -306,7 +313,6 @@
         $('.file').parent('li').removeClass('active');
         if (!!docAnchor) {
             var idWithAnchor = '#files ul li .file#' + docAnchor;
-            console.log(idWithAnchor);
             $(idWithAnchor).parent('li').addClass('active');
         }
         DV.load(
@@ -328,36 +334,6 @@
         }
     }
 
-    $('.hidden-reply').hide();
-    $('.embed textarea').trigger('autosize.destroy');
-
-    /* Documents */
-
-    $('a.view-file').click(function() {
-        var docId = $(this).data('docId');
-        var docTitle = $(this).data('docTitle');
-        var docAnchor = $(this).data('docAnchor');
-        $('#files-radio').trigger('click');
-        displayDoc(docId, docTitle, docAnchor);
-    });
-
-    /* Modals */
-
-    $('.text-area.modal-button').click(function(e){
-        e.preventDefault();
-        textAreaModal($(this).next());
-        return false;
-    });
-
-    /* Replies */
-
-    $('.text-area.reply-button').click(function(e){
-        e.preventDefault();
-        console.log($(this).next());
-        textAreaReply($(this).next());
-        return false;
-    });
-
     /* Tab Bar */
 
     $('input:radio').change(function() {
@@ -377,9 +353,6 @@
 
     /* Deep link into tab */
 
-    var target = window.location.hash;
-    var n = target.indexOf('-');
-    target = target.substring(0, n != -1 ? n : target.length);
     if (target == '#comm' || target == '#comms') {
         $('#request-radio').trigger('click');
     } else if (target == '#file' || target == '#files') {
@@ -387,6 +360,37 @@
     } else if (target == '#note' || target == '#notes') {
         $('#notes-radio').trigger('click');
     }
+
+    /* Documents */
+
+    $('a.view-file').click(function() {
+        var docId = $(this).data('docId');
+        var docTitle = $(this).data('docTitle');
+        var docAnchor = $(this).data('docAnchor');
+        $('#files-radio').trigger('click');
+        displayDoc(docId, docTitle, docAnchor);
+    });
+
+    if (target == '#file') {
+        var specificFile = window.location.hash;
+        $(specificFile + ' .view-file').trigger('click');
+    }
+
+    /* Modals */
+
+    $('.text-area.modal-button').click(function(e){
+        e.preventDefault();
+        textAreaModal($(this).next());
+        return false;
+    });
+
+    /* Replies */
+
+    $('.text-area.reply-button').click(function(e){
+        e.preventDefault();
+        textAreaReply($(this).next());
+        return false;
+    });
 
     /* Status changer */
     $('#edit-status').click(function() {
