@@ -5,11 +5,9 @@ FOIA views for actions
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from collections import namedtuple
@@ -230,7 +228,6 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         )
         foia.status = 'processed'
         foia.save()
-        args = {'request': foia, 'amount': int(amount) / 100.0}
         PaymentTask.objects.create(
             user=request.user,
             amount=int(amount)/100.0,

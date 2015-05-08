@@ -2,9 +2,8 @@
 Viewsets for the FOIA API
 """
 
-from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string, get_template
+from django.template.loader import get_template
 from django.template import RequestContext
 
 from datetime import datetime
