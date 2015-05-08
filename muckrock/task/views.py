@@ -45,9 +45,10 @@ def count_tasks():
 class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
+    model = Task
     template_name = 'lists/task_list.html'
     task_template = 'task/default.html'
-    model = Task
+    bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
         """Apply query parameters to the queryset"""
@@ -106,6 +107,7 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
+        context['bulk_actions'] = self.bulk_actions
         context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
@@ -249,6 +251,7 @@ class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
     task_template = 'task/orphan.html'
+    bulk_actions = ['reject']
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
