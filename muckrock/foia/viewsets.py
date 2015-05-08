@@ -149,10 +149,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             foia.status = 'processed'
             foia.save()
 
-            send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-                      render_to_string('text/foia/admin_payment.txt',
-                                       {'request': foia, 'amount': amount / 100.0}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             PaymentTask.objects.create(
                 user=request.user,
                 amount=int(amount)/100.0,

@@ -231,13 +231,6 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         foia.status = 'processed'
         foia.save()
         args = {'request': foia, 'amount': int(amount) / 100.0}
-        send_mail(
-            '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-            render_to_string('text/foia/admin_payment.txt', args),
-            'info@muckrock.com',
-            ['requests@muckrock.com'],
-            fail_silently=False
-        )
         PaymentTask.objects.create(
             user=request.user,
             amount=int(amount)/100.0,

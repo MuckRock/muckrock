@@ -45,18 +45,6 @@ def detail(request, fed_slug, state_slug, local_slug):
     if request.method == 'POST':
         form = FlagForm(request.POST)
         if form.is_valid():
-            send_mail(
-                '[FLAG] %s: %s' % ('Jurisdiction', jurisdiction.name),
-                render_to_string('text/jurisdiction/flag.txt', {
-                    'obj': jurisdiction,
-                    'user': request.user,
-                    'type': 'jurisdiction',
-                    'reason': form.cleaned_data.get('reason')
-                }),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             FlaggedTask.objects.create(
                 user=request.user,
                 text=form.cleaned_data.get('reason'),

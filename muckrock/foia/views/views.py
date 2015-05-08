@@ -209,23 +209,6 @@ class Detail(DetailView):
             foia.status = status
             foia.save()
 
-            subject = '%s changed the status of "%s" to %s' % (
-                request.user.username,
-                foia.title,
-                foia.get_status_display()
-            )
-            args = {
-                'request': foia,
-                'old_status': old_status,
-                'user': request.user
-            }
-            send_mail(
-                subject,
-                render_to_string('text/foia/status_change.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             StatusChangeTask.objects.create(
                 user=request.user,
                 old_status=old_status,
@@ -265,18 +248,6 @@ class Detail(DetailView):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
         if request.user.is_authenticated() and text:
-            args = {
-                'request': foia,
-                'user': request.user,
-                'reason': text
-            }
-            send_mail(
-                '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('text/foia/flag.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,

@@ -94,11 +94,6 @@ def handle_request(request, mail_id):
                 _upload_file(foia, comm, file_, from_)
 
         _forward(post, request.FILES)
-        send_mail('[RESPONSE] Freedom of Information Request: %s' % foia.title,
-                  render_to_string('text/foia/admin_request.txt',
-                                   {'request': foia, 'post': post,
-                                    'date': date.today().toordinal()}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
         ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
@@ -224,11 +219,6 @@ def bounces(request):
     foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
                                        Q(other_emails__icontains=recipient))\
                .filter(status__in=['ack', 'processed', 'appealing', 'payment'])
-    send_mail('[%s] %s' % (event.upper(), recipient),
-              render_to_string('text/foia/bounce.txt',
-                               {'agencies': agencies, 'recipient': recipient,
-                                'foia': foia, 'foias': foias, 'error': error}),
-              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
     RejectedEmailTask.objects.create(
         category=event[0],
         foia=foia,

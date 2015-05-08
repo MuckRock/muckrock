@@ -428,20 +428,6 @@ class FOIARequest(models.Model):
         else:
             # snail mail it
             self.status = 'submitted'
-            notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
-            notice = 'APPEAL' if appeal else notice
-            send_mail(
-                '[%s] Freedom of Information Request: %s' % (
-                    notice, self.title
-                ),
-                render_to_string(
-                    'text/foia/admin_mail.txt',
-                    {'request': self, 'appeal': appeal}
-                ),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
@@ -494,9 +480,6 @@ class FOIARequest(models.Model):
         else:
             self.status = 'submitted'
             self.save()
-            send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
-                      render_to_string('text/foia/admin_mail.txt', {'request': self}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category='f', communication=comm)
