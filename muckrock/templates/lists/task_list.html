@@ -108,43 +108,66 @@ $.ajaxSetup({
 var tasks = $('.task');
 var resolved = $('.resolved.task');
 
-function resolve(task_pk) {
-    var task_id = '#' + task_pk + '-task';
-    var task_api_url = '/api_v1/task/' + task_pk;
+function resolve(taskForm) {
+    taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    taskData = $(taskForm).serialize() + '&resolve=true'
+    console.log(taskData);
     $.ajax({
-        type: 'PATCH',
-        url: task_api_url,
-        data: {'resolved': true},
-        success: markAsResolved(task_id),
-        dataType: 'json'
+        type: 'POST',
+        data: taskData,
+        success: markAsResolved(taskID)
     });
 }
 
-function markAsResolved(task) {
-    $(task).addClass('resolved');
-    $(task).find(':input').attr('disabled', true).addClass('disabled');
-    $(task).find('.task-type').text('Resolved');
+function getTaskID(taskFormData) {
+    // Gets the task ID from a task form
+    var taskID;
+    $.each(taskFormData, function(i, input){
+        if (input.name == 'task') {
+            taskID = input.value;
+        }
+    });
+    return taskID;
+}
+
+function markAsResolved(taskID) {
+    $(taskID).addClass('resolved');
+    $(taskID).find(':input').attr('disabled', true).addClass('disabled');
+    $(taskID).find('.task-type').text('Resolved');
 }
 
 resolved.each(function(){
     markAsResolved(this);
 });
 
+function hasResolveAction(taskForm) {
+    // checks whether the task form has a 'Resolve' action or not
+    var resolveActionExists = false;
+    if (!!$(taskForm).children('button[name="resolve"]').length) {
+        resolveActionExists = true;
+    }
+    return resolveActionExists;
+}
+
 $('button[name="resolve"]').click(function(e){
     e.preventDefault;
     // if the button clicked is the "resolve all" button,
-    // then get IDs for all the currently checked tasks
+    // then get forms for all the currently checked tasks
     // else,
-    // just get the ID for the task that owns the button
-    var tasks = [];
+    // just get the form for the task that owns the button
+    var forms = [];
     if ($(this).attr('id') == 'batched-resolve') {
         $(':checked[form=batched]').each(function() {
-            tasks.push($(this).attr('value'));
+            var taskForm = $(this).closest('.task').find('form');
+            // the form needs to have a resolve action in order to be added
+            if (hasResolveAction(taskForm)) {
+                forms.push(taskForm);
+            }
         });
     } else {
-        tasks.push($(this).siblings('[name=task]').attr('value'));
+        forms.push($(this).closest('form'));
     }
-    $(tasks).each(function(){
+    $(forms).each(function(){
         resolve(this);
     });
     return false;
@@ -199,5 +222,4 @@ $('.reveal-extra-context').click(function(e){
         $(this).next().removeClass('hidden');
     }
 });
-
 {% endblock list-scripts %}
