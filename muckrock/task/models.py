@@ -97,7 +97,13 @@ class SnailMailTask(Task):
         comm.status = foia.status
         comm.date = datetime.now()
         comm.save()
-        self.resolve()
+
+    def update_date(self):
+        """Sets the date of the communication to today"""
+        comm = self.communication
+        comm.date = datetime.now()
+        comm.save()
+        comm.foia.update()
 
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""

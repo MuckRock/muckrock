@@ -231,13 +231,6 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         foia.status = 'processed'
         foia.save()
         args = {'request': foia, 'amount': int(amount) / 100.0}
-        send_mail(
-            '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-            render_to_string('text/foia/admin_payment.txt', args),
-            'info@muckrock.com',
-            ['requests@muckrock.com'],
-            fail_silently=False
-        )
         PaymentTask.objects.create(
             user=request.user,
             amount=int(amount)/100.0,
@@ -297,14 +290,13 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             else:
                 from_who = foia.user.get_full_name()
             save_foia_comm(
-                request,
                 foia,
                 from_who,
                 form.cleaned_data['comm'],
-                'Admin Fix submitted',
                 formset,
                 snail=form.cleaned_data['snail_mail']
             )
+            messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
         else:
             messages.error(request, 'Could not apply admin fix.')

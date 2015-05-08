@@ -74,16 +74,6 @@ def _make_new_agency(request, agency, jurisdiction):
         user=user,
         approved=False,
     )
-    send_mail(
-        '[AGENCY] %s' % agency.name,
-        render_to_string(
-            'text/foia/admin_agency.txt',
-            {'agency': agency}
-        ),
-        'info@muckrock.com',
-        ['requests@muckrock.com'],
-        fail_silently=False
-    )
     NewAgencyTask.objects.create(
             user=user,
             agency=agency)
@@ -408,16 +398,6 @@ def draft_multirequest(request, slug, idx):
                     foia.status = 'submitted'
                     foia.save()
                     messages.success(request, 'Your multi-request was submitted.')
-                    send_mail(
-                        '[MULTI] Freedom of Information Request: %s' % (foia.title),
-                        render_to_string(
-                            'text/foia/multi_mail.txt',
-                            {'request': foia}
-                        ),
-                        'info@muckrock.com',
-                        ['requests@muckrock.com'],
-                        fail_silently=False
-                    )
                     MultiRequestTask.objects.create(multirequest=foia)
                     return redirect('foia-mylist')
                 messages.success(request, 'Updates to this request were saved.')

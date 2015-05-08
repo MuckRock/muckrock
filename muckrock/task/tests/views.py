@@ -1,6 +1,7 @@
 """
 Tests for Tasks views
 """
+from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -11,6 +12,7 @@ import nose
 from muckrock import task
 from muckrock import agency
 from muckrock.foia.models import FOIARequest
+from muckrock.foia.views import save_foia_comm
 from muckrock.views import MRFilterableListView
 
 eq_ = nose.tools.eq_
@@ -189,7 +191,7 @@ class OrphanTaskViewTests(TestCase):
                 ('Rejecting an orphan with a likely FOIA should not move'
                 ' the communication to that FOIA'))
 
-class TaskListViewSnailMailTaskPOSTTests(TestCase):
+class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -203,10 +205,24 @@ class TaskListViewSnailMailTaskPOSTTests(TestCase):
         self.client.login(username='adam', password='abc')
 
     def test_post_set_status(self):
-        self.client.post(self.url, {'status': 'ack', 'task': self.task.pk})
+        """Should update the status of the task's communication and associated request."""
+        new_status = 'ack'
+        self.client.post(self.url, {'status': new_status, 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
-        eq_(updated_task.resolved, True,
-            'Snail mail task should resolve itself when setting status of its communication')
+        eq_(updated_task.communication.status, new_status,
+            'Should update status of the communication.')
+        eq_(updated_task.communication.foia.status, new_status,
+            'Should update the status of the communication\'s associated request.')
+
+    def test_post_update_date(self):
+        """Should update the date of the communication to today."""
+        comm_date = self.task.communication.date
+        self.client.post(self.url, {'update_date': 'true', 'task': self.task.pk})
+        updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
+        ok_(updated_task.communication.date > comm_date,
+            'Should update the communication date.')
+        eq_(updated_task.communication.date.day, datetime.now().day,
+            'Should update teh communication to today\'s date.')
 
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
@@ -341,3 +357,24 @@ class ResponseTaskListViewTests(TestCase):
             'task': self.task.pk
         })
         ok_(response)
+
+    def test_foia_integrity(self):
+        """
+        Updating a request through a task should maintain integrity of that request's data.
+        This is in response to issue #387.
+        """
+        # first saving a comm
+        foia = self.task.communication.foia
+        num_comms = foia.communications.count()
+        save_foia_comm(foia, 'Testman', 'Just testing, u no')
+        eq_(foia.communications.count(), num_comms + 1,
+            'Should add a new communication to the FOIA.')
+        num_comms = foia.communications.count()
+        # next try resolving the task with a tracking number set
+        self.client.post(self.url, {
+            'resolve': 'true',
+            'tracking_number': u'12345',
+            'task': self.task.pk
+        })
+        eq_(foia.communications.count(), num_comms,
+            'The number of communications should not have changed from before.')
