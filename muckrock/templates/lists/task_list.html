@@ -119,6 +119,18 @@ function resolve(taskForm) {
     });
 }
 
+function reject(taskForm) {
+    taskData = $(taskForm).serializeArray()
+    taskID = '#' + getTaskID(taskData) + '-task';
+    console.log($(taskForm).serialize());
+    console.log(taskID);
+    $.ajax({
+        type: 'POST',
+        data: 'resolve=true&task=' + getTaskID(taskData),
+        success: markAsResolved(taskID)
+    });
+}
+
 function getTaskID(taskFormData) {
     // Gets the task ID from a task form
     var taskID;
@@ -170,6 +182,12 @@ $('button[name="resolve"]').click(function(e){
     $(forms).each(function(){
         resolve(this);
     });
+    return false;
+});
+
+$('button[name="reject"]').click(function(e){
+    e.preventDefault;
+    reject($(this).closest('form'));
     return false;
 });
 
