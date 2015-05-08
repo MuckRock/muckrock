@@ -362,6 +362,7 @@
     });
 
     /* Tab Bar */
+
     $('input:radio').change(function() {
         $(this).parent().addClass( 'active' );
         $(this).parent().siblings().removeClass( "active" );
@@ -376,6 +377,19 @@
     $('#notes-radio').change(function() {
         hideAllExcept($('#notes'));
     });
+
+    /* Deep link into tab */
+
+    var target = window.location.hash;
+    var n = target.indexOf('-');
+    target = target.substring(0, n != -1 ? n : target.length);
+    if (target == '#comm' || target == '#comms') {
+        $('#request-radio').trigger('click');
+    } else if (target == '#file' || target == '#files') {
+        $('#files-radio').trigger('click');
+    } else if (target == '#note' || target == '#notes') {
+        $('#notes-radio').trigger('click');
+    }
 
     /* Status changer */
     $('#edit-status').click(function() {
