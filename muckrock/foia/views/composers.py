@@ -226,7 +226,16 @@ def create_request(request):
             return redirect(foia)
         else:
             # form is invalid
-            form = RequestForm(request.POST, request=request)
+            # autocomplete blows up if you pass it a bad value in state
+            # or local - not sure how this is happening, but am removing
+            # blank values for these keys
+            # this seems to technically be a bug in autocompletes rendering
+            # should probably fix it there and submit a patch
+            post = request.POST.copy()
+            for chk_val in ['local', 'state']:
+                if chk_val in post and not post[chk_val]:
+                    del post[chk_val]
+            form = RequestForm(post, request=request)
     else:
         if clone:
             form = RequestForm(initial=initial_data, request=request)
