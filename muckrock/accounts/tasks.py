@@ -83,8 +83,8 @@ def store_statstics():
         total_unresolved_orphan_tasks=OrphanTask.objects.filter(resolved=False).count(),
         total_snailmail_tasks=SnailMailTask.objects.count(),
         total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
-        total_rejectedemail_tasks=RejectedEmailTask.objects.count(),
-        total_unresolved_rejectedemail_tasks=
+        total_rejected_tasks=RejectedEmailTask.objects.count(),
+        total_unresolved_rejected_tasks=
             RejectedEmailTask.objects.filter(resolved=False).count(),
         total_staleagency_tasks=StaleAgencyTask.objects.count(),
         total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
@@ -96,10 +96,10 @@ def store_statstics():
         total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
         total_faxfail_tasks=FailedFaxTask.objects.count(),
         total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
-        total_payment=PaymentTask.objects.count(),
-        total_unresolved_payment=PaymentTask.objects.filter(resolved=False).count(),
-        total_crowdfundpayment=CrowdfundTask.objects.count(),
-        total_unresolved_crowdfundpayment=
+        total_payment_tasks=PaymentTask.objects.count(),
+        total_unresolved_payment_tasks=PaymentTask.objects.filter(resolved=False).count(),
+        total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
+        total_unresolved_crowdfundpayment_tasks=
             CrowdfundTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
