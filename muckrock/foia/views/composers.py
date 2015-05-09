@@ -205,7 +205,7 @@ def create_request(request):
         initial_data = {
             'title': foia.title,
             'document': smart_text(foia.requested_docs),
-            'agency': foia.agency.name
+            'agency': foia.agency.name if foia.agency else ''
         }
         jurisdiction = foia.jurisdiction
         level = jurisdiction.level
