@@ -57,6 +57,7 @@ def handle_request(request, mail_id):
         return HttpResponseForbidden()
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
+    subject = post.get('Subject') or post.get('subject', '')
 
     try:
         from_realname, from_email = parseaddr(from_)
@@ -77,7 +78,8 @@ def handle_request(request, mail_id):
 
         comm = FOIACommunication.objects.create(
                 foia=foia, from_who=from_realname[:255], priv_from_who=from_[:255],
-                to_who=foia.user.get_full_name(), response=True,
+                to_who=foia.user.get_full_name(),
+                subject=subject, response=True,
                 date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
                     (post.get('stripped-text', ''), post.get('stripped-signature')))
