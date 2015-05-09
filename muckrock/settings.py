@@ -239,6 +239,7 @@ INSTALLED_APPS = (
     'storages',
     'taggit',
     'urlauth',
+    'django_xmlrpc',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
