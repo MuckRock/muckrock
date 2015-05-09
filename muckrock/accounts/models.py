@@ -451,6 +451,12 @@ class Statistics(models.Model):
     total_unresolved_newagency_tasks = models.IntegerField(null=True)
     total_response_tasks = models.IntegerField(null=True)
     total_unresolved_response_tasks = models.IntegerField(null=True)
+    total_faxfail_tasks = models.IntegerField(null=True)
+    total_unresolved_faxfail_tasks = models.IntegerField(null=True)
+    total_payment_tasks = models.IntegerField(null=True)
+    total_unresolved_payment_tasks = models.IntegerField(null=True)
+    total_crowdfundpayment_tasks = models.IntegerField(null=True)
+    total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True)
 
     def __unicode__(self):
         return 'Stats for %s' % self.date
