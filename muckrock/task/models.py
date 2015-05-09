@@ -111,7 +111,7 @@ class RejectedEmailTask(Task):
     category = models.CharField(max_length=1, choices=categories)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
-    error = models.CharField(max_length=255, blank=True)
+    error = models.TextField(blank=True)
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.foia)
