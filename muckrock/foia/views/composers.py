@@ -188,14 +188,16 @@ def _submit_request(request, foia):
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
 
-# pylint: disable=unused-argument
 def clone_request(request, jurisdiction, jidx, slug, idx):
     """A URL handler for cloning requests"""
+    # pylint: disable=unused-argument
     foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
     """A very important view for composing FOIA requests"""
+    # pylint: disable=too-many-locals
+    # we should refactor this, its too long, and remove the pylint disable
     initial_data = {}
     clone = False
     parent = None
