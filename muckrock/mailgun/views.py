@@ -92,7 +92,6 @@ def handle_request(request, mail_id):
             if type_ == 'file':
                 upload_file.apply_async(args=[foia.pk, comm.pk, file_, from_], countdown=3)
 
-        _forward(post, request.FILES)
         ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
