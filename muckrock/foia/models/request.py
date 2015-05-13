@@ -435,6 +435,9 @@ class FOIARequest(models.Model):
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category=notice, communication=comm)
+        else:
+            # not an approved agency, all we do is mark as submitted
+            self.status = 'submitted'
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
