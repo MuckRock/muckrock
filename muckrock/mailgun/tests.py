@@ -63,9 +63,8 @@ class TestMailgunViews(TestCase):
                                     kwargs={'mail_id': foia.get_mail_id()}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
-        nose.tools.eq_(len(mail.outbox), 2)
-        nose.tools.eq_(mail.outbox[0].body, 'Test normal.')
-        nose.tools.eq_(mail.outbox[1].to, [foia.user.email])
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
 
         foia = FOIARequest.objects.get(pk=1)
         nose.tools.eq_(foia.email, 'test@agency.gov')
