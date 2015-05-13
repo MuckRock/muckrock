@@ -90,7 +90,7 @@ def handle_request(request, mail_id):
         for file_ in request.FILES.itervalues():
             type_ = _file_type(file_)
             if type_ == 'file':
-                upload_file.apply_async(args=[foia.pk, comm.pk, file_, from_], countdown=3)
+                upload_file.apply(args=[foia.pk, comm.pk, file_, from_], countdown=3)
 
         ResponseTask.objects.create(communication=comm)
 
