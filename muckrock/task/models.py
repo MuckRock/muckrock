@@ -95,7 +95,7 @@ class SnailMailTask(Task):
         foia.update()
         foia.save()
         comm.status = foia.status
-        comm.date = datetime.now()
+#        comm.date = datetime.now()
         comm.save()
 
     def update_date(self):
