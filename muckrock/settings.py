@@ -295,7 +295,7 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
 CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks',
-                  'muckrock.agency.tasks', 'muckrock.mailgun.tasks')
+                  'muckrock.agency.tasks')
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
