@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from datetime import date
 import hashlib
 import hmac
 import nose.tools
@@ -126,12 +127,13 @@ class TestMailgunViews(TestCase):
             nose.tools.eq_(response.status_code, 200)
 
             foia = FOIARequest.objects.get(pk=1)
-            nose.tools.eq_(foia.files.all()[0].ffile.name, 'foia_files/data.xls')
+            file_path = date.today().strftime('foia_files/%Y/%m/%d/data.xls')
+            nose.tools.eq_(foia.files.all()[0].ffile.name, file_path)
 
         finally:
             foia.files.all()[0].delete()
             os.remove('data.xls')
-            file_path = os.path.join(SITE_ROOT, 'static/media/foia_files/data.xls')
+            file_path = os.path.join(SITE_ROOT, 'static/media/', file_path)
             if os.path.exists(file_path):
                 os.remove(file_path)
 
