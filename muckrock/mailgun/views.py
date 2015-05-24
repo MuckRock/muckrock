@@ -11,6 +11,7 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -18,12 +19,30 @@ from datetime import datetime
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIACommunication, RawEmail
-from muckrock.mailgun.tasks import upload_file
+from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
+from muckrock.foia.tasks import upload_document_cloud
 from muckrock.settings import MAILGUN_ACCESS_KEY
 from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FailedFaxTask
 
 logger = logging.getLogger(__name__)
+
+def _upload_file(foia, comm, file_, sender):
+    """Upload a file to attach to a FOIA request"""
+
+    access = 'private' if foia and foia.is_embargo() else 'public'
+    source = foia.agency.name if foia and foia.agency else sender
+
+    foia_file = FOIAFile(
+            foia=foia,
+            comm=comm,
+            title=os.path.splitext(file_.name)[0][:70],
+            date=datetime.now(),
+            source=source[:70],
+            access=access)
+    foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
+    foia_file.save()
+    if foia:
+        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
@@ -43,7 +62,7 @@ def _make_orphan_comm(from_, to_, post, files, foia):
     for file_ in files.itervalues():
         type_ = _file_type(file_)
         if type_ == 'file':
-            upload_file.apply_async(args=[None, comm.pk, file_, from_], countdown=3)
+            _upload_file(None, comm, file_, from_)
     return comm
 
 @csrf_exempt
@@ -90,7 +109,7 @@ def handle_request(request, mail_id):
         for file_ in request.FILES.itervalues():
             type_ = _file_type(file_)
             if type_ == 'file':
-                upload_file.apply(args=[foia.pk, comm.pk, file_, from_], countdown=3)
+                _upload_file(foia, comm, file_, from_)
 
         ResponseTask.objects.create(communication=comm)
 
