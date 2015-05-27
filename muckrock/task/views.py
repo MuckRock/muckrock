@@ -135,7 +135,9 @@ class TaskList(MRFilterableListView):
             # These actions are shared between all Task objects
             # resolve will either be True or None
             # the task will only resolve if True
-            if request.POST.get('resolve'):
+            if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
+                # dont resolve response tasks here
+                # do it in the handler below after checking for errors
                 task.resolve(request.user)
             if request.POST.get('assign'):
                 user_pk = request.POST.get('assign')
@@ -243,7 +245,7 @@ def response_task_post_handler(request, task_pk):
             messages.error(request,
                 'You tried to set an invalid tracking id. Just use a string of characters.')
             error_happened = True
-    if move or status or tracking_number and not error_happened:
+    if (move or status or tracking_number) and not error_happened:
         response_task.resolve(request.user)
     return
 
