@@ -117,7 +117,8 @@ class FOIARequestAdminForm(forms.ModelForm):
     user = autocomplete_light.ModelChoiceField('UserAdminAutocomplete',
                                                queryset=User.objects.all())
     parent = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete',
-                                                 queryset=FOIARequest.objects.all())
+                                                 queryset=FOIARequest.objects.all(),
+                                                 required=False)
 
     class Meta:
         # pylint: disable=R0903
