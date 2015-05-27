@@ -180,6 +180,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     if foia.embargo or foia.status not in finished_status:
         foia.embargo = not foia.embargo
         foia.permanent_embargo = False
+        foia.date_embargo = None
         foia.save()
         return redirect(foia)
     else:
