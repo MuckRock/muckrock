@@ -31,7 +31,8 @@ class Article(models.Model):
     pub_date = models.DateTimeField('Publish date', default=datetime.now)
     title = models.CharField(max_length=200)
     kicker = models.CharField(max_length=200, blank=True)
-    slug = models.SlugField(help_text='A "Slug" is a unique URL-friendly title for an object.')
+    slug = models.SlugField(unique=True,
+            help_text='A "Slug" is a unique URL-friendly title for an object.')
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
     body = models.TextField('Body text')
     authors = models.ManyToManyField(User, related_name='authored_articles')
@@ -91,7 +92,6 @@ class Article(models.Model):
         # pylint: disable=R0903
         ordering = ['-pub_date']
         get_latest_by = 'pub_date'
-        unique_together = (('slug', 'pub_date'),)
 
 
 class Photo(models.Model):
