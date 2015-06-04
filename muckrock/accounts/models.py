@@ -458,6 +458,10 @@ class Statistics(models.Model):
     total_crowdfundpayment_tasks = models.IntegerField(null=True)
     total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True)
 
+    # notes
+    public_notes = models.TextField(default='', blank=True)
+    admin_notes = models.TextField(default='', blank=True)
+
     def __unicode__(self):
         return 'Stats for %s' % self.date
 
