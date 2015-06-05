@@ -40,6 +40,7 @@ class Task(models.Model):
         self.assigned = user
         self.save()
 
+
 class GenericTask(Task):
     """A generic task"""
     # pylint: disable=no-member
@@ -48,6 +49,7 @@ class GenericTask(Task):
 
     def __unicode__(self):
         return self.subject
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
@@ -75,6 +77,7 @@ class OrphanTask(Task):
         """Simply resolves the request. Should do something to spam addresses."""
         # pylint: disable=no-self-use
         return
+
 
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
@@ -104,6 +107,7 @@ class SnailMailTask(Task):
         comm.date = datetime.now()
         comm.save()
         comm.foia.update()
+
 
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""
@@ -190,6 +194,7 @@ class NewAgencyTask(Task):
                 first_comm = comms[0]
                 first_comm.resend(replacement_agency.email)
 
+
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
     # pylint: disable=no-member
@@ -233,6 +238,7 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
+
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
     # pylint: disable=no-member
@@ -240,6 +246,7 @@ class FailedFaxTask(Task):
 
     def __unicode__(self):
         return u'Failed Fax: %s' % (self.communication.foia)
+
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
@@ -251,6 +258,7 @@ class StatusChangeTask(Task):
     def __unicode__(self):
         return u'StatusChange: %s' % self.foia
 
+
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
     amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -260,12 +268,14 @@ class PaymentTask(Task):
     def __unicode__(self):
         return u'Payment: %s for %s' % (self.amount, self.foia)
 
+
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
     crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
 
     def __unicode__(self):
         return u'Crowdfund: %s' % self.crowdfund
+
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
