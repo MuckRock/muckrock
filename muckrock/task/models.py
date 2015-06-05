@@ -283,3 +283,12 @@ class MultiRequestTask(Task):
 
     def __unicode__(self):
         return u'Multi-Request: %s' % self.multirequest
+
+
+# Not a task, but use by tasks
+class BlacklistDomain(models.Model):
+    """A domain to be blacklisted from sending us emails"""
+    domain = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.domain

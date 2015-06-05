@@ -6,9 +6,19 @@ from reversion import VersionAdmin
 
 from django.contrib import admin
 
-from muckrock.task.models import OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, \
-                                 ResponseTask, GenericTask, PaymentTask, CrowdfundTask
+from muckrock.task.models import (
+        OrphanTask,
+        SnailMailTask,
+        RejectedEmailTask,
+        StaleAgencyTask,
+        FlaggedTask,
+        NewAgencyTask,
+        ResponseTask,
+        GenericTask,
+        PaymentTask,
+        CrowdfundTask,
+        BlacklistDomain,
+        )
 
 class OrphanTaskAdmin(VersionAdmin):
     """Orphan Task Admin"""
@@ -59,3 +69,4 @@ admin.site.register(ResponseTask, ResponseTaskAdmin)
 admin.site.register(GenericTask, GenericTaskAdmin)
 admin.site.register(PaymentTask, PaymentTaskAdmin)
 admin.site.register(CrowdfundTask, CrowdfundTaskAdmin)
+admin.site.register(BlacklistDomain)
