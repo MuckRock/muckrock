@@ -13,6 +13,10 @@ def domain_blacklist(sender, instance, **kwargs):
     # pylint: disable=unused-argument
 
     _, email = parseaddr(instance.communication.priv_from_who)
+
+    if '@' not in email:
+        return
+
     domain = email.split('@')[1]
 
     logger.info('Checking domain %s against blacklist', domain)
