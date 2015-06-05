@@ -95,7 +95,7 @@ class SnailMailTask(Task):
         foia.update()
         foia.save()
         comm.status = foia.status
-#        comm.date = datetime.now()
+        #comm.date = datetime.now()
         comm.save()
 
     def update_date(self):
@@ -221,8 +221,8 @@ class ResponseTask(Task):
             raise ValueError('Invalid status.')
         # save comm first
         comm.status = status
-#        if status in ['ack', 'processed', 'appealing']:
-#            comm.date = datetime.now()
+        #if status in ['ack', 'processed', 'appealing']:
+        #    comm.date = datetime.now()
         comm.save()
         # save foia next
         foia = comm.foia
