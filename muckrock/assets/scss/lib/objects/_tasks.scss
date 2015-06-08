@@ -67,6 +67,8 @@ dl.task-data {
     input, select, button, label {
         display: block;
         width: 100%;
+    }
+    input, select, button {
         margin-bottom: $base-margin/2;
     }
     .task-assign {
