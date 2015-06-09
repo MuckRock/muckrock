@@ -1,9 +1,12 @@
+"""
+Nodes and tags for rendering tasks into templates
+"""
+
 from django import template
 
 from muckrock import agency
 from muckrock import foia
 from muckrock import task
-
 
 import logging
 
@@ -25,10 +28,7 @@ class TaskNode(template.Node):
         except (template.VariableDoesNotExist, self.model.DoesNotExist):
             return ''
         context.update(self.get_extra_context(the_task))
-        return template.loader.render_to_string(
-            self.task_template,
-            context
-        )
+        return template.loader.render_to_string(self.task_template, context)
 
     def get_extra_context(self, the_task):
         """Returns a dictionary of context for the specific task"""
