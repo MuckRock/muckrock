@@ -47,7 +47,6 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     model = Task
     template_name = 'lists/task_list.html'
-    task_template = 'task/default.html'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
@@ -222,7 +221,6 @@ def response_task_post_handler(request, task_pk):
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
-    task_template = 'task/orphan.html'
     bulk_actions = ['reject']
 
 class SnailMailTaskList(TaskList):
