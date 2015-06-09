@@ -8,8 +8,6 @@ from muckrock import agency
 from muckrock import foia
 from muckrock import task
 
-import logging
-
 register = template.Library()
 
 class TaskNode(template.Node):
@@ -32,6 +30,7 @@ class TaskNode(template.Node):
 
     def get_extra_context(self, the_task):
         """Returns a dictionary of context for the specific task"""
+        # pylint:disable=no-self-use
         extra_context = {'task': the_task}
         return extra_context
 
@@ -98,6 +97,7 @@ class NewAgencyTaskNode(TaskNode):
 
     def get_extra_context(self, the_task):
         """Adds an approval form, other agencies, and relevant requests to context"""
+        # pylint:disable=line-too-long
         extra_context = super(NewAgencyTaskNode, self).get_extra_context(the_task)
         other_agencies = agency.models.Agency.objects.filter(jurisdiction=the_task.agency.jurisdiction)
         other_agencies = other_agencies.exclude(id=the_task.agency.id)
@@ -128,11 +128,15 @@ class ResponseTaskNode(TaskNode):
 
 def get_id(token):
     """Helper function to check token has correct arguments and return the task_id."""
+    # pylint:disable=unused-variable
     try:
         tag_name, task_id = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%s tag requires a single argument." % token.contents.split()[0])
+        error_msg = "%s tag requires a single argument." % token.contents.split()[0]
+        raise template.TemplateSyntaxError(error_msg)
     return task_id
+
+# pylint:disable=unused-argument
 
 @register.tag
 def default_task(parser, token):

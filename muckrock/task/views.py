@@ -1,7 +1,7 @@
 """
 Views for the Task application
 """
-from django import template
+
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
