@@ -79,7 +79,6 @@ class TaskList(MRFilterableListView):
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
-        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
