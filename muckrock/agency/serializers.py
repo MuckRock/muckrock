@@ -34,5 +34,6 @@ class AgencySerializer(serializers.ModelSerializer):
                   'contact_salutation', 'contact_first_name', 'contact_last_name',
                   'contact_title', 'url', 'expires', 'phone', 'fax', 'approved', 'appeal_agency',
                   'can_email_appeals', 'image_attr_line', 'stale', 'website', 'twitter',
-                  'twitter_handles', 'foia_logs', 'foia_guide', 'exempt', 'email', 'other_emails')
+                  'twitter_handles', 'foia_logs', 'foia_guide', 'exempt', 'email', 'other_emails',
+                  'parent')
 

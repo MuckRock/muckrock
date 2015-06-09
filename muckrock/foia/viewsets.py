@@ -2,9 +2,8 @@
 Viewsets for the FOIA API
 """
 
-from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string, get_template
+from django.template.loader import get_template
 from django.template import RequestContext
 
 from datetime import datetime
@@ -149,10 +148,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             foia.status = 'processed'
             foia.save()
 
-            send_mail('[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-                      render_to_string('text/foia/admin_payment.txt',
-                                       {'request': foia, 'amount': amount / 100.0}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             PaymentTask.objects.create(
                 user=request.user,
                 amount=int(amount)/100.0,

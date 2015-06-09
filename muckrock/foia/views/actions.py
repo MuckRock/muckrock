@@ -5,11 +5,9 @@ FOIA views for actions
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template.loader import render_to_string
 from django.template import RequestContext
 
 from collections import namedtuple
@@ -182,6 +180,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     if foia.embargo or foia.status not in finished_status:
         foia.embargo = not foia.embargo
         foia.permanent_embargo = False
+        foia.date_embargo = None
         foia.save()
         return redirect(foia)
     else:
@@ -230,14 +229,6 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
         )
         foia.status = 'processed'
         foia.save()
-        args = {'request': foia, 'amount': int(amount) / 100.0}
-        send_mail(
-            '[PAYMENT] Freedom of Information Request: %s' % (foia.title),
-            render_to_string('text/foia/admin_payment.txt', args),
-            'info@muckrock.com',
-            ['requests@muckrock.com'],
-            fail_silently=False
-        )
         PaymentTask.objects.create(
             user=request.user,
             amount=int(amount)/100.0,
@@ -297,14 +288,13 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             else:
                 from_who = foia.user.get_full_name()
             save_foia_comm(
-                request,
                 foia,
                 from_who,
                 form.cleaned_data['comm'],
-                'Admin Fix submitted',
                 formset,
                 snail=form.cleaned_data['snail_mail']
             )
+            messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
         else:
             messages.error(request, 'Could not apply admin fix.')

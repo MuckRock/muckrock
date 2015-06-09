@@ -43,6 +43,9 @@ class AgencyAdminForm(forms.ModelForm):
     appeal_agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
                                                         queryset=Agency.objects.all(),
                                                         required=False)
+    parent = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
+                                                 queryset=Agency.objects.all(),
+                                                 required=False)
 
     class Meta:
         # pylint: disable=R0903

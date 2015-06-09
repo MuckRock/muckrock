@@ -79,8 +79,11 @@
         </div>
         <form method="POST" id="batched">
             {% csrf_token %}
-            <button type="submit" name="resolve" value="true" id="batched-resolve">Resolve</button>
-            <button type="submit" name="assign" value="true" id="batched-assign">Assign</button>
+            {% if bulk_actions %}
+                {% for bulk_action in bulk_actions %}
+            <button type="submit" name="{{bulk_action}}" value="true" id="batched-{{bulk_action}}">{{bulk_action|title}}</button>
+                {% endfor %}
+            {% endif %}
             <button id="collapse-all">Collapse All</button>
         </form>
     </section>
@@ -110,44 +113,100 @@ $.ajaxSetup({
 var tasks = $('.task');
 var resolved = $('.resolved.task');
 
-function resolve(task_pk) {
-    var task_id = '#' + task_pk + '-task';
-    var task_api_url = '/api_v1/task/' + task_pk;
+function resolve(taskForm) {
+    taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    taskData = $(taskForm).serialize() + '&resolve=true'
+    console.log(taskData);
     $.ajax({
-        type: 'PATCH',
-        url: task_api_url,
-        data: {'resolved': true},
-        success: markAsResolved(task_id),
-        dataType: 'json'
+        type: 'POST',
+        data: taskData,
+        success: markAsResolved(taskID)
     });
 }
 
-function markAsResolved(task) {
-    $(task).addClass('resolved');
-    $(task).find(':input').attr('disabled', true).addClass('disabled');
-    $(task).find('.task-type').text('Resolved');
+function reject(taskForm) {
+    taskData = $(taskForm).serializeArray()
+    taskID = '#' + getTaskID(taskData) + '-task';
+    console.log($(taskForm).serialize());
+    console.log(taskID);
+    $.ajax({
+        type: 'POST',
+        data: 'resolve=true&task=' + getTaskID(taskData),
+        success: markAsResolved(taskID)
+    });
+}
+
+function getTaskID(taskFormData) {
+    // Gets the task ID from a task form
+    var taskID;
+    $.each(taskFormData, function(i, input){
+        if (input.name == 'task') {
+            taskID = input.value;
+        }
+    });
+    return taskID;
+}
+
+function markAsResolved(taskID) {
+    $(taskID).addClass('resolved');
+    $(taskID).find(':input').attr('disabled', true).addClass('disabled');
+    $(taskID).find('.task-type').text('Resolved');
 }
 
 resolved.each(function(){
     markAsResolved(this);
 });
 
+function formHasAction(taskForm, action) {
+    // checks whether the task form has a 'Resolve' action or not
+    var actionExists = false;
+    var actionButton = 'button[name="' + action + '"]';
+    if (!!$(taskForm).children(actionButton).length) {
+        actionExists = true;
+    }
+    return actionExists;
+}
+
 $('button[name="resolve"]').click(function(e){
     e.preventDefault;
     // if the button clicked is the "resolve all" button,
-    // then get IDs for all the currently checked tasks
+    // then get forms for all the currently checked tasks
     // else,
-    // just get the ID for the task that owns the button
-    var tasks = [];
+    // just get the form for the task that owns the button
+    var forms = [];
     if ($(this).attr('id') == 'batched-resolve') {
         $(':checked[form=batched]').each(function() {
-            tasks.push($(this).attr('value'));
+            var taskForm = $(this).closest('.task').find('form');
+            // the form needs to have a resolve action in order to be added
+            if (formHasAction(taskForm, 'resolve')) {
+                forms.push(taskForm);
+            }
         });
     } else {
-        tasks.push($(this).siblings('[name=task]').attr('value'));
+        forms.push($(this).closest('form'));
     }
-    $(tasks).each(function(){
+    $(forms).each(function(){
         resolve(this);
+    });
+    return false;
+});
+
+$('button[name="reject"]').click(function(e){
+    e.preventDefault;
+    var forms = [];
+    if ($(this).attr('id') == 'batched-reject') {
+        $(':checked[form=batched]').each(function() {
+            var taskForm = $(this).closest('.task').find('form');
+            if (formHasAction(taskForm, 'reject')) {
+                forms.push(taskForm);
+            }
+        });
+    } else {
+        forms.push($(this).closest('form'));
+    }
+    $(forms).each(function(){
+        console.log($(this));
+        reject(this);
     });
     return false;
 });
@@ -167,14 +226,32 @@ $('.task .checkbox').click(function(e) {
 
 var checkboxes = $('.task header').find(':checkbox');
 var batchedButtons = $('#batched button').not('#collapse-all');
-batchedButtons.attr('disabled', true);
-checkboxes.click(function(){
+function toggleBatchedButtons() {
     if ($('.task header').find(':checkbox:checked').length > 0) {
         batchedButtons.attr('disabled', false);
     } else {
         batchedButtons.attr('disabled', true);
     }
+}
+batchedButtons.attr('disabled', true);
+checkboxes.click(function(){
+    toggleBatchedButtons();
 });
+// Rebinds the toggle all checkbox to only select checkboxes in task headers
+$('#toggle-all').unbind('click');
+$('#toggle-all').click(function(){
+    var toggleAll = this;
+    $('.task header :checkbox').not('#toggle-all').not('.list-filters-fields').each(function(){
+        $(this).click(function(){
+            toggleAll.checked = false;
+        });
+        if (!$(this).data('ignore-toggle-all')) {
+            this.checked = toggleAll.checked;
+            toggleBatchedButtons();
+        }
+    });
+});
+
 
 $('#collapse-all').click(function(e){
     e.preventDefault();
@@ -201,5 +278,4 @@ $('.reveal-extra-context').click(function(e){
         $(this).next().removeClass('hidden');
     }
 });
-
 {% endblock list-scripts %}

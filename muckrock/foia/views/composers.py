@@ -74,16 +74,6 @@ def _make_new_agency(request, agency, jurisdiction):
         user=user,
         approved=False,
     )
-    send_mail(
-        '[AGENCY] %s' % agency.name,
-        render_to_string(
-            'text/foia/admin_agency.txt',
-            {'agency': agency}
-        ),
-        'info@muckrock.com',
-        ['requests@muckrock.com'],
-        fail_silently=False
-    )
     NewAgencyTask.objects.create(
             user=user,
             agency=agency)
@@ -198,14 +188,16 @@ def _submit_request(request, foia):
     messages.success(request, 'Your request was submitted.')
     return redirect(foia)
 
-# pylint: disable=unused-argument
 def clone_request(request, jurisdiction, jidx, slug, idx):
     """A URL handler for cloning requests"""
+    # pylint: disable=unused-argument
     foia = get_foia(jurisdiction, jidx, slug, idx)
     return HttpResponseRedirect(reverse('foia-create') + '?clone=%s' % foia.pk)
 
 def create_request(request):
     """A very important view for composing FOIA requests"""
+    # pylint: disable=too-many-locals
+    # we should refactor this, its too long, and remove the pylint disable
     initial_data = {}
     clone = False
     parent = None
@@ -215,7 +207,7 @@ def create_request(request):
         initial_data = {
             'title': foia.title,
             'document': smart_text(foia.requested_docs),
-            'agency': foia.agency.name
+            'agency': foia.agency.name if foia.agency else ''
         }
         jurisdiction = foia.jurisdiction
         level = jurisdiction.level
@@ -236,7 +228,16 @@ def create_request(request):
             return redirect(foia)
         else:
             # form is invalid
-            form = RequestForm(request.POST, request=request)
+            # autocomplete blows up if you pass it a bad value in state
+            # or local - not sure how this is happening, but am removing
+            # blank values for these keys
+            # this seems to technically be a bug in autocompletes rendering
+            # should probably fix it there and submit a patch
+            post = request.POST.copy()
+            for chk_val in ['local', 'state']:
+                if chk_val in post and not post[chk_val]:
+                    del post[chk_val]
+            form = RequestForm(post, request=request)
     else:
         if clone:
             form = RequestForm(initial=initial_data, request=request)
@@ -408,16 +409,6 @@ def draft_multirequest(request, slug, idx):
                     foia.status = 'submitted'
                     foia.save()
                     messages.success(request, 'Your multi-request was submitted.')
-                    send_mail(
-                        '[MULTI] Freedom of Information Request: %s' % (foia.title),
-                        render_to_string(
-                            'text/foia/multi_mail.txt',
-                            {'request': foia}
-                        ),
-                        'info@muckrock.com',
-                        ['requests@muckrock.com'],
-                        fail_silently=False
-                    )
                     MultiRequestTask.objects.create(multirequest=foia)
                     return redirect('foia-mylist')
                 messages.success(request, 'Updates to this request were saved.')

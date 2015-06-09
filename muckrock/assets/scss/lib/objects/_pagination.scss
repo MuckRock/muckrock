@@ -1,34 +1,50 @@
 .pagination {
-    p, div {
-        margin-top: 0;
-        margin-bottom: $base-margin/2;
-        &:last-child {
-            margin-bottom: 0;
+    @include row;
+}
+.pagination-form, .pagination-links {
+    @include span-columns(6);
+    @include media($medium-layout) {
+        @include span-columns(6);
+    }
+    @include media($large-layout) {
+        @include span-columns(12);
+    }
+}
+
+.pagination-info {
+    @extend %third;
+    @include omega(3n);
+    @include media($medium-layout){
+        &:nth-child(2) {
+            text-align: center;
+        }
+        &:nth-child(3) {
+            text-align: right;
         }
     }
 }
 
-.pagination-form {
-    @include row;
-}
-
-.pagination-items, .pagination-pages {
-    @include grid-columns(4, 3, 6);
-    @include omega(2n);
+.pagination p {
+    margin-top: 0;
 }
 
 .pagination-links {
-    width: 100%;
+    // width: 100%;
     display: table;
+    margin-bottom: $base-margin;
     border-collapse: collapse;
     a, span {
         width: 25%;
-        display: table-cell;
+        display: table-row;
         border: 1px solid $color-grey;
         text-align: center;
+        @include media($medium-layout) {
+            display: table-cell;
+        }
     }
     span {
         cursor: default;
+        color: $color-grey;
     }
     a:hover {
         text-decoration: none;

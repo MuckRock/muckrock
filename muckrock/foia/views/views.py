@@ -4,12 +4,10 @@ Views for the FOIA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
@@ -209,23 +207,6 @@ class Detail(DetailView):
             foia.status = status
             foia.save()
 
-            subject = '%s changed the status of "%s" to %s' % (
-                request.user.username,
-                foia.title,
-                foia.get_status_display()
-            )
-            args = {
-                'request': foia,
-                'old_status': old_status,
-                'user': request.user
-            }
-            send_mail(
-                subject,
-                render_to_string('text/foia/status_change.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             StatusChangeTask.objects.create(
                 user=request.user,
                 old_status=old_status,
@@ -238,13 +219,8 @@ class Detail(DetailView):
         text = request.POST.get('text', False)
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Your follow up has been sent.'
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text)
+            messages.success(request, 'Your follow up has been sent.')
         return redirect(foia)
 
     def _question(self, request, foia):
@@ -270,18 +246,6 @@ class Detail(DetailView):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
         if request.user.is_authenticated() and text:
-            args = {
-                'request': foia,
-                'user': request.user,
-                'reason': text
-            }
-            send_mail(
-                '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('text/foia/flag.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,
@@ -293,14 +257,8 @@ class Detail(DetailView):
         """Handle submitting an appeal"""
         text = request.POST.get('text')
         if foia.editable_by(request.user) and foia.is_appealable() and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Appeal succesfully sent',
-                appeal=True
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
+            messages.success(request, 'Appeal successfully sent.')
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):

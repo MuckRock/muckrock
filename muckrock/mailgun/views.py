@@ -3,10 +3,8 @@ Views for mailgun
 """
 
 from django.contrib.localflavor.us.us_states import STATE_CHOICES
-from django.core.mail import EmailMessage, send_mail
-from django.db.models import Q
+from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
-from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
 import hashlib
@@ -17,7 +15,7 @@ import os
 import re
 import sys
 import time
-from datetime import datetime, date
+from datetime import datetime
 from email.utils import parseaddr, getaddresses
 
 from muckrock.agency.models import Agency
@@ -27,6 +25,24 @@ from muckrock.settings import MAILGUN_ACCESS_KEY
 from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FailedFaxTask
 
 logger = logging.getLogger(__name__)
+
+def _upload_file(foia, comm, file_, sender):
+    """Upload a file to attach to a FOIA request"""
+
+    access = 'private' if foia and foia.is_embargo() else 'public'
+    source = foia.agency.name if foia and foia.agency else sender
+
+    foia_file = FOIAFile(
+            foia=foia,
+            comm=comm,
+            title=os.path.splitext(file_.name)[0][:70],
+            date=datetime.now(),
+            source=source[:70],
+            access=access)
+    foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
+    foia_file.save()
+    if foia:
+        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
@@ -59,6 +75,7 @@ def handle_request(request, mail_id):
         return HttpResponseForbidden()
     from_ = post.get('From')
     to_ = post.get('To') or post.get('to')
+    subject = post.get('Subject') or post.get('subject', '')
 
     try:
         from_realname, from_email = parseaddr(from_)
@@ -79,7 +96,8 @@ def handle_request(request, mail_id):
 
         comm = FOIACommunication.objects.create(
                 foia=foia, from_who=from_realname[:255], priv_from_who=from_[:255],
-                to_who=foia.user.get_full_name(), response=True,
+                to_who=foia.user.get_full_name(),
+                subject=subject, response=True,
                 date=datetime.now(), full_html=False, delivered='email',
                 communication='%s\n%s' %
                     (post.get('stripped-text', ''), post.get('stripped-signature')))
@@ -93,12 +111,6 @@ def handle_request(request, mail_id):
             if type_ == 'file':
                 _upload_file(foia, comm, file_, from_)
 
-        _forward(post, request.FILES)
-        send_mail('[RESPONSE] Freedom of Information Request: %s' % foia.title,
-                  render_to_string('text/foia/admin_request.txt',
-                                   {'request': foia, 'post': post,
-                                    'date': date.today().toordinal()}),
-                  'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
         ResponseTask.objects.create(communication=comm)
 
         foia.email = from_email
@@ -219,16 +231,6 @@ def bounces(request):
     except (IndexError, ValueError, KeyError, FOIARequest.DoesNotExist):
         foia = None
 
-    agencies = Agency.objects.filter(Q(email__iexact=recipient) |
-                                     Q(other_emails__icontains=recipient))
-    foias = FOIARequest.objects.filter(Q(email__iexact=recipient) |
-                                       Q(other_emails__icontains=recipient))\
-               .filter(status__in=['ack', 'processed', 'appealing', 'payment'])
-    send_mail('[%s] %s' % (event.upper(), recipient),
-              render_to_string('text/foia/bounce.txt',
-                               {'agencies': agencies, 'recipient': recipient,
-                                'foia': foia, 'foias': foias, 'error': error}),
-              'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
     RejectedEmailTask.objects.create(
         category=event[0],
         foia=foia,
@@ -283,20 +285,6 @@ def _forward(post, files, title='', extra_content=''):
         email.attach(file_.name, file_.read(), file_.content_type)
 
     email.send(fail_silently=False)
-
-def _upload_file(foia, comm, file_, sender):
-    """Upload a file to attach to a FOIA request"""
-    # pylint: disable=E1101
-
-    access = 'private' if foia and foia.is_embargo() else 'public'
-    source = foia.agency.name if foia and foia.agency else sender
-
-    foia_file = FOIAFile(foia=foia, comm=comm, title=os.path.splitext(file_.name)[0][:70],
-                         date=datetime.now(), source=source[:70], access=access)
-    foia_file.ffile.save(file_.name[:100].encode('ascii', 'ignore'), file_)
-    foia_file.save()
-    if foia:
-        upload_document_cloud.apply_async(args=[foia_file.pk, False], countdown=3)
 
 def _allowed_email(email, foia=None):
     """Is this an allowed email?"""

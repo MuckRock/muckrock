@@ -40,6 +40,7 @@ class Task(models.Model):
         self.assigned = user
         self.save()
 
+
 class GenericTask(Task):
     """A generic task"""
     # pylint: disable=no-member
@@ -48,6 +49,7 @@ class GenericTask(Task):
 
     def __unicode__(self):
         return self.subject
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
@@ -76,6 +78,7 @@ class OrphanTask(Task):
         # pylint: disable=no-self-use
         return
 
+
 class SnailMailTask(Task):
     """A communication that needs to be snail mailed"""
     # pylint: disable=no-member
@@ -95,9 +98,16 @@ class SnailMailTask(Task):
         foia.update()
         foia.save()
         comm.status = foia.status
+        #comm.date = datetime.now()
+        comm.save()
+
+    def update_date(self):
+        """Sets the date of the communication to today"""
+        comm = self.communication
         comm.date = datetime.now()
         comm.save()
-        self.resolve()
+        comm.foia.update()
+
 
 class RejectedEmailTask(Task):
     """A FOIA request has had an outgoing email rejected"""
@@ -105,7 +115,7 @@ class RejectedEmailTask(Task):
     category = models.CharField(max_length=1, choices=categories)
     foia = models.ForeignKey('foia.FOIARequest', blank=True, null=True)
     email = models.EmailField(blank=True)
-    error = models.CharField(max_length=255, blank=True)
+    error = models.TextField(blank=True)
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.foia)
@@ -171,7 +181,7 @@ class NewAgencyTask(Task):
             comms = foia.communications.all()
             if comms.count():
                 first_comm = comms[0]
-                first_comm.resend(self.agency.email)
+                first_comm.resend(self.agency.get_email())
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency and resolves"""
@@ -183,6 +193,7 @@ class NewAgencyTask(Task):
             if comms.count():
                 first_comm = comms[0]
                 first_comm.resend(replacement_agency.email)
+
 
 class ResponseTask(Task):
     """A response has been received and needs its status set"""
@@ -215,8 +226,8 @@ class ResponseTask(Task):
             raise ValueError('Invalid status.')
         # save comm first
         comm.status = status
-        if status in ['ack', 'processed', 'appealing']:
-            comm.date = datetime.now()
+        #if status in ['ack', 'processed', 'appealing']:
+        #    comm.date = datetime.now()
         comm.save()
         # save foia next
         foia = comm.foia
@@ -227,6 +238,7 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
+
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
     # pylint: disable=no-member
@@ -234,6 +246,7 @@ class FailedFaxTask(Task):
 
     def __unicode__(self):
         return u'Failed Fax: %s' % (self.communication.foia)
+
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
@@ -245,6 +258,7 @@ class StatusChangeTask(Task):
     def __unicode__(self):
         return u'StatusChange: %s' % self.foia
 
+
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
     amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -254,6 +268,7 @@ class PaymentTask(Task):
     def __unicode__(self):
         return u'Payment: %s for %s' % (self.amount, self.foia)
 
+
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
     crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
@@ -261,9 +276,19 @@ class CrowdfundTask(Task):
     def __unicode__(self):
         return u'Crowdfund: %s' % self.crowdfund
 
+
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
     multirequest = models.ForeignKey('foia.FOIAMultiRequest')
 
     def __unicode__(self):
         return u'Multi-Request: %s' % self.multirequest
+
+
+# Not a task, but use by tasks
+class BlacklistDomain(models.Model):
+    """A domain to be blacklisted from sending us emails"""
+    domain = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return self.domain

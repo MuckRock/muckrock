@@ -45,8 +45,10 @@ def count_tasks():
 class TaskList(MRFilterableListView):
     """List of tasks"""
     title = 'Tasks'
-    template_name = 'lists/task_list.html'
     model = Task
+    template_name = 'lists/task_list.html'
+    task_template = 'task/default.html'
+    bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
         """Apply query parameters to the queryset"""
@@ -76,6 +78,8 @@ class TaskList(MRFilterableListView):
         else:
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
+        context['bulk_actions'] = self.bulk_actions
+        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -102,7 +106,9 @@ class TaskList(MRFilterableListView):
             # These actions are shared between all Task objects
             # resolve will either be True or None
             # the task will only resolve if True
-            if request.POST.get('resolve'):
+            if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
+                # dont resolve response tasks here
+                # do it in the handler below after checking for errors
                 task.resolve(request.user)
             if request.POST.get('assign'):
                 user_pk = request.POST.get('assign')
@@ -148,6 +154,8 @@ def snail_mail_task_post_handler(request, task_pk):
         status = request.POST.get('status')
         if status in dict(STATUS):
             snail_mail_task.set_status(status)
+    if request.POST.get('update_date'):
+        snail_mail_task.update_date()
     return
 
 def new_agency_task_post_handler(request, task_pk):
@@ -208,13 +216,15 @@ def response_task_post_handler(request, task_pk):
             messages.error(request,
                 'You tried to set an invalid tracking id. Just use a string of characters.')
             error_happened = True
-    if move or status or tracking_number and not error_happened:
+    if (move or status or tracking_number) and not error_happened:
         response_task.resolve(request.user)
     return
 
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
+    task_template = 'task/orphan.html'
+    bulk_actions = ['reject']
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'

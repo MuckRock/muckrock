@@ -5,7 +5,9 @@ Tests for mailgun
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
 
+from datetime import date
 import hashlib
 import hmac
 import nose.tools
@@ -22,6 +24,7 @@ from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 # pylint: disable=E1103
 # pylint: disable=bad-continuation
 
+@override_settings(CELERY_ALWAYS_EAGER=True)
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
     fixtures = ['holidays.json', 'agency_types.json', 'test_agencies.json', 'test_users.json',
@@ -61,10 +64,8 @@ class TestMailgunViews(TestCase):
                                     kwargs={'mail_id': foia.get_mail_id()}), data, **self.kwargs)
         nose.tools.eq_(response.status_code, 200)
 
-        nose.tools.eq_(len(mail.outbox), 3)
-        nose.tools.eq_(mail.outbox[0].body, 'Test normal.')
-        nose.tools.ok_(mail.outbox[1].subject.startswith('[RESPONSE]'))
-        nose.tools.eq_(mail.outbox[2].to, [foia.user.email])
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(mail.outbox[0].to, [foia.user.email])
 
         foia = FOIARequest.objects.get(pk=1)
         nose.tools.eq_(foia.email, 'test@agency.gov')
@@ -126,12 +127,13 @@ class TestMailgunViews(TestCase):
             nose.tools.eq_(response.status_code, 200)
 
             foia = FOIARequest.objects.get(pk=1)
-            nose.tools.eq_(foia.files.all()[0].ffile.name, 'foia_files/data.xls')
+            file_path = date.today().strftime('foia_files/%Y/%m/%d/data.xls')
+            nose.tools.eq_(foia.files.all()[0].ffile.name, file_path)
 
         finally:
             foia.files.all()[0].delete()
             os.remove('data.xls')
-            file_path = os.path.join(SITE_ROOT, 'static/media/foia_files/data.xls')
+            file_path = os.path.join(SITE_ROOT, 'static/media/', file_path)
             if os.path.exists(file_path):
                 os.remove(file_path)
 
