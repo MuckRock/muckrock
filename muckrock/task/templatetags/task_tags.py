@@ -7,12 +7,14 @@ from django import template
 from muckrock import agency
 from muckrock import foia
 from muckrock import task
+# imports Task model separately to patch bug in django-compressor parser
+from muckrock.task.models import Task
 
 register = template.Library()
 
 class TaskNode(template.Node):
     """A base class for rendering a task into a template."""
-    model = task.models.Task
+    model = Task
     task_template = 'task/default.html'
 
     def __init__(self, task_id):
