@@ -88,6 +88,24 @@ class OrphanTaskTests(TestCase):
         """Shouldn't do anything, ATM. Revisit later."""
         self.task.reject()
 
+    def test_blacklist(self):
+        """A blacklisted email should be automatically resolved"""
+        import muckrock.task.signals
+        task.models.BlacklistDomain.objects.create(domain='spam.com')
+        comm = FOIACommunication.objects.create(
+                date=datetime.now(),
+                from_who='spammer',
+                priv_from_who='evil@spam.com')
+        orphan = task.models.OrphanTask.objects.create(
+            reason='ib',
+            communication=comm,
+            address='orphan-address')
+        print '~~~'
+        print orphan.address
+        print orphan.resolved
+        print '~~~'
+        nose.tools.ok_(orphan.resolved)
+
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 

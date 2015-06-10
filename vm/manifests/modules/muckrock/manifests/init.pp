@@ -66,6 +66,9 @@ class muckrock {
 		virtualenv => true,
 	}
 
+	package { 'libjpeg-dev':
+		ensure => installed,
+	} ->
 	python::virtualenv { '/home/vagrant/ve/muckrock' :
 		ensure       => present,
 		owner        => 'vagrant',
