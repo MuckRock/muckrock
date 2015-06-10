@@ -169,7 +169,13 @@ def crowdfund(context, foia_pk):
     """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
     the_crowdfund = foia.crowdfund
-    payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': the_crowdfund.pk})
+    initial_data = {'crowdfund': the_crowdfund.pk}
+    default_amount = 25
+    if the_crowdfund.amount_remaining() < default_amount:
+        initial_data['amount'] = int(the_crowdfund.amount_remaining()) * 100
+    else:
+        initial_data['amount'] = default_amount * 100
+    payment_form = CrowdfundRequestPaymentForm(initial=initial_data)
     logged_in = context['user'].is_authenticated()
     user_email = context['user'].email if logged_in else ''
     endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
