@@ -171,11 +171,13 @@ def crowdfund(context, foia_pk):
     the_crowdfund = foia.crowdfund
     payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': the_crowdfund.pk})
     logged_in = context['user'].is_authenticated()
+    user_email = context['user'].email if logged_in else ''
     endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
     return {
         'crowdfund': the_crowdfund,
         'endpoint': endpoint,
         'logged_in': logged_in,
+        'user_email': user_email,
         'payment_form': payment_form,
         'stripe_pk': STRIPE_PUB_KEY
     }

@@ -44,7 +44,7 @@
                 {{ payment_form.amount }}
             </section>
             <section class="action">
-                <button data-email="{% if user.is_authenticated %}{{ user.email }}{% endif %}"
+                <button data-email="{{ user_email }}"
                         data-icon="{% static 'apple-touch-icon.png' %}"
                         data-key="{{ stripe_pk }}"
                         id="crowdfund-button">
