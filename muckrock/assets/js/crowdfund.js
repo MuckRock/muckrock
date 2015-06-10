@@ -83,16 +83,15 @@ function checkoutCrowdfund(event) {
 function prettifyAmountInput(input, pretty) {
     // pretty_amount_input is used as a functional wrapper for the amount input field
     // progressive enhancement ftw!
-    var prettyInputElement = '<input name="pretty-input" placeholder="$5.00" class="success" >';
-    $(input).before(prettyInputElement);
     $(input).attr('hidden', true).hide();
+    var initialAmount = $(input).attr('value');
+    var prettyInputElement = '<input name="pretty-input" class="success" >';
+    $(input).before(prettyInputElement);
     $(pretty).autoNumeric('init', {aSign:'$', pSign:'p'});
-    function inputWrapper(input) {
-        var value = $(input).autoNumeric('get') * 100;
-        $(amount).attr('value', value);
-    }
-    $(pretty).change(function(e){
-        inputWrapper(this);
+    $(pretty).autoNumeric('set', initialAmount/100.00);
+    $(pretty).keydown(function(e){
+        var value = $(this).autoNumeric('get') * 100;
+        $(input).attr('value', value);
     });
 }
 

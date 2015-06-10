@@ -1,6 +1,6 @@
 .task {
     @include row;
-    margin: $base-margin;
+    margin: 0 0 $base-margin 0;
     border: 1px solid $color-black;
     &.resolved {
         border-color: $color-success;
@@ -67,6 +67,8 @@ dl.task-data {
     input, select, button, label {
         display: block;
         width: 100%;
+    }
+    input, select, button {
         margin-bottom: $base-margin/2;
     }
     .task-assign {

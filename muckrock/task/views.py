@@ -1,7 +1,7 @@
 """
 Views for the Task application
 """
-from django import template
+
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -47,7 +47,6 @@ class TaskList(MRFilterableListView):
     title = 'Tasks'
     model = Task
     template_name = 'lists/task_list.html'
-    task_template = 'task/default.html'
     bulk_actions = ['resolve'] # bulk actions have to be lowercase and 1 word
 
     def get_queryset(self):
@@ -70,35 +69,6 @@ class TaskList(MRFilterableListView):
         queryset = queryset.order_by('date_done', 'date_created')
         return queryset
 
-    def render_list(self, tasks):
-        """Renders a list of tasks"""
-        rendered_tasks = []
-        for task in tasks:
-            rendered_task = self.render_task(task)
-            rendered_tasks.append(rendered_task)
-        return rendered_tasks
-
-    def get_task_context(self, task):
-        """Returns a dictionary of context for the specific task"""
-        # pylint: disable=no-self-use
-        task_context = {'task': task}
-        return task_context
-
-    def render_task(self, task):
-        """Renders a single task"""
-        the_template = self.task_template
-        the_context = {}
-        try:
-            task = self.model.objects.get(id=task.id)
-            the_context.update(self.get_task_context(task))
-        except self.model.DoesNotExist:
-            return ''
-        return template.loader.render_to_string(
-            the_template,
-            the_context,
-            context_instance=template.RequestContext(self.request)
-        )
-
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
@@ -108,7 +78,6 @@ class TaskList(MRFilterableListView):
             context['filter_form'] = TaskFilterForm()
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
-        context['rendered_tasks'] = self.render_list(context['object_list'])
         return context
 
     @method_decorator(user_passes_test(lambda u: u.is_staff))
@@ -252,89 +221,48 @@ def response_task_post_handler(request, task_pk):
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
-    task_template = 'task/orphan.html'
     bulk_actions = ['reject']
 
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
-    task_template = 'task/snail_mail.html'
-
-    def get_task_context(self, task):
-        """Adds SnailMailTask-specific context"""
-        task_context = super(SnailMailTaskList, self).get_task_context(task)
-        task_context['status'] = STATUS
-        return task_context
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
     model = RejectedEmailTask
-    task_template = 'task/rejected_email.html'
 
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
     model = StaleAgencyTask
-    task_template = 'task/stale_agency.html'
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
     model = FlaggedTask
-    task_template = 'task/flagged.html'
 
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
-    task_template = 'task/new_agency.html'
-
-    def get_task_context(self, task):
-        """Adds NewAgencyTask-specific context"""
-        task_context = super(NewAgencyTaskList, self).get_task_context(task)
-        task_context.update({'agency_form': AgencyForm(instance=task.agency)})
-        other_agencies = Agency.objects.filter(jurisdiction=task.agency.jurisdiction)
-        other_agencies = other_agencies.exclude(id=task.agency.id)
-        task_context.update({'other_agencies': other_agencies})
-        task_context.update({'foias': foia.models.FOIARequest.objects.filter(agency=task.agency)})
-        return task_context
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
-    task_template = 'task/response.html'
-
-    def get_task_context(self, task):
-        """Adds ResponseTask-specific context"""
-        task_context = super(ResponseTaskList, self).get_task_context(task)
-        form_initial = {}
-        if task.communication.foia:
-            the_foia = task.communication.foia
-            form_initial['status'] = the_foia.status
-            form_initial['tracking_number'] = the_foia.tracking_id
-            task_context.update({'all_comms': the_foia.communications.all().order_by('-date')})
-        task_context.update({'response_form': ResponseTaskForm(initial=form_initial)})
-        task_context.update({'attachments': task.communication.files.all()})
-        return task_context
 
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
     model = StatusChangeTask
-    task_template = 'task/status_change.html'
 
 class PaymentTaskList(TaskList):
     title = 'Payments'
     model = PaymentTask
-    task_template = 'task/payment.html'
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     model = CrowdfundTask
-    task_template = 'task/crowdfund.html'
 
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'
     model = MultiRequestTask
-    task_template = 'task/multirequest.html'
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
     model = FailedFaxTask
-    task_template = 'task/failed_fax.html'

@@ -1,4 +1,5 @@
 .crowdfund.form {
+
     @include row;
     padding: 0;
     margin-bottom: $base-margin;
@@ -20,5 +21,11 @@
 
     fieldset.description {
         padding: 0;
+    }
+
+    .form-head h1 {
+        margin: 0.75rem;
+        font-size: 2em;
+        font-weight: normal;
     }
 }
