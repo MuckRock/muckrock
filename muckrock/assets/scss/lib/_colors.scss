@@ -2,98 +2,32 @@
  // Colors //
 ////////////
 
-// Luminosity
-$dark-1: 10%;
-$dark-2: 20%;
-$dark-3: 30%;
-$dark-4: 40%;
-$light-1: 98%;
-$light-2: 90%;
-$light-3: 80%;
-$light-4: 70%;
+$color-grey-1:      #101010;
+$color-grey-2:      #181818;
+$color-grey-3:      #232323;
+$color-grey-4:      #323333;
+$color-grey-5:      #484848;
+$color-grey-6:      #676767;
+$color-grey-7:      #AEAEAE;
+$color-grey-8:      #F9F9F9;
 
-// Saturation
-$high-saturation: 80%;
-$low-saturation: 60%;
+$color-red:         #FC4032;
+$color-red-dark:    #9D271F;
+$color-yellow:      #FFDD33;
+$color-yellow-dark: #9F891F;
+$color-green:       #66FF99;
+$color-green-dark:  #3F9F5F;
+$color-blue:        #66A9FF;
+$color-blue-dark:   #3F699F;
 
-// Hue
-$red-hue: 4;
-$yellow-hue: 50;
-$green-hue: 140;
-$blue-hue: 214;
-
-////
-
-// Red
-$red-light-1: hsl($red-hue, $high-saturation, $light-1);
-$red-light-2: hsl($red-hue, $high-saturation, $light-2);
-$red-light-3: hsl($red-hue, $high-saturation, $light-3);
-$red-light-4: hsl($red-hue, $high-saturation, $light-4);
-$red-dark-1:  hsl($red-hue, $high-saturation, $dark-1);
-$red-dark-2:  hsl($red-hue, $high-saturation, $dark-2);
-$red-dark-3:  hsl($red-hue, $high-saturation, $dark-3);
-$red-dark-4:  hsl($red-hue, $high-saturation, $dark-4);
-$red-light:   $red-light-2;
-$red-dark:    $red-dark-2;
-
-// Yellow
-$yellow-light-1: hsl($yellow-hue, $high-saturation, $light-1);
-$yellow-light-2: hsl($yellow-hue, $high-saturation, $light-2);
-$yellow-light-3: hsl($yellow-hue, $high-saturation, $light-3);
-$yellow-light-4: hsl($yellow-hue, $high-saturation, $light-4);
-$yellow-dark-1:  hsl($yellow-hue, $high-saturation, $dark-1);
-$yellow-dark-2:  hsl($yellow-hue, $high-saturation, $dark-2);
-$yellow-dark-3:  hsl($yellow-hue, $high-saturation, $dark-3);
-$yellow-dark-4:  hsl($yellow-hue, $high-saturation, $dark-4);
-$yellow-light:   $yellow-light-2;
-$yellow-dark:    $yellow-dark-2;
-
-// Green
-$green-light-1: hsl($green-hue, $low-saturation, $light-1);
-$green-light-2: hsl($green-hue, $low-saturation, $light-2);
-$green-light-3: hsl($green-hue, $low-saturation, $light-3);
-$green-light-4: hsl($green-hue, $low-saturation, $light-4);
-$green-dark-1:  hsl($green-hue, $low-saturation, $dark-1);
-$green-dark-2:  hsl($green-hue, $low-saturation, $dark-2);
-$green-dark-3:  hsl($green-hue, $low-saturation, $dark-3);
-$green-dark-4:  hsl($green-hue, $low-saturation, $dark-4);
-$green-light:   $green-light-2;
-$green-dark:    $green-dark-2;
-
-// Blue
-$blue-light-1: hsl($blue-hue, $low-saturation, $light-1);
-$blue-light-2: hsl($blue-hue, $low-saturation, $light-2);
-$blue-light-3: hsl($blue-hue, $low-saturation, $light-3);
-$blue-light-4: hsl($blue-hue, $low-saturation, $light-4);
-$blue-dark-1:  hsl($blue-hue, $low-saturation, $dark-1);
-$blue-dark-2:  hsl($blue-hue, $low-saturation, $dark-2);
-$blue-dark-3:  hsl($blue-hue, $low-saturation, $dark-3);
-$blue-dark-4:  hsl($blue-hue, $low-saturation, $dark-4);
-$blue-light:   $blue-light-2;
-$blue-dark:    $blue-dark-2;
-
-// Grey
-$grey-light-1: hsl(0, 0%, $light-1);
-$grey-light-2: hsl(0, 0%, $light-2);
-$grey-light-3: hsl(0, 0%, $light-3);
-$grey-light-4: hsl(0, 0%, $light-4);
-$grey-dark-1:  hsl(0, 0%, $dark-1);
-$grey-dark-2:  hsl(0, 0%, $dark-2);
-$grey-dark-3:  hsl(0, 0%, $dark-3);
-$grey-dark-4:  hsl(0, 0%, $dark-4);
-$grey-light:   $grey-light-2;
-$grey-dark:    $grey-dark-2;
-
-////
-
-$color-black: $grey-dark;
-$color-white: $grey-light-1;
-$color-grey: $grey-light;
+// Patches
+$color-black: $color-grey-3;
+$color-white: $color-grey-8;
+$color-grey: $color-grey-7;
 $color-gray: $color-grey;
-
-$color-primary: $blue-light;
-$color-success: $green-light;
-$color-failure: $red-light;
-$color-warning: $yellow-light;
-$color-default: $grey-dark;
-$color-disabled: $grey-light;
+$color-primary: $color-blue;
+$color-success: $color-green;
+$color-failure: $color-yellow;
+$color-warning: $color-red;
+$color-default: $color-grey;
+$color-disabled: $color-white;
