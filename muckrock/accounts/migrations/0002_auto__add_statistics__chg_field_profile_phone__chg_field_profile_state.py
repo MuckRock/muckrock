@@ -31,10 +31,10 @@ class Migration(SchemaMigration):
         db.create_unique('accounts_statistics_users_today', ['statistics_id', 'user_id'])
 
         # Changing field 'Profile.phone'
-        db.alter_column('accounts_profile', 'phone', self.gf('django.contrib.localflavor.us.models.PhoneNumberField')(max_length=20, blank=True))
+        db.alter_column('accounts_profile', 'phone', self.gf('localflavor.us.models.PhoneNumberField')(max_length=20, blank=True))
 
         # Changing field 'Profile.state'
-        db.alter_column('accounts_profile', 'state', self.gf('django.contrib.localflavor.us.models.USStateField')(max_length=2, blank=True))
+        db.alter_column('accounts_profile', 'state', self.gf('localflavor.us.models.USStateField')(max_length=2, blank=True))
 
 
     def backwards(self, orm):
@@ -46,10 +46,10 @@ class Migration(SchemaMigration):
         db.delete_table('accounts_statistics_users_today')
 
         # Changing field 'Profile.phone'
-        db.alter_column('accounts_profile', 'phone', self.gf('django.contrib.localflavor.us.models.PhoneNumberField')(blank=True))
+        db.alter_column('accounts_profile', 'phone', self.gf('localflavor.us.models.PhoneNumberField')(blank=True))
 
         # Changing field 'Profile.state'
-        db.alter_column('accounts_profile', 'state', self.gf('django.contrib.localflavor.us.models.USStateField')(blank=True))
+        db.alter_column('accounts_profile', 'state', self.gf('localflavor.us.models.USStateField')(blank=True))
 
 
     models = {
@@ -61,8 +61,8 @@ class Migration(SchemaMigration):
             'date_update': ('django.db.models.fields.DateField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'monthly_requests': ('django.db.models.fields.IntegerField', [], {'default': '5'}),
-            'phone': ('django.contrib.localflavor.us.models.PhoneNumberField', [], {'max_length': '20', 'blank': 'True'}),
-            'state': ('django.contrib.localflavor.us.models.USStateField', [], {'default': "'MA'", 'max_length': '2', 'blank': 'True'}),
+            'phone': ('localflavor.us.models.PhoneNumberField', [], {'max_length': '20', 'blank': 'True'}),
+            'state': ('localflavor.us.models.USStateField', [], {'default': "'MA'", 'max_length': '2', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'}),
             'zip_code': ('django.db.models.fields.CharField', [], {'max_length': '10', 'blank': 'True'})
         },

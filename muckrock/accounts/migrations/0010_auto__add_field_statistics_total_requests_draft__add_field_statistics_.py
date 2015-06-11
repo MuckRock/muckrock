@@ -120,8 +120,8 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'monthly_requests': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'num_requests': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'phone': ('django.contrib.localflavor.us.models.PhoneNumberField', [], {'max_length': '20', 'blank': 'True'}),
-            'state': ('django.contrib.localflavor.us.models.USStateField', [], {'default': "'MA'", 'max_length': '2', 'blank': 'True'}),
+            'phone': ('localflavor.us.models.PhoneNumberField', [], {'max_length': '20', 'blank': 'True'}),
+            'state': ('localflavor.us.models.USStateField', [], {'default': "'MA'", 'max_length': '2', 'blank': 'True'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'}),
             'zip_code': ('django.db.models.fields.CharField', [], {'max_length': '10', 'blank': 'True'})
