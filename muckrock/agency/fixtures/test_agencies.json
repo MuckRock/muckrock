@@ -19,6 +19,7 @@
             "notes": "", 
             "contact_title": "", 
             "email": "test@agency1.gov", 
+            "can_email_appeals": true,
             "types": [
                 1, 
                 8
@@ -46,6 +47,7 @@
             "notes": "", 
             "contact_title": "", 
             "email": "", 
+            "can_email_appeals": true,
             "types": [
                 1
             ], 
@@ -72,6 +74,7 @@
             "notes": "", 
             "contact_title": "", 
             "email": "", 
+            "can_email_appeals": true,
             "types": [
                 1
             ], 

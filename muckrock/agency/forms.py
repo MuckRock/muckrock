@@ -1,7 +1,8 @@
 """Forms for Agency application"""
 
 from django import forms
-from django.contrib.localflavor.us.forms import USPhoneNumberField
+
+from localflavor.us.forms import USPhoneNumberField
 
 from muckrock.agency.models import Agency, AgencyType
 from muckrock.fields import FullEmailField
@@ -18,6 +19,7 @@ class AgencyForm(forms.ModelForm):
         # pylint: disable=R0903
         model = Agency
         fields = ['name', 'aliases', 'address', 'email', 'url', 'phone', 'fax']
+
 
 class CSVImportForm(forms.Form):
     """Import a CSV file of models"""

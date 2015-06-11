@@ -120,7 +120,7 @@ elif AWS_DEBUG:
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
 else:
-    STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
@@ -210,7 +210,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
-    'django.contrib.markup',
     'django.contrib.staticfiles',
     #'staticfiles',
     'autocomplete_light',
@@ -225,6 +224,7 @@ INSTALLED_APPS = (
     'filer',
     'gunicorn',
     'haystack',
+    'localflavor',
     'markdown_deux',
     'mathfilters',
     'news_sitemaps',
@@ -269,6 +269,8 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
     'INTERCEPT_REDIRECTS': False,
 }
+
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')

@@ -3,26 +3,26 @@ Models for the accounts application
 """
 
 from django.contrib.auth.models import User
-from django.contrib.localflavor.us.models import PhoneNumberField, USStateField
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
+
+import dbsettings
+import string
+import stripe
+from datetime import datetime
+from easy_thumbnails.fields import ThumbnailerImageField
+from itertools import groupby
+from localflavor.us.models import PhoneNumberField, USStateField
+from random import choice
+from urlauth.models import AuthKey
+from urllib import urlencode
 
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
-
-from easy_thumbnails.fields import ThumbnailerImageField
-from datetime import datetime
-import dbsettings
-from itertools import groupby
-from random import choice
-import string
-import stripe
-from urlauth.models import AuthKey
-from urllib import urlencode
 
 stripe.api_key = STRIPE_SECRET_KEY
 

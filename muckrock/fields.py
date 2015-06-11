@@ -11,7 +11,7 @@ from email.utils import parseaddr
 from itertools import groupby
 
 from django import forms
-from django.core.validators import email_re, EmailValidator, ValidationError
+from django.core.validators import EmailValidator, ValidationError, validate_email
 from django.db.models import CharField, FileField
 from django.forms.models import ModelChoiceIterator, ModelChoiceField
 from django.utils.translation import ugettext as _
@@ -20,11 +20,6 @@ from south.modelsinspector import add_introspection_rules
 add_introspection_rules([], [r"^muckrock\.fields\.EmailsListField"])
 
 email_separator_re = re.compile(r'[^\w\.\-\+\&@_]+')
-
-def _is_valid_email(email):
-    """Validates an email address"""
-    return email_re.match(email)
-
 
 # https://code.djangoproject.com/ticket/11027
 # edited - only filename is stored in db
@@ -59,8 +54,8 @@ class EmailsListField(CharField):
             raise forms.ValidationError(_(u'Enter at least one e-mail address.'))
 
         for email in emails:
-            if not _is_valid_email(email):
-                raise forms.ValidationError(_('%s is not a valid e-mail address.') % email)
+            # XXX ensure im testing this
+            validate_email(email)
 
         return value
 
@@ -79,7 +74,7 @@ class FullEmailValidator(EmailValidator):
             fullname, email = parseaddr(value)
             super(FullEmailValidator, self).__call__(email)
 
-validate_full_email = FullEmailValidator(email_re, 'Enter a valid e-mail address.', 'invalid')
+validate_full_email = FullEmailValidator()
 
 
 class FullEmailField(forms.EmailField):
