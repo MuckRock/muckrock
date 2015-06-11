@@ -90,7 +90,7 @@ class OrphanTaskTests(TestCase):
 
     def test_blacklist(self):
         """A blacklisted email should be automatically resolved"""
-        import muckrock.task.signals
+        # pylint: disable=no-self-use
         task.models.BlacklistDomain.objects.create(domain='spam.com')
         comm = FOIACommunication.objects.create(
                 date=datetime.now(),
@@ -100,10 +100,6 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=comm,
             address='orphan-address')
-        print '~~~'
-        print orphan.address
-        print orphan.resolved
-        print '~~~'
         nose.tools.ok_(orphan.resolved)
 
 class SnailMailTaskTests(TestCase):
