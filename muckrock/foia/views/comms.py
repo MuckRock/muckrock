@@ -22,7 +22,6 @@ def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False
         date=datetime.now(),
         response=False,
         full_html=False,
-        opened=False,
         communication=comm
     )
     if formset is not None:
