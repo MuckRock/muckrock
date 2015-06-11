@@ -54,7 +54,6 @@ class EmailsListField(CharField):
             raise forms.ValidationError(_(u'Enter at least one e-mail address.'))
 
         for email in emails:
-            # XXX ensure im testing this
             validate_email(email)
 
         return value
