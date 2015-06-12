@@ -66,21 +66,6 @@
 
 }
 
-/* Progress Bar */
-
-$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
-$progress-animation-duration: 0.7s;
-
-.progress-bar {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin: $base-vertical-rhythm/2 0;
-    @extend %border;
-    border-radius: $base-border-radius + $base-border-width;
-    background-color: $color-white;
-}
-
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
@@ -131,10 +116,6 @@ table {
 }
 
 /* Sharing */
-
-$color-facebook: #3b5998;
-$color-twitter: #55acee;
-$color-email: #663285;
 
 .social.sharing {
     width: 100%;

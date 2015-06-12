@@ -35,7 +35,7 @@
     color: $color-blue;
     cursor: pointer;
     &:hover {
-        color: darken($color-blue, 10%);
+        color: $color-blue-dark;
     }
 }
 

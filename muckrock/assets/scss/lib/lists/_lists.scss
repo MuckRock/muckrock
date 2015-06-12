@@ -50,7 +50,7 @@
                     border-left: $base-border-width solid $color-grey;
                     &:hover {
                         text-decoration: none;
-                        background: lighten($color-blue, 20%);
+                        background: $color-grey-7;
                     }
                 }
                 &.current-tab {
@@ -206,7 +206,7 @@
     .list-table-head .sortable {
         cursor: pointer;
         &:hover {
-            background: lighten($color-blue, 35%);
+            background: $color-grey-7;
         }
         .arrow {
             font-size: .8em;
@@ -214,7 +214,7 @@
         }
     }
     .list-table-body tr:hover {
-        background: lighten($color-blue, 35%);
+        background: $color-grey-7;
     }
     .list-table-body tr.unread {
         background: lighten($color-blue, 35%);

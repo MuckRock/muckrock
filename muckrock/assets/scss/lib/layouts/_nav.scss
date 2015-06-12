@@ -268,7 +268,6 @@ nav.secondary {
 
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
-    $sidebar-button-background: darken($color-black, 4%);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     height: 100%;
@@ -278,7 +277,7 @@ nav.sidebar {
         padding: $base-padding $base-padding 1em;
     }
     color: $color-white;
-    background: darken($color-black, 4%);
+    background: $color-grey-1;
 
     dfn { padding: 1.5em 0 0.5em 0; }
 
@@ -382,7 +381,7 @@ nav.sidebar {
                 font-weight: $bold;
                 text-align: center;
                 color: $color-white;
-                background: lighten($color-black, 8%);
+                background: $color-grey-4;
             }
             &:hover {
                 color: $color-blue;
@@ -434,9 +433,9 @@ nav.sidebar {
             margin-right: 0;
             font-size: 0.9em;
             color: $color-white;
-            background: lighten($color-black, 8%);
+            background: $color-grey-3;
             @include placeholder { color: $color-grey; }
-            border: $base-border-width solid lighten($color-black, 8%);
+            border: $base-border-width solid $color-grey-3;
             @include border-right-radius(0);
             transform: translateY(2px);
             &:focus, &:hover {

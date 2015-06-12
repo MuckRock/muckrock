@@ -78,7 +78,7 @@ dfn, dt {
     display: block;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: darken($color-grey, 20%);
+    color: $color-grey-3;
 }
 
 dd { margin-left: 0; }

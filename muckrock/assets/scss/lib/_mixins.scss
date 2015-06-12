@@ -1,5 +1,5 @@
 @mixin button($color) {
-  $color-dark: darken($color, 10%);
+  $color-dark: darken($color, $color-darken-amount);
   $shadow-normal: 3px;
   $shadow-hover: 5px;
   $shadow-active: 2px;
@@ -45,7 +45,7 @@
 @mixin panel-color($color, $disabled: false) {
     @if not $disabled {
         color: $color-white;
-        border-color: darken($color, 10%);
+        border-color: darken($color, $color-darken-amount);
     } @else {
         color: $color;
         background: none;

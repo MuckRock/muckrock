@@ -1,7 +1,6 @@
 $crowdfund-color: $color-green;
-$crowdfund-color-dark: darken($color-green, 25%);
+$crowdfund-color-dark: $color-green-dark;
 $crowdfund-color-light: desaturate(lighten($color-green, 30%), 15%);
-
 $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 .crowdfund.widget {
@@ -13,10 +12,10 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     border-radius: $base-border-radius;
 
     a {
-        color: $crowdfund-color-dark;
+        color: $crowdfund-color;
         text-decoration: underline;
         &:hover {
-            color: lighten($crowdfund-color-dark, 10%);
+            color: $crowdfund-color-dark;
         }
     }
 

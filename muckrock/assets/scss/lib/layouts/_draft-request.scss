@@ -4,7 +4,7 @@
     padding: 0;
     border: none;
     border-radius: 0;
-    border-bottom: 2*$base-border-width dotted lighten($color-black, 20%);
+    border-bottom: 2*$base-border-width dotted $color-grey-4;
     @include font-sizing(2);
     @include media($small-layout) { @include font-sizing(1.5); }
 }
@@ -35,14 +35,14 @@
     header, form { padding-left: 0; }
     header, h1 { margin: 0; }
     @include row;
-    
+
     #id_title {
         @extend %draft-title;
     }
     .request {
         @extend %draft-request;
     }
-    
+
     .buy-requests {
         border-color: $color-green;
         @include row;
@@ -54,7 +54,7 @@
             }
         }
     }
-    
+
     .bottom { @include row; }
     .embargo {
         @extend %three-quarters;

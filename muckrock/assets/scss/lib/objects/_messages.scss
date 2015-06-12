@@ -3,8 +3,8 @@
 .message {
     @extend %panel;
     padding: 0;
-    $color-sent: lighten($color-blue, 5%);
-    $color-received: lighten($color-black, 5%);
+    $color-sent: $color-blue;
+    $color-received: $color-grey-2;
     $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
 
     @include media($small-layout) { @include span-columns(4); }
@@ -79,10 +79,10 @@
     fieldset { margin-bottom: $base-margin/4; }
     .comm-action {
         cursor: pointer;
-        color: lighten($color-black, 20%);
+        color: $color-grey-3;
         padding-right: $base-padding/2;
         &:hover {
-            color: $color-black;
+            color: $color-grey-1;
         }
     }
 }

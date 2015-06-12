@@ -14,7 +14,6 @@ button.tag, .button.tag {
     background: $tag-color;
     font-size: .9em;
     box-shadow: none;
-
     &:hover {
         $hover-color: darken($tag-color, 8%);
         background: $hover-color;
