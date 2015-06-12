@@ -49,7 +49,6 @@ ul.notifications {
                 width: 6em;
                 button.close {
                     @include button($color-grey-3);
-                    background: $color-black;
                     float: right;
                     opacity: 0.5;
                     font-size: 0.8em;
@@ -62,7 +61,7 @@ ul.notifications {
         }
 
         @mixin colorize($color) {
-            span.text, span.dismiss { background-color: lighten($color, 10%); }
+            span.text, span.dismiss { background-color: $color; }
             span.symbol {
                 color: $color;
                 @include colorize-icon($color);
