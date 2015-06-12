@@ -5,7 +5,7 @@
 }
 
 button.tag, .button.tag {
-    $tag-color: lighten($color-primary, 5%);
+    $tag-color: lighten($color-blue, 5%);
     position: relative;
     margin: $base-margin/4 $base-margin/6;
     border: none;

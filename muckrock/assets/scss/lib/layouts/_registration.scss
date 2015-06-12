@@ -4,7 +4,7 @@
         padding: $base-padding;
         @include border-top-radius($base-border-radius);
         color: $color-white;
-        background-color: $color-primary;
+        background-color: $color-blue;
         a {
             color: $color-white;
             text-decoration: underline;
@@ -102,7 +102,7 @@
                 @include font-sizing(1);
                 font-weight: $bold;
                 color: $color-default;
-            }            
+            }
         }
     }
 }

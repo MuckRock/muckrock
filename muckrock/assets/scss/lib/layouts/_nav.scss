@@ -6,7 +6,7 @@
 $color-menu: $color-white;
 $color-secondary: $color-white;
 $color-unselected: $color-black;
-$color-selected: $color-primary;
+$color-selected: $color-blue;
 
 $small-menu-breakpoint: 540px;
 
@@ -146,7 +146,7 @@ nav.secondary {
         margin-bottom: $base-vertical-rhythm;
         svg > path, svg > g { fill: $color-black; }
         &:hover {
-            svg > path, svg > g { fill: $color-primary; }
+            svg > path, svg > g { fill: $color-blue; }
         }
 
     }
@@ -281,14 +281,14 @@ nav.sidebar {
     padding: $base-padding/2;
     @media screen and (min-width: 540px) { padding: $base-padding $base-padding 1em; }
     color: $color-white;
-    background: $color-black;
+    background: darken($color-black, 4%);
 
     dfn { padding: 1.5em 0 0.5em 0; }
 
     ul { @include row; }
     li { @extend %half; }
     .button {
-        @include button($color-grey-2);
+        @include button($color-grey-3);
         display: block;
         height: $sidebar-object-height;
         width: 100%;
@@ -388,9 +388,9 @@ nav.sidebar {
                 background: lighten($color-black, 8%);
             }
             &:hover {
-                color: $color-primary;
+                color: $color-blue;
                 .counter {
-                    background: $color-primary;
+                    background: $color-blue;
                 }
             }
         }

@@ -165,7 +165,7 @@
                 border-radius: $base-border-radius;
                 padding: .25em;
                 padding-right: .75em;
-                background: $color-primary;
+                background: $color-blue;
                 color: $color-white;
             }
         }
@@ -260,8 +260,8 @@
                 }
                 &.active {
                     color: $color-white;
-                    background-color: $color-primary;
-                    border-color: $color-primary;
+                    background-color: $color-blue;
+                    border-color: $color-blue;
                 }
             }
 
@@ -278,11 +278,11 @@
                 li {
                     @extend %half;
                     margin-bottom: $base-vertical-rhythm/2;
-                    border: $base-border-width solid $color-primary;
+                    border: $base-border-width solid $color-blue;
                     @extend %border-radius;
                     padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
                     &.active {
-                        background-color: $color-primary;
+                        background-color: $color-blue;
                         color: $color-white;
                         a { color: $color-white; }
                         .embed.modal { color: $color-black; }

@@ -2,7 +2,7 @@
 
 .button, button, input[type='submit'] {
 
-    @include button($color-grey-7);
+    @include button($color-grey);
 
     &.primary {
       @include button($color-blue);
@@ -21,7 +21,7 @@
     }
 
     &.disabled {
-      @include button($color-grey-8);
+      @include button($color-grey-2);
     }
 }
 
@@ -32,10 +32,10 @@
     text-transform: none;
     letter-spacing: 0;
     line-height: 1rem;
-    color: $color-primary;
+    color: $color-blue;
     cursor: pointer;
     &:hover {
-        color: darken($color-primary, 10%);
+        color: darken($color-blue, 10%);
     }
 }
 

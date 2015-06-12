@@ -92,7 +92,7 @@ $progress-animation-duration: 0.7s;
 
     @include classifier(success, $color-success);
     @include classifier(failure, $color-failure);
-    @include classifier(primary, $color-primary);
+    @include classifier(primary, $color-blue);
     @include classifier(default, $color-default);
     @include classifier(disabled, $color-disabled);
 }

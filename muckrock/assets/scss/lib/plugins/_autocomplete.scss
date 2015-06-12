@@ -1,14 +1,14 @@
 .autocomplete-light-widget {
     font-family: $base-font-family !important;
     color: $color-black !important;
-    
+
 }
 
 .yourlabs-autocomplete {
     background-color: $color-white !important;
     border-radius: $base-border-radius !important;
     .hilight {
-        background-color: $color-primary !important;
+        background-color: $color-blue !important;
         background-image: none !important;
     }
     .choice, [data-value], em {

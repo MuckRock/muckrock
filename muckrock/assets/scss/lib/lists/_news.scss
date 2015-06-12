@@ -55,7 +55,7 @@
                 color: $color-black;
                 text-decoration: none;
                 &:hover {
-                    color: $color-primary;
+                    color: $color-blue;
                 }
             }
              @include media($medium-layout) {

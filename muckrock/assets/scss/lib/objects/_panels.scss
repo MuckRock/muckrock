@@ -11,7 +11,7 @@
     }
 }
 .panel.primary { @extend %panel;
-    @include panel-color($color-primary);
+    @include panel-color($color-blue);
     a {
         text-decoration: underline;
         color: $color-white;

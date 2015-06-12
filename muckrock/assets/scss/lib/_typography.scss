@@ -28,7 +28,7 @@ h6 { @include font-sizing(1.25); }
 b, strong { font-weight: $bold; }
 
 a {
-    color: $color-primary;
+    color: $color-blue;
     text-decoration: none;
     &:hover { text-decoration: underline; }
 }
@@ -62,18 +62,18 @@ code {
     color: $color-black;
     background-color: darken($color-white, 15%);
     border-radius: $base-border-radius/2;
-    
+
     i, em {
         font-style: normal;
-        color: $color-primary;
+        color: $color-blue;
     }
     b, strong {
         font-weight: normal;
-        color: $color-failure;
+        color: $color-red;
     }
     u {
         text-decoration: none;
-        color: $color-success;
+        color: $color-green;
     }
 }
 
@@ -116,12 +116,12 @@ td { vertical-align: top; }
 
 table + h3 { margin-top: $base-margin/2; }
 
-.default { color: $color-default; }
-.primary { color: $color-primary; }
-.success { color: $color-success; }
-.warning { color: $color-warning; }
-.failure { color: $color-failure; }
-.disabled { color: $color-disabled; }
+.default { color: $color-grey; }
+.primary { color: $color-blue; }
+.success { color: $color-green; }
+.warning { color: $color-yellow; }
+.failure { color: $color-red; }
+.disabled { color: $color-grey-7; }
 
 .large-number {
     font-weight: $light;

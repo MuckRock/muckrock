@@ -38,19 +38,19 @@
                 vertical-align: middle;
                 line-height: 1em;
                 &.current-tab {
-                    border-color: $color-primary;
-                    background: $color-primary;
+                    border-color: $color-blue;
+                    background: $color-blue;
                     a { color: $color-white; }
                 }
                 &:hover {
-                    border-color: lighten($color-primary, 20%);
+                    border-color: lighten($color-blue, 20%);
                 }
                 & a {
                     display: table-cell;
                     padding: $base-padding/2;
                     &:hover {
                         text-decoration: none;
-                        background: lighten($color-primary, 20%);
+                        background: lighten($color-blue, 20%);
 
                     }
                 }
@@ -76,7 +76,7 @@
                 border-radius: $base-border-radius;
                 padding: .25em;
                 padding-left: 1.5em;
-                background: $color-primary;
+                background: $color-blue;
                 color: $color-white;
             }
             .remove {
@@ -191,7 +191,7 @@
     .list-table-head .sortable {
         cursor: pointer;
         &:hover {
-            background: lighten($color-primary, 35%);
+            background: lighten($color-blue, 35%);
         }
         .arrow {
             font-size: .8em;
@@ -199,10 +199,10 @@
         }
     }
     .list-table-body tr:hover {
-        background: lighten($color-primary, 35%);
+        background: lighten($color-blue, 35%);
     }
     .list-table-body tr.unread {
-        background: lighten($color-primary, 35%);
+        background: lighten($color-blue, 35%);
     }
     .list-empty {
         @extend %full;

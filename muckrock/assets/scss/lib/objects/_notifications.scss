@@ -71,7 +71,7 @@ ul.notifications {
 
         &.success { @include colorize($color-success); }
         &.error { @include colorize($color-failure); }
-        &.info { @include colorize($color-primary); }
+        &.info { @include colorize($color-blue); }
         &.warning { @include colorize($color-warning); }
     }
 }
