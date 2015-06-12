@@ -48,7 +48,7 @@ ul.notifications {
                 text-align: center;
                 width: 6em;
                 button.close {
-                    @include button($color-black);
+                    @include button($color-grey-3);
                     background: $color-black;
                     float: right;
                     opacity: 0.5;

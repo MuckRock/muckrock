@@ -14,7 +14,7 @@
             transform: translateY(1px);
         }
         input[type=submit] {
-            @include button($color-primary);
+            @include button($color-blue);
             width: 25%;
             float: right;
             margin: 0;

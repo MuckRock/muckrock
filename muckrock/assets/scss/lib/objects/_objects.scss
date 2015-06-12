@@ -85,7 +85,6 @@ $progress-animation-duration: 0.7s;
     @include box-sizing(border-box);
     display: block;
     height: $base-vertical-rhythm;
-    @include background-gradient($color-default);
     border: $progress-meter-border;
     @extend %border-radius;
     @include border-right-radius(0px);

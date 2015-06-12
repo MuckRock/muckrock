@@ -288,7 +288,7 @@ nav.sidebar {
     ul { @include row; }
     li { @extend %half; }
     .button {
-        @include button($sidebar-button-background);
+        @include button($color-grey-2);
         display: block;
         height: $sidebar-object-height;
         width: 100%;
@@ -447,7 +447,7 @@ nav.sidebar {
                 border-color: $color-selected;
             }
             & + span.input-button {
-                @include button($sidebar-button-background);
+                @include button($color-grey-2);
                 margin: 0;
                 float: right;
                 clear: right;
