@@ -50,19 +50,15 @@ small {
 }
 
 code {
-    overflow-x: auto;
-    display: block;
+    display: inline;
     width: 100%;
-    margin: $base-vertical-rhythm/2 0;
-
-    font-family: 'Source Code Pro', monospace;
-    @include font-sizing(0.8);
-
-    padding: $base-vertical-rhythm/3 $base-vertical-rhythm/2;
+    margin: 0 $base-margin/4;
+    padding: $base-margin/4 $base-padding/2;
+    border-radius: $base-border-radius;
+    background-color: $color-gray-7;
     color: $color-black;
-    background-color: darken($color-white, 15%);
-    border-radius: $base-border-radius/2;
-
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.8em;
     i, em {
         font-style: normal;
         color: $color-blue;
