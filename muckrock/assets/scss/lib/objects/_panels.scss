@@ -27,7 +27,7 @@
     }
 }
 .panel.failure { @extend %panel;
-    @include panel-color($color-failure);
+    @include panel-color($color-red);
     a {
         text-decoration: underline;
         color: $color-white;
