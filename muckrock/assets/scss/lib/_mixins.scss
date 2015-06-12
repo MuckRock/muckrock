@@ -59,13 +59,6 @@
     svg { fill: $color-white; }
 }
 
-@mixin classifier($status, $color) {
-    &.#{$status} {
-        color: $color-white;
-        border: 1px solid darken($color, 15%);
-    }
-}
-
 @mixin colorize-icon($color) {
     .svg-icon path,
     .svg-icon polygon,

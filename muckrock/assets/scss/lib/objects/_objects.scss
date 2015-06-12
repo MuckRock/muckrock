@@ -81,22 +81,6 @@ $progress-animation-duration: 0.7s;
     background-color: $color-white;
 }
 
-.meter {
-    @include box-sizing(border-box);
-    display: block;
-    height: $base-vertical-rhythm;
-    border: $progress-meter-border;
-    @extend %border-radius;
-    @include border-right-radius(0px);
-    &.completed { @include border-right-radius($base-border-radius); }
-
-    @include classifier(success, $color-green);
-    @include classifier(failure, $color-red);
-    @include classifier(primary, $color-blue);
-    @include classifier(default, $color-grey);
-    @include classifier(disabled, $color-disabled);
-}
-
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
