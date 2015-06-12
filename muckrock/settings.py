@@ -227,6 +227,7 @@ INSTALLED_APPS = (
     'haystack',
     'markdown_deux',
     'mathfilters',
+    'news_sitemaps',
     'pingback',
     'raven.contrib.django',
     'rest_framework',
@@ -238,6 +239,7 @@ INSTALLED_APPS = (
     'storages',
     'taggit',
     'urlauth',
+    'django_xmlrpc',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -260,7 +262,7 @@ def show_toolbar(request):
     """show toolbar on the site"""
     if DEBUG or (boolcheck(os.environ.get('SHOW_DDT', False))) or \
         (request.user and request.user.username == 'mitch'):
-        return False
+        return True
     return False
 
 DEBUG_TOOLBAR_CONFIG = {
@@ -292,7 +294,8 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
-CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks', 'muckrock.agency.tasks')
+CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks',
+                  'muckrock.agency.tasks')
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
@@ -478,6 +481,8 @@ DOCUMENTCLOUD_PASSWORD = os.environ.get('DOCUMENTCLOUD_PASSWORD')
 GA_USERNAME = os.environ.get('GA_USERNAME')
 GA_PASSWORD = os.environ.get('GA_PASSWORD')
 GA_ID = os.environ.get('GA_ID')
+
+PUBLICATION_NAME = 'MuckRock'
 
 # Register database schemes in URLs.
 urlparse.uses_netloc.append('postgres')

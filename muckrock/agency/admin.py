@@ -43,6 +43,9 @@ class AgencyAdminForm(forms.ModelForm):
     appeal_agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
                                                         queryset=Agency.objects.all(),
                                                         required=False)
+    parent = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
+                                                 queryset=Agency.objects.all(),
+                                                 required=False)
 
     class Meta:
         # pylint: disable=R0903
@@ -54,7 +57,7 @@ class AgencyAdmin(VersionAdmin):
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
-    list_filter = ['approved', 'jurisdiction', 'types']
+    list_filter = ['approved', 'types']
     search_fields = ['name']
     filter_horizontal = ('types',)
     form = AgencyAdminForm

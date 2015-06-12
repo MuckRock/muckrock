@@ -37,7 +37,7 @@
             {% endif %}
             {% if foia.agency.address %}
     <dt>Agency Address</dt>
-    <dd>Agency Address: {{foia.agency.address|linebreaks}}</dd>
+    <dd>{{foia.agency.address|linebreaks}}</dd>
             {% endif %}
             {% if foia.agency.notes and not foia.agency.email and not foia.agency.fax %}
     <dt>Agency Notes</dt>
@@ -50,7 +50,7 @@
     <dd><a href="{% url 'admin:agency_agency_change' foia.agency.appeal_agency.pk %}">{{foia.agency.appeal_agency}}</a></dd>
             {% if foia.agency.appeal_agency.address %}
     <dt>Appeal Agency Address</dt>
-    <dd>Address: {{foia.agency.appeal_agency.address|linebreaks}}</dd>
+    <dd>{{foia.agency.appeal_agency.address|linebreaks}}</dd>
             {% endif %}
         {% endif %}
     {% endif %}
@@ -66,19 +66,22 @@
         <option value="{{s|first}}">{{s|last}}</option>
     {% endfor %}
     </select>
-    <button type="submit" class="primary">Set Status</button>
-    <button type="submit" name="resolve" value="true">Resolve</button>
+    <input type="checkbox" name="update_date" id="update-date-{{task.pk}}" checked>
+    <label for="update-date-{{task.pk}}">Save the communication with today's date.</label>
+    <button class="primary" type="submit" name="resolve" value="true">Save & Resolve</button>
 {% endblock %}
 
 {% block task-extra-context %}
 <div class="task-extra-context snail-mail-full-letter">
 {# full letter here, hidden #}
-    <button onclick="$('#full-letter-{{task.pk}}').toggle()">Show/Hide Letter</button>
-    <textarea id="full-letter-{{task.pk}}" style="display: none;">
-    {% now "F j, Y" %}
-    {% with task.communication.foia as request %}
-        {% include "text/foia/comms.txt" %}
-    {% endwith %}
-    </textarea>
+    <button class="reveal-extra-context" data-state="0">More Info</button>
+    <div class="extra-context hidden">
+        <textarea id="full-letter-{{task.pk}}">
+{{task.communication.foia.agency.address}}
+
+{% now "F j, Y" %}
+{% with task.communication.foia as request %}{% include "text/foia/comms.txt" %}{% endwith %}
+        </textarea>
+    </div>
 </div>
 {% endblock %}

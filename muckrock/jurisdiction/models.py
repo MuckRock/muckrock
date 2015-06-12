@@ -120,6 +120,9 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.name
 
+    def __repr__(self):
+        return '<Jurisdiction: %d>' % self.pk
+
     def get_absolute_url(self):
         """The url for this object"""
         return self.get_url('detail')

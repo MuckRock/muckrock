@@ -83,7 +83,7 @@
         "pk":2,
         "model":"task.orphantask",
         "fields":{
-            "communication":1,
+            "communication":19,
             "reason":"ib",
             "address":"100 Bay State Road, Boston, MA 02215"
         }

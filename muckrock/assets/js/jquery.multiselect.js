@@ -187,6 +187,18 @@
       })
     },
 
+    'removeOption' : function(options){
+      var that = this;
+
+      if (options.value) options = [options];
+      $.each(options, function(index, option){
+        if (option.value && that.$element.find("option[value='"+option.value+"']").length === 1){
+          that.$element.find("option[value='" + option.value + "']").remove();
+          that.$container.find("ul.ms-list [id^='" + option.value + "']").remove();
+        }
+      })
+    },
+
     'escapeHTML' : function(text){
       return $("<div>").text(text).html();
     },
@@ -286,7 +298,7 @@
       }
       if ($nextElem.length > 0){
         $nextElem.addClass('ms-hover');
-        var scrollTo = $list.scrollTop() + $nextElem.position().top - 
+        var scrollTo = $list.scrollTop() + $nextElem.position().top -
                        containerHeight / 2 + elemHeight / 2;
 
         $list.scrollTop(scrollTo);

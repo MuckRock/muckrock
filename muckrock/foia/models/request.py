@@ -4,7 +4,7 @@ Models for the FOIA application
 """
 
 from django.contrib.auth.models import User, AnonymousUser
-from django.core.mail import send_mail, send_mass_mail, EmailMultiAlternatives
+from django.core.mail import send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models, connection, transaction
 from django.db.models import Q, Sum
@@ -23,7 +23,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
-from muckrock.task.models import SnailMailTask
+from muckrock import task
 from muckrock import fields
 
 logger = logging.getLogger(__name__)
@@ -411,6 +411,8 @@ class FOIARequest(models.Model):
             self.email = self.agency.get_email()
             self.other_emails = self.agency.other_emails
 
+        # if agency isnt approved, do not email or snail mail
+        # it will be handled after agency is approved
         approved_agency = self.agency and self.agency.approved
         can_email = self.email and not appeal
         comm = self.last_comm()
@@ -425,28 +427,17 @@ class FOIARequest(models.Model):
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
-        else:
+        elif approved_agency:
             # snail mail it
             self.status = 'submitted'
-            notice = 'NEW' if self.communications.count() == 1 else 'UPDATED'
-            notice = 'APPEAL' if appeal else notice
-            send_mail(
-                '[%s] Freedom of Information Request: %s' % (
-                    notice, self.title
-                ),
-                render_to_string(
-                    'text/foia/admin_mail.txt',
-                    {'request': self, 'appeal': appeal}
-                ),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
-            SnailMailTask.objects.create(category=notice, communication=comm)
+            task.models.SnailMailTask.objects.create(category=notice, communication=comm)
+        else:
+            # not an approved agency, all we do is mark as submitted
+            self.status = 'submitted'
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
@@ -494,11 +485,9 @@ class FOIARequest(models.Model):
         else:
             self.status = 'submitted'
             self.save()
-            send_mail('[FOLLOWUP] Freedom of Information Request: %s' % self.title,
-                      render_to_string('text/foia/admin_mail.txt', {'request': self}),
-                      'info@muckrock.com', ['requests@muckrock.com'], fail_silently=False)
             comm.delivered = 'mail'
             comm.save()
+            task.models.SnailMailTask.objects.create(category='f', communication=comm)
 
         # Do not self.update() here for now to avoid excessive emails
         self.update_dates()
@@ -518,6 +507,9 @@ class FOIARequest(models.Model):
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
+
+        if from_addr == 'fax':
+            subject = 'MR#%s-%s - %s' % (self.pk, comm.pk, subject)
 
         cc_addrs = self.get_other_emails()
         from_email = '%s@%s' % (from_addr, MAILGUN_SERVER_NAME)

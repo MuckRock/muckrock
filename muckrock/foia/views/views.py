@@ -4,12 +4,10 @@ Views for the FOIA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
-from django.template.loader import render_to_string
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
@@ -28,7 +26,7 @@ from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
-from muckrock.task.models import FlaggedTask
+from muckrock.task.models import FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=R0901
@@ -67,26 +65,18 @@ class MyRequestList(RequestList):
 
     template_name = 'lists/request_my_list.html'
 
-    def set_read_status(self, foia_pks, status):
-        """Mark requests as read or unread"""
-        for foia_pk in foia_pks:
-            foia = FOIARequest.objects.get(pk=foia_pk, user=self.request.user)
-            foia.updated = status
-            foia.save()
-
     def post(self, request):
         """Handle updating read status"""
         try:
             post = request.POST
             foia_pks = post.getlist('foia')
             if post.get('submit') == 'Mark as Read':
-                self.set_read_status(foia_pks, False)
+                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=False)
             elif post.get('submit') == 'Mark as Unread':
-                self.set_read_status(foia_pks, True)
+                FOIARequest.objects.filter(pk__in=foia_pks).update(updated=True)
             elif post.get('submit') == 'Mark All as Read':
-                foia_requests = FOIARequest.objects.filter(user=self.request.user, updated=True)
-                all_unread = [foia.pk for foia in foia_requests]
-                self.set_read_status(all_unread, False)
+                FOIARequest.objects.filter(user=self.request.user, updated=True)\
+                                   .update(updated=False)
         except FOIARequest.DoesNotExist:
             pass
         return redirect('foia-mylist')
@@ -211,26 +201,16 @@ class Detail(DetailView):
         """Handle updating status"""
         status = request.POST.get('status')
         old_status = foia.get_status_display()
-        if foia.status not in ['started', 'submitted'] and ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or (request.user.is_staff and status in [s for s, _ in STATUS])):
+        if foia.status not in ['started', 'submitted'] and \
+                ((foia.editable_by(request.user) and status in [s for s, _ in STATUS_NODRAFT]) or
+                 (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
 
-            subject = '%s changed the status of "%s" to %s' % (
-                request.user.username,
-                foia.title,
-                foia.get_status_display()
-            )
-            args = {
-                'request': foia,
-                'old_status': old_status,
-                'user': request.user
-            }
-            send_mail(
-                subject,
-                render_to_string('text/foia/status_change.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
+            StatusChangeTask.objects.create(
+                user=request.user,
+                old_status=old_status,
+                foia=foia,
             )
         return redirect(foia)
 
@@ -239,13 +219,8 @@ class Detail(DetailView):
         text = request.POST.get('text', False)
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Your follow up has been sent.'
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text)
+            messages.success(request, 'Your follow up has been sent.')
         return redirect(foia)
 
     def _question(self, request, foia):
@@ -271,18 +246,6 @@ class Detail(DetailView):
         """Allow a user to notify us of a problem with the request"""
         text = request.POST.get('text')
         if request.user.is_authenticated() and text:
-            args = {
-                'request': foia,
-                'user': request.user,
-                'reason': text
-            }
-            send_mail(
-                '[FLAG] Freedom of Information Request: %s' % foia.title,
-                render_to_string('text/foia/flag.txt', args),
-                'info@muckrock.com',
-                ['requests@muckrock.com'],
-                fail_silently=False
-            )
             FlaggedTask.objects.create(
                 user=request.user,
                 text=text,
@@ -294,14 +257,8 @@ class Detail(DetailView):
         """Handle submitting an appeal"""
         text = request.POST.get('text')
         if foia.editable_by(request.user) and foia.is_appealable() and text:
-            save_foia_comm(
-                request,
-                foia,
-                foia.user.get_full_name(),
-                text,
-                'Appeal succesfully sent',
-                appeal=True
-            )
+            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
+            messages.success(request, 'Appeal successfully sent.')
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):

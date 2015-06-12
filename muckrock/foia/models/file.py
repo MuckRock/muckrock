@@ -24,7 +24,7 @@ class FOIAFile(models.Model):
     # pylint: disable=E1101
     foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
-    ffile = models.FileField(upload_to='foia_files', verbose_name='File', max_length=255)
+    ffile = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
     title = models.CharField(max_length=255)
     date = models.DateTimeField(null=True, db_index=True)
     source = models.CharField(max_length=255, blank=True)
@@ -84,6 +84,10 @@ class FOIAFile(models.Model):
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
+
+    def is_eml(self):
+        """Is this an eml file?"""
+        return self.ffile.name.endswith('.eml')
 
     def anchor(self):
         """Anchor name"""

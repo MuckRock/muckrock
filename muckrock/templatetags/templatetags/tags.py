@@ -9,11 +9,13 @@ from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 
+from email.parser import Parser
 import re
 
+from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.foia.models import FOIARequest
 from muckrock.forms import TagManagerForm
-from muckrock.settings import STATIC_URL
+from muckrock.settings import STATIC_URL, STRIPE_PUB_KEY
 
 register = Library()
 
@@ -25,37 +27,15 @@ def active(request, pattern):
         return 'current-tab'
     return ''
 
-def page_links_common(page_obj, option_dict):
-    """Return page links for surrounding pages"""
-
-    def make_link(num, skip):
-        """Make a link to page num"""
-        options = ''.join('&amp;%s=%s' % (k, escape(v)) for k, v in option_dict.iteritems() if v)
-        if num != skip:
-            return '<a href="?page=%d%s">%d</a>' % (num, options, num)
-        else:
-            return str(num)
-
-    pages = range(max(page_obj.number - 3, 1),
-                  min(page_obj.number + 3, page_obj.paginator.num_pages) + 1)
-    links = '&nbsp;&nbsp;'.join(make_link(n, page_obj.number) for n in pages)
-
-    if pages[0] != 1:
-        links = '&hellip;&nbsp;' + links
-    if pages[-1] != page_obj.paginator.num_pages:
-        links += '&nbsp;&hellip;'
-
-    return links
-
 @register.simple_tag
-def page_links(page_obj, order=None, field=None, per_page=None):
-    """Page links for list displays"""
-    return page_links_common(page_obj, {'order': order, 'field': field, 'per_page': per_page})
-
-@register.simple_tag
-def search_page_links(page_obj, query=None):
-    """Page links for list displays"""
-    return page_links_common(page_obj, {'q': query})
+def page_link(request, page_num):
+    """Generates a pagination link that preserves context"""
+    query = request.GET
+    href = '?page=' + str(page_num)
+    for key, value in query.iteritems():
+        if value and key != u'page':
+            href += '&%s=%s' % (key, escape(value))
+    return href
 
 @register.filter
 @stringfilter
@@ -188,16 +168,24 @@ def editable_by(foia, user):
 def crowdfund(context, foia_pk):
     """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
-    endpoint = reverse('foia-contribute', kwargs={
-        'jurisdiction': foia.jurisdiction.slug,
-        'jidx': foia.jurisdiction.pk,
-        'idx': foia.id,
-        'slug': foia.slug
-    })
+    the_crowdfund = foia.crowdfund
+    initial_data = {'crowdfund': the_crowdfund.pk}
+    default_amount = 25
+    if the_crowdfund.amount_remaining() < default_amount:
+        initial_data['amount'] = int(the_crowdfund.amount_remaining()) * 100
+    else:
+        initial_data['amount'] = default_amount * 100
+    payment_form = CrowdfundRequestPaymentForm(initial=initial_data)
+    logged_in = context['user'].is_authenticated()
+    user_email = context['user'].email if logged_in else ''
+    endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
     return {
-        'user': context['user'],
-        'crowdfund': foia.crowdfund,
+        'crowdfund': the_crowdfund,
         'endpoint': endpoint,
+        'logged_in': logged_in,
+        'user_email': user_email,
+        'payment_form': payment_form,
+        'stripe_pk': STRIPE_PUB_KEY
     }
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
@@ -219,3 +207,16 @@ def tag_manager(context, mr_object):
         'is_authorized': is_authorized,
         'endpoint': mr_object.get_absolute_url()
     }
+
+@register.filter
+def display_eml(foia_file):
+    """Extract text from eml file for display"""
+    msg = Parser().parse(foia_file.ffile)
+    if msg.get_content_type() == 'text/plain':
+        return msg.get_payload(decode=True)
+    if msg.get_content_type() == 'multipart/alternative':
+        for sub_msg in msg.get_payload():
+            if sub_msg.get_content_type() == 'text/plain':
+                return sub_msg.get_payload(decode=True)
+
+
