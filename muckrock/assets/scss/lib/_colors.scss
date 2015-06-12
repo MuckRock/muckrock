@@ -2,14 +2,14 @@
  // Colors //
 ////////////
 
-$color-grey-dark-1: #2E2E2E;
-$color-grey-dark-2: #474747;
-$color-grey-dark-3: #616161;
-$color-grey-dark-4: #7A7A7A;
-$color-grey-light-4: #ADADAD;
-$color-grey-light-3: #C7C7C7;
-$color-grey-light-2: #E0E0E0;
-$color-grey-light-1: #F9F9F9;
+$color-grey-1: #333C47;
+$color-grey-2: #495361;
+$color-grey-3: #616C7A;
+$color-grey-4: #7B8694;
+$color-grey-5: #97A1AD;
+$color-grey-6: #B5BDC7;
+$color-grey-7: #D5DAE0;
+$color-grey-8: #F7F8FA;
 
 $color-red:         #E63A2E;
 $color-red-dark:    #99271F;
@@ -21,9 +21,9 @@ $color-blue:        #458AE6;
 $color-blue-dark:   #3F699F;
 
 // Patches
-$color-black: $color-grey-dark-1;
-$color-white: $color-grey-light-1;
-$color-grey: $color-grey-light-4;
+$color-black: $color-grey-1;
+$color-white: $color-grey-8;
+$color-grey: $color-grey-5;
 $color-gray: $color-grey;
 $color-primary: $color-blue;
 $color-success: $color-green;
