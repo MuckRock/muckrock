@@ -140,14 +140,14 @@
             border-radius: 0;
             background: none;
             box-shadow: none;
-            color: $color-default;
+            color: $color-grey;
             text-align: left;
             &:hover {
                 color: $color-black;
                 box-shadow: none;
             }
             &:disabled:hover {
-                color: $color-default;
+                color: $color-grey;
             }
             &:first-of-type {
                 padding-left: 0;

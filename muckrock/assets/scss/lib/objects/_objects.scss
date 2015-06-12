@@ -93,7 +93,7 @@ $progress-animation-duration: 0.7s;
     @include classifier(success, $color-green);
     @include classifier(failure, $color-red);
     @include classifier(primary, $color-blue);
-    @include classifier(default, $color-default);
+    @include classifier(default, $color-grey);
     @include classifier(disabled, $color-disabled);
 }
 
@@ -103,7 +103,7 @@ table {
     border: $base-border-width solid $color-grey;
     @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
-    thead tr { background-color: $color-default; }
+    thead tr { background-color: $color-grey; }
     tbody tr:nth-child(odd) { background-color: $color-odd-background; }
     &, tr {
         border-top: $base-border-width solid $color-grey;

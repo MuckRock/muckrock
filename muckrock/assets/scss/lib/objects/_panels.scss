@@ -3,7 +3,7 @@
 .panel { @extend %panel; }
 
 .panel.default { @extend %panel;
-    @include panel-color($color-default);
+    @include panel-color($color-grey);
     a {
         text-decoration: underline;
         color: $color-white;
