@@ -8,7 +8,6 @@ from celery.task import periodic_task
 from django.contrib.auth.models import User
 from django.db.models import Sum
 
-import gdata.analytics.service
 import logging
 from datetime import date, timedelta
 
@@ -16,7 +15,9 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
-from muckrock.settings import GA_USERNAME, GA_PASSWORD, GA_ID
+from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
+                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
+                                 GenericTask, PaymentTask, CrowdfundTask, FailedFaxTask
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +26,6 @@ def store_statstics():
     """Store the daily statistics"""
 
     yesterday = date.today() - timedelta(1)
-
-    client = gdata.analytics.service.AnalyticsDataService()
-    client.ssl = True
-    client.ClientLogin(GA_USERNAME, GA_PASSWORD)
-    data = client.GetData(ids=GA_ID, metrics='ga:pageviews', start_date=yesterday.isoformat(),
-                          end_date=yesterday.isoformat())
-    total_page_views = data.entry[0].pageviews.value
 
     stats = Statistics.objects.create(
         date=yesterday,
@@ -54,7 +48,6 @@ def store_statstics():
         total_fees=FOIARequest.objects.aggregate(Sum('price'))['price__sum'],
         pro_users=Profile.objects.filter(acct_type='pro').count(),
         pro_user_names=';'.join(p.user.username for p in Profile.objects.filter(acct_type='pro')),
-        total_page_views=total_page_views,
         daily_requests_pro=FOIARequest.objects.filter(
             user__profile__acct_type='pro',
             date_submitted=yesterday
@@ -72,6 +65,32 @@ def store_statstics():
         orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
         unapproved_agencies=Agency.objects.filter(approved=False).count(),
+        total_tasks=Task.objects.count(),
+        total_unresolved_tasks=Task.objects.filter(resolved=False).count(),
+        total_generic_tasks=GenericTask.objects.count(),
+        total_unresolved_generic_tasks=GenericTask.objects.filter(resolved=False).count(),
+        total_orphan_tasks=OrphanTask.objects.count(),
+        total_unresolved_orphan_tasks=OrphanTask.objects.filter(resolved=False).count(),
+        total_snailmail_tasks=SnailMailTask.objects.count(),
+        total_unresolved_snailmail_tasks=SnailMailTask.objects.filter(resolved=False).count(),
+        total_rejected_tasks=RejectedEmailTask.objects.count(),
+        total_unresolved_rejected_tasks=
+            RejectedEmailTask.objects.filter(resolved=False).count(),
+        total_staleagency_tasks=StaleAgencyTask.objects.count(),
+        total_unresolved_staleagency_tasks=StaleAgencyTask.objects.filter(resolved=False).count(),
+        total_flagged_tasks=FlaggedTask.objects.count(),
+        total_unresolved_flagged_tasks=FlaggedTask.objects.filter(resolved=False).count(),
+        total_newagency_tasks=NewAgencyTask.objects.count(),
+        total_unresolved_newagency_tasks=NewAgencyTask.objects.filter(resolved=False).count(),
+        total_response_tasks=ResponseTask.objects.count(),
+        total_unresolved_response_tasks=ResponseTask.objects.filter(resolved=False).count(),
+        total_faxfail_tasks=FailedFaxTask.objects.count(),
+        total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
+        total_payment_tasks=PaymentTask.objects.count(),
+        total_unresolved_payment_tasks=PaymentTask.objects.filter(resolved=False).count(),
+        total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
+        total_unresolved_crowdfundpayment_tasks=
+            CrowdfundTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

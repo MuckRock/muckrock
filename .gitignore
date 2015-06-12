@@ -22,3 +22,4 @@ dump.rdb
 .ruby-version
 style.*.css
 .vagrant
+node_modules

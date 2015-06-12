@@ -4,17 +4,17 @@ Comm helper functions for FOIA views
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.core.validators import validate_email, ValidationError
+from django.core.validators import ValidationError
 from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIACommunication
+from muckrock.foia.models import FOIACommunication, FOIARequest
 
-# pylint: disable=too-many-arguments
-def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=False, snail=False):
+def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False):
     """Save the FOI Communication"""
+    #pylint:disable=too-many-arguments
     comm = FOIACommunication.objects.create(
         foia=foia,
         from_who=from_who,
@@ -32,7 +32,6 @@ def save_foia_comm(request, foia, from_who, comm, message, formset=None, appeal=
             foia_file.date = comm.date
             foia_file.save()
     foia.submit(appeal=appeal, snail=snail)
-    messages.success(request, message)
 
 @user_passes_test(lambda u: u.is_staff)
 def move_comm(request, next_):
@@ -40,15 +39,16 @@ def move_comm(request, next_):
     try:
         comm_pk = request.POST['comm_pk']
         comm = FOIACommunication.objects.get(pk=comm_pk)
+        new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
+        comm.move(new_foia_pks)
+        msg = 'Communication moved to the following requests: '
+        href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
+        msg += ', '.join(href(FOIARequest.objects.get(foia_pk)) for foia_pk in new_foia_pks)
+        messages.success(request, msg)
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
-        return redirect(next_)
-
-    new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
-    invalid_foias = comm.move(request, new_foia_pks)
-    if not invalid_foias:
-        comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.delete()
+    except ValueError:
+        messages.error(request, 'No move destination provided.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)
@@ -70,23 +70,14 @@ def resend_comm(request, next_):
     """Resend the FOI Communication"""
     try:
         comm = FOIACommunication.objects.get(pk=request.POST['comm_pk'])
-        comm.date = datetime.now()
-        comm.save()
-        foia = comm.foia
-        email = request.POST['email']
-        if email:
-            validate_email(email)
-            foia.email = email
-            foia.save()
-            snail = False
-        else:
-            snail = True
-        foia.submit(snail=snail)
+        comm.resend(request.POST['email'])
         messages.success(request, 'The communication was resent.')
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')
     except ValidationError:
-        messages.error(request, 'Not a valid email address')
+        messages.error(request, 'The provided email was invalid')
+    except ValueError:
+        messages.error(request, 'The communication is an orphan and cannot be resent.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)

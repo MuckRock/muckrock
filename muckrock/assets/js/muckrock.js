@@ -51,7 +51,7 @@ function getCheckoutData(button) {
     }
 }
 
-$('textarea').autosize();
+// $('textarea').autosize();
 
 if (typeof $.cookie('broadcast') == 'undefined') {
     $.cookie('broadcast', 1);
@@ -80,7 +80,7 @@ $('#toggle-all').click(function(){
 });
 
 // Tag Manager
-    
+
 $('#edit-tags').click(function() {
     $('#tag-form').show();
     $(this).hide();

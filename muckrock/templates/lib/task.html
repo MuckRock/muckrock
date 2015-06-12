@@ -1,0 +1,28 @@
+{% load task_tags %}
+{% if task.orphantask %}
+    {% orphan_task task.id %}
+{% elif task.snailmailtask %}
+    {% snail_mail_task task.id %}
+{% elif task.rejectedemailtask %}
+    {% rejected_email_task task.id %}
+{% elif task.staleagencytask %}
+    {% stale_agency_task task.id %}
+{% elif task.flaggedtask %}
+    {% flagged_task task.id %}
+{% elif task.newagencytask %}
+    {% new_agency_task task.id %}
+{% elif task.responsetask %}
+    {% response_task task.id %}
+{% elif task.statuschangetask %}
+    {% status_change_task task.id %}
+{% elif task.paymenttask %}
+    {% payment_task task.id %}
+{% elif task.crowdfundtask %}
+    {% crowdfund_task task.id %}
+{% elif task.multirequesttask %}
+    {% multi_request_task task.id %}
+{% elif task.failedfaxtask %}
+    {% failed_fax_task task.id %}
+{% else %}
+    {% default_task task.id %}
+{% endif %}

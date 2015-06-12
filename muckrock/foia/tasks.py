@@ -123,6 +123,14 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         info = json.loads(ret)
         doc.pages = info['document']['pages']
         doc.save()
+    except urllib2.HTTPError, exc:
+        if exc.code == 404:
+            # if 404, this doc id is not on document cloud
+            # delete the doc_id which will cause it to get reuploaded by retry_stuck_documents
+            doc.doc_id = ''
+            doc.save()
+        else:
+            set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
     except urllib2.URLError, exc:
         # pylint: disable=E1101
         set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)

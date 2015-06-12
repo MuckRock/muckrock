@@ -34,24 +34,39 @@
             & li {
                 display: table-row;
                 border: $base-border-width solid $color-grey;
-                text-align: center;
+                padding-left: $base-padding;
+                text-align: left;
                 vertical-align: middle;
                 line-height: 1em;
-                &.current-tab {
-                    border-color: $color-primary;
-                    background: $color-primary;
-                    a { color: $color-white; }
+                .counter {
+                    display: table-cell;
+                    width: 25%;
+                    text-align: center;
+                    font-weight: $bold;
                 }
-                &:hover {
-                    border-color: lighten($color-primary, 20%);
-                }
-                & a {
+                a {
                     display: table-cell;
                     padding: $base-padding/2;
+                    border-left: $base-border-width solid $color-grey;
                     &:hover {
                         text-decoration: none;
                         background: lighten($color-primary, 20%);
-
+                    }
+                }
+                &.current-tab {
+                    border-left: $base-border-width solid $color-primary;
+                    border-right: $base-border-width solid $color-primary;
+                    background: $color-primary;
+                    .counter {
+                        background: $color-white;
+                        color: $color-primary;
+                    }
+                    a {
+                        color: $color-white;
+                        border-color: $color-primary;
+                        &:hover {
+                            background: $color-primary;
+                        }
                     }
                 }
             }

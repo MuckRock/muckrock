@@ -3,6 +3,10 @@ URL mappings for the Task application
 """
 
 from django.conf.urls import patterns, url
+
+# pylint: disable=unused-import
+import muckrock.task.signals
+# pylint: enable=unused-import
 from muckrock.task import views
 
 urlpatterns = patterns(
@@ -17,4 +21,9 @@ urlpatterns = patterns(
     url(r'^flagged/$', views.FlaggedTaskList.as_view(), name='flagged-task-list'),
     url(r'^new-agency/$', views.NewAgencyTaskList.as_view(), name='new-agency-task-list'),
     url(r'^response/$', views.ResponseTaskList.as_view(), name='response-task-list'),
+    url(r'^status-change/$', views.StatusChangeTaskList.as_view(), name='status-change-task-list'),
+    url(r'^payment/$', views.PaymentTaskList.as_view(), name='payment-task-list'),
+    url(r'^crowdfund/$', views.CrowdfundTaskList.as_view(), name='crowdfund-task-list'),
+    url(r'^multirequest/$', views.MultiRequestTaskList.as_view(), name='multirequest-task-list'),
+    url(r'^failed-fax/$', views.FailedFaxTaskList.as_view(), name='failed-fax-task-list')
 )

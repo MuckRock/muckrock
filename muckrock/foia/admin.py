@@ -116,6 +116,9 @@ class FOIARequestAdminForm(forms.ModelForm):
                                                  queryset=Agency.objects.all())
     user = autocomplete_light.ModelChoiceField('UserAdminAutocomplete',
                                                queryset=User.objects.all())
+    parent = autocomplete_light.ModelChoiceField('FOIARequestAdminAutocomplete',
+                                                 queryset=FOIARequest.objects.all(),
+                                                 required=False)
 
     class Meta:
         # pylint: disable=R0903
@@ -126,7 +129,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     """FOIA Request admin options"""
     change_list_template = 'admin/foia/foiarequest/change_list.html'
     prepopulated_fields = {'slug': ('title',)}
-    list_display = ('title', 'user', 'status')
+    list_display = ('title', 'user', 'status', 'agency', 'jurisdiction')
     list_filter = ['status']
     list_select_related = True
     search_fields = ['title', 'description', 'tracking_id', 'mail_id']
