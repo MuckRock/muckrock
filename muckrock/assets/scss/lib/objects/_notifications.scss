@@ -69,7 +69,7 @@ ul.notifications {
             }
         }
 
-        &.success { @include colorize($color-success); }
+        &.success { @include colorize($color-green); }
         &.error { @include colorize($color-failure); }
         &.info { @include colorize($color-blue); }
         &.warning { @include colorize($color-warning); }

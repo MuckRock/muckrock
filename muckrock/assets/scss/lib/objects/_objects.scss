@@ -90,7 +90,7 @@ $progress-animation-duration: 0.7s;
     @include border-right-radius(0px);
     &.completed { @include border-right-radius($base-border-radius); }
 
-    @include classifier(success, $color-success);
+    @include classifier(success, $color-green);
     @include classifier(failure, $color-failure);
     @include classifier(primary, $color-blue);
     @include classifier(default, $color-default);

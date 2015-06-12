@@ -44,7 +44,7 @@
     }
     
     .buy-requests {
-        border-color: $color-success;
+        border-color: $color-green;
         @include row;
         p { @extend %three-quarters; }
         button {

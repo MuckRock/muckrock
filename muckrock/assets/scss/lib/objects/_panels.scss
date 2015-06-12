@@ -19,7 +19,7 @@
     }
 }
 .panel.success { @extend %panel;
-    @include panel-color($color-success);
+    @include panel-color($color-green);
     a {
         text-decoration: underline;
         color: $color-white;

@@ -3,7 +3,7 @@
     margin: $base-margin;
     border: 1px solid $color-black;
     &.resolved {
-        border-color: $color-success;
+        border-color: $color-green;
     }
 }
 
@@ -12,7 +12,7 @@
 }
 
 .resolved.task header {
-    background: $color-success;
+    background: $color-green;
 }
 
 .task header {

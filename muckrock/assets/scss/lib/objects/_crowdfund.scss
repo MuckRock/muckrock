@@ -22,17 +22,17 @@
             @include span-columns(3);
         }
     }
-    border-color: $color-success;
+    border-color: $color-green;
     h1, h2, h3 { font-weight: $normal; }
     h1 {
         @include font-sizing(1.2);
-        color: $color-success;
+        color: $color-green;
     }
     h2 { @include font-sizing(1.2); }
     h3 { @include font-sizing(0.9); }
     input {
         width: 100%;
-        border: $base-border-width solid $color-success;
+        border: $base-border-width solid $color-green;
         @extend %border-radius;
         padding: $base-vertical-rhythm/8 $base-vertical-rhythm/4;
         background-color: $color-white;
