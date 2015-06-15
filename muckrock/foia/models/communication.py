@@ -47,7 +47,8 @@ class FOIACommunication(models.Model):
     priv_to_who = models.CharField(max_length=255, blank=True)
     subject = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField(db_index=True)
-    response = models.BooleanField(help_text='Is this a response (or a request)?')
+    response = models.BooleanField(default=False,
+            help_text='Is this a response (or a request)?')
     full_html = models.BooleanField(default=False)
     communication = models.TextField(blank=True)
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)

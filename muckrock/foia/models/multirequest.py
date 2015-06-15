@@ -24,7 +24,7 @@ class FOIAMultiRequest(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     status = models.CharField(max_length=10, choices=STATUS[:2])
-    embargo = models.BooleanField()
+    embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
     agencies = models.ManyToManyField(Agency, related_name='agencies', blank=True, null=True)
 

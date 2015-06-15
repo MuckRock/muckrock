@@ -42,10 +42,10 @@ class Agency(models.Model, RequestHelper):
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
-    approved = models.BooleanField()
+    approved = models.BooleanField(default=False)
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    can_email_appeals = models.BooleanField()
+    can_email_appeals = models.BooleanField(default=False)
     image = ThumbnailerImageField(
         upload_to='agency_images',
         blank=True,
