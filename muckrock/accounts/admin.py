@@ -54,7 +54,7 @@ class MRUserAdmin(UserAdmin):
         """Creates/cancels a pro subscription if changing to/from pro acct_type"""
         obj = form.instance
         try:
-            profile = obj.get_profile()
+            profile = obj.profile
             before_acct_type = profile.acct_type
         except ObjectDoesNotExist:
             profile = None

@@ -300,7 +300,6 @@ CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks',
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
-AUTH_PROFILE_MODULE = 'accounts.Profile'
 AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),

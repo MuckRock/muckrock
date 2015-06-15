@@ -8,7 +8,7 @@
 {% block form-title %}{{ action|title }}{% endblock %}
 
 {% block form-info %}
-{% with remaining=foia.user.get_profile.num_requests %}
+{% with remaining=foia.user.profile.num_requests %}
 
 {% endwith %}
 {% endblock form-info %}
@@ -16,7 +16,7 @@
 {% block form-form %}
 
 {% if form %}
-{% with remaining=foia.user.get_profile.total_requests %}
+{% with remaining=foia.user.profile.total_requests %}
 <form method="post" class="draft">
     {% csrf_token %}
     
@@ -47,7 +47,7 @@
     {% endif %}
     
     <div class="bottom">
-        {% if foia.user.get_profile.can_embargo %}
+        {% if foia.user.profile.can_embargo %}
         <section class="embargo">
             <div class="input">
                 {{ form.embargo }}

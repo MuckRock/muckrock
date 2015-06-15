@@ -102,7 +102,7 @@ class FollowingRequestList(RequestList):
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
         objects = super(FollowingRequestList, self).get_queryset()
-        profile = self.request.user.get_profile()
+        profile = self.request.user.profile
         return objects.filter(followed_by=profile)
 
 # pylint: disable=no-self-use

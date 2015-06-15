@@ -37,7 +37,7 @@
         <div class="news-article-date">{{ article.pub_date | date:"F j, Y" }}</div>
         <div class="news-article-authors">by
             {% for author in article.authors.all %}
-                <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+                <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
                 {% if not forloop.last %}, {% endif %}
             {% endfor %}
         </div>
@@ -65,8 +65,8 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:site" content="@muckrock" />
 {% with article.authors.all|first as author %}
-    {% if author.get_profile.twitter %}
-<meta name="twitter:creator" content="{{ author.get_profile.twitter }}" />
+    {% if author.profile.twitter %}
+<meta name="twitter:creator" content="{{ author.profile.twitter }}" />
     {% endif %}
 {% endwith %}
 <meta name="twitter:title" content="{{ article.title }}" />

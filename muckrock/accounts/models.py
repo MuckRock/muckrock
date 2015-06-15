@@ -50,7 +50,7 @@ class Profile(models.Model):
         ('weekly', 'Weekly'),
     )
 
-    user = models.ForeignKey(User, unique=True)
+    user = models.OneToOneField(User)
     address1 = models.CharField(
         max_length=50,
         blank=True,

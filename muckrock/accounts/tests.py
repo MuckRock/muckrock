@@ -270,7 +270,7 @@ class TestAccountFunctional(TestCase):
             user_data)
 
         user = User.objects.get(username='adam')
-        profile = user.get_profile()
+        profile = user.profile
         for key, val in user_data.iteritems():
             if key in ['first_name', 'last_name', 'email']:
                 nose.tools.eq_(val, getattr(user, key))

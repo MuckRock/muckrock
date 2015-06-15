@@ -41,7 +41,7 @@ class OrganizationAdmin(VersionAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.stripe_id:
             obj.create_plan()
-            obj.owner.get_profile().customer()
+            obj.owner.profile.customer()
         if change:
             original = Organization.objects.get(pk=obj.pk)
             if original.monthly_cost != obj.monthly_cost:

@@ -387,7 +387,7 @@ class FOIARequest(models.Model):
         self.updated = True
         self.save()
 
-        for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+        for profile in chain(self.followed_by.all(), [self.user.profile]):
             if self.is_viewable(profile.user):
                 profile.notify(self)
 
@@ -669,7 +669,7 @@ class FOIARequest(models.Model):
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
         can_edit = self.editable_by(user) or user.is_staff
-        can_embargo = not self.is_editable() and can_edit and user.get_profile().can_embargo()
+        can_embargo = not self.is_editable() and can_edit and user.profile.can_embargo()
         # pylint: disable=line-too-long
         can_permanently_embargo = can_embargo and self.is_embargo() and not self.is_permanently_embargoed()
         can_pay = can_edit and self.is_payable()
