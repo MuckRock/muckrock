@@ -17,8 +17,6 @@ from rest_framework.routers import DefaultRouter
 import autocomplete_light
 import dbsettings.urls
 
-autocomplete_light.autodiscover()
-
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls
@@ -31,7 +29,6 @@ from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 
-admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
 
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap,
