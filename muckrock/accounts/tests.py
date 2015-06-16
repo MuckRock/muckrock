@@ -15,12 +15,6 @@ import os
 from datetime import datetime, timedelta
 from mock import Mock, patch
 
-## resolve weird django bug ##
-from django.db.models.loading import cache as model_cache
-if not model_cache.loaded:
-    model_cache.get_models()
-##############################
-
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
