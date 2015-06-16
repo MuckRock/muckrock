@@ -102,8 +102,16 @@ class TestProject(TestCase):
 
     def test_make_private(self):
         """Projects should be able to be made private."""
-        ok_(False)
+        project = self.basic_project
+        ok_(not project.private)
+        project.make_private()
+        ok_(project.private)
+        project.make_public()
+        ok_(not project.private)
 
     def test_add_tags(self):
         """Projects should keep a list of relevant tags."""
-        ok_(False)
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
