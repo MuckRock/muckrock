@@ -17,18 +17,8 @@ import nose
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
-"""
-* Projects must have a title.
-* Projects should have a statement describing their purpose.
-* Projects should have an image or illustration to accompany them.
-* Projects should keep a list of relevant requests.
-* Projects should keep a list of relevant articles.
-* Projects should keep a list of relevant keywords/tags.
-* Projects should be kept very flexible and nonprescritive.
-* Projects should be able to be made private.
-"""
-
 class TestProject(TestCase):
+    """Projects are a mixture of general and specific information on a broad subject."""
 
     fixtures = [
         'test_users.json',
@@ -109,3 +99,11 @@ class TestProject(TestCase):
         ok_(request2 in project.requests.all())
         project.articles.clear()
         eq_(len(project.articles.all()), 0)
+
+    def test_make_private(self):
+        """Projects should be able to be made private."""
+        ok_(False)
+
+    def test_add_tags(self):
+        """Projects should keep a list of relevant tags."""
+        ok_(False)
