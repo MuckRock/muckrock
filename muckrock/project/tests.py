@@ -1,16 +1,20 @@
 """
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
-
-Replace this with more appropriate tests for your application.
+Projects are a way to quickly introduce our audience to the
+topics and issues we cover and then provide them avenues for
+deeper, sustained involvement with our work on those topics.
 """
 
 from django.test import TestCase
 
+"""
+* Projects should have a title.
+* Projects should have a statement describing their purpose.
+* Projects should have an image or illustration to accompany them.
+* Projects should keep a list of users who are contributors.
+* Projects should keep a list of relevant requests.
+* Projects should keep a list of relevant articles.
+* Projects should keep a list of relevant keywords/tags.
+* Projects should be kept very flexible and nonprescritive.
+* Projects should be able to be made private.
+"""
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
