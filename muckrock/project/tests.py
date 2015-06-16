@@ -11,6 +11,7 @@ from muckrock.project.models import Project
 import nose
 
 ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
 
 """
 * Projects must have a title.
@@ -36,3 +37,7 @@ class TestProject(TestCase):
                         'profits are growing larger.')
         )
         ok_(project)
+
+    def test_project_unicode(self):
+        project = Project(title='Private Prisons')
+        eq_(project.__unicode__(), u'Private Prisons')
