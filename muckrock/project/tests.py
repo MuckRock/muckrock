@@ -5,11 +5,11 @@ deeper, sustained involvement with our work on those topics.
 """
 
 from django.contrib.auth.models import User
-from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-import mock
-from muckrock.news.models import Photo
+
 from muckrock.project.models import Project
+
 import nose
 
 ok_ = nose.tools.ok_
@@ -39,19 +39,27 @@ class TestProject(TestCase):
         * Projects should have an image or illustration to accompany them.
         """
         minimum_project = Project(title='Private Prisons')
+        minimum_project.save()
         ok_(minimum_project)
+        test_image = SimpleUploadedFile(
+            name='foo.gif',
+            content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
+                    '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00')
+        )
         ideal_project = Project(
             title='Private Prisons',
             description=('The prison industry is growing at an alarming rate. '
                         'Even more alarming? The conditions inside prisions '
                         'are growing worse while their tax-dollar derived '
                         'profits are growing larger.'),
-            image=mock.MagicMock(spec=File, name='FileMock')
+            image=test_image
         )
+        ideal_project.save()
         ok_(ideal_project)
 
     def test_project_unicode(self):
         project = Project(title='Private Prisons')
+        project.save()
         eq_(project.__unicode__(), u'Private Prisons')
 
     def test_add_contributors(self):
