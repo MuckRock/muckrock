@@ -31,16 +31,19 @@ class TestProject(TestCase):
 
     fixtures = ['test_users.json']
 
-    def test_create_new_project(self):
+    def setUp(self):
+        self.basic_project = Project(title='Private Prisons')
+        self.basic_project.save()
+
+    def test_basic_project(self):
+        """All projects need at least a title."""
+        ok_(self.basic_project)
+
+    def test_ideal_project(self):
         """
-        Create a new project:
-        * Projects must have a title.
-        * Projects should have a statement describing their purpose.
-        * Projects should have an image or illustration to accompany them.
+        Projects should have a statement describing their purpose
+        and an image or illustration to accompany them.
         """
-        minimum_project = Project(title='Private Prisons')
-        minimum_project.save()
-        ok_(minimum_project)
         test_image = SimpleUploadedFile(
             name='foo.gif',
             content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
@@ -63,9 +66,14 @@ class TestProject(TestCase):
         eq_(project.__unicode__(), u'Private Prisons')
 
     def test_add_contributors(self):
+        """
+        A project should keep a list of contributors,
+        but a list of contributors should not be required.
+        """
+        project = self.basic_project
         user1 = User.objects.get(pk=1)
         user2 = User.objects.get(pk=2)
-        project = Project(title='Private Prisons')
-        project.save()
         project.contributors.add(user1, user2)
         ok_(user1 in project.contributors.all() and user2 in project.contributors.all())
+        project.contributors.clear()
+        ok_(not project.contributors.all())
