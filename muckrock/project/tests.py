@@ -4,6 +4,7 @@ topics and issues we cover and then provide them avenues for
 deeper, sustained involvement with our work on those topics.
 """
 
+from django.contrib.auth.models import User
 from django.core.files import File
 from django.test import TestCase
 import mock
@@ -28,6 +29,8 @@ eq_ = nose.tools.eq_
 
 class TestProject(TestCase):
 
+    fixtures = ['test_users.json']
+
     def test_create_new_project(self):
         """
         Create a new project:
@@ -51,4 +54,10 @@ class TestProject(TestCase):
         project = Project(title='Private Prisons')
         eq_(project.__unicode__(), u'Private Prisons')
 
-
+    def test_add_contributors(self):
+        user1 = User.objects.get(pk=1)
+        user2 = User.objects.get(pk=2)
+        project = Project(title='Private Prisons')
+        project.save()
+        project.contributors.add(user1, user2)
+        ok_(user1 in project.contributors.all() and user2 in project.contributors.all())
