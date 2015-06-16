@@ -15,7 +15,7 @@ from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from random import choice
-#from urlauth.models import AuthKey
+from sesame.utils import get_parameters
 from urllib import urlencode
 
 from muckrock.foia.models import FOIARequest
@@ -392,10 +392,9 @@ class Profile(models.Model):
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         if self.use_autologin:
-            #return AuthKey.objects.wrap_url(link, uid=self.user.pk, **extra)
-            return link + '?' + urlencode(extra)
-        else:
-            return link + '?' + urlencode(extra)
+            params = get_parameters(self.user)
+            extra.update(params)
+        return link + '?' + urlencode(extra)
 
 class Statistics(models.Model):
     """Nightly statistics"""

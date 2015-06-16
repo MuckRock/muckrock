@@ -165,7 +165,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'pingback.middleware.PingbackMiddleware',
-    #'muckrock.middleware.AuthKeyMiddleware',
+    'sesame.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
@@ -295,12 +295,18 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
-CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks',
-                  'muckrock.agency.tasks')
+CELERY_IMPORTS = (
+    'muckrock.foia.tasks',
+    'muckrock.accounts.tasks',
+    'muckrock.agency.tasks',
+    )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
-AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
+AUTHENTICATION_BACKENDS = (
+    'muckrock.accounts.backends.CaseInsensitiveModelBackend',
+    'sesame.backends.ModelBackend',
+    )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
@@ -341,8 +347,7 @@ HAYSTACK_CONNECTIONS['default'] = haystack_connections[
     os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
 HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
-URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
-URLAUTH_AUTHKEY_NAME = 'authkey'
+SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
 ASSETS_DEBUG = False
 
