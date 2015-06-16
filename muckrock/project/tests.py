@@ -32,12 +32,17 @@ class TestProject(TestCase):
     ]
 
     def setUp(self):
-        self.basic_project = Project(title='Private Prisons')
+        self.basic_title = 'Private Prisons'
+        self.basic_project = Project(title=self.basic_title)
         self.basic_project.save()
 
     def test_basic_project(self):
         """All projects need at least a title."""
         ok_(self.basic_project)
+
+    def test_project_unicode(self):
+        """Projects should default to printing their title."""
+        eq_(self.basic_project.__unicode__(), self.basic_title)
 
     def test_ideal_project(self):
         """
@@ -50,7 +55,7 @@ class TestProject(TestCase):
                     '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00')
         )
         ideal_project = Project(
-            title='Private Prisons',
+            title=self.basic_title,
             description=('The prison industry is growing at an alarming rate. '
                         'Even more alarming? The conditions inside prisions '
                         'are growing worse while their tax-dollar derived '
@@ -110,9 +115,3 @@ class TestProject(TestCase):
         ok_(project.private)
         project.make_public()
         ok_(not project.private)
-
-    def test_project_unicode(self):
-        """Projects should default to printing their title."""
-        project = Project(title='Private Prisons')
-        project.save()
-        eq_(project.__unicode__(), u'Private Prisons')
