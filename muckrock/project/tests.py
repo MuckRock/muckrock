@@ -60,11 +60,6 @@ class TestProject(TestCase):
         ideal_project.save()
         ok_(ideal_project)
 
-    def test_project_unicode(self):
-        project = Project(title='Private Prisons')
-        project.save()
-        eq_(project.__unicode__(), u'Private Prisons')
-
     def test_add_contributors(self):
         """
         A project should keep a list of contributors,
@@ -100,6 +95,13 @@ class TestProject(TestCase):
         project.articles.clear()
         eq_(len(project.articles.all()), 0)
 
+    def test_add_tags(self):
+        """Projects should keep a list of relevant tags."""
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
+
     def test_make_private(self):
         """Projects should be able to be made private."""
         project = self.basic_project
@@ -109,9 +111,8 @@ class TestProject(TestCase):
         project.make_public()
         ok_(not project.private)
 
-    def test_add_tags(self):
-        """Projects should keep a list of relevant tags."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
+    def test_project_unicode(self):
+        """Projects should default to printing their title."""
+        project = Project(title='Private Prisons')
+        project.save()
+        eq_(project.__unicode__(), u'Private Prisons')
