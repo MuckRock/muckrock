@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+from muckrock.news.models import Article
 from muckrock.project.models import Project
 
 import nose
@@ -19,7 +20,6 @@ eq_ = nose.tools.eq_
 * Projects must have a title.
 * Projects should have a statement describing their purpose.
 * Projects should have an image or illustration to accompany them.
-* Projects should keep a list of users who are contributors.
 * Projects should keep a list of relevant requests.
 * Projects should keep a list of relevant articles.
 * Projects should keep a list of relevant keywords/tags.
@@ -29,7 +29,7 @@ eq_ = nose.tools.eq_
 
 class TestProject(TestCase):
 
-    fixtures = ['test_users.json']
+    fixtures = ['test_users.json', 'test_news.json']
 
     def setUp(self):
         self.basic_project = Project(title='Private Prisons')
@@ -76,4 +76,15 @@ class TestProject(TestCase):
         project.contributors.add(user1, user2)
         ok_(user1 in project.contributors.all() and user2 in project.contributors.all())
         project.contributors.clear()
-        ok_(not project.contributors.all())
+        eq_(len(project.contributors.all()), 0)
+
+    def test_add_articles(self):
+        """Projects should keep a list of relevant articles."""
+        project = self.basic_project
+        article1 = Article.objects.get(pk=1)
+        article2 = Article.objects.get(pk=2)
+        project.articles.add(article1, article2)
+        ok_(article1 in project.articles.all())
+        ok_(article2 in project.articles.all())
+        project.articles.clear()
+        eq_(len(project.articles.all()), 0)

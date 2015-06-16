@@ -7,6 +7,7 @@ class Project(models.Model):
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
 
     contributors = models.ManyToManyField(User, related_name='projects')
+    articles = models.ManyToManyField('news.article', related_name='projects')
 
     def __unicode__(self):
         return self.title
