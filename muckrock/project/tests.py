@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 
+from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
 
@@ -29,7 +30,16 @@ eq_ = nose.tools.eq_
 
 class TestProject(TestCase):
 
-    fixtures = ['test_users.json', 'test_news.json']
+    fixtures = [
+        'test_users.json',
+        'test_profiles.json',
+        'test_news.json',
+        'test_foiarequests.json',
+        'test_agencies.json',
+        'agency_types.json',
+        'jurisdictions.json',
+        'holidays.json'
+    ]
 
     def setUp(self):
         self.basic_project = Project(title='Private Prisons')
@@ -86,5 +96,16 @@ class TestProject(TestCase):
         project.articles.add(article1, article2)
         ok_(article1 in project.articles.all())
         ok_(article2 in project.articles.all())
+        project.articles.clear()
+        eq_(len(project.articles.all()), 0)
+
+    def test_add_requests(self):
+        """Projects should keep a list of relevant FOIA requests."""
+        project = self.basic_project
+        request1 = FOIARequest.objects.get(pk=1)
+        request2 = FOIARequest.objects.get(pk=2)
+        project.requests.add(request1, request2)
+        ok_(request1 in project.requests.all())
+        ok_(request2 in project.requests.all())
         project.articles.clear()
         eq_(len(project.articles.all()), 0)

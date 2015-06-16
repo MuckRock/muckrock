@@ -6,8 +6,21 @@ class Project(models.Model):
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
 
-    contributors = models.ManyToManyField(User, related_name='projects')
-    articles = models.ManyToManyField('news.article', related_name='projects')
+    contributors = models.ManyToManyField(
+        User,
+        related_name='projects',
+        blank=True,
+        null=True)
+    articles = models.ManyToManyField(
+        'news.article',
+        related_name='projects',
+        blank=True,
+        null=True)
+    requests = models.ManyToManyField(
+        'foia.FOIARequest',
+        related_name='projects',
+        blank=True,
+        null=True)
 
     def __unicode__(self):
         return self.title
