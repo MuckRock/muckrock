@@ -3,7 +3,8 @@ Views for the project application
 """
 
 from django.shortcuts import render, redirect
-from django.views.generic import View
+from django.views.generic import View, DetailView
+from django.utils.text import slugify
 
 from muckrock.project.models import Project
 from muckrock.project.forms import CreateProjectForm
@@ -23,6 +24,9 @@ class CreateProjectView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             # create the project
-            # return redirect(project)
             pass
         return render(request, self.template_name, {'form': form})
+
+class ProjectDetailView(DetailView):
+    """Detail about a specific project"""
+    template_name = 'project/detail.html'
