@@ -167,5 +167,5 @@ class TestProjectViews(TestCase):
         ok_(new_project, 'Should create the project.')
         eq_(response.status_code, 302,
             'Should redirect after submitting NewProjectForm.')
-        eq_(response.url, '/project/' + new_project.slug,
-            'Should redirect to the page for the newly created project')
+        self.assertRedirects(response, '/project/' + new_project.slug + '/')
+        # Hooray! My project has been created!
