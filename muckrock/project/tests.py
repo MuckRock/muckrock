@@ -147,6 +147,8 @@ class TestProjectViews(TestCase):
         response = self.client.get(new_project_url)
         eq_(response.status_code, 200,
             'Should load page to create a new project. CODE: %d' % response.status_code)
+        eq_(type(response.context['form']), type(CreateProjectForm()),
+            'Should load page with a CreateProjectForm')
         # Then I fill out a form with all the details of my project.
         project_title = test_title
         project_description = test_description
@@ -154,17 +156,16 @@ class TestProjectViews(TestCase):
         project_image = test_image
         project_contributors = [User.objects.get(pk=2), User.objects.get(pk=3)]
         project_make_me_a_contributor = True
-        new_project_form = CreateProjectForm(
-            title=project_title,
-            description=project_description,
-            tags=project_tags,
-            image=project_image,
-            contributors=project_contributors,
-            make_current_user_contributor=project_make_me_a_contributor
-        )
+        new_project_form = CreateProjectForm({
+            'title': project_title,
+            'description': project_description,
+            'image': project_image
+        })
         # When I submit the form, I expect the project to be made and to be redirected to it.
-        response = self.client.post(new_project_form.cleaned_data(), follow=False)
-        ok_(response.status_code, 302,
+        response = self.client.post(reverse('project-create'), new_project_form.data)
+        eq_(Project.objects.filter(title=project_title).count(), 1,
+            'Should create the project.')
+        eq_(response.status_code, 302,
             'Should redirect after submitting NewProjectForm.')
-        ok_(response.redirect_url, '/project/' + slugify(project_title),
+        eq_(response.redirect_url, '/project/' + slugify(project_title),
             'Should redirect to the page for the newly created project')
