@@ -3,6 +3,7 @@ Models for the project application.
 """
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 
 from muckrock.tags.models import TaggedItemBase
@@ -39,9 +40,8 @@ class Project(models.Model):
     def __unicode__(self):
         return unicode(self.title)
 
-    @models.permalink
     def get_absolute_url(self):
-        return ('project-detail', [], {'slug': self.slug})
+        return reverse('project-detail', kwargs={'slug': self.slug})
 
     def make_private(self):
         """Sets a project to be private."""
