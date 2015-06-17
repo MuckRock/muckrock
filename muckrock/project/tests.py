@@ -6,7 +6,7 @@ deeper, sustained involvement with our work on those topics.
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, Client
 
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
@@ -16,6 +16,18 @@ import nose
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
+
+test_title = u'Private Prisons'
+test_description = (
+    u'The prison industry is growing at an alarming rate. '
+    'Even more alarming? The conditions inside prisions '
+    'are growing worse while their tax-dollar derived '
+    'profits are growing larger.')
+test_image = SimpleUploadedFile(
+    name='foo.gif',
+    content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
+    '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00'))
+
 
 class TestProject(TestCase):
     """Projects are a mixture of general and specific information on a broad subject."""
@@ -32,8 +44,7 @@ class TestProject(TestCase):
     ]
 
     def setUp(self):
-        self.basic_title = 'Private Prisons'
-        self.basic_project = Project(title=self.basic_title)
+        self.basic_project = Project(title=test_title)
         self.basic_project.save()
 
     def test_basic_project(self):
@@ -42,24 +53,16 @@ class TestProject(TestCase):
 
     def test_project_unicode(self):
         """Projects should default to printing their title."""
-        eq_(self.basic_project.__unicode__(), self.basic_title)
+        eq_(self.basic_project.__unicode__(), test_title)
 
     def test_ideal_project(self):
         """
         Projects should have a statement describing their purpose
         and an image or illustration to accompany them.
         """
-        test_image = SimpleUploadedFile(
-            name='foo.gif',
-            content=(b'GIF87a\x01\x00\x01\x00\x80\x01\x00\x00\x00\x00ccc,'
-                    '\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00')
-        )
         ideal_project = Project(
-            title=self.basic_title,
-            description=('The prison industry is growing at an alarming rate. '
-                        'Even more alarming? The conditions inside prisions '
-                        'are growing worse while their tax-dollar derived '
-                        'profits are growing larger.'),
+            title=test_title,
+            description=test_description,
             image=test_image
         )
         ideal_project.save()
