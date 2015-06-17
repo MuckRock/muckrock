@@ -31,4 +31,5 @@ class CreateProjectView(View):
 
 class ProjectDetailView(DetailView):
     """Detail about a specific project"""
+    model = Project
     template_name = 'project/detail.html'
