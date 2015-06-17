@@ -62,11 +62,9 @@ class TestProject(TestCase):
         Projects should have a statement describing their purpose
         and an image or illustration to accompany them.
         """
-        ideal_project = Project(
-            title=test_title,
-            description=test_description,
-            image=test_image
-        )
+        ideal_project = self.basic_project
+        ideal_project.description = test_description
+        ideal_project.image = test_image
         ideal_project.save()
         ok_(ideal_project)
 
