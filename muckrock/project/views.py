@@ -23,8 +23,10 @@ class CreateProjectView(View):
         """Creates a project based on the received data"""
         form = self.form_class(request.POST)
         if form.is_valid():
-            # create the project
-            pass
+            project = form.save(commit=False)
+            project.slug = slugify(project.title)
+            project.save()
+            return redirect(project)
         return render(request, self.template_name, {'form': form})
 
 class ProjectDetailView(DetailView):

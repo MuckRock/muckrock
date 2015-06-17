@@ -163,9 +163,9 @@ class TestProjectViews(TestCase):
         })
         # When I submit the form, I expect the project to be made and to be redirected to it.
         response = self.client.post(reverse('project-create'), new_project_form.data)
-        eq_(Project.objects.filter(title=project_title).count(), 1,
-            'Should create the project.')
+        new_project = Project.objects.get(title=project_title)
+        ok_(new_project, 'Should create the project.')
         eq_(response.status_code, 302,
             'Should redirect after submitting NewProjectForm.')
-        eq_(response.redirect_url, '/project/' + slugify(project_title),
+        eq_(response.url, '/project/' + new_project.slug,
             'Should redirect to the page for the newly created project')
