@@ -2,13 +2,10 @@
 Models for the project application.
 """
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from muckrock.tags.models import TaggedItemBase
-
-from taggit.managers import TaggableManager
+import taggit
 
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
@@ -21,12 +18,12 @@ class Project(models.Model):
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
     private = models.BooleanField(default=False)
     contributors = models.ManyToManyField(
-        User,
+        'auth.User',
         related_name='projects',
         blank=True,
         null=True)
     articles = models.ManyToManyField(
-        'news.article',
+        'news.Article',
         related_name='projects',
         blank=True,
         null=True)
@@ -35,7 +32,7 @@ class Project(models.Model):
         related_name='projects',
         blank=True,
         null=True)
-    tags = TaggableManager(through=TaggedItemBase, blank=True)
+    tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
 
     def __unicode__(self):
         return unicode(self.title)
