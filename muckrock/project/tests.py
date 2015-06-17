@@ -118,3 +118,50 @@ class TestProject(TestCase):
         ok_(project.private)
         project.make_public()
         ok_(not project.private)
+
+class TestProjectViews(TestCase):
+    """Project views allow projects to be created, displayed, and edited."""
+
+    fixtures = [
+        'test_users.json',
+        'test_profiles.json',
+        'test_news.json',
+        'test_foiarequests.json',
+        'test_agencies.json',
+        'agency_types.json',
+        'jurisdictions.json',
+        'holidays.json'
+    ]
+
+    def setUp(self):
+        self.client = Client()
+
+    def test_create_new_project(self):
+        """I want to create a new project."""
+        # First things first I need to be logged in
+        self.client.login(username='adam', password='abc')
+        # I point my browser at the right webpage
+        response = self.client.get('/project/new/')
+        eq_(response.status_code, 200,
+            'Should load page to create a new project.')
+        # Then I fill out a form with all the details of my project.
+        project_title = test_title
+        project_description = test_description
+        project_tags = u'prison, privatization, corrections'
+        project_image = test_image
+        project_contributors = [User.objects.get(pk=2), User.objects.get(pk=3)]
+        project_make_me_a_contributor = True
+        new_project_form = NewProjectForm(
+            title=project_title,
+            description=project_description,
+            tags=project_tags,
+            image=project_image,
+            contributors=project_contributors,
+            make_current_user_contributor=project_make_me_a_contributor
+        )
+        # When I submit the form, I expect the project to be made and to be redirected to it.
+        response = self.client.post(new_project_form.cleaned_data(), follow=False)
+        ok_(response.status_code, 302,
+            'Should redirect after submitting NewProjectForm.')
+        ok_(response.redirect_url, '/project/' + slugify(project_title),
+            'Should redirect to the page for the newly created project')
