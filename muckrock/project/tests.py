@@ -6,11 +6,13 @@ deeper, sustained involvement with our work on those topics.
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.project.forms import CreateProjectForm
 
 import nose
 
@@ -136,14 +138,15 @@ class TestProjectViews(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_create_new_project(self):
-        """I want to create a new project."""
+    def test_create_project(self):
+        """I want to create a project."""
         # First things first I need to be logged in
         self.client.login(username='adam', password='abc')
         # I point my browser at the right webpage
-        response = self.client.get('/project/new/')
+        new_project_url = reverse('project-create')
+        response = self.client.get(new_project_url)
         eq_(response.status_code, 200,
-            'Should load page to create a new project.')
+            'Should load page to create a new project. CODE: %d' % response.status_code)
         # Then I fill out a form with all the details of my project.
         project_title = test_title
         project_description = test_description
@@ -151,7 +154,7 @@ class TestProjectViews(TestCase):
         project_image = test_image
         project_contributors = [User.objects.get(pk=2), User.objects.get(pk=3)]
         project_make_me_a_contributor = True
-        new_project_form = NewProjectForm(
+        new_project_form = CreateProjectForm(
             title=project_title,
             description=project_description,
             tags=project_tags,
