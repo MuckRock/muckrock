@@ -11,7 +11,11 @@ from taggit.managers import TaggableManager
 
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
-    title = models.CharField(max_length=100, help_text='Titles are limited to 100 characters.')
+    title = models.CharField(
+        unique=True,
+        max_length=100,
+        help_text='Titles are limited to 100 characters and cannot be changed.')
+    slug = models.SlugField(unique=True, max_length=255)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
     private = models.BooleanField(default=False)
@@ -34,6 +38,10 @@ class Project(models.Model):
 
     def __unicode__(self):
         return unicode(self.title)
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('project-detail', [], {'slug': self.slug})
 
     def make_private(self):
         """Sets a project to be private."""
