@@ -10,4 +10,5 @@ from muckrock.project import views
 urlpatterns = patterns('',
     url(r'^create/$', login_required(views.ProjectCreateView.as_view()), name='project-create'),
     url(r'^(?P<slug>[\w-]+)/$', views.ProjectDetailView.as_view(), name='project-detail'),
+    url(r'^(?P<slug>[\w-]+)/update/$', views.ProjectUpdateView.as_view(), name='project-update'),
 )
