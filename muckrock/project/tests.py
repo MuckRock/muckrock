@@ -12,7 +12,7 @@ from django.test import TestCase, Client
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.project.forms import CreateProjectForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
 import nose
 
@@ -144,13 +144,13 @@ class TestProjectCreateView(TestCase):
         response = self.client.get(reverse('project-create'))
         eq_(response.status_code, 200,
             'Should load page to create a new project.')
-        eq_(type(response.context['form']), type(CreateProjectForm()),
-            'Should load page with a CreateProjectForm')
+        eq_(type(response.context['form']), type(ProjectCreateForm()),
+            'Should load page with a ProjectCreateForm')
         # Then I fill out a form with all the details of my project.
         project_title = test_title
         project_description = test_description
         project_image = test_image
-        new_project_form = CreateProjectForm({
+        new_project_form = ProjectCreateForm({
             'title': project_title,
             'description': project_description,
             'image': project_image

@@ -5,11 +5,11 @@ Views for the project application
 from django.views.generic import CreateView, DetailView, UpdateView
 
 from muckrock.project.models import Project
-from muckrock.project.forms import CreateProjectForm, ProjectUpdateForm
+from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
 class ProjectCreateView(CreateView):
     """Create a project instance."""
-    form_class = CreateProjectForm
+    form_class = ProjectCreateForm
     template_name = 'project/create.html'
 
 class ProjectDetailView(DetailView):

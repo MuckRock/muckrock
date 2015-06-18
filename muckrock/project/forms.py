@@ -6,7 +6,7 @@ from django import forms
 
 from muckrock.project.models import Project
 
-class CreateProjectForm(forms.ModelForm):
+class ProjectCreateForm(forms.ModelForm):
     """Form for creating a new project"""
 
     class Meta:
