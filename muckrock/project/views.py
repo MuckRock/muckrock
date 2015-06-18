@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView
 
 from muckrock.project.models import Project
-from muckrock.project.forms import CreateProjectForm
+from muckrock.project.forms import CreateProjectForm, ProjectUpdateForm
 
 class ProjectCreateView(CreateView):
     """Create a project instance."""
@@ -21,4 +21,5 @@ class ProjectDetailView(DetailView):
 class ProjectUpdateView(UpdateView):
     """Update a project instance"""
     model = Project
+    form_class = ProjectUpdateForm
     template_name = 'project/update.html'
