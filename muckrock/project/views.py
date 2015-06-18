@@ -3,17 +3,22 @@ Views for the project application
 """
 
 from django.shortcuts import render, redirect
-from django.views.generic import CreateView, DetailView
+from django.views.generic import CreateView, DetailView, UpdateView
 
 from muckrock.project.models import Project
 from muckrock.project.forms import CreateProjectForm
 
 class ProjectCreateView(CreateView):
-    """View for creating a new project."""
+    """Create a project instance."""
     form_class = CreateProjectForm
     template_name = 'project/create.html'
 
 class ProjectDetailView(DetailView):
-    """Detail about a specific project"""
+    """View a project instance"""
     model = Project
     template_name = 'project/detail.html'
+
+class ProjectUpdateView(UpdateView):
+    """Update a project instance"""
+    model = Project
+    template_name = 'project/update.html'
