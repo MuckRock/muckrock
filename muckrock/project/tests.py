@@ -12,7 +12,7 @@ from django.test import TestCase, Client
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
-from muckrock.project.forms import CreateProjectForm
+from muckrock.project.forms import CreateProjectForm, ProjectUpdateForm
 
 import nose
 
@@ -214,7 +214,7 @@ class TestProjectUpdateView(TestCase):
         # I expect to be redirected back to the project.
         eq_(response.status_code, 302,
             'Should redirect after submitting the update form.')
-        self.assertRedirects(response, '/project/' + new_project.slug + '/')
+        self.assertRedirects(response, self.project.get_absolute_url())
         # I expect the project to reflect my update.
         updated_project = Project.objects.get(id=self.project.id)
         eq_(updated_project.description, new_description,
