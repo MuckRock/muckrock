@@ -119,8 +119,8 @@ class TestProject(TestCase):
         project.make_public()
         ok_(not project.private)
 
-class TestProjectViews(TestCase):
-    """Project views allow projects to be created, displayed, and edited."""
+class TestProjectCreateView(TestCase):
+    """Tests creating a project as a user."""
 
     fixtures = [
         'test_users.json',
@@ -136,15 +136,14 @@ class TestProjectViews(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_create_project(self):
+    def test_create_project_functional(self):
         """I want to create a project."""
         # First things first I need to be logged in
         self.client.login(username='adam', password='abc')
         # I point my browser at the right webpage
-        new_project_url = reverse('project-create')
-        response = self.client.get(new_project_url)
+        response = self.client.get(reverse('project-create'))
         eq_(response.status_code, 200,
-            'Should load page to create a new project. CODE: %d' % response.status_code)
+            'Should load page to create a new project.')
         eq_(type(response.context['form']), type(CreateProjectForm()),
             'Should load page with a CreateProjectForm')
         # Then I fill out a form with all the details of my project.
@@ -167,3 +166,4 @@ class TestProjectViews(TestCase):
             'Should redirect after submitting NewProjectForm.')
         self.assertRedirects(response, '/project/' + new_project.slug + '/')
         # Hooray! My project has been created!
+
