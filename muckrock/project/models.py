@@ -4,6 +4,7 @@ Models for the project application.
 
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.utils.text import slugify
 
 import taggit
 
@@ -12,11 +13,16 @@ class Project(models.Model):
     title = models.CharField(
         unique=True,
         max_length=100,
-        help_text='Titles are limited to 100 characters and cannot be changed.')
-    slug = models.SlugField(unique=True, max_length=255)
+        help_text='Titles are limited to 100 characters.')
+    slug = models.SlugField(
+        unique=True,
+        max_length=255,
+        help_text='The slug is automatically generated based on the title.')
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
-    private = models.BooleanField(default=False)
+    private = models.BooleanField(
+        default=False,
+        help_text='If a project is private, it is only visible to its contributors.')
     contributors = models.ManyToManyField(
         'auth.User',
         related_name='projects',
@@ -36,6 +42,11 @@ class Project(models.Model):
 
     def __unicode__(self):
         return unicode(self.title)
+
+    def save(self, *args, **kwargs):
+        """Autogenerates the slug based on the title"""
+        self.slug = slugify(self.title)
+        super(Project, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('project-detail', kwargs={'slug': self.slug})
