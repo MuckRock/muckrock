@@ -149,10 +149,7 @@ class TestProjectCreateView(TestCase):
         # Then I fill out a form with all the details of my project.
         project_title = test_title
         project_description = test_description
-        project_tags = u'prison, privatization, corrections'
         project_image = test_image
-        project_contributors = [User.objects.get(pk=2), User.objects.get(pk=3)]
-        project_make_me_a_contributor = True
         new_project_form = CreateProjectForm({
             'title': project_title,
             'description': project_description,
@@ -164,8 +161,7 @@ class TestProjectCreateView(TestCase):
         ok_(new_project, 'Should create the project.')
         eq_(response.status_code, 302,
             'Should redirect after submitting NewProjectForm.')
-        self.assertRedirects(response, '/project/' + new_project.slug + '/')
-        # Hooray! My project has been created!
+        self.assertRedirects(response, new_project.get_absolute_url())
 
 class TestProjectUpdateView(TestCase):
     """Tests updating a project as a user."""

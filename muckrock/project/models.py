@@ -49,6 +49,7 @@ class Project(models.Model):
         super(Project, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
+        """Returns the project URL as a string"""
         return reverse('project-detail', kwargs={'slug': self.slug})
 
     def make_private(self):

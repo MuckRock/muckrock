@@ -2,7 +2,6 @@
 Views for the project application
 """
 
-from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, UpdateView
 
 from muckrock.project.models import Project
