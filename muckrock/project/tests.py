@@ -163,7 +163,7 @@ class TestProjectCreateView(TestCase):
             'Should redirect to the newly created project.')
         self.assertRedirects(response, new_project.get_absolute_url())
 
-    def test_create_project_requires_login(self):
+    def test_requires_login(self):
         """Logged out users cannot create projects."""
         response = self.client.get(reverse('project-create'))
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
@@ -222,7 +222,7 @@ class TestProjectUpdateView(TestCase):
         eq_(updated_project.description, new_description,
             'The updates to the project should be saved.')
 
-    def test_create_project_requires_login(self):
+    def test_requires_login(self):
         """Logged out users cannot update projects."""
         project_update_url = self.project.get_absolute_url() + 'update/'
         response = self.client.get(project_update_url)
@@ -272,8 +272,8 @@ class TestProjectDeleteView(TestCase):
             'The page should redirect after deleting the project.')
         self.assertRedirects(response, reverse('index'))
 
-    def test_create_project_requires_login(self):
-        """Logged out users cannot update projects."""
+    def test_requires_login(self):
+        """Logged out users cannot delete projects."""
         project_delete_url = self.project.get_absolute_url() + 'delete/'
         response = self.client.get(project_delete_url)
         redirect_url = reverse('acct-login') + '?next=' + project_delete_url
