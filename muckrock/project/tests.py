@@ -222,6 +222,13 @@ class TestProjectUpdateView(TestCase):
         eq_(updated_project.description, new_description,
             'The updates to the project should be saved.')
 
+    def test_create_project_requires_login(self):
+        """Logged out users cannot update projects."""
+        project_update_url = self.project.get_absolute_url() + 'update/'
+        response = self.client.get(project_update_url)
+        redirect_url = reverse('acct-login') + '?next=' + project_update_url
+        self.assertRedirects(response, redirect_url)
+
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""
 
