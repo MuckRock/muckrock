@@ -17,5 +17,7 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>[\w-]+)/update/$',
         login_required(views.ProjectUpdateView.as_view()),
         name='project-update'),
-    url(r'^(?P<slug>[\w-]+)/delete/$', views.ProjectDeleteView.as_view(), name='project-delete')
+    url(r'^(?P<slug>[\w-]+)/delete/$',
+        login_required(views.ProjectDeleteView.as_view()),
+        name='project-delete')
 )
