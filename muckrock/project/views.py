@@ -8,7 +8,7 @@ from django.views.generic import CreateView, DetailView
 from muckrock.project.models import Project
 from muckrock.project.forms import CreateProjectForm
 
-class CreateProjectView(CreateView):
+class ProjectCreateView(CreateView):
     """View for creating a new project."""
     form_class = CreateProjectForm
     template_name = 'project/create.html'
