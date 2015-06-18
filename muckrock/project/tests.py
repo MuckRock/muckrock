@@ -215,3 +215,45 @@ class TestProjectUpdateView(TestCase):
         updated_project = Project.objects.get(id=self.project.id)
         eq_(updated_project.description, new_description,
             'The updates to the project should be saved.')
+
+class TestProjectDeleteView(TestCase):
+    """Tests deleting a project as a user."""
+
+    fixtures = [
+        'test_users.json',
+        'test_profiles.json',
+        'test_news.json',
+        'test_foiarequests.json',
+        'test_agencies.json',
+        'agency_types.json',
+        'jurisdictions.json',
+        'holidays.json'
+    ]
+
+    def setUp(self):
+        # We will start with a project that's already been made.
+        self.project = Project.objects.create(
+            title=test_title,
+            description=test_description,
+            image=test_image
+        )
+        self.project.save()
+        # I will start by logging in.
+        self.user = Client()
+        self.user.login(username='adam', password='abc')
+
+    @nose.tools.raises(Project.DoesNotExist)
+    def test_delete_project_functional(self):
+        """I want to delete a project that I've already made."""
+        # First I go to the page for deleting a project instance.
+        project_delete_url = self.project.get_absolute_url() + 'delete/'
+        response = self.user.get(project_delete_url)
+        ok_(response.status_code, 200,
+            'The page for deleting a project should load.')
+        # I am really, absolutely sure I want to delete this project!
+        response = self.user.post(project_delete_url)
+        # Poof! Goodbye, project!
+        ok_(not deleted_project,
+            'The project should be deleted.')
+        ok_(response.status_code, 302,
+            'The page should redirect after deleting the project.')
