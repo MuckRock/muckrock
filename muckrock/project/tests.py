@@ -254,8 +254,7 @@ class TestProjectDeleteView(TestCase):
         response = self.user.post(project_delete_url)
         deleted_project = Project.objects.get(id=self.project.id)
         # Poof! Goodbye, project!
-        ok_(not deleted_project,
-            'The project should be deleted.')
-        ok_(response.status_code, 302,
+        ok_(not deleted_project, 'The project should be deleted.')
+        eq_(response.status_code, 302,
             'The page should redirect after deleting the project.')
         self.assertRedirects(response, reverse('index'))
