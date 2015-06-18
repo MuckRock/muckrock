@@ -26,7 +26,7 @@ def requests_from_pks(foia_pks):
     """A helper function to get all the requests given a list of their PKs."""
     foias = []
     # if foia_pks isn't a list (say, a single pk), then it should be made into one
-    if type(foia_pks) is not type(list()):
+    if not isinstance(foia_pks, list):
         foia_pks = [foia_pks]
     for foia_pk in foia_pks:
         try:
@@ -98,7 +98,7 @@ class FOIACommunication(models.Model):
         """
         if not foia_pks:
             raise ValueError('Expected a request to move the communication to.')
-        if type(foia_pks) is not type(list()):
+        if not isinstance(foia_pks, list):
             foia_pks = [foia_pks]
         move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
         self.foia = move_to_request

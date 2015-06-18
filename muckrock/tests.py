@@ -15,7 +15,6 @@ from muckrock.fields import EmailsListField
 # allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=R0201
 # pylint: disable=R0904
-# pylint: disable=W0142
 
 logging.disable(logging.CRITICAL)
 

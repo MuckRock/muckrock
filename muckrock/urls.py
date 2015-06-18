@@ -14,7 +14,6 @@ from django.views.generic.base import RedirectView
 
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
-import autocomplete_light
 import dbsettings.urls
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \

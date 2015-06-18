@@ -307,8 +307,6 @@ class TestAccountFunctional(TestCase):
 
     def test_stripe_webhooks(self):
         """Test webhooks received from stripe"""
-        # pylint: disable=W0142
-
         kwargs = {"wsgi.url_scheme": "https"}
 
         response = self.client.post(reverse('acct-webhook'), {}, **kwargs)

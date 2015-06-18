@@ -12,7 +12,7 @@ from taggit.managers import TaggableManager
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
-class ArticleManager(models.Manager):
+class ArticleQuerySet(models.QuerySet):
     """Object manager for news articles"""
     # pylint: disable=R0904
 
@@ -54,7 +54,7 @@ class Article(models.Model):
         null=True,
         resize_source={'size': (1600, 1200), 'crop': 'smart'}
     )
-    objects = ArticleManager()
+    objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):

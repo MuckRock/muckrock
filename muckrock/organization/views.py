@@ -200,4 +200,4 @@ def update_organization(request, **kwargs):
         {'form': form},
         context_instance=RequestContext(request)
     )
-        
+

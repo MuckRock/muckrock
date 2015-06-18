@@ -10,7 +10,6 @@ from datetime import date
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock.models import ChainableManager
 from muckrock import fields
 
 class AgencyType(models.Model):
@@ -26,7 +25,7 @@ class AgencyType(models.Model):
         ordering = ['name']
 
 
-class AgencyManager(ChainableManager):
+class AgencyQuerySet(models.QuerySet):
     """Object manager for Agencies"""
     # pylint: disable=R0904
 
@@ -79,7 +78,7 @@ class Agency(models.Model, RequestHelper):
                                  help_text='Begin with http://')
     exempt = models.BooleanField(default=False)
 
-    objects = AgencyManager()
+    objects = AgencyQuerySet.as_manager()
 
     def __unicode__(self):
         return self.name

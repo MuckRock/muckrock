@@ -20,7 +20,6 @@ import logging
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
@@ -28,7 +27,7 @@ from muckrock import fields
 
 logger = logging.getLogger(__name__)
 
-class FOIARequestManager(ChainableManager):
+class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
     # pylint: disable=R0904
 
@@ -172,7 +171,7 @@ class FOIARequest(models.Model):
         null=True
     )
 
-    objects = FOIARequestManager()
+    objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     foia_type = 'foia'
@@ -603,8 +602,6 @@ class FOIARequest(models.Model):
 
     def update_tags(self, tags):
         """Update the requests tags"""
-        # pylint: disable=W0142
-
         tag_set = set()
         for tag in tags.split(','):
             tag = Tag.normalize(tag)
