@@ -258,3 +258,4 @@ class TestProjectDeleteView(TestCase):
             'The project should be deleted.')
         ok_(response.status_code, 302,
             'The page should redirect after deleting the project.')
+        self.assertRedirects(response, reverse('index'))
