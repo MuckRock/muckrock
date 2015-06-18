@@ -271,3 +271,10 @@ class TestProjectDeleteView(TestCase):
         eq_(response.status_code, 302,
             'The page should redirect after deleting the project.')
         self.assertRedirects(response, reverse('index'))
+
+    def test_create_project_requires_login(self):
+        """Logged out users cannot update projects."""
+        project_delete_url = self.project.get_absolute_url() + 'delete/'
+        response = self.client.get(project_delete_url)
+        redirect_url = reverse('acct-login') + '?next=' + project_delete_url
+        self.assertRedirects(response, redirect_url)
