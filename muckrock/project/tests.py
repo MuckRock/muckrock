@@ -163,6 +163,12 @@ class TestProjectCreateView(TestCase):
             'Should redirect to the newly created project.')
         self.assertRedirects(response, new_project.get_absolute_url())
 
+    def test_create_project_requires_login(self):
+        """Logged out users cannot create projects."""
+        response = self.client.get(reverse('project-create'))
+        redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
+        self.assertRedirects(response, redirect_url)
+
 class TestProjectUpdateView(TestCase):
     """Tests updating a project as a user."""
 
