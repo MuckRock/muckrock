@@ -160,7 +160,7 @@ class TestProjectCreateView(TestCase):
         new_project = Project.objects.get(title=project_title)
         ok_(new_project, 'Should create the project.')
         eq_(response.status_code, 302,
-            'Should redirect after submitting NewProjectForm.')
+            'Should redirect to the newly created project.')
         self.assertRedirects(response, new_project.get_absolute_url())
 
 class TestProjectUpdateView(TestCase):
