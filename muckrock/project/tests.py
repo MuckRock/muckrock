@@ -248,10 +248,11 @@ class TestProjectDeleteView(TestCase):
         # First I go to the page for deleting a project instance.
         project_delete_url = self.project.get_absolute_url() + 'delete/'
         response = self.user.get(project_delete_url)
-        ok_(response.status_code, 200,
+        eq_(response.status_code, 200,
             'The page for deleting a project should load.')
         # I am really, absolutely sure I want to delete this project!
         response = self.user.post(project_delete_url)
+        deleted_project = Project.objects.get(id=self.project.id)
         # Poof! Goodbye, project!
         ok_(not deleted_project,
             'The project should be deleted.')
