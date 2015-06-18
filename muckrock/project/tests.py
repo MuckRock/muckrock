@@ -167,3 +167,55 @@ class TestProjectCreateView(TestCase):
         self.assertRedirects(response, '/project/' + new_project.slug + '/')
         # Hooray! My project has been created!
 
+class TestProjectUpdateView(TestCase):
+    """Tests updating a project as a user."""
+
+    fixtures = [
+        'test_users.json',
+        'test_profiles.json',
+        'test_news.json',
+        'test_foiarequests.json',
+        'test_agencies.json',
+        'agency_types.json',
+        'jurisdictions.json',
+        'holidays.json'
+    ]
+
+    def setUp(self):
+        # We will start with a project that's already been made.
+        self.project = Project.objects.create(
+            title=test_title,
+            description=test_description,
+            image=test_image
+        )
+        self.project.save()
+        # I will start by logging in.
+        self.user = Client()
+        self.user.login(username='adam', password='abc')
+
+    def test_update_project_functional(self):
+        """I want to update a project that I've already made."""
+        # First I go to the page for updating the project.
+        project_update_url = self.project.get_absolute_url() + 'update/'
+        response = self.user.get(project_update_url)
+        eq_(response.status_code, 200,
+            'The page for updating the project should load.')
+        eq_(type(response.context['form']), type(ProjectUpdateForm()),
+            'The page should contain a form for updating the project.')
+        eq_(response.context['form'].instance, self.project,
+            'The form on the page should reflect my project instance.')
+        # Then I want to update the description of the project to something new.
+        new_description = u'This is the greatest project of all time!'
+        project_update_form = ProjectUpdateForm({
+            'description': new_description
+        }, instance=self.project)
+        # Then I submit the form with my updated information.
+        response = self.user.post(project_update_url, project_update_form.data)
+        # I expect to be redirected back to the project.
+        eq_(response.status_code, 302,
+            'Should redirect after submitting the update form.')
+        self.assertRedirects(response, '/project/' + new_project.slug + '/')
+        # I expect the project to reflect my update.
+        updated_project = Project.objects.get(id=self.project.id)
+        eq_(updated_project.description, new_description,
+            'The updates to the project should be saved.')
