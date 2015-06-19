@@ -7,13 +7,6 @@ $base-padding:          $base-vertical-rhythm;
 $base-border-width:     1px;
 $base-border-radius:    9px;
 
-/* Colors */
-@import 'colors';
-$color-odd-background:  darken($color-grey-8, 5%);
-
-/* Typography */
-@import 'typography';
-
 /* Breakpoints */
 $large-breakpoint:      1025px;
 $medium-breakpoint:     500px;
