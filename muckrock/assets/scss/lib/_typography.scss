@@ -1,21 +1,39 @@
+// Type Weight
+
+$font-weight-bold: 500;
+$font-weight-normal: 400;
+$font-weight-light: 300;
+
+// Type Scale
+
+$font-size-1: 0.6875em;
+$font-size-2: 0.8125em;
+$font-size-3: 1.0000em;
+$font-size-4: 1.1875em;
+$font-size-5: 1.4375em;
+$font-size-6: 1.6875em;
+$font-size-7: 2.0625em;
+$font-size-8: 2.5000em;
+$font-size-9: 3.0000em;
+
+// Type Line
+
+$font-line-height: 1.5em;
+
+// Display Sizes
+
+$font-size-display-1: $font-size-7;
+$font-size-display-2: $font-size-8;
+$font-size-display-3: $font-size-9;
+
 body {
-    color: $color-black;
-    background-color: $color-white;
-    font-size: 14px;
+    font-size: $font-size-3;
     font-family: $base-font-family;
     font-weight: $base-font-weight;
     line-height: 24px;
     @include font-feature-settings('liga', 'kern');
     @include media($large-layout) {
-        font-size: 16px;
-        line-height: 24px;
     }
-}
-
-h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-    font-weight: $light;
-    strong, b { font-weight: $normal; }
 }
 
 h1 { @include font-sizing(2); }
