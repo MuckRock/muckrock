@@ -62,6 +62,7 @@ class TaskListViewTests(TestCase):
 
     def test_render_task_list(self):
         """The list should have rendered task widgets in its object_list context variable"""
+        # pylint: disable=no-member
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         obj_list = response.context['object_list']

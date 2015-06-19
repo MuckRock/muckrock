@@ -148,6 +148,7 @@ class Organization(models.Model):
 
     def start_subscription(self):
         """Subscribes the owner to this org's plan"""
+        # pylint: disable=no-member
         profile = self.owner.profile
         org_plan = stripe.Plan.retrieve(self.stripe_id)
         customer = profile.customer()
@@ -163,6 +164,7 @@ class Organization(models.Model):
 
     def pause_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
+        # pylint: disable=no-member
         customer = self.owner.profile.customer()
         customer.cancel_subscription()
         customer.save()

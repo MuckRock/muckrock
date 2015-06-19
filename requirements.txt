@@ -56,7 +56,7 @@ newrelic==2.18.1.15
 pascha==0.5
 psycopg2==2.0.14
 pylibmc==1.2.3
-pylint-django==0.6
+pylint-django==0.6.1
 pylint==1.4.3
 pysolr==3.0.5
 python-memcached==1.48
