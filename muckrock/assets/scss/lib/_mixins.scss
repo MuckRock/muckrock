@@ -10,9 +10,10 @@
   border-radius: $base-border-radius;
   padding: $base-padding/4 $base-padding/2;
   box-shadow: 0px $shadow-normal 0px 0px $color-dark;
-  // Type
+  // Color
   background: $color;
   color: $color-white;
+  // Type
   text-align: center;
   text-decoration: none;
   // Transitions
@@ -30,11 +31,13 @@
   &:hover {
     @include transform(translateY($shadow-normal - $shadow-hover));
     box-shadow: 0px $shadow-hover 0px 0px $color-dark;
+    color: $color-white;
     text-decoration: none;
   }
   &:active {
     @include transform(translateY($shadow-normal - $shadow-active));
     box-shadow: 0px $shadow-active 0px 0px $color-dark;
+    color: $color-white;
   }
   &:disabled:hover {
     transform: none;
@@ -50,13 +53,6 @@
         color: $color;
         background: none;
     }
-}
-
-@mixin active-button {
-    color: $color-white;
-    border-color: $color-selected;
-    background: $color-selected;
-    svg { fill: $color-white; }
 }
 
 @mixin colorize-icon($color) {
