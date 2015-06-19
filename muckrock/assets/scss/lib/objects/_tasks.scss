@@ -3,12 +3,12 @@
     margin: 0 0 $base-margin 0;
     border: 1px solid $color-black;
     &.resolved {
-        border-color: $color-success;
+        border-color: $color-green;
     }
 }
 
 .resolved .task-header {
-    background: $color-success;
+    background: $color-green;
 }
 
 .task-header {
@@ -110,11 +110,11 @@ dl.task-data {
 /* New Agency Task */
 
 .new-agency.rejection.form {
-    border-color: $color-failure;
+    border-color: $color-red;
 }
 
 .new-agency.approval.form {
-    border-color: $color-success;
+    border-color: $color-green;
     @include row;
     overflow: hidden;
     .id_name, .id_aliases, .id_address {

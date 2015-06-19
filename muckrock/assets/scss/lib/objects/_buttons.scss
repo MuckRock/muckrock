@@ -2,26 +2,26 @@
 
 .button, button, input[type='submit'] {
 
-    @include button($color-default);
+    @include button($color-grey);
 
     &.primary {
-      @include button($color-primary);
+      @include button($color-blue);
     }
 
     &.success {
-      @include button($color-success);
+      @include button($color-green);
     }
 
     &.failure {
-      @include button($color-failure);
+      @include button($color-red);
     }
 
     &.warning {
-      @include button($color-warning);
+      @include button($color-yellow);
     }
 
     &.disabled {
-      @include button($color-disabled);
+      @include button($color-grey-2);
     }
 }
 
@@ -32,10 +32,10 @@
     text-transform: none;
     letter-spacing: 0;
     line-height: 1rem;
-    color: $color-primary;
+    color: $color-blue;
     cursor: pointer;
     &:hover {
-        color: darken($color-primary, 10%);
+        color: $color-blue-dark;
     }
 }
 

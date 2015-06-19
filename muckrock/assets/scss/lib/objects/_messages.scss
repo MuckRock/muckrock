@@ -3,14 +3,14 @@
 .message {
     @extend %panel;
     padding: 0;
-    $color-sent: lighten($color-primary, 5%);
-    $color-received: lighten($color-black, 5%);
+    $color-sent: $color-blue;
+    $color-received: $color-grey-2;
     $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
 
     @include media($small-layout) { @include span-columns(4); }
     @include media($medium-layout) { @include span-columns(6); }
     @include media($large-layout) { @include span-columns(11); }
-    
+
     .meta {
         display: block;
         width: 100%;
@@ -41,12 +41,12 @@
         }
         .permalink { color: $color-white; }
     }
-    
+
     .body {
         display: block;
         padding: $base-padding/2 $base-padding/2 0;
     }
-    
+
     .attachments {
         display: block;
         width: 100%;
@@ -65,7 +65,7 @@
         .meta { background-color: $color-received; }
         .attachments { border-color: $color-sent; }
     }
-    
+
     &.sent {
         border-color: $color-sent;
         .meta { background-color: $color-sent; }
@@ -79,10 +79,10 @@
     fieldset { margin-bottom: $base-margin/4; }
     .comm-action {
         cursor: pointer;
-        color: lighten($color-black, 20%);
+        color: $color-grey-3;
         padding-right: $base-padding/2;
         &:hover {
-            color: $color-black;
+            color: $color-grey-1;
         }
     }
 }

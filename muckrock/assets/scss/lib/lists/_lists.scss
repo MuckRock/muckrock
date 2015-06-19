@@ -50,22 +50,22 @@
                     border-left: $base-border-width solid $color-grey;
                     &:hover {
                         text-decoration: none;
-                        background: lighten($color-primary, 20%);
+                        background: $color-grey-7;
                     }
                 }
                 &.current-tab {
-                    border-left: $base-border-width solid $color-primary;
-                    border-right: $base-border-width solid $color-primary;
-                    background: $color-primary;
+                    border-left: $base-border-width solid $color-blue;
+                    border-right: $base-border-width solid $color-blue;
+                    background: $color-blue;
                     .counter {
                         background: $color-white;
-                        color: $color-primary;
+                        color: $color-blue;
                     }
                     a {
                         color: $color-white;
-                        border-color: $color-primary;
+                        border-color: $color-blue;
                         &:hover {
-                            background: $color-primary;
+                            background: $color-blue;
                         }
                     }
                 }
@@ -91,7 +91,7 @@
                 border-radius: $base-border-radius;
                 padding: .25em;
                 padding-left: 1.5em;
-                background: $color-primary;
+                background: $color-blue;
                 color: $color-white;
             }
             .remove {
@@ -155,14 +155,14 @@
             border-radius: 0;
             background: none;
             box-shadow: none;
-            color: $color-default;
+            color: $color-grey;
             text-align: left;
             &:hover {
                 color: $color-black;
                 box-shadow: none;
             }
             &:disabled:hover {
-                color: $color-default;
+                color: $color-grey;
             }
             &:first-of-type {
                 padding-left: 0;
@@ -206,7 +206,7 @@
     .list-table-head .sortable {
         cursor: pointer;
         &:hover {
-            background: lighten($color-primary, 35%);
+            background: $color-grey-7;
         }
         .arrow {
             font-size: .8em;
@@ -214,10 +214,10 @@
         }
     }
     .list-table-body tr:hover {
-        background: lighten($color-primary, 35%);
+        background: $color-grey-7;
     }
     .list-table-body tr.unread {
-        background: lighten($color-primary, 35%);
+        background: lighten($color-blue, 35%);
     }
     .list-empty {
         @extend %full;

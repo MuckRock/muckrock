@@ -4,7 +4,7 @@
         padding: $base-padding;
         @include border-top-radius($base-border-radius);
         color: $color-white;
-        background-color: $color-primary;
+        background-color: $color-blue;
         a {
             color: $color-white;
             text-decoration: underline;
@@ -35,7 +35,7 @@
     header {
         @include outer-container;
         color: $color-white;
-        background-color: $color-failure;
+        background-color: $color-red;
         .heading, .subheading { @extend %half; }
         .heading {
             @include font-sizing(5);
@@ -101,8 +101,8 @@
             h2 {
                 @include font-sizing(1);
                 font-weight: $bold;
-                color: $color-default;
-            }            
+                color: $color-grey;
+            }
         }
     }
 }

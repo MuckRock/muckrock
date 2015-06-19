@@ -66,45 +66,13 @@
 
 }
 
-/* Progress Bar */
-
-$progress-meter-border: $base-border-width solid darken($color-grey, 15%);
-$progress-animation-duration: 0.7s;
-
-.progress-bar {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin: $base-vertical-rhythm/2 0;
-    @extend %border;
-    border-radius: $base-border-radius + $base-border-width;
-    background-color: $color-white;
-}
-
-.meter {
-    @include box-sizing(border-box);
-    display: block;
-    height: $base-vertical-rhythm;
-    @include background-gradient($color-default);
-    border: $progress-meter-border;
-    @extend %border-radius;
-    @include border-right-radius(0px);
-    &.completed { @include border-right-radius($base-border-radius); }
-
-    @include classifier(success, $color-success);
-    @include classifier(failure, $color-failure);
-    @include classifier(primary, $color-primary);
-    @include classifier(default, $color-default);
-    @include classifier(disabled, $color-disabled);
-}
-
 table {
     width: 100%;
     margin-top: $base-vertical-rhythm 0;
     border: $base-border-width solid $color-grey;
     @extend %border-radius;
     th, td { padding: 0.25em 0.5em; }
-    thead tr { background-color: $color-default; }
+    thead tr { background-color: $color-grey; }
     tbody tr:nth-child(odd) { background-color: $color-odd-background; }
     &, tr {
         border-top: $base-border-width solid $color-grey;
@@ -148,10 +116,6 @@ table {
 }
 
 /* Sharing */
-
-$color-facebook: #3b5998;
-$color-twitter: #55acee;
-$color-email: #663285;
 
 .social.sharing {
     width: 100%;

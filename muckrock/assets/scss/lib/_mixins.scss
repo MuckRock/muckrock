@@ -1,10 +1,5 @@
-@mixin background-gradient($color) {
-    background: $color;
-    @include background(linear-gradient($color, darken($color, $base-gradient-darken)));
-}
-
-@mixin button($color-main) {
-  $color-dark: darken($color-main, 10%);
+@mixin button($color) {
+  $color-dark: darken($color, $color-darken-amount);
   $shadow-normal: 3px;
   $shadow-hover: 5px;
   $shadow-active: 2px;
@@ -16,8 +11,8 @@
   padding: $base-padding/4 $base-padding/2;
   box-shadow: 0px $shadow-normal 0px 0px $color-dark;
   // Type
-  background: $color-main;
-  color: #FFFFFF;
+  background: $color;
+  color: $color-white;
   text-align: center;
   text-decoration: none;
   // Transitions
@@ -33,12 +28,12 @@
     box-shadow: 0px $shadow-normal 0px 0px $color-dark;
   }
   &:hover {
-    transform: translateY($shadow-normal - $shadow-hover);
+    @include transform(translateY($shadow-normal - $shadow-hover));
     box-shadow: 0px $shadow-hover 0px 0px $color-dark;
     text-decoration: none;
   }
   &:active {
-    transform: translateY($shadow-normal - $shadow-active);
+    @include transform(translateY($shadow-normal - $shadow-active));
     box-shadow: 0px $shadow-active 0px 0px $color-dark;
   }
   &:disabled:hover {
@@ -50,8 +45,7 @@
 @mixin panel-color($color, $disabled: false) {
     @if not $disabled {
         color: $color-white;
-        @include background-gradient($color);
-        border-color: darken($color, 10%);
+        border-color: darken($color, $color-darken-amount);
     } @else {
         color: $color;
         background: none;
@@ -63,14 +57,6 @@
     border-color: $color-selected;
     background: $color-selected;
     svg { fill: $color-white; }
-}
-
-@mixin classifier($status, $color) {
-    &.#{$status} {
-        color: $color-white;
-        @include background-gradient($color);
-        border: 1px solid darken($color, 15%);
-    }
 }
 
 @mixin colorize-icon($color) {

@@ -12,7 +12,7 @@
         @include media($small-layout) { height: 26em; }
         @include media($medium-layout) { height: 32.5em; }
         @include media($large-layout) { height: 35em; }
-        
+
         .banner-container {
             height: 100%;
             overflow: hidden;
@@ -29,14 +29,14 @@
                 padding-top: 9em;
             }
         }
-        
+
         h1 {
             @include media($small-layout) {
                 @include font-sizing(1.85);
                 margin: 0 auto;
             }
             @include media($medium-layout) {
-                @include font-sizing(2.5); 
+                @include font-sizing(2.5);
                 margin: 0 auto;
             }
             @include media($large-layout) {
@@ -45,17 +45,17 @@
             }
             max-width: 15em;
         }
-        
+
         h2 {
             @include media($small-layout) {
                 @include font-sizing(1.5);
             }
         }
-        
+
         .call-to-action {
             margin: $base-margin*2 auto;
         }
-        
+
         a.dotted {
             color: $color-white;
             text-decoration: none;
@@ -78,7 +78,7 @@
             position: absolute;
             bottom: $base-vertical-rhythm;
             right: $base-vertical-rhythm;
-            color: $color-white;   
+            color: $color-white;
         }
         #learn-more {
             margin-left: $base-vertical-rhythm/4;
@@ -97,7 +97,7 @@
         .body { @extend %half; }
         @include media($medium-layout) {
             border-bottom: $base-border-width solid $color-grey;
-            
+
         }
     }
     .article {
@@ -107,15 +107,13 @@
         padding: 0 $base-padding $base-padding;
         h1 { @include font-sizing(1.5); }
     }
-    
+
     .stats {
-        $color-stat-dark: #0E2340;
-        $color-stat-light: #326FBF;
         padding: $base-padding/2;
         @include media($medium-layout) { padding: $base-padding; }
         width: 100%;
         color: $color-white;
-        @include background(linear-gradient($color-stat-dark, darken($color-stat-dark, 3%)));
+        @include background(linear-gradient($color-blue-dark, $color-blue));
         h1 {
             @include font-sizing(1.25);
             font-weight: $normal;
@@ -137,12 +135,12 @@
             display: block;
             max-width: 50%;
             margin: $base-margin/2 auto;
-            border-top: $base-border-width solid $color-stat-light;
+            border-top: $base-border-width solid $color-white;
             padding-top: $base-padding/2;
         }
-        
+
     }
-    
+
     .footer-container {
         padding: 0 $base-padding/2;
         @include media($medium-layout) { padding: 0 $base-padding; }

@@ -6,7 +6,7 @@
 $color-menu: $color-white;
 $color-secondary: $color-white;
 $color-unselected: $color-black;
-$color-selected: $color-primary;
+$color-selected: $color-blue;
 
 $small-menu-breakpoint: 540px;
 
@@ -226,7 +226,7 @@ nav.secondary {
         margin-bottom: $base-vertical-rhythm;
         svg > path, svg > g { fill: $color-black; }
         &:hover {
-            svg > path, svg > g { fill: $color-primary; }
+            svg > path, svg > g { fill: $color-blue; }
         }
 
     }
@@ -268,7 +268,6 @@ nav.secondary {
 
 nav.sidebar {
     $sidebar-object-height: 2.5rem;
-    $sidebar-button-background: darken($color-black, 4%);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     height: 100%;
@@ -278,14 +277,14 @@ nav.sidebar {
         padding: $base-padding $base-padding 1em;
     }
     color: $color-white;
-    background: $color-black;
+    background: $color-grey-1;
 
     dfn { padding: 1.5em 0 0.5em 0; }
 
     ul { @include row; }
     li { @extend %half; }
     .button {
-        @include button($sidebar-button-background);
+        @include button($color-grey-3);
         display: block;
         height: $sidebar-object-height;
         width: 100%;
@@ -341,7 +340,7 @@ nav.sidebar {
             top: 5%;
             right: 5%;
             font-size: 1.5em;
-            color: $color-default;
+            color: $color-grey;
             cursor: pointer;
             &:hover {
                 color: $color-black;
@@ -382,12 +381,12 @@ nav.sidebar {
                 font-weight: $bold;
                 text-align: center;
                 color: $color-white;
-                background: lighten($color-black, 8%);
+                background: $color-grey-4;
             }
             &:hover {
-                color: $color-primary;
+                color: $color-blue;
                 .counter {
-                    background: $color-primary;
+                    background: $color-blue;
                 }
             }
         }
@@ -434,9 +433,9 @@ nav.sidebar {
             margin-right: 0;
             font-size: 0.9em;
             color: $color-white;
-            background: lighten($color-black, 8%);
+            background: $color-grey-3;
             @include placeholder { color: $color-grey; }
-            border: $base-border-width solid lighten($color-black, 8%);
+            border: $base-border-width solid $color-grey-3;
             @include border-right-radius(0);
             transform: translateY(2px);
             &:focus, &:hover {
@@ -444,7 +443,7 @@ nav.sidebar {
                 border-color: $color-selected;
             }
             & + span.input-button {
-                @include button($sidebar-button-background);
+                @include button($color-grey-2);
                 margin: 0;
                 float: right;
                 clear: right;
