@@ -90,8 +90,6 @@ body {
     @include font-feature-settings('liga', 'kern');
 }
 
-
-
 b, strong { font-weight: $font-weight-bold; }
 
 a {
@@ -99,15 +97,12 @@ a {
     &:hover { text-decoration: underline; }
 }
 
-ul, ol {
-    margin: $base-margin/2 0;
-    padding-left: 0;
-}
-
 blockquote {
     margin-left: 0;
-    padding-left: $base-padding/2;
+    padding-left: $vertical-rhythm;
     border-left: 1px solid $color-grey;
+    font-style: italic;
+    i, em { font-style: normal; }
 }
 
 small {
@@ -115,67 +110,39 @@ small {
     font-style: normal;
 }
 
-code {
-    display: inline;
-    width: 100%;
-    margin: 0 $base-margin/4;
-    padding: $base-margin/4 $base-padding/2;
-    border-radius: $base-border-radius;
-    font-family: 'Source Code Pro', monospace;
-    font-size: 0.8em;
-    i, em {
-        font-style: normal;
-        color: $color-blue;
-    }
-    b, strong {
-        font-weight: normal;
-        color: $color-red;
-    }
-    u {
-        text-decoration: none;
-        color: $color-green;
-    }
-}
-
 dfn, dt {
     @extend small;
     display: block;
+    font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
-dd { margin-left: 0; }
+code {
+    padding: .2em .4em;
+    border-radius: $base-border-radius;
+    font-family: $font-monospace;
+    font-size: $font-size-2;
+}
 
 hr {
     border-top: none;
     border-bottom: 1px solid $color-grey;
-    margin: $base-vertical-rhythm/2 0;
 }
 
 img, audio, video, embed, iframe {
     max-width: 100%;
-    margin: 0;
 }
 
-figure { margin: $base-vertical-rhythm 0 0; }
-
 figcaption {
-    @extend small;
-    margin: 0 0 1.5em;
+    font-size: $font-size-2;
 }
 
 th {
     font-size: $font-size-2;
+    font-weight: $font-weight-bold;
     text-align: left;
     vertical-align: top;
-    font-weight: $font-weight-bold;
 }
 
 td { vertical-align: top; }
-
-table + h3 { margin-top: $base-margin/2; }
-
-.large-number {
-    font-weight: $font-weight-light;
-    font-size: 2em;
-}
