@@ -1,6 +1,8 @@
-  ////////////
- // Colors //
-////////////
+    ///////////////////////////////
+   //                           //
+  //        C O L O R S        //
+ //                           //
+///////////////////////////////
 
 $color-grey-1: #333C47;
 $color-grey-2: #495361;
@@ -31,3 +33,33 @@ $color-twitter: #55acee;
 $color-email: #663285;
 
 $color-darken-amount: 10%;
+$color-odd-background:  darken($color-grey-8, 5%);
+
+body {
+    color: $color-black;
+    background-color: $color-white;
+}
+
+a {
+    color: $color-blue;
+    &:hover { color: $color-blue-dark; }
+}
+
+code {
+    background-color: $color-grey-7;
+    color: $color-black;
+    i, em { color: $color-blue; }
+    b, strong { color: $color-red; }
+    u { color: $color-green; }
+}
+
+dfn, dt {
+    color: $color-grey-3;
+}
+
+.default { color: $color-grey; }
+.primary { color: $color-blue; }
+.success { color: $color-green; }
+.warning { color: $color-yellow; }
+.failure { color: $color-red; }
+.disabled { color: $color-grey-7; }
