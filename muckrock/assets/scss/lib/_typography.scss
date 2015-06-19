@@ -1,3 +1,15 @@
+// Legacy Variables
+
+$light:                 300;
+$normal:                400;
+$bold:                  500;
+$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
+$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
+$base-font-family:      $font-sans-serif;
+$base-font-weight:      $normal;
+$font-size:             16px;
+$base-line-height:      $base-vertical-rhythm;
+
 // Type Weight
 
 $font-weight-bold: 500;
@@ -51,7 +63,7 @@ h6, .h6 { font-size: $font-size-2; }
 }
 
 body {
-    font-size: $font-size-3;
+    font-size: $font-size;
     font-family: $base-font-family;
     font-weight: $base-font-weight;
     line-height: 24px;
@@ -78,7 +90,7 @@ blockquote {
 }
 
 small {
-    @include font-sizing(0.8);
+    font-size: $font-size-2;
     font-style: normal;
 }
 
@@ -135,7 +147,7 @@ figcaption {
 }
 
 th {
-    @include font-sizing(0.9, 1);
+    font-size: $font-size-2;
     text-align: left;
     vertical-align: top;
     font-weight: $bold;

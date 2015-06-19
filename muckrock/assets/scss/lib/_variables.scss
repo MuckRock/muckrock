@@ -3,20 +3,18 @@ $base-vertical-rhythm:  1.5em;
 $base-margin:           $base-vertical-rhythm;
 $base-padding:          $base-vertical-rhythm;
 
-/* Typography */
-$light:                 300;
-$normal:                400;
-$bold:                  500;
-$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
-$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
-$base-font-family:      $font-sans-serif;
-$base-font-weight:      $normal;
-$base-font-size:        1em;
-$base-line-height:      $base-vertical-rhythm;
-
 /* Borders */
 $base-border-width:     1px;
 $base-border-radius:    9px;
+
+/* Colors */
+@import 'colors';
+$color-odd-background:  darken($color-grey-8, 5%);
+
+/* Typography */
+@import 'typography';
+
+
 
 /* Breakpoints */
 $large-breakpoint:      1025px;
@@ -25,9 +23,7 @@ $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
 $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 $small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
 
-/* Colors */
-@import 'colors';
-$color-odd-background:  darken($color-grey-8, 5%);
+
 
 /* Menus */
 $menu-breakpoint:       1024px;
