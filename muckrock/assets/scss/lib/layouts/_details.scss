@@ -225,6 +225,26 @@
                 @extend %half;
             }
         }
+        .status-badge {
+            color: $color-black;
+            border: 1px solid $color-grey;
+            display: inline-block;
+            margin-bottom: .75em;
+            padding: .25em .75em;
+            border-radius: 4px;
+            font-weight: $bold;
+
+            @mixin colorize($status, $color, $color-dark) {
+                &.#{$status} {
+                    color: $color;
+                    border-color: $color;
+                }
+            }
+            @include colorize(success, $color-green, $color-green-dark);
+            @include colorize(failure, $color-red, $color-red-dark);
+            @include colorize(warning, $color-yellow, $color-yellow-dark);
+            @include colorize(default, $color-grey, $color-black);
+        }
         .status-form {
             display: none;
             font-size: 0.85em;
