@@ -169,6 +169,15 @@ class TestProjectCreateView(TestCase):
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
         self.assertRedirects(response, redirect_url)
 
+    def test_creator_made_contributor(self):
+        """The user who creates a project should be made a contributor of it."""
+        self.client.login(username='adam', password='abc')
+        current_user = User.objects.get(username='adam')
+        project_create_form = ProjectCreateForm({'title': test_title})
+        self.client.post(reverse('project-create'), project_create_form.data)
+        new_project = Project.objects.get(title=test_title)
+        ok_(current_user in new_project.contributors.all())
+
 class TestProjectUpdateView(TestCase):
     """Tests updating a project as a user."""
 
