@@ -13,9 +13,9 @@ $font-family:           $font-sans-serif;
 
 // Font Weights
 
-$font-weight-bold:                  500;
-$font-weight-normal:                400;
-$font-weight-light:                 300;
+$font-weight-bold:      500;
+$font-weight-normal:    400;
+$font-weight-light:     300;
 
 $font-weight:           $font-weight-normal;
 
@@ -32,10 +32,18 @@ $font-size-8:           2.5000em;
 $font-size-9:           3.0000em;
 
 $font-size:             $font-size-3;
+$font-line-height:      $font-size-5;
 
 // Type Vertical Rhythm
 
-$font-line-height:      $font-size-6;
+$vertical-rhythm:       1.1875rem;
+%vertical-rhythm {
+    margin-top: 0;
+    margin-bottom: $vertical-rhythm;
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
 
 // Display Sizes
 
@@ -47,7 +55,8 @@ $font-size-display-3:   $font-size-9;
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-weight: $font-weight-bold;
-    margin-bottom: 1.5rem;
+    line-height: $font-size-4;
+    @extend %vertical-rhythm;
 }
 h1, .h1 { font-size: $font-size-7; }
 h2, .h2 { font-size: $font-size-6; }
@@ -67,13 +76,21 @@ h6, .h6 { font-size: $font-size-2; }
     }
 }
 
+// Body
+
+article, aside, blockquote, body, br, button, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, map, nav, object, ol, output, p, pre, section, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+    @extend %vertical-rhythm;
+}
+
 body {
     font-size: 16px;
     font-family: $font-family;
     font-weight: $font-weight;
-    line-height: 24px;
+    line-height: $font-line-height;
     @include font-feature-settings('liga', 'kern');
 }
+
+
 
 b, strong { font-weight: $font-weight-bold; }
 
