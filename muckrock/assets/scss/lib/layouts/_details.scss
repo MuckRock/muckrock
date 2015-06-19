@@ -226,24 +226,21 @@
             }
         }
         .status-badge {
-            color: $color-black;
-            border: 1px solid $color-grey;
             display: inline-block;
-            margin-bottom: .75em;
             padding: .25em .75em;
+            border: 1px solid $color-grey;
             border-radius: 4px;
+            color: $color-grey-4;
             font-weight: $font-weight-bold;
-
-            @mixin colorize($status, $color, $color-dark) {
+            @mixin colorize($status, $color) {
                 &.#{$status} {
                     color: $color;
                     border-color: $color;
                 }
             }
-            @include colorize(success, $color-green, $color-green-dark);
-            @include colorize(failure, $color-red, $color-red-dark);
-            @include colorize(warning, $color-yellow, $color-yellow-dark);
-            @include colorize(default, $color-grey, $color-black);
+            @include colorize(success, $color-green);
+            @include colorize(failure, $color-red);
+            @include colorize(warning, $color-yellow);
         }
         .status-form {
             display: none;
