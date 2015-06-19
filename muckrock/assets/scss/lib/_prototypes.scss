@@ -15,17 +15,6 @@
     border-color: $color-grey;
 }
 
-// Textbox -> Button
-%button {
-    @extend %textbox;
-    display: inline-block;
-    margin: 0.25em 0.325em 0.25em 0;
-    padding: $base-padding/4 $base-padding/1.5;
-    text-decoration: none;
-    text-align: center;
-    &:hover { text-decoration: none; }
-}
-
 // Textbox -> Panel
 %panel {
     @extend %textbox;
