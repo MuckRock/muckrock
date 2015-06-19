@@ -60,7 +60,6 @@
     margin: 0 auto;
     .header-container {
         @include outer-container;
-        @extend %base-spacing;
         .main {
             @extend %two-thirds;
             margin: $base-margin/2 0 0;
@@ -77,7 +76,7 @@
             margin: $base-vertical-rhythm/2 0;
             dl { margin-top: 0; }
         }
-        summary { 
+        summary {
             font-weight: $light;
             @include media($medium-layout) {
                 display: block;
