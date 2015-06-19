@@ -1,6 +1,8 @@
-  ////////////
- // Colors //
-////////////
+    ///////////////////////////////
+   //                           //
+  //        C O L O R S        //
+ //                           //
+///////////////////////////////
 
 $color-grey-1: #333C47;
 $color-grey-2: #495361;
@@ -31,3 +33,4 @@ $color-twitter: #55acee;
 $color-email: #663285;
 
 $color-darken-amount: 10%;
+$color-odd-background:  darken($color-grey-8, 5%);
