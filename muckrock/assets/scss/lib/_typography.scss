@@ -78,7 +78,6 @@ body {
 b, strong { font-weight: $font-weight-bold; }
 
 a {
-    color: $color-blue;
     text-decoration: none;
     &:hover { text-decoration: underline; }
 }
@@ -105,8 +104,6 @@ code {
     margin: 0 $base-margin/4;
     padding: $base-margin/4 $base-padding/2;
     border-radius: $base-border-radius;
-    background-color: $color-grey-7;
-    color: $color-black;
     font-family: 'Source Code Pro', monospace;
     font-size: 0.8em;
     i, em {
@@ -128,7 +125,6 @@ dfn, dt {
     display: block;
     text-transform: uppercase;
     letter-spacing: 2px;
-    color: $color-grey-3;
 }
 
 dd { margin-left: 0; }
@@ -161,13 +157,6 @@ th {
 td { vertical-align: top; }
 
 table + h3 { margin-top: $base-margin/2; }
-
-.default { color: $color-grey; }
-.primary { color: $color-blue; }
-.success { color: $color-green; }
-.warning { color: $color-yellow; }
-.failure { color: $color-red; }
-.disabled { color: $color-grey-7; }
 
 .large-number {
     font-weight: $font-weight-light;

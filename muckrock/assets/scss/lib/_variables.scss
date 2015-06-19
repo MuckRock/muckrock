@@ -14,16 +14,12 @@ $color-odd-background:  darken($color-grey-8, 5%);
 /* Typography */
 @import 'typography';
 
-
-
 /* Breakpoints */
 $large-breakpoint:      1025px;
 $medium-breakpoint:     500px;
 $large-layout:          new-breakpoint(min-width $large-breakpoint 12);
 $medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
 $small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
-
-
 
 /* Menus */
 $menu-breakpoint:       1024px;
