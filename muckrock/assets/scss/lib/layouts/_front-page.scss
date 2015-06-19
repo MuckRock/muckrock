@@ -116,7 +116,7 @@
         @include background(linear-gradient($color-blue-dark, $color-blue));
         h1 {
             @include font-sizing(1.25);
-            font-weight: $normal;
+            font-weight: $font-weight-normal;
             text-align: center;
             margin: $base-margin auto;
         }
@@ -129,7 +129,7 @@
             display: block;
             @include font-sizing(2.5);
             margin-bottom: 0;
-            font-weight: $light;
+            font-weight: $font-weight-light;
         }
         .legend {
             display: block;

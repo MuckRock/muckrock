@@ -11,7 +11,7 @@
 
     &.flatpage {
         h1 {
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
         }
         @include font-sizing(1.1, 1.2);
         max-width: 45em;
@@ -67,7 +67,7 @@
         .news-article-title {
             margin-top: 0;
             font-size: 2.0625em;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             @include media($large-layout) {
                 max-width: 150%;
             }
@@ -76,7 +76,7 @@
         .news-article-kicker {
             margin: $base-margin/2 0;
             font-size: 1.4375em;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             line-height: 1.5em;
             @include media($large-layout) {
                 max-width: 150%;
@@ -85,7 +85,7 @@
 
         .news-article-authors {
             font-size: 1em;
-            font-weight: $normal;
+            font-weight: $font-weight-normal;
             margin-bottom: $base-margin;
         }
 
@@ -204,7 +204,7 @@
             h1 {
                 @include font-sizing(3);
                 margin-top: 0;
-                font-weight: $light;
+                font-weight: $font-weight-light;
             }
             dl { margin-top: $base-vertical-rhythm; }
         }
@@ -232,7 +232,7 @@
             margin-bottom: .75em;
             padding: .25em .75em;
             border-radius: 4px;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
 
             @mixin colorize($status, $color, $color-dark) {
                 &.#{$status} {

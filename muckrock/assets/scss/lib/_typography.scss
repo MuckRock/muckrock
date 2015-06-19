@@ -1,42 +1,47 @@
-// Legacy Variables
+    ///////////////////////////////
+   //                           //
+  //    T Y P O G R A P H Y    //
+ //                           //
+///////////////////////////////
 
-$light:                 300;
-$normal:                400;
-$bold:                  500;
+// Font Families
+
 $font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
 $font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
-$base-font-family:      $font-sans-serif;
-$base-font-weight:      $normal;
-$font-size:             16px;
-$base-line-height:      $base-vertical-rhythm;
 
-// Type Weight
+$font-family:           $font-sans-serif;
 
-$font-weight-bold: 500;
-$font-weight-normal: 400;
-$font-weight-light: 300;
+// Font Weights
+
+$font-weight-bold:                  500;
+$font-weight-normal:                400;
+$font-weight-light:                 300;
+
+$font-weight:           $font-weight-normal;
 
 // Type Scale
 
-$font-size-1: 0.6875em;
-$font-size-2: 0.8125em;
-$font-size-3: 1.0000em;
-$font-size-4: 1.1875em;
-$font-size-5: 1.4375em;
-$font-size-6: 1.6875em;
-$font-size-7: 2.0625em;
-$font-size-8: 2.5000em;
-$font-size-9: 3.0000em;
+$font-size-1:           0.6875em;
+$font-size-2:           0.8125em;
+$font-size-3:           1.0000em;
+$font-size-4:           1.1875em;
+$font-size-5:           1.4375em;
+$font-size-6:           1.6875em;
+$font-size-7:           2.0625em;
+$font-size-8:           2.5000em;
+$font-size-9:           3.0000em;
 
-// Type Line
+$font-size:             $font-size-3;
 
-$font-line-height: 1.5em;
+// Type Vertical Rhythm
+
+$font-line-height:      $font-size-6;
 
 // Display Sizes
 
-$font-size-display-1: $font-size-7;
-$font-size-display-2: $font-size-8;
-$font-size-display-3: $font-size-9;
+$font-size-display-1:   $font-size-7;
+$font-size-display-2:   $font-size-8;
+$font-size-display-3:   $font-size-9;
 
 // Headings
 
@@ -63,14 +68,14 @@ h6, .h6 { font-size: $font-size-2; }
 }
 
 body {
-    font-size: $font-size;
-    font-family: $base-font-family;
-    font-weight: $base-font-weight;
+    font-size: 16px;
+    font-family: $font-family;
+    font-weight: $font-weight;
     line-height: 24px;
     @include font-feature-settings('liga', 'kern');
 }
 
-b, strong { font-weight: $bold; }
+b, strong { font-weight: $font-weight-bold; }
 
 a {
     color: $color-blue;
@@ -150,7 +155,7 @@ th {
     font-size: $font-size-2;
     text-align: left;
     vertical-align: top;
-    font-weight: $bold;
+    font-weight: $font-weight-bold;
 }
 
 td { vertical-align: top; }
@@ -165,6 +170,6 @@ table + h3 { margin-top: $base-margin/2; }
 .disabled { color: $color-grey-7; }
 
 .large-number {
-    font-weight: $light;
+    font-weight: $font-weight-light;
     font-size: 2em;
 }

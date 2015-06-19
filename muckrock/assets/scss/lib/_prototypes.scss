@@ -77,7 +77,7 @@
             dl { margin-top: 0; }
         }
         summary {
-            font-weight: $light;
+            font-weight: $font-weight-light;
             @include media($medium-layout) {
                 display: block;
                 @include font-sizing(1.25);
