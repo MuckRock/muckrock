@@ -15,6 +15,7 @@
         display: block;
         width: 100%;
         padding: $base-vertical-rhythm/4;
+        margin-bottom: 0;
         line-height: 1em;
         color: $color-white;
         text-align: left;
@@ -44,7 +45,10 @@
 
     .body {
         display: block;
-        padding: $base-padding/2 $base-padding/2 0;
+        padding: $vertical-rhythm/2;
+        @include media($medium-layout) {
+            padding: $vertical-rhythm;
+        }
     }
 
     .attachments {
