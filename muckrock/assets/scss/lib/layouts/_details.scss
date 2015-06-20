@@ -6,7 +6,6 @@
 
     &.agency {
         aside dl { @extend %third; }
-        aside dd + dt { margin-top: $base-margin; }
     }
 
     &.flatpage {
@@ -227,11 +226,14 @@
         }
         .status-badge {
             display: inline-block;
-            padding: .25em .75em;
+            padding: 0 .6em;
             border: 1px solid $color-grey;
             border-radius: 4px;
             color: $color-grey-4;
-            font-weight: $font-weight-bold;
+            font-size: $font-size-2;
+            font-weight: $font-weight-normal;
+            letter-spacing:2px;
+            text-transform:uppercase;
             @mixin colorize($status, $color) {
                 &.#{$status} {
                     color: $color;
