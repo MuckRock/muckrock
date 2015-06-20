@@ -9,18 +9,7 @@
     }
 
     &.flatpage {
-        h1 {
-            font-weight: $font-weight-bold;
-        }
-        @include font-sizing(1.1, 1.2);
         max-width: 45em;
-        ul { padding-left: $base-padding; }
-    }
-
-    &.jurisdiction {
-        h3 { font-weight: normal; }
-        h3 + table { margin-top: 0; }
-        h3 + h3 { margin-top: 1.5em; }
     }
 
     &.news {
@@ -169,12 +158,6 @@
             }
         }
         .members {
-            display: table;
-            margin: $base-margin 0;
-            border-radius: 0;
-            th {
-                font-size: 1rem;
-            }
             th:first-child, td:first-child {
                 width: 5%;
             }
@@ -198,17 +181,6 @@
         }
     }
 
-    &.profile {
-        section.meta > header {
-            h1 {
-                @include font-sizing(3);
-                margin-top: 0;
-                font-weight: $font-weight-light;
-            }
-            dl { margin-top: $base-vertical-rhythm; }
-        }
-    }
-
     &.question {
         .messages-container {
             @include row;
@@ -216,13 +188,8 @@
     }
 
     &.request {
-        h3 { font-size: 1.25em; }
         .draft {
             @include row;
-            button, .button {
-                display: block;
-                @extend %half;
-            }
         }
         .status-badge {
             display: inline-block;
@@ -246,22 +213,19 @@
         }
         .status-form {
             display: none;
-            font-size: 0.85em;
             background: none;
             border: none;
-            button { margin-left: $base-vertical-rhythm/4; }
-            p { margin-top: 0; }
+            button { margin-left: $vertical-rhythm; }
         }
         .tabs {
             list-style-type: none;
             overflow: hidden;
-            padding-left: $base-vertical-rhythm;
             border-bottom: $base-border-width solid $color-grey;
             input[type="radio"] { display: none; }
             label {
                 display: block;
                 float: left;
-                padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+                padding: $vertical-rhythm/4 $base-vertical-rhythm/2;
                 @extend %border;
                 border-left: none;
                 border-bottom: none;
