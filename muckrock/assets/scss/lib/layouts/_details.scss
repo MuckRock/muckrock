@@ -304,29 +304,14 @@
             clear: both;
             .hidden-reply {
                 display: block;
-                max-width: 30em;
-                margin: 0 auto;
-                @include row;
-                h1 {
-                    @include font-sizing(1.5);
-                    @extend %half;
-                }
-                h2 {
-                    @include font-sizing(1.25);
-                    @extend %half;
-                    text-align: right;
-                }
+                padding: $vertical-rhythm;
+                margin-bottom: 0;
                 textarea {
-                    @extend %full;
                     height: 10em;
                     overflow-y: scroll;
                     resize: vertical;
-                    margin-bottom: $base-margin/2;
                 }
-                .buttons {
-                    @extend %full;
-                    input, span { float: left; }
-                }
+                button { float: right; }
             }
         }
     }
