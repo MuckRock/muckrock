@@ -118,6 +118,13 @@ dfn, dt {
     letter-spacing: 2px;
 }
 
+dd {
+    -webkit-margin-start: 0;
+    & + dt {
+        margin-top: $vertical-rhythm;
+    }
+}
+
 code {
     padding: .2em .4em;
     border-radius: $base-border-radius;
