@@ -33,7 +33,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
         h1 {
             font-size: 1rem;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
         }
 
 
@@ -115,7 +115,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             box-shadow: inset 0px 3px 3px 0px $color-grey;
             padding: 0.325em;
             font-size: 1.25em;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             text-align: center;
         }
         @include media($medium-layout) {
@@ -148,7 +148,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         }
     }
     & > .overlay h1 {
-        font-weight: $bold;
+        font-weight: $font-weight-bold;
         text-align: center;
         color: $color-white;
         position: relative;

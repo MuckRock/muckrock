@@ -3,17 +3,23 @@
 //
 // Do not appear in compiled CSS
 
+// Frameworks
 @import 'normalize';
 @import 'bourbon/bourbon';
 @import 'neat/neat';
 
+// Basics
 @import 'lib/variables';
 @import 'lib/colors';
+@import 'lib/typography';
 @import 'lib/mixins';
 @import 'lib/grid';
 @import 'lib/prototypes';
-@import 'lib/typography';
+
+// Elements
 @import 'lib/objects/objects';
+
+// Layouts
 @import 'lib/layouts/layouts';
 @import 'lib/lists/lists';
 

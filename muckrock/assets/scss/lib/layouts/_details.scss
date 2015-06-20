@@ -6,22 +6,10 @@
 
     &.agency {
         aside dl { @extend %third; }
-        aside dd + dt { margin-top: $base-margin; }
     }
 
     &.flatpage {
-        h1 {
-            font-weight: $bold;
-        }
-        @include font-sizing(1.1, 1.2);
         max-width: 45em;
-        ul { padding-left: $base-padding; }
-    }
-
-    &.jurisdiction {
-        h3 { font-weight: normal; }
-        h3 + table { margin-top: 0; }
-        h3 + h3 { margin-top: 1.5em; }
     }
 
     &.news {
@@ -67,7 +55,7 @@
         .news-article-title {
             margin-top: 0;
             font-size: 2.0625em;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             @include media($large-layout) {
                 max-width: 150%;
             }
@@ -76,7 +64,7 @@
         .news-article-kicker {
             margin: $base-margin/2 0;
             font-size: 1.4375em;
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             line-height: 1.5em;
             @include media($large-layout) {
                 max-width: 150%;
@@ -85,7 +73,7 @@
 
         .news-article-authors {
             font-size: 1em;
-            font-weight: $normal;
+            font-weight: $font-weight-normal;
             margin-bottom: $base-margin;
         }
 
@@ -170,12 +158,6 @@
             }
         }
         .members {
-            display: table;
-            margin: $base-margin 0;
-            border-radius: 0;
-            th {
-                font-size: 1rem;
-            }
             th:first-child, td:first-child {
                 width: 5%;
             }
@@ -199,17 +181,6 @@
         }
     }
 
-    &.profile {
-        section.meta > header {
-            h1 {
-                @include font-sizing(3);
-                margin-top: 0;
-                font-weight: $light;
-            }
-            dl { margin-top: $base-vertical-rhythm; }
-        }
-    }
-
     &.question {
         .messages-container {
             @include row;
@@ -217,52 +188,44 @@
     }
 
     &.request {
-        h3 { font-size: 1.25em; }
         .draft {
             @include row;
-            button, .button {
-                display: block;
-                @extend %half;
-            }
         }
         .status-badge {
-            color: $color-black;
-            border: 1px solid $color-grey;
             display: inline-block;
-            margin-bottom: .75em;
-            padding: .25em .75em;
+            padding: 0 .6em;
+            border: 1px solid $color-grey;
             border-radius: 4px;
-            font-weight: $bold;
-
-            @mixin colorize($status, $color, $color-dark) {
+            color: $color-grey-4;
+            font-size: $font-size-2;
+            font-weight: $font-weight-normal;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            @mixin colorize($status, $color) {
                 &.#{$status} {
                     color: $color;
                     border-color: $color;
                 }
             }
-            @include colorize(success, $color-green, $color-green-dark);
-            @include colorize(failure, $color-red, $color-red-dark);
-            @include colorize(warning, $color-yellow, $color-yellow-dark);
-            @include colorize(default, $color-grey, $color-black);
+            @include colorize(success, $color-green);
+            @include colorize(failure, $color-red);
+            @include colorize(warning, $color-yellow);
         }
         .status-form {
             display: none;
-            font-size: 0.85em;
             background: none;
             border: none;
-            button { margin-left: $base-vertical-rhythm/4; }
-            p { margin-top: 0; }
+            button { margin-left: $vertical-rhythm; }
         }
         .tabs {
             list-style-type: none;
             overflow: hidden;
-            padding-left: $base-vertical-rhythm;
             border-bottom: $base-border-width solid $color-grey;
             input[type="radio"] { display: none; }
             label {
                 display: block;
                 float: left;
-                padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+                padding: $vertical-rhythm/4 $base-vertical-rhythm/2;
                 @extend %border;
                 border-left: none;
                 border-bottom: none;
@@ -341,29 +304,14 @@
             clear: both;
             .hidden-reply {
                 display: block;
-                max-width: 30em;
-                margin: 0 auto;
-                @include row;
-                h1 {
-                    @include font-sizing(1.5);
-                    @extend %half;
-                }
-                h2 {
-                    @include font-sizing(1.25);
-                    @extend %half;
-                    text-align: right;
-                }
+                padding: $vertical-rhythm;
+                margin-bottom: 0;
                 textarea {
-                    @extend %full;
                     height: 10em;
                     overflow-y: scroll;
                     resize: vertical;
-                    margin-bottom: $base-margin/2;
                 }
-                .buttons {
-                    @extend %full;
-                    input, span { float: left; }
-                }
+                button { float: right; }
             }
         }
     }

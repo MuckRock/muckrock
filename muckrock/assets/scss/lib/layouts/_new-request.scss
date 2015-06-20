@@ -12,7 +12,7 @@
             @extend %half;
             @include font-sizing(2.5, 3);
             margin-top: 0;
-            font-weight: $light;
+            font-weight: $font-weight-light;
         }
         summary {
             @extend %half;
@@ -120,7 +120,7 @@
         label {
             color: $color-white;
             @include font-sizing(1);
-            font-weight: $bold;
+            font-weight: $font-weight-bold;
             text-align: center;
             cursor: pointer;
         }
@@ -142,7 +142,7 @@
             @extend dfn;
             color: $color-white;
             margin: 0;
-            font-weight: $light;
+            font-weight: $font-weight-light;
             font-size: 1rem;
         }
         input {
@@ -193,7 +193,7 @@
                 @extend dfn;
                 color: $color-white;
                 margin: 0;
-                font-weight: $light;
+                font-weight: $font-weight-light;
                 font-size: 1rem;
             }
             span.remove {

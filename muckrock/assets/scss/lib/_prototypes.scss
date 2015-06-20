@@ -15,17 +15,6 @@
     border-color: $color-grey;
 }
 
-// Textbox -> Button
-%button {
-    @extend %textbox;
-    display: inline-block;
-    margin: 0.25em 0.325em 0.25em 0;
-    padding: $base-padding/4 $base-padding/1.5;
-    text-decoration: none;
-    text-align: center;
-    &:hover { text-decoration: none; }
-}
-
 // Textbox -> Panel
 %panel {
     @extend %textbox;
@@ -56,48 +45,21 @@
 
 %detail {
     @extend %body;
-    @extend %edge-to-edge;
-    margin: 0 auto;
+    margin: 0 auto 1.5em;
     .header-container {
         @include outer-container;
         .main {
             @extend %two-thirds;
-            margin: $base-margin/2 0 0;
-            h1 { @include font-sizing(1.5); }
-            h2 { @include font-sizing(1); }
-            @include media($medium-layout) {
-                padding-right: $base-padding;
-                h1 { @include font-sizing(2); }
-                h2 { @include font-sizing(1.5); }
-            }
         }
         .aside {
             @extend %third;
-            margin: $base-vertical-rhythm/2 0;
-            dl { margin-top: 0; }
-        }
-        summary {
-            font-weight: $light;
-            @include media($medium-layout) {
-                display: block;
-                @include font-sizing(1.25);
-            }
         }
     }
     .body {
         @include outer-container;
-        @extend %base-spacing;
-        .stats {
-            @include row;
-            dl { @extend %quarter; }
-        }
     }
     .actions {
         @extend %controls;
-        width: auto;
-        @include media($medium-layout){
-            margin: $base-margin/2 $base-margin;
-        }
     }
 }
 

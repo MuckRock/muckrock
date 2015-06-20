@@ -40,14 +40,14 @@
         .heading {
             @include font-sizing(5);
             margin: 0;
-            font-weight: $light;
+            font-weight: $font-weight-light;
         }
         .subheading {
             @include media($medium-layout) { text-align: right; }
             .price {
                 @include font-sizing(2);
                 margin: 0;
-                font-weight: $light;
+                font-weight: $font-weight-light;
                 .amount {
                     @include font-sizing(1.4);
                 }
@@ -70,7 +70,7 @@
         .interaction-information {
             @extend %two-thirds;
             .interaction-call-to-action {
-                font-weight: $bold;
+                font-weight: $font-weight-bold;
             }
         }
     }
@@ -81,7 +81,7 @@
             h2 {
                 @include font-sizing(1.5);
                 margin-top: 0;
-                font-weight: $bold;
+                font-weight: $font-weight-bold;
             }
             ul {
                 padding-left: 0;
@@ -100,7 +100,7 @@
             @extend %third;
             h2 {
                 @include font-sizing(1);
-                font-weight: $bold;
+                font-weight: $font-weight-bold;
                 color: $color-grey;
             }
         }

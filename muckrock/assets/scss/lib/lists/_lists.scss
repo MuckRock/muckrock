@@ -42,7 +42,7 @@
                     display: table-cell;
                     width: 25%;
                     text-align: center;
-                    font-weight: $bold;
+                    font-weight: $font-weight-bold;
                 }
                 a {
                     display: table-cell;
@@ -223,7 +223,7 @@
         @extend %full;
         @extend h2;
         margin-top: 2em;
-        font-weight: $bold;
+        font-weight: $font-weight-bold;
         color: $color-grey;
         text-align: center;
     }
