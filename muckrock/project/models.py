@@ -6,6 +6,8 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.text import slugify
 
+from muckrock.foia.models import FOIARequest
+
 import taggit
 
 class Project(models.Model):
@@ -70,3 +72,14 @@ class Project(models.Model):
             return True
         else:
             return False
+
+    def suggest_requests(self):
+        """Returns a list of requests that may be related to this project."""
+        requests = []
+        for contributor in self.contributors.all():
+            requests += list(FOIARequest.objects.filter(user=contributor, tags__name__in=self.tags.names()))
+        # Ignores requests that are already added to the project
+        for foia_request in self.requests.all():
+            if foia_request in requests:
+                requests.remove(foia_request)
+        return requests
