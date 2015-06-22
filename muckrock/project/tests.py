@@ -163,7 +163,7 @@ class TestProjectCreateView(TestCase):
         response = self.client.get(self.url)
         eq_(response.status_code, 200,
             'Should load page to create a new project.')
-        eq_(type(response.context['form']), type(ProjectCreateForm()),
+        ok_(isinstance(response.context['form'], ProjectCreateForm),
             'Should load page with a ProjectCreateForm')
         # Then I fill out a form with all the details of my project.
         project_title = test_title
@@ -286,7 +286,7 @@ class TestProjectUpdateView(TestCase):
         response = self.user.get(self.url)
         eq_(response.status_code, 200,
             'The page for updating the project should load.')
-        eq_(type(response.context['form']), type(ProjectUpdateForm()),
+        ok_(isinstance(response.context['form'], ProjectUpdateForm),
             'The page should contain a form for updating the project.')
         eq_(response.context['form'].instance, self.project,
             'The form on the page should reflect my project instance.')
