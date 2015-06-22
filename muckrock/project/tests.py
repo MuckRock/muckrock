@@ -253,6 +253,7 @@ class TestProjectUpdateView(TestCase):
             image=test_image
         )
         self.project.save()
+        self.url = self.project.get_absolute_url() + 'update/'
         # I will start by logging in.
         self.user = Client()
         self.user.login(username='adam', password='abc')
@@ -260,8 +261,7 @@ class TestProjectUpdateView(TestCase):
     def test_update_project_functional(self):
         """I want to update a project that I've already made."""
         # First I go to the page for updating the project.
-        project_update_url = self.project.get_absolute_url() + 'update/'
-        response = self.user.get(project_update_url)
+        response = self.user.get(self.url)
         eq_(response.status_code, 200,
             'The page for updating the project should load.')
         eq_(type(response.context['form']), type(ProjectUpdateForm()),
@@ -274,7 +274,7 @@ class TestProjectUpdateView(TestCase):
             'description': new_description
         }, instance=self.project)
         # Then I submit the form with my updated information.
-        response = self.user.post(project_update_url, project_update_form.data)
+        response = self.user.post(self.url, project_update_form.data)
         # I expect to be redirected back to the project.
         eq_(response.status_code, 302,
             'Should redirect after submitting the update form.')
@@ -286,15 +286,13 @@ class TestProjectUpdateView(TestCase):
 
     def test_requires_login(self):
         """Logged out users cannot update projects."""
-        project_update_url = self.project.get_absolute_url() + 'update/'
-        response = self.client.get(project_update_url)
-        redirect_url = reverse('acct-login') + '?next=' + project_update_url
+        response = self.client.get(self.url)
+        redirect_url = reverse('acct-login') + '?next=' + self.url
         self.assertRedirects(response, redirect_url)
 
     def test_staff_or_contributor_only(self):
         """Projects should only be updated by staff or project contributors."""
-        project_update_url = self.project.get_absolute_url() + 'update/'
-        staff_and_contributors_only(self.project, project_update_url, 'update')
+        staff_and_contributors_only(self.project, self.url, 'update')
 
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""
@@ -318,6 +316,7 @@ class TestProjectDeleteView(TestCase):
             image=test_image
         )
         self.project.save()
+        self.url = self.project.get_absolute_url() + 'delete/'
         # I will start by logging in.
         self.user = Client()
         self.user.login(username='adam', password='abc')
@@ -326,12 +325,11 @@ class TestProjectDeleteView(TestCase):
     def test_delete_project_functional(self):
         """I want to delete a project that I've already made."""
         # First I go to the page for deleting a project instance.
-        project_delete_url = self.project.get_absolute_url() + 'delete/'
-        response = self.user.get(project_delete_url)
+        response = self.user.get(self.url)
         eq_(response.status_code, 200,
             'The page for deleting a project should load.')
         # I am really, absolutely sure I want to delete this project!
-        response = self.user.post(project_delete_url)
+        response = self.user.post(self.url)
         deleted_project = Project.objects.get(id=self.project.id)
         # Poof! Goodbye, project!
         ok_(not deleted_project, 'The project should be deleted.')
@@ -341,12 +339,10 @@ class TestProjectDeleteView(TestCase):
 
     def test_requires_login(self):
         """Logged out users cannot delete projects."""
-        project_delete_url = self.project.get_absolute_url() + 'delete/'
-        response = self.client.get(project_delete_url)
-        redirect_url = reverse('acct-login') + '?next=' + project_delete_url
+        response = self.client.get(self.url)
+        redirect_url = reverse('acct-login') + '?next=' + self.url
         self.assertRedirects(response, redirect_url)
 
     def test_staff_or_contributor_only(self):
         """Projects should only be deleted by staff or project contributors."""
-        project_delete_url = self.project.get_absolute_url() + 'delete/'
-        staff_and_contributors_only(self.project, project_delete_url, 'delete')
+        staff_and_contributors_only(self.project, self.url, 'delete')
