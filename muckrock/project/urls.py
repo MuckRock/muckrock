@@ -3,13 +3,13 @@ URL routes for the project application
 """
 
 from django.conf.urls import patterns, url
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from muckrock.project import views
 
 urlpatterns = patterns('',
     url(r'^create/$',
-        login_required(views.ProjectCreateView.as_view()),
+        views.ProjectCreateView.as_view(),
         name='project-create'),
     url(r'^(?P<slug>[\w-]+)/$',
         views.ProjectDetailView.as_view(),
