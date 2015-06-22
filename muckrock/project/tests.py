@@ -169,6 +169,21 @@ class TestProjectCreateView(TestCase):
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
         self.assertRedirects(response, redirect_url)
 
+    def test_staff_only(self):
+        """For now, staff are the only ones who can create new projects."""
+        staff_user = User.objects.get(username='adam')
+        nonstaff_user = User.objects.get(username='bob')
+        ok_(staff_user.is_staff and not nonstaff_user.is_staff)
+        staff_client = Client()
+        staff_client.login(username='adam', password='abc')
+        staff_response = staff_client.get(reverse('project-create'))
+        ok_(staff_response.status_code is 200)
+        nonstaff_client = Client()
+        nonstaff_client.login(username='bob', password='abc')
+        nonstaff_response = nonstaff_client.get(reverse('project-create'))
+        ok_(nonstaff_response.status_code is not 200,
+            'Nonstaff users should not be able to create a new project at this time.')
+
     def test_creator_made_contributor(self):
         """The creation form should set the current user as a contributor by default."""
         self.client.login(username='adam', password='abc')
