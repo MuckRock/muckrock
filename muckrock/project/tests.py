@@ -14,6 +14,7 @@ from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
+import logging
 import nose
 
 ok_ = nose.tools.ok_
@@ -48,6 +49,9 @@ class TestProject(TestCase):
     def setUp(self):
         self.basic_project = Project(title=test_title)
         self.basic_project.save()
+
+    def tearDown(self):
+        self.basic_project.delete()
 
     def test_basic_project(self):
         """All projects need at least a title."""
@@ -144,13 +148,17 @@ class TestProjectCreateView(TestCase):
 
     def setUp(self):
         self.client = Client()
+        self.url = reverse('project-create')
+
+    def tearDown(self):
+        self.client.logout()
 
     def test_create_project_functional(self):
         """I want to create a project."""
         # First things first I need to be logged in
         self.client.login(username='adam', password='abc')
         # I point my browser at the right webpage
-        response = self.client.get(reverse('project-create'))
+        response = self.client.get(self.url)
         eq_(response.status_code, 200,
             'Should load page to create a new project.')
         eq_(type(response.context['form']), type(ProjectCreateForm()),
@@ -164,17 +172,25 @@ class TestProjectCreateView(TestCase):
             'description': project_description,
             'image': project_image
         })
+        logging.debug('The form is valid: %s.', new_project_form.is_valid())
         eq_(Project.objects.count(), 0, 'There should be no projects.')
+        logging.debug('Projects: %s', Project.objects.all())
         # When I submit the form, I expect the project to be made and to be redirected to it.
-        response = self.client.post(reverse('project-create'), new_project_form.data)
+        response = self.client.post(self.url, new_project_form.data, follow=False)
+        logging.debug('POST data: %s', new_project_form.data)
+        logging.debug('POST URL: %s', self.url)
+        logging.debug('POST status code: %s', response.status_code)
+        logging.debug('There are %s projects.', Project.objects.count())
+        logging.debug('Projects: %s', Project.objects.all())
         eq_(Project.objects.count(), 1, 'There should now be one project.')
+        logging.debug('Projects: %s', Project.objects.all())
         eq_(response.status_code, 302,
             'Should redirect to the newly created project.')
-        self.assertRedirects(response, Project.objects.all()[0].get_absolute_url())
+        self.assertRedirects(response, list(Project.objects.all())[-1].get_absolute_url())
 
     def test_requires_login(self):
         """Logged out users cannot create projects."""
-        response = self.client.get(reverse('project-create'))
+        response = self.client.get(self.url)
         redirect_url = reverse('acct-login') + '?next=' + reverse('project-create')
         self.assertRedirects(response, redirect_url)
 
@@ -185,18 +201,18 @@ class TestProjectCreateView(TestCase):
         ok_(staff_user.is_staff and not nonstaff_user.is_staff)
         staff_client = Client()
         staff_client.login(username='adam', password='abc')
-        staff_response = staff_client.get(reverse('project-create'))
+        staff_response = staff_client.get(self.url)
         ok_(staff_response.status_code is 200)
         nonstaff_client = Client()
         nonstaff_client.login(username='bob', password='abc')
-        nonstaff_response = nonstaff_client.get(reverse('project-create'))
+        nonstaff_response = nonstaff_client.get(self.url)
         ok_(nonstaff_response.status_code is not 200,
             'Nonstaff users should not be able to create a new project at this time.')
 
     def test_creator_made_contributor(self):
         """The creation form should set the current user as a contributor by default."""
         self.client.login(username='adam', password='abc')
-        response = self.client.get(reverse('project-create'))
+        response = self.client.get(self.url)
         project_create_form = response.context['form']
         ok_(User.objects.get(username='adam') in project_create_form.initial['contributors'],
             'Current user should be an initial value for the contributors field')
@@ -257,6 +273,10 @@ class TestProjectUpdateView(TestCase):
         # I will start by logging in.
         self.user = Client()
         self.user.login(username='adam', password='abc')
+
+    def tearDown(self):
+        self.project.delete()
+        self.user.logout()
 
     def test_update_project_functional(self):
         """I want to update a project that I've already made."""
@@ -320,6 +340,10 @@ class TestProjectDeleteView(TestCase):
         # I will start by logging in.
         self.user = Client()
         self.user.login(username='adam', password='abc')
+
+    def tearDown(self):
+        self.user.logout()
+        self.project.delete()
 
     @nose.tools.raises(Project.DoesNotExist)
     def test_delete_project_functional(self):
