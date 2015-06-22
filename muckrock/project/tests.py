@@ -172,7 +172,7 @@ class TestProjectCreateView(TestCase):
         new_project_form = ProjectCreateForm({
             'title': project_title,
             'description': project_description,
-            'image': project_image
+            # 'image': project_image
         })
         logging.debug('The form is valid: %s.', new_project_form.is_valid())
         eq_(Project.objects.count(), 0, 'There should be no projects.')
