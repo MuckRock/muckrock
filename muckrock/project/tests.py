@@ -119,6 +119,15 @@ class TestProject(TestCase):
         project.make_public()
         ok_(not project.private)
 
+    def test_has_contributors(self):
+        """Projects should test to see if a given user is a contributor."""
+        project = self.basic_project
+        user1 = User.objects.get(pk=1)
+        user2 = User.objects.get(pk=2)
+        project.contributors.add(user1)
+        ok_(project.has_contributor(user1))
+        ok_(not project.has_contributor(user2))
+
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""
 

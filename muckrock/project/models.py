@@ -63,3 +63,10 @@ class Project(models.Model):
         self.private = False
         self.save()
         return
+
+    def has_contributor(self, user):
+        """Checks if the user is a contributor."""
+        if user in self.contributors.all():
+            return True
+        else:
+            return False
