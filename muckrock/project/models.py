@@ -77,7 +77,9 @@ class Project(models.Model):
         """Returns a list of requests that may be related to this project."""
         requests = []
         for contributor in self.contributors.all():
-            requests += list(FOIARequest.objects.filter(user=contributor, tags__name__in=self.tags.names()))
+            requests += list(
+                FOIARequest.objects.filter(user=contributor, tags__name__in=self.tags.names())
+            )
         # Ignores requests that are already added to the project
         for foia_request in self.requests.all():
             if foia_request in requests:

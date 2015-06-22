@@ -20,6 +20,7 @@ class ProjectCreateView(CreateView):
     @method_decorator(login_required)
     @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
+        """At the moment, only staff are allowed to create a project."""
         return super(ProjectCreateView, self).dispatch(*args, **kwargs)
 
     def get_initial(self):
@@ -44,11 +45,13 @@ class ProjectPermissionsMixin(object):
     """
 
     def _is_editable_by(self, user):
+        """A project is editable by MuckRock staff and project contributors."""
         project = self.get_object()
         return project.has_contributor(user) or user.is_staff
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
+        """Overrides the dispatch function to include permissions checking."""
         if not self._is_editable_by(self.request.user):
             raise exceptions.PermissionDenied()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)

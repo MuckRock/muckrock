@@ -3,7 +3,6 @@ URL routes for the project application
 """
 
 from django.conf.urls import patterns, url
-from django.contrib.auth.decorators import login_required, user_passes_test
 
 from muckrock.project import views
 

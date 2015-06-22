@@ -168,7 +168,7 @@ class TestProjectCreateView(TestCase):
         # Then I fill out a form with all the details of my project.
         project_title = test_title
         project_description = test_description
-        project_image = test_image
+        # project_image = test_image
         new_project_form = ProjectCreateForm({
             'title': project_title,
             'description': project_description,
