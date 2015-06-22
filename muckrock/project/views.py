@@ -53,3 +53,13 @@ class ProjectDeleteView(DeleteView):
     model = Project
     success_url = reverse_lazy('index')
     template_name = 'project/delete.html'
+
+    def _is_editable_by(self, user):
+        project = self.get_object()
+        return project.has_contributor(user) or user.is_staff
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self._is_editable_by(self.request.user):
+            raise exceptions.PermissionDenied()
+        return super(ProjectDeleteView, self).dispatch(*args, **kwargs)
