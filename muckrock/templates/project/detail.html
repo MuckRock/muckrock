@@ -1,0 +1,15 @@
+{% extends 'details/base_detail.html' %}
+
+{% block type %}project{% endblock %}
+
+{% block header %}
+    <h1>{{ project.title }}</h1>
+{% endblock %}
+
+{% block aside %}
+    <ul class="contributors">
+    {% for contributor in project.contributors.all %}
+        <li>{{ contributor.get_full_name }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}
