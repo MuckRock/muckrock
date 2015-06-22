@@ -252,6 +252,35 @@ class TestProjectUpdateView(TestCase):
         redirect_url = reverse('acct-login') + '?next=' + project_update_url
         self.assertRedirects(response, redirect_url)
 
+    def test_staff_or_contributor_only(self):
+        """Projects should only be updated by staff or project contributors."""
+        project_update_url = self.project.get_absolute_url() + 'update/'
+        client = Client()
+        staff_user = User.objects.get(username='adam')
+        contributor_user = User.objects.get(username='bob')
+        nonstaff_noncontributor_user = User.objects.get(username='community')
+        ok_(staff_user.is_staff)
+        # set the contributor as a contributor
+        self.project.contributors.add(contributor_user)
+        ok_(contributor_user in self.project.contributors.all())
+        ok_(not nonstaff_noncontributor_user.is_staff and \
+            nonstaff_noncontributor_user not in self.project.contributors.all())
+        # try accessing as a staff user
+        client.login(username='adam', password='abc')
+        response = client.get(project_update_url)
+        ok_(response.status_code is 200, 'Staff should be able to update the project.')
+        client.logout()
+        # try accessing as a contributor
+        client.login(username='bob', password='abc')
+        response = client.get(project_update_url)
+        ok_(response.status_code is 200, 'Contributors should be able to update the project.')
+        client.logout()
+        # try accessing as a nonstaff noncontributor
+        client.login(username='community', password='abc')
+        response = client.get(project_update_url)
+        ok_(response.status_code is not 200,
+            'Nonstaff-noncontributors should not be able to update the project.')
+
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""
 
