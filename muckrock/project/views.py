@@ -32,34 +32,35 @@ class ProjectDetailView(DetailView):
     model = Project
     template_name = 'project/detail.html'
 
-class ProjectUpdateView(UpdateView):
+class ProjectPermissionsMixin(object):
+    """
+    This mixin provides a test to see if the current user is either
+    a staff member or a project contributor. If they are, they are
+    granted access to the page. If they aren't, a PermissionDenied
+    exception is thrown.
+
+    Note: It must be included first when subclassing Django generic views
+    because it overrides their dispatch method.
+    """
+
+    def _is_editable_by(self, user):
+        project = self.get_object()
+        return project.has_contributor(user) or user.is_staff
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self._is_editable_by(self.request.user):
+            raise exceptions.PermissionDenied()
+        return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
+
+class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
     model = Project
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
 
-    def _is_editable_by(self, user):
-        project = self.get_object()
-        return project.has_contributor(user) or user.is_staff
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        if not self._is_editable_by(self.request.user):
-            raise exceptions.PermissionDenied()
-        return super(ProjectUpdateView, self).dispatch(*args, **kwargs)
-
-class ProjectDeleteView(DeleteView):
+class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
     success_url = reverse_lazy('index')
     template_name = 'project/delete.html'
-
-    def _is_editable_by(self, user):
-        project = self.get_object()
-        return project.has_contributor(user) or user.is_staff
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        if not self._is_editable_by(self.request.user):
-            raise exceptions.PermissionDenied()
-        return super(ProjectDeleteView, self).dispatch(*args, **kwargs)
