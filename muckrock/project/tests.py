@@ -170,13 +170,12 @@ class TestProjectCreateView(TestCase):
         self.assertRedirects(response, redirect_url)
 
     def test_creator_made_contributor(self):
-        """The user who creates a project should be made a contributor of it."""
+        """The creation form should set the current user as a contributor by default."""
         self.client.login(username='adam', password='abc')
-        current_user = User.objects.get(username='adam')
-        project_create_form = ProjectCreateForm({'title': test_title})
-        self.client.post(reverse('project-create'), project_create_form.data)
-        new_project = Project.objects.get(title=test_title)
-        ok_(current_user in new_project.contributors.all())
+        response = self.client.get(reverse('project-create'))
+        project_create_form = response.context['form']
+        ok_(User.objects.get(username='adam') in project_create_form.initial['contributors'],
+            'Current user should be an initial value for the contributors field')
 
 class TestProjectUpdateView(TestCase):
     """Tests updating a project as a user."""

@@ -2,6 +2,7 @@
 Views for the project application
 """
 
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 
@@ -12,6 +13,11 @@ class ProjectCreateView(CreateView):
     """Create a project instance"""
     form_class = ProjectCreateForm
     template_name = 'project/create.html'
+
+    def get_initial(self):
+        """Sets current user as a default contributor"""
+        queryset = User.objects.filter(pk=self.request.user.pk)
+        return {'contributors': queryset}
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
