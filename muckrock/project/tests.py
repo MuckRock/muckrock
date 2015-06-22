@@ -201,6 +201,36 @@ class TestProjectCreateView(TestCase):
         ok_(User.objects.get(username='adam') in project_create_form.initial['contributors'],
             'Current user should be an initial value for the contributors field')
 
+def staff_and_contributors_only(project, project_url, action='load'):
+    """Tests that only staff and contributors can access a given URL."""
+    client = Client()
+    staff_user = User.objects.get(username='adam')
+    contributor_user = User.objects.get(username='bob')
+    nonstaff_noncontributor_user = User.objects.get(username='community')
+    # set the contributor as a contributor
+    project.contributors.add(contributor_user)
+    # test that all users have the expected permissions
+    ok_(staff_user.is_staff)
+    ok_(contributor_user in project.contributors.all() and not contributor_user.is_staff)
+    ok_(not nonstaff_noncontributor_user.is_staff and \
+        nonstaff_noncontributor_user not in project.contributors.all())
+    # try accessing as a staff user
+    client.login(username='adam', password='abc')
+    response = client.get(project_url)
+    ok_(response.status_code is 200, 'Staff should be able to ' + action + ' the project.')
+    client.logout()
+    # try accessing as a contributor
+    client.login(username='bob', password='abc')
+    response = client.get(project_url)
+    ok_(response.status_code is 200, 'Contributors should be able to ' + action + ' the project.')
+    client.logout()
+    # try accessing as a nonstaff noncontributor
+    client.login(username='community', password='abc')
+    response = client.get(project_url)
+    ok_(response.status_code is not 200,
+        'Nonstaff-noncontributors should not be able to ' + action + ' the project.')
+    client.logout()
+
 class TestProjectUpdateView(TestCase):
     """Tests updating a project as a user."""
 
@@ -264,31 +294,7 @@ class TestProjectUpdateView(TestCase):
     def test_staff_or_contributor_only(self):
         """Projects should only be updated by staff or project contributors."""
         project_update_url = self.project.get_absolute_url() + 'update/'
-        client = Client()
-        staff_user = User.objects.get(username='adam')
-        contributor_user = User.objects.get(username='bob')
-        nonstaff_noncontributor_user = User.objects.get(username='community')
-        ok_(staff_user.is_staff)
-        # set the contributor as a contributor
-        self.project.contributors.add(contributor_user)
-        ok_(contributor_user in self.project.contributors.all())
-        ok_(not nonstaff_noncontributor_user.is_staff and \
-            nonstaff_noncontributor_user not in self.project.contributors.all())
-        # try accessing as a staff user
-        client.login(username='adam', password='abc')
-        response = client.get(project_update_url)
-        ok_(response.status_code is 200, 'Staff should be able to update the project.')
-        client.logout()
-        # try accessing as a contributor
-        client.login(username='bob', password='abc')
-        response = client.get(project_update_url)
-        ok_(response.status_code is 200, 'Contributors should be able to update the project.')
-        client.logout()
-        # try accessing as a nonstaff noncontributor
-        client.login(username='community', password='abc')
-        response = client.get(project_update_url)
-        ok_(response.status_code is not 200,
-            'Nonstaff-noncontributors should not be able to update the project.')
+        staff_and_contributors_only(self.project, project_update_url, 'update')
 
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""
@@ -341,30 +347,6 @@ class TestProjectDeleteView(TestCase):
         self.assertRedirects(response, redirect_url)
 
     def test_staff_or_contributor_only(self):
-        """Projects should only be updated by staff or project contributors."""
+        """Projects should only be deleted by staff or project contributors."""
         project_delete_url = self.project.get_absolute_url() + 'delete/'
-        client = Client()
-        staff_user = User.objects.get(username='adam')
-        contributor_user = User.objects.get(username='bob')
-        nonstaff_noncontributor_user = User.objects.get(username='community')
-        ok_(staff_user.is_staff)
-        # set the contributor as a contributor
-        self.project.contributors.add(contributor_user)
-        ok_(contributor_user in self.project.contributors.all())
-        ok_(not nonstaff_noncontributor_user.is_staff and \
-            nonstaff_noncontributor_user not in self.project.contributors.all())
-        # try accessing as a staff user
-        client.login(username='adam', password='abc')
-        response = client.get(project_delete_url)
-        ok_(response.status_code is 200, 'Staff should be able to update the project.')
-        client.logout()
-        # try accessing as a contributor
-        client.login(username='bob', password='abc')
-        response = client.get(project_delete_url)
-        ok_(response.status_code is 200, 'Contributors should be able to update the project.')
-        client.logout()
-        # try accessing as a nonstaff noncontributor
-        client.login(username='community', password='abc')
-        response = client.get(project_delete_url)
-        ok_(response.status_code is not 200,
-            'Nonstaff-noncontributors should not be able to update the project.')
+        staff_and_contributors_only(self.project, project_delete_url, 'delete')
