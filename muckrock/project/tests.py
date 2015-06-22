@@ -164,13 +164,13 @@ class TestProjectCreateView(TestCase):
             'description': project_description,
             'image': project_image
         })
+        eq_(Project.objects.count(), 0, 'There should be no projects.')
         # When I submit the form, I expect the project to be made and to be redirected to it.
         response = self.client.post(reverse('project-create'), new_project_form.data)
-        new_project = Project.objects.get(title=project_title)
-        ok_(new_project, 'Should create the project.')
+        eq_(Project.objects.count(), 1, 'There should now be one project.')
         eq_(response.status_code, 302,
             'Should redirect to the newly created project.')
-        self.assertRedirects(response, new_project.get_absolute_url())
+        self.assertRedirects(response, Project.objects.all()[0].get_absolute_url())
 
     def test_requires_login(self):
         """Logged out users cannot create projects."""

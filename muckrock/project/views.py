@@ -4,6 +4,7 @@ Views for the project application
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
@@ -36,6 +37,16 @@ class ProjectUpdateView(UpdateView):
     model = Project
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
+
+    def _is_editable_by(self, user):
+        project = self.get_object()
+        return project.has_contributor(user) or user.is_staff
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        if not self._is_editable_by(self.request.user):
+            raise exceptions.PermissionDenied()
+        return super(ProjectUpdateView, self).dispatch(*args, **kwargs)
 
 class ProjectDeleteView(DeleteView):
     """Delete a project instance"""
