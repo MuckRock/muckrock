@@ -134,6 +134,25 @@ class TestProject(TestCase):
         ok_(project.has_contributor(user1))
         ok_(not project.has_contributor(user2))
 
+    def test_suggest_requests(self):
+        """
+        Projects should recommend requests to be added to them.
+        They should recommend requests that intersect both the
+        project's set of contributors and the project's set of tags.
+        But projects should not recommend requests that they already contain.
+        """
+        ok_(False, 'No test written for requst suggestions.')
+
+    def test_suggest_articles(self):
+        """
+        Projects should recommend articles to be added to them.
+        They should recommend articles that intersect both the
+        project's set of contributors and the project's set of tags.
+        But projects should not recommend articles that they already contain.
+        """
+        ok_(False, 'No test written for article suggestions.')
+
+
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""
 
