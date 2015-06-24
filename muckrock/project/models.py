@@ -76,15 +76,10 @@ class Project(models.Model):
 
     def suggest_requests(self):
         """Returns a list of requests that may be related to this project."""
-        requests = []
-        for contributor in self.contributors.all():
-            requests += list(
-                FOIARequest.objects.filter(user=contributor, tags__name__in=self.tags.names())
-            )
-        # Ignores requests that are already added to the project
-        for foia_request in self.requests.all():
-            if foia_request in requests:
-                requests.remove(foia_request)
+        requests = list(FOIARequest.objects.filter(
+            user__in=self.contributors.all(),
+            tags__name__in=self.tags.names()
+        ).exclude(projects=self))
         return requests
 
     def suggest_articles(self):
@@ -92,9 +87,5 @@ class Project(models.Model):
         articles = list(Article.objects.filter(
             authors__in=self.contributors.all(),
             tags__name__in=self.tags.names(),
-            ).exclude(projects=self))
-        # Ignores articles that are already added to the project
-        # for article in articles:
-        #    if self in article.projects.all():
-        #        articles.remove(article)
+        ).exclude(projects=self))
         return articles
