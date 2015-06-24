@@ -17,6 +17,7 @@ from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
 import logging
+import mock
 import nose
 
 ok_ = nose.tools.ok_
@@ -141,7 +142,20 @@ class TestProject(TestCase):
         project's set of contributors and the project's set of tags.
         But projects should not recommend requests that they already contain.
         """
-        ok_(False, 'No test written for requst suggestions.')
+        # set up data
+        tags = u'a'
+        user = User.objects.get(pk=1)
+        project = self.basic_project
+        project.contributors.add(user)
+        project.tags.add(tags)
+        test_request = FOIARequest.objects.get(pk=1)
+        test_request.user = user
+        test_request.tags.add(tags)
+        # since they have the same user and tags, the project should suggest the request
+        ok_(test_request in project.suggest_requests())
+        # add the request to the project, then try again. it should not be sugggested.
+        project.requests.add(test_request)
+        ok_(test_request not in project.suggest_requests())
 
     def test_suggest_articles(self):
         """
