@@ -164,8 +164,22 @@ class TestProject(TestCase):
         project's set of contributors and the project's set of tags.
         But projects should not recommend articles that they already contain.
         """
-        ok_(False, 'No test written for article suggestions.')
-
+        # set up data
+        tags = u'a'
+        user = User.objects.get(pk=1)
+        project = self.basic_project
+        project.contributors.add(user)
+        project.tags.add(tags)
+        test_article = Article.objects.get(pk=1)
+        test_article.authors.add(user)
+        test_article.tags.add(tags)
+        # since they have the same user and tags, the project should suggest the article.
+        ok_(test_article in project.suggest_articles())
+        logging.info(project.suggest_articles())
+        # add the article to the project, then try again. it should not be suggested
+        project.articles.add(test_article)
+        ok_(test_article not in project.suggest_articles())
+        logging.info(project.suggest_articles())
 
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""

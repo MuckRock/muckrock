@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.text import slugify
 
 from muckrock.foia.models import FOIARequest
+from muckrock.news.models import Article
 
 import taggit
 
@@ -85,3 +86,15 @@ class Project(models.Model):
             if foia_request in requests:
                 requests.remove(foia_request)
         return requests
+
+    def suggest_articles(self):
+        """Returns a list of articles that may be related to this project."""
+        articles = list(Article.objects.filter(
+            authors__in=self.contributors.all(),
+            tags__name__in=self.tags.names(),
+            ).exclude(projects=self))
+        # Ignores articles that are already added to the project
+        # for article in articles:
+        #    if self in article.projects.all():
+        #        articles.remove(article)
+        return articles
