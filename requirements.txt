@@ -5,7 +5,6 @@ BeautifulSoup==3.2.1
 Django==1.8.2
 Markdown==2.3.1
 Pillow==2.8.2
-South==1.0.2
 Unidecode==0.04.14
 Whoosh==2.6.0
 argparse==1.2.1
