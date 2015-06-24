@@ -115,7 +115,6 @@ class Project(models.Model):
         FOIARequest,
         related_name='foias',
         blank=True,
-        null=True
     )
 
     def __unicode__(self):

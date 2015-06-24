@@ -50,6 +50,7 @@ class AgencyAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Agency
+        fields = '__all__'
 
 
 class AgencyAdmin(VersionAdmin):

@@ -8,7 +8,6 @@ from django.contrib import admin, messages
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.urlresolvers import reverse
-from django.forms.models import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -41,6 +40,7 @@ class FOIAFileAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = FOIAFile
+        fields = '__all__'
 
     @staticmethod
     def _only_ascii(text):
@@ -61,34 +61,14 @@ class FOIAFileAdminForm(forms.ModelForm):
         return inner
 
 
-class BaseInlinePrefetchedFormSet(BaseInlineFormSet):
-    """A formset for prefetched models
-    This is pretty gross, but there are no hooks in here to do this without overriding this class
-    This should be checked whenever we upgrade version of Django"""
-    # pylint: disable=no-member
-    # pylint: disable=too-many-arguments
-    def __init__(self, data=None, files=None, instance=None,
-                 save_as_new=False, prefix=None, queryset=None, **kwargs):
-        from django.db.models.fields.related import RelatedObject
-        if instance is None:
-            self.instance = self.fk.rel.to()
-        else:
-            self.instance = instance
-        self.save_as_new = save_as_new
-        # is there a better way to get the object descriptor?
-        self.rel_name = RelatedObject(self.fk.rel.to, self.model, self.fk).get_accessor_name()
-        super(BaseInlinePrefetchedFormSet, self).__init__(data, files, prefix=prefix,
-                                                queryset=queryset, **kwargs)
-
-
 class FOIAFileInline(NestedTabularInline):
     """FOIA File Inline admin options"""
     model = FOIAFile
     form = FOIAFileAdminForm
-    #formset = BaseInlinePrefetchedFormSet
     readonly_fields = ['doc_id', 'pages']
     exclude = ('foia', 'access', 'source')
     extra = 0
+
 
 class FOIACommunicationInline(NestedTabularInline):
     """FOIA Communication Inline admin options"""
@@ -123,6 +103,7 @@ class FOIARequestAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = FOIARequest
+        fields = '__all__'
 
 
 class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):

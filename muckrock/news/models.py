@@ -36,7 +36,11 @@ class Article(models.Model):
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
     body = models.TextField('Body text')
     authors = models.ManyToManyField(User, related_name='authored_articles')
-    editors = models.ManyToManyField(User, related_name='edited_articles', blank=True, null=True)
+    editors = models.ManyToManyField(
+            User,
+            related_name='edited_articles',
+            blank=True,
+            )
     publish = models.BooleanField(
         'Publish on site',
         default=False,
@@ -46,7 +50,6 @@ class Article(models.Model):
         FOIARequest,
         related_name='articles',
         blank=True,
-        null=True
     )
     image = ThumbnailerImageField(
         upload_to='news_images',

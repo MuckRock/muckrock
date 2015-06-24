@@ -26,7 +26,11 @@ class FOIAMultiRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS[:2])
     embargo = models.BooleanField(default=False)
     requested_docs = models.TextField(blank=True)
-    agencies = models.ManyToManyField(Agency, related_name='agencies', blank=True, null=True)
+    agencies = models.ManyToManyField(
+            Agency,
+            related_name='agencies',
+            blank=True,
+            )
 
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 

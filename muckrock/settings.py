@@ -164,7 +164,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'pingback.middleware.PingbackMiddleware',
     'sesame.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
@@ -212,10 +211,8 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    #'staticfiles',
     'celery_haystack',
     'compressor',
-    'dbsettings',
     'debug_toolbar',
     'django_tablib',
     'djangosecure',
@@ -224,11 +221,11 @@ INSTALLED_APPS = (
     'filer',
     'gunicorn',
     'haystack',
+    'dbsettings',
     'localflavor',
     'markdown_deux',
     'mathfilters',
     'news_sitemaps',
-    'pingback',
     'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
@@ -237,7 +234,6 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
-    #'urlauth',
     'django_xmlrpc',
     'muckrock.accounts',
     'muckrock.foia',
@@ -311,9 +307,11 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
 
+DBSETTINGS_USE_SITES = False
+
 if DEBUG:
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-    SOUTH_TESTS_MIGRATE = False
+    pass
+    #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',

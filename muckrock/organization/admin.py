@@ -12,6 +12,7 @@ import stripe
 
 from muckrock.organization.models import Organization
 
+
 class OrganizationAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
     owner = autocomplete_light.ModelChoiceField(
@@ -30,6 +31,8 @@ class OrganizationAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Organization
+        fields = '__all__'
+
 
 class OrganizationAdmin(VersionAdmin):
     """Organization Admin"""

@@ -19,6 +19,7 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Profile
+        fields = '__all__'
 
 
 class UserChangeForm(ProfileForm):

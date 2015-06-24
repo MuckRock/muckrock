@@ -11,6 +11,7 @@ import autocomplete_light
 
 from muckrock.news.models import Article, Photo
 
+
 class AuthorListFilter(admin.SimpleListFilter):
     """Filter by authors"""
     title = 'Author'
@@ -43,9 +44,11 @@ class ArticleAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Article
+        fields = '__all__'
 
     class Media:
         css = {'all': ('css/admin/epiceditor.css',)}
+
 
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""

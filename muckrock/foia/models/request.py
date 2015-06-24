@@ -6,7 +6,7 @@ Models for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import send_mass_mail, EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.db import models, connection, transaction
+from django.db import models, connection
 from django.db.models import Q, Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
@@ -162,13 +162,11 @@ class FOIARequest(models.Model):
         User,
         related_name='read_access',
         blank=True,
-        null=True
     )
     edit_collaborators = models.ManyToManyField(
         User,
         related_name='edit_access',
         blank=True,
-        null=True
     )
 
     objects = FOIARequestQuerySet.as_manager()
@@ -318,7 +316,6 @@ class FOIARequest(models.Model):
         cursor.execute("UPDATE foia_foiarequest "
                        "SET mail_id = CASE WHEN mail_id='' THEN %s ELSE mail_id END "
                        "WHERE id = %s", [mail_id, self.pk])
-        transaction.commit_unless_managed()
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 

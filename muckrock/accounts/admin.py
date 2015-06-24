@@ -35,6 +35,7 @@ class ProfileAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=R0903
         model = Profile
+        fields = '__all__'
 
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""

@@ -76,7 +76,7 @@ class NestedModelAdmin(ModelAdmin):
 
 
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction.atomic
     def add_view(self, request, form_url='', extra_context=None):
         """The 'add' admin view for this model."""
         # pylint: disable=protected-access
@@ -155,7 +155,7 @@ class NestedModelAdmin(ModelAdmin):
 
 
     @csrf_protect_m
-    @transaction.commit_on_success
+    @transaction.atomic
     def change_view(self, request, object_id, extra_context=None):
         "The 'change' admin view for this model."
         model = self.model
