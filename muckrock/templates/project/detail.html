@@ -3,13 +3,18 @@
 {% block type %}project{% endblock %}
 
 {% block header %}
+    {{ project.image }}
     <h1>{{ project.title }}</h1>
-{% endblock %}
-
-{% block aside %}
+    <h2>Contributors</h2>
     <ul class="contributors">
     {% for contributor in project.contributors.all %}
         <li>{{ contributor.get_full_name }}</li>
     {% endfor %}
     </ul>
+    <h2>Description</h2>
+    <p>{{ project.description }}</p>
+{% endblock %}
+
+{% block aside %}
+    <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="button">Edit</a>
 {% endblock %}
