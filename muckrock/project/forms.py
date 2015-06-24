@@ -11,7 +11,7 @@ class ProjectCreateForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'image', 'contributors', 'tags']
+        fields = ['title', 'description', 'image', 'contributors', 'tags', 'private']
 
 class ProjectUpdateForm(forms.ModelForm):
     """Form for updating a project instance"""
