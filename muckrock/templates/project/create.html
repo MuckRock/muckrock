@@ -1,1 +1,61 @@
 {% extends 'forms/base_form.html' %}
+
+{% block form-title %}Create a new project{% endblock %}
+
+{% block form-form %}
+<form method="post">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <object class="failure panel">
+    {{ form.non_field_errors }}
+    </object>
+    {% endif %}
+    <div class="hidden-fields">
+    {% for field in form.hidden_fields %}
+        {{ field }}
+    {% endfor %}
+    </div>
+    <div class="visible-fields">
+    {% for field in form.visible_fields %}
+        <fieldset class="{{ field.label|lower }}{% if field.field.required %} required{% endif %}">
+            <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+            {{ field.errors }}
+            {{ field }}
+            {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+        </fieldset>
+    {% endfor %}
+    </div>
+
+    <div class="social preview">
+        <h2>Here is how this project will appear when shared.</h2>
+        <p>
+            Make sure to optimize it for display.
+            Make sure the title and description are clear, concise, and compelling.
+            Make sure to include an attractive image!
+            Or else your project will never succeed.
+        </p>
+        <section class="facebook">
+            <img src="placeholder_project_image.png" />
+            <p class="title">Project Title</p>
+            <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+            <p class="attribution">muckrock.com</p>
+        </section>
+        <section class="twitter">
+            <img src="placeholder_project_image.png" />
+            <p class="title">Project Title</p>
+            <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+            <p class="attribution">muckrock.com</p>
+        </section>
+    </div>
+
+    <button class="primary">Create</button>
+</form>
+{% endblock form-form %}
+
+{% block scripts %}
+
+<script type="text/javascript">
+    console.log('hello world');
+</script>
+
+{% endblock scripts %}
