@@ -35,13 +35,13 @@
             Or else your project will never succeed.
         </p>
         <section class="facebook">
-            <img src="placeholder_project_image.png" />
+            <img src="placeholder_project_image.png" class="image" />
             <p class="title">Project Title</p>
             <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
             <p class="attribution">muckrock.com</p>
         </section>
         <section class="twitter">
-            <img src="placeholder_project_image.png" />
+            <img src="placeholder_project_image.png" class="image" />
             <p class="title">Project Title</p>
             <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
             <p class="attribution">muckrock.com</p>
@@ -55,7 +55,24 @@
 {% block scripts %}
 
 <script type="text/javascript">
-    console.log('hello world');
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('.social.preview .image').attr('src', e.target.result);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    $("#id_title").on("keydown keyup change", function(){
+        $('.social.preview .title').text(this.value);
+    });
+    $("#id_description").on("keydown keyup change", function(){
+        $('.social.preview .description').text(this.value);
+    });
+    $("#id_image").change(function(){
+        previewImage(this);
+    });
 </script>
 
 {% endblock scripts %}
