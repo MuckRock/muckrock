@@ -152,11 +152,11 @@ class TestProject(TestCase):
         test_request.tags.add(tags)
         # since they have the same user and tags, the project should suggest the request
         ok_(test_request in project.suggest_requests())
-        logging.info(project.suggest_requests())
+        logging.debug(project.suggest_requests())
         # add the request to the project, then try again. it should not be suggested
         project.requests.add(test_request)
         ok_(test_request not in project.suggest_requests())
-        logging.info(project.suggest_requests())
+        logging.debug(project.suggest_requests())
 
     def test_suggest_articles(self):
         """
@@ -176,11 +176,11 @@ class TestProject(TestCase):
         test_article.tags.add(tags)
         # since they have the same user and tags, the project should suggest the article.
         ok_(test_article in project.suggest_articles())
-        logging.info(project.suggest_articles())
+        logging.debug(project.suggest_articles())
         # add the article to the project, then try again. it should not be suggested
         project.articles.add(test_article)
         ok_(test_article not in project.suggest_articles())
-        logging.info(project.suggest_articles())
+        logging.debug(project.suggest_articles())
 
 class TestProjectCreateView(TestCase):
     """Tests creating a project as a user."""
