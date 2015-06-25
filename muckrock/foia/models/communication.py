@@ -96,7 +96,7 @@ class FOIACommunication(models.Model):
         """
         if not foia_pks:
             raise ValueError('Expected a request to move the communication to.')
-        if type(foia_pks) is not type(list()):
+        if not isinstance(foia_pks, list):
             foia_pks = [foia_pks]
         move_to_request = get_object_or_404(FOIARequest, pk=foia_pks[0])
         self.foia = move_to_request
@@ -138,11 +138,18 @@ class FOIACommunication(models.Model):
             this_clone.foia = request
             this_clone.save()
             for file_ in files:
+                original_file_id = file_.id
                 file_.pk = None
                 file_.foia = request
-                file_.comm = self
+                file_.comm = this_clone
                 # make a copy of the file on the storage backend
-                new_ffile = ContentFile(file_.ffile.read())
+                try:
+                    new_ffile = ContentFile(file_.ffile.read())
+                except ValueError:
+                    error_msg = ('FOIAFile #%s has no data in its ffile field. '
+                                'It has not been cloned.')
+                    logging.error(error_msg, original_file_id)
+                    continue
                 new_ffile.name = file_.ffile.name
                 file_.ffile = new_ffile
                 file_.save()
