@@ -37,20 +37,25 @@ class TestCommunicationMove(test.TestCase):
         self.file.save()
         eq_(self.comm.files.count(), 1)
 
-    def test_move_single_foia(self):
+    def test_move_single_comm(self):
         """Should change the request associated with the communication."""
-        comms = self.comm.move(self.foia2.id)
-        eq_(len(comms), 1,
+        moved_comms = self.comm.move(self.foia2.id)
+        eq_(len(moved_comms), 1,
             'Move function should only return one item')
-        eq_(comms[0], self.comm,
+        moved_comm = moved_comms[0]
+        eq_(moved_comm, self.comm,
             'Communication returned should be the same as the one acted on.')
-        eq_(self.comm.foia.id, self.foia2.id,
+        eq_(moved_comm.foia.id, self.foia2.id,
             'Should change the FOIA associated with the communication.')
-        logging.debug('File foia: %d; Expected: %d', self.file.foia.id, self.foia2.id)
-        eq_(self.file.foia.id, self.foia2.id,
+        moved_files = moved_comm.files.all()
+        moved_file = moved_files[0]
+        logging.debug('File foia: %d; Expected: %d', moved_file.foia.id, self.foia2.id)
+        eq_(moved_file.foia, self.foia2,
             'Should also change the files to reference the destination FOIA.')
+        eq_(moved_file.comm, self.comm,
+            'Should not have changed the communication associated with the file.')
 
-    def test_move_multi_foias(self):
+    def test_move_multi_comms(self):
         """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
         file_count = self.comm.files.count()
