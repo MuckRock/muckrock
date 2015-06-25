@@ -58,7 +58,6 @@ class TestCommunicationMove(test.TestCase):
     def test_move_multi_comms(self):
         """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
-        file_count = self.comm.files.count()
         comms = self.comm.move([self.foia1.id, self.foia2.id])
         # + 1 communications created
         updated_comm = FOIACommunication.objects.get(pk=self.comm.pk)
