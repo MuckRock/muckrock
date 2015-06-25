@@ -5,11 +5,14 @@ Tests for the FOIACommunication model
 import datetime
 
 from django import test
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.validators import ValidationError
 
 from muckrock.foia.models.communication import FOIACommunication
 from muckrock.foia.models.request import FOIARequest
+from muckrock.foia.models.file import FOIAFile
 
+import logging
 import nose
 
 ok_ = nose.tools.ok_
@@ -21,30 +24,43 @@ class TestCommunicationMove(test.TestCase):
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
+                'test_foiacommunications.json', 'test_foiafiles.json']
 
     def setUp(self):
-        self.comm = FOIACommunication.objects.get(id=1)
-        self.comm_pk = self.comm.pk
         self.foia1 = FOIARequest.objects.get(id=1)
         self.foia2 = FOIARequest.objects.get(id=2)
+        self.comm = FOIACommunication.objects.get(id=1)
+        # add a file to the communication
+        self.file = FOIAFile.objects.get(id=1)
+        self.file.comm = self.comm
+        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
+        self.file.save()
+        eq_(self.comm.files.count(), 1)
 
-    def test_move_single_foia(self):
+    def test_move_single_comm(self):
         """Should change the request associated with the communication."""
-        comms = self.comm.move(self.foia2.id)
-        eq_(self.comm.foia.id, self.foia2.id,
+        moved_comms = self.comm.move(self.foia2.id)
+        eq_(len(moved_comms), 1,
+            'Move function should only return one item')
+        moved_comm = moved_comms[0]
+        eq_(moved_comm, self.comm,
+            'Communication returned should be the same as the one acted on.')
+        eq_(moved_comm.foia.id, self.foia2.id,
             'Should change the FOIA associated with the communication.')
-        for file_ in self.comm.files.all():
-            eq_(file_.foia.id, self.foia2.id,
-                'Should also change the files to reference the destination FOIA.')
-        eq_(self.comm, comms[0], 'Should this comm as the one operated on.')
+        moved_files = moved_comm.files.all()
+        moved_file = moved_files[0]
+        logging.debug('File foia: %d; Expected: %d', moved_file.foia.id, self.foia2.id)
+        eq_(moved_file.foia, self.foia2,
+            'Should also change the files to reference the destination FOIA.')
+        eq_(moved_file.comm, self.comm,
+            'Should not have changed the communication associated with the file.')
 
-    def test_move_multi_foias(self):
+    def test_move_multi_comms(self):
         """Should move the comm to the first request, then clone it to the rest."""
         comm_count = FOIACommunication.objects.count()
         comms = self.comm.move([self.foia1.id, self.foia2.id])
         # + 1 communications created
-        updated_comm = FOIACommunication.objects.get(pk=self.comm_pk)
+        updated_comm = FOIACommunication.objects.get(pk=self.comm.pk)
         eq_(updated_comm.foia.id, self.foia1.id,
             'The communication should be moved to the first listed request.')
         eq_(FOIACommunication.objects.count(), comm_count + 1,
@@ -61,7 +77,7 @@ class TestCommunicationMove(test.TestCase):
         """Should raise an error if trying to call move on invalid request pks."""
         original_request = self.comm.foia.id
         self.comm.move('abc')
-        eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
+        eq_(FOIACommunication.objects.get(pk=self.comm.pk).foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
     @raises(ValueError)
@@ -69,18 +85,32 @@ class TestCommunicationMove(test.TestCase):
         """Should raise an error if trying to call move on an empty list."""
         original_request = self.comm.foia.id
         self.comm.move([])
-        eq_(FOIACommunication.objects.get(pk=self.comm_pk).foia.id, original_request,
+        eq_(FOIACommunication.objects.get(pk=self.comm.pk).foia.id, original_request,
             'If something goes wrong, the move should not complete.')
+
+    def test_move_missing_ffile(self):
+        """
+        The move operation should not crash when FOIAFile has a null ffile field.
+        """
+        self.file.ffile = None
+        self.file.save()
+        ok_(not self.comm.files.all()[0].ffile)
+        self.comm.move(self.foia2.id)
 
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
 
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
+                'test_foiacommunications.json', 'test_foiafiles.json']
 
     def setUp(self):
         self.comm = FOIACommunication.objects.get(id=1)
+        self.file = FOIAFile.objects.get(id=1)
+        self.file.comm = self.comm
+        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
+        self.file.save()
+        ok_(self.file in self.comm.files.all())
 
     def test_clone_single(self):
         """Should duplicate the communication to the request."""
@@ -119,6 +149,15 @@ class TestCommunicationClone(test.TestCase):
     def test_clone_bad_pk(self):
         """Should throw an error if bad foia PK given"""
         self.comm.clone('abc')
+
+    def test_clone_missing_ffile(self):
+        """
+        The clone operation should not crash when FOIAFile has a null ffile field.
+        """
+        self.file.ffile = None
+        self.file.save()
+        ok_(not self.comm.files.all()[0].ffile)
+        self.comm.clone(2)
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
