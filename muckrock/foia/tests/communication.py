@@ -89,6 +89,15 @@ class TestCommunicationMove(test.TestCase):
         eq_(FOIACommunication.objects.get(pk=self.comm.pk).foia.id, original_request,
             'If something goes wrong, the move should not complete.')
 
+    def test_move_missing_ffile(self):
+        """
+        The move operation should not crash when FOIAFile has a null ffile field.
+        """
+        self.file.ffile = None
+        self.file.save()
+        ok_(not self.comm.files.all()[0].ffile)
+        self.comm.move(self.foia2.id)
+
 class TestCommunicationClone(test.TestCase):
     """Tests the clone method"""
 
@@ -141,6 +150,15 @@ class TestCommunicationClone(test.TestCase):
     def test_clone_bad_pk(self):
         """Should throw an error if bad foia PK given"""
         self.comm.clone('abc')
+
+    def test_clone_missing_ffile(self):
+        """
+        The clone operation should not crash when FOIAFile has a null ffile field.
+        """
+        self.file.ffile = None
+        self.file.save()
+        ok_(not self.comm.files.all()[0].ffile)
+        self.comm.clone(2)
 
 class TestCommunicationResend(test.TestCase):
     """Tests the resend method"""
