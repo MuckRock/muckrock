@@ -74,7 +74,7 @@
         .list-filters {
             background: $color-odd-background;
             margin-bottom: $base-margin/2;
-            @extend %border;
+            @include border;
             padding: $base-padding/2;
             & select, & input[type=text] {
                 width: 100%;

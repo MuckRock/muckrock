@@ -1,9 +1,7 @@
-%border { border: $base-border-width solid $color-grey; }
-
 // Textbox
 %textbox {
     @include box-sizing(border-box);
-    @extend %border;
+    @include border;
     @include border-radius;
     @include outer-container;
     ul {

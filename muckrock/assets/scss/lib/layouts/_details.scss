@@ -244,7 +244,7 @@
                 display: block;
                 float: left;
                 padding: $vertical-rhythm/4 $base-vertical-rhythm/2;
-                @extend %border;
+                @include border;
                 border-left: none;
                 border-bottom: none;
                 cursor: pointer;
