@@ -18,7 +18,7 @@
 */
 
 .list {
-    @extend %body;
+    @include outer-container;
     .list-navigation {
         @include grid-columns(4, 2, 3);
         .list-head .list-title {

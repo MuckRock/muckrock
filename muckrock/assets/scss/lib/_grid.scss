@@ -58,12 +58,6 @@ html, body { min-height: 100%; }
     @include media($large-layout) { @include span-columns(9); }
 }
 
-%body {
-    display: block;
-    overflow: hidden;
-    @include outer-container;
-}
-
 %base-spacing {
     padding: 0 $base-padding/2;
     @include media($medium-layout) { padding: 0 $base-padding; }
