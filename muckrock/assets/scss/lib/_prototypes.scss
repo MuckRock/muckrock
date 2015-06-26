@@ -42,24 +42,3 @@
 %controls {
     @extend %panel;
 }
-
-%detail {
-    @extend %body;
-    margin: 0 auto 1.5em;
-    .header-container {
-        @include outer-container;
-        .main {
-            @extend %two-thirds;
-        }
-        .aside {
-            @extend %third;
-        }
-    }
-    .body {
-        @include outer-container;
-    }
-    .actions {
-        @extend %controls;
-    }
-}
-
