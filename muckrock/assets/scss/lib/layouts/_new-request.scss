@@ -1,28 +1,28 @@
+$color-title: #F26C5A;
+$color-jurisdiction: #5A90F2;
+$color-jurisdiction-picker: darken($color-jurisdiction, 10%);
+$color-agency: darken($color-jurisdiction-picker, 10%);
+
 .new-request {
     @include outer-container;
+    @include row;
     header {
-        @include row;
-        h1, summary {
-            @extend %half;
-        }
+        @extend %third;
     }
-
     .create-request {
+        @extend %two-thirds;
         @include border-radius;
-        background-color: $color-grey;
-        overflow: hidden;
+        background-color: $color-grey-6;
     }
-
     fieldset {
         margin: 0;
-        padding: $base-vertical-rhythm;
+        padding: $vertical-rhythm;
     }
-
-    $color-title: #F26C5A;
-    $color-jurisdiction: #5A90F2;
     .title {
         @include border-top-radius($base-border-radius);
         background-color: $color-title;
+        border: 2px solid $color-red-dark;
+        border-bottom: none;
         label { display: none; }
         input {
             width: 100%;
@@ -30,21 +30,24 @@
             padding: 0;
             border: none;
             border-radius: 0;
-            border-bottom: 2*$base-border-width dotted lighten($color-title, 20%);
-            @include font-sizing(2,3);
-            @include placeholder { color: lighten($color-title, 15%); }
-            color: $color-white; // darken($color-title, 45%);
+            border-bottom: $base-border-width dotted lighten($color-title, 20%);
+            color: $color-white;
+            font-size: $font-size-6;
+            @include placeholder {
+                color: lighten($color-title, 15%);
+            }
         }
     }
-
     .document {
+        border-left: 2px solid $color-grey;
+        border-right: 2px solid $color-grey;
         padding: 0;
         label { display: none; }
         textarea {
             display: block;
             width: 100%;
             height: 10em;
-            padding: $base-vertical-rhythm;
+            padding: $vertical-rhythm;
             resize: none;
             border: none;
             border-radius: 0;
@@ -53,11 +56,11 @@
             }
         }
     }
-
-    $color-jurisdiction-picker: darken($color-jurisdiction, 10%);
     fieldset.state, fieldset.local {
         width: 100%;
         background-color: $color-jurisdiction-picker;
+        border-left: 2px solid $color-blue-dark;
+        border-right: 2px solid $color-blue-dark;
         label { display: none; }
         input {
             display: block;
@@ -71,6 +74,8 @@
         padding: 0;
         color: $color-white;
         background-color: $color-jurisdiction;
+        border-left: 2px solid $color-blue-dark;
+        border-right: 2px solid $color-blue-dark;
         width: 100%;
         max-width: 100%;
         h2 { margin: 0; }
@@ -115,8 +120,6 @@
             display: none;
         }
     }
-
-    $color-agency: darken($color-jurisdiction-picker, 10%);
     .agency {
         display: none;
         margin: 0;
@@ -124,14 +127,7 @@
         color: $color-white;
         background-color: $color-agency;
 
-        label {
-            display: block;
-            @extend dfn;
-            color: $color-white;
-            margin: 0;
-            font-weight: $font-weight-light;
-            font-size: 1rem;
-        }
+        label { color: $color-white; }
         input {
             width: 100%;
             background-color: $color-agency;
@@ -199,6 +195,8 @@
         padding: $base-padding;
         @include border-bottom-radius($base-border-radius);
         @include row;
+        border: 2px solid $color-grey-2;
+        border-top: none;
         input {
             @extend %quarter;
         }
