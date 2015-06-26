@@ -8,7 +8,7 @@
     }
 
     .create-request {
-        @extend %border-radius;
+        @include border-radius;
         background-color: $color-grey;
         overflow: hidden;
     }

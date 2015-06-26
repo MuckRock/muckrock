@@ -54,7 +54,7 @@ ul.notifications {
                     font-size: 0.8em;
                     margin: 0 1.5em;
                     padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
-                    @extend %border-radius;
+                    @include border-radius;
                     &:hover { opacity: 0.9; }
                 }
             }

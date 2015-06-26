@@ -6,7 +6,7 @@
     margin-bottom: $base-vertical-rhythm/2;
     padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
     @extend %border;
-    @extend %border-radius;
+    @include border-radius;
     &:first-child {
         margin-left: 0;
     }

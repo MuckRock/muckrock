@@ -1,11 +1,10 @@
 %border { border: $base-border-width solid $color-grey; }
-%border-radius { border-radius: $base-border-radius; }
 
 // Textbox
 %textbox {
     @include box-sizing(border-box);
     @extend %border;
-    @extend %border-radius;
+    @include border-radius;
     @include outer-container;
     ul {
         list-style-type: none;

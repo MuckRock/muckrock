@@ -23,7 +23,7 @@
     display: block;
     max-width: 100%;
     margin: 5%;
-    @extend %border-radius;
+    @include border-radius;
     padding: $base-vertical-rhythm;
 
     background-color: $color-white;
