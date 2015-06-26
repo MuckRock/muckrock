@@ -11,16 +11,12 @@ html, body { min-height: 100%; }
 
 %full {
     @include omega;
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(6); }
-    @include media($large-layout) { @include span-columns(12); }
+    @include grid-columns(4, 6, 12);
 }
 
 %half {
     @include omega(2n);
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(3); }
-    @include media($large-layout) { @include span-columns(6); }
+    @include grid-columns(4, 3, 6);
 }
 
 %half-flip {
@@ -30,15 +26,11 @@ html, body { min-height: 100%; }
 
 %third {
     @include omega(3n);
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(2); }
-    @include media($large-layout) { @include span-columns(4); }
+    @include grid-columns(4, 2, 4);
 }
 
 %two-thirds {
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(4); }
-    @include media($large-layout) { @include span-columns(8); }
+    @include grid-columns(4, 4, 8);
 }
 
 %quarter {
@@ -53,9 +45,7 @@ html, body { min-height: 100%; }
 }
 
 %three-quarters {
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(6); }
-    @include media($large-layout) { @include span-columns(9); }
+    @include grid-columns(4, 6, 9);
 }
 
 %edge-to-edge {
