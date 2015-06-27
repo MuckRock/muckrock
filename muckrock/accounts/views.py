@@ -423,7 +423,7 @@ def stripe_webhook_v2(request):
                     'url': url,
                     'type': type_}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['info@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
         else:
             msg = EmailMessage(
@@ -438,7 +438,7 @@ def stripe_webhook_v2(request):
                     'url': url,
                     'type': type_}),
                 from_email='info@muckrock.com',
-                to=[email], bcc=['info@muckrock.com']
+                to=[email], bcc=['diagnostics@muckrock.com']
             )
         msg.send(fail_silently=False)
 
@@ -455,7 +455,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'attempt': 'final'}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['requests@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
             msg.send(fail_silently=False)
         else:
@@ -466,7 +466,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'attempt': attempt}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['requests@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
             msg.send(fail_silently=False)
 
