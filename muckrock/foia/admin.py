@@ -150,7 +150,11 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
-        # NOT saving here - saving after formset so that we can check for updates there first
+        # NOT saving here if changed
+        # saving after formset so that we can check for updates there first
+        if not change:
+            obj.save()
+
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""

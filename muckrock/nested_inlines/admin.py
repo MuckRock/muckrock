@@ -98,10 +98,10 @@ class NestedModelAdmin(ModelAdmin):
 
             formsets, inline_admin_formsets, media = \
                 self._nested_formsets(request, self, new_object,
-                    lambda FormSet, req, admin, inst, prefix, inline:
+                    lambda FormSet, req, admin, inst, prefix, queryset:
                         FormSet(data=req.POST, files=req.FILES, instance=inst,
                                 save_as_new=req.POST.has_key('_saveasnew'),
-                                prefix=prefix, queryset=inline.queryset(req)))
+                                prefix=prefix, queryset=queryset))
 
             if all_valid(formsets) and form_validated:
                 self.save_model(request, new_object, form, change=False)
@@ -126,9 +126,9 @@ class NestedModelAdmin(ModelAdmin):
 
             formsets, inline_admin_formsets, media = \
                 self._nested_formsets(request, self, None,
-                    lambda FormSet, req, admin, inst, prefix, inline:
+                    lambda FormSet, req, admin, inst, prefix, queryset:
                         FormSet(instance=admin.model(), prefix=prefix,
-                                queryset=inline.queryset(req)))
+                                queryset=queryset))
 
         adminForm = helpers.AdminForm(form, list(self.get_fieldsets(request)),
             self.prepopulated_fields, self.get_readonly_fields(request),
