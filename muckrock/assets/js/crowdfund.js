@@ -89,7 +89,7 @@ function prettifyAmountInput(input, pretty) {
     $(input).before(prettyInputElement);
     $(pretty).autoNumeric('init', {aSign:'$', pSign:'p'});
     $(pretty).autoNumeric('set', initialAmount/100.00);
-    $(pretty).keydown(function(e){
+    $(pretty).keyup(function(e){
         var value = $(this).autoNumeric('get') * 100;
         $(input).attr('value', value);
     });

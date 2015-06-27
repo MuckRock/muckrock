@@ -73,10 +73,9 @@ class CrowdfundRequestDetail(DetailView):
         crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
-        if request.user.is_authenticated() and show:
+        user = None
+        if request.user.is_authenticated():
             user = request.user
-        else:
-            user = None
         logging.debug(user)
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
