@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
     change_list_template = 'admin/jurisdiction/jurisdiction/change_list.html'
+    prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'level')
     list_filter = ['level']
     search_fields = ['name']
