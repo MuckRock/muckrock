@@ -441,29 +441,8 @@ class FOIARequest(models.Model):
         self.save()
 
         # whether it is automailed or not, notify the followers (but not the owner)
-        send_data = []
         for profile in self.followed_by.all():
-            link = profile.wrap_url(self.get_absolute_url())
-            msg = render_to_string(
-                'text/foia/mail.txt',
-                {
-                    'name': profile.user.get_full_name(),
-                    'title': self.title,
-                    'status': self.get_status_display(),
-                    'link': link,
-                    'follow': self.user != profile.user
-                }
-            )
-            send_data.append(
-                (
-                    '[MuckRock] FOI request "%s" has been updated' % self.title,
-                    msg,
-                    'info@muckrock.com',
-                    [profile.user.email]
-                )
-            )
-
-        send_mass_mail(send_data, fail_silently=False)
+            profile.notify(self)
 
     def followup(self):
         """Send a follow up email for this request"""
