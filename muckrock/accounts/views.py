@@ -409,6 +409,12 @@ def stripe_webhook_v2(request):
             url = '/foia/new/'
             subject = 'Payment received for professional account'
 
+        card = event_data.get('card')
+        if card:
+            last4 = card.get('last4')
+        else:
+            last4 = ''
+
         if user:
             msg = EmailMessage(
                 subject=subject,
@@ -416,7 +422,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': event_data.get('card', {}).get('last4'),
+                    'last4': last4,
                     'amount': amount,
                     'base_amount': base_amount,
                     'fee_amount': fee_amount,
@@ -431,7 +437,7 @@ def stripe_webhook_v2(request):
                 body=render_to_string('text/user/anon_receipt.txt', {
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': event_data.get('card', {}).get('last4'),
+                    'last4': last4,
                     'amount': amount,
                     'base_amount': base_amount,
                     'fee_amount': fee_amount,
