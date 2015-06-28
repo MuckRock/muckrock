@@ -26,8 +26,8 @@ class NestedModelAdmin(ModelAdmin):
     def _nested_formsets(self, request, admin, instance, create_formset, prefixes=None,
                          qs_field=None):
         """Collect all formsets recursively"""
-        # pylint: disable=R0913
-        # pylint: disable=R0914
+        # pylint: disable=too-many-arguments
+        # pylint: disable=too-many-locals
         # pylint: disable=too-many-locals
 
         formsets = []

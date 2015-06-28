@@ -178,10 +178,10 @@ class ExceptionLoggingMiddleware(object):
     """Log exceptions to command line
 
     useful for debugging non html outputting views, such as stripe webhooks"""
-    # pylint: disable=R0903
-    # pylint: disable=R0201
+    # pylint: disable=too-few-public-methods
+    # pylint: disable=no-self-use
     def process_exception(self, request, exception):
-        # pylint: disable=W0613
+        # pylint: disable=unused-argument
         """printe the exception traceback"""
         import traceback
         print traceback.format_exc()
@@ -285,9 +285,9 @@ else:
 
 
 import djcelery
-# pylint: disable=W0611
+# pylint: disable=unused-import
 import iron_celery
-# pylint: enable=W0611
+# pylint: enable=unused-import
 djcelery.setup_loader()
 
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
@@ -453,7 +453,7 @@ LOGGING = {
     }
 }
 
-# pylint: disable=W0611
+# pylint: disable=unused-import
 import monkey
 
 # these will be set in local settings if not in env var
@@ -492,7 +492,7 @@ DATABASES = {}
 
 url = urlparse.urlparse(os.environ.get('DATABASE_URL', 'postgres://muckrock@localhost/muckrock'))
 
-# pylint: disable=E1101
+# pylint: disable=no-member
 # Update with environment configuration.
 DATABASES['default'] = {
     'NAME': url.path[1:],
@@ -568,8 +568,8 @@ SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
 
-# pylint: disable=W0401
-# pylint: disable=W0614
+# pylint: disable=wildcard-import
+# pylint: disable=unused-wildcard-import
 try:
     from local_settings import *
 except ImportError:

@@ -26,7 +26,7 @@ class Tag(TaggitTag):
         return name.translate(html_remove).strip().lower()
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['name']
 
 class TaggedItemBase(GenericTaggedItemBase):

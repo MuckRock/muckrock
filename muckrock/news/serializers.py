@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from muckrock.news.models import Article
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model"""

@@ -94,8 +94,8 @@ def redirect_flag(request, **kwargs):
 
 class JurisdictionViewSet(viewsets.ModelViewSet):
     """API views for Jurisdiction"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     queryset = Jurisdiction.objects.all()
     serializer_class = JurisdictionSerializer
     filter_fields = ('name', 'abbrev', 'level', 'parent')

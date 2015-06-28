@@ -2,7 +2,7 @@
 Feeds for the News application
 """
 
-# pylint: disable=E0611
+# pylint: disable=no-name-in-module
 from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import escape, linebreaks
 
@@ -16,11 +16,11 @@ class LatestEntries(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return Article.objects.get_published().order_by('-pub_date')[:25]
 
     def item_description(self, item):
         """The description of each rss item"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return linebreaks(escape(item.summary))
 

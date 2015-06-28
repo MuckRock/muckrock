@@ -2,8 +2,8 @@
 Monkey patch Django urlize bug
 """
 
-# pylint: disable=C0301
-# pylint: disable=R0914
+# pylint: disable=line-too-long
+# pylint: disable=too-many-locals
 # pylint: disable=C0322
 
 import string

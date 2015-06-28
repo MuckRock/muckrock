@@ -45,7 +45,7 @@ FileField.default_validators = FileField.default_validators[:] + [filefield_maxl
 
 class EmailsListField(CharField):
     """Multi email field"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
 
     widget = forms.Textarea
 
@@ -68,10 +68,10 @@ class EmailsListField(CharField):
 class FullEmailValidator(EmailValidator):
     """Validate email addresses with full names"""
     #http://djangosnippets.org/snippets/2635/
-    # pylint: disable=R0903
+    # pylint: disable=too-few-public-methods
 
     def __call__(self, value):
-        # pylint: disable=W0612
+        # pylint: disable=unused-variable
         try:
             super(FullEmailValidator, self).__call__(value)
         except ValidationError:
@@ -88,7 +88,7 @@ class FullEmailField(forms.EmailField):
 
     def clean(self, value):
         """Accept full name emails - only store the email part"""
-        # pylint: disable=W0612
+        # pylint: disable=unused-variable
 
         super(FullEmailField, self).clean(value)
         fullname, email = parseaddr(value)
@@ -121,7 +121,7 @@ class GroupedModelChoiceField(ModelChoiceField):
 
 class GroupedModelChoiceIterator(ModelChoiceIterator):
     """Iterator for grouped model choice"""
-    # pylint: disable=R0903
+    # pylint: disable=too-few-public-methods
     # pylint: disable=line-too-long
     def __iter__(self):
         if self.field.empty_label is not None:

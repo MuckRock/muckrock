@@ -24,7 +24,7 @@ class ArticleSitemap(LimitSitemap):
 
     def lastmod(self, obj):
         """When was the article last modified?"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return obj.pub_date
 
 class ArticleNewsSitemap(NewsSitemap):
@@ -37,7 +37,7 @@ class ArticleNewsSitemap(NewsSitemap):
 
     def lastmod(self, obj):
         """When was the article last modified?"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return obj.pub_date
 
 register(articles=ArticleNewsSitemap)

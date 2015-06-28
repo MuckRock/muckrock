@@ -21,7 +21,7 @@ from muckrock.jurisdiction.forms import CSVImportForm
 logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable=R0904
+# pylint: disable=too-many-public-methods
 
 class JurisdictionAdmin(VersionAdmin):
     """Jurisdiction admin options"""
@@ -53,8 +53,8 @@ class JurisdictionAdmin(VersionAdmin):
 
     def csv_import(self, request):
         """Import a CSV file of jurisdictions"""
-        # pylint: disable=R0201
-        # pylint: disable=W0703
+        # pylint: disable=no-self-use
+        # pylint: disable=broad-except
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
@@ -92,7 +92,7 @@ class JurisdictionCsvModel(CsvModel):
     parent = DjangoModelField(Jurisdiction, pk='name')
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         dbModel = Jurisdiction
         delimiter = ','
         update = {'keys': ['slug', 'parent']}
