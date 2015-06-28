@@ -10,8 +10,8 @@ from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 # pylint: disable=bad-continuation
 
 class TestJurisdictionUnit(TestCase):

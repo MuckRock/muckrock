@@ -337,9 +337,9 @@ def stripe_webhook(request):
 @csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
-    # pylint: disable=R0912
-    # pylint: disable=R0914
-    # pylint: disable=R0915
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
 
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
@@ -481,8 +481,8 @@ def stripe_webhook_v2(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     model = User
     serializer_class = UserSerializer
     permission_classes = (DjangoModelPermissions,)
@@ -491,8 +491,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class StatisticsViewSet(viewsets.ModelViewSet):
     """API views for Statistics"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     model = Statistics
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)

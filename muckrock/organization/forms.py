@@ -24,7 +24,7 @@ class OrganizationForm(forms.ModelForm):
         raise forms.ValidationError('Organization already exists.')
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Organization
         fields = ['name']
         widgets = {'name': forms.TextInput(attrs={'placeholder': 'Name your organization'})}

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 class FOIARequestManager(ChainableManager):
     """Object manager for FOIA requests"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
 
     def get_submitted(self):
         """Get all submitted FOIA requests"""
@@ -106,7 +106,7 @@ STATUS = (
 
 class Action():
     """A helper class to provide interfaces for request actions"""
-    # pylint: disable=R0913
+    # pylint: disable=too-many-arguments
     def __init__(self, test=None, link=None, title=None, action=None, desc=None, class_name=None):
         self.test = test
         self.link = link
@@ -122,8 +122,8 @@ class Action():
 
 class FOIARequest(models.Model):
     """A Freedom of Information Act request"""
-    # pylint: disable=R0904
-    # pylint: disable=R0902
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
@@ -289,7 +289,7 @@ class FOIARequest(models.Model):
 
     def color_code(self):
         """Get the color code for the current status"""
-        # pylint: disable=C0326
+        # pylint: disable=bad-whitespace
         code_stop = 'failure'
         code_wait = ''
         code_go = 'success'
@@ -309,7 +309,7 @@ class FOIARequest(models.Model):
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         # use raw sql here in order to avoid race conditions
         uid = int(md5(self.title.encode('utf8') +
@@ -336,7 +336,7 @@ class FOIARequest(models.Model):
 
     def get_to_who(self):
         """Who communications are to"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         if self.agency:
             return self.agency.name
@@ -353,12 +353,12 @@ class FOIARequest(models.Model):
 
     def last_comm(self):
         """Return the last communication"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         return self.communications.reverse()[0]
 
     def last_comm_date(self):
         """Return the date of the latest communication or doc or file"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         qsets = [self.communications.all().order_by('-date'),
                  self.files.exclude(date=None).order_by('-date')]
@@ -380,8 +380,8 @@ class FOIARequest(models.Model):
 
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
-        # pylint: disable=E1101
-        # pylint: disable=W0613
+        # pylint: disable=no-member
+        # pylint: disable=unused-argument
         # Do something with anchor
 
         self.updated = True
@@ -395,7 +395,7 @@ class FOIARequest(models.Model):
 
     def submit(self, appeal=False, snail=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         # can email appeal if the agency has an appeal agency which has an email address
         # and can accept emailed appeals
@@ -446,7 +446,7 @@ class FOIARequest(models.Model):
 
     def followup(self):
         """Send a follow up email for this request"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
 
         comm = FOIACommunication.objects.create(
@@ -473,7 +473,7 @@ class FOIARequest(models.Model):
 
     def _send_email(self):
         """Send an email of the request to its email address"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         # self.email should be set before calling this method
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
@@ -523,7 +523,7 @@ class FOIARequest(models.Model):
 
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         cal = self.jurisdiction.get_calendar()
 
@@ -574,7 +574,7 @@ class FOIARequest(models.Model):
 
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:
@@ -720,7 +720,7 @@ class FOIARequest(models.Model):
 
     def total_pages(self):
         """Get the total number of pages for this request"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         pages = self.files.aggregate(Sum('pages'))['pages__sum']
         if pages is None:
             return 0
@@ -733,7 +733,7 @@ class FOIARequest(models.Model):
 
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['title']
         verbose_name = 'FOIA Request'
         app_label = 'foia'

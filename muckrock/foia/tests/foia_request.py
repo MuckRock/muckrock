@@ -25,8 +25,8 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # pylint: skip-file
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 # pylint: disable=E1103
 
 class TestFOIARequestUnit(TestCase):
@@ -175,7 +175,7 @@ class TestFOIARequestUnit(TestCase):
 
     def test_foia_followup(self):
         """Make sure the follow up date is set correctly"""
-        # pylint: disable=W0212
+        # pylint: disable=protected-access
         foia = FOIARequest.objects.get(pk=15)
         foia.followup()
         nose.tools.eq_(foia.date_followup,
@@ -376,7 +376,7 @@ class TestFOIAIntegration(TestCase):
     def setUp(self):
         """Set up tests"""
         # pylint: disable=C0103
-        # pylint: disable=E1003
+        # pylint: disable=bad-super-call
         # pylint: disable=C0111
 
         mail.outbox = []
@@ -440,8 +440,8 @@ class TestFOIAIntegration(TestCase):
 
     def test_request_lifecycle_no_email(self):
         """Test a request going through the full cycle as if we had to physically mail it"""
-        # pylint: disable=R0915
-        # pylint: disable=W0212
+        # pylint: disable=too-many-statements
+        # pylint: disable=protected-access
 
         user = User.objects.get(username='adam')
         agency = Agency.objects.get(pk=3)

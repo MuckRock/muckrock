@@ -8,7 +8,7 @@ from reversion import VersionAdmin
 
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
 
-# pylint: disable=R0904
+# pylint: disable=too-many-public-methods
 
 class CrowdfundRequestPaymentAdmin(admin.TabularInline):
     """Model Admin for crowdfund request payment"""

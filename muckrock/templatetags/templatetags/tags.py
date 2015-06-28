@@ -50,7 +50,7 @@ class TableHeaderNode(Node):
     """Tag to create table headers"""
 
     def __init__(self, get, args):
-        # pylint: disable=W0231
+        # pylint: disable=super-init-not-called
         self.get = get
         self.args = args
 
@@ -137,7 +137,7 @@ def do_evaluate(parser, token):
     """
     tag usage {% evaluate object.textfield %}
     """
-    # pylint: disable=W0613
+    # pylint: disable=unused-argument
     try:
         _, variable = token.split_contents()
     except ValueError:
@@ -148,7 +148,7 @@ def do_evaluate(parser, token):
 class EvaluateNode(template.Node):
     """Node for do_evaluate"""
     def __init__(self, variable):
-        # pylint: disable=W0231
+        # pylint: disable=super-init-not-called
         self.variable = template.Variable(variable)
 
     def render(self, context):

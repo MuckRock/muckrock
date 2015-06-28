@@ -14,7 +14,7 @@ from muckrock.tags.models import TaggedItemBase
 
 class ArticleManager(models.Manager):
     """Object manager for news articles"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
 
     def get_published(self):
         """Get all published news articles"""
@@ -79,7 +79,7 @@ class Article(models.Model):
 
     def get_authors_names(self):
         """Get all authors names for a byline"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         authors = list(self.authors.all())
         names = ', '.join(a.get_full_name() for a in authors[:-1])
         if names:
@@ -89,7 +89,7 @@ class Article(models.Model):
         return names
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['-pub_date']
         get_latest_by = 'pub_date'
 
