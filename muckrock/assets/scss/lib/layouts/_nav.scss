@@ -219,6 +219,9 @@ nav.secondary {
     display: block;
     width: 100%;
 
+    border-top: 1px solid $color-grey;
+    padding-top: $vertical-rhythm;
+
     .logo {
         display: inline-block;
         margin-bottom: $vertical-rhythm;
