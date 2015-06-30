@@ -34,8 +34,3 @@
         color: $color-disabled;
     }
 }
-
-// Textbox -> Panel -> Controls
-%controls {
-    @extend %panel;
-}
