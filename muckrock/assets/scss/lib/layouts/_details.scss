@@ -275,6 +275,7 @@
         .tab-section {
             display: none;
             &.active { display: block; }
+            margin-bottom: 0;
         }
         .files {
             ul {
