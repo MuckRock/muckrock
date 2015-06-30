@@ -1,8 +1,8 @@
 /* Layouts */
 
 .container {
-    padding: $base-padding/2;
-    @include media($medium-layout) { padding: $base-padding; }
+    padding: $vertical-rhythm/2;
+    @include media($medium-layout) { padding: $vertical-rhythm; }
 }
 
 @import 'details';

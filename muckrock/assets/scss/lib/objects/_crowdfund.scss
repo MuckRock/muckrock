@@ -7,7 +7,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     overflow: hidden;
     @include row;
     max-width: 60em;
-    margin: 0 auto $base-margin;
+    margin: 0 auto $vertical-rhythm;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
 
@@ -20,7 +20,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     header, footer {
-        padding: $base-padding/2;
+        padding: $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
@@ -58,7 +58,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     .description {
-        padding: $base-padding/2;
+        padding: $vertical-rhythm/2;
     }
 
     .stats {
@@ -71,13 +71,13 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     .contributors p {
-        margin-bottom: $base-margin/4;
+        margin-bottom: $vertical-rhythm/4;
     }
     .contributor-list {
         margin-top: 0;
         li {
             display: inline-block;
-            padding: 0 $base-padding/2 0 0;
+            padding: 0 $vertical-rhythm/2 0 0;
         }
     }
 
@@ -89,7 +89,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         form > section {
             @extend %third;
             input {
-                margin-bottom: $base-margin/2;
+                margin-bottom: $vertical-rhythm/2;
                 @include media($medium-layout) {
                     margin-bottom: 0;
                 }
@@ -99,7 +99,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             margin: 0;
         }
         .anonymity input {
-            margin: $base-padding/4;
+            margin: $vertical-rhythm/4;
         }
         .action button, .amount input {
             display: block;
@@ -119,7 +119,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             text-align: center;
         }
         @include media($medium-layout) {
-            .action { padding-left: $base-padding/2; }
+            .action { padding-left: $vertical-rhythm/2; }
         }
     }
 }

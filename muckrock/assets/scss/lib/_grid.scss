@@ -49,6 +49,6 @@ html, body { min-height: 100%; }
 }
 
 %edge-to-edge {
-    margin: 0 -1*$base-margin/2;
-    @include media($medium-layout) { margin: 0 -1*$base-margin; }
+    margin: 0 -1*$vertical-rhythm/2;
+    @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
 }

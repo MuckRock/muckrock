@@ -14,7 +14,7 @@
     .meta {
         display: block;
         width: 100%;
-        padding: $base-vertical-rhythm/4;
+        padding: $vertical-rhythm/4;
         margin-bottom: 0;
         line-height: 1em;
         color: $color-white;
@@ -29,7 +29,7 @@
         }
         span {
             display: inline-block;
-            padding: $base-vertical-rhythm/2;
+            padding: $vertical-rhythm/2;
             &.left { float: left; }
             &.right { float: right; }
         }
@@ -58,7 +58,7 @@
         @include border-bottom-radius($base-border-radius - 1px);
         .attachment-list { margin: 0; }
         .attachment {
-            padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+            padding: $vertical-rhythm/2 $vertical-rhythm;
             border-top-width: $base-border-width;
             border-top-style: dotted;
         }
@@ -80,11 +80,11 @@
 
 .comm-actions {
     clear: both;
-    fieldset { margin-bottom: $base-margin/4; }
+    fieldset { margin-bottom: $vertical-rhythm/4; }
     .comm-action {
         cursor: pointer;
         color: $color-grey-3;
-        padding-right: $base-padding/2;
+        padding-right: $vertical-rhythm/2;
         &:hover {
             color: $color-grey-1;
         }

@@ -16,8 +16,8 @@
         .banner-container {
             height: 100%;
             overflow: hidden;
-            padding: $base-padding/2;
-            @include media($medium-layout) { padding: $base-padding; }
+            padding: $vertical-rhythm/2;
+            @include media($medium-layout) { padding: $vertical-rhythm; }
             @include row;
             @include background(
                 linear-gradient(
@@ -53,7 +53,7 @@
         }
 
         .call-to-action {
-            margin: $base-margin*2 auto;
+            margin: $vertical-rhythm*2 auto;
         }
 
         a.dotted {
@@ -66,7 +66,7 @@
         }
         .button {
             display: inline-block;
-            margin: $base-vertical-rhythm/4 auto;
+            margin: $vertical-rhythm/4 auto;
             clear: both;
             @include media($small-layout) {
                 display: block;
@@ -76,22 +76,22 @@
         }
         .image-attribution {
             position: absolute;
-            bottom: $base-vertical-rhythm;
-            right: $base-vertical-rhythm;
+            bottom: $vertical-rhythm;
+            right: $vertical-rhythm;
             color: $color-white;
         }
         #learn-more {
-            margin-left: $base-vertical-rhythm/4;
+            margin-left: $vertical-rhythm/4;
         }
     }
     .articles { @include outer-container; }
     .featured-article {
         @include row;
-        padding: $base-padding/2;
+        padding: $vertical-rhythm/2;
         .image {
             @extend %half;
             @include media($small-layout) {
-                margin-bottom: $base-margin/3;
+                margin-bottom: $vertical-rhythm/3;
             }
         }
         .body { @extend %half; }
@@ -104,13 +104,13 @@
         @extend %half;
         &:nth-child(even) { clear: left; }
         &:nth-child(odd) { clear: none; }
-        padding: 0 $base-padding $base-padding;
+        padding: 0 $vertical-rhythm $vertical-rhythm;
         h1 { @include font-sizing(1.5); }
     }
 
     .stats {
-        padding: $base-padding/2;
-        @include media($medium-layout) { padding: $base-padding; }
+        padding: $vertical-rhythm/2;
+        @include media($medium-layout) { padding: $vertical-rhythm; }
         width: 100%;
         color: $color-white;
         @include background(linear-gradient($color-blue-dark, $color-blue));
@@ -118,7 +118,7 @@
             @include font-sizing(1.25);
             font-weight: $font-weight-normal;
             text-align: center;
-            margin: $base-margin auto;
+            margin: $vertical-rhythm auto;
         }
         ul {
             @include outer-container;
@@ -134,15 +134,15 @@
         .legend {
             display: block;
             max-width: 50%;
-            margin: $base-margin/2 auto;
+            margin: $vertical-rhythm/2 auto;
             border-top: $base-border-width solid $color-white;
-            padding-top: $base-padding/2;
+            padding-top: $vertical-rhythm/2;
         }
 
     }
 
     .footer-container {
-        padding: 0 $base-padding/2;
-        @include media($medium-layout) { padding: 0 $base-padding; }
+        padding: 0 $vertical-rhythm/2;
+        @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     }
 }

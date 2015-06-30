@@ -5,10 +5,10 @@
   $shadow-active: 2px;
   // Metrics
   display: inline-block;
-  margin: $base-margin/4 0;
+  margin: $vertical-rhythm/4 0;
   border: 1px solid $color-dark;
   border-radius: $base-border-radius;
-  padding: $base-padding/4 $base-padding/2;
+  padding: $vertical-rhythm/4 $vertical-rhythm/2;
   box-shadow: 0px $shadow-normal 0px 0px $color-dark;
   // Color
   background: $color;
@@ -66,10 +66,10 @@
 
 @mixin font-sizing($size-multiplier, $line-multiplier:3) {
     $size: 1em * $size-multiplier;
-    $line: 1em + (1em / ($base-vertical-rhythm * $line-multiplier));
+    $line: $vertical-rhythm;
     font-size: $size;
-    line-height: $line;
-    margin: $line/4 0;
+    line-height: $font-line-height;
+    margin: 0 0 $vertical-rhythm 0;
 }
 
 @mixin omega-reset($nth) {

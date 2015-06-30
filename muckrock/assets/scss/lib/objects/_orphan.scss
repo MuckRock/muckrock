@@ -3,22 +3,22 @@
         overflow: hidden;
         fieldset {
             display: block;
-            margin: 0 $base-margin $base-margin/2 0;
+            margin: 0 $vertical-rhythm $vertical-rhythm/2 0;
             label, input {
                 float: left;
-                margin: 0 $base-margin/4 0 0;
+                margin: 0 $vertical-rhythm/4 0 0;
             }
         }
     }
     .orphan {
         @include row;
         .orphan-head {
-            margin-top: $base-margin/2;
+            margin-top: $vertical-rhythm/2;
             border-top: $base-border-width solid $color-grey;
-            padding-top: $base-padding/2;
+            padding-top: $vertical-rhythm/2;
             div {
                 float: left;
-                margin-right: $base-margin/2;
+                margin-right: $vertical-rhythm/2;
                 &:last-child {
                     margin-right: 0;
                 }

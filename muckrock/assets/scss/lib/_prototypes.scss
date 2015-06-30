@@ -8,7 +8,7 @@
         list-style-type: none;
         padding-left: 0;
     }
-    line-height: $base-vertical-rhythm;
+    line-height: $vertical-rhythm;
     border-color: $color-grey;
 }
 
@@ -18,8 +18,8 @@
     overflow: hidden;
     display: block;
     width: 100%;
-    margin:  $base-margin/2 0;
-    padding: $base-padding/6 $base-padding/3;
+    margin:  $vertical-rhythm/2 0;
+    padding: $vertical-rhythm/6 $vertical-rhythm/3;
 
 }
 
@@ -27,7 +27,7 @@
 %input {
     @extend %textbox;
     display: inline-block;
-    padding: $base-padding/4 $base-padding/3 $base-padding/4 $base-padding/2;
+    padding: $vertical-rhythm/4 $vertical-rhythm/3 $vertical-rhythm/4 $vertical-rhythm/2;
     &:disabled {
         background-color: lighten($color-disabled, 25%);
         border: 1px solid $color-disabled;

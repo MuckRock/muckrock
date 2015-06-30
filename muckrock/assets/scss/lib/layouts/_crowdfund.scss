@@ -2,12 +2,12 @@
 
     @include row;
     padding: 0;
-    margin-bottom: $base-margin;
+    margin-bottom: $vertical-rhythm;
 
     form {
         @include row;
         @extend %full;
-        padding: $base-padding/2;
+        padding: $vertical-rhythm/2;
     }
 
     fieldset > p {

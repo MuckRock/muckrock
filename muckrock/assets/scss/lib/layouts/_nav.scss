@@ -96,7 +96,7 @@ $small-menu-breakpoint: 540px;
         {
             width: $desktop-menu-width;
             & + .container {
-                padding-right: em($desktop-menu-width) + $base-padding;
+                padding-right: rem($desktop-menu-width) + $vertical-rhythm;
             }
         }
         height: 100%;
@@ -146,7 +146,7 @@ nav.primary {
     /* Logo */
 
     %logo {
-        margin: $base-margin/4 0;
+        margin: $vertical-rhythm/4 0;
         border: none;
         padding: 0 0.5em 0 0;
         svg > path, svg > g { fill: $color-black; }
@@ -218,12 +218,12 @@ nav.secondary {
 .footer-container {
     display: block;
     width: 100%;
-    margin-top: $base-vertical-rhythm;
-    padding-top: $base-vertical-rhythm;
+    margin-top: $vertical-rhythm;
+    padding-top: $vertical-rhythm;
 
     .logo {
         display: inline-block;
-        margin-bottom: $base-vertical-rhythm;
+        margin-bottom: $vertical-rhythm;
         svg > path, svg > g { fill: $color-black; }
         &:hover {
             svg > path, svg > g { fill: $color-blue; }
@@ -257,11 +257,11 @@ nav.secondary {
     }
     li {
         @include font-sizing(0.9, 3);
-        margin: $base-vertical-rhythm/2 0;
+        margin: $vertical-rhythm/2 0;
     }
     p { margin-top: 0; }
     .copyright {
-        margin: $base-vertical-rhythm 0;
+        margin: $vertical-rhythm 0;
         color: $color-black;
     }
 }
@@ -272,9 +272,9 @@ nav.sidebar {
     -webkit-overflow-scrolling: touch;
     height: 100%;
     width: 100%;
-    padding: $base-padding/2;
+    padding: $vertical-rhythm/2;
     @media screen and (min-width: 540px) {
-        padding: $base-padding $base-padding 1em;
+        padding: $vertical-rhythm $vertical-rhythm 1em;
     }
     color: $color-white;
     background: $color-grey-1;
@@ -288,13 +288,13 @@ nav.sidebar {
         display: block;
         height: $sidebar-object-height;
         width: 100%;
-        margin-bottom: $base-vertical-rhythm/4;
-        padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+        margin-bottom: $vertical-rhythm/4;
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
     }
 
     .button-list {
         display: block;
-        margin-top: $base-margin/2;
+        margin-top: $vertical-rhythm/2;
         li {
             @extend %full;
             &:first-child a {
@@ -349,12 +349,12 @@ nav.sidebar {
     }
 
     .account {
-        margin-top: 2 * $base-margin;
+        margin-top: 2 * $vertical-rhythm;
         .username {
             display: block;
             @extend h5;
             // margin: 0;
-            margin-bottom: $base-vertical-rhythm/2;
+            margin-bottom: $vertical-rhythm/2;
             color: $color-white;
         }
         .options {
@@ -366,7 +366,7 @@ nav.sidebar {
         .account-info {
             display: block;
             height: auto;
-            margin: $base-margin 0 0;
+            margin: $vertical-rhythm 0 0;
             border: none;
             padding: 0;
             background: none;
@@ -375,8 +375,8 @@ nav.sidebar {
             text-decoration: none;
 
             .counter {
-                margin-right: $base-vertical-rhythm/4;
-                padding: $base-vertical-rhythm/5 $base-vertical-rhythm/2;
+                margin-right: $vertical-rhythm/4;
+                padding: $vertical-rhythm/5 $vertical-rhythm/2;
                 border-radius: 1.5em;
                 font-weight: $font-weight-bold;
                 text-align: center;
@@ -424,7 +424,7 @@ nav.sidebar {
         display: block;
         width: 100%;
         height: $sidebar-object-height;
-        margin: 0 0 $base-vertical-rhythm/2;
+        margin: 0 0 $vertical-rhythm/2;
         input {
             @include appearance(none);
             width: 75%;

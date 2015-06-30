@@ -89,7 +89,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
             display: table-cell;
             text-align: center;
             width: 33%;
-            padding: $base-vertical-rhythm/2;
+            padding: $vertical-rhythm/2;
             border-right: $base-border-width solid lighten($color-jurisdiction, 10%);
             &.active {
                 &:hover { background-color: $color-jurisdiction-picker; }
@@ -192,7 +192,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     }
 
     footer {
-        padding: $base-padding;
+        padding: $vertical-rhythm;
         @include border-bottom-radius($base-border-radius);
         @include row;
         border: 2px solid $color-grey-2;
@@ -202,17 +202,17 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         }
         p {
             @extend %three-quarters;
-            margin-top: $base-margin;
+            margin-top: $vertical-rhythm;
             @include media($large-layout) {
                 margin-top: 0;
-                padding-left: $base-padding;
+                padding-left: $vertical-rhythm;
             }
         }
     }
 
     .failure.panel {
         ul {
-            padding-left: $base-padding;
+            padding-left: $vertical-rhythm;
             list-style-type: disc;
         }
         ul li ul {
@@ -225,7 +225,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 .clone-candidates { @include outer-container; }
 .clone-candidates h2 {
     @include font-sizing(1.4);
-    margin: $base-margin 0;
+    margin: $vertical-rhythm 0;
 }
 
 .multirequest-create {

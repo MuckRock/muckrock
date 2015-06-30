@@ -1,6 +1,6 @@
 .search.list {
     .list-actions {
-        margin-bottom: $base-margin;
+        margin-bottom: $vertical-rhythm;
         #global-search {
             display: block;
             width: 100%;
@@ -23,13 +23,13 @@
     }
     .list-filters {
         margin-top: 0;
-        margin-bottom: $base-margin/2;
+        margin-bottom: $vertical-rhythm/2;
         label {
-            padding-left: $base-padding/4;
+            padding-left: $vertical-rhythm/4;
         }
         li {
             display: inline-block;
-            padding-right: $base-padding;
+            padding-right: $vertical-rhythm;
             &:last-child {
                 padding-right: 0;
             }

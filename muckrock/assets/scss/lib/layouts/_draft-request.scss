@@ -24,7 +24,7 @@
             height: 20em;
             border: none;
             border-radius: 0;
-            padding: $base-padding $base-padding/2;
+            padding: $vertical-rhythm $vertical-rhythm/2;
             font-family: $font-monospace;
         }
     }
@@ -65,7 +65,7 @@
                 width: auto;
             }
             input {
-                margin: $base-margin/4 $base-margin/6 $base-margin/6 0;
+                margin: $vertical-rhythm/4 $vertical-rhythm/6 $vertical-rhythm/6 0;
             }
         }
         small {
@@ -97,10 +97,10 @@
         @extend %draft-request;
         // .body { background-color: $color-white; }
         p {
-            margin: $base-margin/2;
+            margin: $vertical-rhythm/2;
             &:first-child {
                 margin-top: 0;
-                padding-top: $base-padding;
+                padding-top: $vertical-rhythm;
             }
         }
     }

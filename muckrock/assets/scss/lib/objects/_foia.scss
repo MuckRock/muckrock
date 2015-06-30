@@ -3,8 +3,8 @@
 .foia-single {
     @include row;
     display: block;
-    margin-bottom: $base-vertical-rhythm/2;
-    padding: $base-vertical-rhythm/4 $base-vertical-rhythm/2;
+    margin-bottom: $vertical-rhythm/2;
+    padding: $vertical-rhythm/4 $vertical-rhythm/2;
     @include border;
     @include border-radius;
     &:first-child {

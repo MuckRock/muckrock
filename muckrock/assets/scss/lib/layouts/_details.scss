@@ -37,9 +37,9 @@
         .news-image {
             @extend %full;
             @include omega;
-            margin-bottom: $base-margin;
+            margin-bottom: $vertical-rhythm;
             @include media($medium-layout) {
-                margin-bottom: $base-margin*2;
+                margin-bottom: $vertical-rhythm*2;
             }
         }
         .news-article {
@@ -47,7 +47,7 @@
             @include span-columns(12);
             @include media($medium-layout) {
                 @include span-columns(4);
-                padding-right: $base-padding;
+                padding-right: $vertical-rhythm;
             }
             @include media($large-layout) {
                 @include span-columns(8);
@@ -63,7 +63,7 @@
         }
 
         .news-article-header {
-            margin-bottom: $base-margin;
+            margin-bottom: $vertical-rhythm;
             border-bottom: $base-border-width solid $color-grey;
             @include media($medium-layout) {
                 margin-bottom: 0;
@@ -80,7 +80,7 @@
         }
 
         .news-article-kicker {
-            margin: $base-margin/2 0;
+            margin: $vertical-rhythm/2 0;
             font-size: 1.4375em;
             font-weight: $font-weight-bold;
             line-height: 1.5em;
@@ -92,7 +92,7 @@
         .news-article-authors {
             font-size: 1em;
             font-weight: $font-weight-normal;
-            margin-bottom: $base-margin;
+            margin-bottom: $vertical-rhythm;
         }
 
         .news-article-body {
@@ -100,12 +100,12 @@
             @include media($medium-layout) {
                 @include font-sizing(1.2, 1.4);
             }
-            margin: $base-margin 0;
+            margin: $vertical-rhythm 0;
             padding-top: 0;
             p {
                 margin-bottom: 1.4em;
             }
-            ul { padding-left: $base-padding; }
+            ul { padding-left: $vertical-rhythm; }
             img, figure, .pullquote {
                 max-width: 100%;
                 @include media($medium-layout) {
@@ -117,9 +117,9 @@
         // Fixes for embedded content
         div[id^='viewer'] {
             max-width: 90%;
-            margin: $base-margin auto;
+            margin: $vertical-rhythm auto;
             @include media($large-layout) {
-                margin: $base-margin auto $base-margin 0;
+                margin: $vertical-rhythm auto $vertical-rhythm 0;
             }
 
         }
@@ -144,7 +144,7 @@
         }
         .add-members {
             @include row;
-            margin-bottom: $base-margin;
+            margin-bottom: $vertical-rhythm;
             button {
                 @extend %quarter;
                 @include omega(n);
@@ -243,7 +243,7 @@
             label {
                 display: block;
                 float: left;
-                padding: $vertical-rhythm/4 $base-vertical-rhythm/2;
+                padding: $vertical-rhythm/4 $vertical-rhythm/2;
                 @include border;
                 border-left: none;
                 border-bottom: none;
@@ -278,10 +278,10 @@
                 @include row;
                 li {
                     @extend %half;
-                    margin-bottom: $base-vertical-rhythm/2;
+                    margin-bottom: $vertical-rhythm/2;
                     border: $base-border-width solid $color-blue;
                     @include border-radius;
-                    padding: $base-vertical-rhythm/2 $base-vertical-rhythm;
+                    padding: $vertical-rhythm/2 $vertical-rhythm;
                     &.active {
                         background-color: $color-blue;
                         color: $color-white;
@@ -294,14 +294,14 @@
                 position: relative;
                 width: 100%;
                 height: 66em;
-                margin: $base-vertical-rhythm auto;
+                margin: $vertical-rhythm auto;
             }
         }
         .notes {
             .note {
                 @include row;
-                margin: $base-margin 0 0;
-                padding: 0 0 $base-padding/2;
+                margin: $vertical-rhythm 0 0;
+                padding: 0 0 $vertical-rhythm/2;
                 border-bottom: $base-border-width solid $color-grey;
                 .note-date {
                     @extend %quarter;

@@ -1,7 +1,7 @@
 .register.form {
     padding: 0;
     .form-head {
-        padding: $base-padding;
+        padding: $vertical-rhythm;
         @include border-top-radius($base-border-radius);
         color: $color-white;
         background-color: $color-blue;
@@ -10,7 +10,7 @@
             text-decoration: underline;
         }
         .form-title {
-            padding-right: $base-padding;
+            padding-right: $vertical-rhythm;
         }
         h1 {
             @include media($small-layout) { @include font-sizing(2); }
@@ -20,17 +20,17 @@
         .form-info {
             margin-top: 0;
             list-style-type: disc;
-            padding-left: $base-padding;
+            padding-left: $vertical-rhythm;
         }
     }
-    form { margin: $base-margin; }
+    form { margin: $vertical-rhythm; }
 }
 
 .subscribe.page {
     @extend %edge-to-edge;
     header, .body, .interaction {
         @include outer-container;
-        padding: $base-padding;
+        padding: $vertical-rhythm;
     }
     header {
         @include outer-container;
@@ -90,7 +90,7 @@
             }
             li {
                 font-size: 1.1em;
-                margin-bottom: $base-margin;
+                margin-bottom: $vertical-rhythm;
                 &:last-child {
                     margin-bottom: 0;
                 }
