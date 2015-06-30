@@ -7,6 +7,11 @@ html, body { min-height: 100%; }
     @include media($large-layout) { @include span-columns($large); }
 }
 
+@mixin omega-reset($nth) {
+    &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
+    &:nth-child(#{$nth}+1) { clear: none }
+}
+
 // Prototypes
 
 %full {

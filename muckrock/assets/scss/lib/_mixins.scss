@@ -25,11 +25,6 @@
     margin: 0 0 $vertical-rhythm 0;
 }
 
-@mixin omega-reset($nth) {
-    &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
-    &:nth-child(#{$nth}+1) { clear: none }
-}
-
 @mixin border-radius() {
     border-radius: $base-border-radius;
 }
