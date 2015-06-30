@@ -4,6 +4,7 @@ Forms for the project application
 
 from django import forms
 
+import autocomplete_light
 from muckrock.project.models import Project
 
 class ProjectCreateForm(forms.ModelForm):
@@ -12,6 +13,11 @@ class ProjectCreateForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'description', 'image', 'contributors', 'tags', 'private']
+        widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('StaffAutocomplete')}
+        help_texts = {
+            'contributors': ('As the project creator, you are'
+                            ' automatically listed as a contributor.'),
+        }
 
 class ProjectUpdateForm(forms.ModelForm):
     """Form for updating a project instance"""
