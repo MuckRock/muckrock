@@ -2,7 +2,7 @@
 Feeds for the QandA application
 """
 
-# pylint: disable=E0611
+# pylint: disable=no-name-in-module
 from django.contrib.syndication.views import Feed
 from django.template.defaultfilters import escape, linebreaks
 
@@ -16,7 +16,7 @@ class LatestQuestions(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         # pylint: disable=E1103
         return Question.objects.all().order_by('-date')[:25]
 

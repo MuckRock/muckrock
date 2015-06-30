@@ -25,8 +25,8 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # pylint: skip-file
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 # pylint: disable=E1103
 
 
@@ -40,7 +40,7 @@ class TestFOIACrowdfunding(TestCase):
     def setUp(self):
         """Set up tests"""
         # pylint: disable=C0103
-        # pylint: disable=E1003
+        # pylint: disable=bad-super-call
         # pylint: disable=C0111
 
         mail.outbox = []

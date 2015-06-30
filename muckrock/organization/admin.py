@@ -28,7 +28,7 @@ class OrganizationAdminForm(forms.ModelForm):
         return owner
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Organization
 
 class OrganizationAdmin(VersionAdmin):

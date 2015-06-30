@@ -6,7 +6,7 @@ from rest_framework import serializers, permissions
 
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 
 class FOIAPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
     """
@@ -72,8 +72,8 @@ class FOIARequestSerializer(serializers.ModelSerializer):
     notes = FOIANoteSerializer(many=True)
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=E1101
-        # pylint: disable=E1002
+        # pylint: disable=no-member
+        # pylint: disable=super-on-old-class
         super(FOIARequestSerializer, self).__init__(*args, **kwargs)
         if args:
             foia = args[0]

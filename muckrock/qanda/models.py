@@ -49,7 +49,7 @@ class Question(models.Model):
 
     def notify_update(self):
         """Email users who want to be notified of updates to this question"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         send_data = []
         for profile in self.followed_by.all():
             link = profile.wrap_url(reverse(
@@ -70,7 +70,7 @@ class Question(models.Model):
         return users
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['-date']
 
 
@@ -89,7 +89,7 @@ class Answer(models.Model):
 
     def save(self, *args, **kwargs):
         """Update the questions answer date when you save the answer"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         super(Answer, self).save(*args, **kwargs)
         question = self.question
         question.answer_date = self.date
@@ -97,5 +97,5 @@ class Answer(models.Model):
         question.save()
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['date']
