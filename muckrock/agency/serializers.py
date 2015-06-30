@@ -6,15 +6,15 @@ from rest_framework import serializers
 
 from muckrock.agency.models import Agency
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 
 class AgencySerializer(serializers.ModelSerializer):
     """Serializer for Agency model"""
     types = serializers.RelatedField(many=True)
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=E1101
-        # pylint: disable=E1002
+        # pylint: disable=no-member
+        # pylint: disable=super-on-old-class
         super(AgencySerializer, self).__init__(*args, **kwargs)
 
         if 'request' not in self.context:

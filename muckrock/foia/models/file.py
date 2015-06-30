@@ -21,7 +21,7 @@ class FOIAFile(models.Model):
 
     access = (('public', 'Public'), ('private', 'Private'), ('organization', 'Organization'))
 
-    # pylint: disable=E1101
+    # pylint: disable=no-member
     foia = models.ForeignKey(FOIARequest, related_name='files', blank=True, null=True)
     comm = models.ForeignKey(FOIACommunication, related_name='files', blank=True, null=True)
     ffile = models.FileField(upload_to='foia_files/%Y/%m/%d', verbose_name='File', max_length=255)
@@ -94,7 +94,7 @@ class FOIAFile(models.Model):
         return 'file-%d' % self.pk
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         verbose_name = 'FOIA Document File'
         ordering = ['date']
         app_label = 'foia'

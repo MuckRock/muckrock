@@ -16,7 +16,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.jurisdiction.models import Jurisdiction
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable=R0904
+# pylint: disable=too-many-public-methods
 
 class StatisticsAdmin(VersionAdmin):
     """Statistics admin options"""
@@ -33,7 +33,7 @@ class ProfileAdminForm(forms.ModelForm):
                                                    required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Profile
 
 class ProfileInline(admin.StackedInline):

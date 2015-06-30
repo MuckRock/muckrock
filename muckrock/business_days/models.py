@@ -113,7 +113,7 @@ class Holiday(models.Model):
 
     def _match_election(self, date_, _):
         """match for election day"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return date_.month == NOV and date_.weekday() == TUES and \
                date_.day >= 2 and date_.day <= 8
 
@@ -174,7 +174,7 @@ class HolidayCalendar(object):
 
 class Calendar(object):
     """A set of holidays"""
-    # pylint: disable=R0201
+    # pylint: disable=no-self-use
 
     def is_holiday(self, _):
         """Is given date a holiday?"""

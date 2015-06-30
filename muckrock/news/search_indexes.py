@@ -19,7 +19,7 @@ class ArticleIndex(CelerySearchIndex, Indexable):
 
     def index_queryset(self, using=None):
         """Used when the entire index for model is updated."""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         return Article.objects.get_published()
 
 

@@ -16,7 +16,7 @@ class ProfileForm(forms.ModelForm):
     zip_code = USZipCodeField(required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Profile
 
 class UserChangeForm(ProfileForm):
@@ -26,7 +26,7 @@ class UserChangeForm(ProfileForm):
     email = forms.EmailField()
 
     class Meta(ProfileForm.Meta):
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         fields = ['first_name', 'last_name', 'email', 'address1', 'address2', 'city', 'state',
                   'zip_code', 'phone', 'email_pref', 'use_autologin']
 
@@ -55,7 +55,7 @@ class RegisterForm(UserCreationForm):
                                 widget=forms.PasswordInput(attrs={'class': 'required'}))
 
     class Meta(UserCreationForm.Meta):
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
 
     def clean_username(self):
