@@ -53,6 +53,7 @@ class TestCrowdfundRequestView(TestCase):
             payment_required=foia.price,
             date_due=due
         )
+        self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
         self.data = {
@@ -85,6 +86,8 @@ class TestCrowdfundRequestView(TestCase):
         eq_(payment.user, None,
             ('If the user is logged out, the returned payment'
             ' object should not reference any account.'))
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_anonymous_while_logged_in(self):
         """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
@@ -95,6 +98,8 @@ class TestCrowdfundRequestView(TestCase):
             'The logged in user should be associated with the payment.')
         eq_(payment.show, False,
             'If the user wants to be anonymous, then the show flag should be false.')
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_attributed_contribution(self):
         """An attributed contribution is opted-in by the user"""
@@ -106,6 +111,8 @@ class TestCrowdfundRequestView(TestCase):
             'The logged in user should be associated with the payment.')
         eq_(payment.show, True,
             'If the user wants to be attributed, then the show flag should be true.')
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_correct_amount(self):
         """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
