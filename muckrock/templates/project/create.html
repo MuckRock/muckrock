@@ -1,5 +1,7 @@
 {% extends 'forms/base_form.html' %}
 
+{% block title %}MuckRock &bull; Create a project{% endblock %}
+{% block form-type %}project-create{% endblock %}
 {% block form-title %}Create a new project{% endblock %}
 
 {% block form-form %}
@@ -27,24 +29,29 @@
     </div>
 
     <div class="social preview">
-        <h2>Here is how this project will appear when shared.</h2>
+        <h2>Here is how this project will appear when shared:</h2>
         <p>
             Make sure to optimize it for display.
             Make sure the title and description are clear, concise, and compelling.
             Make sure to include an attractive image!
             Or else your project will never succeed.
         </p>
-        <section class="facebook">
-            <img src="placeholder_project_image.png" class="image" />
-            <p class="title">Project Title</p>
-            <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-            <p class="attribution">muckrock.com</p>
+        <section>
+            <dfn>Facebook</dfn>
+            <div class="facebook">
+                <div class="textarea">
+                    <p class="title">Untitled Project</p>
+                    <p class="description"></p>
+                    <p class="attribution">muckrock.com</p>
+                </div>
+            </div>
         </section>
-        <section class="twitter">
-            <img src="placeholder_project_image.png" class="image" />
-            <p class="title">Project Title</p>
-            <p class="description">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
-            <p class="attribution">muckrock.com</p>
+        <section>
+            <dfn>Twitter</dfn>
+            <div class="twitter">
+                <p class="title">Untitled Project</p>
+                <p class="attribution">muckrock.com</p>
+            </div>
         </section>
     </div>
 
@@ -53,13 +60,24 @@
 {% endblock form-form %}
 
 {% block scripts %}
-
 <script type="text/javascript">
+
+    String.prototype.trunc = String.prototype.trunc ||
+      function(n){
+          return this.length>n ? this.substr(0,n-1)+'…' : this;
+      };
+
+    function addImage(imgSrc) {
+        var imageElement = '<div class="image" style="background-image:url('+imgSrc+')" />';
+        $('.social.preview .facebook').prepend(imageElement);
+        $('.social.preview .twitter').append(imageElement);
+    }
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
             reader.onload = function (e) {
-                $('.social.preview .image').attr('src', e.target.result);
+                var imgSrc = e.target.result;
+                addImage(imgSrc);
             }
             reader.readAsDataURL(input.files[0]);
         }
@@ -68,11 +86,11 @@
         $('.social.preview .title').text(this.value);
     });
     $("#id_description").on("keydown keyup change", function(){
-        $('.social.preview .description').text(this.value);
+        var desc = this.value.trunc(200);
+        $('.social.preview .description').text(desc);
     });
     $("#id_image").change(function(){
         previewImage(this);
     });
 </script>
-
 {% endblock scripts %}
