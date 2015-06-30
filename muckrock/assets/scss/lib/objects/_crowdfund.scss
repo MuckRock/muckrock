@@ -55,18 +55,24 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
     .description, .stats {
         @extend %full;
+        padding: $vertical-rhythm/2;
     }
 
     .description {
-        padding: $vertical-rhythm/2;
+        padding-top: 0;
+        padding-bottom: 0;
     }
 
     .stats {
         @include row;
-        background-color: lighten($crowdfund-color-light, 20%);
+        border-top: $crowdfund-border;
+        margin-bottom: 0;
         p {
             @extend %third;
-            text-align: center;
+            margin-bottom: 0;
+            @include media($medium-layout) {
+                text-align: center;
+            }
         }
     }
 
@@ -88,11 +94,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         form { @include row; }
         form > section {
             @extend %third;
-            input {
-                margin-bottom: $vertical-rhythm/2;
-                @include media($medium-layout) {
-                    margin-bottom: 0;
-                }
+            @include media($medium-layout) {
+                margin-bottom: 0;
+            }
+            &.action {
+                margin-bottom: 0;
             }
         }
         .anonymity p {
