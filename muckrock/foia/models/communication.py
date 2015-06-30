@@ -71,7 +71,7 @@ class FOIACommunication(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
 
     def save(self, *args, **kwargs):
@@ -218,7 +218,7 @@ class FOIACommunication(models.Model):
 
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['date']
         verbose_name = 'FOIA Communication'
         app_label = 'foia'
@@ -249,7 +249,7 @@ class FOIANote(models.Model):
         return 'Note for %s on %s' % (self.foia.title, self.date)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['foia', 'date']
         verbose_name = 'FOIA Note'
         app_label = 'foia'

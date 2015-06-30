@@ -53,7 +53,7 @@ class Detail(DetailView):
 
     def post(self, request, **kwargs):
         """Edit the question or answer"""
-        # pylint: disable=W0613
+        # pylint: disable=unused-argument
 
         question = self.get_object()
         obj_type = request.POST.get('object')
@@ -70,7 +70,7 @@ class Detail(DetailView):
 
     def _question(self, request, question):
         """Edit the question"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         if request.user == question.user or request.user.is_staff:
             question.question = request.POST.get('question')
             question.save()
@@ -80,7 +80,7 @@ class Detail(DetailView):
 
     def _answer(self, request):
         """Edit an answer"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         answer = Answer.objects.get(pk=request.POST.get('answer-pk'))
         if request.user == answer.user or request.user.is_staff:
             answer.answer = request.POST.get('answer')
@@ -179,9 +179,9 @@ def subscribe(request):
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    # pylint: disable=R0901
+    # pylint: disable=too-many-ancestors
     model = Question
     serializer_class = QuestionSerializer
     permission_classes = (QuestionPermissions,)

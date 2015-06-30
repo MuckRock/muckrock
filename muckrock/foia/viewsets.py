@@ -21,7 +21,7 @@ from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSe
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import PaymentTask
 
-# pylint: disable=R0901
+# pylint: disable=too-many-ancestors
 # pylint: disable=bad-continuation
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest
     Filter fields: `user`, `title`, `status`, `jurisdiction`, `agency`, `embargo`, `tags`
     """
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
     model = FOIARequest
     serializer_class = FOIARequestSerializer
@@ -38,8 +38,8 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Requests"""
-        # pylint: disable=E1101
-        # pylint: disable=R0903
+        # pylint: disable=no-member
+        # pylint: disable=too-few-public-methods
         agency = django_filters.CharFilter(name='agency__name')
         jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
         user = django_filters.CharFilter(name='user__username')
@@ -196,7 +196,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
 
 class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
     model = FOIACommunication
     serializer_class = FOIACommunicationSerializer
@@ -204,8 +204,8 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
 
     class Filter(django_filters.FilterSet):
         """API Filter for FOIA Communications"""
-        # pylint: disable=E1101
-        # pylint: disable=R0903
+        # pylint: disable=no-member
+        # pylint: disable=too-few-public-methods
         min_date = django_filters.DateFilter(name='date', lookup_type='gte')
         max_date = django_filters.DateFilter(name='date', lookup_type='lte')
         class Meta:

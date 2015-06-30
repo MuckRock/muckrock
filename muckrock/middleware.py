@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class AuthKeyMiddleware(middleware.AuthKeyMiddleware):
     """Override process request to remove url auth key from url after validating"""
-    # pylint: disable=R0903
+    # pylint: disable=too-few-public-methods
 
     def process_request(self, request):
         """Redirect to remove authkey from url and put extra get params in"""
