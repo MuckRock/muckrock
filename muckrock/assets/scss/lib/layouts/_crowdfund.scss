@@ -1,13 +1,15 @@
 .crowdfund.form {
 
     @include row;
-    padding: 0;
     margin-bottom: $vertical-rhythm;
+
+    .form-head h1 {
+        margin-bottom: 0;
+    }
 
     form {
         @include row;
         @extend %full;
-        padding: $vertical-rhythm/2;
     }
 
     fieldset > p {
@@ -19,13 +21,7 @@
         @extend %full;
     }
 
-    fieldset.description {
-        padding: 0;
-    }
-
-    .form-head h1 {
-        margin: 0.75rem;
-        font-size: 2em;
-        font-weight: normal;
+    fieldset.amount {
+        margin-bottom: 0;
     }
 }
