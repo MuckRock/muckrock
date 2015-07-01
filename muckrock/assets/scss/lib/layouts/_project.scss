@@ -73,3 +73,19 @@
     }
 }
 
+.project.detail {
+    ul {
+        padding-left: $base-padding;
+    }
+    .main h1 {
+        font-weight: $bold;
+    }
+    .main h2 {
+        @extend h2;
+    }
+    .aside {
+        .update.button {
+            margin-bottom: 1.5em;
+        }
+    }
+}

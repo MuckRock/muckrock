@@ -1,20 +1,55 @@
 {% extends 'details/base_detail.html' %}
 
+{% load tags %}
+
 {% block type %}project{% endblock %}
 
 {% block header %}
-    {{ project.image }}
     <h1>{{ project.title }}</h1>
-    <h2>Contributors</h2>
+    <p>{{ project.description }}</p>
+    <img src="{{ MEDIA_URL }}{{ project.image }}">
+{% endblock %}
+
+{% block aside %}
+    {% if request.user.is_staff %}
+    <div class="controls">
+        <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="update primary button">
+            Update
+        </a>
+        <a href="{% url 'project-delete' slug=project.slug id=project.id %}" class="delete failure button">
+            Delete
+        </a>
+    </div>
+    {% endif %}
+    <dfn>Contributors</dfn>
     <ul class="contributors">
     {% for contributor in project.contributors.all %}
         <li>{{ contributor.get_full_name }}</li>
     {% endfor %}
     </ul>
-    <h2>Description</h2>
-    <p>{{ project.description }}</p>
+    {% tag_manager project %}
+    {% include 'lib/social.html' with title=project.title %}
 {% endblock %}
 
-{% block aside %}
-    <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="button">Edit</a>
-{% endblock %}
+{% block main %}
+<h2>Requests</h2>
+<ul class="requests">
+    {% for request in project.requests.all %}
+    <li class="request">
+        <a href="{{ request.get_absolute_url }}" title="{{ request.title }}">
+            {{ request.title }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+<h2>Articles</h2>
+<ul class="articles">
+    {% for article in project.articles.all %}
+    <li class="article">
+        <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
+            {{ article.title }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock main %}
