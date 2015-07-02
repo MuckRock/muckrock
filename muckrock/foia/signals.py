@@ -11,8 +11,8 @@ from muckrock.settings import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STOR
 
 def foia_update_embargo(sender, **kwargs):
     """When embargo has possibly been switched, update the document cloud permissions"""
-    # pylint: disable=E1101
-    # pylint: disable=W0613
+    # pylint: disable=no-member
+    # pylint: disable=unused-argument
 
     request = kwargs['instance']
     old_request = request.get_saved()

@@ -116,7 +116,7 @@ class MultiRequestForm(forms.ModelForm):
     )
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'agencies']
 
@@ -136,7 +136,7 @@ class MultiRequestDraftForm(forms.ModelForm):
                   'You may change this whenever you want.'
     )
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIAMultiRequest
         fields = ['title', 'requested_docs', 'embargo']
 
@@ -170,7 +170,7 @@ class FOIAEmbargoForm(forms.ModelForm):
         return self.cleaned_data
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIARequest
         fields = ['date_embargo']
 
@@ -186,7 +186,7 @@ FOIAFileFormSet = forms.models.modelformset_factory(FOIAFile, fields=('ffile',))
 class FOIANoteForm(forms.ModelForm):
     """A form for a FOIA Note"""
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIANote
         fields = ['note']
         widgets = {'note': forms.Textarea()}

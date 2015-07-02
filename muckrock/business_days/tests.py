@@ -12,8 +12,8 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=C0103
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 
 class TestBusinessDayUnit(TestCase):
     """Unit tests for business days"""

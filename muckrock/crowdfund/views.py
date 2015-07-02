@@ -73,10 +73,9 @@ class CrowdfundRequestDetail(DetailView):
         crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
-        if request.user.is_authenticated() and show:
+        user = None
+        if request.user.is_authenticated():
             user = request.user
-        else:
-            user = None
         logging.debug(user)
         crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
 
@@ -106,10 +105,23 @@ class CrowdfundRequestDetail(DetailView):
                 payment_object = payment_form.save(commit=False)
                 payment_object.user = user
                 payment_object.save()
+                logging.info(payment_object)
                 crowdfund_object.update_payment_received()
-        # if AJAX, return HTTP 200 OK
-        # else, return to the crowdfund page
+                # if AJAX, return HTTP 200 OK
+                # else, add a message to the session
+                if request.is_ajax():
+                    return HttpResponse(200)
+                else:
+                    messages.success(request, 'Thank you for your contribution!')
+                    return redirect(crowdfund_object.foia)
+        # if AJAX, return HTTP 400 ERROR
+        # else, add a message to the session
         if request.is_ajax():
-            return HttpResponse(200)
+            return HttpResponse(400)
         else:
+            messages.error(
+                request,
+                ('There was an error making your contribution. '
+                'Your card has not been charged.')
+            )
             return redirect(crowdfund_object.foia)

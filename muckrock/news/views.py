@@ -17,7 +17,7 @@ from muckrock.news.serializers import ArticleSerializer
 from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 
-# pylint: disable=R0901
+# pylint: disable=too-many-ancestors
 
 class NewsDetail(DateDetailView):
     """View for news detail"""
@@ -75,16 +75,16 @@ class List(ListView):
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """API views for Article"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     model = Article
     serializer_class = ArticleSerializer
     permission_classes = (DjangoModelPermissions,)
 
     class Filter(django_filters.FilterSet):
         """API Filter for Articles"""
-        # pylint: disable=E1101
-        # pylint: disable=R0903
+        # pylint: disable=no-member
+        # pylint: disable=too-few-public-methods
         authors = django_filters.CharFilter(name='authors__username')
         editors = django_filters.CharFilter(name='editors__username')
         tags = django_filters.CharFilter(name='tags__name')

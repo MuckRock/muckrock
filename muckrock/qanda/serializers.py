@@ -6,7 +6,7 @@ from rest_framework import serializers, permissions
 
 from muckrock.qanda.models import Question, Answer
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 
 class QuestionPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
     """

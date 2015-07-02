@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from muckrock.accounts.models import Profile, Statistics
 
-# pylint: disable=R0903
+# pylint: disable=too-few-public-methods
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profile model"""
@@ -32,8 +32,8 @@ class StatisticsSerializer(serializers.ModelSerializer):
     """Serializer for Statistics model"""
 
     def __init__(self, *args, **kwargs):
-        # pylint: disable=E1101
-        # pylint: disable=E1002
+        # pylint: disable=no-member
+        # pylint: disable=super-on-old-class
         super(StatisticsSerializer, self).__init__(*args, **kwargs)
         if 'request' not in self.context or not self.context['request'].user.is_staff:
             staff_only = (
