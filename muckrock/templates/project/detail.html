@@ -1,6 +1,7 @@
 {% extends 'details/base_detail.html' %}
 
 {% load tags %}
+{% load markdown_deux_tags %}
 
 {% block type %}project{% endblock %}
 
@@ -9,7 +10,7 @@
     <img src="{{ MEDIA_URL }}{{ project.image }}">
     {% endif %}
     <h1>{{ project.title }}</h1>
-    <p>{{ project.description }}</p>
+    <p>{{ project.description|markdown:"trusted" }}</p>
 {% endblock %}
 
 {% block aside %}
