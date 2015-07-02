@@ -5,7 +5,12 @@
 {% block form-title %}Create a new project{% endblock %}
 
 {% block form-form %}
+
+{% if form.is_multipart %}
+<form enctype="multipart/form-data" method="post">
+{% else %}
 <form method="post">
+{% endif %}
     {% csrf_token %}
     {% if form.non_field_errors %}
     <object class="failure panel">

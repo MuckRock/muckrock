@@ -6,7 +6,12 @@ This form object takes one optional arguments:
 
 If the form is hidden, it is revealed by the CSS :target selector. There must be at least one button with the id `hidden-form-button` on the page containing the hidden form that targets #hidden-form. There must be at most one hidden form per page.
 {% endcomment %}
+
+{% if form.is_multipart %}
+<form enctype="multipart/form-data" method="post">
+{% else %}
 <form method="post">
+{% endif %}
     {% csrf_token %}
     {% if form.non_field_errors %}
     <object class="failure panel">
