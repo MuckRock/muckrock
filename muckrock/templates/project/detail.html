@@ -5,11 +5,11 @@
 {% block type %}project{% endblock %}
 
 {% block header %}
-    <h1>{{ project.title }}</h1>
-    <p>{{ project.description }}</p>
     {% if project.image %}
     <img src="{{ MEDIA_URL }}{{ project.image }}">
     {% endif %}
+    <h1>{{ project.title }}</h1>
+    <p>{{ project.description }}</p>
 {% endblock %}
 
 {% block aside %}
