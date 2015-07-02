@@ -7,7 +7,9 @@
 {% block header %}
     <h1>{{ project.title }}</h1>
     <p>{{ project.description }}</p>
+    {% if project.image %}
     <img src="{{ MEDIA_URL }}{{ project.image }}">
+    {% endif %}
 {% endblock %}
 
 {% block aside %}
@@ -21,17 +23,20 @@
         </a>
     </div>
     {% endif %}
+    {% if project.contributors.count > 0 %}
     <dfn>Contributors</dfn>
     <ul class="contributors">
     {% for contributor in project.contributors.all %}
         <li>{{ contributor.get_full_name }}</li>
     {% endfor %}
     </ul>
+    {% endif %}
     {% tag_manager project %}
     {% include 'lib/social.html' with title=project.title %}
 {% endblock %}
 
 {% block main %}
+{% if project.requests.count > 0 %}
 <h2>Requests</h2>
 <ul class="requests">
     {% for request in project.requests.all %}
@@ -42,6 +47,8 @@
     </li>
     {% endfor %}
 </ul>
+{% endif %}
+{% if project.articles.count > 0 %}
 <h2>Articles</h2>
 <ul class="articles">
     {% for article in project.articles.all %}
@@ -52,4 +59,5 @@
     </li>
     {% endfor %}
 </ul>
+{% endif %}
 {% endblock main %}
