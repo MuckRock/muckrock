@@ -31,7 +31,14 @@
     {% endfor %}
     </ul>
     {% endif %}
-    {% tag_manager project %}
+    {% if project.tags.count > 0 %}
+    <dfn>Tags</dfn>
+    <ul class="tags">
+    {% for tag in project.tags.all %}
+        <li class="tag">{{ tag.name }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
     {% include 'lib/social.html' with title=project.title %}
 {% endblock %}
 
