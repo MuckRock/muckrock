@@ -75,10 +75,10 @@
 
 .project.detail {
     ul {
-        padding-left: $base-padding;
+        padding-left: $vertical-rhythm;
     }
     .main h1 {
-        font-weight: $bold;
+        font-weight: $font-weight-bold;
     }
     .main h2 {
         @extend h2;
