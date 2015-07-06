@@ -9,7 +9,7 @@
         margin: 0 -1 * $vertical-rhythm;
     }
     @include media($large-layout) {
-        margin: 0 0 0 -1 * $vertical-rhythm;
+        margin: 0 -24px 0 -1 * $vertical-rhythm;
     }
     .banner {
         display: block;
