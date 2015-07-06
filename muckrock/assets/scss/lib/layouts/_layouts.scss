@@ -3,6 +3,7 @@
 .container {
     padding: $vertical-rhythm/2;
     @include media($medium-layout) { padding: $vertical-rhythm; }
+    margin-bottom: 0;
 }
 
 @import 'details';
