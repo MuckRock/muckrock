@@ -181,6 +181,7 @@ nav.secondary {
     ul {
         width: 100%;
         display: block;
+        padding-left: 0;
     }
     li {
         display: inline-block;
@@ -353,13 +354,13 @@ nav.sidebar {
         margin-top: 2 * $vertical-rhythm;
         .username {
             display: block;
-            @extend h5;
-            // margin: 0;
-            margin-bottom: $vertical-rhythm/2;
+            @extend .h3;
             color: $color-white;
         }
         .options {
             @include row;
+            padding-left: 0;
+            margin-bottom: 0;
             #mylist { @extend %full; }
         }
 
