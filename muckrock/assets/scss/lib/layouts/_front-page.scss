@@ -1,11 +1,19 @@
 .homepage {
     overflow: hidden;
-    @extend %edge-to-edge;
+    margin: 0 -.5 * $vertical-rhythm;
+    margin-bottom: 0;
+    section {
+        margin-bottom: 0;
+    }
+    @include media($medium-layout) {
+        margin: 0 -1 * $vertical-rhythm;
+    }
+    @include media($large-layout) {
+        margin: 0 0 0 -1 * $vertical-rhythm;
+    }
     .banner {
         display: block;
         width: 100%;
-        position: relative;
-        margin-right: -1px;
         background-size: cover;
         background-position: center;
         color: $color-white;
@@ -31,25 +39,8 @@
         }
 
         h1 {
-            @include media($small-layout) {
-                @include font-sizing(1.85);
-                margin: 0 auto;
-            }
-            @include media($medium-layout) {
-                @include font-sizing(2.5);
-                margin: 0 auto;
-            }
-            @include media($large-layout) {
-                @include font-sizing(3.5);
-                margin: 0 auto;
-            }
+            margin: 0 auto $vertical-rhythm;
             max-width: 15em;
-        }
-
-        h2 {
-            @include media($small-layout) {
-                @include font-sizing(1.5);
-            }
         }
 
         .call-to-action {
@@ -66,12 +57,11 @@
         }
         .button {
             display: inline-block;
-            margin: $vertical-rhythm/4 auto;
+            margin: 0 auto $vertical-rhythm;
             clear: both;
             @include media($small-layout) {
                 display: block;
                 max-width: 15em;
-                margin: 0 auto;
             }
         }
         .image-attribution {
@@ -84,7 +74,10 @@
             margin-left: $vertical-rhythm/4;
         }
     }
-    .articles { @include outer-container; }
+    .articles {
+        @include outer-container;
+        margin-bottom: $vertical-rhythm;
+    }
     .featured-article {
         @include row;
         padding: $vertical-rhythm/2;
@@ -95,10 +88,6 @@
             }
         }
         .body { @extend %half; }
-        @include media($medium-layout) {
-            border-bottom: $base-border-width solid $color-grey;
-
-        }
     }
     .article {
         @extend %half;
@@ -121,7 +110,8 @@
             margin: $vertical-rhythm auto;
         }
         ul {
-            @include outer-container;
+            @include row;
+            padding-left: 0;
             text-align: center;
         }
         li { @extend %third; }
