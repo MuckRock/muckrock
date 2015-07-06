@@ -26,7 +26,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.nested_inlines.admin import NestedModelAdmin, NestedTabularInline
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable=R0904
+# pylint: disable=too-many-public-methods
 # pylint: disable=bad-continuation
 
 class FOIAFileAdminForm(forms.ModelForm):
@@ -39,7 +39,7 @@ class FOIAFileAdminForm(forms.ModelForm):
         self.clean_description = self._validate('description')
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIAFile
 
     @staticmethod
@@ -121,7 +121,7 @@ class FOIARequestAdminForm(forms.ModelForm):
                                                  required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = FOIARequest
 
 
@@ -139,8 +139,8 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     save_on_top = True
     form = FOIARequestAdminForm
     formats = ['xls', 'csv']
-    # pylint: disable=E1101
-    # pylint: disable=W0212
+    # pylint: disable=no-member
+    # pylint: disable=protected-access
     headers = [f.name for f in FOIARequest._meta.fields] + ['total_pages']
 
     def save_model(self, request, obj, form, change):
@@ -150,11 +150,15 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
         if obj.status in ['done', 'partial'] and obj.embargo and not obj.date_embargo:
             obj.date_embargo = date.today() + timedelta(30)
 
-        # NOT saving here - saving after formset so that we can check for updates there first
+        # NOT saving here if changed
+        # saving after formset so that we can check for updates there first
+        if not change:
+            obj.save()
+
 
     def save_formset(self, request, form, formset, change):
         """Actions to take while saving inline instances"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         if formset.model == FOIANote:
             formset.save()
@@ -218,7 +222,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def _list_helper(self, request, foias, action):
         """List all the requests that need to be processed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         paginator = Paginator(foias, 10)
         try:
             page = paginator.page(request.GET.get('page'))
@@ -232,25 +236,25 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def process(self, request):
         """List all the requests that need to be processed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.filter(status='submitted'))
         return self._list_helper(request, foias, 'Process')
 
     def followup(self, request):
         """List all the requests that need to be followed up"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.get_followup())
         return self._list_helper(request, foias, 'Follow Up')
 
     def undated(self, request):
         """List all the requests that have undated documents or files"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         foias = list(FOIARequest.objects.get_undated())
         return self._list_helper(request, foias, 'Undated')
 
     def send_update(self, request, idx):
         """Manually send the user an update notification"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
 
         foia = get_object_or_404(FOIARequest, pk=idx)
         foia.update()
@@ -259,8 +263,8 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def retry_pages(self, request, idx):
         """Retry getting the page count"""
-        # pylint: disable=E1101
-        # pylint: disable=R0201
+        # pylint: disable=no-member
+        # pylint: disable=no-self-use
 
         docs = FOIAFile.objects.filter(foia=idx, pages=0)
         for doc in docs:
@@ -274,14 +278,14 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
 
     def autoimport(self, request):
         """Autoimport documents from S3"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         autoimport.apply_async()
         messages.info(request, 'Auotimport started')
         return HttpResponseRedirect(reverse('admin:foia_foiarequest_changelist'))
 
     def set_status(self, request, idx, status):
         """Set the status of the request"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
 
         try:
             foia = FOIARequest.objects.get(pk=idx)
@@ -335,7 +339,7 @@ class FOIAMultiRequestAdmin(VersionAdmin):
 
     def submit(self, request, idx):
         """Submit the multi request"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
 
         get_object_or_404(FOIAMultiRequest, pk=idx)
         submit_multi_request.apply_async(args=[idx])

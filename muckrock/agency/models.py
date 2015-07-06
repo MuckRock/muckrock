@@ -22,13 +22,13 @@ class AgencyType(models.Model):
         return self.name
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['name']
 
 
 class AgencyManager(ChainableManager):
     """Object manager for Agencies"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
 
     def get_approved(self):
         """Get all approved agencies"""
@@ -87,7 +87,7 @@ class Agency(models.Model, RequestHelper):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         return ('agency-detail', [], {'jurisdiction': self.jurisdiction.slug,
                                       'jidx': self.jurisdiction.pk,
                                       'slug': self.slug, 'idx': self.pk})
@@ -138,7 +138,7 @@ class Agency(models.Model, RequestHelper):
 
     def latest_response(self):
         """When was the last time we heard from them?"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         foias = self.foiarequest_set.get_open()
         latest_responses = []
         for foia in foias:
@@ -149,6 +149,6 @@ class Agency(models.Model, RequestHelper):
             return max(latest_responses)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'
 

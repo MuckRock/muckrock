@@ -10,7 +10,7 @@ from muckrock.tags.models import Tag
 
 class TagAdmin(admin.ModelAdmin):
     """Model Admin for a tag"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
 
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'user')

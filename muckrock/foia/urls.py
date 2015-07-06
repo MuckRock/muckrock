@@ -7,16 +7,16 @@ from django.views.generic.base import RedirectView
 
 from pingback import register_pingback
 
-# pylint: disable=W0611
+# pylint: disable=unused-import
 import muckrock.foia.signals
-# pylint: enable=W0611
+# pylint: enable=unused-import
 from muckrock.foia import views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
                                 UserSubmittedFeed, UserDoneFeed, UserUpdateFeed
 from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
-# pylint: disable=E1120
+# pylint: disable=no-value-for-parameter
 # pylint: disable=bad-whitespace
 # pylint: disable=bad-continuation
 

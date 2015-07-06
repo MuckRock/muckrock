@@ -1,22 +1,17 @@
-
-
 .tag {
     display: inline-block;
+    margin: $base-margin/4 $base-margin/6;
+    padding: $base-padding/6 $base-padding/3 $base-padding/6 $base-padding/3;
+    background-color: $color-blue;
+    color: $color-white;
+    font-size: .9em;
 }
 
 button.tag, .button.tag {
-    $tag-color: lighten($color-blue, 5%);
-    position: relative;
-    margin: $vertical-rhythm/4 $vertical-rhythm/6;
     border: none;
     border-radius: 0;
-    padding: $vertical-rhythm/6 $vertical-rhythm/3 $vertical-rhythm/6 $vertical-rhythm/3;
-    background: $tag-color;
-    font-size: .9em;
     box-shadow: none;
     &:hover {
-        $hover-color: darken($tag-color, 8%);
-        background: $hover-color;
         box-shadow: none;
     }
 }

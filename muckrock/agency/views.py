@@ -67,8 +67,8 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
-    # pylint: disable=W0612
-    # pylint: disable=W0613
+    # pylint: disable=unused-variable
+    # pylint: disable=unused-argument
 
     # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
     agency = get_object_or_404(Agency, pk=idx)
@@ -103,15 +103,15 @@ def stale(request):
 
 class AgencyViewSet(viewsets.ModelViewSet):
     """API views for Agency"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     queryset = Agency.objects.all()
     serializer_class = AgencySerializer
 
     class Filter(django_filters.FilterSet):
         """API Filter for Agencies"""
-        # pylint: disable=E1101
-        # pylint: disable=R0903
+        # pylint: disable=no-member
+        # pylint: disable=too-few-public-methods
         jurisdiction = django_filters.CharFilter(name='jurisdiction__name')
         types = django_filters.CharFilter(name='types__name')
         class Meta:
