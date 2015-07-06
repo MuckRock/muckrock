@@ -6,11 +6,17 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import CreateView, DetailView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+
+class ProjectListView(ListView):
+    """List all projects"""
+    model = Project
+    template_name = 'project/list.html'
+    paginate_by = 25
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
