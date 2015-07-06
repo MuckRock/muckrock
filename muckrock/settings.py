@@ -253,6 +253,7 @@ INSTALLED_APPS = (
     'muckrock.sidebar',
     'muckrock.task',
     'muckrock.organization',
+    'muckrock.project'
 )
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)
