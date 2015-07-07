@@ -159,6 +159,7 @@
         @include row;
         display: table;
         border: $base-border-width solid $color-grey;
+        border-bottom: none;
         border-radius: $base-border-radius;
         border-collapse: collapse;
         thead {
@@ -166,6 +167,7 @@
         }
         tbody {
             display: table-row-group;
+            border-bottom: $base-border-width solid $color-grey;
         }
         tr {
             display: table-row;
