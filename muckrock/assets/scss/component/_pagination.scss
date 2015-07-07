@@ -9,6 +9,7 @@
     @include media($large-layout) {
         @include span-columns(12);
     }
+    margin-bottom: 0;
 }
 
 .pagination-info {
@@ -24,12 +25,7 @@
     }
 }
 
-.pagination p {
-    margin-top: 0;
-}
-
 .pagination-links {
-    // width: 100%;
     display: table;
     margin-bottom: $vertical-rhythm;
     border-collapse: collapse;
