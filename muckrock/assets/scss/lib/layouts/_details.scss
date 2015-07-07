@@ -24,7 +24,7 @@
     }
 
     .actions {
-        @extend %panel;
+        @include panel;
     }
 
     &.agency {
@@ -189,7 +189,7 @@
             }
         }
         .controls {
-            @extend %panel;
+            @include panel;
             .user-controls, .org-controls {
                 @extend %half;
             }

@@ -1,5 +1,5 @@
 .form {
-    @extend %panel;
+    @include panel;
     @include outer-container;
     padding: $vertical-rhythm;
     header, form { @include row; }

@@ -1,8 +1,8 @@
 /* Panels */
 
-.panel { @extend %panel; }
+.panel { @include panel; }
 
-.panel.default { @extend %panel;
+.panel.default { @include panel;
     @include panel-color($color-grey);
     a {
         text-decoration: underline;
@@ -10,7 +10,7 @@
         background-color: none;
     }
 }
-.panel.primary { @extend %panel;
+.panel.primary { @include panel;
     @include panel-color($color-blue);
     a {
         text-decoration: underline;
@@ -18,7 +18,7 @@
         background-color: none;
     }
 }
-.panel.success { @extend %panel;
+.panel.success { @include panel;
     @include panel-color($color-green);
     a {
         text-decoration: underline;
@@ -26,7 +26,7 @@
         background-color: none;
     }
 }
-.panel.failure { @extend %panel;
+.panel.failure { @include panel;
     @include panel-color($color-red);
     a {
         text-decoration: underline;
@@ -34,6 +34,6 @@
         background-color: none;
     }
 }
-.panel.disabled { @extend %panel;
+.panel.disabled { @include panel;
     @include panel-color($color-disabled, true);
 }

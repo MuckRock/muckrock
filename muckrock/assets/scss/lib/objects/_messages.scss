@@ -1,7 +1,7 @@
 /* Messages */
 
 .message {
-    @extend %panel;
+    @include panel;
     padding: 0;
     $color-sent: $color-blue;
     $color-received: $color-grey-2;

@@ -14,7 +14,7 @@
 }
 
 .ms-container .ms-list{
-    @extend %panel;
+    @include panel;
     background-color: white;
     border-radius: $base-border-radius;
     position: relative;

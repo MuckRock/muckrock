@@ -13,7 +13,7 @@
 
 /* Feeds */
 
-.feed-item { @extend %panel;
+.feed-item { @include panel;
     overflow: hidden;
     @include fill-parent();
     > header {
