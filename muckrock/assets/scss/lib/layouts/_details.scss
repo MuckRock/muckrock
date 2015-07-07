@@ -11,11 +11,11 @@
     .header-container {
         @include outer-container;
         .main {
-            @extend %two-thirds;
+            @include two-thirds;
             margin-bottom: 0;
         }
         .aside {
-            @extend %third;
+            @include third;
         }
     }
 
@@ -28,7 +28,7 @@
     }
 
     &.agency {
-        aside dl { @extend %third; }
+        aside dl { @include third; }
     }
 
     &.flatpage {

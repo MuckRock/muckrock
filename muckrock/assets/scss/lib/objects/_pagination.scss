@@ -12,7 +12,7 @@
 }
 
 .pagination-info {
-    @extend %third;
+    @include third;
     @include omega(3n);
     @include media($medium-layout){
         &:nth-child(2) {

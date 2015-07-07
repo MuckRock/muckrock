@@ -114,7 +114,7 @@
             padding-left: 0;
             text-align: center;
         }
-        li { @extend %third; }
+        li { @include third; }
         .stat {
             display: block;
             @include font-sizing(2.5);

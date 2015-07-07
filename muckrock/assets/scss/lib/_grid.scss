@@ -26,12 +26,12 @@
     &:nth-child(odd) { clear: right; }
 }
 
-%third {
+@mixin third() {
     @include omega(3n);
     @include grid-columns(4, 2, 4);
 }
 
-%two-thirds {
+@mixin two-thirds() {
     @include grid-columns(4, 4, 8);
 }
 

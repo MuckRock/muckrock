@@ -68,7 +68,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         border-top: $crowdfund-border;
         margin-bottom: 0;
         p {
-            @extend %third;
+            @include third;
             margin-bottom: 0;
             @include media($medium-layout) {
                 text-align: center;
@@ -93,7 +93,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         border-top: $crowdfund-border;
         form { @include row; }
         form > section {
-            @extend %third;
+            @include third;
             @include media($medium-layout) {
                 margin-bottom: 0;
             }
