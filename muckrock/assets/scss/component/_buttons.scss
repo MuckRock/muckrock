@@ -48,28 +48,12 @@
 }
 
 .button, button, input[type='submit'] {
-
     @include button($color-grey);
-
-    &.primary {
-      @include button($color-blue);
-    }
-
-    &.success {
-      @include button($color-green);
-    }
-
-    &.failure {
-      @include button($color-red);
-    }
-
-    &.warning {
-      @include button($color-yellow);
-    }
-
-    &.disabled {
-      @include button($color-grey-2);
-    }
+    &.primary   { @include button($color-blue);     }
+    &.success   { @include button($color-green);    }
+    &.failure   { @include button($color-red);      }
+    &.warning   { @include button($color-yellow);   }
+    &.disabled  { @include button($color-grey-2);   }
 }
 
 .edit {
