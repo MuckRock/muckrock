@@ -6,7 +6,7 @@
     }
     .social.preview {
         @include row;
-        margin: 0 0 1.5em;
+        margin: 0 0 $vertical-rhythm;
         padding: .5em;
         border: 1px solid $color-grey;
         section {
@@ -74,20 +74,6 @@
 }
 
 .project.detail {
-    ul {
-        padding-left: $vertical-rhythm;
-    }
-    .main h1 {
-        font-weight: $font-weight-bold;
-    }
-    .main h2 {
-        @extend h2;
-    }
-    .aside {
-        .update.button {
-            margin-bottom: 1.5em;
-        }
-    }
     .tags {
         padding-left: 0;
     }
