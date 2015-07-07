@@ -35,14 +35,9 @@
 
 @mixin textbox() {
     @include box-sizing(border-box);
+    @include outer-container;
     @include border;
     @include border-radius;
-    @include outer-container;
-    ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-    line-height: $vertical-rhythm;
     border-color: $color-grey;
 }
 
