@@ -19,7 +19,7 @@
         input { width: 100%; }
     }
     .buttons { @include row; }
-    input[type="submit"] { @extend %quarter; }
+    input[type="submit"] { @include quarter; }
 }
 .hidden-stripe-handler { display: none; }
 textarea, #{$all-text-inputs} { @include input; }

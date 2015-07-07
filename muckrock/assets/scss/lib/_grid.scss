@@ -35,7 +35,7 @@
     @include grid-columns(4, 4, 8);
 }
 
-%quarter {
+@mixin quarter() {
     @include omega(2n);
     @include media($small-layout) { @include span-columns(2); }
     @include media($medium-layout) { @include span-columns(3); }
@@ -46,6 +46,6 @@
     }
 }
 
-%three-quarters {
+@mixin three-quarters() {
     @include grid-columns(4, 6, 9);
 }

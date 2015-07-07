@@ -198,10 +198,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         border: 2px solid $color-grey-2;
         border-top: none;
         input {
-            @extend %quarter;
+            @include quarter;
         }
         p {
-            @extend %three-quarters;
+            @include three-quarters;
             margin-top: $vertical-rhythm;
             @include media($large-layout) {
                 margin-top: 0;

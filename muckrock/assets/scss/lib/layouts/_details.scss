@@ -151,13 +151,13 @@
             @include row;
             margin-bottom: $vertical-rhythm;
             button {
-                @extend %quarter;
+                @include quarter;
                 @include omega(n);
                 margin-top: 0;
                 padding: .5em 1em;
             }
             #id_add_members-wrapper {
-                @extend %three-quarters;
+                @include three-quarters;
                 border: $base-border-width solid $color-grey;
                 border-radius: $base-border-radius;
                 background: white;
@@ -310,11 +310,11 @@
                 padding: 0 0 $vertical-rhythm/2;
                 border-bottom: $base-border-width solid $color-grey;
                 .note-date {
-                    @extend %quarter;
+                    @include quarter;
                     color: $color-grey;
                     text-align: right;
                 }
-                .note-body { @extend %three-quarters; }
+                .note-body { @include three-quarters; }
             }
 
             .button {

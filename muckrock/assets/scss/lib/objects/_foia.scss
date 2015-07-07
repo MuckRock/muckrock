@@ -11,7 +11,7 @@
         margin-left: 0;
     }
     .foia-body {
-        @extend %three-quarters;
+        @include three-quarters;
     }
     p {
         @include font-sizing(0.8);
