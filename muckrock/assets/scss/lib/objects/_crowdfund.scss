@@ -25,7 +25,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
     }
     header {
-        @extend %full;
+        @include full;
         overflow: hidden;
 
         @include border-top-radius($base-border-radius);
@@ -54,7 +54,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     .description, .stats {
-        @extend %full;
+        @include full;
         padding: $vertical-rhythm/2;
     }
 
@@ -88,7 +88,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     footer {
-        @extend %full;
+        @include full;
         @include border-bottom-radius($base-border-radius);
         border-top: $crowdfund-border;
         form { @include row; }

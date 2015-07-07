@@ -66,12 +66,12 @@ fieldset {
     &.update,
     &.password-change,
     &.foia-embargo {
-        .visible-fields fieldset { @extend %full; }
+        .visible-fields fieldset { @include full; }
     }
 
     &.admin-fix {
         .visible-fields fieldset {
-            @extend %full;
+            @include full;
             margin-bottom: $vertical-rhythm/2;
             p { margin-bottom: 0; }
         }

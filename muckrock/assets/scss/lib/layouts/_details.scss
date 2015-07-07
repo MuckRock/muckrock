@@ -40,7 +40,7 @@
         $article-body-width: 33em;
 
         .news-image {
-            @extend %full;
+            @include full;
             @include omega;
             margin-bottom: $vertical-rhythm;
             @include media($medium-layout) {

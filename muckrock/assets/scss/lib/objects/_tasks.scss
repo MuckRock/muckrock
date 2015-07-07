@@ -118,7 +118,7 @@ dl.task-data {
     @include row;
     overflow: hidden;
     .id_name, .id_aliases, .id_address {
-        @extend %full;
+        @include full;
     }
     .id_address, .id_url, .id_fax {
         @include omega;

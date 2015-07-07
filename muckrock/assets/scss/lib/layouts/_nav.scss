@@ -298,7 +298,7 @@ nav.sidebar {
         display: block;
         margin-top: $vertical-rhythm/2;
         li {
-            @extend %full;
+            @include full;
             &:first-child a {
                 border-top: none;
                 @include border-top-radius($base-border-radius);
@@ -361,7 +361,7 @@ nav.sidebar {
             @include row;
             padding-left: 0;
             margin-bottom: 0;
-            #mylist { @extend %full; }
+            #mylist { @include full; }
         }
 
 

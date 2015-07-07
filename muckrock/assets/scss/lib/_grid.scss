@@ -11,9 +11,7 @@
     &:nth-child(#{$nth}+1) { clear: none }
 }
 
-// Prototypes
-
-%full {
+@mixin full() {
     @include omega;
     @include grid-columns(4, 6, 12);
 }

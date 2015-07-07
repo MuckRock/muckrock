@@ -233,7 +233,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     form {
         @include row;
         .visible-fields fieldset {
-            @extend %full;
+            @include full;
             textarea {
                 width: 100%;
             }

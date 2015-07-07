@@ -87,7 +87,7 @@
     @include outer-container;
     form {
         @include row;
-        .visible-fields fieldset { @extend %full; }
+        .visible-fields fieldset { @include full; }
     }
     .title {
         label { display: none; }

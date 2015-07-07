@@ -1,7 +1,7 @@
 .project-create.form {
     fieldset {
         &.title, &.description {
-            @extend %full;
+            @include full;
         }
     }
     .social.preview {
