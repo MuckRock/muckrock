@@ -1,34 +1,30 @@
-.foia-group { @include outer-container; }
-.foia-group > .foia-single { @include half; }
+.foia-group {
+    @include outer-container;
+}
+
+.foia-group > .foia-single {
+    @include half;
+}
+
 .foia-single {
     @include row;
     display: block;
-    margin-bottom: $vertical-rhythm/2;
-    padding: $vertical-rhythm/4 $vertical-rhythm/2;
+    padding: $vertical-rhythm/2;
     @include border;
     @include border-radius;
+    font-size: $font-size-2;
     &:first-child {
         margin-left: 0;
     }
     .foia-body {
         @include three-quarters;
-    }
-    p {
-        @include font-sizing(0.8);
-    }
-    h3 {
-        @include font-sizing(1.2);
-        font-weight: $font-weight-normal;
+        margin-bottom: 0;
     }
     .foia-actions {
         @include grid-columns(4, 6, 3);
         @include row;
         .button {
             @include grid-columns(2, 3, 12);
-            @include font-sizing(0.8);
-            margin-top: 0.5em;
-            margin-right: 0;
-            display: block;
         }
     }
 }
