@@ -76,7 +76,6 @@ table {
     tbody tr:nth-child(odd) { background-color: $color-odd-background; }
     &, tr {
         border-top: $base-border-width solid $color-grey;
-        border-bottom: $base-border-width solid $color-grey
     }
 }
 
