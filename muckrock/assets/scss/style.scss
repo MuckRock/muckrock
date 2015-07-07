@@ -1,8 +1,3 @@
-// Subatomic Elements
-// Standalone Libraries & Variables
-//
-// Do not appear in compiled CSS
-
 // Frameworks
 @import 'normalize';
 @import 'bourbon/bourbon';
@@ -10,11 +5,10 @@
 
 // Basics
 @import 'lib/variables';
+@import 'lib/mixins';
 @import 'lib/colors';
 @import 'lib/typography';
-@import 'lib/mixins';
 @import 'lib/grid';
-@import 'lib/prototypes';
 
 // Elements
 @import 'lib/objects/objects';
@@ -23,7 +17,7 @@
 @import 'lib/layouts/layouts';
 @import 'lib/lists/lists';
 
-/* Plugins */
+// Plugins
 
 @import 'lib/plugins/autocomplete';
 @import 'lib/plugins/multiselect';
