@@ -1,18 +1,16 @@
 /* Details */
 
 .detail {
-
-    margin: 0 auto 1.5em;
+    @include outer-container;
 
     .header {
         margin-bottom: 0;
     }
 
     .header-container {
-        @include outer-container;
+        @include row;
         .main {
             @include two-thirds;
-            margin-bottom: 0;
         }
         .aside {
             @include third;
@@ -20,7 +18,7 @@
     }
 
     .body {
-        @include outer-container;
+        @include row;
     }
 
     .actions {
