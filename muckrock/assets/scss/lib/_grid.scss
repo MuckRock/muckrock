@@ -1,13 +1,12 @@
-/* Allows for full-height elements with CSS */
-html, body { min-height: 100%; }
-
 @mixin grid-columns($small, $medium, $large) {
+    // Conveniently set all grid column sizes at once.
     @include media($small-layout) { @include span-columns($small); }
     @include media($medium-layout) { @include span-columns($medium); }
     @include media($large-layout) { @include span-columns($large); }
 }
 
 @mixin omega-reset($nth) {
+    // Reset the omega math mid-row
     &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
     &:nth-child(#{$nth}+1) { clear: none }
 }
@@ -51,9 +50,4 @@ html, body { min-height: 100%; }
 
 %three-quarters {
     @include grid-columns(4, 6, 9);
-}
-
-%edge-to-edge {
-    margin: 0 -1*$vertical-rhythm/2;
-    @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
 }

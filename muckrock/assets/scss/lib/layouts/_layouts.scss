@@ -1,9 +1,24 @@
-/* Layouts */
+    /////////////////////////
+   //                     //
+  //    L A Y O U T S    //
+ //                     //
+/////////////////////////
+
+html, body {
+    // Allows for full-height elements with CSS
+    min-height: 100%;
+}
 
 .container {
     padding: $vertical-rhythm/2;
     @include media($medium-layout) { padding: $vertical-rhythm; }
     margin-bottom: 0;
+}
+
+@mixin edge-to-edge() {
+    // Ignore container padding
+    margin: 0 -1*$vertical-rhythm/2;
+    @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
 }
 
 @import 'details';

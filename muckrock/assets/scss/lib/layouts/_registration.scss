@@ -27,7 +27,7 @@
 }
 
 .subscribe.page {
-    @extend %edge-to-edge;
+    @include edge-to-edge;
     header, .body, .interaction {
         @include outer-container;
         padding: $vertical-rhythm;
