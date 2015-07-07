@@ -1,24 +1,23 @@
-// Frameworks
-@import 'normalize';
-@import 'bourbon/bourbon';
-@import 'neat/neat';
+// Third Party Frameworks
+@import 'framework/normalize';
+@import 'framework/bourbon/bourbon';
+@import 'framework/neat/neat';
 
 // Basics
-@import 'lib/variables';
-@import 'lib/mixins';
-@import 'lib/colors';
-@import 'lib/typography';
-@import 'lib/grid';
+@import 'base/variables';
+@import 'base/mixins';
+@import 'base/grid';
+@import 'base/colors';
+@import 'base/typography';
 
-// Elements
-@import 'lib/objects/objects';
+// Components
+@import 'component/components';
 
 // Layouts
-@import 'lib/layouts/layouts';
-@import 'lib/lists/lists';
+@import 'layout/layouts';
+@import 'layout/list/lists';
 
-// Plugins
-
-@import 'lib/plugins/autocomplete';
-@import 'lib/plugins/multiselect';
-@import 'lib/plugins/datepicker';
+// Third Party Plugins
+@import 'plugin/autocomplete';
+@import 'plugin/multiselect';
+@import 'plugin/datepicker';
