@@ -4,7 +4,7 @@
     padding: $vertical-rhythm/6 $vertical-rhythm/3 $vertical-rhythm/6 $vertical-rhythm/3;
     background-color: $color-blue;
     color: $color-white;
-    font-size: .9em;
+    font-size: $font-size-2;
 }
 
 button.tag, .button.tag {
@@ -18,9 +18,8 @@ button.tag, .button.tag {
 
 .tag-form {
     display: none;
-    font-size: 0.85em;
+    font-size: $font-size-2;
     background: none;
     border: none;
     button { margin-left: $vertical-rhythm/4; }
-    p { margin-top: 0; }
 }
