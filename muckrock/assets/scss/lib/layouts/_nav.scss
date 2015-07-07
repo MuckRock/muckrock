@@ -284,7 +284,7 @@ nav.sidebar {
     dfn { padding: 1.5em 0 0.5em 0; }
 
     ul { @include row; }
-    li { @extend %half; }
+    li { @include half; }
     .button {
         @include button($color-grey-3);
         display: block;

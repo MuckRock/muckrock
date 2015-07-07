@@ -6,7 +6,7 @@
 }
 
 .ms-container .ms-selectable, .ms-container .ms-selection{
-    @extend %half;
+    @include half;
     height: 100%;
 }
 .ms-container .ms-selection{

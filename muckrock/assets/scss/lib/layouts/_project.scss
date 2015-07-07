@@ -10,7 +10,7 @@
         padding: .5em;
         border: 1px solid $color-grey;
         section {
-            @extend %half;
+            @include half;
         }
         .image {
             height: 15em;

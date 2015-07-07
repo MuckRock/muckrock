@@ -161,7 +161,7 @@ dl.task-data {
         header {
             @include row;
             @extend dfn;
-            p, time { @extend %half; }
+            p, time { @include half; }
             p { margin: 0; }
             @include media($medium-layout) {
                 time { text-align: right; }

@@ -191,7 +191,7 @@
         .controls {
             @include panel;
             .user-controls, .org-controls {
-                @extend %half;
+                @include half;
             }
             .user-controls {
                 text-align: left;
@@ -283,7 +283,7 @@
                 padding-left: 0;
                 @include row;
                 li {
-                    @extend %half;
+                    @include half;
                     margin-bottom: $vertical-rhythm/2;
                     border: $base-border-width solid $color-blue;
                     @include border-radius;

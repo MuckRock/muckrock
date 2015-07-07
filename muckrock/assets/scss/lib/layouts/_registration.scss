@@ -36,7 +36,7 @@
         @include outer-container;
         color: $color-white;
         background-color: $color-red;
-        .heading, .subheading { @extend %half; }
+        .heading, .subheading { @include half; }
         .heading {
             @include font-sizing(5);
             margin: 0;

@@ -3,7 +3,7 @@
     @include outer-container;
     padding: $vertical-rhythm;
     header, form { @include row; }
-    .form-title, .form-info { @extend %half; }
+    .form-title, .form-info { @include half; }
     h1 {
         @include font-sizing(3);
         margin-top: 0;
@@ -15,7 +15,7 @@
         @include row;
     }
     .visible-fields fieldset {
-        @extend %half;
+        @include half;
         input { width: 100%; }
     }
     .buttons { @include row; }
