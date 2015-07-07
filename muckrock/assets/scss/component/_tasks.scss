@@ -1,6 +1,5 @@
 .task {
     @include row;
-    margin: 0 0 $vertical-rhythm 0;
     border: 1px solid $color-black;
     &.resolved {
         border-color: $color-green;
@@ -15,6 +14,7 @@
     @include span-columns(12);
     @include row;
     position: relative;
+    margin-bottom: 0;
     background-color: $color-black;
     color: $color-white;
     cursor: pointer;
@@ -53,13 +53,6 @@
     }
 }
 
-dl.task-data {
-    margin: 0;
-    p {
-        margin: 0;
-    }
-}
-
 .task .task-actions {
     @include span-columns(4);
     @include omega;
@@ -67,6 +60,7 @@ dl.task-data {
     input, select, button, label {
         display: block;
         width: 100%;
+        margin-bottom: $vertical-rhythm;
     }
     input, select, button {
         margin-bottom: $vertical-rhythm/2;
@@ -79,7 +73,7 @@ dl.task-data {
 .task .task-extra-context {
     @include span-columns(12);
     padding: $vertical-rhythm/2;
-    background: $color-disabled;
+    background: $color-grey-7;
 
     button {
         display: block;
@@ -89,15 +83,11 @@ dl.task-data {
 
     .extra-context {
         display: block;
-        margin-top: $vertical-rhythm;
         padding-top: $vertical-rhythm;
         border-top: 1px solid $color-grey;
     }
     .extra-context.hidden {
         display: none;
-    }
-    .form {
-        margin: 0 0 $vertical-rhythm 0;
     }
 }
 
