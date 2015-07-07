@@ -279,16 +279,20 @@ nav.sidebar {
         padding: $vertical-rhythm $vertical-rhythm 1em;
     }
     color: $color-white;
-    background: $color-grey-1;
+    background: $color-grey-2;
 
     dfn { padding: 1.5em 0 0.5em 0; }
 
-    ul { @include row; }
-    li { @include half; }
+    ul {
+        @include row;
+        padding-left: 0;
+    }
+    li {
+        @include half;
+    }
     .button {
-        @include button($color-grey-3);
+        @include button($color-black);
         display: block;
-        height: $sidebar-object-height;
         width: 100%;
         margin-bottom: $vertical-rhythm/4;
         padding: $vertical-rhythm/4 $vertical-rhythm/2;
@@ -395,31 +399,11 @@ nav.sidebar {
 
     }
 
-    .social-links {
-        a {
-            svg {
-                height: 1em;
-                width: auto;
-                margin-bottom: -0.1em;
-                fill: $color-grey;
-            }
-            &:hover {
-                background: $color-selected;
-                svg { fill: $color-white; }
-            }
-        }
-    }
-
-    .spotlight {
-        margin-top: 1.5em;
-        img { margin: 0; }
-        h1 {
-            @extend h6;
-            font-weight: $font-weight-normal;
-            font-size: 98%;
-            line-height: 1.2em;
-        }
-        p { @extend small; line-height: 1.2em; }
+    .social-links svg {
+        height: 1em;
+        width: auto;
+        margin-bottom: -0.1em;
+        fill: $color-white;
     }
 
     form {
@@ -433,19 +417,18 @@ nav.sidebar {
             height: 100%;
             float: left;
             margin-right: 0;
-            font-size: 0.9em;
             color: $color-white;
             background: $color-grey-3;
-            @include placeholder { color: $color-grey; }
-            border: $base-border-width solid $color-grey-3;
+            @include placeholder { color: $color-grey-6; }
+            border: $base-border-width solid $color-grey-1;
             @include border-right-radius(0);
             transform: translateY(2px);
             &:focus, &:hover {
                 outline: none;
-                border-color: $color-selected;
+                border-color: $color-blue;
             }
             & + span.input-button {
-                @include button($color-grey-2);
+                @include button($color-black);
                 margin: 0;
                 float: right;
                 clear: right;
@@ -460,7 +443,7 @@ nav.sidebar {
                     width: auto;
                     margin-left: -.25em;
                     vertical-align: middle;
-                    fill: $color-grey;
+                    fill: $color-white;
                 }
             }
         }
