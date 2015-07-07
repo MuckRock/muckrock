@@ -1,0 +1,105 @@
+
+nav.primary {
+    overflow: hidden;
+    ul {
+        display: table;
+        list-style-type: none;
+        margin: 0;
+        padding-left: 0;
+        &.left
+        {
+            float: left;
+        }
+        &.right
+        {
+            display: table;
+            float: right;
+        }
+    }
+    #new-request > .button {
+        @include border-left-radius($base-border-radius);
+        @include border-right-radius(0);
+        border-right: none;
+    }
+    #menu-button > .button, #menu-close > .button {
+        @include border-right-radius($base-border-radius);
+        @include border-left-radius(0);
+        border-left: none;
+    }
+    .menu-text { display: none; }
+    @media screen
+    and (min-width: $small-menu-breakpoint - 200px) {
+        .menu-text { display: inline; }
+    }
+
+    /* Logo */
+
+    %logo {
+        margin: $vertical-rhythm/4 0;
+        border: none;
+        padding: 0 0.5em 0 0;
+        svg > path, svg > g { fill: $color-black; }
+        &:hover {
+            background: none;
+            svg > path, svg > g { fill: $color-selected; }
+        }
+    }
+    #muckrock-text { @extend %logo; display: none; }
+    #muckrock-icon { @extend %logo;
+        display: block;
+        padding-top: 0em;
+        > svg {
+            display: block;
+            height: 2rem;
+            width: 2rem;
+        }
+    }
+    @media screen and (min-width: 680px) {
+        #muckrock-text {
+            display: block;
+            padding-top: 0.375em;
+            padding-right: 1em;
+        }
+        #muckrock-icon { display: none; }
+    }
+}
+
+
+nav.secondary {
+    ul {
+        width: 100%;
+        display: block;
+        padding-left: 0;
+    }
+    li {
+        display: inline-block;
+        margin: 0 0.25em;
+        &:first-child {
+            margin-left: 0;
+        }
+    }
+    a {
+        position: relative;
+        padding-right: 0.5em;
+        color: $color-unselected;
+        &:hover {
+            color: $color-selected;
+            text-decoration: none;
+            -webkit-box-shadow: 0px 2px 0px 0px $color-selected;
+            -moz-box-shadow:    0px 2px 0px 0px $color-selected;
+            box-shadow:         0px 2px 0px 0px $color-selected;
+        }
+        @media all and (min-width: 400px) { padding-right: 1em; }
+        @media all and (min-width: 500px) { padding-right: 2em; }
+        @media all and (min-width: 600px) { padding-right: 4em; }
+        @media all and (min-width: 700px) { padding-right: 5.5em; }
+
+        @include transition (all 0.2s ease-in-out);
+    }
+    @media screen and (min-width: $small-menu-breakpoint ) {
+        li {
+            text-align: left;
+            // padding-right: 10%;
+        }
+    }
+}

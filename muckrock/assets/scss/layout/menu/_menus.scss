@@ -1,0 +1,10 @@
+$color-menu: $color-white;
+$color-secondary: $color-white;
+$color-unselected: $color-black;
+$color-selected: $color-blue;
+
+$small-menu-breakpoint: 540px;
+
+@import 'header';
+@import 'sidebar';
+@import 'footer';
