@@ -258,8 +258,8 @@ nav.secondary {
         padding-left: 0;
     }
     li {
-        @include font-sizing(0.9, 3);
-        margin: $vertical-rhythm/2 0;
+        font-size: $font-size-2;
+        margin-bottom: $vertical-rhythm/2;
     }
     p { margin-top: 0; }
     .copyright {
