@@ -33,8 +33,21 @@
     border: $base-border-width solid $color-grey;
 }
 
+@mixin textbox() {
+    @include box-sizing(border-box);
+    @include border;
+    @include border-radius;
+    @include outer-container;
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    line-height: $vertical-rhythm;
+    border-color: $color-grey;
+}
+
 @mixin panel() {
-    @extend %textbox;
+    @include textbox;
     overflow: hidden;
     display: block;
     width: 100%;
@@ -44,7 +57,7 @@
 }
 
 @mixin input() {
-    @extend %textbox;
+    @include textbox;
     display: inline-block;
     padding: $vertical-rhythm/4 $vertical-rhythm/3 $vertical-rhythm/4 $vertical-rhythm/2;
     &:disabled {
