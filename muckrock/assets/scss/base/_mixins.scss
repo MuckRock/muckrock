@@ -1,13 +1,3 @@
-@mixin panel-color($color, $disabled: false) {
-    @if not $disabled {
-        color: $color-white;
-        border-color: darken($color, $color-darken-amount);
-    } @else {
-        color: $color;
-        background: none;
-    }
-}
-
 @mixin colorize-icon($color) {
     .svg-icon path,
     .svg-icon polygon,

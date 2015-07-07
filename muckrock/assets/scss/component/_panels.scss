@@ -2,38 +2,24 @@
 
 .panel { @include panel; }
 
-.panel.default { @include panel;
-    @include panel-color($color-grey);
+@mixin colored-panel($color, $disabled: false) {
+    @include panel;
+    @if not $disabled {
+        color: $color-white;
+        border-color: darken($color, $color-darken-amount);
+    } @else {
+        color: $color;
+        background: none;
+    }
     a {
         text-decoration: underline;
         color: $color-white;
         background-color: none;
     }
 }
-.panel.primary { @include panel;
-    @include panel-color($color-blue);
-    a {
-        text-decoration: underline;
-        color: $color-white;
-        background-color: none;
-    }
-}
-.panel.success { @include panel;
-    @include panel-color($color-green);
-    a {
-        text-decoration: underline;
-        color: $color-white;
-        background-color: none;
-    }
-}
-.panel.failure { @include panel;
-    @include panel-color($color-red);
-    a {
-        text-decoration: underline;
-        color: $color-white;
-        background-color: none;
-    }
-}
-.panel.disabled { @include panel;
-    @include panel-color($color-disabled, true);
-}
+
+.panel.default  { @include colored-panel($color-grey);           }
+.panel.primary  { @include colored-panel($color-blue);           }
+.panel.success  { @include colored-panel($color-green);          }
+.panel.failure  { @include colored-panel($color-red);            }
+.panel.disabled { @include colored-panel($color-disabled, true); }
