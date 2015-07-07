@@ -127,6 +127,7 @@ nav.sidebar {
     ul {
         @include row;
         padding-left: 0;
+        margin-bottom: $vertical-rhythm/2;
     }
     li {
         @include half;
@@ -141,7 +142,6 @@ nav.sidebar {
 
     .button-list {
         display: block;
-        margin-top: $vertical-rhythm/2;
         li {
             @include full;
             &:first-child a {
