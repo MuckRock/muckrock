@@ -11,11 +11,11 @@
     .header-container {
         @include outer-container;
         .main {
-            @extend %two-thirds;
+            @include two-thirds;
             margin-bottom: 0;
         }
         .aside {
-            @extend %third;
+            @include third;
         }
     }
 
@@ -28,7 +28,7 @@
     }
 
     &.agency {
-        aside dl { @extend %third; }
+        aside dl { @include third; }
     }
 
     &.flatpage {
@@ -40,7 +40,7 @@
         $article-body-width: 33em;
 
         .news-image {
-            @extend %full;
+            @include full;
             @include omega;
             margin-bottom: $vertical-rhythm;
             @include media($medium-layout) {
@@ -151,13 +151,13 @@
             @include row;
             margin-bottom: $vertical-rhythm;
             button {
-                @extend %quarter;
+                @include quarter;
                 @include omega(n);
                 margin-top: 0;
                 padding: .5em 1em;
             }
             #id_add_members-wrapper {
-                @extend %three-quarters;
+                @include three-quarters;
                 border: $base-border-width solid $color-grey;
                 border-radius: $base-border-radius;
                 background: white;
@@ -191,7 +191,7 @@
         .controls {
             @include panel;
             .user-controls, .org-controls {
-                @extend %half;
+                @include half;
             }
             .user-controls {
                 text-align: left;
@@ -283,7 +283,7 @@
                 padding-left: 0;
                 @include row;
                 li {
-                    @extend %half;
+                    @include half;
                     margin-bottom: $vertical-rhythm/2;
                     border: $base-border-width solid $color-blue;
                     @include border-radius;
@@ -310,11 +310,11 @@
                 padding: 0 0 $vertical-rhythm/2;
                 border-bottom: $base-border-width solid $color-grey;
                 .note-date {
-                    @extend %quarter;
+                    @include quarter;
                     color: $color-grey;
                     text-align: right;
                 }
-                .note-body { @extend %three-quarters; }
+                .note-body { @include three-quarters; }
             }
 
             .button {

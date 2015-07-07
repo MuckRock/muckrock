@@ -36,7 +36,7 @@
         @include outer-container;
         color: $color-white;
         background-color: $color-red;
-        .heading, .subheading { @extend %half; }
+        .heading, .subheading { @include half; }
         .heading {
             @include font-sizing(5);
             margin: 0;
@@ -64,11 +64,11 @@
     .interaction {
         border-bottom: $base-border-width solid $color-grey;
         .interaction-button {
-            @extend %third;
+            @include third;
             font-size: 1.25em;
         }
         .interaction-information {
-            @extend %two-thirds;
+            @include two-thirds;
             .interaction-call-to-action {
                 font-weight: $font-weight-bold;
             }
@@ -77,7 +77,7 @@
     .body {
         padding-bottom: 0;
         .features {
-            @extend %two-thirds;
+            @include two-thirds;
             h2 {
                 @include font-sizing(1.5);
                 margin-top: 0;
@@ -97,7 +97,7 @@
             }
         }
         .faq {
-            @extend %third;
+            @include third;
             h2 {
                 @include font-sizing(1);
                 font-weight: $font-weight-bold;

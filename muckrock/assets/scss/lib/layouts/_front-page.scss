@@ -82,15 +82,15 @@
         @include row;
         padding: $vertical-rhythm/2;
         .image {
-            @extend %half;
+            @include half;
             @include media($small-layout) {
                 margin-bottom: $vertical-rhythm/3;
             }
         }
-        .body { @extend %half; }
+        .body { @include half; }
     }
     .article {
-        @extend %half;
+        @include half;
         &:nth-child(even) { clear: left; }
         &:nth-child(odd) { clear: none; }
         padding: 0 $vertical-rhythm $vertical-rhythm;
@@ -114,7 +114,7 @@
             padding-left: 0;
             text-align: center;
         }
-        li { @extend %third; }
+        li { @include third; }
         .stat {
             display: block;
             @include font-sizing(2.5);

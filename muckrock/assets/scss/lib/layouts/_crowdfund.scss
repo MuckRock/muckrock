@@ -9,7 +9,7 @@
 
     form {
         @include row;
-        @extend %full;
+        @include full;
     }
 
     fieldset > p {
@@ -18,7 +18,7 @@
     }
 
     fieldset.name, fieldset.description {
-        @extend %full;
+        @include full;
     }
 
     fieldset.amount {

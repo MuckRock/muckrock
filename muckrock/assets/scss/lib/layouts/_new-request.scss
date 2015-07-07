@@ -7,10 +7,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     @include outer-container;
     @include row;
     header {
-        @extend %third;
+        @include third;
     }
     .create-request {
-        @extend %two-thirds;
+        @include two-thirds;
         @include border-radius;
         background-color: $color-grey-6;
     }
@@ -198,10 +198,10 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         border: 2px solid $color-grey-2;
         border-top: none;
         input {
-            @extend %quarter;
+            @include quarter;
         }
         p {
-            @extend %three-quarters;
+            @include three-quarters;
             margin-top: $vertical-rhythm;
             @include media($large-layout) {
                 margin-top: 0;
@@ -233,7 +233,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     form {
         @include row;
         .visible-fields fieldset {
-            @extend %full;
+            @include full;
             textarea {
                 width: 100%;
             }

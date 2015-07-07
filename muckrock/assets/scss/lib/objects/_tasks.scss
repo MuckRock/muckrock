@@ -118,7 +118,7 @@ dl.task-data {
     @include row;
     overflow: hidden;
     .id_name, .id_aliases, .id_address {
-        @extend %full;
+        @include full;
     }
     .id_address, .id_url, .id_fax {
         @include omega;
@@ -161,7 +161,7 @@ dl.task-data {
         header {
             @include row;
             @extend dfn;
-            p, time { @extend %half; }
+            p, time { @include half; }
             p { margin: 0; }
             @include media($medium-layout) {
                 time { text-align: right; }

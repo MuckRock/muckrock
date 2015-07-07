@@ -220,7 +220,7 @@
         background: lighten($color-blue, 35%);
     }
     .list-empty {
-        @extend %full;
+        @include full;
         @extend h2;
         margin-top: 2em;
         font-weight: $font-weight-bold;

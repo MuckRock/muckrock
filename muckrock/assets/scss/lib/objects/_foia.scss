@@ -1,5 +1,5 @@
 .foia-group { @include outer-container; }
-.foia-group > .foia-single { @extend %half; }
+.foia-group > .foia-single { @include half; }
 .foia-single {
     @include row;
     display: block;
@@ -11,7 +11,7 @@
         margin-left: 0;
     }
     .foia-body {
-        @extend %three-quarters;
+        @include three-quarters;
     }
     p {
         @include font-sizing(0.8);

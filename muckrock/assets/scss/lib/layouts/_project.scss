@@ -1,7 +1,7 @@
 .project-create.form {
     fieldset {
         &.title, &.description {
-            @extend %full;
+            @include full;
         }
     }
     .social.preview {
@@ -10,7 +10,7 @@
         padding: .5em;
         border: 1px solid $color-grey;
         section {
-            @extend %half;
+            @include half;
         }
         .image {
             height: 15em;

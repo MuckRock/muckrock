@@ -3,7 +3,7 @@
     @include outer-container;
     padding: $vertical-rhythm;
     header, form { @include row; }
-    .form-title, .form-info { @extend %half; }
+    .form-title, .form-info { @include half; }
     h1 {
         @include font-sizing(3);
         margin-top: 0;
@@ -15,11 +15,11 @@
         @include row;
     }
     .visible-fields fieldset {
-        @extend %half;
+        @include half;
         input { width: 100%; }
     }
     .buttons { @include row; }
-    input[type="submit"] { @extend %quarter; }
+    input[type="submit"] { @include quarter; }
 }
 .hidden-stripe-handler { display: none; }
 textarea, #{$all-text-inputs} { @include input; }
@@ -66,12 +66,12 @@ fieldset {
     &.update,
     &.password-change,
     &.foia-embargo {
-        .visible-fields fieldset { @extend %full; }
+        .visible-fields fieldset { @include full; }
     }
 
     &.admin-fix {
         .visible-fields fieldset {
-            @extend %full;
+            @include full;
             margin-bottom: $vertical-rhythm/2;
             p { margin-bottom: 0; }
         }
