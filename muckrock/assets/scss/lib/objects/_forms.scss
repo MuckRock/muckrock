@@ -22,7 +22,7 @@
     input[type="submit"] { @extend %quarter; }
 }
 .hidden-stripe-handler { display: none; }
-textarea, #{$all-text-inputs} { @extend %input; }
+textarea, #{$all-text-inputs} { @include input; }
 textarea {
     width: 100%;
     resize: vertical;

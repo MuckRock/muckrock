@@ -24,13 +24,4 @@
 }
 
 // Textbox -> Input
-%input {
-    @extend %textbox;
-    display: inline-block;
-    padding: $vertical-rhythm/4 $vertical-rhythm/3 $vertical-rhythm/4 $vertical-rhythm/2;
-    &:disabled {
-        background-color: lighten($color-disabled, 25%);
-        border: 1px solid $color-disabled;
-        color: $color-disabled;
-    }
-}
+
