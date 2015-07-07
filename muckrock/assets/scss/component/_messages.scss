@@ -1,27 +1,25 @@
 /* Messages */
 
+$color-sent: $color-blue;
+$color-received: $color-grey-2;
+$message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
+
 .message {
     @include panel;
+    @include grid-columns(4, 6, 11);
     padding: 0;
-    $color-sent: $color-blue;
-    $color-received: $color-grey-2;
-    $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
-
-    @include media($small-layout) { @include span-columns(4); }
-    @include media($medium-layout) { @include span-columns(6); }
-    @include media($large-layout) { @include span-columns(11); }
 
     .meta {
-        display: block;
+        @include fill-parent();
         width: 100%;
         padding: $vertical-rhythm/4;
         margin-bottom: 0;
-        line-height: 1em;
         color: $color-white;
-        text-align: left;
         overflow: hidden;
         @include border-top-radius($base-border-radius - 1);
-        &.collapsed { @include border-bottom-radius($base-border-radius - 1); }
+        &.collapsed {
+            @include border-bottom-radius($base-border-radius - 1);
+        }
         img {
             display: none;
             width: 25px;
@@ -33,18 +31,14 @@
             &.left { float: left; }
             &.right { float: right; }
         }
-        @include fill-parent();
         .visibility {
             padding-right: 0;
-            padding-top: 1em;
-            font-size: 0.8em;
             cursor: pointer;
         }
         .permalink { color: $color-white; }
     }
 
     .body {
-        display: block;
         padding: $vertical-rhythm/2;
         @include media($medium-layout) {
             padding: $vertical-rhythm;
@@ -52,9 +46,7 @@
     }
 
     .attachments {
-        display: block;
         width: 100%;
-        color: $color-black;
         @include border-bottom-radius($base-border-radius - 1px);
         .attachment-list { margin: 0; }
         .attachment {
@@ -86,7 +78,7 @@
         color: $color-grey-3;
         padding-right: $vertical-rhythm/2;
         &:hover {
-            color: $color-grey-1;
+            color: $color-black;
         }
     }
 }
