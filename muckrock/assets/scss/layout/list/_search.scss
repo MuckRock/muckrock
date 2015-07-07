@@ -1,29 +1,19 @@
 .search.list {
     .list-actions {
-        margin-bottom: $vertical-rhythm;
         #global-search {
-            display: block;
+            display: flex;
             width: 100%;
         }
         input[type=search] {
             width: 75%;
-            float: left;
-            margin: 0;
-            border-radius: $base-border-radius;
-            @include border-right-radius(0);
-            transform: translateY(1px);
+            margin-right: $vertical-rhythm;
         }
         input[type=submit] {
-            @include button($color-blue);
-            width: 25%;
-            float: right;
+            flex: auto;
             margin: 0;
-            @include border-left-radius(0);
         }
     }
     .list-filters {
-        margin-top: 0;
-        margin-bottom: $vertical-rhythm/2;
         label {
             padding-left: $vertical-rhythm/4;
         }

@@ -27,11 +27,9 @@
 
 .news-list-article {
     @include row;
-    margin-bottom: $vertical-rhythm;
     border-bottom: $base-border-width solid $color-grey;
     padding-bottom: $vertical-rhythm;
     &:last-child {
-        margin-bottom: 0;
         border-bottom: none;
         padding-bottom: 0;
     }
@@ -49,7 +47,6 @@
         @include row;
         .news-list-article-headline {
             @include grid-columns(4, 6, 12);
-            margin: $vertical-rhythm/2 0 $vertical-rhythm/2 0;
             font-weight: $font-weight-bold;
             a {
                 color: $color-black;
@@ -58,15 +55,9 @@
                     color: $color-blue;
                 }
             }
-             @include media($medium-layout) {
-                margin-top: 0;
-            }
         }
         .news-list-article-summary {
             @include grid-columns(4, 6, 12);
-            p:first-child {
-                margin-top: 0;
-            }
         }
         .news-list-article-authors, .news-list-article-read-more {
             @include grid-columns(2, 3, 6);

@@ -143,31 +143,11 @@
         font-size: .9em;
     }
     .list-actions {
-        @include row;
-        display: table;
         width: 100%;
-        margin-top: $vertical-rhythm/2;
-        text-align: left;
-        button, .button {
-            display: table-cell;
-            margin: 0;
-            border: none;
-            border-radius: 0;
-            background: none;
-            box-shadow: none;
-            color: $color-grey;
-            text-align: left;
-            &:hover {
-                color: $color-black;
-                box-shadow: none;
-            }
-            &:disabled:hover {
-                color: $color-grey;
-            }
-            &:first-of-type {
-                padding-left: 0;
-            }
-        }
+        display: flex;
+        flex-flow: row wrap;
+        align-content: center;
+        justify-content: space-between;
     }
     .pagination {
         @include row;
