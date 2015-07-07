@@ -12,7 +12,7 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     .create-request {
         @include two-thirds;
         @include border-radius;
-        background-color: $color-grey-6;
+        background-color: $color-grey-7;
     }
     fieldset {
         margin: 0;
@@ -165,19 +165,16 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         display: block;
         width: 100%;
         span.deck > span {
-            @include font-sizing(1.25, 3);
-            color: $color-white;
             display: block;
             width: 100%;
             margin: 0;
+            color: $color-white;
+            font-size: $font-size-4;
             &:before {
                 content: "Jurisdiction";
                 display: block;
                 @extend dfn;
                 color: $color-white;
-                margin: 0;
-                font-weight: $font-weight-light;
-                font-size: 1rem;
             }
             span.remove {
                 float: right;
@@ -195,16 +192,14 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
         padding: $vertical-rhythm;
         @include border-bottom-radius($base-border-radius);
         @include row;
-        border: 2px solid $color-grey-2;
+        border: 2px solid $color-grey-5;
         border-top: none;
         input {
             @include quarter;
         }
         p {
             @include three-quarters;
-            margin-top: $vertical-rhythm;
             @include media($large-layout) {
-                margin-top: 0;
                 padding-left: $vertical-rhythm;
             }
         }
@@ -223,10 +218,6 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
 }
 
 .clone-candidates { @include outer-container; }
-.clone-candidates h2 {
-    @include font-sizing(1.4);
-    margin: $vertical-rhythm 0;
-}
 
 .multirequest-create {
     @include outer-container;

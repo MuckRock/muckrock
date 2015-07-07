@@ -4,13 +4,14 @@
 
 @mixin colored-panel($color, $disabled: false) {
     @include panel;
-    @if not $disabled {
+    @if $disabled {
         color: $color-white;
-        border-color: darken($color, $color-darken-amount);
     } @else {
         color: $color;
         background: none;
     }
+    padding: $vertical-rhythm;
+    border-color: darken($color, $color-darken-amount);
     a {
         text-decoration: underline;
         color: $color-white;
