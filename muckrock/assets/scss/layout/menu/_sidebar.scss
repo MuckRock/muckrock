@@ -3,7 +3,6 @@
 // Grey: #D8C9C6
 // Red: #D24019
 
-
 @mixin sidebar-controller
 {
     $on: table-cell;
@@ -121,7 +120,9 @@ nav.sidebar {
     color: $color-white;
     background: $color-grey-2;
 
-    dfn { padding: 1.5em 0 0.5em 0; }
+    dfn {
+        color: $color-white;
+    }
 
     ul {
         @include row;
