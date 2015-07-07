@@ -122,13 +122,14 @@ blockquote {
 }
 
 small {
-    font-size: $font-size-1;
+    font-size: 0.8125em;
     font-style: normal;
 }
 
 dfn, dt {
-    @extend small;
     display: block;
+    font-size: $font-size-1;
+    font-style: normal;
     font-weight: $font-weight-bold;
     text-transform: uppercase;
     letter-spacing: 2px;
