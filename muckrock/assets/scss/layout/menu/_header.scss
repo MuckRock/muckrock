@@ -1,3 +1,11 @@
+.website-header > * {
+    padding-left: $vertical-rhythm/2;
+    padding-right: $vertical-rhythm/2;
+    @include media($medium-layout) {
+        padding-left: $vertical-rhythm;
+        padding-right: $vertical-rhythm;
+    }
+}
 
 nav.primary {
     overflow: hidden;
@@ -65,10 +73,20 @@ nav.primary {
 }
 
 
-nav.secondary {
+nav.website-navigation {
+    overflow: hidden;
+    padding-top: $vertical-rhythm/4;
+    padding-bottom: $vertical-rhythm/4;
+    @include media($medium-layout) {
+        padding-top: $vertical-rhythm/2;
+        padding-bottom: $vertical-rhythm/2;
+    }
+
+    background-color: #FFF;
+    border-bottom: 1px solid $color-grey-6;
     ul {
-        width: 100%;
-        display: block;
+        display: inline-block;
+        margin-bottom: 0;
         padding-left: 0;
     }
     li {
@@ -77,6 +95,9 @@ nav.secondary {
         &:first-child {
             margin-left: 0;
         }
+        &:last-child {
+            margin-right: 0;
+        }
     }
     a {
         position: relative;
@@ -84,8 +105,8 @@ nav.secondary {
         &:hover {
             color: $color-blue;
             text-decoration: none;
-            padding-bottom: $vertical-rhythm/8;
-            border-bottom: 2px solid $color-blue;
+            padding-bottom: $vertical-rhythm/2;
+            border-bottom: 8px solid $color-blue;
         }
         @include transition (color .25s ease);
     }
@@ -93,6 +114,21 @@ nav.secondary {
         li {
             text-align: left;
             // padding-right: 10%;
+        }
+    }
+
+    .social-links {
+        float: right;
+        .label { display: none; }
+        a svg {
+            width: auto;
+            height: 16px;
+            vertical-align: middle;
+            fill: $color-black;
+            @include transition(fill .25s ease);
+        }
+        a:hover svg {
+            fill: $color-blue;
         }
     }
 }

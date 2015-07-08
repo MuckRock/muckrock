@@ -9,9 +9,9 @@ html, body {
     min-height: 100%;
 }
 
-.container {
-    padding: $vertical-rhythm/2;
-    @include media($medium-layout) { padding: $vertical-rhythm; }
+.content {
+    padding: 0 $vertical-rhythm/2;
+    @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     margin-bottom: 0;
 }
 

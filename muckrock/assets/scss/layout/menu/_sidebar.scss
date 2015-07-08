@@ -89,7 +89,7 @@
         {
             width: $desktop-menu-width;
             & + .container {
-                padding-right: $desktop-menu-width + 24px;
+                padding-right: $desktop-menu-width;
             }
         }
         height: 100%;
