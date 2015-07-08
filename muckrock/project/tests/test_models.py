@@ -108,13 +108,6 @@ class TestProject(TestCase):
         project.articles.clear()
         eq_(len(project.articles.all()), 0)
 
-    def test_add_tags(self):
-        """Projects should keep a list of relevant tags."""
-        project = self.basic_project
-        eq_(len(project.tags.all()), 0)
-        project.tags.add(u'prison', u'privatization', u'corrections')
-        eq_(len(project.tags.all()), 3)
-
     def test_make_private(self):
         """Projects should be able to be made private."""
         project = self.basic_project
@@ -180,3 +173,17 @@ class TestProject(TestCase):
         project.articles.add(test_article)
         ok_(test_article not in project.suggest_articles())
         logging.debug(project.suggest_articles())
+
+class TestProjectTagging(TestCase):
+    """Tests for the tagging feature of projects"""
+
+    def setUp(self):
+        self.basic_project = Project(title=test_title)
+        self.basic_project.save()
+
+    def test_add_tags(self):
+        """Projects should keep a list of relevant tags."""
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
