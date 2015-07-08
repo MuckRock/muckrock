@@ -59,9 +59,9 @@
                 {% endif %}
             </a>
 
-            <ul class="updated button-list">
+            <ul class="updated">
                 {% for foia in updates|slice:":10" %}
-                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}" class="button">{{ foia.title }}</a></li>
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
                 {% endfor %}
             </ul>
             {% endif %}

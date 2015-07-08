@@ -160,12 +160,33 @@ nav.sidebar {
 
     }
 
-    .updated a, .updated .button {
-        text-align: left;
-        text-align:left;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .updated {
+        display: block;
+        padding: $vertical-rhythm;
+        margin-top: -.5 * $vertical-rhythm;
+        margin-left: .6 * $vertical-rhythm;
+        @include border;
+        border-color: $color-black;
+
+        li {
+            @include full;
+            display: list-item;
+            margin-bottom: $vertical-rhythm/2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        a {
+            color: $color-grey-6;
+            text-decoration: underline;
+            &:hover {
+                color: $color-blue;
+            }
+        }
     }
 
     .broadcast {
@@ -211,14 +232,15 @@ nav.sidebar {
 
 
         .account-info {
-            display: block;
+            display: inline-block;
             height: auto;
             margin: $vertical-rhythm 0 0;
             border: none;
-            padding: 0;
+            padding: 0 $vertical-rhythm/2 0 0;
             background: none;
             text-align: left;
             color: $color-white;
+            background-color: $color-grey-2;
             text-decoration: none;
 
             .counter {
