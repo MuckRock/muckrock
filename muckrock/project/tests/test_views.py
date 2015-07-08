@@ -9,10 +9,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
-from muckrock.foia.models import FOIARequest
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.news.models import Article
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
