@@ -7,6 +7,7 @@ deeper, sustained involvement with our work on those topics.
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 from django.test import TestCase, Client
 
 from muckrock.foia.models import FOIARequest
@@ -186,4 +187,30 @@ class TestProjectTagging(TestCase):
         project = self.basic_project
         eq_(len(project.tags.all()), 0)
         project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
+
+    def test_add_existing_tags(self):
+        """Projects should not contain duplicate tags."""
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
+
+    def test_remove_existing_tag(self):
+        """Tags should be easily removed from projects."""
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
+        project.tags.remove(u'prison')
+        eq_(len(project.tags.all()), 2)
+
+    def test_remove_nonexisting_tag(self):
+        """Nonexisting tags cannot be removed from a project."""
+        project = self.basic_project
+        eq_(len(project.tags.all()), 0)
+        project.tags.add(u'prison', u'privatization', u'corrections')
+        eq_(len(project.tags.all()), 3)
+        project.tags.remove(u'spongebob')
         eq_(len(project.tags.all()), 3)
