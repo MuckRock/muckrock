@@ -77,4 +77,13 @@
     .tags {
         padding-left: 0;
     }
+    .privacy.notification {
+        margin-bottom: $base-margin;
+        padding: $base-padding/2;
+        background-color: $color-warning;
+        border-radius: $base-border-radius;
+        p {
+            margin: 0;
+        }
+    }
 }
