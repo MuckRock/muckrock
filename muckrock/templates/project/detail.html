@@ -3,6 +3,14 @@
 {% load tags %}
 {% load markdown_deux_tags %}
 
+{% block title %}
+MuckRock &bull; {{ project.title }}
+{% endblock %}
+
+{% block description %}
+<meta name="description" content="{{ project.description }}" />
+{% endblock %}
+
 {% block type %}project{% endblock %}
 
 {% block header %}
