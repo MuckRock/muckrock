@@ -32,6 +32,11 @@ MuckRock &bull; {{ project.title }}
         </a>
     </div>
     {% endif %}
+    {% if project.private %}
+    <div class="privacy notification">
+        <p>This project is private. It is only visible to its contributors.</p>
+    </div>
+    {% endif %}
     {% if project.contributors.count > 0 %}
     <dfn>Contributors</dfn>
     <ul class="contributors">
