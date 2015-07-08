@@ -14,7 +14,8 @@ class ProjectCreateForm(forms.ModelForm):
 
     tags = TaggitField(
         widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'Search tags'}),
-        help_text='Separate tags with commas.'
+        help_text='Separate tags with commas.',
+        required=False
     )
 
     class Meta:
@@ -31,7 +32,8 @@ class ProjectUpdateForm(forms.ModelForm):
 
     tags = TaggitField(
         widget=TaggitWidget('TagAutocomplete', attrs={'placeholder': 'Search tags'}),
-        help_text='Separate tags with commas.'
+        help_text='Separate tags with commas.',
+        required=False
     )
 
     class Meta:

@@ -190,6 +190,7 @@ class TestProjectUpdateView(TestCase):
         project_update_form = ProjectUpdateForm({
             'description': new_description
         }, instance=self.project)
+        ok_(project_update_form.is_valid(), 'The project form should validate.')
         # Then I submit the form with my updated information.
         response = self.user.post(self.url, project_update_form.data)
         # I expect to be redirected back to the project.
