@@ -3,6 +3,14 @@
 {% load tags %}
 {% load markdown_deux_tags %}
 
+{% block title %}
+MuckRock &bull; {{ project.title }}
+{% endblock %}
+
+{% block description %}
+<meta name="description" content="{{ project.description }}" />
+{% endblock %}
+
 {% block type %}project{% endblock %}
 
 {% block header %}
@@ -22,6 +30,11 @@
         <a href="{% url 'project-delete' slug=project.slug id=project.id %}" class="delete failure button">
             Delete
         </a>
+    </div>
+    {% endif %}
+    {% if project.private %}
+    <div class="privacy notification">
+        <p>This project is private. It is only visible to its contributors.</p>
     </div>
     {% endif %}
     {% if project.contributors.count > 0 %}
