@@ -84,11 +84,13 @@
         {% include 'lib/sidebar.html' with hidden=1 %}
         {% endif %}
         <div class="container">
-            {% include 'lib/header.html' %}
+            {% include 'nav/header.html' %}
             {% include 'lib/notification.html' %}
+            <div class="content">
             {% block content %}
             {% endblock content %}
-            {% include 'lib/footer.html' %}
+            </div>
+            {% include 'nav/footer.html' %}
         </div>
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
