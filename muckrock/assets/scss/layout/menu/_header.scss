@@ -77,9 +77,11 @@ nav.website-navigation {
     overflow: hidden;
     padding-top: $vertical-rhythm/4;
     padding-bottom: $vertical-rhythm/4;
+    margin-bottom: $vertical-rhythm/4;
     @include media($medium-layout) {
         padding-top: $vertical-rhythm/2;
         padding-bottom: $vertical-rhythm/2;
+        margin-bottom: $vertical-rhythm/2;
     }
 
     background-color: #FFF;
@@ -134,4 +136,47 @@ nav.website-navigation {
             fill: $color-blue;
         }
     }
+
+    #website-sections-dropdown {
+        display: inline-block;
+        margin-bottom: 0;
+        font-weight: $font-weight-bold;
+        cursor: pointer;
+        @include border-radius;
+        &.active {
+            color: $color-blue;
+        }
+    }
+
+    .website-sections {
+        width: 100%;
+        position: fixed;
+        z-index: 100;
+        left: 0;
+        top: 0;
+        background-color: $color-white;
+        @include transition(transform .5s ease-in-out);
+        @include transform(translateY(-40em));
+        list-style-type: none;
+        li {
+            display: block;
+            margin: 0;
+            font-size: $font-size-4;
+        }
+        a {
+            display: block;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-grey;
+            &:hover {
+                color: $color-white;
+                background-color: $color-blue;
+            }
+        }
+    }
+
+    .website-sections.visible {
+        @include transform(translateY(0));
+    }
+
 }

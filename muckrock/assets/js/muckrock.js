@@ -166,3 +166,17 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
         return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
     };
 });
+
+
+$('#website-sections-dropdown').click(function(){
+    var button = this;
+    var menu = 'ul.website-sections';
+    $(button).toggleClass('active');
+    $(menu).toggleClass('visible');
+    $('body').on("click touchmove touchend", function(e) {
+        if (!$(e.target).is(menu) && !$(e.target).is(button) && !$(e.touchTarget).is(menu)) {
+            $(button).removeClass('active');
+            $(menu).removeClass('visible');
+        }
+    });
+});
