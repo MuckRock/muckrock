@@ -215,32 +215,6 @@ class TestProjectUpdateView(TestCase):
         """Projects should only be updated by staff or project contributors."""
         staff_and_contributors_only(self.project, self.url, 'update')
 
-    def test_suggest_requests(self):
-        """
-        Based on the project's contributors and tags, the update view should
-        initialize the update form with some suggested FOIA requests preselected.
-        """
-        # First, give the project a contributor and a tag
-        test_user = User.objects.get(pk=1)
-        test_tag = u'test'
-        self.project.contributors.add(test_user)
-        self.project.tags.add(test_tag)
-        self.project.save()
-        ok_(test_user in self.project.contributors.all())
-        ok_(test_tag in self.project.tags.names())
-        # Next, create a request that matches these values
-        foia_request = FOIARequest.objects.create(
-            user=test_user,
-            agency=Agency.objects.get(pk=1),
-            jurisdiction=Jurisdiction.objects.get(pk=1),
-            title='Test Request',
-            status='processing')
-        foia_request.tags.add(test_tag)
-        foia_request.save()
-        ok_(foia_request)
-        # Now, we expect the project to produce this request as a suggested one
-        ok_(foia_request in self.project.suggest_requests())
-
 
 class TestProjectDeleteView(TestCase):
     """Tests deleting a project as a user."""
