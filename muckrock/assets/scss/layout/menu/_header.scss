@@ -91,7 +91,10 @@ nav.website-navigation {
     }
     li {
         display: inline-block;
-        margin: 0 $vertical-rhythm/2;
+        margin: 0 $vertical-rhythm/4;
+        @include media($large-layout) {
+            margin: 0 $vertical-rhythm/2;
+        }
         &:first-child {
             margin-left: 0;
         }
@@ -105,8 +108,8 @@ nav.website-navigation {
         &:hover {
             color: $color-blue;
             text-decoration: none;
-            padding-bottom: $vertical-rhythm/2;
-            border-bottom: 8px solid $color-blue;
+            padding-bottom: $vertical-rhythm/2.5;
+            border-bottom: 4px solid $color-blue;
         }
         @include transition (color .25s ease);
     }
