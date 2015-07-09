@@ -258,49 +258,16 @@ nav.sidebar {
                 }
             }
         }
-
     }
 
-    form {
-        display: block;
+    .newsletter {
         width: 100%;
-        height: $sidebar-object-height;
-        margin: 0 0 $vertical-rhythm/2;
-        input {
-            @include appearance(none);
-            width: 75%;
-            height: 100%;
-            float: left;
-            margin-right: 0;
-            color: $color-white;
-            background: $color-grey-3;
-            @include placeholder { color: $color-grey-6; }
-            border: $base-border-width solid $color-grey-1;
-            @include border-right-radius(0);
-            transform: translateY(2px);
-            &:focus, &:hover {
-                outline: none;
-                border-color: $color-blue;
-            }
-            & + span.input-button {
-                @include button($color-black);
-                margin: 0;
-                float: right;
-                clear: right;
-                height: 100%;
-                width: 25%;
-                @include border-right-radius($base-border-radius);
-                @include border-left-radius(0);
-                cursor: pointer;
-                svg {
-                    display: inline-block;
-                    height: 1.25em;
-                    width: auto;
-                    margin-left: -.25em;
-                    vertical-align: middle;
-                    fill: $color-white;
-                }
-            }
-        }
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-blue;
+        @include action-input($color-white, $color-blue-dark);
     }
+
 }

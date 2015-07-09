@@ -24,6 +24,11 @@ nav.primary {
             float: right;
         }
     }
+
+    .search {
+        @include action-input;
+    }
+
     #new-request > .button {
         @include border-left-radius($base-border-radius);
         @include border-right-radius(0);
