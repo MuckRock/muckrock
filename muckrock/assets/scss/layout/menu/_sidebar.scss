@@ -5,7 +5,7 @@
 
 @mixin sidebar-controller
 {
-    $on: table-cell;
+    $on: inline-block;
     $off: none;
     #menu-button
     {
@@ -61,7 +61,9 @@
             opacity: 0;
             @include transition($menu-animation);
         }
-
+        #menu-button {
+            display: none;
+        }
     }
 }
 

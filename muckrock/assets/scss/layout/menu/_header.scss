@@ -63,16 +63,6 @@ nav.primary {
         @include action-input;
     }
 
-    #new-request > .button {
-        @include border-left-radius($base-border-radius);
-        @include border-right-radius(0);
-        border-right: none;
-    }
-    #menu-button > .button, #menu-close > .button {
-        @include border-right-radius($base-border-radius);
-        @include border-left-radius(0);
-        border-left: none;
-    }
     .menu-text { display: none; }
     @media screen
     and (min-width: $small-menu-breakpoint - 200px) {
