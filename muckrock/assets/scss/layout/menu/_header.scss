@@ -32,35 +32,43 @@ nav.primary {
     overflow: hidden;
 
     ul {
-        display: table;
-        width: 100%;
+        display: inline-block;
+        width: auto;
+        margin-bottom: 0;
         padding-left: 0;
         li {
-            display: table-cell;
+            display: inline-block;
             vertical-align: middle;
+            padding-right: $vertical-rhythm/2;
         }
         @include media($medium-layout) {
-            display: inline-block;
-            width: auto;
-            margin-bottom: 0;
             &.left  { float: left;  }
             &.right { float: right; }
-            li {
-                display: inline-block;
+        }
+
+    }
+
+    li.search {
+        @include action-input;
+        @media screen and (max-width: 500px) {
+            input[type="search"] {
+                display: none;
+            }
+            #search-button {
+                border: none;
+                float: none;
+                border-radius: 9px;
+                border-radius: 50px;
+                width: 2.5rem;
+                svg {
+                    width: $vertical-rhythm;
+                }
+            }
+            form:hover #search-button {
+                border: none;
+                background-color: $color-blue;
             }
         }
-
-    }
-
-    li.trademark {
-        width: 10%;
-        @include media($medium-layout) {
-            width: auto;
-        }
-    }
-
-    .search {
-        @include action-input;
     }
 
     .menu-text { display: none; }
@@ -74,7 +82,6 @@ nav.primary {
     %logo {
         margin-bottom: 0;
         border: none;
-        padding: 0 0.5em 0 0;
         svg {
             vertical-align: middle;
         }
