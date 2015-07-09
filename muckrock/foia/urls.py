@@ -5,15 +5,14 @@ URL mappings for the FOIA application
 from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
-# pylint: disable=W0611
-import muckrock.foia.signals
-# pylint: enable=W0611
+
+import muckrock.foia.signals # pylint: disable=unused-import
 from muckrock.foia import views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
                                 UserSubmittedFeed, UserDoneFeed, UserUpdateFeed
 from muckrock.views import jurisdiction
 
-# pylint: disable=E1120
+# pylint: disable=no-value-for-parameter
 # pylint: disable=bad-whitespace
 # pylint: disable=bad-continuation
 

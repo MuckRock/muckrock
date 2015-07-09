@@ -14,7 +14,7 @@ from muckrock.tags.models import Tag
 
 class RequestHelper(object):
     """Helper methods for classes that have a foiarequest_set"""
-    # pylint: disable=E1101
+    # pylint: disable=no-member
 
     def exemptions(self):
         """Get a list of exemptions tagged for requests from this agency"""
@@ -111,7 +111,7 @@ class Jurisdiction(models.Model, RequestHelper):
                               'FOI law has special line for waivers')
 
     def __unicode__(self):
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l' and not self.full_name and self.parent:
             self.full_name = '%s, %s' % (self.name, self.parent.abbrev)
             self.save()
@@ -131,7 +131,7 @@ class Jurisdiction(models.Model, RequestHelper):
     @models.permalink
     def get_url(self, view):
         """The url for this object"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         view = 'jurisdiction-%s' % view
         if self.level == 'l':
             return (view, [], {'fed_slug': self.parent.parent.slug,
@@ -155,7 +155,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def legal(self):
         """Return the jurisdiction abbreviation for which law this jurisdiction falls under"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l':
             return self.parent.abbrev
         else:
@@ -163,7 +163,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_days(self):
         """How many days does an agency have to reply?"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l':
             return self.parent.days
         else:
@@ -171,7 +171,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_day_type(self):
         """Does this jurisdiction use business or calendar days?"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l':
             return 'business' if self.parent.use_business_days else 'calendar'
         else:
@@ -179,7 +179,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_intro(self):
         """Intro for requests"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l':
             return self.parent.intro
         else:
@@ -187,7 +187,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_waiver(self):
         """Waiver paragraph for requests"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l':
             return self.parent.waiver
         else:
@@ -195,7 +195,7 @@ class Jurisdiction(models.Model, RequestHelper):
 
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         if self.level == 'l' and not self.parent.use_business_days:
             return Calendar()
         elif self.level == 'l' and self.parent.use_business_days:
@@ -206,7 +206,7 @@ class Jurisdiction(models.Model, RequestHelper):
             return HolidayCalendar(self.holidays.all(), self.observe_sat)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['name']
         unique_together = ('slug', 'parent')
 

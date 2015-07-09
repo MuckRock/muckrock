@@ -12,9 +12,8 @@ import nose.tools
 
 from muckrock.fields import EmailsListField
 
-# allow methods that could be functions and too many public methods in tests and **kwarg magic
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 
 logging.disable(logging.CRITICAL)
 
@@ -23,7 +22,7 @@ kwargs = {"wsgi.url_scheme": "https"}
 # helper functions for view testing
 def get_allowed(client, url, templates=None, base='base.html', context=None, redirect=None):
     """Test a get on a url that is allowed with the users current credntials"""
-    # pylint: disable=R0913
+    # pylint: disable=too-many-arguments
     response = client.get(url, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
 

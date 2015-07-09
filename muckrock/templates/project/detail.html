@@ -1,0 +1,110 @@
+{% extends 'details/base_detail.html' %}
+
+{% load tags %}
+{% load markdown_deux_tags %}
+
+{% block title %}
+MuckRock &bull; {{ project.title }}
+{% endblock %}
+
+{% block description %}
+<meta name="description" content="{{ project.description }}" />
+{% endblock %}
+
+{% block type %}project{% endblock %}
+
+{% block header %}
+    {% if project.image %}
+    <img src="{{ MEDIA_URL }}{{ project.image }}">
+    {% endif %}
+    <h1>{{ project.title }}</h1>
+    <p>{{ project.description|markdown:"trusted" }}</p>
+{% endblock %}
+
+{% block aside %}
+    {% if request.user.is_staff or request.user in project.contributors.all %}
+    <div class="controls">
+        <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="update primary button">
+            Update
+        </a>
+        <a href="{% url 'project-delete' slug=project.slug id=project.id %}" class="delete failure button">
+            Delete
+        </a>
+    </div>
+    {% endif %}
+    {% if project.private %}
+    <div class="privacy notification">
+        <p>This project is private. It is only visible to its contributors.</p>
+    </div>
+    {% endif %}
+    {% if project.contributors.count > 0 %}
+    <dfn>Contributors</dfn>
+    <ul class="contributors">
+    {% for contributor in project.contributors.all %}
+        <li>{{ contributor.get_full_name }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% if project.tags.count > 0 %}
+    <dfn>Tags</dfn>
+    <ul class="tags">
+    {% for tag in project.tags.all %}
+        <li class="tag">{{ tag.name }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% include 'lib/social.html' with title=project.title %}
+{% endblock %}
+
+{% block main %}
+{% if project.requests.count > 0 %}
+<h2>Requests</h2>
+<ul class="requests">
+    {% for request in project.requests.all %}
+    <li class="request">
+        <a href="{{ request.get_absolute_url }}" title="{{ request.title }}">
+            {{ request.title }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% if project.articles.count > 0 %}
+<h2>Articles</h2>
+<ul class="articles">
+    {% for article in project.articles.all %}
+    <li class="article">
+        <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
+            {{ article.title }}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock main %}
+
+{% block open_graph %}
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{{ project.title }}" />
+<meta property="og:description" content="{{ project.description }}" />
+<meta property="og:url" content="{{ project.get_absolute_url }}" />
+<meta property="og:site_name" content="MuckRock" />
+{% if article.image %}
+<meta property="og:image" content="{{ project.image }}" />
+{% endif %}
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:site" content="@muckrock" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ project.title }}" />
+<meta name="twitter:description" content="{{ project.description }}" />
+{% if project.image %}
+<meta name="twitter:image:src" content="{{ project.image }}" />
+{% endif %}
+{% for contributor in project.contributors.all %}
+{% if contributor.get_profile.twitter %}
+<meta name="twitter:creator" content="{{ contributor.get_profile.twitter }}" />
+{% endif %}
+{% endfor %}
+{% endblock twitter_card %}

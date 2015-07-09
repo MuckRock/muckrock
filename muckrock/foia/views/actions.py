@@ -296,9 +296,6 @@ def admin_fix(request, jurisdiction, jidx, slug, idx):
             )
             messages.success(request, 'Admin Fix submitted')
             return redirect(foia)
-        else:
-            messages.error(request, 'Could not apply admin fix.')
-            return redirect(foia)
     else:
         form = FOIAAdminFixForm(instance=foia)
         formset = FOIAFileFormSet(queryset=FOIAFile.objects.none())

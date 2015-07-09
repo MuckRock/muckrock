@@ -1,7 +1,7 @@
 """Status codes for autoimporting documents"""
 
-# pylint: disable=C0301
-# pylint: disable=C0330
+# pylint: disable=line-too-long
+# pylint: disable=bad-continuation
 
 CODES = {
 	'ACK': ('Acknowledgement Letter', 'processed', 'An acknowledgement letter, stating the request is being processed.'),

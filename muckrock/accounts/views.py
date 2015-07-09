@@ -149,7 +149,6 @@ def subscribe(request):
 
     if request.method == 'POST':
         stripe_token = request.POST.get('stripe_token')
-        stripe_email = request.POST.get('stripe_email')
         customer = user_profile.customer()
         error = False
         user_msg = ''
@@ -157,8 +156,6 @@ def subscribe(request):
 
         if stripe_token:
             try:
-                if request.user.email != stripe_email:
-                    raise ValueError('Account email and Stripe email do not match')
                 customer.card = stripe_token
                 customer.save()
                 user_msg = 'Your payment information has been updated.'
@@ -215,16 +212,12 @@ def buy_requests(request):
         try:
             user_profile = request.user.profile
             stripe_token = request.POST['stripe_token']
-            stripe_email = request.POST['stripe_email']
-            if request.user.email != stripe_email:
-                raise ValueError('Account email and Stripe email do not match')
             user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
             user_profile.save()
             request.session['ga'] = 'request_purchase'
             msg = 'Purchase successful. 4 requests have been added to your account.'
             messages.success(request, msg)
-
             logger.info('%s has purchased requests', request.user.username)
         except stripe.CardError as exc:
             msg = 'Payment error. Your card has not been charged.'
@@ -344,9 +337,9 @@ def stripe_webhook(request):
 @csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
-    # pylint: disable=R0912
-    # pylint: disable=R0914
-    # pylint: disable=R0915
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
 
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
@@ -416,6 +409,12 @@ def stripe_webhook_v2(request):
             url = '/foia/new/'
             subject = 'Payment received for professional account'
 
+        card = event_data.get('card')
+        if card:
+            last4 = card.get('last4')
+        else:
+            last4 = ''
+
         if user:
             msg = EmailMessage(
                 subject=subject,
@@ -423,14 +422,14 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': event_data.get('card', {}).get('last4'),
+                    'last4': last4,
                     'amount': amount,
                     'base_amount': base_amount,
                     'fee_amount': fee_amount,
                     'url': url,
                     'type': type_}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['info@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
         else:
             msg = EmailMessage(
@@ -438,14 +437,14 @@ def stripe_webhook_v2(request):
                 body=render_to_string('text/user/anon_receipt.txt', {
                     'id': event_data['id'],
                     'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': event_data.get('card', {}).get('last4'),
+                    'last4': last4,
                     'amount': amount,
                     'base_amount': base_amount,
                     'fee_amount': fee_amount,
                     'url': url,
                     'type': type_}),
                 from_email='info@muckrock.com',
-                to=[email], bcc=['info@muckrock.com']
+                to=[email], bcc=['diagnostics@muckrock.com']
             )
         msg.send(fail_silently=False)
 
@@ -462,7 +461,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'attempt': 'final'}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['requests@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
             msg.send(fail_silently=False)
         else:
@@ -473,7 +472,7 @@ def stripe_webhook_v2(request):
                     'user': user,
                     'attempt': attempt}),
                 from_email='info@muckrock.com',
-                to=[user.email], bcc=['requests@muckrock.com']
+                to=[user.email], bcc=['diagnostics@muckrock.com']
             )
             msg.send(fail_silently=False)
 
@@ -482,8 +481,8 @@ def stripe_webhook_v2(request):
 
 class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     model = User
     serializer_class = UserSerializer
     permission_classes = (DjangoModelPermissions,)
@@ -492,8 +491,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class StatisticsViewSet(viewsets.ModelViewSet):
     """API views for Statistics"""
-    # pylint: disable=R0901
-    # pylint: disable=R0904
+    # pylint: disable=too-many-ancestors
+    # pylint: disable=too-many-public-methods
     model = Statistics
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)

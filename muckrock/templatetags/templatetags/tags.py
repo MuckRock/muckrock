@@ -50,7 +50,7 @@ class TableHeaderNode(Node):
     """Tag to create table headers"""
 
     def __init__(self, get, args):
-        # pylint: disable=W0231
+        # pylint: disable=super-init-not-called
         self.get = get
         self.args = args
 
@@ -137,7 +137,7 @@ def do_evaluate(parser, token):
     """
     tag usage {% evaluate object.textfield %}
     """
-    # pylint: disable=W0613
+    # pylint: disable=unused-argument
     try:
         _, variable = token.split_contents()
     except ValueError:
@@ -148,7 +148,7 @@ def do_evaluate(parser, token):
 class EvaluateNode(template.Node):
     """Node for do_evaluate"""
     def __init__(self, variable):
-        # pylint: disable=W0231
+        # pylint: disable=super-init-not-called
         self.variable = template.Variable(variable)
 
     def render(self, context):
@@ -169,13 +169,21 @@ def crowdfund(context, foia_pk):
     """Template tag to insert a crowdfunding panel"""
     foia = get_object_or_404(FOIARequest, pk=foia_pk)
     the_crowdfund = foia.crowdfund
-    payment_form = CrowdfundRequestPaymentForm(initial={'crowdfund': the_crowdfund.pk})
+    initial_data = {'crowdfund': the_crowdfund.pk}
+    default_amount = 25
+    if the_crowdfund.amount_remaining() < default_amount:
+        initial_data['amount'] = int(the_crowdfund.amount_remaining()) * 100
+    else:
+        initial_data['amount'] = default_amount * 100
+    payment_form = CrowdfundRequestPaymentForm(initial=initial_data)
     logged_in = context['user'].is_authenticated()
+    user_email = context['user'].email if logged_in else ''
     endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
     return {
         'crowdfund': the_crowdfund,
         'endpoint': endpoint,
         'logged_in': logged_in,
+        'user_email': user_email,
         'payment_form': payment_form,
         'stripe_pk': STRIPE_PUB_KEY
     }

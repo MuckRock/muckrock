@@ -2,7 +2,7 @@
 Feeds for the FOIA application
 """
 
-# pylint: disable=E0611
+# pylint: disable=no-name-in-module
 from django.contrib.auth.models import User
 from django.contrib.syndication.views import Feed
 from django.http import Http404
@@ -19,7 +19,7 @@ class LatestSubmittedRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         # pylint: disable=E1103
         return FOIARequest.objects.get_submitted().get_public().order_by('-date_submitted')[:25]
 
@@ -36,7 +36,7 @@ class LatestDoneRequests(Feed):
 
     def items(self):
         """Return the items for the rss feed"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         # pylint: disable=E1103
         return FOIARequest.objects.get_done().get_public().order_by('-date_done')[:25]
 

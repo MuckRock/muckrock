@@ -1,23 +1,17 @@
-
-
 .tag {
     display: inline-block;
+    margin: $base-margin/4 $base-margin/6;
+    padding: $base-padding/6 $base-padding/3 $base-padding/6 $base-padding/3;
+    background-color: $color-primary;
+    color: $color-white;
+    font-size: .9em;
 }
 
 button.tag, .button.tag {
-    $tag-color: lighten($color-primary, 5%);
-    position: relative;
-    margin: $base-margin/4 $base-margin/6;
     border: none;
     border-radius: 0;
-    padding: $base-padding/6 $base-padding/3 $base-padding/6 $base-padding/3;
-    background: $tag-color;
-    font-size: .9em;
     box-shadow: none;
-
     &:hover {
-        $hover-color: darken($tag-color, 8%);
-        background: $hover-color;
         box-shadow: none;
     }
 }

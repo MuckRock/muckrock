@@ -14,7 +14,8 @@ celery==3.1.10
 coverage==3.7.1
 cssselect==0.7.1
 django-adaptors==0.2.3
-django-autocomplete-light==2.2.2
+django-autocomplete-light==2.2.3
+django-celery-transactions==0.3.1
 django-celery==3.1.10
 django-compressor==1.5
 django-dbsettings==0.8.1

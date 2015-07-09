@@ -5,6 +5,8 @@ Tests for crowdfund app
 from django.test import TestCase
 
 from datetime import datetime, timedelta
+from decimal import Decimal
+from mock import Mock
 import nose
 
 from muckrock.crowdfund.forms import CrowdfundRequestForm
@@ -22,7 +24,9 @@ class TestCrowdfundRequestForm(TestCase):
 
     def setUp(self):
         self.form = CrowdfundRequestForm()
-        foia = FOIARequest.objects.get(pk=18)
+        foia = Mock(FOIARequest)
+        foia.id = 1
+        foia.price = Decimal(100.00)
         due = datetime.today() + timedelta(30)
         self.data = {
             'name': 'Crowdfund this Request',

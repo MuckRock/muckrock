@@ -39,7 +39,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY, MONTHLY_REQUESTS
 from muckrock.task.models import NewAgencyTask, MultiRequestTask
 
-# pylint: disable=R0901
+# pylint: disable=too-many-ancestors
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY

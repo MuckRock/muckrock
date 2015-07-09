@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 class FOIAMultiRequest(models.Model):
     """A Freedom of Information Act request"""
-    # pylint: disable=R0904
-    # pylint: disable=R0902
+    # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     user = models.ForeignKey(User)
     title = models.CharField(max_length=255)
@@ -50,7 +50,7 @@ class FOIAMultiRequest(models.Model):
         return colors.get(self.status, 'go')
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['title']
         verbose_name = 'FOIA Multi-Request'
         app_label = 'foia'

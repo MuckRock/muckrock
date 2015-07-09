@@ -228,7 +228,7 @@ class MRSearchView(SearchView):
 
 def front_page(request):
     """Get all the details needed for the front page"""
-    # pylint: disable=W0612
+    # pylint: disable=unused-variable
     # pylint: disable=E1103
 
     try:
@@ -253,13 +253,13 @@ def front_page(request):
 
 def blog(request, path=''):
     """Redirect to the new blog URL"""
-    # pylint: disable=W0613
+    # pylint: disable=unused-argument
     return redirect('http://blog.muckrock.com/%s/' % path, permanant=True)
 
 def jurisdiction(request, jurisdiction=None, slug=None, idx=None, view=None):
     """Redirect to the jurisdiction page"""
-    # pylint: disable=W0621
-    # pylint: disable=W0613
+    # pylint: disable=redefined-outer-name
+    # pylint: disable=unused-argument
 
     if jurisdiction and idx:
         jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=idx)

@@ -149,7 +149,7 @@ class Profile(models.Model):
     @models.permalink
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         return ('acct-profile', [], {'user_name': self.user.username})
 
     def is_member_of(self, organization):
@@ -262,7 +262,7 @@ class Profile(models.Model):
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         stripe.Charge.create(
             amount=amount,
             currency='usd',
@@ -272,7 +272,7 @@ class Profile(models.Model):
 
     def api_pay(self, amount, desc):
         """Create a stripe charge for the user through the API"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         customer = self.customer()
         desc = '%s: %s' % (self.user.username, desc)
         # always use card on file
@@ -293,7 +293,7 @@ class Profile(models.Model):
     def notify(self, foia):
         """Notify a user that foia has been updated or mark to be notified later
            according to preference"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         if self.email_pref == 'instant':
             link = self.wrap_url(foia.get_absolute_url())
@@ -321,7 +321,7 @@ class Profile(models.Model):
 
     def send_notifications(self):
         """Send deferred notifications"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         subjects = {
             'done': "you've got new MuckRock docs!",
@@ -466,7 +466,7 @@ class Statistics(models.Model):
         return 'Stats for %s' % self.date
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['-date']
         verbose_name_plural = 'statistics'
 

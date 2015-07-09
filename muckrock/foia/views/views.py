@@ -29,7 +29,7 @@ from muckrock.tags.models import Tag
 from muckrock.task.models import FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
 
-# pylint: disable=R0901
+# pylint: disable=too-many-ancestors
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -136,7 +136,7 @@ class Detail(DetailView):
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
-        # pylint: disable=W0613
+        # pylint: disable=unused-argument
         foia = get_foia(
             self.kwargs['jurisdiction'],
             self.kwargs['jidx'],
@@ -191,7 +191,7 @@ class Detail(DetailView):
 
     def _tags(self, request, foia):
         """Handle updating tags"""
-        # pylint: disable=R0201
+        # pylint: disable=no-self-use
         if foia.editable_by(request.user) or request.user.is_staff:
             foia.update_tags(request.POST.get('tags'))
         return redirect(foia)
@@ -263,8 +263,8 @@ class Detail(DetailView):
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
-    # pylint: disable=W0612
-    # pylint: disable=W0613
+    # pylint: disable=unused-variable
+    # pylint: disable=unused-argument
 
     # some jurisdiction slugs changed, just ignore the jurisdiction slug passed in
     foia = get_object_or_404(FOIARequest, pk=idx)

@@ -16,11 +16,8 @@ import time
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
-# allow methods that could be functions and too many public methods in tests and **kwarg magic
-# pylint: disable=R0201
-# pylint: disable=R0904
-# pylint: disable=E1103
-# pylint: disable=bad-continuation
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""

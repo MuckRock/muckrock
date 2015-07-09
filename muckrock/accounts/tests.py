@@ -22,8 +22,8 @@ from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=C0103
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 # pylint: disable=E1103
 
 mock_customer = Mock()
@@ -44,7 +44,7 @@ class TestAccountFormsUnit(TestCase):
 
     def test_user_change_form_email_normal(self):
         """Changing email normally should succeed"""
-        # pylint: disable=W0201
+        # pylint: disable=attribute-defined-outside-init
         form = UserChangeForm(instance=self.profile)
         form.cleaned_data = {}
         form.cleaned_data['email'] = 'new@example.com'
@@ -240,7 +240,7 @@ class TestAccountFunctional(TestCase):
     def _test_post_view_helper(self, url, templates, data,
                                redirect_url='acct-my-profile', username='adam', password='abc'):
         """Helper for logging in, posting to a view, then checking the results"""
-        # pylint: disable=R0913
+        # pylint: disable=too-many-arguments
 
         self.client.login(username=username, password=password)
         post_allowed_bad(self.client, reverse(url), templates)

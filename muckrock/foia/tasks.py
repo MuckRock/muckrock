@@ -47,7 +47,7 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     try:
         doc = FOIAFile.objects.get(pk=doc_pk)
     except FOIAFile.DoesNotExist, exc:
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         # give database time to sync
         upload_document_cloud.retry(countdown=300, args=[doc_pk, change], kwargs=kwargs, exc=exc)
 
@@ -89,13 +89,13 @@ def upload_document_cloud(doc_pk, change, **kwargs):
     try:
         ret = opener.open(request).read()
         if not change:
-        # pylint: disable=E1101
+        # pylint: disable=no-member
             info = json.loads(ret)
             doc.doc_id = info['id']
             doc.save()
             set_document_cloud_pages.apply_async(args=[doc.pk], countdown=1800)
     except (urllib2.URLError, urllib2.HTTPError) as exc:
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         logger.warn('Upload Doc Cloud error: %s %s', url, doc.pk)
         upload_document_cloud.retry(args=[doc.pk, change], kwargs=kwargs, exc=exc)
 
@@ -132,15 +132,15 @@ def set_document_cloud_pages(doc_pk, **kwargs):
         else:
             set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
     except urllib2.URLError, exc:
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         set_document_cloud_pages.retry(args=[doc.pk], countdown=600, kwargs=kwargs, exc=exc)
 
 
 @task(ignore_result=True, max_retries=10, name='muckrock.foia.tasks.submit_multi_request')
 def submit_multi_request(req_pk, **kwargs):
     """Submit a multi request to all agencies"""
-    # pylint: disable=E1101
-    # pylint: disable=W0613
+    # pylint: disable=no-member
+    # pylint: disable=unused-argument
     req = FOIAMultiRequest.objects.get(pk=req_pk)
 
     # break the agencies into chunks of 50 to not timeout the database
@@ -239,7 +239,7 @@ def embargo_warn():
                name='muckrock.foia.tasks.set_all_document_cloud_pages')
 def set_all_document_cloud_pages():
     """Try and set all document cloud documents that have no page count set"""
-    # pylint: disable=E1101
+    # pylint: disable=no-member
     docs = [doc for doc in FOIAFile.objects.filter(pages=0) if doc.is_doccloud()]
     logger.info('Setting document cloud pages, %d documents with 0 pages', len(docs))
     for doc in docs:
@@ -250,7 +250,7 @@ def set_all_document_cloud_pages():
                name='muckrock.foia.tasks.retry_stuck_documents')
 def retry_stuck_documents():
     """Reupload all document cloud documents which are stuck"""
-    # pylint: disable=E1101
+    # pylint: disable=no-member
     docs = [doc for doc in FOIAFile.objects.filter(doc_id='')
             if doc.is_doccloud() and doc.get_foia()]
     logger.info('Reupload documents, %d documents are stuck', len(docs))
@@ -264,8 +264,8 @@ class SizeError(Exception):
 @periodic_task(run_every=crontab(hour=2, minute=0), name='muckrock.foia.tasks.autoimport')
 def autoimport():
     """Auto import documents from S3"""
-    # pylint: disable=R0914
-    # pylint: disable=R0912
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
     p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
                         r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
                         r'(?: ID#(?P<id>\S+))?', re.I)
@@ -322,7 +322,7 @@ def autoimport():
 
     def import_key(key, comm, log, title=None):
         """Import a key"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
 
         foia = comm.foia
         file_name = os.path.split(key.name)[1]
@@ -378,7 +378,7 @@ def autoimport():
 
         for foia_pk in foia_pks:
             try:
-                # pylint: disable=E1101
+                # pylint: disable=no-member
                 foia = FOIARequest.objects.get(pk=foia_pk)
                 source = foia.agency.name if foia.agency else ''
 
@@ -446,8 +446,8 @@ def process_failure_signal(exception, traceback, sender, task_id,
                            signal, args, kwargs, einfo, **kw):
     """Log celery exceptions to sentry"""
     # http://www.colinhowe.co.uk/2011/02/08/celery-and-sentry-recording-errors/
-    # pylint: disable=R0913
-    # pylint: disable=W0613
+    # pylint: disable=too-many-arguments
+    # pylint: disable=unused-argument
     exc_info = (type(exception), exception, traceback)
     logger.error(
         'Celery job exception: %s(%s)', exception.__class__.__name__, exception,

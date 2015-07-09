@@ -12,6 +12,11 @@ def domain_blacklist(sender, instance, **kwargs):
     """Blacklist certain domains - automatically reject tasks from them"""
     # pylint: disable=unused-argument
 
+    if not kwargs['created']:
+        # if this isn't being created for the first time, just return
+        # to avoid an infinite loop from when we resolve the task
+        return
+
     _, email = parseaddr(instance.communication.priv_from_who)
 
     if '@' not in email:

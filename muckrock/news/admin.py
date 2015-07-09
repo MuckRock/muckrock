@@ -42,7 +42,7 @@ class ArticleAdminForm(forms.ModelForm):
         required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Article
         fields = '__all__'
 
@@ -52,7 +52,7 @@ class ArticleAdminForm(forms.ModelForm):
 
 class ArticleAdmin(VersionAdmin):
     """Model Admin for a news article"""
-    # pylint: disable=R0904
+    # pylint: disable=too-many-public-methods
     form = ArticleAdminForm
     prepopulated_fields = {'slug': ('title',)}
     list_display = ('title', 'get_authors_names', 'pub_date', 'publish')

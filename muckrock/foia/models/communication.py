@@ -73,7 +73,7 @@ class FOIACommunication(models.Model):
 
     def get_absolute_url(self):
         """The url for this object"""
-        # pylint: disable=E1101
+        # pylint: disable=no-member
         return self.foia.get_absolute_url() + ('#comm-%d' % self.pk)
 
     def save(self, *args, **kwargs):
@@ -140,11 +140,18 @@ class FOIACommunication(models.Model):
             this_clone.foia = request
             this_clone.save()
             for file_ in files:
+                original_file_id = file_.id
                 file_.pk = None
                 file_.foia = request
-                file_.comm = self
+                file_.comm = this_clone
                 # make a copy of the file on the storage backend
-                new_ffile = ContentFile(file_.ffile.read())
+                try:
+                    new_ffile = ContentFile(file_.ffile.read())
+                except ValueError:
+                    error_msg = ('FOIAFile #%s has no data in its ffile field. '
+                                'It has not been cloned.')
+                    logging.error(error_msg, original_file_id)
+                    continue
                 new_ffile.name = file_.ffile.name
                 file_.ffile = new_ffile
                 file_.save()
@@ -213,7 +220,7 @@ class FOIACommunication(models.Model):
 
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['date']
         verbose_name = 'FOIA Communication'
         app_label = 'foia'
@@ -244,7 +251,7 @@ class FOIANote(models.Model):
         return 'Note for %s on %s' % (self.foia.title, self.date)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         ordering = ['foia', 'date']
         verbose_name = 'FOIA Note'
         app_label = 'foia'

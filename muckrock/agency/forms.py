@@ -16,7 +16,7 @@ class AgencyForm(forms.ModelForm):
     fax = USPhoneNumberField(required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Agency
         fields = ['name', 'aliases', 'address', 'email', 'url', 'phone', 'fax']
 
