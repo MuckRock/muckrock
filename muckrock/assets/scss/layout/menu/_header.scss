@@ -176,12 +176,12 @@ nav.website-navigation {
             }
         }
         .website-sections {
-            max-height: 96%;
-            width: 90%;
+            max-height: 95vh;
+            width: 90vw;
             position: fixed;
             z-index: 300;
-            left: 5%;
-            top: 2%;
+            left: 5vw;
+            top: 5vh;
             overflow-y: scroll;
             background-color: $color-white;
             @include border;
@@ -219,8 +219,8 @@ nav.website-navigation {
     position: fixed;
     top: -9999px;
     left: 0;
-    height: 110%;
-    width: 100%;
+    height: 110vh;
+    width: 100vw;
     z-index: 200;
     background-color: $color-black;
     opacity: 0;
