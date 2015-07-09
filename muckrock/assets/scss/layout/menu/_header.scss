@@ -17,6 +17,10 @@ nav.primary {
         &.left
         {
             float: left;
+            li {
+                display: inline-block;
+                vertical-align: middle;
+            }
         }
         &.right
         {
