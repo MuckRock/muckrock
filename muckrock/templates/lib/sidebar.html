@@ -6,21 +6,7 @@
             <span id="close-broadcast">&times;</span>
         </div>
         {% endif %}
-        <form name="search" action="/search/" method="get">
-            <!--{% csrf_token %}-->
-            <input type="search" name="q" placeholder="Search">
-            <input type="submit" value="" style="display: none;">
-            <span class="input-button" id="search-button" onclick="search.submit()">
-                <svg width="25px" height="25px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
-                    <title>Magnifying Glass Icon</title>
-                    <description>Symbolizes the search command</description>
-                    <path                  d="M19.129,18.164l-4.518-4.52c1.152-1.373,1.852-3.143,1.852-5.077c0-4.361-3.535-7.896-7.896-7.896                c-4.361,0-7.896,3.535-7.896,7.896s3.535,7.896,7.896,7.896c1.934,0,3.705-0.698,5.078-1.853l4.52,4.519                   c0.266,0.268,0.699,0.268,0.965,0C19.396,18.863,19.396,18.431,19.129,18.164z M8.567,15.028c-3.568,0-6.461-2.893-6.461-6.461                s2.893-6.461,6.461-6.461c3.568,0,6.46,2.893,6.46,6.461S12.135,15.028,8.567,15.028z" id="search-icon"></path>
-                </svg>
-            </span>
-        </form>
         {% if user.is_authenticated %}
-        <a href="{% url 'foia-create' %}" class="button" id="new-request">Create&nbsp;a&nbsp;request</a>
-        <a href="{% url 'question-create' %}" class="button" id="new-question">Ask a question</a>
         <section class="account">
             <p class="username">{{ user.get_full_name }}</p>
             <ul class="options">

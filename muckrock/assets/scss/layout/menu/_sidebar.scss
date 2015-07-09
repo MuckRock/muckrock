@@ -55,7 +55,7 @@
     @include media($large-layout)
     {
         @include sidebar-translation(0);
-        nav.primary ul.right
+        nav.primary ul.right .menu-button
         {
             display: none;
             opacity: 0;
@@ -217,7 +217,6 @@ nav.sidebar {
     }
 
     .account {
-        margin-top: 2 * $vertical-rhythm;
         .username {
             display: block;
             @extend .h3;
@@ -260,13 +259,6 @@ nav.sidebar {
             }
         }
 
-    }
-
-    .social-links svg {
-        height: 1em;
-        width: auto;
-        margin-bottom: -0.1em;
-        fill: $color-white;
     }
 
     form {
