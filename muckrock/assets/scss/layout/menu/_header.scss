@@ -133,53 +133,57 @@ nav.website-navigation {
     }
 
     #website-sections-dropdown {
-        display: inline-block;
-        margin-bottom: 0;
-        font-weight: $font-weight-bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        cursor: pointer;
-        @include border-radius;
-        &.active {
-            color: $color-blue;
-        }
+        display: none;
     }
 
-    .website-sections {
-        width: 96%;
-        position: fixed;
-        z-index: 300;
-        left: 2%;
-        top: 1rem;
-        background-color: $color-white;
-        @include transition(transform .3s ease-in-out);
-        @include transform(translateY(-100vh));
-        @include border;
-        list-style-type: none;
-        li {
-            display: block;
-            margin: 0;
-            font-size: $font-size-4;
-            &:last-child a {
-                border-bottom: 0;
+    @media (max-width: 700px) {
+        #website-sections-dropdown {
+            display: inline-block;
+            margin-bottom: 0;
+            font-weight: $font-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            @include border-radius;
+            &.active {
+                color: $color-blue;
             }
         }
-        a {
-            display: block;
-            width: 100%;
-            padding: $vertical-rhythm/2;
-            border-bottom: 1px solid $color-grey;
-            color: $color-black;
-            &:hover {
-                background-color: $color-grey-6;
+        .website-sections {
+            width: 96%;
+            position: fixed;
+            z-index: 300;
+            left: 2%;
+            top: 1rem;
+            background-color: $color-white;
+            @include border;
+            list-style-type: none;
+            li {
+                display: block;
+                margin: 0;
+                font-size: $font-size-4;
+                &:last-child a {
+                    border-bottom: 0;
+                }
+            }
+            a {
+                display: block;
+                width: 100%;
+                padding: $vertical-rhythm/2;
+                border-bottom: 1px solid $color-grey;
+                color: $color-black;
+                &:hover {
+                    background-color: $color-grey-6;
+                }
+            }
+            // State changes
+            @include transition(transform .3s ease-in-out);
+            @include transform(translateY(-100vh));
+            &.visible {
+                @include transform(translateY(0));
             }
         }
     }
-
-    .website-sections.visible {
-        @include transform(translateY(0));
-    }
-
 }
 
 
