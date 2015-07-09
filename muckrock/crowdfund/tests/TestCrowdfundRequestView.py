@@ -17,6 +17,8 @@ from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
 
 # pylint: disable=line-too-long
+# Line too long is disabled so that the testing docstring can stay on one line,
+# since Nose does not render multiline testing docstrings.
 
 def get_stripe_token():
     """
@@ -51,6 +53,7 @@ class TestCrowdfundRequestView(TestCase):
             payment_required=foia.price,
             date_due=due
         )
+        self.num_payments = self.crowdfund.payments.count()
         self.url = self.crowdfund.get_absolute_url()
         self.client = Client()
         self.data = {
@@ -83,15 +86,20 @@ class TestCrowdfundRequestView(TestCase):
         eq_(payment.user, None,
             ('If the user is logged out, the returned payment'
             ' object should not reference any account.'))
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_anonymous_while_logged_in(self):
         """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
         self.client.login(username='adam', password='abc')
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(payment.user, None,
-            ('If the user is logged in, the returned payment'
-            ' object should not reference their account.'))
+        eq_(payment.user.username, 'adam',
+            'The logged in user should be associated with the payment.')
+        eq_(payment.show, False,
+            'If the user wants to be anonymous, then the show flag should be false.')
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_attributed_contribution(self):
         """An attributed contribution is opted-in by the user"""
@@ -99,11 +107,12 @@ class TestCrowdfundRequestView(TestCase):
         self.data['show'] = True
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
-        ok_(payment.user,
-            ('If the user is logged in and opts into attribution, the returned'
-            ' payment object should reference their user account.'))
         eq_(payment.user.username, 'adam',
             'The logged in user should be associated with the payment.')
+        eq_(payment.show, True,
+            'If the user wants to be attributed, then the show flag should be true.')
+        eq_(self.crowdfund.payments.count(), self.num_payments + 1,
+            'The crowdfund should have the payment added to it.')
 
     def test_correct_amount(self):
         """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""

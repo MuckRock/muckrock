@@ -25,7 +25,7 @@ from muckrock.jurisdiction.models import Jurisdiction
 logger = logging.getLogger(__name__)
 
 # These inhereit more than the allowed number of public methods
-# pylint: disable=R0904
+# pylint: disable=too-many-public-methods
 
 class AgencyTypeAdmin(VersionAdmin):
     """AgencyType admin options"""
@@ -48,7 +48,7 @@ class AgencyAdminForm(forms.ModelForm):
                                                  required=False)
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         model = Agency
 
 
@@ -72,8 +72,8 @@ class AgencyAdmin(VersionAdmin):
 
     def csv_import(self, request):
         """Import a CSV file of agencies"""
-        # pylint: disable=R0201
-        # pylint: disable=W0703
+        # pylint: disable=no-self-use
+        # pylint: disable=broad-except
 
         if request.method == 'POST':
             form = CSVImportForm(request.POST, request.FILES)
@@ -110,7 +110,7 @@ admin.site.register(Agency, AgencyAdmin)
 
 def get_jurisdiction(full_name):
     """Get the jurisdiction from its name and parent"""
-    # pylint: disable=E1101
+    # pylint: disable=no-member
     if ', ' in full_name:
         name, parent_abbrev = full_name.split(', ')
         parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
@@ -147,7 +147,7 @@ class AgencyCsvModel(CsvModel):
     approved = BooleanField()
 
     class Meta:
-        # pylint: disable=R0903
+        # pylint: disable=too-few-public-methods
         dbModel = Agency
         delimiter = ','
         update = {'keys': ['name', 'jurisdiction']}

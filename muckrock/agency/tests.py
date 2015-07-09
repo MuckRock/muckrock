@@ -15,8 +15,8 @@ eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
 # allow methods that could be functions and too many public methods in tests
-# pylint: disable=R0201
-# pylint: disable=R0904
+# pylint: disable=no-self-use
+# pylint: disable=too-many-public-methods
 
 class TestAgencyUnit(TestCase):
     """Unit tests for Agencies"""

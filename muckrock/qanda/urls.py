@@ -8,7 +8,7 @@ from django.views.generic.base import RedirectView
 from muckrock.qanda import views
 from muckrock.qanda.feeds import LatestQuestions
 
-# pylint: disable=E1120
+# pylint: disable=no-value-for-parameter
 
 urlpatterns = patterns(
     '',

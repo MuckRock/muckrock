@@ -12,3 +12,10 @@ autocomplete_light.register(User, name='UserAdminAutocomplete',
                             attrs={'placeholder': 'User?',
                                    'data-autocomplete-minimum-characters': 1})
 
+autocomplete_light.register(
+    User,
+    name="StaffAutocomplete",
+    choices=User.objects.filter(is_staff=True),
+    search_fields=('username', 'first_name', 'last_name'),
+    attrs={'placeholder': 'Search staff users'}
+)
