@@ -7,6 +7,27 @@
     }
 }
 
+// Logo visibility depends on viewport size
+.website-header .brand .muckrock-logo {
+    .plaintext {
+        display: none;
+    }
+    .logotype {
+        display: none;
+    }
+    .logo {
+        display: block;
+    }
+    @include media($large-layout) {
+        .logotype {
+            display: block;
+        }
+        .logo {
+            display: none;
+        }
+    }
+}
+
 nav.primary {
     overflow: hidden;
     ul {
@@ -52,32 +73,30 @@ nav.primary {
     /* Logo */
 
     %logo {
-        margin: $vertical-rhythm/4 0;
+        margin-bottom: 0;
         border: none;
         padding: 0 0.5em 0 0;
-        svg > path, svg > g { fill: $color-black; }
+        svg {
+            vertical-align: middle;
+        }
+        svg path {
+            fill: $color-black;
+        }
         &:hover {
             background: none;
-            svg > path, svg > g { fill: $color-selected; }
+            svg path {
+                fill: $color-blue;
+            }
         }
     }
-    #muckrock-text { @extend %logo; display: none; }
-    #muckrock-icon { @extend %logo;
-        display: block;
+    .logotype { @extend %logo; }
+    .logo { @extend %logo;
         padding-top: 0em;
         > svg {
             display: block;
             height: 2rem;
             width: 2rem;
         }
-    }
-    @media screen and (min-width: 680px) {
-        #muckrock-text {
-            display: block;
-            padding-top: 0.375em;
-            padding-right: 1em;
-        }
-        #muckrock-icon { display: none; }
     }
 }
 
@@ -86,7 +105,6 @@ nav.website-navigation {
     overflow: hidden;
     padding-top: $vertical-rhythm/2;
     padding-bottom: $vertical-rhythm/2;
-    margin-bottom: $vertical-rhythm/2;
 
     background-color: #FFF;
     border-bottom: 1px solid $color-grey-6;
