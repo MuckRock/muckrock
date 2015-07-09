@@ -30,23 +30,32 @@
 
 nav.primary {
     overflow: hidden;
+
     ul {
         display: table;
-        list-style-type: none;
-        margin: 0;
+        width: 100%;
         padding-left: 0;
-        &.left
-        {
-            float: left;
+        li {
+            display: table-cell;
+            vertical-align: middle;
+        }
+        @include media($medium-layout) {
+            display: inline-block;
+            width: auto;
+            margin-bottom: 0;
+            &.left  { float: left;  }
+            &.right { float: right; }
             li {
                 display: inline-block;
-                vertical-align: middle;
             }
         }
-        &.right
-        {
-            display: table;
-            float: right;
+
+    }
+
+    li.trademark {
+        width: 10%;
+        @include media($medium-layout) {
+            width: auto;
         }
     }
 
