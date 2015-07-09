@@ -75,14 +75,9 @@ nav.primary {
 
 nav.website-navigation {
     overflow: hidden;
-    padding-top: $vertical-rhythm/4;
-    padding-bottom: $vertical-rhythm/4;
-    margin-bottom: $vertical-rhythm/4;
-    @include media($medium-layout) {
-        padding-top: $vertical-rhythm/2;
-        padding-bottom: $vertical-rhythm/2;
-        margin-bottom: $vertical-rhythm/2;
-    }
+    padding-top: $vertical-rhythm/2;
+    padding-bottom: $vertical-rhythm/2;
+    margin-bottom: $vertical-rhythm/2;
 
     background-color: #FFF;
     border-bottom: 1px solid $color-grey-6;
@@ -141,6 +136,8 @@ nav.website-navigation {
         display: inline-block;
         margin-bottom: 0;
         font-weight: $font-weight-bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         cursor: pointer;
         @include border-radius;
         &.active {
@@ -149,28 +146,32 @@ nav.website-navigation {
     }
 
     .website-sections {
-        width: 100%;
+        width: 96%;
         position: fixed;
-        z-index: 100;
-        left: 0;
-        top: 0;
+        z-index: 300;
+        left: 2%;
+        top: 1rem;
         background-color: $color-white;
-        @include transition(transform .5s ease-in-out);
-        @include transform(translateY(-40em));
+        @include transition(transform .3s ease-in-out);
+        @include transform(translateY(-100vh));
+        @include border;
         list-style-type: none;
         li {
             display: block;
             margin: 0;
             font-size: $font-size-4;
+            &:last-child a {
+                border-bottom: 0;
+            }
         }
         a {
             display: block;
             width: 100%;
             padding: $vertical-rhythm/2;
             border-bottom: 1px solid $color-grey;
+            color: $color-black;
             &:hover {
-                color: $color-white;
-                background-color: $color-blue;
+                background-color: $color-grey-6;
             }
         }
     }
@@ -179,4 +180,22 @@ nav.website-navigation {
         @include transform(translateY(0));
     }
 
+}
+
+
+#modal-overlay {
+    position: fixed;
+    top: -9999px;
+    left: 0;
+    height: 110%;
+    width: 100%;
+    z-index: 200;
+    background-color: $color-black;
+    opacity: 0;
+    transition: top 0s .25s, opacity .25s linear;
+    &.visible {
+        top: 0;
+        opacity: .7;
+        transition: top 0s 0s, opacity .25s linear;
+    }
 }

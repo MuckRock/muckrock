@@ -169,14 +169,12 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
 
 
 $('#website-sections-dropdown').click(function(){
-    var button = this;
     var menu = 'ul.website-sections';
-    $(button).toggleClass('active');
+    var overlay = '#modal-overlay';
     $(menu).toggleClass('visible');
-    $('body').on("click touchmove touchend", function(e) {
-        if (!$(e.target).is(menu) && !$(e.target).is(button) && !$(e.touchTarget).is(menu)) {
-            $(button).removeClass('active');
-            $(menu).removeClass('visible');
-        }
+    $(overlay).toggleClass('visible');
+    $(overlay).click(function(e) {
+        $(menu).removeClass('visible');
+        $(overlay).removeClass('visible');
     });
 });
