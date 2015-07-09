@@ -186,11 +186,13 @@ nav.website-navigation {
             }
         }
         .website-sections {
-            width: 96%;
+            max-height: 96%;
+            width: 90%;
             position: fixed;
             z-index: 300;
-            left: 2%;
-            top: 1rem;
+            left: 5%;
+            top: 2%;
+            overflow-y: scroll;
             background-color: $color-white;
             @include border;
             list-style-type: none;
@@ -214,7 +216,7 @@ nav.website-navigation {
             }
             // State changes
             @include transition(transform .3s ease-in-out);
-            @include transform(translateY(-100vh));
+            @include transform(translateY(-150vh));
             &.visible {
                 @include transform(translateY(0));
             }
