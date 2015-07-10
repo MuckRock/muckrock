@@ -179,4 +179,15 @@ aside.website-sidebar {
         @include action-input($color-white, $color-grey-0);
     }
 
+    .broadcast {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-white;
+        color: $color-black;
+        border-radius: 0;
+    }
+
 }
