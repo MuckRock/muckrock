@@ -43,7 +43,6 @@ aside.website-sidebar {
     width: $sidebar-width;
     height: 100vh;
 
-
     background-color: $color-grey-1;
     color: $color-white;
 
@@ -72,12 +71,17 @@ aside.website-sidebar {
             color: $color-white;
             font-weight: $font-weight-bold;
             text-align: center;
+            @include transition(background-color .25s linear);
             &:hover {
                 text-decoration: none;
-                background-color: $color-blue;
+                background-color: $color-blue-dark;
             }
             &.sign-up {
                 border-right: 1px solid $color-black;
+                background-color: $color-blue;
+                &:hover {
+                    background-color: $color-blue-dark;
+                }
             }
         }
     }
@@ -129,8 +133,8 @@ aside.website-sidebar {
     .newsletter {
         width: 100%;
         padding: $vertical-rhythm;
-        background-color: $color-blue;
-        @include action-input($color-white, $color-blue-dark);
+        // background-color: $color-red;
+        @include action-input($color-white, $color-grey-0);
     }
 
 }

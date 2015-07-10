@@ -57,16 +57,17 @@ nav.primary {
             #search-button {
                 border: none;
                 float: none;
-                border-radius: 9px;
-                border-radius: 50px;
                 width: 2.5rem;
                 svg {
                     width: $vertical-rhythm;
                 }
             }
-            form:hover #search-button {
+            form {
                 border: none;
-                background-color: $color-blue;
+                @include transition(background-color .25s linear);
+                &:hover {
+                    background-color: $color-blue;
+                }
             }
         }
     }
@@ -86,6 +87,7 @@ nav.primary {
             vertical-align: middle;
         }
         svg path {
+            @include transition(fill .25s linear);
             fill: $color-black;
         }
         &:hover {
