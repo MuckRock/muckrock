@@ -9,6 +9,10 @@ html, body {
     min-height: 100%;
 }
 
+.container {
+    margin-bottom: 0;
+}
+
 .content {
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
