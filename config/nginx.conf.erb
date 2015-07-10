@@ -13,6 +13,8 @@ http {
         gzip_comp_level 2;
         gzip_min_length 512;
 
+		deny 76.8.215.42;
+
 	server_tokens off;
 
 	log_format l2met 'measure#nginx.service=$request_time request_id=$http_x_request_id';
