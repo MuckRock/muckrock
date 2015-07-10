@@ -167,7 +167,6 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
     };
 });
 
-
 $('#website-sections-dropdown').click(function(){
     var menu = 'ul.website-sections';
     var overlay = '#modal-overlay';
@@ -175,6 +174,17 @@ $('#website-sections-dropdown').click(function(){
     $(overlay).toggleClass('visible');
     $(overlay).click(function(e) {
         $(menu).removeClass('visible');
+        $(overlay).removeClass('visible');
+    });
+});
+
+$('#sidebar-button').click(function(){
+    var overlay = '#modal-overlay';
+    var sidebar = '#website-sidebar';
+    $(sidebar).addClass('visible');
+    $(overlay).addClass('visible');
+    $(overlay).click(function(){
+        $(sidebar).removeClass('visible');
         $(overlay).removeClass('visible');
     });
 });

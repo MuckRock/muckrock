@@ -104,6 +104,26 @@ nav.primary {
             width: 2rem;
         }
     }
+
+    @include media($large-layout) {
+        #create-request-button {
+            padding-right: 0;
+        }
+    }
+
+    #sidebar-button {
+        .text {
+            display: none;
+        }
+        @include media($medium-layout) {
+            .text {
+                display: inline;
+            }
+        }
+        @include media($large-layout) {
+            display: none;
+        }
+    }
 }
 
 
@@ -236,5 +256,8 @@ nav.website-navigation {
         top: 0;
         opacity: .7;
         transition: top 0s 0s, opacity .25s linear;
+    }
+    &:hover {
+        cursor: pointer;
     }
 }
