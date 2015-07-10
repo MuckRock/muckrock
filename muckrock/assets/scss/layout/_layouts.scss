@@ -10,10 +10,14 @@ html, body {
 }
 
 .container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     margin-bottom: 0;
 }
 
 .content {
+    flex: 1;
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     margin-bottom: 0;

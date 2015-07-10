@@ -71,7 +71,6 @@
 {
     .container
     {
-        display: block;
         width: 100%;
         @include transition($menu-animation);
     }

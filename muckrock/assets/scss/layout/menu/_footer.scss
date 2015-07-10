@@ -19,6 +19,7 @@ footer.website-footer {
         @include fill-parent();
         @include media($medium-layout) { @include span-columns(2); }
         @include media($large-layout) { @include span-columns(2); }
+        margin-bottom: 0;
     }
 
     .sitemap {
