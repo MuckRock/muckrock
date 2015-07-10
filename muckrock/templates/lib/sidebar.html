@@ -1,51 +1,45 @@
 <aside class="website-sidebar" id="website-sidebar">
-    {% if broadcast %}
-    <section class="broadcast panel">
-        <p>{{ broadcast|safe }}</p>
-        <span id="close-broadcast">&times;</span>
-    </section>
-    {% endif %}
     {% if user.is_authenticated %}
-    <section class="account">
-        <p class="username">{{ user.get_full_name }}</p>
-        <ul class="options">
-            <li><a href="{% url 'acct-my-profile' %}" class="button">Profile</a></li>
-            <li><a href="{% url 'acct-logout' %}" class="button">Log Out</a></li>
-        </ul>
-        <a href="{% url 'foia-mylist' %}" class="button">My Requests</a>
-        {% if payments %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=payment">
-            <span class="payments counter">{{ payments|length }}</span>
-            Payment{{ fixes|length|pluralize }} Required
-        </a>
-        {% endif %}
-        {% if fixes %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=fix">
-            <span class="fixes counter">{{ fixes|length }}</span>
-            Fix{{ fixes|length|pluralize:"es" }} Required
-        </a>
-        {% endif %}
-        {% if drafts %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
-            <span class="drafts counter">{{ drafts|length }}</span>
-            Draft{{ drafts|length|pluralize }}
-        </a>
-        {% endif %}
-        {% if updates %}
-        <a class="account-info" href="{% url 'foia-mylist' %}">
-            <span class="updates counter">{{ updates|length }}</span>
-            Update{{ updates|length|pluralize }}
-            {% if updates|length > 10 %}
-            <small>Click to see all</small>
-            {% endif %}
-        </a>
 
-        <ul class="updated">
-            {% for foia in updates|slice:":10" %}
-            <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+    <section class="account">
+        <header>
+            <a href="{% url 'acct-my-profile' %}" class="username">{{ user.get_full_name }}</a>
+        </header>
+        <main class="requests">
+            {% if payments %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=payment">
+                <span class="payments counter">{{ payments|length }}</span>
+                Payment{{ fixes|length|pluralize }} Required
+            </a>
+            {% endif %}
+            {% if fixes %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=fix">
+                <span class="fixes counter">{{ fixes|length }}</span>
+                Fix{{ fixes|length|pluralize:"es" }} Required
+            </a>
+            {% endif %}
+            {% if drafts %}
+            <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
+                <span class="drafts counter">{{ drafts|length }}</span>
+                Draft{{ drafts|length|pluralize }}
+            </a>
+            {% endif %}
+            {% if updates %}
+            <a class="account-info" href="{% url 'foia-mylist' %}">
+                <span class="updates counter">{{ updates|length }}</span>
+                Update{{ updates|length|pluralize }}
+                {% if updates|length > 10 %}
+                <small>Click to see all</small>
+                {% endif %}
+            </a>
+
+            <ul class="updated">
+                {% for foia in updates|slice:":10" %}
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </main>
     </section>
     {% else %}
     <section class="account-links">
@@ -73,6 +67,12 @@
                 </svg>
             </span>
         </form>
+    </section>
+    {% endif %}
+    {% if broadcast %}
+    <section class="broadcast panel">
+        <p>{{ broadcast|safe }}</p>
+        <span id="close-broadcast">&times;</span>
     </section>
     {% endif %}
 </aside>

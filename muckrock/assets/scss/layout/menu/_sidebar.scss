@@ -43,6 +43,7 @@ aside.website-sidebar {
     width: $sidebar-width;
     height: 100vh;
 
+    border-left: 1px solid $color-grey-0;
     background-color: $color-grey-1;
     color: $color-white;
 
@@ -74,42 +75,49 @@ aside.website-sidebar {
             @include transition(background-color .25s linear);
             &:hover {
                 text-decoration: none;
-                background-color: $color-blue-dark;
+                background-color: $color-blue;
             }
             &.sign-up {
                 border-right: 1px solid $color-black;
-                background-color: $color-blue;
-                &:hover {
-                    background-color: $color-blue-dark;
-                }
             }
         }
     }
 
     .account {
+        header {
+            margin-bottom: $vertical-rhythm/2;
+        }
         .username {
             display: block;
-            @extend .h3;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-grey-0;
+            background-color: $color-grey-2;
             color: $color-white;
-        }
-        .options {
-            @include row;
-            padding-left: 0;
-            margin-bottom: 0;
-            #mylist { @include full; }
+            font-weight: $font-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            @include transition(background-color .25s linear);
+            &:hover {
+                text-decoration: none;
+                background-color: $color-blue;
+            }
         }
 
+        .requests {
+            padding: 0 $vertical-rhythm/2;
+        }
 
         .account-info {
             display: inline-block;
             height: auto;
-            margin: $vertical-rhythm 0 0;
+            margin: $vertical-rhythm/2 0 0;
             border: none;
             padding: 0 $vertical-rhythm/2 0 0;
             background: none;
             text-align: left;
             color: $color-white;
-            background-color: $color-grey-2;
+            background-color: $color-black;
             text-decoration: none;
 
             .counter {
