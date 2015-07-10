@@ -30,7 +30,7 @@
 
 nav.primary {
     overflow: hidden;
-
+    margin-bottom: $vertical-rhythm;
     ul {
         display: inline-block;
         width: auto;
@@ -111,7 +111,7 @@ nav.website-navigation {
     overflow: hidden;
     padding-top: $vertical-rhythm/2;
     padding-bottom: $vertical-rhythm/2;
-
+    margin-bottom: $vertical-rhythm/2;
     background-color: #FFF;
     border-bottom: 1px solid $color-grey-6;
     ul {
