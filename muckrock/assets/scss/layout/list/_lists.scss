@@ -18,7 +18,7 @@
 */
 
 .list {
-    @include outer-container;
+    @include row;
     .list-navigation {
         @include grid-columns(4, 2, 3);
         .list-head .list-title {
@@ -148,12 +148,6 @@
         flex-flow: row wrap;
         align-content: center;
         justify-content: space-between;
-    }
-    .pagination {
-        @include row;
-        margin-top: 0;
-        border-top: $base-border-width solid $color-grey;
-        padding-top: $vertical-rhythm/2;
     }
     .list-table {
         @include row;

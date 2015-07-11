@@ -166,3 +166,25 @@ $.expr[":"].icontains = $.expr.createPseudo(function(arg) {
         return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
     };
 });
+
+$('#website-sections-dropdown').click(function(){
+    var menu = 'ul.website-sections';
+    var overlay = '#modal-overlay';
+    $(menu).toggleClass('visible');
+    $(overlay).toggleClass('visible');
+    $(overlay).click(function(e) {
+        $(menu).removeClass('visible');
+        $(overlay).removeClass('visible');
+    });
+});
+
+$('#sidebar-button').click(function(){
+    var overlay = '#modal-overlay';
+    var sidebar = '#website-sidebar';
+    $(sidebar).addClass('visible');
+    $(overlay).addClass('visible');
+    $(overlay).click(function(){
+        $(sidebar).removeClass('visible');
+        $(overlay).removeClass('visible');
+    });
+});

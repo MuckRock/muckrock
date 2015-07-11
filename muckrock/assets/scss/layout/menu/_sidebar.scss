@@ -1,235 +1,112 @@
-/* Navigation Menu */
+// page positioning
 
-// Grey: #D8C9C6
-// Red: #D24019
+$sidebar-width: 250px;
 
-@mixin sidebar-controller
-{
-    $on: table-cell;
-    $off: none;
-    #menu-button
-    {
-        display: $on;
-    }
-    #menu-close
-    {
-        display: $off;
-    }
-    #sidebar-menu:target ~ .container
-    {
-        #menu-button
-        {
-            display: $off;
-        }
-        #menu-close
-        {
-            display: $on;
-        }
-    }
-}
-
-@mixin sidebar-translation($size)
-{
-    #sidebar-menu
-    {
-        @include transform(translateX($size));
-        &:target
-        {
-            @include transform(translateX(0));
-        }
-    }
-    #sidebar-menu:target ~ .container
-    {
-        @include transform(translateX(-$size));
-    }
-}
-
-@mixin hidden-sidebar
-{
-    @include sidebar-controller;
-    @include sidebar-translation($mobile-menu-width);
-    @include media($medium-layout)
-    {
-        @include sidebar-translation($tablet-menu-width);
-    }
-    @include media($large-layout)
-    {
-        @include sidebar-translation(0);
-        nav.primary ul.right
-        {
-            display: none;
-            opacity: 0;
-            @include transition($menu-animation);
-        }
-
-    }
-}
-
-@mixin global-sidebar
-{
-    .container
-    {
-        display: block;
-        width: 100%;
-        @include transition($menu-animation);
-    }
-    #sidebar-menu
-    {
-        display: block;
-        position: fixed;
-        top: 0;
+.website-sidebar {
+    position: fixed;
+    z-index: -100;
+    top: 0;
+    right: -9999px;
+    transition: right 0s .3s;
+    &.visible {
+        z-index: 0;
         right: 0;
-        z-index: 5;
-        width: $mobile-menu-width;
-        @include media($medium-layout)
-        {
-            width: $tablet-menu-width;
-        }
-        @include media($large-layout)
-        {
-            width: $desktop-menu-width;
-            & + .container {
-                padding-right: $desktop-menu-width + 24px;
-            }
-        }
-        height: 100%;
-        @include transition($menu-animation);
+        transition: right 0s 0s;
     }
-    #muckrock-text
-    {
-        @include transition($menu-animation);
-    }
-
-    @include hidden-sidebar;
 }
 
-@include global-sidebar;
+.website-sidebar + .container {
+    @include transition(transform .25s ease-in-out);
+}
 
+.website-sidebar.visible + .container {
+    @include transform(translateX(-1 * $sidebar-width));
+}
 
-
-nav.sidebar {
-    $sidebar-object-height: 2.5rem;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    height: 100%;
-    width: 100%;
-    padding: $vertical-rhythm/2;
-    @media screen and (min-width: 540px) {
-        padding: $vertical-rhythm $vertical-rhythm 1em;
+@include media($large-layout) {
+    .website-sidebar {
+        z-index: 100;
+        right: 0;
     }
+    .website-sidebar.visible + .container {
+        @include transform(translateX(0));
+    }
+    .website-sidebar + .container {
+        margin-right: $sidebar-width;
+    }
+}
+
+aside.website-sidebar {
+
+    display: flex;
+    flex-flow: column nowrap;
+    width: $sidebar-width;
+    height: 100vh;
+
+    border-left: 1px solid $color-grey-0;
+    background-color: $color-grey-1;
     color: $color-white;
-    background: $color-grey-2;
 
     dfn {
         color: $color-white;
     }
 
-    ul {
-        @include row;
-        padding-left: 0;
-        margin-bottom: $vertical-rhythm/2;
+    & > * {
+        margin-bottom: 0;
     }
-    li {
-        @include half;
-    }
-    .button {
-        @include button($color-black);
-        display: block;
+
+    .account-links {
         width: 100%;
-        margin-bottom: $vertical-rhythm/2;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
-    }
-
-    .button-list {
-        display: block;
+        overflow: hidden;
         li {
-            @include full;
-            &:first-child a {
-                border-top: none;
-                @include border-top-radius($base-border-radius);
-            }
-            &:last-child a {
-                @include border-bottom-radius($base-border-radius);
-            }
+            display: inline-block;
+            width: 50%;
+            float: left;
         }
-        a, .button {
-            margin: 0;
-            border-radius: 0;
-            border-top: $base-border-width solid $color-black;
-        }
-
-    }
-
-    .updated {
-        display: block;
-        padding: $vertical-rhythm;
-        margin-top: -.5 * $vertical-rhythm;
-        margin-left: .6 * $vertical-rhythm;
-        @include border;
-        border-color: $color-black;
-
-        li {
-            @include full;
-            display: list-item;
-            margin-bottom: $vertical-rhythm/2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            &:last-child {
-                margin-bottom: 0;
-            }
-        }
-
         a {
-            color: $color-grey-6;
-            text-decoration: underline;
+            display: block;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-black;
+            background-color: $color-grey-2;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            text-align: center;
+            @include transition(background-color .25s linear);
             &:hover {
-                color: $color-blue;
+                text-decoration: none;
+                background-color: $color-blue;
             }
-        }
-    }
-
-    .broadcast {
-        position: relative;
-        margin-top: 0;
-        font-size: 0.9em;
-        color: $color-black;
-        background-color: $color-white;
-        box-shadow: 1px 1px 10px black;
-        h1, h2, h3, h4, h5, h6, p {
-            width: 95%;
-        }
-        p:last-of-type {
-            margin-bottom: 0;
-        }
-
-        #close-broadcast {
-            position: absolute;
-            top: 5%;
-            right: 5%;
-            font-size: 1.5em;
-            color: $color-grey;
-            cursor: pointer;
-            &:hover {
-                color: $color-black;
+            &.sign-up {
+                border-right: 1px solid $color-black;
             }
         }
     }
 
     .account {
-        margin-top: 2 * $vertical-rhythm;
+        header {
+            margin-bottom: $vertical-rhythm/2;
+        }
         .username {
             display: block;
-            @extend .h3;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-grey-0;
+            background-color: $color-grey-2;
             color: $color-white;
-        }
-        .options {
-            @include row;
-            padding-left: 0;
-            margin-bottom: 0;
-            #mylist { @include full; }
+            font-weight: $font-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            @include transition(background-color .25s linear);
+            &:hover {
+                text-decoration: none;
+                background-color: $color-blue;
+            }
         }
 
+        .requests {
+            padding: 0 $vertical-rhythm/2;
+        }
 
         .account-info {
             display: inline-block;
@@ -240,8 +117,12 @@ nav.sidebar {
             background: none;
             text-align: left;
             color: $color-white;
-            background-color: $color-grey-2;
+            background-color: $color-black;
             text-decoration: none;
+
+            &:first-child {
+                margin-top: $vertical-rhythm/2;
+            }
 
             .counter {
                 margin-right: $vertical-rhythm/4;
@@ -260,55 +141,53 @@ nav.sidebar {
             }
         }
 
-    }
+        .updated {
+            display: block;
+            padding: $vertical-rhythm;
+            margin-top: -.5 * $vertical-rhythm;
+            margin-left: .6 * $vertical-rhythm;
+            @include border;
+            border-color: $color-grey-0;
+            overflow: hidden;
 
-    .social-links svg {
-        height: 1em;
-        width: auto;
-        margin-bottom: -0.1em;
-        fill: $color-white;
-    }
-
-    form {
-        display: block;
-        width: 100%;
-        height: $sidebar-object-height;
-        margin: 0 0 $vertical-rhythm/2;
-        input {
-            @include appearance(none);
-            width: 75%;
-            height: 100%;
-            float: left;
-            margin-right: 0;
-            color: $color-white;
-            background: $color-grey-3;
-            @include placeholder { color: $color-grey-6; }
-            border: $base-border-width solid $color-grey-1;
-            @include border-right-radius(0);
-            transform: translateY(2px);
-            &:focus, &:hover {
-                outline: none;
-                border-color: $color-blue;
+            li {
+                @include full;
+                display: list-item;
+                margin-bottom: $vertical-rhythm/2;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                &:last-child {
+                    margin-bottom: 0;
+                }
             }
-            & + span.input-button {
-                @include button($color-black);
-                margin: 0;
-                float: right;
-                clear: right;
-                height: 100%;
-                width: 25%;
-                @include border-right-radius($base-border-radius);
-                @include border-left-radius(0);
-                cursor: pointer;
-                svg {
-                    display: inline-block;
-                    height: 1.25em;
-                    width: auto;
-                    margin-left: -.25em;
-                    vertical-align: middle;
-                    fill: $color-white;
+
+            a {
+                color: $color-grey-6;
+                text-decoration: underline;
+                &:hover {
+                    color: $color-blue;
                 }
             }
         }
     }
+
+    .newsletter {
+        width: 100%;
+        padding: $vertical-rhythm;
+        // background-color: $color-red;
+        @include action-input($color-white, $color-grey-0);
+    }
+
+    .broadcast {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-white;
+        color: $color-black;
+        border-radius: 0;
+    }
+
 }
