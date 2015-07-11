@@ -29,7 +29,7 @@
 {% endblock twitter_card %}
 
 {% block header %}
-    <h3 class="{{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == user or user.is_staff %} <span class="edit" id="edit-status">Change</span></h3>
+    <div class="status-badge {{ foia.color_code }}" id="request-status">{{foia.get_status_display}}{% if foia.status != 'started' and foia.status != 'submitted' %}{% if foia.user == user or user.is_staff %} <span class="edit" id="edit-status">Change</span></div>
         <form method="post" class="status-form" id="status-form">
             {% csrf_token %}
             <select name="status">
@@ -41,7 +41,7 @@
         </form>
         {% endif %}
     {% else %}
-    </h3>
+    </div>
     {% endif %}
     {% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}

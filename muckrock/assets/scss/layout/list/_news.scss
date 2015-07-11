@@ -1,0 +1,71 @@
+// .news-list-article (row)
+//   .news-list-article-headline (full)
+//   .news-list-article-image   (half)
+//   .news-list-article-copy  (half)
+//     .news-list-article-summary (full)
+//     .news-list-article-authors (half)
+//     .news-list-article-read-more (half)
+//
+// +--------------------------------------+
+// |               Headline               |
+// +----------------+---------------------+
+// |                |                     |
+// |                |       Summary       |
+// |     Image      |                     |
+// |                +---------+-----------+
+// |                | Authors | Read More |
+// +----------------+---------+-----------+
+
+.news.list .list-navigation, .news.list .list-content {
+    @include grid-columns(4, 6, 12);
+}
+
+.news-list-articles {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.news-list-article {
+    @include row;
+    border-bottom: $base-border-width solid $color-grey;
+    padding-bottom: $vertical-rhythm;
+    &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .news-list-article-image {
+        @include grid-columns(4, 2, 4);
+        max-width: 100%;
+        height: auto;
+        @include media($medium-layout) {
+            padding-right: $vertical-rhythm;
+            max-width: 100%;
+        }
+    }
+    .news-list-article-copy {
+        @include grid-columns(4, 4, 8);
+        @include row;
+        .news-list-article-headline {
+            @include grid-columns(4, 6, 12);
+            font-weight: $font-weight-bold;
+            a {
+                color: $color-black;
+                text-decoration: none;
+                &:hover {
+                    color: $color-blue;
+                }
+            }
+        }
+        .news-list-article-summary {
+            @include grid-columns(4, 6, 12);
+        }
+        .news-list-article-authors, .news-list-article-read-more {
+            @include grid-columns(2, 3, 6);
+        }
+        .news-list-article-read-more {
+            @include media($medium-layout) {
+                text-align: right;
+            }
+        }
+    }
+}

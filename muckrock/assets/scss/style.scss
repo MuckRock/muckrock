@@ -1,23 +1,24 @@
-// Subatomic Elements
-// Standalone Libraries & Variables
-//
-// Do not appear in compiled CSS
+// Third Party Frameworks
+@import 'framework/normalize';
+@import 'framework/bourbon/bourbon';
+@import 'framework/neat/neat';
 
-@import 'normalize';
-@import 'bourbon/bourbon';
-@import 'neat/neat';
+// Basics
+@import 'base/variables';
+@import 'base/mixins';
+@import 'base/grid';
+@import 'base/colors';
+@import 'base/typography';
 
-@import 'lib/variables';
-@import 'lib/mixins';
-@import 'lib/grid';
-@import 'lib/prototypes';
-@import 'lib/typography';
-@import 'lib/objects/objects';
-@import 'lib/layouts/layouts';
-@import 'lib/lists/lists';
+// Components
+@import 'component/components';
 
-/* Plugins */
+// Layouts
+@import 'layout/layouts';
+@import 'layout/list/lists';
+@import 'layout/menu/menus';
 
-@import 'lib/plugins/autocomplete';
-@import 'lib/plugins/multiselect';
-@import 'lib/plugins/datepicker';
+// Third Party Plugins
+@import 'plugin/autocomplete';
+@import 'plugin/multiselect';
+@import 'plugin/datepicker';

@@ -1,0 +1,26 @@
+/* Panels */
+
+.panel { @include panel; }
+
+@mixin colored-panel($color, $disabled: false) {
+    @include panel;
+    @if $disabled {
+        color: $color-white;
+    } @else {
+        color: $color;
+        background: none;
+    }
+    padding: $vertical-rhythm;
+    border-color: darken($color, $color-darken-amount);
+    a {
+        text-decoration: underline;
+        color: $color-white;
+        background-color: none;
+    }
+}
+
+.panel.default  { @include colored-panel($color-grey);           }
+.panel.primary  { @include colored-panel($color-blue);           }
+.panel.success  { @include colored-panel($color-green);          }
+.panel.failure  { @include colored-panel($color-red);            }
+.panel.disabled { @include colored-panel($color-disabled, true); }

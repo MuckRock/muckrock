@@ -1,0 +1,151 @@
+@import 'buttons';
+@import 'panels';
+@import 'messages';
+@import 'notifications';
+@import 'pagination';
+@import 'modals';
+@import 'forms';
+@import 'foia';
+@import 'orphan';
+@import 'crowdfund';
+@import 'tags';
+@import 'tasks';
+
+/* Feeds */
+
+.feed-item { @include panel;
+    overflow: hidden;
+    @include fill-parent();
+    > header {
+        display: block;
+        width: 100%;
+        margin-bottom: $vertical-rhythm/2;
+        float: left;
+        div {
+            display: block;
+            & + div {
+                @include font-sizing(0.9, 1);
+            }
+        }
+    }
+    .button {
+        @include font-sizing(0.9, 1);
+        line-height: 1.5em;
+        float: left;
+    }
+}
+
+.feed {
+
+    ul, ol {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .feed-item {
+        margin: 0;
+        border-top: none;
+        border-radius: 0;
+    }
+
+    li:first-child > .feed-item {
+        border-top: $base-border-width solid $color-grey;
+        @include border-top-radius($base-border-radius);
+    }
+
+    li:last-child > .feed-item {
+        @include border-bottom-radius($base-border-radius);
+    }
+
+    @include media($large-layout) {
+        @include span-columns(6);
+        &.narrow { @include span-columns(4); }
+        &.wide { @include span-columns(8); }
+    }
+    @include fill-parent();
+
+}
+
+table {
+    width: 100%;
+    margin-top: $vertical-rhythm 0;
+    border: $base-border-width solid $color-grey;
+    @include border-radius;
+    th, td { padding: 0.25em 0.5em; }
+    thead tr { background-color: $color-grey; }
+    tbody tr:nth-child(odd) { background-color: $color-odd-background; }
+    &, tr {
+        border-top: $base-border-width solid $color-grey;
+    }
+}
+
+.file {
+    overflow: hidden;
+    .thumbnail {
+        float: left;
+        max-height: 32px;
+        width: auto;
+        margin: $vertical-rhythm/4 $vertical-rhythm 0 0;
+    }
+    .file-actions a {
+        margin-left: $vertical-rhythm/2;
+        &:first-child { margin-left: 0; }
+    }
+}
+
+.hidden-stripe-handler { display: none; }
+
+/* SVG Icons */
+
+.svg-icon {
+    display: inline-block;
+    width: auto;
+    height: 2rem;
+    vertical-align: middle;
+    margin: 0 0.5em;
+}
+.svg-icon path,
+.svg-icon polygon,
+.svg-icon rect {
+    fill: $color-white;
+}
+.svg-icon circle {
+    stroke: $color-white;
+    stroke-width: 1;
+}
+
+/* Sharing */
+
+.social.sharing {
+    width: 100%;
+    margin: 0 0 $vertical-rhythm 0;
+    text-align: left;
+}
+
+.sharing > a {
+    &.facebook {  @include colorize-icon($color-facebook); }
+    &.twitter { @include colorize-icon($color-twitter); }
+    &.email { @include colorize-icon($color-email); }
+    width: 33%;
+    margin: 0 $vertical-rhythm/8;
+    &:first-of-type {
+        margin-left: 0;
+        svg { margin-left: 0; }
+    }
+    &:last-of-type {
+        margin-right: 0;
+        svg { margin-right: 0; }
+    }
+    text-decoration: none;
+    text-align: left;
+    .svg-icon {
+        height: 24px;
+        width: 24px;
+    }
+}
+
+.sharing > a:hover {
+   &.facebook {  @include colorize-icon(darken($color-facebook, 20%)); }
+    &.twitter { @include colorize-icon(darken($color-twitter, 20%)); }
+    &.email { @include colorize-icon(darken($color-email, 20%)); }
+}
