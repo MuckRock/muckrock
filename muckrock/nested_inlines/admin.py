@@ -49,11 +49,11 @@ class NestedModelAdmin(ModelAdmin):
                 qset = getattr(instance, qs_field).all()
             elif hasattr(inline, 'prefetch'):
                 # we prefetch the related field, then pass that field recursively
-                qset = inline.queryset(request).prefetch_related(inline.prefetch)
+                qset = inline.get_queryset(request).prefetch_related(inline.prefetch)
                 new_qs_field = inline.prefetch
             else:
                 # normal qs
-                qset = inline.queryset(request)
+                qset = inline.get_queryset(request)
             formset = create_formset(form_set, request, admin, instance, prefix, qset)
             formsets.append(formset)
 
