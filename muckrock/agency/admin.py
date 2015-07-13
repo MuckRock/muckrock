@@ -50,6 +50,7 @@ class AgencyAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Agency
+        fields = '__all__'
 
 
 class AgencyAdmin(VersionAdmin):

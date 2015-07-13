@@ -15,12 +15,6 @@ import os
 from datetime import datetime, timedelta
 from mock import Mock, patch
 
-## resolve weird django bug ##
-from django.db.models.loading import cache as model_cache
-if not model_cache.loaded:
-    model_cache.get_models()
-##############################
-
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
@@ -270,7 +264,7 @@ class TestAccountFunctional(TestCase):
             user_data)
 
         user = User.objects.get(username='adam')
-        profile = user.get_profile()
+        profile = user.profile
         for key, val in user_data.iteritems():
             if key in ['first_name', 'last_name', 'email']:
                 nose.tools.eq_(val, getattr(user, key))
@@ -313,8 +307,6 @@ class TestAccountFunctional(TestCase):
 
     def test_stripe_webhooks(self):
         """Test webhooks received from stripe"""
-        # pylint: disable=W0142
-
         kwargs = {"wsgi.url_scheme": "https"}
 
         response = self.client.post(reverse('acct-webhook'), {}, **kwargs)

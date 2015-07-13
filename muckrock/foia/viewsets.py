@@ -82,7 +82,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                     date=datetime.now(), response=False, full_html=False,
                     communication=foia_request)
 
-            if request.user.get_profile().make_request():
+            if request.user.profile.make_request():
                 foia.submit()
                 return Response({'status': 'FOI Request submitted',
                                  'Location': foia.get_absolute_url()},
@@ -142,7 +142,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                 status=http_status.HTTP_400_BAD_REQUEST)
 
             amount = int(foia.price * 105)
-            request.user.get_profile().api_pay(amount,
+            request.user.profile.api_pay(amount,
                                                'Charge for request: %s %s' % (foia.title, foia.pk))
 
             foia.status = 'processed'
@@ -179,10 +179,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                 status=http_status.HTTP_400_BAD_REQUEST)
 
             if request.method == 'POST':
-                foia.followed_by.add(request.user.get_profile())
+                foia.followed_by.add(request.user.profile)
                 return Response({'status': 'Following'}, status=http_status.HTTP_200_OK)
             if request.method == 'DELETE':
-                foia.followed_by.remove(request.user.get_profile())
+                foia.followed_by.remove(request.user.profile)
                 return Response({'status': 'Not following'}, status=http_status.HTTP_200_OK)
 
         except FOIARequest.DoesNotExist:

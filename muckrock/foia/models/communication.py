@@ -26,7 +26,7 @@ def requests_from_pks(foia_pks):
     """A helper function to get all the requests given a list of their PKs."""
     foias = []
     # if foia_pks isn't a list (say, a single pk), then it should be made into one
-    if type(foia_pks) is not type(list()):
+    if not isinstance(foia_pks, list):
         foia_pks = [foia_pks]
     for foia_pk in foia_pks:
         try:
@@ -47,14 +47,16 @@ class FOIACommunication(models.Model):
     priv_to_who = models.CharField(max_length=255, blank=True)
     subject = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField(db_index=True)
-    response = models.BooleanField(help_text='Is this a response (or a request)?')
-    full_html = models.BooleanField()
+    response = models.BooleanField(default=False,
+            help_text='Is this a response (or a request)?')
+    full_html = models.BooleanField(default=False)
     communication = models.TextField(blank=True)
     delivered = models.CharField(max_length=10, choices=DELIVERED, blank=True, null=True)
     # what status this communication should set the request to - used for machine learning
     status = models.CharField(max_length=10, choices=STATUS, blank=True, null=True)
-    opened = models.BooleanField(help_text='If emailed, did we receive an open notification? '
-                                           'If faxed, did we recieve a confirmation?')
+    opened = models.BooleanField(default=False,
+            help_text='If emailed, did we receive an open notification? '
+                      'If faxed, did we recieve a confirmation?')
 
     # only used for orphans
     likely_foia = models.ForeignKey(

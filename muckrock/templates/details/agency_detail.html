@@ -78,7 +78,7 @@
         <dl>
             <dt>E-mail Address</dt>
             {% if agency.email %}
-                {% if request.user.get_profile.can_view_emails %}
+                {% if request.user.profile.can_view_emails %}
             <dd>{{agency.email}}</dd>
                 {% else %}
             <dd><a href="{% url 'acct-subscribe' %}">Available to Pro Users</a></dd>

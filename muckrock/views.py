@@ -112,7 +112,7 @@ class MRFilterableListView(ListView):
             filter_value = get.get(filter_key, None)
             filter_value = self.clean_filter_value(filter_key, filter_value)
             if filter_value:
-                if type(filter_value) == list:
+                if isinstance(filter_value, list):
                     try:
                         filter_value = ', '.join(filter_value)
                     except TypeError:
@@ -130,7 +130,6 @@ class MRFilterableListView(ListView):
 
     def filter_list(self, objects):
         """Filters a list of objects"""
-        # pylint: disable=star-args
         get = self.request.GET
         kwargs = {}
         for filter_by in self.get_filters():

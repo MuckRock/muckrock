@@ -67,7 +67,12 @@ class OrphanTaskTests(TestCase):
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
 
     def setUp(self):
-        self.comm = FOIACommunication.objects.create(date=datetime.now(), from_who='God')
+        self.comm = FOIACommunication.objects.create(
+                date=datetime.now(),
+                from_who='God',
+                full_html=False,
+                opened=False,
+                response=True)
         self.task = task.models.OrphanTask.objects.create(
             reason='ib',
             communication=self.comm,
@@ -110,9 +115,13 @@ class SnailMailTaskTests(TestCase):
 
     def setUp(self):
         self.foia = FOIARequest.objects.get(pk=1)
-        self.comm = FOIACommunication.objects.create(date=datetime.now(),
-                                                     from_who='God',
-                                                     foia=self.foia)
+        self.comm = FOIACommunication.objects.create(
+                date=datetime.now(),
+                from_who='God',
+                foia=self.foia,
+                full_html=False,
+                opened=False,
+                response=True)
         self.task = task.models.SnailMailTask.objects.create(
             category='a',
             communication=self.comm)
@@ -185,9 +194,13 @@ class ResponseTaskTests(TestCase):
 
     def setUp(self):
         self.foia = FOIARequest.objects.get(pk=1)
-        self.comm = FOIACommunication.objects.create(date=datetime.now(),
-                                                     from_who='God',
-                                                     foia=self.foia)
+        self.comm = FOIACommunication.objects.create(
+                date=datetime.now(),
+                from_who='God',
+                foia=self.foia,
+                full_html=False,
+                opened=False,
+                response=True)
         self.task = task.models.ResponseTask.objects.create(communication=self.comm)
 
     def test_task_creates_successfully(self):

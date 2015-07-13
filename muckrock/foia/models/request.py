@@ -6,7 +6,7 @@ Models for the FOIA application
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.mail import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
-from django.db import models, connection, transaction
+from django.db import models, connection
 from django.db.models import Q, Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
@@ -20,7 +20,6 @@ import logging
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.models import ChainableManager
 from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
@@ -28,7 +27,7 @@ from muckrock import fields
 
 logger = logging.getLogger(__name__)
 
-class FOIARequestManager(ChainableManager):
+class FOIARequestQuerySet(models.QuerySet):
     """Object manager for FOIA requests"""
     # pylint: disable=too-many-public-methods
 
@@ -136,18 +135,18 @@ class FOIARequest(models.Model):
     date_due = models.DateField(blank=True, null=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
-    embargo = models.BooleanField()
+    embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
     permanent_embargo = models.BooleanField(default=False)
     price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
     description = models.TextField(blank=True)
-    featured = models.BooleanField()
-    tracker = models.BooleanField()
+    featured = models.BooleanField(default=False)
+    tracker = models.BooleanField(default=False)
     sidebar_html = models.TextField(blank=True)
     tracking_id = models.CharField(blank=True, max_length=255)
     mail_id = models.CharField(blank=True, max_length=255, editable=False)
-    updated = models.BooleanField()
+    updated = models.BooleanField(default=False)
     email = models.EmailField(blank=True)
     other_emails = fields.EmailsListField(blank=True, max_length=255)
     times_viewed = models.IntegerField(default=0)
@@ -163,16 +162,14 @@ class FOIARequest(models.Model):
         User,
         related_name='read_access',
         blank=True,
-        null=True
     )
     edit_collaborators = models.ManyToManyField(
         User,
         related_name='edit_access',
         blank=True,
-        null=True
     )
 
-    objects = FOIARequestManager()
+    objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     foia_type = 'foia'
@@ -319,7 +316,6 @@ class FOIARequest(models.Model):
         cursor.execute("UPDATE foia_foiarequest "
                        "SET mail_id = CASE WHEN mail_id='' THEN %s ELSE mail_id END "
                        "WHERE id = %s", [mail_id, self.pk])
-        transaction.commit_unless_managed()
         # set object's mail id to what is in the database
         self.mail_id = FOIARequest.objects.get(pk=self.pk).mail_id
 
@@ -387,7 +383,7 @@ class FOIARequest(models.Model):
         self.updated = True
         self.save()
 
-        for profile in chain(self.followed_by.all(), [self.user.get_profile()]):
+        for profile in chain(self.followed_by.all(), [self.user.profile]):
             if self.is_viewable(profile.user):
                 profile.notify(self)
 
@@ -582,8 +578,6 @@ class FOIARequest(models.Model):
 
     def update_tags(self, tags):
         """Update the requests tags"""
-        # pylint: disable=W0142
-
         tag_set = set()
         for tag in tags.split(','):
             tag = Tag.normalize(tag)
@@ -648,7 +642,7 @@ class FOIARequest(models.Model):
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
         can_edit = self.editable_by(user) or user.is_staff
-        can_embargo = not self.is_editable() and can_edit and user.get_profile().can_embargo()
+        can_embargo = not self.is_editable() and can_edit and user.profile.can_embargo()
         # pylint: disable=line-too-long
         can_permanently_embargo = can_embargo and self.is_embargo() and not self.is_permanently_embargoed()
         can_pay = can_edit and self.is_payable()

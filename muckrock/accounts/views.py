@@ -60,9 +60,9 @@ def register(request):
                 'Welcome to MuckRock',
                 render_to_string('text/user/welcome.txt', {
                     'user': new_user,
-                    'verification_link': new_user.get_profile().wrap_url(
+                    'verification_link': new_user.profile.wrap_url(
                         reverse('acct-verify-email'),
-                        key=new_user.get_profile().generate_confirmation_key())
+                        key=new_user.profile.generate_confirmation_key())
                     }),
                 'info@muckrock.com',
                 [new_user.email],
@@ -85,21 +85,21 @@ def update(request):
     """Update a users information"""
 
     if request.method == 'POST':
-        user_profile = request.user.get_profile()
+        user_profile = request.user.profile
         form = UserChangeForm(request.POST, instance=user_profile)
         if form.is_valid():
             request.user.first_name = form.cleaned_data['first_name']
             request.user.last_name = form.cleaned_data['last_name']
             request.user.email = form.cleaned_data['email']
             request.user.save()
-            customer = request.user.get_profile().customer()
+            customer = request.user.profile.customer()
             customer.email = request.user.email
             customer.save()
             user_profile = form.save()
             messages.success(request, 'Your account has been updated.')
             return redirect('acct-my-profile')
     else:
-        user_profile = request.user.get_profile()
+        user_profile = request.user.profile
         initial = {
             'first_name': request.user.first_name,
             'last_name': request.user.last_name,
@@ -125,7 +125,7 @@ def subscribe(request):
     can_unsubscribe = not can_subscribe
 
     if request.user.is_authenticated():
-        user_profile = request.user.get_profile()
+        user_profile = request.user.profile
         acct_type = user_profile.acct_type
         can_subscribe = acct_type == 'community' or acct_type == 'beta'
         can_unsubscribe = acct_type == 'pro'
@@ -210,7 +210,7 @@ def buy_requests(request):
     url_redirect = request.GET.get('next', 'acct-my-profile')
     if request.POST.get('stripe_token', False):
         try:
-            user_profile = request.user.get_profile()
+            user_profile = request.user.profile
             stripe_token = request.POST['stripe_token']
             user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
             user_profile.num_requests += 4
@@ -233,7 +233,7 @@ def buy_requests(request):
 def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
-    prof = user.get_profile()
+    prof = user.profile
     key = request.GET.get('key')
     if not prof.email_confirmed:
         if key:
@@ -248,7 +248,7 @@ def verify_email(request):
                 'Verify Your MuckRock Email',
                 render_to_string('text/user/verify_email.txt', {
                     'user': user,
-                    'verification_link': user.get_profile().wrap_url(
+                    'verification_link': user.profile.wrap_url(
                         reverse('acct-verify-email'),
                         key=prof.generate_confirmation_key())
                 }),
@@ -450,7 +450,7 @@ def stripe_webhook_v2(request):
 
     elif event_json['type'] == 'invoice.payment_failed':
         attempt = event_data['attempt_count']
-        user_profile = user.get_profile()
+        user_profile = user.profile
         if attempt == 4:
             user_profile.acct_type = 'community'
             user_profile.save()

@@ -53,7 +53,6 @@ class NewsDetail(DateDetailView):
                     continue
                 new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': request.user})
                 tag_set.add(new_tag)
-            # pylint:disable=star-args
             self.get_object().tags.set(*tag_set)
             self.get_object().save()
             messages.success(request, 'Your tags have been saved to this article.')

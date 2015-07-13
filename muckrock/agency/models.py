@@ -10,7 +10,6 @@ from datetime import date
 from easy_thumbnails.fields import ThumbnailerImageField
 
 from muckrock.jurisdiction.models import Jurisdiction, RequestHelper
-from muckrock.models import ChainableManager
 from muckrock import fields
 
 class AgencyType(models.Model):
@@ -26,7 +25,7 @@ class AgencyType(models.Model):
         ordering = ['name']
 
 
-class AgencyManager(ChainableManager):
+class AgencyQuerySet(models.QuerySet):
     """Object manager for Agencies"""
     # pylint: disable=too-many-public-methods
 
@@ -42,10 +41,10 @@ class Agency(models.Model, RequestHelper):
     slug = models.SlugField(max_length=255)
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
-    approved = models.BooleanField()
+    approved = models.BooleanField(default=False)
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
-    can_email_appeals = models.BooleanField()
+    can_email_appeals = models.BooleanField(default=False)
     image = ThumbnailerImageField(
         upload_to='agency_images',
         blank=True,
@@ -79,7 +78,7 @@ class Agency(models.Model, RequestHelper):
                                  help_text='Begin with http://')
     exempt = models.BooleanField(default=False)
 
-    objects = AgencyManager()
+    objects = AgencyQuerySet.as_manager()
 
     def __unicode__(self):
         return self.name
