@@ -1,4 +1,3 @@
-setuptools==18.0.1
 -e git://github.com/callowayproject/django-news-sitemaps.git@55da6b72580dd6d79380f2bb17240e7afa00555a#egg=django_news_sitemaps-master
 -e git://github.com/dhan88/django-mailgun.git@df4e2f444bd488b6234f87c879a8402e7c8b552e#egg=django_mailgun-dev
 -e git://github.com/jezdez/celery-haystack.git@6d6ef5ea61a2a88bda3e65be69115841545ac3c3#egg=celery_haystack-origin
