@@ -53,7 +53,7 @@ gevent==0.13.7
 greenlet==0.3.4
 gunicorn==0.14.3
 ipython==0.10
-iron-cache==0.3.1
+iron-cache==0.3.2
 iron-celery==0.3.1
 iron-core==1.1.1
 iron-mq==0.5
