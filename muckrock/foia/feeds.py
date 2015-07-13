@@ -165,7 +165,7 @@ class UserUpdateFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        foias = FOIARequest.objects.get_public().filter(user=obj).select_related('communications')
+        foias = FOIARequest.objects.get_public().filter(user=obj).prefetch_related('communications')
         communications = []
         for foia in foias:
             communications.extend(foia.communications.all())
