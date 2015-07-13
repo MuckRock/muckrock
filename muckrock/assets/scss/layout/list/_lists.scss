@@ -144,8 +144,9 @@
     }
     .list-actions {
         width: 100%;
-        display: flex;
-        flex-flow: row wrap;
+        @include display(flex);
+        @include flex-direction(row);
+        @include flex-wrap(wrap);
         align-content: center;
         justify-content: space-between;
     }

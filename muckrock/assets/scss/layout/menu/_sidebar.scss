@@ -38,8 +38,9 @@ $sidebar-width: 250px;
 
 aside.website-sidebar {
 
-    display: flex;
-    flex-flow: column nowrap;
+    @include display(flex);
+    @include flex-direction(column);
+    @include flex-wrap(nowrap);
     width: $sidebar-width;
     height: 100vh;
 

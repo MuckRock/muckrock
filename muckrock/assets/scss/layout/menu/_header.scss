@@ -162,7 +162,7 @@ nav.website-navigation {
         right: 0;
         left: 2em;
         z-index: 1;
-        display: flex;
+        @include display(flex);
         height: 100%;
         margin-bottom: 0;
         background-color: #FFF;

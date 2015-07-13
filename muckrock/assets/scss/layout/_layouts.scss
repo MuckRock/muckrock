@@ -10,15 +10,15 @@ html, body {
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
+    @include display(flex);
+    @include flex-direction(column);
     min-height: 100vh;
     margin-bottom: 0;
     background-color: $color-white;
 }
 
 .content {
-    flex: 1;
+    @include flex(1);
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     margin-bottom: 0;
