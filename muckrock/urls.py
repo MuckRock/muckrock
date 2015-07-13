@@ -14,10 +14,7 @@ from django.views.generic.base import RedirectView
 
 from django_xmlrpc.views import handle_xmlrpc
 from rest_framework.routers import DefaultRouter
-import autocomplete_light
 import dbsettings.urls
-
-autocomplete_light.autodiscover()
 
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
@@ -32,7 +29,6 @@ from muckrock.foia.sitemap import FoiaSitemap
 from muckrock.jurisdiction.sitemap import JurisdictionSitemap
 from muckrock.news.sitemap import ArticleSitemap
 
-admin.autodiscover()
 admin.site.index_template = 'admin/custom_index.html'
 
 sitemaps = {'FOIA': FoiaSitemap, 'News': ArticleSitemap,
@@ -125,6 +121,11 @@ urlpatterns = patterns(
     ),
     url(r'^news-sitemaps/', include('news_sitemaps.urls')),
 
+)
+
+import debug_toolbar
+urlpatterns += patterns('',
+    url(r'^__debug__/', include(debug_toolbar.urls)),
 )
 
 if settings.DEBUG:

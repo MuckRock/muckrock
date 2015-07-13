@@ -8,6 +8,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 1
         }
     },
@@ -20,6 +21,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 2
         }
     },
@@ -32,6 +34,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 3
         }
     },
@@ -44,6 +47,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 4
         }
     },
@@ -56,6 +60,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 5
         }
     },
@@ -68,6 +73,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 6
         }
     },
@@ -80,6 +86,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 7
         }
     },
@@ -92,6 +99,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 8
         }
     },
@@ -104,6 +112,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 9
         }
     },
@@ -116,6 +125,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 10
         }
     },
@@ -128,6 +138,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 11
         }
     },
@@ -140,6 +151,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 12
         }
     },
@@ -152,6 +164,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 13
         }
     },
@@ -164,6 +177,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 14
         }
     },
@@ -176,6 +190,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 15
         }
     },
@@ -188,6 +203,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 16
         }
     },
@@ -200,6 +216,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 17
         }
     },
@@ -212,6 +229,7 @@
             "communication": "Test request",
             "date": "2010-08-21",
             "response": false,
+            "opened": false,
             "foia": 18
         }
     },
@@ -224,6 +242,7 @@
             "communication": "Test orphan request",
             "date": "2010-08-21",
             "response": true,
+            "opened": false,
             "likely_foia": 18
         }
     }

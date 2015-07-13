@@ -2,16 +2,18 @@
 Tests for site level functionality and helper functions for application tests
 """
 
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
+from mock import Mock
 import logging
 import nose.tools
 
-# allow methods that could be functions and too many public methods in tests and **kwarg magic
+from muckrock.fields import EmailsListField
+
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=W0142
 
 logging.disable(logging.CRITICAL)
 
@@ -82,3 +84,21 @@ class TestFunctional(TestCase):
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')
         get_allowed(self.client, '/search/')
+
+
+class TestUnit(TestCase):
+    """Unit tests for top level"""
+
+    def test_emails_list_field(self):
+        """Test email list field"""
+        model_instance = Mock()
+        field = EmailsListField(max_length=255)
+
+        with nose.tools.assert_raises(ValidationError):
+            field.clean('a@example.com,not.an.email', model_instance)
+
+        with nose.tools.assert_raises(ValidationError):
+            field.clean('', model_instance)
+
+        field.clean('a@example.com,an.email@foo.net', model_instance)
+

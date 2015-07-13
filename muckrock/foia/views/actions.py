@@ -141,7 +141,7 @@ def delete(request, jurisdiction, jidx, slug, idx):
 def permanent_embargo(request, jurisdiction, jidx, slug, idx):
     """Toggle the permanant embargo on the FOIA Request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    is_org_member = request.user == foia.user and request.user.get_profile().organization != None
+    is_org_member = request.user == foia.user and request.user.profile.organization != None
     if foia.editable_by(request.user) and is_org_member or request.user.is_staff:
         if foia.embargo == True:
             if foia.is_permanently_embargoed():
@@ -188,7 +188,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             form_actions=form_actions,
             msg='embargo',
             tests=[(
-                lambda f: f.user.get_profile().can_embargo(),
+                lambda f: f.user.profile.can_embargo(),
                 'You may not embargo requests with your account type'
             )],
             form_class=lambda r, f: FOIAEmbargoForm,
@@ -210,7 +210,7 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     amount = request.POST.get('amount', False)
     if token and email and amount:
         try:
-            request.user.get_profile().pay(
+            request.user.profile.pay(
                 token,
                 amount,
                 'Charge for request: %s %s' % (foia.title, foia.pk)
@@ -242,10 +242,10 @@ def follow(request, jurisdiction, jidx, slug, idx):
     if foia.user != request.user:
         followers = foia.followed_by
         if followers.filter(user=request.user): # If following, unfollow
-            followers.remove(request.user.get_profile())
+            followers.remove(request.user.profile)
             msg = 'You are no longer following %s' % foia.title
         else: # If not following, follow
-            followers.add(request.user.get_profile())
+            followers.add(request.user.profile)
             msg = ('You are now following %s. '
                    'We will notify you when it is updated.') % foia.title
         messages.success(request, msg)

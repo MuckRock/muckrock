@@ -58,7 +58,7 @@ class Organization(models.Model):
 
     def add_member(self, user):
         """Add a user to this organization"""
-        profile = user.get_profile()
+        profile = user.profile
         if not profile.is_member_of(self): # doesn't update if already a member
             profile.organization = self
             profile.save()
@@ -83,7 +83,7 @@ class Organization(models.Model):
     def remove_member(self, user):
         """Remove a user (who isn't the owner) from this organization"""
         if not self.is_owned_by(user):
-            profile = user.get_profile()
+            profile = user.profile
             profile.organization = None
             profile.save()
             # send an email notifying the user
@@ -148,7 +148,8 @@ class Organization(models.Model):
 
     def start_subscription(self):
         """Subscribes the owner to this org's plan"""
-        profile = self.owner.get_profile()
+        # pylint: disable=no-member
+        profile = self.owner.profile
         org_plan = stripe.Plan.retrieve(self.stripe_id)
         customer = profile.customer()
         customer.update_subscription(plan=org_plan.id)
@@ -163,7 +164,8 @@ class Organization(models.Model):
 
     def pause_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
-        customer = self.owner.get_profile().customer()
+        # pylint: disable=no-member
+        customer = self.owner.profile.customer()
         customer.cancel_subscription()
         customer.save()
         self.active = False

@@ -27,7 +27,7 @@ def sidebar_message(request):
     """Displays a message to a given usertype"""
     user = request.user
     try:
-        user_class = user.get_profile().acct_type if user.is_authenticated() else 'anonymous'
+        user_class = user.profile.acct_type if user.is_authenticated() else 'anonymous'
     except Profile.DoesNotExist:
         user_class = 'anonymous'
     message = Sidebar.objects.get_text(user_class)

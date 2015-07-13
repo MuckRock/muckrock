@@ -27,7 +27,6 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=E1103
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""

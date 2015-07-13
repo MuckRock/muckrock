@@ -44,7 +44,8 @@ urlpatterns = patterns(
     url(
         r'^change_pw/$',
         auth_views.password_change,
-        {'template_name': 'forms/account/pw_change.html'},
+        {'template_name': 'forms/account/pw_change.html',
+         'post_change_redirect': 'acct-change-pw-done'},
         name='acct-change-pw'
     ),
     url(
@@ -56,7 +57,8 @@ urlpatterns = patterns(
     url(
         r'^reset_pw/$',
         auth_views.password_reset,
-        {'template_name': 'forms/account/pw_reset_part1.html'},
+        {'template_name': 'forms/account/pw_reset_part1.html',
+         'post_reset_redirect': 'acct-reset-pw-done'},
         name='acct-reset-pw'
     ),
     url(
@@ -66,7 +68,7 @@ urlpatterns = patterns(
         name='acct-reset-pw-done'
     ),
     url(
-        r'^reset_pw/(?P<uidb36>[0-9A-Za-z]+)-(?P<token>.+)/$',
+        r'^reset_pw/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
         {'template_name': 'forms/account/pw_reset_part2.html'},
         name='acct-reset-pw-confirm'

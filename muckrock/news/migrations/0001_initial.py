@@ -1,103 +1,50 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
 import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
-
-class Migration(SchemaMigration):
-
-    def forwards(self, orm):
-
-        # Adding model 'Article'
-        db.create_table('news_article', (
-            ('body', self.gf('django.db.models.fields.TextField')()),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('publish', self.gf('django.db.models.fields.BooleanField')(default=True, blank=True)),
-            ('summary', self.gf('django.db.models.fields.TextField')()),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('pub_date', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, db_index=True)),
-            ('foia', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, blank=True)),
-        ))
-        db.send_create_signal('news', ['Article'])
-
-        # Adding unique constraint on 'Article', fields ['slug', 'pub_date']
-        db.create_unique('news_article', ['slug', 'pub_date'])
+from django.conf import settings
+import easy_thumbnails.fields
 
 
-    def backwards(self, orm):
+class Migration(migrations.Migration):
 
-        # Deleting model 'Article'
-        db.delete_table('news_article')
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('foia', '0001_initial'),
+    ]
 
-        # Removing unique constraint on 'Article', fields ['slug', 'pub_date']
-        db.delete_unique('news_article', ['slug', 'pub_date'])
-
-
-    models = {
-        'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'blank': 'True'})
-        },
-        'auth.permission': {
-            'Meta': {'unique_together': "(('content_type', 'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False', 'blank': 'True'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        'foia.foiarequest': {
-            'Meta': {'unique_together': "(('jurisdiction', 'user', 'slug'),)", 'object_name': 'FOIARequest'},
-            'agency': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
-            'date_done': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'date_submitted': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'jurisdiction': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
-            'request': ('django.db.models.fields.TextField', [], {}),
-            'response': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
-        },
-        'news.article': {
-            'Meta': {'unique_together': "(('slug', 'pub_date'),)", 'object_name': 'Article'},
-            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"}),
-            'body': ('django.db.models.fields.TextField', [], {}),
-            'foia': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['foia.FOIARequest']", 'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'pub_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'publish': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'db_index': 'True'}),
-            'summary': ('django.db.models.fields.TextField', [], {}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '200'})
-        }
-    }
-
-    complete_apps = ['news']
+    operations = [
+        migrations.CreateModel(
+            name='Article',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('pub_date', models.DateTimeField(default=datetime.datetime.now, verbose_name=b'Publish date')),
+                ('title', models.CharField(max_length=200)),
+                ('kicker', models.CharField(max_length=200, blank=True)),
+                ('slug', models.SlugField(help_text=b'A "Slug" is a unique URL-friendly title for an object.', unique=True)),
+                ('summary', models.TextField(help_text=b'A single paragraph summary or preview of the article.')),
+                ('body', models.TextField(verbose_name=b'Body text')),
+                ('publish', models.BooleanField(default=False, help_text=b'Articles do not appear on the site until their publish date.', verbose_name=b'Publish on site')),
+                ('image', easy_thumbnails.fields.ThumbnailerImageField(null=True, upload_to=b'news_images', blank=True)),
+                ('authors', models.ManyToManyField(related_name='authored_articles', to=settings.AUTH_USER_MODEL)),
+                ('editors', models.ManyToManyField(related_name='edited_articles', null=True, to=settings.AUTH_USER_MODEL, blank=True)),
+                ('foias', models.ManyToManyField(related_name='articles', null=True, to='foia.FOIARequest', blank=True)),
+            ],
+            options={
+                'ordering': ['-pub_date'],
+                'get_latest_by': 'pub_date',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Photo',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('image', models.ImageField(upload_to=b'news_photos')),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+    ]

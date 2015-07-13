@@ -35,6 +35,7 @@ class ProfileAdminForm(forms.ModelForm):
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Profile
+        fields = '__all__'
 
 class ProfileInline(admin.StackedInline):
     """Profile admin options"""
@@ -54,7 +55,7 @@ class MRUserAdmin(UserAdmin):
         """Creates/cancels a pro subscription if changing to/from pro acct_type"""
         obj = form.instance
         try:
-            profile = obj.get_profile()
+            profile = obj.profile
             before_acct_type = profile.acct_type
         except ObjectDoesNotExist:
             profile = None

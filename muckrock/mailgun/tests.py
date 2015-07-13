@@ -5,7 +5,6 @@ Tests for mailgun
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.test.utils import override_settings
 
 from datetime import date
 import hashlib
@@ -17,14 +16,9 @@ import time
 from muckrock.foia.models import FOIARequest
 from muckrock.settings import MAILGUN_ACCESS_KEY, SITE_ROOT
 
-# allow methods that could be functions and too many public methods in tests and **kwarg magic
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=W0142
-# pylint: disable=E1103
-# pylint: disable=bad-continuation
 
-@override_settings(CELERY_ALWAYS_EAGER=True)
 class TestMailgunViews(TestCase):
     """Tests for Mailgun views"""
     fixtures = ['holidays.json', 'agency_types.json', 'test_agencies.json', 'test_users.json',

@@ -1,336 +1,200 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Task'
-        db.create_table(u'task_task', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('date_created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('date_done', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('resolved', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('assigned', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
-        ))
-        db.send_create_signal(u'task', ['Task'])
+    dependencies = [
+        ('agency', '0001_initial'),
+        ('jurisdiction', '0001_initial'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('foia', '0001_initial'),
+        ('crowdfund', '0001_initial'),
+    ]
 
-        # Adding model 'OrphanTask'
-        db.create_table(u'task_orphantask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('reason', self.gf('django.db.models.fields.CharField')(max_length=2)),
-            ('communication', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIACommunication'])),
-        ))
-        db.send_create_signal(u'task', ['OrphanTask'])
-
-        # Adding model 'SnailMailTask'
-        db.create_table(u'task_snailmailtask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('category', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('communication', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIACommunication'])),
-        ))
-        db.send_create_signal(u'task', ['SnailMailTask'])
-
-        # Adding model 'RejectedEmailTask'
-        db.create_table(u'task_rejectedemailtask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('category', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('foia', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, blank=True)),
-            ('email', self.gf('django.db.models.fields.EmailField')(max_length=75, blank=True)),
-            ('error', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-        ))
-        db.send_create_signal(u'task', ['RejectedEmailTask'])
-
-        # Adding model 'StaleAgencyTask'
-        db.create_table(u'task_staleagencytask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('agency', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['agency.Agency'])),
-        ))
-        db.send_create_signal(u'task', ['StaleAgencyTask'])
-
-        # Adding model 'FlaggedTask'
-        db.create_table(u'task_flaggedtask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('text', self.gf('django.db.models.fields.TextField')()),
-            ('foia', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIARequest'], null=True, blank=True)),
-            ('agency', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['agency.Agency'], null=True, blank=True)),
-            ('jurisdiction', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['jurisdiction.Jurisdiction'], null=True, blank=True)),
-        ))
-        db.send_create_signal(u'task', ['FlaggedTask'])
-
-        # Adding model 'NewAgencyTask'
-        db.create_table(u'task_newagencytask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('agency', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['agency.Agency'])),
-        ))
-        db.send_create_signal(u'task', ['NewAgencyTask'])
-
-        # Adding model 'ResponseTask'
-        db.create_table(u'task_responsetask', (
-            (u'task_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['task.Task'], unique=True, primary_key=True)),
-            ('communication', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['foia.FOIACommunication'])),
-        ))
-        db.send_create_signal(u'task', ['ResponseTask'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'Task'
-        db.delete_table(u'task_task')
-
-        # Deleting model 'OrphanTask'
-        db.delete_table(u'task_orphantask')
-
-        # Deleting model 'SnailMailTask'
-        db.delete_table(u'task_snailmailtask')
-
-        # Deleting model 'RejectedEmailTask'
-        db.delete_table(u'task_rejectedemailtask')
-
-        # Deleting model 'StaleAgencyTask'
-        db.delete_table(u'task_staleagencytask')
-
-        # Deleting model 'FlaggedTask'
-        db.delete_table(u'task_flaggedtask')
-
-        # Deleting model 'NewAgencyTask'
-        db.delete_table(u'task_newagencytask')
-
-        # Deleting model 'ResponseTask'
-        db.delete_table(u'task_responsetask')
-
-
-    models = {
-        u'agency.agency': {
-            'Meta': {'object_name': 'Agency'},
-            'address': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'appeal_agency': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['agency.Agency']", 'null': 'True', 'blank': 'True'}),
-            'approved': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'can_email_appeals': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'contact_first_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'contact_last_name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
-            'contact_salutation': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'contact_title': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'exempt': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'expires': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'fax': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'foia_guide': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'foia_logs': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'image_attr_line': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'agencies'", 'to': u"orm['jurisdiction.Jurisdiction']"}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'other_emails': ('muckrock.fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
-            'phone': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'public_notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255'}),
-            'stale': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'twitter': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'twitter_handles': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['agency.AgencyType']", 'symmetrical': 'False', 'blank': 'True'}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
-            'website': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
-        },
-        u'agency.agencytype': {
-            'Meta': {'ordering': "['name']", 'object_name': 'AgencyType'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '60'})
-        },
-        u'auth.group': {
-            'Meta': {'object_name': 'Group'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
-        },
-        u'auth.permission': {
-            'Meta': {'ordering': "(u'content_type__app_label', u'content_type__model', u'codename')", 'unique_together': "((u'content_type', u'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        u'business_days.holiday': {
-            'Meta': {'object_name': 'Holiday'},
-            'day': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'kind': ('django.db.models.fields.CharField', [], {'max_length': '8'}),
-            'month': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'num': ('django.db.models.fields.SmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'weekday': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'})
-        },
-        u'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'foia.foiacommunication': {
-            'Meta': {'ordering': "['date']", 'object_name': 'FOIACommunication'},
-            'communication': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'date': ('django.db.models.fields.DateTimeField', [], {'db_index': 'True'}),
-            'delivered': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'foia': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'communications'", 'null': 'True', 'to': u"orm['foia.FOIARequest']"}),
-            'from_who': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'full_html': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'likely_foia': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'likely_communications'", 'null': 'True', 'to': u"orm['foia.FOIARequest']"}),
-            'opened': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'priv_from_who': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'priv_to_who': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'raw_email': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'response': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'to_who': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'})
-        },
-        u'foia.foiarequest': {
-            'Meta': {'ordering': "['title']", 'object_name': 'FOIARequest'},
-            'agency': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['agency.Agency']", 'null': 'True', 'blank': 'True'}),
-            'block_incoming': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'date_done': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'date_due': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'date_embargo': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'date_followup': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'date_submitted': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'days_until_due': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'disable_autofollowups': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'embargo': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'featured': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['jurisdiction.Jurisdiction']"}),
-            'mail_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'other_emails': ('muckrock.fields.EmailsListField', [], {'max_length': '255', 'blank': 'True'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIARequest']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
-            'price': ('django.db.models.fields.DecimalField', [], {'default': "'0.00'", 'max_digits': '8', 'decimal_places': '2'}),
-            'requested_docs': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'sidebar_html': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255'}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '10'}),
-            'times_viewed': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'tracker': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'tracking_id': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'updated': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
-        },
-        u'jurisdiction.jurisdiction': {
-            'Meta': {'ordering': "['name']", 'unique_together': "(('slug', 'parent'),)", 'object_name': 'Jurisdiction'},
-            'abbrev': ('django.db.models.fields.CharField', [], {'max_length': '5', 'blank': 'True'}),
-            'days': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'full_name': ('django.db.models.fields.CharField', [], {'max_length': '55', 'blank': 'True'}),
-            'hidden': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'holidays': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['business_days.Holiday']", 'symmetrical': 'False', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'image_attr_line': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'intro': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'level': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'observe_sat': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': u"orm['jurisdiction.Jurisdiction']"}),
-            'public_notes': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '55'}),
-            'use_business_days': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'waiver': ('django.db.models.fields.TextField', [], {'blank': 'True'})
-        },
-        u'taggit.tag': {
-            'Meta': {'object_name': 'Tag'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'unique': 'True', 'max_length': '100'})
-        },
-        u'tags.tag': {
-            'Meta': {'ordering': "['name']", 'object_name': 'Tag', '_ormbases': [u'taggit.Tag']},
-            u'tag_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['taggit.Tag']", 'unique': 'True', 'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
-        },
-        u'tags.taggeditembase': {
-            'Meta': {'object_name': 'TaggedItemBase'},
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'tags_taggeditembase_tagged_items'", 'to': u"orm['contenttypes.ContentType']"}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'object_id': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'}),
-            'tag': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'tags_taggeditembase_items'", 'to': u"orm['tags.Tag']"})
-        },
-        u'task.flaggedtask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'FlaggedTask', '_ormbases': [u'task.Task']},
-            'agency': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['agency.Agency']", 'null': 'True', 'blank': 'True'}),
-            'foia': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIARequest']", 'null': 'True', 'blank': 'True'}),
-            'jurisdiction': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['jurisdiction.Jurisdiction']", 'null': 'True', 'blank': 'True'}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'}),
-            'text': ('django.db.models.fields.TextField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
-        },
-        u'task.newagencytask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'NewAgencyTask', '_ormbases': [u'task.Task']},
-            'agency': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['agency.Agency']"}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"})
-        },
-        u'task.orphantask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'OrphanTask', '_ormbases': [u'task.Task']},
-            'communication': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIACommunication']"}),
-            'reason': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'task.rejectedemailtask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'RejectedEmailTask', '_ormbases': [u'task.Task']},
-            'category': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'error': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'foia': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIARequest']", 'null': 'True', 'blank': 'True'}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'task.responsetask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'ResponseTask', '_ormbases': [u'task.Task']},
-            'communication': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIACommunication']"}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'task.snailmailtask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'SnailMailTask', '_ormbases': [u'task.Task']},
-            'category': ('django.db.models.fields.CharField', [], {'max_length': '1'}),
-            'communication': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['foia.FOIACommunication']"}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'task.staleagencytask': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'StaleAgencyTask', '_ormbases': [u'task.Task']},
-            'agency': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['agency.Agency']"}),
-            u'task_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['task.Task']", 'unique': 'True', 'primary_key': 'True'})
-        },
-        u'task.task': {
-            'Meta': {'ordering': "['date_created']", 'object_name': 'Task'},
-            'assigned': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
-            'date_created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'date_done': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'resolved': ('django.db.models.fields.BooleanField', [], {'default': 'False'})
-        }
-    }
-
-    complete_apps = ['task']
+    operations = [
+        migrations.CreateModel(
+            name='BlacklistDomain',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('domain', models.CharField(max_length=255)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Task',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('date_created', models.DateTimeField(auto_now_add=True)),
+                ('date_done', models.DateTimeField(null=True, blank=True)),
+                ('resolved', models.BooleanField(default=False)),
+            ],
+            options={
+                'ordering': ['date_created'],
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='StatusChangeTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('old_status', models.CharField(max_length=255)),
+                ('foia', models.ForeignKey(to='foia.FOIARequest')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='StaleAgencyTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('agency', models.ForeignKey(to='agency.Agency')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='SnailMailTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('category', models.CharField(max_length=1, choices=[(b'a', b'Appeal'), (b'n', b'New'), (b'u', b'Update'), (b'f', b'Followup')])),
+                ('communication', models.ForeignKey(to='foia.FOIACommunication')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='ResponseTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('communication', models.ForeignKey(to='foia.FOIACommunication')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='RejectedEmailTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('category', models.CharField(max_length=1, choices=[(b'b', b'Bounced'), (b'd', b'Dropped')])),
+                ('email', models.EmailField(max_length=75, blank=True)),
+                ('error', models.TextField(blank=True)),
+                ('foia', models.ForeignKey(blank=True, to='foia.FOIARequest', null=True)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='PaymentTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('amount', models.DecimalField(max_digits=8, decimal_places=2)),
+                ('foia', models.ForeignKey(to='foia.FOIARequest')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='OrphanTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('reason', models.CharField(max_length=2, choices=[(b'bs', b'Bad Sender'), (b'ib', b'Incoming Blocked'), (b'ia', b'Invalid Address')])),
+                ('address', models.CharField(max_length=255)),
+                ('communication', models.ForeignKey(to='foia.FOIACommunication')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='NewAgencyTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('agency', models.ForeignKey(to='agency.Agency')),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='MultiRequestTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('multirequest', models.ForeignKey(to='foia.FOIAMultiRequest')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='GenericTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('subject', models.CharField(max_length=255)),
+                ('body', models.TextField(blank=True)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='FlaggedTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('text', models.TextField()),
+                ('agency', models.ForeignKey(blank=True, to='agency.Agency', null=True)),
+                ('foia', models.ForeignKey(blank=True, to='foia.FOIARequest', null=True)),
+                ('jurisdiction', models.ForeignKey(blank=True, to='jurisdiction.Jurisdiction', null=True)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='FailedFaxTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('communication', models.ForeignKey(to='foia.FOIACommunication')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.CreateModel(
+            name='CrowdfundTask',
+            fields=[
+                ('task_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='task.Task')),
+                ('crowdfund', models.ForeignKey(to='crowdfund.CrowdfundRequest')),
+            ],
+            options={
+            },
+            bases=('task.task',),
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='assigned',
+            field=models.ForeignKey(related_name='assigned_tasks', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='resolved_by',
+            field=models.ForeignKey(related_name='resolved_tasks', blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            preserve_default=True,
+        ),
+    ]

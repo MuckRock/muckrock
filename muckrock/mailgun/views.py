@@ -2,7 +2,6 @@
 Views for mailgun
 """
 
-from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +16,7 @@ import sys
 import time
 from datetime import datetime
 from email.utils import parseaddr, getaddresses
+from localflavor.us.us_states import STATE_CHOICES
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
