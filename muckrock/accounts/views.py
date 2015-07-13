@@ -344,7 +344,7 @@ def stripe_webhook_v2(request):
     if request.method != "POST":
         return HttpResponse("Invalid Request.", status=400)
 
-    event_json = json.loads(request.raw_post_data)
+    event_json = json.loads(request.body)
     event_data = event_json['data']['object']
 
     logger.info(
