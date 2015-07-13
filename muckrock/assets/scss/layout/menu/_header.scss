@@ -163,6 +163,7 @@ nav.website-navigation {
         left: 2em;
         z-index: 1;
         @include display(flex);
+        @include align-items(center);
         height: 100%;
         margin-bottom: 0;
         background-color: #FFF;
@@ -176,14 +177,13 @@ nav.website-navigation {
             border-radius: 0;
             outline: none;
         }
-        .search-close {
-            font-weight: $font-weight-bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: .5em 1em 0 1em;
+        .search-cancel {
+            width: 10%;
+            text-align: center;
             cursor: pointer;
+            color: $color-blue;
             &:hover {
-                color: $color-blue;
+                color: $color-blue-dark;
             }
         }
         &.visible {
