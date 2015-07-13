@@ -1,52 +1,67 @@
-
-.footer-container {
+footer.website-footer {
     display: block;
     width: 100%;
-
+    margin: $vertical-rhythm 0 0 0;
     border-top: 1px solid $color-grey;
-    padding-top: $vertical-rhythm;
+    padding: $vertical-rhythm;
+
+    color: $color-grey;
+    background-color: $color-black;
+
+    @include row;
+
+    .brand {
+        @include fill-parent();
+        @include media($large-layout) { @include span-columns(4); }
+    }
+
+    .sitemap, .about, .actions, .feeds {
+        @include fill-parent();
+        @include media($medium-layout) { @include span-columns(2); }
+        @include media($large-layout) { @include span-columns(2); }
+        margin-bottom: 0;
+    }
+
+    .sitemap {
+        @include media($large-layout) {
+            @include shift(2);
+        }
+    }
 
     .logo {
         display: inline-block;
         margin-bottom: $vertical-rhythm;
-        svg > path, svg > g { fill: $color-black; }
+        svg {
+            fill: $color-white;
+            height: 2rem;
+            width: 2rem;
+        }
         &:hover {
-            svg > path, svg > g { fill: $color-blue; }
-        }
-
-    }
-
-    footer {
-        @include outer-container();
-        .brand {
-            @include fill-parent();
-            @include media($large-layout) { @include span-columns(4); }
-        }
-        .sitemap, .about, .actions, .feeds {
-            @include fill-parent();
-            @include media($medium-layout) { @include span-columns(2); }
-            @include media($large-layout) { @include span-columns(2); }
-        }
-        .sitemap {
-            @include media($large-layout) {
-                @include shift(2);
+            svg {
+                fill: $color-blue;
             }
         }
     }
-    @include media($large-layout) {
-        footer section.about { padding-right: 3em; }
+
+    a {
+        color: $color-white;
+        &:hover {
+            color: $color-blue;
+        }
     }
+
+    dfn {
+        margin-bottom: $vertical-rhythm/2;
+        color: $color-grey;
+    }
+
     ul {
         list-style-type: none;
         padding-left: 0;
     }
+
     li {
         font-size: $font-size-2;
         margin-bottom: $vertical-rhythm/2;
-    }
-    p { margin-top: 0; }
-    .copyright {
-        margin: $vertical-rhythm 0;
-        color: $color-black;
     }
 }

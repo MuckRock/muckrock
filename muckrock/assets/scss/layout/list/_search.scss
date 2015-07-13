@@ -1,7 +1,7 @@
 .search.list {
     .list-actions {
         #global-search {
-            display: flex;
+            @include display(flex);
             width: 100%;
         }
         input[type=search] {
@@ -9,7 +9,7 @@
             margin-right: $vertical-rhythm;
         }
         input[type=submit] {
-            flex: auto;
+            @include flex(auto);
             margin: 0;
         }
     }

@@ -78,17 +78,16 @@
         <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
     </head>
     <body>
-        {% if user.is_authenticated %}
         {% include 'lib/sidebar.html' %}
-        {% else %}
-        {% include 'lib/sidebar.html' with hidden=1 %}
-        {% endif %}
         <div class="container">
-            {% include 'lib/header.html' %}
+            <div id="modal-overlay"></div>
+            {% include 'nav/header.html' %}
             {% include 'lib/notification.html' %}
+            <div class="content">
             {% block content %}
             {% endblock content %}
-            {% include 'lib/footer.html' %}
+            </div>
+            {% include 'nav/footer.html' %}
         </div>
         <!-- SCRIPTS -->
         <!-- Google Analytics -->

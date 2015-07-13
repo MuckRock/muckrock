@@ -10,8 +10,17 @@ html, body {
 }
 
 .container {
-    padding: $vertical-rhythm/2;
-    @include media($medium-layout) { padding: $vertical-rhythm; }
+    @include display(flex);
+    @include flex-direction(column);
+    min-height: 100vh;
+    margin-bottom: 0;
+    background-color: $color-white;
+}
+
+.content {
+    @include flex(1);
+    padding: 0 $vertical-rhythm/2;
+    @include media($medium-layout) { padding: 0 $vertical-rhythm; }
     margin-bottom: 0;
 }
 
