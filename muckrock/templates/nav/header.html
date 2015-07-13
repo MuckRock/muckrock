@@ -1,5 +1,15 @@
 <header class="website-header">
     <nav class="website-navigation">
+        <svg width="24px" height="24px" viewBox="0 0 24 24" class="search-icon" id="show-search">
+            <title>Search Icon</title>
+            <desc>The search icon resembles a magnifying glass.</desc>
+            <path fill="#000000" fill-rule="evenodd" d="M13.7662737,16.6357276 C12.3841494,17.5002833 10.7504323,18 9,18 C4.02943725,18 0,13.9705627 0,9 C0,4.02943725 4.02943725,0 9,0 C13.9705627,0 18,4.02943725 18,9 C18,10.7504323 17.5002833,12.3841494 16.6357276,13.7662737 L24,21.1305462 L21.1305462,24 L13.7662737,16.6357276 Z M9,14.25 C11.8994949,14.25 14.25,11.8994949 14.25,9 C14.25,6.10050506 11.8994949,3.75 9,3.75 C6.10050506,3.75 3.75,6.10050506 3.75,9 C3.75,11.8994949 6.10050506,14.25 9,14.25 Z"></path>
+        </svg>
+        <form action="/search" method="get" class="search" id="global-search">
+            <input type="search" name="q" placeholder="Search">
+            <input type="submit" style="display: none;">
+            <div class="search-close" id="hide-search">Close</div>
+        </form>
         <div id="website-sections-dropdown">Sections</div>
         <ul class="website-sections">
             <li><a href="{% url 'news-index'%}">News</a></li>
@@ -67,19 +77,6 @@
                         </div>
                     </a>
                 </h1>
-            </li>
-            <li class="search">
-                <form name="search" action="/search/" method="get">
-                    <input type="search" name="q" placeholder="Search">
-                    <input type="submit" value="" style="display: none;">
-                    <span class="input-button" id="search-button" onclick="search.submit()">
-                        <svg width="25px" height="25px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
-                            <title>Magnifying Glass Icon</title>
-                            <description>Symbolizes the search command</description>
-                            <path                  d="M19.129,18.164l-4.518-4.52c1.152-1.373,1.852-3.143,1.852-5.077c0-4.361-3.535-7.896-7.896-7.896                c-4.361,0-7.896,3.535-7.896,7.896s3.535,7.896,7.896,7.896c1.934,0,3.705-0.698,5.078-1.853l4.52,4.519                   c0.266,0.268,0.699,0.268,0.965,0C19.396,18.863,19.396,18.431,19.129,18.164z M8.567,15.028c-3.568,0-6.461-2.893-6.461-6.461                s2.893-6.461,6.461-6.461c3.568,0,6.46,2.893,6.46,6.461S12.135,15.028,8.567,15.028z" id="search-icon"></path>
-                        </svg>
-                    </span>
-                </form>
             </li>
         </ul>
         <ul class="right">

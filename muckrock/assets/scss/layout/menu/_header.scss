@@ -48,30 +48,6 @@ nav.primary {
 
     }
 
-    li.search {
-        @include action-input;
-        @media screen and (max-width: 500px) {
-            input[type="search"] {
-                display: none;
-            }
-            #search-button {
-                border: none;
-                float: none;
-                width: 2.5rem;
-                svg {
-                    width: $vertical-rhythm;
-                }
-            }
-            form {
-                border: none;
-                @include transition(background-color .25s linear);
-                &:hover {
-                    background-color: $color-blue;
-                }
-            }
-        }
-    }
-
     .menu-text { display: none; }
     @media screen
     and (min-width: $small-menu-breakpoint - 200px) {
@@ -131,6 +107,7 @@ nav.primary {
 
 nav.website-navigation {
     overflow: hidden;
+    position: relative;
     padding-top: $vertical-rhythm/2;
     padding-bottom: $vertical-rhythm/2;
     margin-bottom: $vertical-rhythm/2;
@@ -170,6 +147,63 @@ nav.website-navigation {
             text-align: left;
             // padding-right: 10%;
         }
+    }
+
+    .search {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 2em;
+        z-index: 1;
+        display: flex;
+        height: 100%;
+        margin-bottom: 0;
+        background-color: #FFF;
+        opacity: 0;
+        transition: opacity .5s linear, transform .5s ease-in-out;
+        @include transform(translateY(-10em));
+        input[type="search"] {
+            width: 100%;
+            padding: 0 $vertical-rhythm/2;
+            border: none;
+            border-radius: 0;
+            outline: none;
+        }
+        .search-close {
+            font-weight: $font-weight-bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: .5em 1em 0 1em;
+            cursor: pointer;
+            &:hover {
+                color: $color-blue;
+            }
+        }
+        &.visible {
+            opacity: 1;
+            @include transform(translateY(0));
+        }
+        @include media($medium-layout) {
+            left: 3em;
+        }
+    }
+
+     .search-icon {
+        display: inline-block;
+        width: $font-size-4;
+        height: $font-size-4;
+        margin-right: $vertical-rhythm/2;
+        vertical-align: middle;
+        cursor: pointer;
+        path {
+            fill: $color-black;
+        }
+        &:hover {
+            path {
+                fill: $color-blue;
+            }
+        }
+        @include transition(fill .25s linear);
     }
 
     .social-links {

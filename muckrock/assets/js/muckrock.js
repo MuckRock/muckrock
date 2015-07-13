@@ -188,3 +188,13 @@ $('#sidebar-button').click(function(){
         $(overlay).removeClass('visible');
     });
 });
+
+$('#show-search').click(function(){
+    var search = '#global-search';
+    var closeSearch = '#hide-search';
+    $(search).toggleClass('visible');
+    $(search).children('input[type="search"]').focus();
+    $(closeSearch).click(function(){
+        $(search).removeClass('visible');
+    });
+});
