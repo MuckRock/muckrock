@@ -167,7 +167,7 @@ nav.website-navigation {
         margin-bottom: 0;
         background-color: #FFF;
         opacity: 0;
-        transition: opacity .5s linear, transform .5s ease-in-out;
+        @include transition(opacity .5s linear, transform .5s ease-in-out);
         @include transform(translateY(-10em));
         input[type="search"] {
             width: 100%;
