@@ -73,13 +73,20 @@ nav.primary {
             }
         }
     }
-    .logotype { @extend %logo; }
-    .logo { @extend %logo;
+    .logotype {
+        @extend %logo;
+        svg {
+            height: 100%;
+            width: 200px;
+        }
+    }
+    .logo {
+        @extend %logo;
         padding-top: 0em;
         > svg {
             display: block;
             height: 2rem;
-            width: 2rem;
+            width: auto;
         }
     }
 
