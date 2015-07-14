@@ -222,3 +222,29 @@ class TestOrgMembership(TestCase):
             'The new member should be added to the org.')
         ok_(self.org.has_member(new_member),
             'The org should recognize the new member.')
+
+    def test_remove_member(self):
+        """Test removing a member from the organization."""
+        self.org.remove_member(self.member)
+        eq_(None, self.member.profile.organization,
+            'The member should be removed from the org.')
+        ok_(not self.org.has_member(self.member),
+            'The org should not recognize the ex-member.')
+
+    def test_remove_non_member(self):
+        """Test removing a user who is not a member from the organization."""
+        non_member = User.objects.create(
+            username='NonMember',
+            password='nommember'
+        )
+        Profile.objects.create(
+            user=non_member,
+            acct_type='community',
+            date_update=datetime.now()
+        )
+        self.org.remove_member(non_member)
+
+    @nose.tools.raises(ValueError)
+    def test_remove_owner(self):
+        """An exception should be raised when trying to remove the org's owner as a member"""
+        self.org.remove_member(self.owner)
