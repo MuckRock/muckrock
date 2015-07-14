@@ -13,6 +13,9 @@ from mock import Mock, patch
 import nose.tools
 import stripe
 
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+
 class OrganizationURLTests(TestCase):
     """Test the views for the organization app"""
 
@@ -158,3 +161,64 @@ class OrganizationPaymentTests(TestCase):
         # customer = org.owner.profile.customer()
         # test if subscription was paused
         nose.tools.assert_false(org.active)
+
+class TestOrgMembership(TestCase):
+    """Test the membership functions of the organization"""
+
+    def setUp(self):
+        """Create an owner, a member, and an organization"""
+        self.owner = User.objects.create(
+            username='TestOwner',
+            password='testowner'
+        )
+        self.member = User.objects.create(
+            username='TestMember',
+            password='testmember'
+        )
+        self.org = Organization.objects.create(
+            name='Test Organization',
+            slug='test-organization',
+            owner=self.owner,
+            date_update=datetime.now(),
+        )
+        Profile.objects.create(
+            user=self.owner,
+            acct_type='community',
+            organization=self.org,
+            date_update=datetime.now(),
+        )
+        Profile.objects.create(
+            user=self.member,
+            acct_type='community',
+            organization=self.org,
+            date_update=datetime.now(),
+        )
+
+    def test_is_owned_by(self):
+        """Test the is_owned_by method."""
+        ok_(self.org.is_owned_by(self.owner), 'The org should correctly report its owner.')
+
+    def test_has_member(self):
+        """Test the has_member method."""
+        ok_(self.org.has_member(self.member), 'The org should correctly report its members.')
+
+    def test_owner_is_member(self):
+        """Org should recognize owners as members."""
+        ok_(self.org.has_member(self.owner), 'The org should regonize its owner as a member.')
+
+    def test_add_member(self):
+        """Test adding a member to the organization."""
+        new_member = User.objects.create(
+            username='NewMember',
+            password='newmember'
+        )
+        Profile.objects.create(
+            user=new_member,
+            acct_type='community',
+            date_update=datetime.now()
+        )
+        self.org.add_member(new_member)
+        eq_(self.org, new_member.profile.organization,
+            'The new member should be added to the org.')
+        ok_(self.org.has_member(new_member),
+            'The org should recognize the new member.')
