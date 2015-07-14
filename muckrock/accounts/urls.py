@@ -71,13 +71,13 @@ urlpatterns = patterns(
         r'^reset_pw/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
         auth_views.password_reset_confirm,
         {'template_name': 'forms/account/pw_reset_part2.html'},
-        name='acct-reset-pw-confirm'
+        name='password_reset_confirm'
     ),
     url(
         r'^reset_pw_complete/$',
         auth_views.password_reset_complete,
         {'template_name': 'forms/account/pw_reset_part2_done.html'},
-        name='acct-reset-pw-complete'
+        name='password_reset_complete'
     ),
     # REDIRECT VIEWS
     url(
