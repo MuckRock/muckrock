@@ -64,27 +64,35 @@ class Organization(models.Model):
             return False
 
     def add_member(self, user):
-        """Adds the passed-in user as a member of the organization"""
-        profile = user.profile
-        if not profile.is_member_of(self): # doesn't update if already a member
-            profile.organization = self
-            profile.save()
-            # send an email notifying the user
-            msg = render_to_string('text/organization/add_member.txt', {
-                'member_name': user.first_name,
-                'organization_name': self.name,
-                'organization_owner': self.owner.get_full_name(),
-                'organization_link': self.get_absolute_url()
-            })
-            email = EmailMessage(
-                subject='[MuckRock] You were added to an organization',
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[user.email],
-                bcc=['diagnostics@muckrock.com']
-            )
-            email.send(fail_silently=False)
-            logger.info('%s was added as a member of the %s organization', user.username, self.name)
+        """
+        Adds the passed-in user as a member of the organization.
+        If the user is already a member of the organization, it does nothing.
+        """
+        if self.has_member(user):
+            logger.error(('Could not add %s as a member to the organization %s, '
+                          'as they are already a member.'), user.username, self.name)
+            return
+
+        user.profile.organization = self
+        user.profile.save()
+        logger.info('%s was added as a member of the organization %s', user.username, self.name)
+
+        # send an email notifying the user
+        msg = render_to_string('text/organization/add_member.txt', {
+            'member_name': user.first_name,
+            'organization_name': self.name,
+            'organization_owner': self.owner.get_full_name(),
+            'organization_link': self.get_absolute_url()
+        })
+        email = EmailMessage(
+            subject='[MuckRock] You were added to an organization',
+            body=msg,
+            from_email='info@muckrock.com',
+            to=[user.email],
+            bcc=['diagnostics@muckrock.com']
+        )
+        email.send(fail_silently=False)
+
         return
 
     def remove_member(self, user):
