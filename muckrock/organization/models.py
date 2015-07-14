@@ -63,6 +63,24 @@ class Organization(models.Model):
         else:
             return False
 
+    def send_email_notification(self, user, subject, template):
+        """Notifies a user via email about a change to their organization membership."""
+        msg = render_to_string(template, {
+            'member_name': user.first_name,
+            'organization_name': self.name,
+            'organization_owner': self.owner.get_full_name(),
+            'organization_link': self.get_absolute_url()
+        })
+        email = EmailMessage(
+            subject=subject,
+            body=msg,
+            from_email='info@muckrock.com',
+            to=[user.email],
+            bcc=['diagnostics@muckrock.com']
+        )
+        email.send(fail_silently=False)
+        return
+
     def add_member(self, user):
         """
         Adds the passed-in user as a member of the organization.
@@ -72,51 +90,37 @@ class Organization(models.Model):
             logger.error(('Could not add %s as a member to the organization %s, '
                           'as they are already a member.'), user.username, self.name)
             return
-
         user.profile.organization = self
         user.profile.save()
         logger.info('%s was added as a member of the organization %s', user.username, self.name)
-
-        # send an email notifying the user
-        msg = render_to_string('text/organization/add_member.txt', {
-            'member_name': user.first_name,
-            'organization_name': self.name,
-            'organization_owner': self.owner.get_full_name(),
-            'organization_link': self.get_absolute_url()
-        })
-        email = EmailMessage(
-            subject='[MuckRock] You were added to an organization',
-            body=msg,
-            from_email='info@muckrock.com',
-            to=[user.email],
-            bcc=['diagnostics@muckrock.com']
-        )
-        email.send(fail_silently=False)
-
+        self.send_email_notification(
+            user,
+            '[MuckRock] You were added to an organization',
+            'text/organization/add_member.txt')
         return
 
     def remove_member(self, user):
-        """Remove a user (who isn't the owner) from this organization"""
-        if not self.is_owned_by(user):
-            profile = user.profile
-            profile.organization = None
-            profile.save()
-            # send an email notifying the user
-            msg = render_to_string('text/organization/remove_member.txt', {
-                'member_name': user.first_name,
-                'organization_name': self.name,
-                'organization_owner': self.owner.get_full_name(),
-            })
-            email = EmailMessage(
-                subject='[MuckRock] You were removed from an organization',
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[user.email],
-                bcc=['diagnostics@muckrock.com']
-            )
-            email.send(fail_silently=False)
-            logger.info('%s was removed as a member of the %s organization',
-                user.username, self.name)
+        """
+        Remove a user (who isn't the owner) from this organization.
+        If the user isn't a member of the organization, do nothing.
+        If the user is the owner, raise an error.
+        """
+        if not self.has_member(user):
+            logger.error(('Cannot remove user %s from the organization %s, as they '
+                'are not a member of the organization.'), user.username, self.name)
+            return
+        if self.is_owned_by(user):
+            error_msg = ('Cannot remove user %s from the organization %s, as they '
+                'are the owner of the organization.') % (user.username, self.name)
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+        user.profile.organization = None
+        user.profile.save()
+        logger.info('%s was removed as a member of the %s organization.', user.username, self.name)
+        self.send_email_notification(
+            user,
+            '[MuckRock] You were removed from an organization',
+            'text/organization/remove_member.txt')
         return
 
     def create_plan(self):
