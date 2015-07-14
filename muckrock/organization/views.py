@@ -38,7 +38,7 @@ class Detail(DetailView):
         if user.is_authenticated():
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
-            context['is_member'] = user.get_profile().is_member_of(organization)
+            context['is_member'] = user.profile.is_member_of(organization)
         else:
             context['is_staff'] = False
             context['is_owner'] = False
@@ -115,7 +115,7 @@ def create_organization(request):
         if form.is_valid():
             stripe_token = request.POST.get('stripe_token', None)
             user = request.user
-            profile = user.get_profile()
+            profile = user.profile
             customer = profile.customer()
             customer.card = stripe_token
             customer.save()
@@ -170,7 +170,7 @@ def delete_organization(request, **kwargs):
             return redirect(organization)
         organization.delete()
         messages.success(request, 'Your organization was deleted.')
-    elif request.user.get_profile().is_member_of(organization):
+    elif request.user.profile.is_member_of(organization):
         messages.error(request, 'Only the owner may delete this organization.')
     else:
         messages.error(request, 'You do not have permission to access this organization.')
@@ -200,4 +200,4 @@ def update_organization(request, **kwargs):
         {'form': form},
         context_instance=RequestContext(request)
     )
-        
+

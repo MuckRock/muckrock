@@ -120,7 +120,7 @@ elif AWS_DEBUG:
     COMPRESS_URL = STATIC_URL
     MEDIA_URL = 'https://muckrock-devel2.s3.amazonaws.com/media/'
 else:
-    STATICFILES_STORAGE = 'staticfiles.storage.StaticFilesStorage'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
 
@@ -164,8 +164,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'pingback.middleware.PingbackMiddleware',
-    'muckrock.middleware.AuthKeyMiddleware',
+    'sesame.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
@@ -205,18 +204,15 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'autocomplete_light',
     'django.contrib.admin',
     'django.contrib.sitemaps',
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.humanize',
-    'django.contrib.markup',
     'django.contrib.staticfiles',
-    #'staticfiles',
-    'autocomplete_light',
     'celery_haystack',
     'compressor',
-    'dbsettings',
     'debug_toolbar',
     'django_tablib',
     'djangosecure',
@@ -225,20 +221,19 @@ INSTALLED_APPS = (
     'filer',
     'gunicorn',
     'haystack',
+    'dbsettings',
+    'localflavor',
     'markdown_deux',
     'mathfilters',
     'news_sitemaps',
-    'pingback',
     'raven.contrib.django',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'reversion',
     'robots',
-    'south',
     'storages',
     'taggit',
-    'urlauth',
     'django_xmlrpc',
     'muckrock.accounts',
     'muckrock.foia',
@@ -271,6 +266,8 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 urlparse.uses_netloc.append('redis')
 urlparse.uses_netloc.append('amqp')
 urlparse.uses_netloc.append('ironmq')
@@ -295,20 +292,27 @@ CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 CELERY_SEND_EVENT = True
 CELERY_IGNORE_RESULTS = True
-CELERY_IMPORTS = ('muckrock.foia.tasks', 'muckrock.accounts.tasks',
-                  'muckrock.agency.tasks')
+CELERY_IMPORTS = (
+    'muckrock.foia.tasks',
+    'muckrock.accounts.tasks',
+    'muckrock.agency.tasks',
+    )
 CELERYD_MAX_TASKS_PER_CHILD = os.environ.get('CELERYD_MAX_TASKS_PER_CHILD', 100)
 CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
-AUTH_PROFILE_MODULE = 'accounts.Profile'
-AUTHENTICATION_BACKENDS = ('muckrock.accounts.backends.CaseInsensitiveModelBackend',)
+AUTHENTICATION_BACKENDS = (
+    'muckrock.accounts.backends.CaseInsensitiveModelBackend',
+    'sesame.backends.ModelBackend',
+    )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
 
+DBSETTINGS_USE_SITES = False
+
 if DEBUG:
-    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-    SOUTH_TESTS_MIGRATE = False
+    pass
+    #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',
@@ -342,8 +346,7 @@ HAYSTACK_CONNECTIONS['default'] = haystack_connections[
     os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
 HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
-URLAUTH_AUTHKEY_TIMEOUT = 60 * 60 * 24 * 2
-URLAUTH_AUTHKEY_NAME = 'authkey'
+SESAME_MAX_AGE = 60 * 60 * 24 * 2
 
 ASSETS_DEBUG = False
 

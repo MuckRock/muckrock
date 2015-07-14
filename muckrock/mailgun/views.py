@@ -2,7 +2,6 @@
 Views for mailgun
 """
 
-from django.contrib.localflavor.us.us_states import STATE_CHOICES
 from django.core.mail import EmailMessage
 from django.http import HttpResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +16,7 @@ import sys
 import time
 from datetime import datetime
 from email.utils import parseaddr, getaddresses
+from localflavor.us.us_states import STATE_CHOICES
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
@@ -47,7 +47,7 @@ def _upload_file(foia, comm, file_, sender):
 def _make_orphan_comm(from_, to_, post, files, foia):
     """Make an orphan commuication"""
     from_realname, _ = parseaddr(from_)
-    to_ = to_[:255] if to_ else to_
+    to_ = to_[:255] if to_ else ''
     comm = FOIACommunication.objects.create(
             priv_from_who=from_[:255], from_who=from_realname[:255],
             priv_to_who=to_, response=True,

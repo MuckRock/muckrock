@@ -98,8 +98,9 @@ class Jurisdiction(models.Model, RequestHelper):
     # non local
     days = models.PositiveSmallIntegerField(blank=True, null=True, help_text='How many days do they'
                                                                              ' have to respond?')
-    observe_sat = models.BooleanField(help_text='Are holidays observed on Saturdays? '
-                                                '(or are they moved to Friday?)')
+    observe_sat = models.BooleanField(default=False,
+            help_text='Are holidays observed on Saturdays? '
+                      '(or are they moved to Friday?)')
     holidays = models.ManyToManyField(Holiday, blank=True)
     use_business_days = models.BooleanField(default=True, help_text='Response time in business days'
                                                                     ' (or calendar days)?')

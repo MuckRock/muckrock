@@ -12,7 +12,7 @@ from taggit.managers import TaggableManager
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
-class ArticleManager(models.Manager):
+class ArticleQuerySet(models.QuerySet):
     """Object manager for news articles"""
     # pylint: disable=too-many-public-methods
 
@@ -36,7 +36,11 @@ class Article(models.Model):
     summary = models.TextField(help_text='A single paragraph summary or preview of the article.')
     body = models.TextField('Body text')
     authors = models.ManyToManyField(User, related_name='authored_articles')
-    editors = models.ManyToManyField(User, related_name='edited_articles', blank=True, null=True)
+    editors = models.ManyToManyField(
+            User,
+            related_name='edited_articles',
+            blank=True,
+            )
     publish = models.BooleanField(
         'Publish on site',
         default=False,
@@ -46,7 +50,6 @@ class Article(models.Model):
         FOIARequest,
         related_name='articles',
         blank=True,
-        null=True
     )
     image = ThumbnailerImageField(
         upload_to='news_images',
@@ -54,7 +57,7 @@ class Article(models.Model):
         null=True,
         resize_source={'size': (1600, 1200), 'crop': 'smart'}
     )
-    objects = ArticleManager()
+    objects = ArticleQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
 
     def __unicode__(self):

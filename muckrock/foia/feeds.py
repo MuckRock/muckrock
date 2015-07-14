@@ -93,7 +93,7 @@ class UserSubmittedFeed(Feed):
 
     def link(self, obj):
         """The link for this feed"""
-        return obj.get_profile().get_absolute_url()
+        return obj.profile.get_absolute_url()
 
     def description(self, obj):
         """The description of this feed"""
@@ -125,7 +125,7 @@ class UserDoneFeed(Feed):
 
     def link(self, obj):
         """The link for this feed"""
-        return obj.get_profile().get_absolute_url()
+        return obj.profile.get_absolute_url()
 
     def description(self, obj):
         """The description of this feed"""
@@ -157,7 +157,7 @@ class UserUpdateFeed(Feed):
 
     def link(self, obj):
         """The link for this feed"""
-        return obj.get_profile().get_absolute_url()
+        return obj.profile.get_absolute_url()
 
     def description(self, obj):
         """The description of this feed"""
@@ -165,7 +165,7 @@ class UserUpdateFeed(Feed):
 
     def items(self, obj):
         """The communications are the items for this feed"""
-        foias = FOIARequest.objects.get_public().filter(user=obj).select_related('communications')
+        foias = FOIARequest.objects.get_public().filter(user=obj).prefetch_related('communications')
         communications = []
         for foia in foias:
             communications.extend(foia.communications.all())

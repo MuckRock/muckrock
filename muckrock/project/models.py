@@ -30,17 +30,17 @@ class Project(models.Model):
         'auth.User',
         related_name='projects',
         blank=True,
-        null=True)
+        )
     articles = models.ManyToManyField(
         'news.Article',
         related_name='projects',
         blank=True,
-        null=True)
+        )
     requests = models.ManyToManyField(
         'foia.FOIARequest',
         related_name='projects',
         blank=True,
-        null=True)
+        )
     tags = taggit.managers.TaggableManager(through='tags.TaggedItemBase', blank=True)
 
     def __unicode__(self):

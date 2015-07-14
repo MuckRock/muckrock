@@ -5,8 +5,6 @@ Middleware for MuckRock
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
-from urlauth import middleware
-from urlauth.util import load_key, InvalidKey
 from urllib import urlencode
 import hotshot, hotshot.stats
 import logging
@@ -20,29 +18,9 @@ from muckrock import settings
 
 logger = logging.getLogger(__name__)
 
-class AuthKeyMiddleware(middleware.AuthKeyMiddleware):
-    """Override process request to remove url auth key from url after validating"""
-    # pylint: disable=too-few-public-methods
-
-    def process_request(self, request):
-        """Redirect to remove authkey from url and put extra get params in"""
-        url = ''
-        try:
-            if settings.URLAUTH_AUTHKEY_NAME in request.GET:
-                authhash = request.GET[settings.URLAUTH_AUTHKEY_NAME]
-                authkey = load_key(authhash)
-                url = '?' + urlencode(authkey.extra)
-        except InvalidKey:
-            return
-        super(AuthKeyMiddleware, self).process_request(request)
-        if url:
-            return HttpResponseRedirect(request.path + '?' + urlencode(authkey.extra))
-
 # Orignal version taken from http://www.djangosnippets.org/snippets/186/
 # Original author: udfalkso
 # Modified by: Shwagroo Team and Gun.io
-
-
 
 words_re = re.compile( r'\s+' )
 

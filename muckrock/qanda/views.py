@@ -114,7 +114,7 @@ def create_question(request):
             question.date = datetime.now()
             question.save()
             question.notify_new()
-            question.followed_by.add(request.user.get_profile())
+            question.followed_by.add(request.user.profile)
             return redirect(question)
     else:
         form = QuestionForm()
@@ -129,10 +129,10 @@ def follow(request, slug, idx):
     question = get_object_or_404(Question, slug=slug, id=idx)
 
     if question.followed_by.filter(user=request.user):
-        question.followed_by.remove(request.user.get_profile())
+        question.followed_by.remove(request.user.profile)
         messages.success(request, 'You are no longer following %s' % question.title)
     else:
-        question.followed_by.add(request.user.get_profile())
+        question.followed_by.add(request.user.profile)
         msg = 'You are now following %s. We will notify you of any replies.' % question.title
         messages.success(request, msg)
     return redirect(question)
@@ -165,7 +165,7 @@ def create_answer(request, slug, idx):
 @login_required
 def subscribe(request):
     """Subscribe or unsubscribe to new questions"""
-    profile = request.user.get_profile()
+    profile = request.user.profile
 
     if profile.follow_questions:
         profile.follow_questions = False

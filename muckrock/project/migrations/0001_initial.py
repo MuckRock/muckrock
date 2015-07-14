@@ -1,34 +1,34 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+from django.conf import settings
+import taggit.managers
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Project'
-        db.create_table(u'project_project', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal(u'project', ['Project'])
+    dependencies = [
+        ('tags', '0001_initial'),
+        ('foia', '0003_auto_20150618_2306'),
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('news', '0003_auto_20150618_2306'),
+    ]
 
-
-    def backwards(self, orm):
-        # Deleting model 'Project'
-        db.delete_table(u'project_project')
-
-
-    models = {
-        u'project.project': {
-            'Meta': {'object_name': 'Project'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        }
-    }
-
-    complete_apps = ['project']
+    operations = [
+        migrations.CreateModel(
+            name='Project',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(help_text=b'Titles are limited to 100 characters.', unique=True, max_length=100)),
+                ('slug', models.SlugField(help_text=b'The slug is automatically generated based on the title.', unique=True, max_length=255)),
+                ('description', models.TextField(null=True, blank=True)),
+                ('image', models.ImageField(null=True, upload_to=b'project_images', blank=True)),
+                ('private', models.BooleanField(default=False, help_text=b'If a project is private, it is only visible to its contributors.')),
+                ('articles', models.ManyToManyField(related_name='projects', to='news.Article', blank=True)),
+                ('contributors', models.ManyToManyField(related_name='projects', to=settings.AUTH_USER_MODEL, blank=True)),
+                ('requests', models.ManyToManyField(related_name='projects', to='foia.FOIARequest', blank=True)),
+                ('tags', taggit.managers.TaggableManager(to='tags.Tag', through='tags.TaggedItemBase', blank=True, help_text='A comma-separated list of tags.', verbose_name='Tags')),
+            ],
+        ),
+    ]

@@ -5,11 +5,12 @@ Forms for accounts application
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django.contrib.localflavor.us.forms import USZipCodeField
+
+from localflavor.us.forms import USZipCodeField
+import re
 
 from muckrock.accounts.models import Profile
 
-import re
 
 class ProfileForm(forms.ModelForm):
     """A form for a user profile"""
@@ -18,6 +19,8 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Profile
+        fields = '__all__'
+
 
 class UserChangeForm(ProfileForm):
     """A form for updating user information"""
@@ -41,6 +44,7 @@ class UserChangeForm(ProfileForm):
             raise forms.ValidationError('A user with that e-mail address already exists.')
 
         return email
+
 
 class RegisterForm(UserCreationForm):
     """Register for a community account"""

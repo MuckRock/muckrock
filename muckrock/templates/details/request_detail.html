@@ -20,8 +20,8 @@
 {% block twitter_card %}
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@muckrock" />
-{% if foia.user.get_profile.twitter %}
-<meta name="twitter:creator" content="{{ foia.user.get_profile.twitter }}" />
+{% if foia.user.profile.twitter %}
+<meta name="twitter:creator" content="{{ foia.user.profile.twitter }}" />
 {% endif %}
 <meta name="twitter:title" content="{{ foia.title }}" />
 <meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />

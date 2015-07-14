@@ -15,6 +15,8 @@ from muckrock.project.models import Project
 import logging
 import nose
 
+# pylint: disable=no-member
+
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
