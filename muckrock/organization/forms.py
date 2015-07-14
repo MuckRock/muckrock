@@ -21,13 +21,13 @@ class OrganizationForm(forms.ModelForm):
             Organization.objects.get(slug=slug)
         except ObjectDoesNotExist:
             return name
-        raise forms.ValidationError('Organization already exists.')
+        raise forms.ValidationError('Organization already exists with this name.')
 
     class Meta:
         # pylint: disable=too-few-public-methods
         model = Organization
-        fields = ['name']
-        widgets = {'name': forms.TextInput(attrs={'placeholder': 'Name your organization'})}
+        fields = ['name', 'owner', 'monthly_requests', 'monthly_cost', 'max_users']
+        widgets = {'owner': autocomplete_light.ChoiceWidget('UserAutocomplete')}
 
 class OrganizationUpdateForm(forms.ModelForm):
     """A form for tweaking the number of members, number of reqeusts, and monthly cost"""

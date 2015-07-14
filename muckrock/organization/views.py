@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
-from django.template.defaultfilters import slugify
+from django.utils.text import slugify
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
@@ -122,47 +122,37 @@ def _remove_members(request, organization):
 
 @login_required
 def create_organization(request):
-    """Creates an organization, setting the user who created it as the owner"""
+    """
+    Presents a form for creating an organization.
+    At the moment, only staff may create organizations.
+    """
+    if not request.user.is_staff:
+        error_msg = ('Only MuckRock staff may create organizations. '
+                     'If you would like an organization account, please contact '
+                     'us by email at info@muckrock.com.')
+        messages.error(request, error_msg)
+        return redirect('org-index')
     if request.method == 'POST':
         form = OrganizationForm(request.POST)
         if form.is_valid():
-            stripe_token = request.POST.get('stripe_token', None)
-            user = request.user
-            profile = user.profile
-            customer = profile.customer()
-            customer.card = stripe_token
-            customer.save()
             organization = form.save(commit=False)
             organization.date_update = datetime.now()
-            organization.slug = slugify(organization.name)
-            organization.owner = user
             organization.num_requests = organization.monthly_requests
+            organization.slug = slugify(organization.name)
             organization.save()
-            organization.create_plan()
-            try:
-                organization.start_subscription()
-            except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
-                messages.error(request, exception)
-            profile.organization = organization
-            profile.save()
-            messages.success(request, 'Your organization has been created.')
+            # make owner a member
+            organization.owner.profile.organization = organization
+            messages.success(request, 'The organization has been created.')
             return redirect(organization)
     else:
         form = OrganizationForm()
 
-    # check if user already owns an org
-    other_org = Organization.objects.filter(owner=request.user)
-    if other_org:
-        messages.error(request, 'You may only own one organization at a time.')
-        return redirect('org-index')
-
     context = {
-        'form': form,
-        'stripe_pk': STRIPE_PUB_KEY
+        'form': form
     }
 
     return render_to_response(
-        'forms/organization/create.html',
+        'organization/create.html',
         context,
         context_instance=RequestContext(request)
     )

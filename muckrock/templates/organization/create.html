@@ -1,0 +1,12 @@
+{% extends 'forms/base_form.html' %}
+{% load static from staticfiles %}
+{% block title %}MuckRock &bull; Create an Organization{% endblock %}
+{% block form-type %}organization{% endblock %}
+{% block form-title %}Create an Organization{% endblock %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+    prettifyAmountInput('#id_monthly_cost');
+</script>
+{% endblock scripts %}
