@@ -5,15 +5,11 @@ URL mappings for the FOIA application
 from django.conf.urls import patterns, url
 from django.views.generic.base import RedirectView
 
-from pingback import register_pingback
 
-# pylint: disable=unused-import
-import muckrock.foia.signals
-# pylint: enable=unused-import
+import muckrock.foia.signals # pylint: disable=unused-import
 from muckrock.foia import views
 from muckrock.foia.feeds import LatestSubmittedRequests, LatestDoneRequests, FOIAFeed,\
                                 UserSubmittedFeed, UserDoneFeed, UserUpdateFeed
-from muckrock.foia.pingbacks import pingback_foia_handler
 from muckrock.views import jurisdiction
 
 # pylint: disable=no-value-for-parameter
@@ -22,8 +18,6 @@ from muckrock.views import jurisdiction
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
 old_foia_url = r'(?P<jurisdiction>[\w\d_-]+)/(?P<slug>[\w\d_-]+)/(?P<idx>\d+)'
-
-register_pingback(views.Detail.as_view(), pingback_foia_handler)
 
 urlpatterns = patterns(
     '',

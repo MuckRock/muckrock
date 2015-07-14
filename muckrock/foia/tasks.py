@@ -11,7 +11,6 @@ from django.template import Context
 
 import dbsettings
 import base64
-import gdata.analytics.service
 import json
 import logging
 import os.path
@@ -22,11 +21,20 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
 
-from muckrock.foia.models import FOIAFile, FOIARequest, FOIAMultiRequest, FOIACommunication
+from muckrock.foia.models import (
+    FOIAFile,
+    FOIARequest,
+    FOIAMultiRequest,
+    FOIACommunication,
+    )
 from muckrock.foia.codes import CODES
-from muckrock.settings import DOCUMNETCLOUD_USERNAME, DOCUMENTCLOUD_PASSWORD, \
-                     GA_USERNAME, GA_PASSWORD, GA_ID, \
-                     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_AUTOIMPORT_BUCKET_NAME
+from muckrock.settings import (
+    DOCUMNETCLOUD_USERNAME,
+    DOCUMENTCLOUD_PASSWORD,
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    AWS_AUTOIMPORT_BUCKET_NAME,
+    )
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -169,29 +177,6 @@ def submit_multi_request(req_pk, **kwargs):
 
             new_foia.submit()
     req.delete()
-
-
-@periodic_task(run_every=crontab(hour=1, minute=10), name='muckrock.foia.tasks.set_top_viewed_reqs')
-def set_top_viewed_reqs():
-    """Get the top 5 most viewed requests from Google Analytics and save them locally"""
-
-    client = gdata.analytics.service.AnalyticsDataService()
-    client.ssl = True
-    client.ClientLogin(GA_USERNAME, GA_PASSWORD)
-    data = client.GetData(ids=GA_ID, dimensions='ga:pagePath', metrics='ga:pageviews',
-                          start_date=(date.today() - timedelta(days=30)).isoformat(),
-                          end_date=date.today().isoformat(), sort='-ga:pageviews')
-    path_re = re.compile('ga:pagePath=/foi/%s/' % foia_url)
-    top_req_paths = [(entry.title.text, int(entry.pageviews.value)) for entry in data.entry
-                     if path_re.match(entry.title.text)]
-
-    for req_path, page_views in top_req_paths:
-        try:
-            req = FOIARequest.objects.get(pk=path_re.match(req_path).group('idx'))
-            req.times_viewed = page_views
-            req.save()
-        except FOIARequest.DoesNotExist:
-            pass
 
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')

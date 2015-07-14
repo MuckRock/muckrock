@@ -7,7 +7,7 @@
 
 {% block header %}
     <h1>{{user_obj.get_full_name}} <small>({{user_obj.username}})</small></h1>
-    {% with user_obj.get_profile.organization as org %}
+    {% with user_obj.profile.organization as org %}
         {% if org %}
         <p>{% if org.owner == user_obj %}Owner{% else %}Member{% endif %} of <a href="{% url 'org-detail' org.slug %}" title="{{org}}'s organization page">{{org}}</a></p>
         {% endif %}
@@ -19,27 +19,27 @@
     <dl>
         <dt>Information on File</dt>
         <dd>{{user_obj.email}}</dd>
-        {% if user_obj.get_profile.phone %}
-        <dd>{{user_obj.get_profile.phone}}</dd>
+        {% if user_obj.profile.phone %}
+        <dd>{{user_obj.profile.phone}}</dd>
         {% endif %}
-        {% if user_obj.get_profile.address1 or user_obj.get_profile.city %}
-            {% if user_obj.get_profile.address1 %}
-        <dd>{{ user_obj.get_profile.address1 }}</dd>
-                {% if user_obj.get_profile.address2 %}
-        <dd>{{ user_obj.get_profile.address2 }}</dd>
+        {% if user_obj.profile.address1 or user_obj.profile.city %}
+            {% if user_obj.profile.address1 %}
+        <dd>{{ user_obj.profile.address1 }}</dd>
+                {% if user_obj.profile.address2 %}
+        <dd>{{ user_obj.profile.address2 }}</dd>
                 {% endif %}
             {% endif %}
-            {% if user_obj.get_profile.city and user_obj.get_profile.state and user_obj.get_profile.zip_code %}
-        <dd>{{user_obj.get_profile.city}}, {{user_obj.get_profile.state}}</dd>
-        <dd>{{user_obj.get_profile.zip_code}}</dd>
+            {% if user_obj.profile.city and user_obj.profile.state and user_obj.profile.zip_code %}
+        <dd>{{user_obj.profile.city}}, {{user_obj.profile.state}}</dd>
+        <dd>{{user_obj.profile.zip_code}}</dd>
             {% endif %}
         {% endif %}
     </dl>
-    {% if user.get_profile.get_acct_type_display != 'Community' %}
+    {% if user.profile.get_acct_type_display != 'Community' %}
     <dl>
         <dt>Monthly Requests</dt>
-        {% if user_obj.get_profile.get_monthly_requests %}
-        <dd>{{ user_obj.get_profile.get_monthly_requests }}</dd>
+        {% if user_obj.profile.get_monthly_requests %}
+        <dd>{{ user_obj.profile.get_monthly_requests }}</dd>
         {% else %}
         <dd>0</dd>
         {% endif %}
@@ -47,8 +47,8 @@
     {% endif %}
     <dl>        
         <dt>Requests Remaining</dt>
-        {% if user_obj.get_profile.num_requests %}
-        <dd>{{ user_obj.get_profile.num_requests }}</dd>
+        {% if user_obj.profile.num_requests %}
+        <dd>{{ user_obj.profile.num_requests }}</dd>
         {% else %}
         <dd>0</dd>
         {% endif %}
@@ -68,12 +68,12 @@
                 data-form="#buy-requests"
                 data-label=""
                 class="checkout-button primary">Buy Requests</button>
-        {% if not user_obj.get_profile.email_confirmed %}
+        {% if not user_obj.profile.email_confirmed %}
         <a href="{% url 'acct-verify-email' %}" class="button">Verify Email</a>
         {% endif %}
         <a href="{% url 'acct-update' %}" class="button">Settings</a>
         <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
-    {% with user_obj.get_profile.organization as org %}
+    {% with user_obj.profile.organization as org %}
         {% if org and org.owner == user_obj %}
         <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
         {% else %}
@@ -114,9 +114,9 @@
         {% endif %}
     {% endif %}
     
-    {% if user == user_obj and user_obj.get_profile.follows_foia.all %}
+    {% if user == user_obj and user_obj.profile.follows_foia.all %}
         <h3>Requests You Follow</h3>
-        {% include 'lib/foia_table.html' with requests=user_obj.get_profile.follows_foia.all %}
+        {% include 'lib/foia_table.html' with requests=user_obj.profile.follows_foia.all %}
     {% endif %}
     
 {% endblock main %}

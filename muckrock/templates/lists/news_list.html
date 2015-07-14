@@ -28,7 +28,7 @@
                 <div class="news-list-article-authors">
                     by
                     {% for author in article.authors.all %}
-                        <a href="{{ author.get_profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
+                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
                         {% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </div>

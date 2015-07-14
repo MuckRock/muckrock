@@ -11,10 +11,9 @@ from datetime import datetime
 from muckrock.news.models import Article
 from muckrock.tests import get_allowed, get_404
 
-# allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=E1103
+# pylint: disable=no-member
 
 class TestNewsUnit(TestCase):
     """Unit tests for news"""

@@ -129,15 +129,15 @@ def _make_user(request, data):
         date_update=datetime.now()
     )
     # send the new user a welcome email
-    password_link = user.get_profile().wrap_url(reverse('acct-change-pw'))
+    password_link = user.profile.wrap_url(reverse('acct-change-pw'))
     send_mail(
         'Welcome to MuckRock',
         render_to_string('text/user/welcome.txt', {
             'user': user,
             'password_link': password_link,
-            'verification_link': user.get_profile().wrap_url(
+            'verification_link': user.profile.wrap_url(
                 reverse('acct-verify-email'),
-                key=user.get_profile().generate_confirmation_key())
+                key=user.profile.generate_confirmation_key())
         }),
         'info@muckrock.com',
         [data['email']],
@@ -179,7 +179,7 @@ def _submit_request(request, foia):
     """Submit request for user"""
     if not foia.user == request.user:
         messages.error(request, 'Only a request\'s owner may submit it.')
-    if not request.user.get_profile().make_request():
+    if not request.user.profile.make_request():
         error_msg = ('You do not have any requests remaining. '
                      'Please purchase more requests and then resubmit.')
         messages.error(request, error_msg)
@@ -287,7 +287,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
             foia.title = data['title']
             foia.slug = slugify(foia.title) or 'untitled'
             foia.embargo = data['embargo']
-            if foia.embargo and not request.user.get_profile().can_embargo():
+            if foia.embargo and not request.user.profile.can_embargo():
                 error_msg = 'Only Pro users may embargo their requests.'
                 messages.error(request, error_msg)
                 return redirect(foia)
@@ -395,7 +395,7 @@ def draft_multirequest(request, slug, idx):
                 foia.slug = slugify(foia.title) or 'untitled'
                 foia.save()
                 if request.POST['submit'] == 'Submit':
-                    profile = request.user.get_profile()
+                    profile = request.user.profile
                     num_requests = len(foia.agencies.all())
                     request_count = profile.multiple_requests(num_requests)
                     if request_count['extra_requests']:
@@ -419,7 +419,7 @@ def draft_multirequest(request, slug, idx):
     else:
         form = MultiRequestDraftForm(instance=foia)
 
-    profile = request.user.get_profile()
+    profile = request.user.profile
     num_requests = len(foia.agencies.all())
     request_balance = profile.multiple_requests(num_requests)
     num_bundles = int(ceil(request_balance['extra_requests']/5.0))

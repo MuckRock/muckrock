@@ -11,8 +11,6 @@ from muckrock.news.models import Article
 from muckrock.news.feeds import LatestEntries
 
 # pylint: disable=no-value-for-parameter
-# pylint: disable=star-args
-# pylint: disable=line-too-long
 
 article_args = {'queryset': Article.objects.get_published()}
 article_date_list_args = dict(article_args, date_field='pub_date', allow_empty=True)
@@ -36,12 +34,16 @@ urlpatterns = patterns(
     ),
     url(
         r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/(?P<day>\w{1,2})/$',
-        DayArchiveView.as_view(template_name='archives/day_archive.html', **article_date_list_args),
+        DayArchiveView.as_view(
+            template_name='archives/day_archive.html',
+            **article_date_list_args),
         name='news-archive-day'
     ),
     url(
         r'^archives/(?P<year>\d{4})/(?P<month>[a-z]{3})/$',
-        MonthArchiveView.as_view(template_name='archives/month_archive.html', **article_date_list_args),
+        MonthArchiveView.as_view(
+            template_name='archives/month_archive.html',
+            **article_date_list_args),
         name='news-archive-month'
     ),
     url(

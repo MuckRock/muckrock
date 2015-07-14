@@ -140,11 +140,11 @@ class OrganizationPaymentTests(TestCase):
         set the org to active, and reduce pro owners to community accounts
         """
         org = Organization.objects.get(slug='test-organization')
-        profile = org.owner.get_profile()
+        profile = org.owner.profile
         profile.acct_type = 'pro'
         org.create_plan()
         org.start_subscription()
-        # customer = org.owner.get_profile().customer()
+        # customer = org.owner.profile.customer()
         # test if subscription was activated
         nose.tools.eq_(profile.acct_type, 'community')
         nose.tools.assert_true(org.active)
@@ -155,6 +155,6 @@ class OrganizationPaymentTests(TestCase):
         org.create_plan()
         org.start_subscription()
         org.pause_subscription()
-        # customer = org.owner.get_profile().customer()
+        # customer = org.owner.profile.customer()
         # test if subscription was paused
         nose.tools.assert_false(org.active)
