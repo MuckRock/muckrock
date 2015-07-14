@@ -11,7 +11,6 @@ from django.template import Context
 
 import dbsettings
 import base64
-import gdata.analytics.service
 import json
 import logging
 import os.path
