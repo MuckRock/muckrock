@@ -22,13 +22,13 @@ from muckrock.settings import STRIPE_PUB_KEY
 class List(ListView):
     """List of organizations"""
     model = Organization
-    template_name = "lists/organization_list.html"
+    template_name = "organization/list.html"
     paginate_by = 25
 
 class Detail(DetailView):
     """Organization detail view"""
     model = Organization
-    template_name = "details/organization_detail.html"
+    template_name = "organization/detail.html"
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
