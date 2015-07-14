@@ -37,6 +37,10 @@ class Organization(models.Model):
         """The url for this object"""
         return ('org-detail', [], {'slug': self.slug})
 
+    def is_active(self):
+        """Is this organization active?"""
+        return self.active
+
     def get_requests(self):
         """Get the number of requests left for this month"""
         not_this_month = self.date_update.month != datetime.now().month
@@ -49,15 +53,18 @@ class Organization(models.Model):
         return self.num_requests
 
     def is_owned_by(self, user):
-        """Answers whether the passed user owns the org"""
+        """Returns true IFF the passed-in user is the owner of the org"""
         return self.owner == user
 
-    def is_active(self):
-        """Is this organization active?"""
-        return self.active
+    def has_member(self, user):
+        """Returns true IFF the passed-in user is a member of the org"""
+        if user.profile in self.members.all():
+            return True
+        else:
+            return False
 
     def add_member(self, user):
-        """Add a user to this organization"""
+        """Adds the passed-in user as a member of the organization"""
         profile = user.profile
         if not profile.is_member_of(self): # doesn't update if already a member
             profile.organization = self
