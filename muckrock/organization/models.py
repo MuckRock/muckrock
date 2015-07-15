@@ -152,7 +152,7 @@ class Organization(models.Model):
         try:
             plan = stripe.Plan.retrieve(self.stripe_id)
             plan.delete()
-        except stripe.invalid_request_error:
+        except stripe.InvalidRequestError:
             logger.error(('No Plan is associated with Stripe ID %s. '
                 'Removing the Stripe ID from the organization anyway.'), self.stripe_id)
         self.stripe_id = ''
@@ -193,8 +193,12 @@ class Organization(models.Model):
         """Cancels the owner's subscription to this org's plan"""
         # pylint: disable=no-member
         customer = self.owner.profile.customer()
-        customer.cancel_subscription()
-        customer.save()
+        try:
+            customer.cancel_subscription()
+            customer.save()
+        except stripe.InvalidRequestError:
+            logger.error(('No subscription is associated with organization '
+                         'owner %s.'), self.owner.username)
         self.active = False
         self.save()
         return
