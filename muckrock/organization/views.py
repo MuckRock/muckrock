@@ -142,7 +142,9 @@ def create_organization(request):
             organization.save()
             # make owner a member
             organization.owner.profile.organization = organization
-            messages.success(request, 'The organization has been created.')
+            organization.owner.profile.save()
+            # redirect to the organization with a friendly message
+            messages.success(request, 'The organization has been created. Excellent!')
             return redirect(organization)
     else:
         form = OrganizationForm()
