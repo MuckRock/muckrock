@@ -26,6 +26,34 @@ class OrganizationListView(ListView):
     paginate_by = 25
 
 
+class OrganizationCreateView(CreateView):
+    """
+    Presents a form for creating an organization.
+    At the moment, only staff may create organizations.
+    """
+    form_class = OrganizationCreateForm
+    template_name = 'organization/create.html'
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, *args, **kwargs):
+        """At the moment, only staff are allowed to create an org."""
+        return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        """
+        When form is valid, save it.
+        Also, make the owner a member of the organization.
+        """
+        organization = form.save()
+        # make owner a member
+        organization.owner.profile.organization = organization
+        organization.owner.profile.save()
+        # redirect to the success url with a nice message
+        messages.success(self.request, 'The organization has been created. Excellent!')
+        return redirect(self.get_success_url())
+
+
 class OrganizationDetailView(DetailView):
     """Organization detail view"""
     model = Organization
@@ -120,34 +148,6 @@ def _remove_members(request, organization):
     msg = 'You revoked membership from %s ' % member_count
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
-
-
-class OrganizationCreateView(CreateView):
-    """
-    Presents a form for creating an organization.
-    At the moment, only staff may create organizations.
-    """
-    form_class = OrganizationCreateForm
-    template_name = 'organization/create.html'
-
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
-    def dispatch(self, *args, **kwargs):
-        """At the moment, only staff are allowed to create an org."""
-        return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
-
-    def form_valid(self, form):
-        """
-        When form is valid, save it.
-        Also, make the owner a member of the organization.
-        """
-        organization = form.save()
-        # make owner a member
-        organization.owner.profile.organization = organization
-        organization.owner.profile.save()
-        # redirect to the success url with a nice message
-        messages.success(self.request, 'The organization has been created. Excellent!')
-        return redirect(self.get_success_url())
 
 def delete_organization(request, **kwargs):
     """Deletes an organization by removing its users and cancelling its plan"""
