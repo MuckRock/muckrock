@@ -10,17 +10,17 @@ urlpatterns = patterns(
     '',
     url(
         r'^$',
-        views.List.as_view(),
+        views.OrganizationListView.as_view(),
         name='org-index'
     ),
     url(
         r'^create/$',
-        views.create_organization,
+        views.OrganizationCreateView.as_view(),
         name='org-create'
     ),
     url(
         r'^(?P<slug>[\w-]+)/$',
-        views.Detail.as_view(),
+        views.OrganizationDetailView.as_view(),
         name='org-detail'
     ),
     url(
