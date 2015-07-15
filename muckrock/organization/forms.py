@@ -11,7 +11,7 @@ from muckrock.organization.models import Organization
 
 import autocomplete_light
 
-class OrganizationForm(forms.ModelForm):
+class OrganizationCreateForm(forms.ModelForm):
     """A form for creating an Organization"""
     def clean_name(self):
         """Ensures name is unique"""

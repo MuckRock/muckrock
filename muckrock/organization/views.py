@@ -7,32 +7,33 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
-from django.utils.text import slugify
-from django.views.generic.detail import DetailView
-from django.views.generic.list import ListView
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView, CreateView, DetailView
 
 import actstream
 from datetime import datetime
 import stripe
 
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationForm, OrganizationUpdateForm, AddMembersForm
+from muckrock.organization.forms import OrganizationCreateForm, OrganizationUpdateForm, AddMembersForm
 from muckrock.settings import STRIPE_PUB_KEY
 
-class List(ListView):
+
+class OrganizationListView(ListView):
     """List of organizations"""
     model = Organization
     template_name = "organization/list.html"
     paginate_by = 25
 
-class Detail(DetailView):
+
+class OrganizationDetailView(DetailView):
     """Organization detail view"""
     model = Organization
     template_name = "organization/detail.html"
 
     def get_context_data(self, **kwargs):
         """Add extra context data"""
-        context = super(Detail, self).get_context_data(**kwargs)
+        context = super(OrganizationDetailView, self).get_context_data(**kwargs)
         organization = context['organization']
         user = self.request.user
         member_accounts = [profile.user for profile in organization.members.all()]
@@ -120,44 +121,33 @@ def _remove_members(request, organization):
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
 
-@login_required
-def create_organization(request):
+
+class OrganizationCreateView(CreateView):
     """
     Presents a form for creating an organization.
     At the moment, only staff may create organizations.
     """
-    if not request.user.is_staff:
-        error_msg = ('Only MuckRock staff may create organizations. '
-                     'If you would like an organization account, please contact '
-                     'us by email at info@muckrock.com.')
-        messages.error(request, error_msg)
-        return redirect('org-index')
-    if request.method == 'POST':
-        form = OrganizationForm(request.POST)
-        if form.is_valid():
-            organization = form.save(commit=False)
-            organization.date_update = datetime.now()
-            organization.num_requests = organization.monthly_requests
-            organization.slug = slugify(organization.name)
-            organization.save()
-            # make owner a member
-            organization.owner.profile.organization = organization
-            organization.owner.profile.save()
-            # redirect to the organization with a friendly message
-            messages.success(request, 'The organization has been created. Excellent!')
-            return redirect(organization)
-    else:
-        form = OrganizationForm()
+    form_class = OrganizationCreateForm
+    template_name = 'organization/create.html'
 
-    context = {
-        'form': form
-    }
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, *args, **kwargs):
+        """At the moment, only staff are allowed to create an org."""
+        return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
 
-    return render_to_response(
-        'organization/create.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    def form_valid(self, form):
+        """
+        When form is valid, save it.
+        Also, make the owner a member of the organization.
+        """
+        organization = form.save()
+        # make owner a member
+        organization.owner.profile.organization = organization
+        organization.owner.profile.save()
+        # redirect to the success url with a nice message
+        messages.success(self.request, 'The organization has been created. Excellent!')
+        return redirect(self.get_success_url())
 
 def delete_organization(request, **kwargs):
     """Deletes an organization by removing its users and cancelling its plan"""
