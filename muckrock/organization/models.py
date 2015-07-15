@@ -6,10 +6,11 @@ from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 
 from muckrock.settings import MONTHLY_REQUESTS
 
-from datetime import datetime
+from datetime import date, timedelta
 import logging
 import stripe
 
@@ -21,13 +22,18 @@ class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     owner = models.ForeignKey(User)
-    date_update = models.DateField()
+    date_update = models.DateField(null=True)
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=50)
     monthly_cost = models.IntegerField(default=45000)
     monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        """Autogenerates the slug based on the org name"""
+        self.slug = slugify(self.name)
+        super(Organization, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -41,15 +47,27 @@ class Organization(models.Model):
         """Is this organization active?"""
         return self.active
 
-    def get_requests(self):
-        """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.now().month
-        not_this_year = self.date_update.year != datetime.now().year
-        if not_this_month or not_this_year and self.active:
-            # update requests if they have not yet been updated this month
-            self.date_update = datetime.now()
+    def restore_requests(self):
+        """Restore the number of requests credited to the org."""
+        if self.active:
+            self.date_update = date.today()
             self.num_requests = self.monthly_requests
             self.save()
+        return
+
+    def get_requests(self):
+        """
+        Get the number of requests left for this month.
+        Before doing so, restore the org's requests if they have not
+        been restored for this month, or ever.
+        """
+        if self.date_update:
+            not_this_month = self.date_update.month != date.today().month
+            not_this_year = self.date_update.year != date.today().year
+            if not_this_month or not_this_year:
+                self.restore_requests()
+        else:
+            self.restore_requests()
         return self.num_requests
 
     def is_owned_by(self, user):
