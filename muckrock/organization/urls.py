@@ -24,13 +24,23 @@ urlpatterns = patterns(
         name='org-detail'
     ),
     url(
-        r'^(?P<slug>[\w-]+)/delete/$',
-        views.delete_organization,
-        name='org-delete'
+        r'^(?P<slug>[\w-]+)/activate/$',
+        views.activate_organization,
+        name='org-activate'
+    ),
+    url(
+        r'^(?P<slug>[\w-]+)/deactivate/$',
+        views.deactivate_organization,
+        name='org-deactivate'
     ),
     url(
         r'^(?P<slug>[\w-]+)/update/$',
         views.update_organization,
         name='org-update'
+    ),
+    url(
+        r'^(?P<slug>[\w-]+)/delete/$',
+        views.delete_organization,
+        name='org-delete'
     ),
 )
