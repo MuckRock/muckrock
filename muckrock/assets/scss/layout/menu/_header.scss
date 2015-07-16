@@ -178,8 +178,9 @@ nav.website-navigation {
             outline: none;
         }
         .search-cancel {
-            width: 10%;
-            text-align: center;
+            width: auto;
+            padding: $vertical-rhythm;
+            text-align: right;
             cursor: pointer;
             color: $color-blue;
             &:hover {
@@ -289,7 +290,7 @@ nav.website-navigation {
     position: fixed;
     top: -9999px;
     left: 0;
-    height: 110vh;
+    height: 110%;
     width: 100vw;
     z-index: 200;
     background-color: $color-black;
@@ -297,7 +298,7 @@ nav.website-navigation {
     transition: top 0s .25s, opacity .25s linear;
     &.visible {
         top: 0;
-        opacity: .7;
+        opacity: .9;
         transition: top 0s 0s, opacity .25s linear;
     }
     &:hover {

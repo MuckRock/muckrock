@@ -36,14 +36,17 @@ $sidebar-width: 250px;
     }
 }
 
-aside.website-sidebar {
-
+.website-sidebar {
+/*
     @include display(flex);
     @include flex-direction(column);
     @include flex-wrap(nowrap);
+*/
     width: $sidebar-width;
-    height: 100vh;
-
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     border-left: 1px solid $color-grey-0;
     background-color: $color-grey-1;
     color: $color-white;
@@ -53,61 +56,14 @@ aside.website-sidebar {
     }
 
     & > * {
-        margin-bottom: 0;
-    }
-
-    .account-links {
-        width: 100%;
-        overflow: hidden;
-        li {
-            display: inline-block;
-            width: 50%;
-            float: left;
-        }
-        a {
-            display: block;
-            width: 100%;
-            padding: $vertical-rhythm/2;
-            border-bottom: 1px solid $color-black;
-            background-color: $color-grey-2;
-            color: $color-white;
-            font-weight: $font-weight-bold;
-            text-align: center;
-            @include transition(background-color .25s linear);
-            &:hover {
-                text-decoration: none;
-                background-color: $color-blue;
-            }
-            &.sign-up {
-                border-right: 1px solid $color-black;
-            }
-        }
-    }
-
-    .account {
-        header {
+        margin-bottom: $vertical-rhythm/2;
+        &:last-child {
             margin-bottom: $vertical-rhythm/2;
         }
-        .username {
-            display: block;
-            width: 100%;
-            padding: $vertical-rhythm/2;
-            border-bottom: 1px solid $color-grey-0;
-            background-color: $color-grey-2;
-            color: $color-white;
-            font-weight: $font-weight-bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            @include transition(background-color .25s linear);
-            &:hover {
-                text-decoration: none;
-                background-color: $color-blue;
-            }
-        }
+    }
 
-        .requests {
-            padding: 0 $vertical-rhythm/2;
-        }
+    .requests {
+        padding: 0 $vertical-rhythm/2;
 
         .account-info {
             display: inline-block;
@@ -171,23 +127,80 @@ aside.website-sidebar {
                 }
             }
         }
+
+
     }
 
-    .newsletter {
+    .account-links {
         width: 100%;
-        padding: $vertical-rhythm;
-        // background-color: $color-red;
+        overflow: hidden;
+        margin-bottom: 0;
+        @include display(flex);
+        a {
+            @include flex(1);
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-black;
+            border-right: 1px solid $color-black;
+            background-color: $color-grey-2;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            text-align: center;
+            @include transition(background-color .25s linear);
+            &:hover {
+                text-decoration: none;
+                background-color: $color-blue;
+            }
+            &:last-child {
+                border-right: 0;
+            }
+            &.username {
+                @include flex(3);
+            }
+            &.log-out {
+                font-weight: $font-weight-normal;
+                font-size: $font-size-2;
+            }
+        }
+    }
+
+    section {
+        width: 100%;
         @include action-input($color-white, $color-grey-0);
     }
 
+    .recent.articles {
+        dfn, .article {
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+        }
+        .article {
+            display: block;
+            width: 100%;
+            color: $color-white;
+            font-size: $font-size-2;
+            line-height: $vertical-rhythm;
+            border-bottom: 1px solid $color-grey-0;
+            &:hover {
+                background-color: $color-grey-0;
+                text-decoration: none;
+            }
+            &:last-child {
+                border-bottom: 0;
+            }
+        }
+    }
+
+    .newsletter {
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        font-size: $font-size-2;
+        p {
+            margin-bottom: $vertical-rhythm/2;
+        }
+    }
+
     .broadcast {
-        width: 100%;
         position: absolute;
         bottom: 0;
         right: 0;
-        padding: $vertical-rhythm;
-        background-color: $color-white;
-        color: $color-black;
         border-radius: 0;
     }
 
