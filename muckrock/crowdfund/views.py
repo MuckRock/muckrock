@@ -101,7 +101,7 @@ class CrowdfundRequestDetail(DetailView):
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         payment_object = None
         if payment_form.is_valid() and email and token:
-            if process_payment(request, amount, email, token, crowdfund_object):
+            if process_payment(request, amount, token, crowdfund_object):
                 payment_object = payment_form.save(commit=False)
                 payment_object.user = user
                 payment_object.save()
