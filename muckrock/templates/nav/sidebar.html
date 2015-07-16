@@ -9,40 +9,44 @@
         {% endif %}
     </header>
 
+
     {% if user.is_authenticated %}
     <section class="requests">
-        {% if actionable_requests.payments %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=payment">
-            <span class="payments counter">{{ actionable_requests.payments|length }}</span>
-            Payment{{ actionable_requests.payments|length|pluralize }} Required
-        </a>
-        {% endif %}
-        {% if actionable_requests.fixes %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=fix">
-            <span class="fixes counter">{{ actionable_requests.fixes|length }}</span>
-            Fix{{ actionable_requests.fixes|length|pluralize:"es" }} Required
-        </a>
-        {% endif %}
-        {% if actionable_requests.drafts %}
-        <a class="account-info" href="{% url 'foia-mylist' %}?status=started">
-            <span class="drafts counter">{{ actionable_requests.drafts|length }}</span>
-            Draft{{ actionable_requests.drafts|length|pluralize }}
-        </a>
-        {% endif %}
-        {% if actionable_requests.updates %}
-        <a class="account-info" href="{% url 'foia-mylist' %}">
-            <span class="updates counter">{{ actionable_requests.updates|length }}</span>
-            Update{{ actionable_requests.updates|length|pluralize }}
-            {% if actionable_requests.updates|length > 10 %}
-            <small>Click to see all</small>
-            {% endif %}
-        </a>
+        <a class="my-requests" href="{% url 'foia-mylist' %}">My Requests</a>
 
-        <ul class="updated">
-            {% for foia in actionable_requests.updates|slice:":10" %}
-            <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
-            {% endfor %}
-        </ul>
+        {% if actionable_requests %}
+            {% if actionable_requests.payments %}
+            <a class="actionable payment" href="{% url 'foia-mylist' %}?status=payment">
+                <span class="payments counter">{{ actionable_requests.payments|length }}</span>
+                Payment{{ actionable_requests.payments|length|pluralize }} Required
+            </a>
+            {% endif %}
+            {% if actionable_requests.fixes %}
+            <a class="actionable fixes" href="{% url 'foia-mylist' %}?status=fix">
+                <span class="fixes counter">{{ actionable_requests.fixes|length }}</span>
+                Fix{{ actionable_requests.fixes|length|pluralize:"es" }} Required
+            </a>
+            {% endif %}
+            {% if actionable_requests.drafts %}
+            <a class="actionable drafts" href="{% url 'foia-mylist' %}?status=started">
+                <span class="drafts counter">{{ actionable_requests.drafts|length }}</span>
+                Draft{{ actionable_requests.drafts|length|pluralize }}
+            </a>
+            {% endif %}
+            {% if actionable_requests.updates %}
+            <a class="actionable updated" href="{% url 'foia-mylist' %}">
+                <span class="updates counter">{{ actionable_requests.updates|length }}</span>
+                Update{{ actionable_requests.updates|length|pluralize }}
+                {% if actionable_requests.updates|length > 10 %}
+                <small>Click to see all</small>
+                {% endif %}
+            </a>
+            <ul class="actionable-request-list">
+                {% for foia in actionable_requests.updates|slice:":10" %}
+                <li><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
         {% endif %}
     </section>
     {% endif %}

@@ -37,11 +37,6 @@ $sidebar-width: 250px;
 }
 
 .website-sidebar {
-/*
-    @include display(flex);
-    @include flex-direction(column);
-    @include flex-wrap(nowrap);
-*/
     width: $sidebar-width;
     height: 100%;
     min-height: 0;
@@ -65,40 +60,58 @@ $sidebar-width: 250px;
     .requests {
         padding: 0 $vertical-rhythm/2;
 
-        .account-info {
+        .my-requests {
+            display: block;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            @include border-radius;
+            @include transition(background-color .25s linear);
+            &:hover {
+                background-color: $color-grey-0;
+                text-decoration: none;
+            }
+        }
+
+        .actionable {
             display: inline-block;
             height: auto;
             margin: $vertical-rhythm 0 0;
             border: none;
             padding: 0 $vertical-rhythm/2 0 0;
-            background: none;
-            text-align: left;
-            color: $color-white;
+            color: $color-grey-6;
             background-color: $color-black;
+            font-size: $font-size-3;
+            font-weight: $font-weight-bold;
+            text-align: left;
             text-decoration: none;
+            @include transition(color .25s linear);
 
             &:first-child {
                 margin-top: $vertical-rhythm/2;
             }
 
-            .counter {
-                margin-right: $vertical-rhythm/4;
-                padding: $vertical-rhythm/5 $vertical-rhythm/2;
-                border-radius: 1.5em;
-                font-weight: $font-weight-bold;
-                text-align: center;
-                color: $color-white;
-                background: $color-grey-4;
-            }
             &:hover {
                 color: $color-blue;
                 .counter {
                     background: $color-blue;
                 }
             }
+
+            .counter {
+                @include transition(background-color .25s linear);
+                margin-right: $vertical-rhythm/4;
+                padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
+                @include border-radius;
+                font-weight: $font-weight-bold;
+                text-align: center;
+                color: $color-white;
+                background: $color-grey-2;
+            }
         }
 
-        .updated {
+        .actionable-request-list {
             display: block;
             padding: $vertical-rhythm;
             margin-top: -.5 * $vertical-rhythm;
@@ -127,14 +140,11 @@ $sidebar-width: 250px;
                 }
             }
         }
-
-
     }
 
     .account-links {
         width: 100%;
         overflow: hidden;
-        margin-bottom: 0;
         @include display(flex);
         a {
             @include flex(1);
