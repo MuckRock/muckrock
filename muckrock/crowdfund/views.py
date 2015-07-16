@@ -18,7 +18,7 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def process_payment(request, amount, email, token, crowdfund):
+def process_payment(request, amount, token, crowdfund):
     """Helper function to create a Stripe charge and handle errors"""
     # double -> int conversion
     # http://stackoverflow.com/a/13528445/4256689
