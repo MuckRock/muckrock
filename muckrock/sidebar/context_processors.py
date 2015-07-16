@@ -28,18 +28,18 @@ def get_actionable_requests(user):
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
-    sidebar_info = {
+    sidebar_info_dict = {
         'recent_articles': get_recent_articles()
     }
     if request.user.is_authenticated():
         # content for logged in users
-        sidebar_info.update({
+        sidebar_info_dict.update({
             'actionable_requests': get_actionable_requests(request.user)
         })
     else:
         # content for logged out users
         pass
-    return sidebar_info
+    return sidebar_info_dict
 
 def sidebar_message(request):
     """Displays a message to a given usertype"""
