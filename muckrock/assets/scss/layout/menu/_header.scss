@@ -1,3 +1,7 @@
+.website-header {
+    margin-bottom: 0;
+}
+
 .website-header > * {
     padding-left: $vertical-rhythm/2;
     padding-right: $vertical-rhythm/2;
@@ -30,7 +34,6 @@
 
 nav.primary {
     overflow: hidden;
-    margin-bottom: $vertical-rhythm;
     ul {
         display: inline-block;
         width: auto;

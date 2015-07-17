@@ -19,9 +19,9 @@ html, body {
 
 .content {
     @include flex(1);
+    margin: $vertical-rhythm 0 0 0;
     padding: 0 $vertical-rhythm/2;
     @include media($medium-layout) { padding: 0 $vertical-rhythm; }
-    margin-bottom: 0;
 }
 
 @mixin edge-to-edge() {
