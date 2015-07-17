@@ -2,12 +2,15 @@
 Test organization view classes and functions
 """
 
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
+import logging
 from mock import Mock
 from nose.tools import ok_, eq_
 
+from muckrock.organization.forms import OrganizationCreateForm
 from muckrock.organization.views import OrganizationCreateView
 
 class TestOrgCreate(TestCase):
@@ -32,7 +35,26 @@ class TestOrgCreate(TestCase):
 
     def test_owner_is_member(self):
         """The organization owner should be saved as a member."""
-        ok_(False, 'Test unwritten.')
+        # create an owner for the organization
+        owner = Mock(spec=User)
+        profile = Mock()
+        profile.user = owner
+        profile.organization = None
+        # fill out Form
+        form = OrganizationCreateForm({
+            'name': 'Cool Org',
+            'owner': owner,
+            'monthly_cost': 1000,
+            'monthly_requests': 100,
+            'max_users': 20
+        })
+        form.is_valid()
+        logging.info(form.errors.as_data())
+        ok_(form.is_valid(), 'The creation form should validate.')
+        # submit form
+        self.request_factory.post(self.url, form.data)
+        eq_(owner_profile.organization.name, 'Cool Org',
+            'The owner should be made a member of the org.')
 
 class TestOrgActivation(TestCase):
     """Test the expectations of organization activation"""
