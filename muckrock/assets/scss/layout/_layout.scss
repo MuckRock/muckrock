@@ -1,8 +1,8 @@
-    /////////////////////////
-   //                     //
-  //    L A Y O U T S    //
- //                     //
-/////////////////////////
+    ///////////////////////
+   //                   //
+  //    L A Y O U T    //
+ //                   //
+///////////////////////
 
 html, body {
     // Allows for full-height elements with CSS
@@ -36,3 +36,5 @@ html, body {
 @import 'draft-request';
 @import 'crowdfund';
 @import 'project';
+@import 'list/list';
+@import 'nav/nav';
