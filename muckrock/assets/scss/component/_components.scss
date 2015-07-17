@@ -7,6 +7,7 @@
 @import 'forms';
 @import 'foia';
 @import 'file';
+@import 'icon';
 @import 'orphan';
 @import 'crowdfund';
 @import 'table';
@@ -17,22 +18,7 @@
 
 /* SVG Icons */
 
-.svg-icon {
-    display: inline-block;
-    width: auto;
-    height: 2rem;
-    vertical-align: middle;
-    margin: 0 0.5em;
-}
-.svg-icon path,
-.svg-icon polygon,
-.svg-icon rect {
-    fill: $color-white;
-}
-.svg-icon circle {
-    stroke: $color-white;
-    stroke-width: 1;
-}
+
 
 /* Sharing */
 
