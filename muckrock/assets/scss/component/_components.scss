@@ -11,61 +11,6 @@
 @import 'tags';
 @import 'tasks';
 
-/* Feeds */
-
-.feed-item { @include panel;
-    overflow: hidden;
-    @include fill-parent();
-    > header {
-        display: block;
-        width: 100%;
-        margin-bottom: $vertical-rhythm/2;
-        float: left;
-        div {
-            display: block;
-            & + div {
-                @include font-sizing(0.9, 1);
-            }
-        }
-    }
-    .button {
-        @include font-sizing(0.9, 1);
-        line-height: 1.5em;
-        float: left;
-    }
-}
-
-.feed {
-
-    ul, ol {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-    .feed-item {
-        margin: 0;
-        border-top: none;
-        border-radius: 0;
-    }
-
-    li:first-child > .feed-item {
-        border-top: $base-border-width solid $color-grey;
-        @include border-top-radius($base-border-radius);
-    }
-
-    li:last-child > .feed-item {
-        @include border-bottom-radius($base-border-radius);
-    }
-
-    @include media($large-layout) {
-        @include span-columns(6);
-        &.narrow { @include span-columns(4); }
-        &.wide { @include span-columns(8); }
-    }
-    @include fill-parent();
-
-}
-
 table {
     width: 100%;
     margin-top: $vertical-rhythm 0;
