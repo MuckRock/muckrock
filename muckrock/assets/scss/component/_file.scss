@@ -1,0 +1,13 @@
+.file {
+    overflow: hidden;
+    .thumbnail {
+        float: left;
+        max-height: 32px;
+        width: auto;
+        margin: $vertical-rhythm/4 $vertical-rhythm 0 0;
+    }
+    .file-actions a {
+        margin-left: $vertical-rhythm/2;
+        &:first-child { margin-left: 0; }
+    }
+}
