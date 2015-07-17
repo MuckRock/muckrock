@@ -10,11 +10,18 @@ import logging
 from mock import Mock
 from nose.tools import ok_, eq_
 
+from muckrock.accounts.models import Profile
 from muckrock.organization.forms import OrganizationCreateForm
 from muckrock.organization.views import OrganizationCreateView
 
 class TestOrgCreate(TestCase):
     """Test the expectations of organization creation"""
+
+    fixtures = [
+        'test_users.json',
+        'test_profiles.json',
+    ]
+
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
@@ -35,25 +42,22 @@ class TestOrgCreate(TestCase):
 
     def test_owner_is_member(self):
         """The organization owner should be saved as a member."""
-        # create an owner for the organization
-        owner = Mock(spec=User)
-        profile = Mock()
-        profile.user = owner
-        profile.organization = None
-        # fill out Form
+        owner_pk = 1
+        owner = User.objects.get(pk=owner_pk)
         form = OrganizationCreateForm({
             'name': 'Cool Org',
-            'owner': owner,
+            'owner': owner_pk,
             'monthly_cost': 1000,
             'monthly_requests': 100,
             'max_users': 20
         })
-        form.is_valid()
-        logging.info(form.errors.as_data())
-        ok_(form.is_valid(), 'The creation form should validate.')
-        # submit form
+        ok_(form.is_valid(),
+            'The form should validate. Form errors: %s' % form.errors.as_json)
         self.request_factory.post(self.url, form.data)
-        eq_(owner_profile.organization.name, 'Cool Org',
+        profile = Profile.objects.get(user=owner)
+        ok_(profile.organization,
+            'The owner should be assigned an organization.')
+        eq_(profile.organization.name, 'Cool Org',
             'The owner should be made a member of the org.')
 
 class TestOrgActivation(TestCase):
