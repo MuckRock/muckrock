@@ -31,7 +31,11 @@ def sidebar_broadcast(user):
         user_class = user.profile.acct_type if user.is_authenticated() else 'anonymous'
     except Profile.DoesNotExist:
         user_class = 'anonymous'
-    return Broadcast.objects.get_text(user_class)
+    try:
+        broadcast = Broadcast.objects.get(context=user_class).text
+    except Broadcast.DoesNotExist:
+        broadcast = None
+    return broadcast
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
