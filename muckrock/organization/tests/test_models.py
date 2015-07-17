@@ -1,5 +1,5 @@
 """
-Tests for the organization application
+Tests the models of the organization application
 """
 
 from django.contrib.auth.models import User
