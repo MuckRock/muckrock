@@ -186,6 +186,7 @@ $sidebar-width: 250px;
 
     .recent.articles {
         padding: 0;
+        margin-bottom: 0;
         dfn, .article {
             padding: $vertical-rhythm/2 $vertical-rhythm;
         }
@@ -210,7 +211,11 @@ $sidebar-width: 250px;
     }
 
     .newsletter {
-        @include action-input($color-white, $color-grey-0);
+        margin-bottom: 0;
+        padding-bottom: $vertical-rhythm;
+        color: $color-white;
+        background-color: $color-blue;
+        @include action-input($color-white, $color-blue-dark);
     }
 
 }
