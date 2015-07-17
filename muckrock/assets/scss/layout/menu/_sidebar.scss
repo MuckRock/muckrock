@@ -57,91 +57,6 @@ $sidebar-width: 250px;
         }
     }
 
-    .requests {
-        padding: 0 $vertical-rhythm/2;
-
-        .my-requests {
-            display: block;
-            width: 100%;
-            padding: $vertical-rhythm/2;
-            color: $color-white;
-            font-weight: $font-weight-bold;
-            @include border-radius;
-            @include transition(background-color .25s linear);
-            &:hover {
-                background-color: $color-grey-0;
-                text-decoration: none;
-            }
-        }
-
-        .actionable {
-            display: inline-block;
-            height: auto;
-            margin: $vertical-rhythm 0 0;
-            border: none;
-            padding: 0 $vertical-rhythm/2 0 0;
-            color: $color-grey-6;
-            background-color: $color-black;
-            font-size: $font-size-3;
-            font-weight: $font-weight-bold;
-            text-align: left;
-            text-decoration: none;
-            @include transition(color .25s linear);
-
-            &:first-child {
-                margin-top: $vertical-rhythm/2;
-            }
-
-            &:hover {
-                color: $color-blue;
-                .counter {
-                    background: $color-blue;
-                }
-            }
-
-            .counter {
-                @include transition(background-color .25s linear);
-                margin-right: $vertical-rhythm/4;
-                padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
-                @include border-radius;
-                font-weight: $font-weight-bold;
-                text-align: center;
-                color: $color-white;
-                background: $color-grey-2;
-            }
-        }
-
-        .actionable-request-list {
-            display: block;
-            padding: $vertical-rhythm;
-            margin-top: -.5 * $vertical-rhythm;
-            margin-left: .6 * $vertical-rhythm;
-            @include border;
-            border-color: $color-grey-0;
-            overflow: hidden;
-
-            li {
-                @include full;
-                display: list-item;
-                margin-bottom: $vertical-rhythm/2;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                &:last-child {
-                    margin-bottom: 0;
-                }
-            }
-
-            a {
-                color: $color-grey-6;
-                text-decoration: underline;
-                &:hover {
-                    color: $color-blue;
-                }
-            }
-        }
-    }
-
     .account-links {
         width: 100%;
         overflow: hidden;
@@ -175,43 +90,127 @@ $sidebar-width: 250px;
 
     section {
         width: 100%;
-        @include action-input($color-white, $color-grey-0);
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        color: $color-grey-6;
+        font-size: $font-size-2;
+        line-height: $vertical-rhythm;
+        dfn {
+            color: $color-white;
+        }
+        p {
+            margin-bottom: $vertical-rhythm/2;
+        }
+    }
+
+    .requests {
+        padding: 0 $vertical-rhythm/2;
+
+        .my-requests {
+            display: block;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            color: $color-white;
+            font-size: $font-size-3;
+            font-weight: $font-weight-bold;
+            @include border-radius;
+            @include transition(color .25s linear);
+            &:hover {
+                color: $color-blue;
+                text-decoration: none;
+            }
+        }
+
+        .actionable {
+            display: inline-block;
+            height: auto;
+            margin: $vertical-rhythm 0 0;
+            border: none;
+            color: $color-grey-6;
+            background-color: $color-black;
+            font-size: $font-size-3;
+            font-weight: $font-weight-bold;
+            text-align: left;
+            text-decoration: none;
+            @include transition(color .25s linear);
+
+            &:first-child {
+                margin-top: $vertical-rhythm/2;
+            }
+
+            &:hover {
+                color: $color-blue;
+                .counter {
+                    background: $color-blue;
+                }
+            }
+
+            .counter {
+                @include transition(background-color .25s linear);
+                margin-right: $vertical-rhythm/4;
+                padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
+                @include border-radius;
+                font-weight: $font-weight-bold;
+                text-align: center;
+                color: $color-white;
+                background: $color-grey-2;
+            }
+        }
+
+        .actionable-request-list {
+            display: block;
+            overflow: hidden;
+            padding: $vertical-rhythm;
+            li {
+                @include full;
+                display: list-item;
+                margin-bottom: $vertical-rhythm/2;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            a {
+                display: block;
+                color: $color-grey-6;
+                @include transition(color .25s linear);
+                &:hover {
+                    color: $color-blue;
+                    text-decoration: none;
+                }
+            }
+        }
     }
 
     .recent.articles {
+        padding: 0;
         dfn, .article {
             padding: $vertical-rhythm/2 $vertical-rhythm;
         }
         .article {
             display: block;
             width: 100%;
-            color: $color-white;
-            font-size: $font-size-2;
-            line-height: $vertical-rhythm;
+            color: $color-grey-6;
             border-bottom: 1px solid $color-grey-0;
+            @include transition(background-color .25s linear, color .25s linear);
             &:hover {
+                color: $color-white;
                 background-color: $color-grey-0;
                 text-decoration: none;
             }
             &:last-child {
                 border-bottom: 0;
             }
+            p {
+                margin-bottom: 0;
+            }
         }
     }
 
     .newsletter {
-        padding: $vertical-rhythm/2 $vertical-rhythm;
-        font-size: $font-size-2;
-        p {
-            margin-bottom: $vertical-rhythm/2;
-        }
-    }
-
-    .broadcast {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
+        @include action-input($color-white, $color-grey-0);
     }
 
 }

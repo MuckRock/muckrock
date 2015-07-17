@@ -51,12 +51,19 @@
     </section>
     {% endif %}
 
+    {% if broadcast %}
+    <section class="broadcast">
+        <dfn>Announcement</dfn>
+        <p>{{ broadcast|safe }}</p>
+    </section>
+    {% endif %}
+
     {% if recent_articles %}
     <section class="recent articles">
         <dfn>Newest News</dfn>
         {% for article in recent_articles %}
         <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article block">
-            <p>{{ article.summary }}</p>
+            <p>{{ article.summary|safe }}</p>
         </a>
         {% endfor %}
     </section>
@@ -82,11 +89,4 @@
             </span>
         </form>
     </section>
-
-    {% if broadcast %}
-    <section class="broadcast panel">
-        <p>{{ broadcast|safe }}</p>
-        <span id="close-broadcast">&times;</span>
-    </section>
-    {% endif %}
 </aside>
