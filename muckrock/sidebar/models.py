@@ -17,12 +17,12 @@ class SidebarQuerySet(models.QuerySet):
             return None
 
 
-class Sidebar(models.Model):
+class Broadcast(models.Model):
     """Text to put into the sidebar"""
-    title = models.CharField(max_length=255, unique=True, choices=SIDEBAR_TITLES)
+    context = models.CharField(max_length=255, unique=True, choices=SIDEBAR_TITLES)
     text = models.TextField(blank=True)
 
     objects = SidebarQuerySet.as_manager()
 
     def __unicode__(self):
-        return self.title
+        return self.context

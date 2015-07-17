@@ -5,7 +5,7 @@ Context processors to ensure data is displayed in sidebar for all views
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
-from muckrock.sidebar.models import Sidebar
+from muckrock.sidebar.models import Broadcast
 
 def get_recent_articles():
     """Lists last five recent news articles"""
@@ -25,21 +25,20 @@ def get_actionable_requests(user):
         'drafts': drafts,
     }
 
-def sidebar_message(user):
-    """Displays a message to a given usertype"""
+def sidebar_broadcast(user):
+    """Displays a broadcast to a given usertype"""
     try:
         user_class = user.profile.acct_type if user.is_authenticated() else 'anonymous'
     except Profile.DoesNotExist:
         user_class = 'anonymous'
-    message = Sidebar.objects.get_text(user_class)
-    return {'broadcast': message}
+    return Broadcast.objects.get_text(user_class)
 
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
     sidebar_info_dict = {
         'recent_articles': get_recent_articles(),
-        'broadcast': sidebar_message(request.user)
+        'broadcast': sidebar_broadcast(request.user)
     }
     if request.user.is_authenticated():
         # content for logged in users
