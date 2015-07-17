@@ -2,16 +2,35 @@
 Test organization view classes and functions
 """
 
-from django.test import TestCase
+from django.contrib.auth.models import AnonymousUser, User
+from django.core.urlresolvers import reverse
+from django.test import TestCase, RequestFactory
 
-from nose.tools import ok_
+from mock import Mock
+from nose.tools import ok_, eq_
+
+from muckrock.organization.views import OrganizationCreateView
 
 class TestOrgCreate(TestCase):
     """Test the expectations of organization creation"""
+    def setUp(self):
+        self.url = reverse('org-create')
+        self.request_factory = RequestFactory()
 
     def test_staff_only(self):
         """Only MuckRock staff may create a new organization."""
-        ok_(False, 'Test unwritten.')
+        request = self.request_factory.get(self.url)
+        mock_nonstaff = Mock(spec=User)
+        mock_nonstaff.is_staff = False
+        request.user = mock_nonstaff
+        create_view = OrganizationCreateView.as_view()
+        response = create_view(request)
+        eq_(response.status_code, 302, 'Nonstaff users should be redirected.')
+        mock_staff = Mock(spec=User)
+        mock_staff.is_staff = True
+        request.user = mock_staff
+        response = create_view(request)
+        eq_(response.status_code, 200, 'Staff users should be allowed access.')
 
     def test_owner_is_member(self):
         """The organization owner should be saved as a member."""
