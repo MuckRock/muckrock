@@ -11,10 +11,11 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, DetailView
 
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationCreateForm, OrganizationUpdateForm, AddMembersForm
+from muckrock.organization.forms import OrganizationCreateForm, \
+                                        OrganizationUpdateForm, \
+                                        AddMembersForm
 from muckrock.settings import STRIPE_PUB_KEY
 
-from datetime import datetime
 import stripe
 
 class OrganizationListView(ListView):
