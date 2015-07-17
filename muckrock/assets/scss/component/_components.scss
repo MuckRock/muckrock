@@ -71,7 +71,9 @@ table {
     margin-top: $vertical-rhythm 0;
     border: $base-border-width solid $color-grey;
     @include border-radius;
-    th, td { padding: 0.25em 0.5em; }
+    th, td {
+        padding: 0.25em 0.5em;
+    }
     thead tr { background-color: $color-grey; }
     tbody tr:nth-child(odd) { background-color: $color-odd-background; }
     &, tr {

@@ -59,10 +59,10 @@ $sidebar-width: 250px;
 
     .account-links {
         width: 100%;
-        overflow: hidden;
         @include display(flex);
         a {
             @include flex(1);
+            @include overflow-ellipsis;
             padding: $vertical-rhythm/2;
             border-bottom: 1px solid $color-black;
             border-right: 1px solid $color-black;
@@ -121,7 +121,7 @@ $sidebar-width: 250px;
         }
 
         .actionable {
-            display: inline-block;
+            display: block;
             height: auto;
             margin: $vertical-rhythm 0 0;
             border: none;
@@ -162,11 +162,9 @@ $sidebar-width: 250px;
             padding: $vertical-rhythm;
             li {
                 @include full;
+                @include overflow-ellipsis;
                 display: list-item;
                 margin-bottom: $vertical-rhythm/2;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
                 &:last-child {
                     margin-bottom: 0;
                 }
