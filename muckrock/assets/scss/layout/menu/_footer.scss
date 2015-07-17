@@ -5,7 +5,7 @@ footer.website-footer {
     border-top: 1px solid $color-grey;
     padding: $vertical-rhythm;
 
-    color: $color-grey;
+    color: $color-grey-6;
     background-color: $color-black;
 
     @include row;
@@ -35,6 +35,7 @@ footer.website-footer {
             fill: $color-white;
             height: 2rem;
             width: 2rem;
+            @include transition(fill .25s linear);
         }
         &:hover {
             svg {
@@ -44,15 +45,17 @@ footer.website-footer {
     }
 
     a {
-        color: $color-white;
+        color: $color-grey-6;
+        @include transition(color .25s linear);
         &:hover {
             color: $color-blue;
+            text-decoration: none;
         }
     }
 
     dfn {
         margin-bottom: $vertical-rhythm/2;
-        color: $color-grey;
+        color: $color-white;
     }
 
     ul {

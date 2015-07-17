@@ -140,14 +140,15 @@ nav.website-navigation {
     }
     a {
         position: relative;
-        color: $color-unselected;
+        padding-bottom: $vertical-rhythm/2.5;
+        border-bottom: 4px solid #FFF;
+        color: $color-black;
         &:hover {
             color: $color-blue;
+            border-color: $color-blue;
             text-decoration: none;
-            padding-bottom: $vertical-rhythm/2.5;
-            border-bottom: 4px solid $color-blue;
         }
-        @include transition (color .25s ease);
+        @include transition (color .25s linear, border-color .25s linear);
     }
     @media screen and (min-width: $small-menu-breakpoint ) {
         li {
@@ -168,7 +169,7 @@ nav.website-navigation {
         margin-bottom: 0;
         background-color: #FFF;
         opacity: 0;
-        @include transition(opacity .5s linear, transform .5s ease-in-out);
+        @include transition(opacity .25s linear, transform .25s ease-in-out);
         @include transform(translateY(-10em));
         input[type="search"] {
             width: 100%;
@@ -201,17 +202,20 @@ nav.website-navigation {
         width: $font-size-4;
         height: $font-size-4;
         margin-right: $vertical-rhythm/2;
+        @include media($large-layout) {
+            margin-right: $vertical-rhythm;
+        }
         vertical-align: middle;
         cursor: pointer;
         path {
             fill: $color-black;
+            @include transition(fill .25s linear);
         }
         &:hover {
             path {
                 fill: $color-blue;
             }
         }
-        @include transition(fill .25s linear);
     }
 
     .social-links {
