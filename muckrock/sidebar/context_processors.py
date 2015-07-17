@@ -25,11 +25,21 @@ def get_actionable_requests(user):
         'drafts': drafts,
     }
 
+def sidebar_message(user):
+    """Displays a message to a given usertype"""
+    try:
+        user_class = user.profile.acct_type if user.is_authenticated() else 'anonymous'
+    except Profile.DoesNotExist:
+        user_class = 'anonymous'
+    message = Sidebar.objects.get_text(user_class)
+    return {'broadcast': message}
+
 def sidebar_info(request):
     """Displays info about a user's requsts in the sidebar"""
     # content for all users
     sidebar_info_dict = {
-        'recent_articles': get_recent_articles()
+        'recent_articles': get_recent_articles(),
+        'broadcast': sidebar_message(request.user)
     }
     if request.user.is_authenticated():
         # content for logged in users
@@ -40,13 +50,3 @@ def sidebar_info(request):
         # content for logged out users
         pass
     return sidebar_info_dict
-
-def sidebar_message(request):
-    """Displays a message to a given usertype"""
-    user = request.user
-    try:
-        user_class = request.user.profile.acct_type if user.is_authenticated() else 'anonymous'
-    except Profile.DoesNotExist:
-        user_class = 'anonymous'
-    message = Sidebar.objects.get_text(user_class)
-    return {'broadcast': message}
