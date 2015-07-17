@@ -9,7 +9,7 @@ from muckrock.organization.models import Organization
 
 from datetime import datetime
 from mock import Mock, patch
-import nose.tools.eq_ as eq_
+from nose.tools import eq_
 
 class OrganizationURLTests(TestCase):
     """Test the urls for the organization app"""
