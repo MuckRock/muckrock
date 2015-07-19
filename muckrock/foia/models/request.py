@@ -138,7 +138,7 @@ class FOIARequest(models.Model):
     embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
     permanent_embargo = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=8, decimal_places=2, default='0.00')
+    price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
     description = models.TextField(blank=True)
     featured = models.BooleanField(default=False)
