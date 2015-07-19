@@ -35,7 +35,7 @@ django-mptt==0.7.4
 django-nose==1.4
 django-polymorphic==0.7.1
 django-pylibmc-sasl==0.2.4
-django-rest-swagger==0.1.14
+django-rest-swagger==0.3.2
 django-reversion==1.8.7
 django-robots==1.1
 django-secure==1.0
