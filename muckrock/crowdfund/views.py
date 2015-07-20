@@ -62,6 +62,7 @@ class CrowdfundRequestDetail(CrowdfundDetailView):
     Specificies a CrowdfundDetailView to use the CrowdfundRequest method.
     """
     model = CrowdfundRequest
+    form = CrowdfundRequestPaymentForm
     template_name = 'details/crowdfund_request_detail.html'
 
     def post(self, request, **kwargs):
@@ -71,28 +72,24 @@ class CrowdfundRequestDetail(CrowdfundDetailView):
         return a CrowdfundRequestPayment object.
         """
         # pylint: disable=unused-argument
-        # pylint: disable=no-self-use
         amount = request.POST.get('amount')
         show = request.POST.get('show')
         crowdfund = request.POST.get('crowdfund')
         email = request.POST.get('email')
         token = request.POST.get('token')
-        user = None
-        if request.user.is_authenticated():
-            user = request.user
+        user = request.user if request.user.is_authenticated() else None
+        crowdfund_object = get_object_or_404(self.model, pk=crowdfund)
+
         logging.debug(user)
-        crowdfund_object = get_object_or_404(CrowdfundRequest, pk=crowdfund)
-
-        log_msg = '\n\
-                   --- Crowdfunding Payment ---\n\
-                   Amount:      %s\n\
-                   Email:       %s\n\
-                   Token:       %s\n\
-                   Show:        %s\n\
-                   Crowdfund:   %s\n\
-                   User:        %s\n\
-                   \n'
-
+        log_msg = """
+            -:- Crowdfund Payment -:-
+            Amount:      %s
+            Email:       %s
+            Token:       %s
+            Show:        %s
+            Crowdfund:   %s
+            User:        %s
+        """
         logging.info(log_msg, amount, email, token, show, crowdfund, user)
 
         amount = Decimal(float(amount)/100)
@@ -102,7 +99,7 @@ class CrowdfundRequestDetail(CrowdfundDetailView):
             amount = crowdfund_object.amount_remaining()
 
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
-        payment_form = CrowdfundRequestPaymentForm(payment_data)
+        payment_form = self.form(payment_data)
         payment_object = None
         if payment_form.is_valid() and email and token:
             if process_payment(request, amount, token, crowdfund_object):
