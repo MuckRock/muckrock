@@ -122,3 +122,12 @@ class CrowdfundProject(CrowdfundABC):
 
     def get_crowdfund_object(self):
         return self.project
+
+class CrowdfundProjectPayment(CrowdfundPaymentABC):
+    """Individual payments made to a project crowdfund"""
+    crowdfund = models.ForeignKey(CrowdfundProject, related_name='payments')
+
+    def __unicode__(self):
+        # pylint: disable=no-member
+        return 'Payment of $%.2f by %s on %s for %s' % \
+            (self.amount, self.user, self.date.date(), self.crowdfund.project)
