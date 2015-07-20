@@ -44,21 +44,25 @@ def process_payment(request, amount, token, crowdfund):
                                 ' Your card has not been charged.'))
         return False
 
-class CrowdfundRequestDetail(DetailView):
+
+class CrowdfundDetailView(DetailView):
     """
     Presents details about a crowdfunding campaign,
-    as well as providing a private endpoint for contributions
+    as well as providing a private endpoint for contributions.
+    """
+    def get_context_data(self, **kwargs):
+        """Adds Stripe public key to context"""
+        context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        return context
+
+
+class CrowdfundRequestDetail(CrowdfundDetailView):
+    """
+    Specificies a CrowdfundDetailView to use the CrowdfundRequest method.
     """
     model = CrowdfundRequest
     template_name = 'details/crowdfund_request_detail.html'
-
-    def get_context_data(self, **kwargs):
-        """Adds Stripe public key to context"""
-        # pylint: disable=no-self-use
-        # pylint: disable=unused-variable
-        context = super(CrowdfundRequestDetail, self).get_context_data(**kwargs)
-        context['stripe_pk'] = STRIPE_PUB_KEY
-        return context
 
     def post(self, request, **kwargs):
         """
