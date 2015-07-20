@@ -120,6 +120,11 @@ class CrowdfundProject(CrowdfundABC):
     def __unicode__(self):
         return 'Crowdfunding for %s' % self.project.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('crowdfund-project', [], {'pk': self.pk})
+
     def get_crowdfund_object(self):
         return self.project
 

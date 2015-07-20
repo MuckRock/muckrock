@@ -12,8 +12,8 @@ from decimal import Decimal
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
-from muckrock.crowdfund.models import CrowdfundRequest
+from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -131,9 +131,13 @@ class CrowdfundDetailView(DetailView):
         self.return_error(request)
 
 class CrowdfundRequestDetail(CrowdfundDetailView):
-    """
-    Specificies a CrowdfundDetailView to use the CrowdfundRequest method.
-    """
+    """Specificies a detail view for crowdfunding requests."""
     model = CrowdfundRequest
     form = CrowdfundRequestPaymentForm
-    template_name = 'details/crowdfund_request_detail.html'
+    template_name = 'crowdfund/request_detail.html'
+
+class CrowdfundProjectDetail(CrowdfundDetailView):
+    """Specifies a detail view for crowdfunding projects."""
+    model = CrowdfundProject
+    form = CrowdfundProjectPaymentForm
+    template_name = 'crowdfund/project_detail.html'

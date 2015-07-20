@@ -11,8 +11,9 @@ from nose.tools import ok_, eq_
 import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
 from muckrock.foia.models import FOIARequest
+from muckrock.project.models import Project
 from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
 
@@ -161,3 +162,28 @@ class TestCrowdfundRequestView(TestCase):
             'The due date should be the same as today.')
         eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
             'A new crowdfund task should be created.')
+
+
+class TestCrowdfundProjectDetailView(TestCase):
+    """Tests for the crowdfund project detail view."""
+
+    def setUp(self):
+        self.crowdfund = CrowdfundProject()
+        self.crowdfund.name = 'Cool project please help'
+        self.crowdfund.date_due = date.today() + timedelta(30)
+        self.project = Project.objects.create(title='Test Project')
+        self.crowdfund.project = self.project
+        self.crowdfund.save()
+        self.url = self.crowdfund.get_absolute_url()
+        self.client = Client()
+        self.data = {
+            'amount': 200,
+            'show': '',
+            'crowdfund': self.crowdfund.pk,
+            'email': 'test@example.com'
+        }
+
+    def test_view(self):
+        """The crowdfund view should resolve and be visible to everyone."""
+        response = self.client.get(self.url)
+        eq_(response.status_code, 200, 'The response should be 200 OK.')
