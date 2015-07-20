@@ -6,7 +6,7 @@ Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
 
 For mailed responses, please address (see note):
-MuckRock News
+MuckRock
 DEPT MR {{ request.pk }}
 PO Box 55819
 Boston, MA 02205-5819
