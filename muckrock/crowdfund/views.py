@@ -12,7 +12,7 @@ from decimal import Decimal
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
+from muckrock.crowdfund.forms import CrowdfundProjectForm, CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
@@ -141,3 +141,9 @@ class CrowdfundProjectDetail(CrowdfundDetailView):
     model = CrowdfundProject
     form = CrowdfundProjectPaymentForm
     template_name = 'crowdfund/project_detail.html'
+
+class CrowdfundProjectCreateView(CreateView):
+    """A creation view for project crowdfunding"""
+    model = CrowdfundProject
+    form = CrowdfundProjectForm
+    template_name = 'project/crowdfund.html'

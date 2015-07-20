@@ -4,6 +4,7 @@ URL routes for the project application
 
 from django.conf.urls import patterns, url
 
+from muckrock.crowdfund.views import CrowdfundProjectCreateView
 from muckrock.project import views
 
 urlpatterns = patterns('',
@@ -21,5 +22,8 @@ urlpatterns = patterns('',
         name='project-update'),
     url(r'^(?P<slug>[\w-]+)-(?P<id>\d+)/delete/$',
         views.ProjectDeleteView.as_view(),
-        name='project-delete')
+        name='project-delete'),
+    url(r'^(?P<slug>[\w-]+)-(?P<id>\d+)/crowdfund/$',
+        CrowdfundProjectCreateView.as_view(),
+        name='project-crowdfund'),
 )
