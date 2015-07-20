@@ -14,8 +14,11 @@ class TestCrowdfundProject(TestCase):
         self.crowdfund = models.CrowdfundProject()
         self.crowdfund.name = 'Cool project please help'
         self.crowdfund.due_date = date.today() + timedelta(30)
-        project = Project.objects.create(title='Test Project')
-        self.crowdfund.project = project
+        self.project = Project.objects.create(title='Test Project')
+        self.crowdfund.project = self.project
 
     def test_unicode(self):
         eq_('%s' % self.crowdfund, 'Crowdfunding for Test Project')
+
+    def test_get_crowdfund_object(self):
+        eq_(self.crowdfund.get_crowdfund_object(), self.project)

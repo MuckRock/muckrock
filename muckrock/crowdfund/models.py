@@ -72,6 +72,10 @@ class CrowdfundABC(models.Model):
         logging.debug(contributors)
         return contributors
 
+    def get_crowdfund_object(self):
+        """Return the object being crowdfunded. Should be implemented by subclasses."""
+        return None
+
 class CrowdfundPaymentABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
@@ -97,6 +101,9 @@ class CrowdfundRequest(CrowdfundABC):
         """The url for this object"""
         return ('crowdfund-request', [], {'pk': self.pk})
 
+    def get_crowdfund_object(self):
+        return self.foia
+
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
     crowdfund = models.ForeignKey(CrowdfundRequest, related_name='payments')
@@ -113,3 +120,5 @@ class CrowdfundProject(CrowdfundABC):
     def __unicode__(self):
         return 'Crowdfunding for %s' % self.project.title
 
+    def get_crowdfund_object(self):
+        return self.project
