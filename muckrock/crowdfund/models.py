@@ -15,6 +15,9 @@ from muckrock import task
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
+    class Meta:
+        abstract = True
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     payment_required = models.DecimalField(
@@ -36,34 +39,6 @@ class CrowdfundABC(models.Model):
     def amount_remaining(self):
         """Reports the amount still needed to be raised"""
         return self.payment_required - self.payment_received
-
-    class Meta:
-        abstract = True
-
-class CrowdfundPaymentABC(models.Model):
-    """Abstract base class for crowdfunding objects"""
-    # pylint: disable=too-few-public-methods, model-missing-unicode
-    user = models.ForeignKey(User, blank=True, null=True)
-    name = models.CharField(max_length=255, blank=True)
-    amount = models.DecimalField(max_digits=14, decimal_places=2)
-    date = models.DateTimeField(auto_now_add=True)
-    show = models.BooleanField(default=False)
-
-    class Meta:
-        abstract = True
-
-class CrowdfundRequest(CrowdfundABC):
-    """Keep track of crowdfunding for a request"""
-    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
-
-    def __unicode__(self):
-        # pylint: disable=no-member
-        return 'Crowdfunding for %s' % self.foia.title
-
-    @models.permalink
-    def get_absolute_url(self):
-        """The url for this object"""
-        return ('crowdfund-request', [], {'pk': self.pk})
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
@@ -96,6 +71,31 @@ class CrowdfundRequest(CrowdfundABC):
         logging.debug(payments)
         logging.debug(contributors)
         return contributors
+
+class CrowdfundPaymentABC(models.Model):
+    """Abstract base class for crowdfunding objects"""
+    # pylint: disable=too-few-public-methods, model-missing-unicode
+    user = models.ForeignKey(User, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True)
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
+    date = models.DateTimeField(auto_now_add=True)
+    show = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+
+class CrowdfundRequest(CrowdfundABC):
+    """Keep track of crowdfunding for a request"""
+    foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
+
+    def __unicode__(self):
+        # pylint: disable=no-member
+        return 'Crowdfunding for %s' % self.foia.title
+
+    @models.permalink
+    def get_absolute_url(self):
+        """The url for this object"""
+        return ('crowdfund-request', [], {'pk': self.pk})
 
 class CrowdfundRequestPayment(CrowdfundPaymentABC):
     """M2M intermediate model"""
