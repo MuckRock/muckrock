@@ -15,6 +15,8 @@ from muckrock import task
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
     payment_required = models.DecimalField(
         max_digits=14,
         decimal_places=2,
@@ -52,8 +54,6 @@ class CrowdfundPaymentABC(models.Model):
 
 class CrowdfundRequest(CrowdfundABC):
     """Keep track of crowdfunding for a request"""
-    name = models.CharField(max_length=255, default='Crowdfund this request')
-    description = models.TextField(blank=True)
     foia = models.OneToOneField(FOIARequest, related_name='crowdfund')
 
     def __unicode__(self):
