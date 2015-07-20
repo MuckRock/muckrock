@@ -16,12 +16,12 @@ class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
     payment_required = models.DecimalField(
-        max_digits=8,
+        max_digits=14,
         decimal_places=2,
         default='0.00'
     )
     payment_received = models.DecimalField(
-        max_digits=8,
+        max_digits=14,
         decimal_places=2,
         default='0.00'
     )
@@ -43,7 +43,7 @@ class CrowdfundPaymentABC(models.Model):
     # pylint: disable=too-few-public-methods, model-missing-unicode
     user = models.ForeignKey(User, blank=True, null=True)
     name = models.CharField(max_length=255, blank=True)
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    amount = models.DecimalField(max_digits=14, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=False)
 
