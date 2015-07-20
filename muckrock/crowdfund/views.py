@@ -62,10 +62,23 @@ class CrowdfundDetailView(DetailView):
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
-        # pylint: disable=unused-argument
+        crowdfund = request.POST.get('crowdfund')
+        if crowdfund != kwargs['pk']:
+            logging.error('The crowdfund associated with the payment and the crowdfund associated with this page do not match. Something has gone terribly wrong.')
+            # if AJAX, return HTTP 400 ERROR
+            # else, add a message to the session
+            if request.is_ajax():
+                return HttpResponse(400)
+            else:
+                messages.error(
+                    request,
+                    ('There was an error making your contribution. '
+                    'Your card has not been charged.')
+                )
+                return redirect(redirect_url)
         amount = request.POST.get('amount')
         show = request.POST.get('show')
-        crowdfund = request.POST.get('crowdfund')
+
         email = request.POST.get('email')
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() else None
