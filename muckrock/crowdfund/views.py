@@ -2,6 +2,7 @@
 Views for the crowdfund application
 """
 
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -56,6 +57,28 @@ class CrowdfundDetailView(DetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
+    def get_redirect_url(self):
+        """Returns a url to redirect to"""
+        try:
+            crowdfund_object = self.get_object().get_crowdfund_object()
+            redirect_url = reverse(crowdfund_object)
+        except (AttributeError, NoReverseMatch) as exception:
+            logging.error(exception)
+            redirect_url = reverse('index')
+        return redirect_url
+
+    def return_error(self, request):
+        """If AJAX, return HTTP 400 ERROR. Else, add a message to the session."""
+        if request.is_ajax():
+            return HttpResponse(400)
+        else:
+            messages.error(
+                request,
+                ('There was an error making your contribution. '
+                'Your card has not been charged.')
+            )
+            return redirect(self.get_redirect_url())
+
     def post(self, request, **kwargs):
         """
         First we validate the payment form, so we don't charge someone's card by accident.
@@ -65,43 +88,18 @@ class CrowdfundDetailView(DetailView):
         crowdfund = request.POST.get('crowdfund')
         if crowdfund != kwargs['pk']:
             logging.error('The crowdfund associated with the payment and the crowdfund associated with this page do not match. Something has gone terribly wrong.')
-            # if AJAX, return HTTP 400 ERROR
-            # else, add a message to the session
-            if request.is_ajax():
-                return HttpResponse(400)
-            else:
-                messages.error(
-                    request,
-                    ('There was an error making your contribution. '
-                    'Your card has not been charged.')
-                )
-                return redirect(redirect_url)
+            self.return_error(request)
         amount = request.POST.get('amount')
         show = request.POST.get('show')
-
         email = request.POST.get('email')
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() else None
         crowdfund_object = get_object_or_404(self.model, pk=crowdfund)
-
-        logging.debug(user)
-        log_msg = """
-            -:- Crowdfund Payment -:-
-            Amount:      %s
-            Email:       %s
-            Token:       %s
-            Show:        %s
-            Crowdfund:   %s
-            User:        %s
-        """
-        logging.info(log_msg, amount, email, token, show, crowdfund, user)
-
         amount = Decimal(float(amount)/100)
         # check if the amount is greater than the amount required
         # if it is, only charge the amount required
         if amount > crowdfund_object.amount_remaining():
             amount = crowdfund_object.amount_remaining()
-
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = self.form(payment_data)
         payment_object = None
@@ -112,24 +110,25 @@ class CrowdfundDetailView(DetailView):
                 payment_object.save()
                 logging.info(payment_object)
                 crowdfund_object.update_payment_received()
+                # log the payment
+                log_msg = """
+                    -:- Crowdfund Payment -:-
+                    Amount:      %s
+                    Email:       %s
+                    Token:       %s
+                    Show:        %s
+                    Crowdfund:   %s
+                    User:        %s
+                """
+                logging.info(log_msg, amount, email, token, show, crowdfund, user)
                 # if AJAX, return HTTP 200 OK
                 # else, add a message to the session
                 if request.is_ajax():
                     return HttpResponse(200)
                 else:
                     messages.success(request, 'Thank you for your contribution!')
-                    return redirect(crowdfund_object.foia)
-        # if AJAX, return HTTP 400 ERROR
-        # else, add a message to the session
-        if request.is_ajax():
-            return HttpResponse(400)
-        else:
-            messages.error(
-                request,
-                ('There was an error making your contribution. '
-                'Your card has not been charged.')
-            )
-            return redirect(crowdfund_object.foia)
+                    return redirect(self.get_redirect_url())
+        self.return_error(request)
 
 class CrowdfundRequestDetail(CrowdfundDetailView):
     """
