@@ -7,7 +7,7 @@ from django import forms
 from decimal import Decimal
 from datetime import date, timedelta
 
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProjectPayment
 
 class NumberInput(forms.TextInput):
     """Patches a NumberInput widget on top of the TextInput widget"""
@@ -62,6 +62,24 @@ class CrowdfundRequestPaymentForm(forms.ModelForm):
     """Form to create a payment to a FOIA crowdfund"""
     class Meta:
         model = CrowdfundRequestPayment
+        fields = ['amount', 'show', 'crowdfund']
+        widgets = {
+            'amount': NumberInput(),
+            'show': forms.CheckboxInput(),
+            'crowdfund': forms.HiddenInput()
+        }
+
+    def clean_amount(self):
+        """Ensure the amount of the payment is greater than zero"""
+        amount = self.cleaned_data['amount']
+        if not amount > 0:
+            raise forms.ValidationError('Cannot contribute zero dollars')
+        return amount
+
+class CrowdfundProjectPaymentForm(forms.ModelForm):
+    """Form to create a payment to a project crowdfund"""
+    class Meta:
+        model = CrowdfundProjectPayment
         fields = ['amount', 'show', 'crowdfund']
         widgets = {
             'amount': NumberInput(),
