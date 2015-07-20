@@ -105,3 +105,11 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
         # pylint: disable=no-member
         return 'Payment of $%.2f by %s on %s for %s' % \
             (self.amount, self.user, self.date.date(), self.crowdfund.foia)
+
+class CrowdfundProject(CrowdfundABC):
+    """A crowdfunding campaign for a project."""
+    project = models.ForeignKey('project.Project', related_name='crowdfund')
+
+    def __unicode__(self):
+        return 'Crowdfunding for %s' % self.project.title
+
