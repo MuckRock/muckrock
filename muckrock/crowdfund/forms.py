@@ -16,7 +16,7 @@ class NumberInput(forms.TextInput):
 class CrowdfundRequestForm(forms.ModelForm):
     """Form to confirm enable crowdfunding on a FOIA"""
 
-    fee_rate = Decimal(0.1)
+    fee_rate = Decimal(0.15)
 
     class Meta:
         model = CrowdfundRequest
@@ -27,7 +27,7 @@ class CrowdfundRequestForm(forms.ModelForm):
 
     payment_required = forms.DecimalField(
         label='Amount',
-        help_text='We will add 10% to this amount, which goes towards our operating costs.',
+        help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
     )
 
