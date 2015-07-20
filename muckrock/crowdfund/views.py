@@ -56,15 +56,6 @@ class CrowdfundDetailView(DetailView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         return context
 
-
-class CrowdfundRequestDetail(CrowdfundDetailView):
-    """
-    Specificies a CrowdfundDetailView to use the CrowdfundRequest method.
-    """
-    model = CrowdfundRequest
-    form = CrowdfundRequestPaymentForm
-    template_name = 'details/crowdfund_request_detail.html'
-
     def post(self, request, **kwargs):
         """
         First we validate the payment form, so we don't charge someone's card by accident.
@@ -126,3 +117,11 @@ class CrowdfundRequestDetail(CrowdfundDetailView):
                 'Your card has not been charged.')
             )
             return redirect(crowdfund_object.foia)
+
+class CrowdfundRequestDetail(CrowdfundDetailView):
+    """
+    Specificies a CrowdfundDetailView to use the CrowdfundRequest method.
+    """
+    model = CrowdfundRequest
+    form = CrowdfundRequestPaymentForm
+    template_name = 'details/crowdfund_request_detail.html'
