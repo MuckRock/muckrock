@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.views.generic.detail import DetailView
+from django.views.generic import DetailView, CreateView
 
 from decimal import Decimal
 import logging

@@ -76,7 +76,7 @@ class CrowdfundRequestPaymentForm(forms.ModelForm):
             raise forms.ValidationError('Cannot contribute zero dollars')
         return amount
 
-class CrowdfundRequestForm(forms.ModelForm):
+class CrowdfundProjectForm(forms.ModelForm):
     """Form to confirm and enable crowdfunding on a project"""
 
     fee_rate = Decimal(0.15)
