@@ -2,12 +2,9 @@
 Serilizers for the Q&A application API
 """
 
-from django.contrib.auth.models import User
-
 from rest_framework import serializers, permissions
 
 from muckrock.qanda.models import Question, Answer
-from muckrock.tags.models import Tag
 
 # pylint: disable=too-few-public-methods
 

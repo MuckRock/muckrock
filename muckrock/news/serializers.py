@@ -2,8 +2,6 @@
 Serilizers for the news application API
 """
 
-from django.contrib.auth.models import User
-
 from rest_framework import serializers
 
 from muckrock.news.models import Article
