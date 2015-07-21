@@ -33,6 +33,17 @@ def get_stripe_token():
     ok_(token)
     return token.id
 
+class TestCrowdfundDetailView(TestCase):
+    """Tests the helper method in the DetailView subclass"""
+
+    def setUp(self):
+        self.view = CrowdfundDetailView()
+        self.view.form = CrowdfundRequestPaymentForm
+
+    def test_get_form(self):
+        """Should return a form or nothing"""
+        ok_(isinstance(self.view.get_form(), CrowdfundRequestPaymentForm))
+
 class TestCrowdfundRequestView(TestCase):
     """Tests the Detail view for CrowdfundRequest objects"""
 
