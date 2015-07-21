@@ -38,10 +38,11 @@ class TestCrowdfundDetailView(TestCase):
 
     def setUp(self):
         self.view = CrowdfundDetailView()
-        self.view.form = CrowdfundRequestPaymentForm
+        self.view.form = CrowdfundRequestPaymentForm()
 
     def test_get_form(self):
         """Should return a form or nothing"""
+        logging.debug(self.view.get_form())
         ok_(isinstance(self.view.get_form(), CrowdfundRequestPaymentForm))
 
 class TestCrowdfundRequestView(TestCase):
