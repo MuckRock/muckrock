@@ -32,7 +32,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    model = FOIARequest
+    queryset = FOIARequest.objects.all()
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
 
@@ -199,7 +199,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    model = FOIACommunication
+    queryset = FOIACommunication.objects.all()
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 

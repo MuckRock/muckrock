@@ -483,7 +483,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    model = User
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (DjangoModelPermissions,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')
@@ -493,7 +493,7 @@ class StatisticsViewSet(viewsets.ModelViewSet):
     """API views for Statistics"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    model = Statistics
+    queryset = Statistics.objects.all()
     serializer_class = StatisticsSerializer
     permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     filter_fields = ('date',)
