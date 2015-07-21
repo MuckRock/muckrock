@@ -13,7 +13,7 @@ from django.views.generic.detail import DetailView
 
 from datetime import datetime
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -194,7 +194,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
             obj.user = self.request.user
         return super(QuestionViewSet, self).pre_save(obj)
 
-    @action(permission_classes=(IsAuthenticated,))
+    @detail_route(permission_classes=(IsAuthenticated,))
     def answer(self, request, pk=None):
         """Answer a question"""
         try:
