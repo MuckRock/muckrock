@@ -182,7 +182,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
     # pylint: disable=too-many-ancestors
-    model = Question
+    queryset = Question.objects.all()
     serializer_class = QuestionSerializer
     permission_classes = (QuestionPermissions,)
     filter_fields = ('title', 'foia',)
