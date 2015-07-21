@@ -1,8 +1,11 @@
+"""
+Tests for crowdfunding models
+"""
+
 from django.test import TestCase
 
 from datetime import date, timedelta
-from mock import Mock, patch
-from nose.tools import ok_, eq_
+from nose.tools import eq_
 
 from muckrock.crowdfund import models
 from muckrock.project.models import Project
@@ -18,7 +21,9 @@ class TestCrowdfundProject(TestCase):
         self.crowdfund.project = self.project
 
     def test_unicode(self):
+        """The crowdfund should express itself concisely."""
         eq_('%s' % self.crowdfund, 'Crowdfunding for Test Project')
 
     def test_get_crowdfund_object(self):
+        """The crowdfund should have a project being crowdfunded."""
         eq_(self.crowdfund.get_crowdfund_object(), self.project)

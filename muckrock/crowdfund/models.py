@@ -74,6 +74,7 @@ class CrowdfundABC(models.Model):
 
     def get_crowdfund_object(self):
         """Return the object being crowdfunded. Should be implemented by subclasses."""
+        # pylint:disable=no-self-use
         return None
 
 class CrowdfundPaymentABC(models.Model):
@@ -118,6 +119,7 @@ class CrowdfundProject(CrowdfundABC):
     project = models.ForeignKey('project.Project', related_name='crowdfund')
 
     def __unicode__(self):
+        # pylint: disable=no-member
         return 'Crowdfunding for %s' % self.project.title
 
     @models.permalink

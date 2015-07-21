@@ -12,7 +12,9 @@ from decimal import Decimal
 import logging
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundProjectForm, CrowdfundRequestPaymentForm, CrowdfundProjectPaymentForm
+from muckrock.crowdfund.forms import CrowdfundProjectForm, \
+                                     CrowdfundRequestPaymentForm, \
+                                     CrowdfundProjectPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
@@ -51,6 +53,12 @@ class CrowdfundDetailView(DetailView):
     Presents details about a crowdfunding campaign,
     as well as providing a private endpoint for contributions.
     """
+    form = None
+
+    def get_form(self):
+        """Returns a form or None"""
+        return self.form
+
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
         context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
@@ -87,7 +95,9 @@ class CrowdfundDetailView(DetailView):
         """
         crowdfund = request.POST.get('crowdfund')
         if crowdfund != kwargs['pk']:
-            logging.error('The crowdfund associated with the payment and the crowdfund associated with this page do not match. Something has gone terribly wrong.')
+            error_msg = ('The crowdfund associated with the payment and the crowdfund '
+                         'associated with this page do not match.')
+            logging.error(error_msg)
             self.return_error(request)
         amount = request.POST.get('amount')
         show = request.POST.get('show')
@@ -101,7 +111,8 @@ class CrowdfundDetailView(DetailView):
         if amount > crowdfund_object.amount_remaining():
             amount = crowdfund_object.amount_remaining()
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
-        payment_form = self.form(payment_data)
+        payment_form = self.get_form()
+        payment_form = payment_form(payment_data)
         payment_object = None
         if payment_form.is_valid() and email and token:
             if process_payment(request, amount, token, crowdfund_object):

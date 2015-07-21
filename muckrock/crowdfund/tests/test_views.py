@@ -10,16 +10,13 @@ import logging
 from nose.tools import ok_, eq_
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
+from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
+from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
-
-# pylint: disable=line-too-long
-# Line too long is disabled so that the testing docstring can stay on one line,
-# since Nose does not render multiline testing docstrings.
 
 def get_stripe_token():
     """
@@ -81,7 +78,10 @@ class TestCrowdfundRequestView(TestCase):
         return response
 
     def test_anonymous_contribution(self):
-        """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
+        """
+        After posting the payment, the email, and the token, the server should process the
+        payment before creating and returning a payment object.
+        """
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.user, None,
@@ -91,7 +91,10 @@ class TestCrowdfundRequestView(TestCase):
             'The crowdfund should have the payment added to it.')
 
     def test_anonymous_while_logged_in(self):
-        """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
+        """
+        An attributed contribution checks if the user is logged in, but still
+        defaults to anonymity.
+        """
         self.client.login(username='adam', password='abc')
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
@@ -116,7 +119,10 @@ class TestCrowdfundRequestView(TestCase):
             'The crowdfund should have the payment added to it.')
 
     def test_correct_amount(self):
-        """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
+        """
+        Amounts come in from stripe in units of .01. The payment object should
+        account for this and transform it into a Decimal object for storage.
+        """
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         amount = Decimal(float(self.data['amount'])/100)
