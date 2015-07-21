@@ -188,6 +188,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
     filter_fields = ('title', 'foia',)
 
     def pre_save(self, obj):
+        """Auto fill fields on create"""
         if not obj.pk:
             obj.date = datetime.now()
             obj.slug = slugify(obj.title)
