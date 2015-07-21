@@ -76,7 +76,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     """API views for Article"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = Article.objects.all()
+    model = Article
     serializer_class = ArticleSerializer
     permission_classes = (DjangoModelPermissions,)
 
