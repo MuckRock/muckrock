@@ -13,8 +13,8 @@ from muckrock.news.models import Article
 class ArticleSerializer(serializers.ModelSerializer):
     """Serializer for Article model"""
 
-    authors = serializers.RelatedField(many=True, queryset=User.objects.all())
-    editors = serializers.RelatedField(many=True, queryset=User.objects.all())
+    authors = serializers.StringRelatedField(many=True)
+    editors = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Article
