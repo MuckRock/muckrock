@@ -4,7 +4,7 @@ Serilizers for the Agency application API
 
 from rest_framework import serializers
 
-from muckrock.agency.models import Agency, AgencyType
+from muckrock.agency.models import Agency
 
 # pylint: disable=too-few-public-methods
 

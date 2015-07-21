@@ -2,12 +2,9 @@
 Serilizers for the FOIA application API
 """
 
-from django.contrib.auth.models import User
-
 from rest_framework import serializers, permissions
 
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
-from muckrock.tags.models import Tag
 
 # pylint: disable=too-few-public-methods
 
