@@ -4,13 +4,14 @@ Serilizers for the Agency application API
 
 from rest_framework import serializers
 
-from muckrock.agency.models import Agency
+from muckrock.agency.models import Agency, AgencyType
 
 # pylint: disable=too-few-public-methods
 
 class AgencySerializer(serializers.ModelSerializer):
     """Serializer for Agency model"""
-    types = serializers.RelatedField(many=True)
+    types = serializers.RelatedField(
+        many=True, queryset=AgencyType.objects.all())
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=no-member

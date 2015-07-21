@@ -101,7 +101,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                        'of existing entities.  Agency must be in Jurisdiction.'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(permission_classes=(IsOwner,))
+    @decorators.detail_route(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
         """Followup on a request"""
         try:
@@ -131,7 +131,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Missing data - Please supply text for followup'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(permission_classes=(IsOwner,))
+    @decorators.detail_route(permission_classes=(IsOwner,))
     def pay(self, request, pk=None):
         """Pay for a request"""
         try:
@@ -166,7 +166,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Stripe Card Error: %s' % exc},
                             status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
+    @decorators.detail_route(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""
 

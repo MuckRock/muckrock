@@ -2,9 +2,12 @@
 Serilizers for the FOIA application API
 """
 
+from django.contrib.auth.models import User
+
 from rest_framework import serializers, permissions
 
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
+from muckrock.tags.models import Tag
 
 # pylint: disable=too-few-public-methods
 
@@ -66,8 +69,9 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
-    username = serializers.RelatedField(source='user')
-    tags = serializers.RelatedField(many=True)
+    username = serializers.RelatedField(
+        source='user', queryset=User.objects.all())
+    tags = serializers.RelatedField(many=True, queryset=Tag.objects.all())
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
 
