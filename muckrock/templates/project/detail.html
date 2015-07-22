@@ -24,10 +24,13 @@ MuckRock &bull; {{ project.title }}
 {% block aside %}
     {% if request.user.is_staff or request.user in project.contributors.all %}
     <div class="controls">
-        <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="update primary button">
+        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
+            Crowdfund
+        </a>
+        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
             Update
         </a>
-        <a href="{% url 'project-delete' slug=project.slug id=project.id %}" class="delete failure button">
+        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
             Delete
         </a>
     </div>
