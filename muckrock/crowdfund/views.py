@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, CreateView
 
+from datetime import date, timedelta
 from decimal import Decimal
 import logging
 import stripe
@@ -16,6 +17,7 @@ from muckrock.crowdfund.forms import CrowdfundProjectForm, \
                                      CrowdfundRequestPaymentForm, \
                                      CrowdfundProjectPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundProject
+from muckrock.project.models import Project
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -158,3 +160,14 @@ class CrowdfundProjectCreateView(CreateView):
     model = CrowdfundProject
     form_class = CrowdfundProjectForm
     template_name = 'project/crowdfund.html'
+
+    def get_initial(self):
+        """Sets defaults in crowdfund project form"""
+        project = self.get_object(queryset=Project.objects.all())
+        initial_name = 'Crowdfund the ' + project.title
+        initial_date = date.today() + timedelta(30)
+        return {
+            'name': initial_name,
+            'date_due': initial_date,
+            'project': project.id
+        }
