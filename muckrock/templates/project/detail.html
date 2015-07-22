@@ -1,5 +1,7 @@
 {% extends 'details/base_detail.html' %}
+{% load static from staticfiles %}
 
+{% load crowdfund_tags %}
 {% load tags %}
 {% load markdown_deux_tags %}
 
@@ -24,10 +26,13 @@ MuckRock &bull; {{ project.title }}
 {% block aside %}
     {% if request.user.is_staff or request.user in project.contributors.all %}
     <div class="controls">
-        <a href="{% url 'project-update' slug=project.slug id=project.id %}" class="update primary button">
+        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
+            Crowdfund
+        </a>
+        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
             Update
         </a>
-        <a href="{% url 'project-delete' slug=project.slug id=project.id %}" class="delete failure button">
+        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
             Delete
         </a>
     </div>
@@ -57,30 +62,39 @@ MuckRock &bull; {{ project.title }}
 {% endblock %}
 
 {% block main %}
-{% if project.requests.count > 0 %}
-<h2>Requests</h2>
-<ul class="requests">
-    {% for request in project.requests.all %}
-    <li class="request">
-        <a href="{{ request.get_absolute_url }}" title="{{ request.title }}">
-            {{ request.title }}
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% if project.articles.count > 0 %}
-<h2>Articles</h2>
-<ul class="articles">
-    {% for article in project.articles.all %}
-    <li class="article">
-        <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
-            {{ article.title }}
-        </a>
-    </li>
-    {% endfor %}
-</ul>
-{% endif %}
+
+    {% if project.crowdfund.count > 0 %}
+    <h2>Crowdfund</h2>
+        {% for crowdfund in project.crowdfund.all %}
+            {% crowdfund_project crowdfund.pk %}
+        {% endfor %}
+    {% endif %}
+
+    {% if project.requests.count > 0 %}
+    <h2>Requests</h2>
+    <ul class="requests">
+        {% for request in project.requests.all %}
+        <li class="request">
+            <a href="{{ request.get_absolute_url }}" title="{{ request.title }}">
+                {{ request.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if project.articles.count > 0 %}
+    <h2>Articles</h2>
+    <ul class="articles">
+        {% for article in project.articles.all %}
+        <li class="article">
+            <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
+                {{ article.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 {% endblock main %}
 
 {% block open_graph %}
@@ -108,3 +122,9 @@ MuckRock &bull; {{ project.title }}
 {% endif %}
 {% endfor %}
 {% endblock twitter_card %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
+{% endblock scripts %}

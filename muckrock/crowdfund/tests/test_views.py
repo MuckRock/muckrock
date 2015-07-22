@@ -2,23 +2,23 @@
 Tests for crowdfund app
 """
 
+from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 import logging
+from mock import Mock, MagicMock, patch
 from nose.tools import ok_, eq_
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
-from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment
+from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
+from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
+from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.foia.models import FOIARequest
+from muckrock.project.models import Project
 from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
-
-# pylint: disable=line-too-long
-# Line too long is disabled so that the testing docstring can stay on one line,
-# since Nose does not render multiline testing docstrings.
 
 def get_stripe_token():
     """
@@ -34,6 +34,36 @@ def get_stripe_token():
     })
     ok_(token)
     return token.id
+
+class TestCrowdfundDetailView(TestCase):
+    """Tests the helper method in the DetailView subclass"""
+
+    def setUp(self):
+        self.view = CrowdfundDetailView()
+        self.view.form = CrowdfundRequestPaymentForm()
+        self.mock_url = '/mock-123/'
+        self.crowdfund = Mock()
+        project = Mock()
+        project.get_absolute_url = Mock(return_value=self.mock_url)
+        self.crowdfund.get_crowdfund_object = Mock(return_value=project)
+        self.view.get_object = Mock(return_value=self.crowdfund)
+
+    def test_get_form(self):
+        """Should return a form or nothing"""
+        logging.debug(self.view.get_form())
+        ok_(isinstance(self.view.get_form(), CrowdfundRequestPaymentForm))
+        self.view.form = None
+        ok_(self.view.get_form() is None)
+
+    def test_get_redirect_url(self):
+        """Should return a redirect url or the index url"""
+        eq_(self.view.get_redirect_url(), self.mock_url,
+            'The function should return the url of the crowdfund object.')
+        self.crowdfund.get_crowdfund_object = Mock(return_value=None)
+        self.view.get_object = Mock(return_value=self.crowdfund)
+        eq_(self.view.get_redirect_url(), reverse('index'),
+            ('The function should return the index url as a fallback '
+            'if the url cannot be reversed.'))
 
 class TestCrowdfundRequestView(TestCase):
     """Tests the Detail view for CrowdfundRequest objects"""
@@ -80,7 +110,10 @@ class TestCrowdfundRequestView(TestCase):
         return response
 
     def test_anonymous_contribution(self):
-        """After posting the payment, the email, and the token, the server should process the payment before creating and returning a payment object."""
+        """
+        After posting the payment, the email, and the token, the server should process the
+        payment before creating and returning a payment object.
+        """
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.user, None,
@@ -90,7 +123,10 @@ class TestCrowdfundRequestView(TestCase):
             'The crowdfund should have the payment added to it.')
 
     def test_anonymous_while_logged_in(self):
-        """An attributed contribution checks if the user is logged in, but still defaults to anonymity."""
+        """
+        An attributed contribution checks if the user is logged in, but still
+        defaults to anonymity.
+        """
         self.client.login(username='adam', password='abc')
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
@@ -115,7 +151,10 @@ class TestCrowdfundRequestView(TestCase):
             'The crowdfund should have the payment added to it.')
 
     def test_correct_amount(self):
-        """Amounts come in from stripe in units of .01. The payment object should account for this and transform it into a Decimal object for storage."""
+        """
+        Amounts come in from stripe in units of .01. The payment object should
+        account for this and transform it into a Decimal object for storage.
+        """
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         amount = Decimal(float(self.data['amount'])/100)
@@ -161,3 +200,28 @@ class TestCrowdfundRequestView(TestCase):
             'The due date should be the same as today.')
         eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
             'A new crowdfund task should be created.')
+
+
+class TestCrowdfundProjectDetailView(TestCase):
+    """Tests for the crowdfund project detail view."""
+
+    def setUp(self):
+        self.crowdfund = CrowdfundProject()
+        self.crowdfund.name = 'Cool project please help'
+        self.crowdfund.date_due = date.today() + timedelta(30)
+        self.project = Project.objects.create(title='Test Project')
+        self.crowdfund.project = self.project
+        self.crowdfund.save()
+        self.url = self.crowdfund.get_absolute_url()
+        self.client = Client()
+        self.data = {
+            'amount': 200,
+            'show': '',
+            'crowdfund': self.crowdfund.pk,
+            'email': 'test@example.com'
+        }
+
+    def test_view(self):
+        """The crowdfund view should resolve and be visible to everyone."""
+        response = self.client.get(self.url)
+        eq_(response.status_code, 200, 'The response should be 200 OK.')
