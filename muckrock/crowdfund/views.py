@@ -57,10 +57,6 @@ class CrowdfundDetailView(DetailView):
     """
     form = None
 
-    def get_form(self):
-        """Returns a form or None"""
-        return self.form
-
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
         context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
@@ -113,7 +109,7 @@ class CrowdfundDetailView(DetailView):
         if amount > crowdfund_object.amount_remaining():
             amount = crowdfund_object.amount_remaining()
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
-        payment_form = self.get_form()
+        payment_form = self.get_form_class()
         payment_form = payment_form(payment_data)
         payment_object = None
         if payment_form.is_valid() and email and token:
