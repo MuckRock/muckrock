@@ -161,9 +161,12 @@ class CrowdfundProjectCreateView(CreateView):
     form_class = CrowdfundProjectForm
     template_name = 'project/crowdfund.html'
 
+    def get_project(self):
+        return self.get_object(queryset=Project.objects.all())
+
     def get_initial(self):
         """Sets defaults in crowdfund project form"""
-        project = self.get_object(queryset=Project.objects.all())
+        project = self.get_project()
         initial_name = 'Crowdfund the ' + project.title
         initial_date = date.today() + timedelta(30)
         return {
@@ -171,3 +174,7 @@ class CrowdfundProjectCreateView(CreateView):
             'date_due': initial_date,
             'project': project.id
         }
+
+    def get_success_url(self):
+        project = self.get_project()
+        return project.get_absolute_url()
