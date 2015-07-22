@@ -8,7 +8,7 @@ from muckrock.sidebar.serializers import SidebarSerializer
 
 class SidebarViewSet(viewsets.ModelViewSet):
     """API views for Sidebar"""
-    model = Sidebar
+    queryset = Sidebar.objects.all()
     serializer_class = SidebarSerializer
     permission_classes = (DjangoModelPermissions)
     filter_fields = ('title')

@@ -66,8 +66,8 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
-    username = serializers.RelatedField(source='user')
-    tags = serializers.RelatedField(many=True)
+    username = serializers.StringRelatedField(source='user')
+    tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)
 

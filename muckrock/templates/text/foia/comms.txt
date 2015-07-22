@@ -6,9 +6,9 @@ Filed via MuckRock.com
 E-mail (Preferred): {{ request.get_mail_id }}@requests.muckrock.com
 
 For mailed responses, please address (see note):
-MuckRock News
+MuckRock
 DEPT MR {{ request.pk }}
 PO Box 55819
 Boston, MA 02205-5819
 
-PLEASE NOTE the new address as well as the fact that improperly addressed (i.e., with the requester's name rather than MuckRock News) requests might be returned by the USPS as undeliverable.{% endif %}{% if not forloop.last %}---{% endif %}{% endfor %}{% endautoescape %}
+{% if request.user.is_staff %}PLEASE NOTE: This request was filed by a MuckRock staff reporter. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% else %}PLEASE NOTE: This request is not filed by a MuckRock staff member, but is being sent through MuckRock by the above in order to better track, share, and manage public records requests. Also note that improperly addressed (i.e., with the requester's name rather than "MuckRock News" and the department number) requests might be returned as undeliverable.{% endif %}{% endif %}{% if not forloop.last %}---{% endif %}{% endfor %}{% endautoescape %}

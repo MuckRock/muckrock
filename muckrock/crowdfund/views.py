@@ -18,7 +18,7 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def process_payment(request, amount, email, token):
+def process_payment(request, amount, token, crowdfund):
     """Helper function to create a Stripe charge and handle errors"""
     # double -> int conversion
     # http://stackoverflow.com/a/13528445/4256689
@@ -29,8 +29,8 @@ def process_payment(request, amount, email, token):
             amount=amount,
             source=token,
             currency='usd',
-            description='Crowdfund contribution',
-            receipt_email=email
+            description='Contribute to Crowdfunding: %s %s' %
+                (crowdfund, crowdfund.pk),
         )
         return True
     except (
@@ -101,7 +101,7 @@ class CrowdfundRequestDetail(DetailView):
         payment_form = CrowdfundRequestPaymentForm(payment_data)
         payment_object = None
         if payment_form.is_valid() and email and token:
-            if process_payment(request, amount, email, token):
+            if process_payment(request, amount, token, crowdfund_object):
                 payment_object = payment_form.save(commit=False)
                 payment_object.user = user
                 payment_object.save()
