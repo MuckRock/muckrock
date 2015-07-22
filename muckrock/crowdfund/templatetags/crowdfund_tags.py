@@ -29,6 +29,7 @@ def crowdfund_user(context):
     return (logged_in, user_email)
 
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
+    """Generates context in a way that's agnostic towards the object being crowdfunded."""
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)

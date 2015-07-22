@@ -162,6 +162,7 @@ class CrowdfundProjectCreateView(CreateView):
     template_name = 'project/crowdfund.html'
 
     def get_project(self):
+        """Returns the project based on the URL keyword arguments"""
         return self.get_object(queryset=Project.objects.all())
 
     def get_initial(self):

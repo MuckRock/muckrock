@@ -8,11 +8,11 @@ from django.test import TestCase, Client
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 import logging
-from mock import Mock, MagicMock, patch
+from mock import Mock
 from nose.tools import ok_, eq_
 import stripe
 
-from muckrock.crowdfund.forms import CrowdfundRequestForm, CrowdfundRequestPaymentForm
+from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
 from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.foia.models import FOIARequest
