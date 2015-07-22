@@ -156,5 +156,5 @@ class CrowdfundProjectDetail(CrowdfundDetailView):
 class CrowdfundProjectCreateView(CreateView):
     """A creation view for project crowdfunding"""
     model = CrowdfundProject
-    form = CrowdfundProjectForm
+    form_class = CrowdfundProjectForm
     template_name = 'project/crowdfund.html'
