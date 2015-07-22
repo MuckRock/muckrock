@@ -57,6 +57,10 @@ class CrowdfundDetailView(DetailView):
     """
     form = None
 
+    def get_form(self):
+        """Returns a form or None"""
+        return self.form
+
     def get_context_data(self, **kwargs):
         """Adds Stripe public key to context"""
         context = super(CrowdfundDetailView, self).get_context_data(**kwargs)
@@ -109,8 +113,11 @@ class CrowdfundDetailView(DetailView):
         if amount > crowdfund_object.amount_remaining():
             amount = crowdfund_object.amount_remaining()
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
-        payment_form = self.get_form_class()
+        payment_form = self.get_form()
+        # pylint:disable=not-callable
+        # pylint believes payment form is uncallable because in this view it is None
         payment_form = payment_form(payment_data)
+        # pylint:enable=not-callable
         payment_object = None
         if payment_form.is_valid() and email and token:
             if process_payment(request, amount, token, crowdfund_object):
