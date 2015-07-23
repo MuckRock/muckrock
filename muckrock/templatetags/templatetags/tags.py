@@ -3,8 +3,6 @@ General temaplate tags
 """
 
 from django import template
-from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404
 from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
@@ -12,10 +10,8 @@ from django.utils.html import escape
 from email.parser import Parser
 import re
 
-from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
-from muckrock.foia.models import FOIARequest
 from muckrock.forms import TagManagerForm
-from muckrock.settings import STATIC_URL, STRIPE_PUB_KEY
+from muckrock.settings import STATIC_URL
 
 register = Library()
 
@@ -163,30 +159,6 @@ class EvaluateNode(template.Node):
 def editable_by(foia, user):
     """Template tag to call editable by on FOIAs"""
     return foia.editable_by(user)
-
-@register.inclusion_tag('tags/crowdfund.html', takes_context=True)
-def crowdfund(context, foia_pk):
-    """Template tag to insert a crowdfunding panel"""
-    foia = get_object_or_404(FOIARequest, pk=foia_pk)
-    the_crowdfund = foia.crowdfund
-    initial_data = {'crowdfund': the_crowdfund.pk}
-    default_amount = 25
-    if the_crowdfund.amount_remaining() < default_amount:
-        initial_data['amount'] = int(the_crowdfund.amount_remaining()) * 100
-    else:
-        initial_data['amount'] = default_amount * 100
-    payment_form = CrowdfundRequestPaymentForm(initial=initial_data)
-    logged_in = context['user'].is_authenticated()
-    user_email = context['user'].email if logged_in else ''
-    endpoint = reverse('crowdfund-request', kwargs={'pk': the_crowdfund.pk})
-    return {
-        'crowdfund': the_crowdfund,
-        'endpoint': endpoint,
-        'logged_in': logged_in,
-        'user_email': user_email,
-        'payment_form': payment_form,
-        'stripe_pk': STRIPE_PUB_KEY
-    }
 
 @register.inclusion_tag('tags/tag_manager.html', takes_context=True)
 def tag_manager(context, mr_object):
