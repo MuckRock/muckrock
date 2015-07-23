@@ -1,8 +1,6 @@
 {% load humanize %}
 {% load static from staticfiles %}
 
-{% if not crowdfund.expired %}
-
 <section class="crowdfund widget">
     <div class="overlay hidden"></div>
     <header>
@@ -13,22 +11,29 @@
         <p>{{ crowdfund.description }}</p>
     </section>
     <section class="stats">
-        {% with crowdfund.contributors|length as num_contribs %}
-        <p class="contributors">
-            {% if num_contribs == 1 %}
-            1 person has contributed.
-            {% else %}
-                {% if num_contribs > 0 %}
-            {{ num_contribs }} people have contributed.
-                {% else %}
-            Nobody has contributed. Be the first!
-                {% endif %}
+        <div class="contributors">
+            <p class="contributor summary">{{ contributor_summary }}</p>
+        {% if crowdfund.contributors|length > 0 %}
+            <ul class="contributor dropdown">
+            {% for contributor in crowdfund.named_contributors %}
+                <li>{{ contributor.get_full_name }}</li>
+            {% endfor %}
+            {% if crowdfund.anonymous_contributors %}
+                <li>{{ crowdfund.anonymous_contributors|length }} Anonymous</li>
             {% endif %}
-        </p>
-        {% endwith %}
+            </ul>
+        </div>
+        {% endif %}
         <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
-        <p class="time-remaining">{{ crowdfund.date_due|timeuntil }} remaining</p>
+        <p class="time-remaining">
+        {% if not crowdfund.expired %}
+            {{ crowdfund.date_due|timeuntil }} remaining
+        {% else %}
+            This crowdfund has ended.
+        {% endif %}
+        </p>
     </section>
+    {% if not crowdfund.expired %}
     <footer>
         <form method="POST" action="{{ endpoint }}" class="crowdfund-form" id="crowdfund-form">
             <section class="anonymity">
@@ -55,13 +60,5 @@
             {{ payment_form.crowdfund }}
         </form>
     </footer>
+    {% endif %}
 </section>
-
-{% else %}
-
-<section class="expired crowdfund panel">
-    <h1>This crowdfund has ended.</h1>
-    <p>It raised ${{ crowdfund.payment_received|intcomma }}.</p>
-</section>
-
-{% endif %}

@@ -12,6 +12,26 @@ from muckrock.settings import STRIPE_PUB_KEY
 
 register = template.Library()
 
+def list_to_english_string(the_list):
+    """A utility function to convert a list into an English string"""
+    str_list = [str(each_item) for each_item in the_list] # convert list items to strings
+    str_list = filter(bool, str_list) # remove empty strings from the array
+    num_str = len(str_list)
+    ret_str = ''
+    # base case is that the list is empty
+    if num_str == 0:
+        return ret_str
+    # construct an English list based on the number of items
+    last_str = str_list[num_str - 1]
+    if num_str == 1:
+        ret_str = last_str
+    elif num_str == 2:
+        ret_str = str_list[0] + ' and ' + last_str
+    else:
+        sans_last_str = str_list[:num_str - 1]
+        ret_str = (', ').join(sans_last_str) + ', and ' + last_str
+    return ret_str
+
 def crowdfund_form(crowdfund, form):
     """Returns a form initialized with crowdfund data"""
     initial_data = {'crowdfund': crowdfund.pk}
@@ -28,13 +48,43 @@ def crowdfund_user(context):
     user_email = context['user'].email if logged_in else ''
     return (logged_in, user_email)
 
+def contributor_summary(crowdfund):
+    """Returns a summary of the contributors to the project"""
+    anonymous = 0
+    contributor_names = []
+    unnamed_string = ''
+    for contributor in crowdfund.contributors():
+        if contributor.is_anonymous():
+            anonymous += 1
+        else:
+            contributor_names.append(contributor.get_full_name())
+    # limit named contributors to `named_limit`
+    named_limit = 4
+    num_unnamed = len(contributor_names) - named_limit
+    if anonymous > 0:
+        unnamed_string = str(anonymous)
+    if num_unnamed > 0:
+        unnamed_string = str(num_unnamed + anonymous)
+    if len(contributor_names) > 0:
+        unnamed_string += ' others'
+    else:
+        unnamed_string += ' people'
+    summary = list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
+    if not summary:
+        summary = 'No contributors yet. Be the first!'
+    else:
+        summary = 'Supported by ' + summary + '.'
+    return summary
+
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
     """Generates context in a way that's agnostic towards the object being crowdfunded."""
     endpoint = reverse(the_url_name, kwargs={'pk': the_crowdfund.pk})
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)
+    contrib_sum = contributor_summary(the_crowdfund)
     return {
         'crowdfund': the_crowdfund,
+        'contributor_summary': contrib_sum,
         'endpoint': endpoint,
         'logged_in': logged_in,
         'user_email': user_email,

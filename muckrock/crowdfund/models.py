@@ -72,6 +72,14 @@ class CrowdfundABC(models.Model):
         logging.debug(contributors)
         return contributors
 
+    def anonymous_contributors(self):
+        """Return anonymous contributors only."""
+        return [x for x in self.contributors() if x.is_anonymous()]
+
+    def named_contributors(self):
+        """Return named contributors only."""
+        return [x for x in self.contributors() if not x.is_anonymous()]
+
     def get_crowdfund_object(self):
         """Return the object being crowdfunded. Should be implemented by subclasses."""
         # pylint:disable=no-self-use
