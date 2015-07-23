@@ -114,7 +114,12 @@ class CrowdfundDetailView(DetailView):
             amount = crowdfund_object.amount_remaining()
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = self.get_form()
-        payment_form = payment_form(payment_data)
+        try:
+            payment_form = payment_form(payment_data)
+        except TypeError:
+            logging.error(('The subclassed object does not have a form attribute '
+                           'so no payments can be made.'))
+            raise ValueError('%s does not have its form attribute set.' % self.__class__)
         payment_object = None
         if payment_form.is_valid() and email and token:
             if process_payment(request, amount, token, crowdfund_object):
@@ -162,6 +167,7 @@ class CrowdfundProjectCreateView(CreateView):
     template_name = 'project/crowdfund.html'
 
     def get_project(self):
+        """Returns the project based on the URL keyword arguments"""
         return self.get_object(queryset=Project.objects.all())
 
     def get_initial(self):
