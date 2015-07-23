@@ -22,7 +22,7 @@ class QuestionPermissions(permissions.DjangoModelPermissionsOrAnonReadOnly):
 
 class AnswerSerializer(serializers.ModelSerializer):
     """Serializer for Answer model"""
-    user = serializers.RelatedField()
+    user = serializers.StringRelatedField()
 
     class Meta:
         model = Answer
@@ -31,9 +31,9 @@ class AnswerSerializer(serializers.ModelSerializer):
 
 class QuestionSerializer(serializers.ModelSerializer):
     """Serializer for Question model"""
-    user = serializers.RelatedField()
+    user = serializers.StringRelatedField()
     answers = AnswerSerializer(many=True, read_only=True)
-    tags = serializers.RelatedField(many=True)
+    tags = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Question

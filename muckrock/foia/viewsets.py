@@ -32,7 +32,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    model = FOIARequest
+    queryset = FOIARequest.objects.all()
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
 
@@ -101,7 +101,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                        'of existing entities.  Agency must be in Jurisdiction.'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(permission_classes=(IsOwner,))
+    @decorators.detail_route(permission_classes=(IsOwner,))
     def followup(self, request, pk=None):
         """Followup on a request"""
         try:
@@ -131,7 +131,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Missing data - Please supply text for followup'},
                              status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(permission_classes=(IsOwner,))
+    @decorators.detail_route(permission_classes=(IsOwner,))
     def pay(self, request, pk=None):
         """Pay for a request"""
         try:
@@ -166,7 +166,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Stripe Card Error: %s' % exc},
                             status=http_status.HTTP_400_BAD_REQUEST)
 
-    @decorators.action(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
+    @decorators.detail_route(methods=['POST', 'DELETE'], permission_classes=(IsAuthenticated,))
     def follow(self, request, pk=None):
         """Follow or unfollow a request"""
 
@@ -189,6 +189,7 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
             return Response({'status': 'Not Found'}, status=http_status.HTTP_404_NOT_FOUND)
 
     def post_save(self, obj, created=False):
+        """Save tags"""
         if 'tags' in self.request.DATA:
             obj.tags.set(*self.request.DATA['tags'])
         return super(FOIARequestViewSet, self).post_save(obj, created=created)
@@ -198,7 +199,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    model = FOIACommunication
+    queryset = FOIACommunication.objects.all()
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 
