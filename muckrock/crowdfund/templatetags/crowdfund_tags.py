@@ -14,8 +14,8 @@ register = template.Library()
 
 def list_to_english_string(the_list):
     """A utility function to convert a list into an English string"""
-    str_list = [str(each_item) for each_item in the_list] # convert list items to strings
-    str_list = filter(bool, str_list) # remove empty strings from the array
+    # convert list items to strings and remove empty strings
+    str_list = [str(each_item) for each_item in the_list if str(each_item)]
     num_str = len(str_list)
     ret_str = ''
     # base case is that the list is empty
