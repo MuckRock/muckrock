@@ -69,11 +69,12 @@ def contributor_summary(crowdfund):
         unnamed_string += ' others'
     else:
         unnamed_string += ' people'
-    summary = list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
-    if not summary:
-        summary = 'No contributors yet. Be the first!'
+    if len(crowdfund.contributors()) > 0:
+        summary = ('Supported by '
+                   + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
+                   + '.')
     else:
-        summary = 'Supported by ' + summary + '.'
+        summary = 'No contributors yet. Be the first!'
     return summary
 
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
