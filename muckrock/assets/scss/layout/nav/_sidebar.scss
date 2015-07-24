@@ -59,6 +59,7 @@ $sidebar-width: 250px;
 
     .account-links {
         width: 100%;
+        margin-bottom: 0;
         @include display(flex);
         a {
             @include flex(1);
@@ -92,7 +93,7 @@ $sidebar-width: 250px;
         width: 100%;
         padding: $vertical-rhythm/2 $vertical-rhythm;
         color: $color-grey-6;
-        font-size: $font-size-2;
+        font-size: $font-size-3;
         line-height: $vertical-rhythm;
         dfn {
             color: $color-white;
@@ -103,6 +104,7 @@ $sidebar-width: 250px;
     }
 
     .requests {
+        margin-top: $vertical-rhythm/2;
         padding: 0 $vertical-rhythm/2;
 
         .my-requests {

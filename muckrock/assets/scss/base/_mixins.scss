@@ -58,12 +58,8 @@
         width: 100%;
         height: 2*$vertical-rhythm;
         background-color: $background;
-        @include border;
         @include border-radius;
         border-color: $background;
-        &:hover {
-            border-color: $color;
-        }
         @include transition(border-color .25s linear);
         input {
             @include appearance(none);
