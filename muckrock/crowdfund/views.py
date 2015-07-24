@@ -4,8 +4,10 @@ Views for the crowdfund application
 
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, CreateView
 
 from datetime import date, timedelta
@@ -169,6 +171,12 @@ class CrowdfundProjectCreateView(CreateView):
     model = CrowdfundProject
     form_class = CrowdfundProjectForm
     template_name = 'project/crowdfund.html'
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    def dispatch(self, *args, **kwargs):
+        """At the moment, only staff are allowed to create a project crowdfund."""
+        return super(CrowdfundProjectCreateView, self).dispatch(*args, **kwargs)
 
     def get_project(self):
         """Returns the project based on the URL keyword arguments"""
