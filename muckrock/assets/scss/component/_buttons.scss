@@ -53,7 +53,13 @@
     &.success   { @include button($color-green);    }
     &.failure   { @include button($color-red);      }
     &.warning   { @include button($color-yellow);   }
-    &.disabled  { @include button($color-grey-2);   }
+    &.disabled, &:disabled  {
+        @include button($color-white);
+        color: darken($color-white, $color-darken-amount);
+        &:hover {
+            color: darken($color-white, $color-darken-amount);
+        }
+    }
 }
 
 .edit {
