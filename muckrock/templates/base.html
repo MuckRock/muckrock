@@ -81,8 +81,8 @@
         {% include 'nav/sidebar.html' %}
         <div class="container">
             <div id="modal-overlay"></div>
-            {% include 'nav/header.html' %}
             {% include 'lib/notification.html' %}
+            {% include 'nav/header.html' %}
             <div class="content">
             {% block content %}
             {% endblock content %}
@@ -141,9 +141,11 @@
         <script type="text/javascript"
                 src="{% static 'js/jquery.autosize.min.js' %}"></script>
         <script type="text/javascript"
+                src="{% static 'js/jquery.formset.js' %}"></script>
+        <script type="text/javascript"
                 src="{% static 'js/muckrock.js' %}"></script>
         <script type="text/javascript"
-                src="{% static 'js/jquery.formset.js' %}"></script>
+                src="{% static 'js/notification.js' %}"></script>
         {% endcompress %}
         <!--<script type="text/javascript"
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->

@@ -102,16 +102,6 @@ $('.message .visibility').click(function() {
     }
 });
 
-// NOTIFICATIONS
-var notificationCloseButton = $('.notification .dismiss .close');
-notificationCloseButton.click(function(){
-    $(this).parent().parent().hide();
-    var notificationContainer = $('.notifications');
-    if (notificationContainer.children(':visible').length == 0) {
-        notificationContainer.hide();
-    }
-});
-
 if ($.cookie('broadcast') == false) {
     var broadcastPanel= $('.sidebar .broadcast')[0];
     $(broadcastPanel).hide();

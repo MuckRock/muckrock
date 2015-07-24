@@ -3,10 +3,8 @@
 .notifications {
     display: block;
     width: 100%;
-    position: fixed;
-    z-index: 100;
     top: 0;
-    margin-bottom: $vertical-rhythm;
+    margin-bottom: 0;
     border-bottom: 1px solid $color-black;
     padding: 0;
     list-style-type: none;
