@@ -162,7 +162,9 @@
         }
         tbody {
             display: table-row-group;
-            border-bottom: $base-border-width solid $color-grey;
+            @include media($medium-layout) {
+                border-bottom: $base-border-width solid $color-grey;
+            }
         }
         tr {
             display: table-row;
@@ -222,7 +224,6 @@
             th, td {
                 display: block;
                 width: 100%;
-                margin-left: $vertical-rhythm*2;
                 text-align: left;
                 line-height: 1em;
             }
