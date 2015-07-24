@@ -58,17 +58,6 @@
     </section>
     {% endif %}
 
-    {% if recent_articles %}
-    <section class="recent articles">
-        <dfn>Newest News</dfn>
-        {% for article in recent_articles %}
-        <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article block">
-            <p>{{ article.summary|safe }}</p>
-        </a>
-        {% endfor %}
-    </section>
-    {% endif %}
-
     <section class="newsletter">
         <dfn>Stay FOIA-Informed</dfn>
         <p>Sign up for our weekly newsletter.</p>
@@ -89,4 +78,16 @@
             </span>
         </form>
     </section>
+
+    {% if recent_articles %}
+    <section class="recent articles">
+        <dfn>Newest News</dfn>
+        {% for article in recent_articles %}
+        <a href="{{article.get_absolute_url}}" title="{{article.title}}" class="article block">
+            <p>{{ article.summary|safe }}</p>
+        </a>
+        {% endfor %}
+    </section>
+    {% endif %}
+
 </aside>
