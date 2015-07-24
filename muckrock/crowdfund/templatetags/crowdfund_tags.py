@@ -34,7 +34,10 @@ def list_to_english_string(the_list):
 
 def crowdfund_form(crowdfund, form):
     """Returns a form initialized with crowdfund data"""
-    initial_data = {'crowdfund': crowdfund.pk}
+    initial_data = {
+        'show': True,
+        'crowdfund': crowdfund.pk
+    }
     default_amount = 25
     if crowdfund.amount_remaining() < default_amount:
         initial_data['amount'] = int(crowdfund.amount_remaining()) * 100
