@@ -71,12 +71,12 @@ class CrowdfundDetailView(DetailView):
 
     def get_redirect_url(self):
         """Returns a url to redirect to"""
+        redirect_url = reverse('index')
         try:
             crowdfund_object = self.get_object().get_crowdfund_object()
             redirect_url = crowdfund_object.get_absolute_url()
         except (AttributeError, NoReverseMatch) as exception:
             logging.error(exception)
-            redirect_url = reverse('index')
         return redirect_url
 
     def return_error(self, request):
