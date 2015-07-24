@@ -61,14 +61,21 @@ def contributor_summary(crowdfund):
     # limit named contributors to `named_limit`
     named_limit = 4
     num_unnamed = len(contributor_names) - named_limit
-    if anonymous > 0:
-        unnamed_string = str(anonymous)
-    if num_unnamed > 0:
+    if num_unnamed < 0:
+        num_unnamed = 0
+    if anonymous > 0 or num_unnamed > 0:
         unnamed_string = str(num_unnamed + anonymous)
-    if len(contributor_names) > 0:
-        unnamed_string += ' others'
+    # if named and unnamed together, use 'other(s)'
+    if unnamed_string and len(contributor_names) > 0:
+        unnamed_string += ' other'
+        if (anonymous + num_unnamed) > 1:
+            unnamed_string += 's'
+    # if only unnamed, use 'person/people'
     else:
-        unnamed_string += ' people'
+        if (anonymous + num_unnamed) > 1:
+            unnamed_string += ' people'
+        else:
+            unnamed_string += ' person'
     if len(crowdfund.contributors()) > 0:
         summary = ('Supported by '
                    + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
