@@ -1,0 +1,42 @@
+{% extends 'forms/base_form.html' %}
+
+{% load static from staticfiles %}
+
+{% block title %}MuckRock &bull; Start a crowdfund{% endblock %}
+{% block form-type %}crowdfund{% endblock %}
+{% block form-title %}Crowdfund this project{% endblock form-title %}
+
+{% block scripts %}
+<script src="{% static 'js/jquery.ui.datepicker.js' %}" type="text/javascript"></script>
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+    function prettifyAmountInput(input, pretty) {
+        // pretty_amount_input is used as a functional wrapper for the amount input field
+        // progressive enhancement ftw!
+        var initialValue = $(input).val();
+        var str_val = '$' + String(initialValue);
+        var prettyInputElement = '<input name="pretty-input" type="text" value="' + str_val + '" class="success" >';
+        $(input).before(prettyInputElement);
+        $(input).attr('hidden', true).hide();
+        $(pretty).autoNumeric('init', {aSign:'$', pSign:'p'});
+        function inputWrapper(input) {
+            var value = $(input).autoNumeric('get');
+            $('input[name=payment_required]').attr('value', value);
+        }
+        $(pretty).change(function(e){
+            inputWrapper(this);
+        });
+    }
+
+    prettifyAmountInput('input[name=payment_required]', 'input[name=pretty-input]');
+
+    $('#id_date_due').datepicker({
+        dateFormat: 'yy-mm-dd',
+        maxDate: '+1m',
+        minDate: 0,
+        firstDay: 1,
+        hideIfNoPrevNext: true,
+        numberOfMonths: 1,
+    });
+</script>
+{% endblock %}
