@@ -1,0 +1,20 @@
+.profile {
+    @include row;
+    @include border;
+    .metadata {
+        @include third;
+        margin-bottom: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-grey-7;
+        h1 {
+            font-weight: $font-weight-bold;
+        }
+        @include media($medium-layout) {
+            border-right: 1px solid $color-grey;
+        }
+    }
+    .activity {
+        @include two-thirds;
+        padding-top: $vertical-rhythm;
+    }
+}
