@@ -1,0 +1,30 @@
+.foia-group {
+    @include outer-container;
+}
+
+.foia-group > .foia-single {
+    @include half;
+}
+
+.foia-single {
+    @include row;
+    display: block;
+    padding: $vertical-rhythm/2;
+    @include border;
+    @include border-radius;
+    font-size: $font-size-2;
+    &:first-child {
+        margin-left: 0;
+    }
+    .foia-body {
+        @include three-quarters;
+        margin-bottom: 0;
+    }
+    .foia-actions {
+        @include grid-columns(4, 6, 3);
+        @include row;
+        .button {
+            @include grid-columns(2, 3, 12);
+        }
+    }
+}

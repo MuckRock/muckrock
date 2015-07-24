@@ -1,0 +1,221 @@
+// page positioning
+
+$sidebar-width: 250px;
+
+.website-sidebar {
+    position: fixed;
+    z-index: -100;
+    top: 0;
+    right: -9999px;
+    transition: right 0s .3s;
+    &.visible {
+        z-index: 0;
+        right: 0;
+        transition: right 0s 0s;
+    }
+}
+
+.website-sidebar + .container {
+    @include transition(transform .25s ease-in-out);
+}
+
+.website-sidebar.visible + .container {
+    @include transform(translateX(-1 * $sidebar-width));
+}
+
+@include media($large-layout) {
+    .website-sidebar {
+        z-index: 100;
+        right: 0;
+    }
+    .website-sidebar.visible + .container {
+        @include transform(translateX(0));
+    }
+    .website-sidebar + .container {
+        margin-right: $sidebar-width;
+    }
+}
+
+.website-sidebar {
+    width: $sidebar-width;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-left: 1px solid $color-grey-0;
+    background-color: $color-grey-1;
+    color: $color-white;
+
+    dfn {
+        color: $color-white;
+    }
+
+    & > * {
+        margin-bottom: $vertical-rhythm/2;
+        &:last-child {
+            margin-bottom: $vertical-rhythm/2;
+        }
+    }
+
+    .account-links {
+        width: 100%;
+        margin-bottom: 0;
+        @include display(flex);
+        a {
+            @include flex(1);
+            @include overflow-ellipsis;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-black;
+            border-right: 1px solid $color-black;
+            background-color: $color-grey-2;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            text-align: center;
+            @include transition(background-color .25s linear);
+            &:hover {
+                text-decoration: none;
+                background-color: $color-blue;
+            }
+            &:last-child {
+                border-right: 0;
+            }
+            &.username {
+                @include flex(3);
+            }
+            &.log-out {
+                font-weight: $font-weight-normal;
+                font-size: $font-size-2;
+            }
+        }
+    }
+
+    section {
+        width: 100%;
+        padding: $vertical-rhythm/2 $vertical-rhythm;
+        color: $color-grey-6;
+        font-size: $font-size-3;
+        line-height: $vertical-rhythm;
+        dfn {
+            color: $color-white;
+        }
+        p {
+            margin-bottom: $vertical-rhythm/2;
+        }
+    }
+
+    .requests {
+        margin-top: $vertical-rhythm/2;
+        padding: 0 $vertical-rhythm/2;
+
+        .my-requests {
+            display: block;
+            width: 100%;
+            padding: $vertical-rhythm/2;
+            color: $color-white;
+            font-size: $font-size-3;
+            font-weight: $font-weight-bold;
+            @include border-radius;
+            @include transition(color .25s linear);
+            &:hover {
+                color: $color-blue;
+                text-decoration: none;
+            }
+        }
+
+        .actionable {
+            display: block;
+            height: auto;
+            margin: $vertical-rhythm 0 0;
+            border: none;
+            color: $color-grey-6;
+            background-color: $color-black;
+            font-size: $font-size-3;
+            font-weight: $font-weight-bold;
+            text-align: left;
+            text-decoration: none;
+            @include transition(color .25s linear);
+
+            &:first-child {
+                margin-top: $vertical-rhythm/2;
+            }
+
+            &:hover {
+                color: $color-blue;
+                .counter {
+                    background: $color-blue;
+                }
+            }
+
+            .counter {
+                @include transition(background-color .25s linear);
+                margin-right: $vertical-rhythm/4;
+                padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
+                @include border-radius;
+                font-weight: $font-weight-bold;
+                text-align: center;
+                color: $color-white;
+                background: $color-grey-2;
+            }
+        }
+
+        .actionable-request-list {
+            display: block;
+            overflow: hidden;
+            padding: $vertical-rhythm;
+            li {
+                @include full;
+                @include overflow-ellipsis;
+                display: list-item;
+                margin-bottom: $vertical-rhythm/2;
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+
+            a {
+                display: block;
+                color: $color-grey-6;
+                @include transition(color .25s linear);
+                &:hover {
+                    color: $color-blue;
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+
+    .recent.articles {
+        padding: 0;
+        margin-bottom: 0;
+        dfn, .article {
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+        }
+        .article {
+            display: block;
+            width: 100%;
+            color: $color-grey-6;
+            border-bottom: 1px solid $color-grey-0;
+            @include transition(background-color .25s linear, color .25s linear);
+            &:hover {
+                color: $color-white;
+                background-color: $color-grey-0;
+                text-decoration: none;
+            }
+            &:last-child {
+                border-bottom: 0;
+            }
+            p {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .newsletter {
+        margin-bottom: 0;
+        padding-bottom: $vertical-rhythm;
+        color: $color-white;
+        background-color: $color-blue;
+        @include action-input($color-white, $color-blue-dark);
+    }
+
+}

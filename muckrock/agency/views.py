@@ -62,7 +62,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
 
     collect_stats(agency, context)
 
-    return render_to_response('details/agency_detail.html', context,
+    return render_to_response('profile/agency.html', context,
                               context_instance=RequestContext(request))
 
 def redirect_old(request, jurisdiction, slug, idx, action):

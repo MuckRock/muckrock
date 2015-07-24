@@ -1,0 +1,80 @@
+/* Buttons */
+
+@mixin button($color) {
+  $color-dark: darken($color, $color-darken-amount);
+  $shadow-normal: 3px;
+  $shadow-hover: 5px;
+  $shadow-active: 2px;
+  // Metrics
+  display: inline-block;
+  margin: $vertical-rhythm/4 0;
+  border: 1px solid $color-dark;
+  border-radius: $base-border-radius;
+  padding: $vertical-rhythm/4 $vertical-rhythm/2;
+  box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+  // Color
+  background: $color;
+  color: $color-white;
+  // Type
+  text-align: center;
+  text-decoration: none;
+  // Transitions
+  transition-property: box-shadow transform;
+  transition-duration: .15s;
+  transition-timing-function: ease;
+  // Misc
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+  // State
+  &:link, &:visited {
+    box-shadow: 0px $shadow-normal 0px 0px $color-dark;
+  }
+  &:hover {
+    @include transform(translateY($shadow-normal - $shadow-hover));
+    box-shadow: 0px $shadow-hover 0px 0px $color-dark;
+    color: $color-white;
+    text-decoration: none;
+  }
+  &:active {
+    @include transform(translateY($shadow-normal - $shadow-active));
+    box-shadow: 0px $shadow-active 0px 0px $color-dark;
+    color: $color-white;
+  }
+  &:disabled:hover {
+    transform: none;
+    box-shadow: 0 $shadow-normal 0 0 $color-dark;
+  }
+}
+
+.button, button, input[type='submit'] {
+    @include button($color-grey);
+    &.primary   { @include button($color-blue);     }
+    &.success   { @include button($color-green);    }
+    &.failure   { @include button($color-red);      }
+    &.warning   { @include button($color-yellow);   }
+    &.disabled, &:disabled  {
+        @include button($color-white);
+        color: darken($color-white, $color-darken-amount);
+        &:hover {
+            color: darken($color-white, $color-darken-amount);
+        }
+    }
+}
+
+.edit {
+    display: inline-block;
+    font-size: $font-size-2;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    cursor: pointer;
+    color: $color-blue;
+    &:hover {
+        color: $color-blue-dark;
+    }
+}
+
+.tag-manager .button, .status-form .button {
+    margin: 0;
+}

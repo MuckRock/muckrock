@@ -1,0 +1,70 @@
+footer.website-footer {
+    display: block;
+    width: 100%;
+    margin: $vertical-rhythm 0 0 0;
+    border-top: 1px solid $color-grey;
+    padding: $vertical-rhythm;
+
+    color: $color-grey-6;
+    background-color: $color-black;
+
+    @include row;
+
+    .brand {
+        @include fill-parent();
+        @include media($large-layout) { @include span-columns(4); }
+    }
+
+    .sitemap, .about, .actions, .feeds {
+        @include fill-parent();
+        @include media($medium-layout) { @include span-columns(2); }
+        @include media($large-layout) { @include span-columns(2); }
+        margin-bottom: 0;
+    }
+
+    .sitemap {
+        @include media($large-layout) {
+            @include shift(2);
+        }
+    }
+
+    .logo {
+        display: inline-block;
+        margin-bottom: $vertical-rhythm;
+        svg {
+            fill: $color-white;
+            height: 2rem;
+            width: 2rem;
+            @include transition(fill .25s linear);
+        }
+        &:hover {
+            svg {
+                fill: $color-blue;
+            }
+        }
+    }
+
+    a {
+        color: $color-grey-6;
+        @include transition(color .25s linear);
+        &:hover {
+            color: $color-blue;
+            text-decoration: none;
+        }
+    }
+
+    dfn {
+        margin-bottom: $vertical-rhythm/2;
+        color: $color-white;
+    }
+
+    ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    li {
+        font-size: $font-size-3;
+        margin-bottom: $vertical-rhythm/2;
+    }
+}

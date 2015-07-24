@@ -168,7 +168,7 @@ class TestAccountFunctional(TestCase):
 
         get_allowed(self.client,
             reverse('acct-profile', args=['adam']),
-            ['details/account_detail.html', 'details/base_detail.html'])
+            ['profile/account.html', 'base_profile.html'])
         get_allowed(self.client,
             reverse('acct-login'),
             ['forms/account/login.html', 'forms/base_form.html'])
@@ -215,7 +215,7 @@ class TestAccountFunctional(TestCase):
 
         # get authenticated pages
         get_allowed(self.client, reverse('acct-my-profile'),
-                    ['details/account_detail.html', 'details/base_detail.html'])
+                    ['profile/account.html', 'base_profile.html'])
 
     def test_auth_views(self):
         """Test private views while logged in"""
@@ -226,7 +226,7 @@ class TestAccountFunctional(TestCase):
         # get authenticated pages
         get_allowed(self.client,
             reverse('acct-my-profile'),
-            ['details/account_detail.html', 'details/base_detail.html'])
+            ['profile/account.html', 'base_profile.html'])
         get_allowed(self.client,
             reverse('acct-update'),
             ['forms/account/update.html', 'forms/base_form.html'])
@@ -235,7 +235,7 @@ class TestAccountFunctional(TestCase):
             ['forms/account/pw_change.html', 'forms/base_form.html'])
         get_allowed(self.client,
             reverse('acct-buy-requests'),
-            ['details/account_detail.html', 'details/base_detail.html'])
+            ['profile/account.html', 'base_profile.html'])
 
     def _test_post_view_helper(self, url, templates, data,
                                redirect_url='acct-my-profile', username='adam', password='abc'):
@@ -296,7 +296,7 @@ class TestAccountFunctional(TestCase):
         # admin
         self.client.login(username='admin', password='abc')
         get_allowed(self.client, reverse('acct-manage-subsc'),
-                    ['details/account_detail.html', 'details/base_detail.html'])
+                    ['profile/account.html', 'base_profile.html'])
 
         # update this for stripe for community and pro
 

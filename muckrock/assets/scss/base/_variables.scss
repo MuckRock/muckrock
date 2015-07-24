@@ -1,0 +1,20 @@
+/* Borders */
+$base-border-width:     1px;
+$base-border-radius:    9px;
+
+/* Breakpoints */
+$large-breakpoint:      1100px;
+$medium-breakpoint:     500px;
+$large-layout:          new-breakpoint(min-width $large-breakpoint 12);
+$medium-layout:         new-breakpoint(min-width $medium-breakpoint 6);
+$small-layout:          new-breakpoint(max-width $medium-breakpoint 4);
+
+/* Menus */
+$menu-breakpoint:       1100px;
+$mobile-menu-width:     220px;
+$tablet-menu-width:     280px;
+$desktop-menu-width:    280px;
+$menu-animation:        all 0.25s ease;
+
+/* Animation */
+$base-duration:         0.25s;

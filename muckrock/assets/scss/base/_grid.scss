@@ -1,0 +1,58 @@
+@mixin grid-columns($small, $medium, $large) {
+    // Conveniently set all grid column sizes at once.
+    @include media($small-layout) { @include span-columns($small); }
+    @include media($medium-layout) { @include span-columns($medium); }
+    @include media($large-layout) { @include span-columns($large); }
+}
+
+@mixin omega-reset($nth) {
+    // Reset the omega math mid-row
+    &:nth-child(#{$nth}) { margin-right: flex-gutter(); }
+    &:nth-child(#{$nth}+1) { clear: none }
+}
+
+@mixin full() {
+    // Fills a row
+    @include omega;
+    @include grid-columns(4, 6, 12);
+}
+
+@mixin half() {
+    // Half of a row
+    @include omega(2n);
+    @include grid-columns(4, 3, 6);
+}
+
+@mixin half-flip() {
+    // Reverse order of row halves
+    &:nth-child(even) { clear: left; }
+    &:nth-child(odd) { clear: right; }
+}
+
+@mixin third() {
+    // Third of a row
+    @include omega(3n);
+    @include grid-columns(4, 2, 4);
+}
+
+@mixin two-thirds() {
+    // Two thirds of a row
+    @include grid-columns(4, 4, 8);
+}
+
+@mixin quarter() {
+    // Quarter of a row
+    @include omega(2n);
+    @include media($small-layout) { @include span-columns(2); }
+    @include media($medium-layout) { @include span-columns(3); }
+    @include media($large-layout) {
+        @include omega-reset(2n);
+        @include span-columns(3);
+        @include omega(4n);
+    }
+}
+
+@mixin three-quarters() {
+    // Three quarters of a row
+    @include grid-columns(4, 6, 9);
+}

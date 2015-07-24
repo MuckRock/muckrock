@@ -1,0 +1,162 @@
+.form {
+    @include panel;
+    padding: $vertical-rhythm;
+
+    header, form, .visible-fields, .buttons {
+        @include row;
+    }
+
+    .form-title, .form-info, .visible-fields fieldset {
+        @include half;
+    }
+
+    input[type="submit"] {
+        @include quarter;
+    }
+
+    .visible-fields fieldset input {
+        width: 100%;
+    }
+
+    &.question,
+    &.reply,
+    &.update,
+    &.password-change,
+    &.foia-embargo {
+        .visible-fields fieldset { @include full; }
+    }
+
+    &.admin-fix {
+        .visible-fields fieldset {
+            @include full;
+            p { margin-bottom: 0; }
+        }
+        .snail.mail input { width: auto; }
+    }
+
+    &.search {
+        dfn { margin: $vertical-rhythm/2 $vertical-rhythm/4; }
+        .search-filters {
+            margin: 0;
+            li {
+                display: inline-block;
+                padding: 0 $vertical-rhythm/4;
+            }
+            label {
+                padding-left: $vertical-rhythm/6;
+            }
+        }
+    }
+}
+
+.hidden-fields {
+    display: none;
+}
+
+.hidden-stripe-handler {
+    display: none;
+}
+
+textarea, #{$all-text-inputs} {
+    @include input;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+}
+
+fieldset {
+
+    label, .errorlist {
+        @extend dfn;
+    }
+
+    @include media($large-layout) {
+        label.failure {
+            float: left;
+        }
+        .errorlist {
+            float: right;
+        }
+    }
+
+    input + label {
+        float: left;
+        margin-right: $vertical-rhythm;
+    }
+
+    & > fieldset, & > fieldset + fieldset {
+        margin: 0;
+    }
+}
+
+.register.form {
+    padding: 0;
+    border-color: $color-blue-dark;
+    .form-head {
+        padding: $vertical-rhythm;
+        @include border-top-radius($base-border-radius);
+        color: $color-white;
+        background-color: $color-blue;
+        a {
+            color: $color-white;
+            text-decoration: underline;
+        }
+        ul {
+            list-style-type: disc;
+        }
+    }
+    form { margin: $vertical-rhythm; }
+}
+
+.subscribe.page {
+    @include panel;
+    border-color: $color-red-dark;
+    padding: 0;
+    header {
+        @include full;
+        padding: $vertical-rhythm;
+        color: $color-white;
+        background-color: $color-red;
+        a {
+            color: $color-white;
+            text-decoration: underline;
+        }
+        .heading, .subheading { @include half; }
+        .heading {
+            font-size: $font-size-8;
+        }
+        .subheading .price {
+            font-size: $font-size-6;
+            .amount {
+                font-size: $font-size-5;
+                font-weight: $font-weight-light;
+            }
+            sup {
+                margin-right: 0.1em;
+            }
+        }
+        @include media($medium-layout) {
+            .subheading {
+                text-align: right;
+            }
+        }
+    }
+    .interaction, .body {
+        @include grid-columns(4, 6, 6);
+        padding: 0 $vertical-rhythm;
+    }
+    .interaction {
+        .button, button, input[type="submit"] {
+            display: block;
+            @include media($medium-layout) {
+                display: inline-block;
+            }
+        }
+    }
+    .body {
+        margin-bottom: $vertical-rhythm;
+        clear: none !important;
+    }
+}

@@ -1,0 +1,246 @@
+/* Lists */
+
+/*
+**  .list
+**    .list-head
+**      .list-title
+**      .list-actions
+**    .list-navigation
+**      .list-sections
+**      .list-filters
+**        .list-filters-buttons
+**    .list-content
+**      .list-table
+**        .list-table-head
+**        .list-table-body
+**          .list-table-item
+**    .list-empty
+*/
+
+.list {
+    @include row;
+    .list-navigation {
+        @include grid-columns(4, 2, 3);
+        .list-head .list-title {
+            @extend h1;
+        }
+        .list-sections {
+            margin-bottom: $vertical-rhythm/2;
+            & ul {
+                display: table;
+                width: 100%;
+                border-collapse: collapse;
+            }
+            & li {
+                display: table-row;
+                border: $base-border-width solid $color-grey;
+                padding-left: $vertical-rhythm;
+                text-align: left;
+                vertical-align: middle;
+                line-height: 1em;
+                .counter {
+                    display: table-cell;
+                    width: 25%;
+                    text-align: center;
+                    font-weight: $font-weight-bold;
+                }
+                a {
+                    display: table-cell;
+                    padding: $vertical-rhythm/2;
+                    border-left: $base-border-width solid $color-grey;
+                    &:hover {
+                        text-decoration: none;
+                        background: $color-grey-7;
+                    }
+                }
+                &.current-tab {
+                    border-left: $base-border-width solid $color-blue;
+                    border-right: $base-border-width solid $color-blue;
+                    background: $color-blue;
+                    .counter {
+                        background: $color-white;
+                        color: $color-blue;
+                    }
+                    a {
+                        color: $color-white;
+                        border-color: $color-blue;
+                        &:hover {
+                            background: $color-blue;
+                        }
+                    }
+                }
+            }
+        }
+        .list-filters {
+            background: $color-odd-background;
+            margin-bottom: $vertical-rhythm/2;
+            @include border;
+            padding: $vertical-rhythm/2;
+            & select, & input[type=text] {
+                width: 100%;
+                margin-top: $vertical-rhythm/2;
+                border-radius: 0;
+            }
+            .autocomplete-light-widget {
+                display: block;
+            }
+            .deck > span {
+                position: relative;
+                width: 100%;
+                margin-top: $vertical-rhythm/2;
+                border-radius: $base-border-radius;
+                padding: .25em;
+                padding-left: 1.5em;
+                background: $color-blue;
+                color: $color-white;
+            }
+            .remove {
+                position: absolute;
+                top: .5em;
+                left: .25em;
+            }
+        }
+        .list-filters-buttons {
+            @include row;
+            margin-top: $vertical-rhythm/2;
+            font-size: 0.75em;
+            button, .button {
+                @include grid-columns(2, 3, 6);
+            }
+        }
+        #list-filters-toggle-label, #list-filters-toggle {
+            display: none;
+        }
+        @include media($small-layout) {
+            .list-filters-fields, .list-filters-buttons {
+                display: none;
+            }
+            .list-filters {
+                overflow: hidden;
+                dfn {
+                    float: left;
+                }
+            }
+            #list-filters-toggle-label {
+                float: right;
+                display: inline-block;
+                padding: .1em $vertical-rhythm/2;
+                border-radius: $base-border-radius;
+                background: $color-black;
+                color: $color-white;
+                font-size: .9em;
+            }
+            #list-filters-toggle:checked {
+                & ~ .list-filters-fields, & ~ .list-filters-buttons {
+                    display: block;
+                }
+            }
+        }
+
+    }
+    .list-content {
+        @include grid-columns(4, 4, 9);
+        font-size: .9em;
+    }
+    .list-actions {
+        width: 100%;
+        @include display(flex);
+        @include flex-direction(row);
+        @include flex-wrap(wrap);
+        align-content: center;
+        justify-content: space-between;
+    }
+    .list-table {
+        @include row;
+        display: table;
+        border: $base-border-width solid $color-grey;
+        border-bottom: none;
+        border-radius: $base-border-radius;
+        border-collapse: collapse;
+        thead {
+            display: table-header-group;
+        }
+        tbody {
+            display: table-row-group;
+            @include media($medium-layout) {
+                border-bottom: $base-border-width solid $color-grey;
+            }
+        }
+        tr {
+            display: table-row;
+        }
+        th, td {
+            display: table-cell;
+        }
+    }
+    .list-table-head, .list-table-body {
+        display: table-row;
+        width: 100%;
+    }
+    .list-table-head tr {
+        display: table-row;
+        background: $color-white;
+        border: none;
+    }
+    .list-table-head .sortable {
+        cursor: pointer;
+        &:hover {
+            background: $color-grey-7;
+        }
+        .arrow {
+            font-size: .8em;
+            margin-right: $vertical-rhythm/2;
+        }
+    }
+    .list-table-body tr:hover {
+        background: $color-grey-7;
+    }
+    .list-table-body tr.unread {
+        background: lighten($color-blue, 35%);
+    }
+    .list-empty {
+        @include full;
+        @extend h2;
+        margin-top: 2em;
+        font-weight: $font-weight-bold;
+        color: $color-grey;
+        text-align: center;
+    }
+
+    // Makes tables responsive
+    @include media($small-layout) {
+        .list-table {
+            display: block;
+            border: none;
+            border-radius: 0;
+            tr {
+                position: relative;
+                display: block;
+                width: 100%;
+                margin: $vertical-rhythm/2 0;
+                padding: $vertical-rhythm/2 0;
+                border: $base-border-width solid $color-grey;
+            }
+            th, td {
+                display: block;
+                width: 100%;
+                text-align: left;
+                line-height: 1em;
+            }
+            thead, tbody {
+                display: block;
+                margin: $vertical-rhythm/2 0;
+            }
+            .list-table-checkbox {
+                width: auto;
+                position: absolute;
+                top: $vertical-rhythm/2;
+                left: $vertical-rhythm/2;
+                margin-left: 0;
+            }
+        }
+    }
+}
+
+@import 'search';
+@import 'news';
