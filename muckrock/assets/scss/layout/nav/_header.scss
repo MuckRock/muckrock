@@ -1,0 +1,310 @@
+.website-header {
+    margin-bottom: 0;
+}
+
+.website-header > * {
+    padding-left: $vertical-rhythm/2;
+    padding-right: $vertical-rhythm/2;
+    @include media($medium-layout) {
+        padding-left: $vertical-rhythm;
+        padding-right: $vertical-rhythm;
+    }
+}
+
+// Logo visibility depends on viewport size
+.website-header .brand .muckrock-logo {
+    .plaintext {
+        display: none;
+    }
+    .logotype {
+        display: none;
+    }
+    .logo {
+        display: block;
+    }
+    @include media($medium-layout) {
+        .logotype {
+            display: block;
+        }
+        .logo {
+            display: none;
+        }
+    }
+}
+
+nav.primary {
+    overflow: hidden;
+    ul {
+        display: inline-block;
+        width: auto;
+        margin-bottom: 0;
+        padding-left: 0;
+        li {
+            display: inline-block;
+            vertical-align: middle;
+            padding-right: $vertical-rhythm/2;
+        }
+        &.left  { float: left;  }
+        &.right { float: right; }
+    }
+
+    .menu-text { display: none; }
+    @media screen
+    and (min-width: $small-menu-breakpoint - 200px) {
+        .menu-text { display: inline; }
+    }
+
+    /* Logo */
+
+    %logo {
+        margin-top: $vertical-rhythm/4;
+        margin-bottom: 0;
+        border: none;
+        svg {
+            vertical-align: middle;
+        }
+        svg path {
+            @include transition(fill .25s linear);
+            fill: $color-black;
+        }
+        &:hover {
+            background: none;
+            svg path {
+                fill: $color-blue;
+            }
+        }
+    }
+    .logotype {
+        @extend %logo;
+        svg {
+            height: 100%;
+            width: 200px;
+        }
+    }
+    .logo {
+        @extend %logo;
+        padding-top: 0em;
+        > svg {
+            display: block;
+            height: 100%;
+            width: 35px;
+        }
+    }
+
+    @include media($large-layout) {
+        #create-request-button {
+            padding-right: 0;
+        }
+    }
+
+    #sidebar-button {
+        .text {
+            display: none;
+        }
+        @include media($medium-layout) {
+            .text {
+                display: inline;
+            }
+        }
+        @include media($large-layout) {
+            display: none;
+        }
+    }
+}
+
+
+nav.website-navigation {
+    overflow: hidden;
+    position: relative;
+    padding-top: $vertical-rhythm/2;
+    padding-bottom: $vertical-rhythm/2;
+    margin-bottom: $vertical-rhythm/2;
+    background-color: #FFF;
+    border-bottom: 1px solid $color-grey-6;
+    ul {
+        display: inline-block;
+        margin-bottom: 0;
+        padding-left: 0;
+    }
+    li {
+        display: inline-block;
+        margin: 0 $vertical-rhythm/4;
+        @include media($large-layout) {
+            margin: 0 $vertical-rhythm/2;
+        }
+        &:first-child {
+            margin-left: 0;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+    a {
+        position: relative;
+        padding-bottom: $vertical-rhythm/2.5;
+        border-bottom: 4px solid #FFF;
+        color: $color-black;
+        &:hover {
+            color: $color-blue;
+            border-color: $color-blue;
+            text-decoration: none;
+        }
+        @include transition (color .25s linear, border-color .25s linear);
+    }
+    @media screen and (min-width: $small-menu-breakpoint ) {
+        li {
+            text-align: left;
+            // padding-right: 10%;
+        }
+    }
+
+    .search {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 2em;
+        z-index: 1;
+        @include display(flex);
+        @include align-items(center);
+        height: 100%;
+        margin-bottom: 0;
+        background-color: #FFF;
+        opacity: 0;
+        @include transition(opacity .25s linear, transform .25s ease-in-out);
+        @include transform(translateY(-10em));
+        input[type="search"] {
+            width: 100%;
+            padding: 0 $vertical-rhythm/2;
+            border: none;
+            border-radius: 0;
+            outline: none;
+        }
+        .search-cancel {
+            width: auto;
+            padding: $vertical-rhythm;
+            text-align: right;
+            cursor: pointer;
+            color: $color-blue;
+            &:hover {
+                color: $color-blue-dark;
+            }
+        }
+        &.visible {
+            opacity: 1;
+            @include transform(translateY(0));
+        }
+        @include media($medium-layout) {
+            left: 3em;
+        }
+    }
+
+     .search-icon {
+        display: inline-block;
+        width: $font-size-4;
+        height: $font-size-4;
+        margin-right: $vertical-rhythm/2;
+        @include media($large-layout) {
+            margin-right: $vertical-rhythm;
+        }
+        vertical-align: middle;
+        cursor: pointer;
+        path {
+            fill: $color-black;
+            @include transition(fill .25s linear);
+        }
+        &:hover {
+            path {
+                fill: $color-blue;
+            }
+        }
+    }
+
+    .social-links {
+        float: right;
+        .label { display: none; }
+        a svg {
+            width: auto;
+            height: 16px;
+            vertical-align: middle;
+            fill: $color-black;
+            @include transition(fill .25s ease);
+        }
+        a:hover svg {
+            fill: $color-blue;
+        }
+    }
+
+    #website-sections-dropdown {
+        display: none;
+    }
+
+    @media (max-width: 700px) {
+        #website-sections-dropdown {
+            display: inline-block;
+            margin-bottom: 0;
+            font-weight: $font-weight-bold;
+            cursor: pointer;
+            @include border-radius;
+            &.active {
+                color: $color-blue;
+            }
+        }
+        .website-sections {
+            max-height: 95vh;
+            width: 90vw;
+            position: fixed;
+            z-index: 300;
+            left: 5vw;
+            top: 5vh;
+            overflow-y: scroll;
+            background-color: $color-white;
+            @include border;
+            list-style-type: none;
+            li {
+                display: block;
+                margin: 0;
+                font-size: $font-size-4;
+                &:last-child a {
+                    border-bottom: 0;
+                }
+            }
+            a {
+                display: block;
+                width: 100%;
+                padding: $vertical-rhythm/2;
+                border-bottom: 1px solid $color-grey;
+                color: $color-black;
+                &:hover {
+                    background-color: $color-grey-6;
+                }
+            }
+            // State changes
+            @include transition(transform .3s ease-in-out);
+            @include transform(translateY(-150vh));
+            &.visible {
+                @include transform(translateY(0));
+            }
+        }
+    }
+}
+
+
+#modal-overlay {
+    position: fixed;
+    top: -9999px;
+    left: 0;
+    height: 110%;
+    width: 100vw;
+    z-index: 200;
+    background-color: $color-black;
+    opacity: 0;
+    transition: top 0s .25s, opacity .25s linear;
+    &.visible {
+        top: 0;
+        opacity: .9;
+        transition: top 0s 0s, opacity .25s linear;
+    }
+    &:hover {
+        cursor: pointer;
+    }
+}

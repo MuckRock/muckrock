@@ -63,12 +63,13 @@ MuckRock &bull; {{ project.title }}
 
 {% block main %}
 
+    <div class="crowdfunds">
     {% if project.crowdfund.count > 0 %}
-    <h2>Crowdfund</h2>
         {% for crowdfund in project.crowdfund.all %}
             {% crowdfund_project crowdfund.pk %}
         {% endfor %}
     {% endif %}
+    </div>
 
     {% if project.requests.count > 0 %}
     <h2>Requests</h2>

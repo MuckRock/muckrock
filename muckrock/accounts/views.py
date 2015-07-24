@@ -275,7 +275,7 @@ def profile(request, user_name=None):
         'sidebar_admin_url': reverse('admin:auth_user_change', args=(user.pk,)),
     }
     return render_to_response(
-        'details/account_detail.html',
+        'profile/account.html',
         context,
         context_instance=RequestContext(request)
     )

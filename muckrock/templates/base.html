@@ -78,17 +78,16 @@
         <meta name="google-site-verification" content="4KnIEDr5Fi-PUL9klVnMlC2BMcStrUwQIj-4gMVfqjk" />
     </head>
     <body>
-        {% if user.is_authenticated %}
-        {% include 'lib/sidebar.html' %}
-        {% else %}
-        {% include 'lib/sidebar.html' with hidden=1 %}
-        {% endif %}
+        {% include 'nav/sidebar.html' %}
         <div class="container">
-            {% include 'lib/header.html' %}
+            <div id="modal-overlay"></div>
             {% include 'lib/notification.html' %}
+            {% include 'nav/header.html' %}
+            <div class="content">
             {% block content %}
             {% endblock content %}
-            {% include 'lib/footer.html' %}
+            </div>
+            {% include 'nav/footer.html' %}
         </div>
         <!-- SCRIPTS -->
         <!-- Google Analytics -->
@@ -142,9 +141,11 @@
         <script type="text/javascript"
                 src="{% static 'js/jquery.autosize.min.js' %}"></script>
         <script type="text/javascript"
+                src="{% static 'js/jquery.formset.js' %}"></script>
+        <script type="text/javascript"
                 src="{% static 'js/muckrock.js' %}"></script>
         <script type="text/javascript"
-                src="{% static 'js/jquery.formset.js' %}"></script>
+                src="{% static 'js/notification.js' %}"></script>
         {% endcompress %}
         <!--<script type="text/javascript"
                 src="{% static 'js/jquery.hotkeys.js' %}"></script>-->

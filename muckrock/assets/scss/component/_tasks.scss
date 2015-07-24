@@ -1,0 +1,181 @@
+.task {
+    @include row;
+    border: 1px solid $color-black;
+    &.resolved {
+        border-color: $color-green;
+    }
+}
+
+.resolved .task-header {
+    background: $color-green;
+}
+
+.task-header {
+    @include span-columns(12);
+    @include row;
+    position: relative;
+    margin-bottom: 0;
+    background-color: $color-black;
+    color: $color-white;
+    cursor: pointer;
+
+    .checkbox {
+        position: absolute;
+        top: $vertical-rhythm/2;
+        left: $vertical-rhythm/4;
+    }
+
+    .task-resolved, .task-metadata {
+        @include span-columns(12);
+        @include row;
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        p, time {
+            @include span-columns(6);
+        }
+    }
+
+    p {
+        margin: 0;
+        padding-left: $vertical-rhythm;
+    }
+
+    time {
+        text-align: right;
+        a { color: $color-white; }
+    }
+}
+
+.task .task-data {
+    @include span-columns(8);
+    padding: $vertical-rhythm/2;
+    li {
+        margin-left: $vertical-rhythm;
+    }
+}
+
+.task .task-actions {
+    @include span-columns(4);
+    @include omega;
+    padding: $vertical-rhythm/2;
+    input, select, button, label {
+        display: block;
+        width: 100%;
+        margin-bottom: $vertical-rhythm;
+    }
+    input, select, button {
+        margin-bottom: $vertical-rhythm/2;
+    }
+    .task-assign {
+        margin-bottom: $vertical-rhythm/2;
+    }
+}
+
+.task .task-extra-context {
+    @include span-columns(12);
+    padding: $vertical-rhythm/2;
+    background: $color-grey-7;
+
+    button {
+        display: block;
+        width: 10em;
+        margin-bottom: $vertical-rhythm/2;
+    }
+
+    .extra-context {
+        display: block;
+        padding-top: $vertical-rhythm;
+        border-top: 1px solid $color-grey;
+    }
+    .extra-context.hidden {
+        display: none;
+    }
+}
+
+.collapsed.task {
+    .task-data, .task-actions, .task-extra-context {
+        display: none;
+    }
+}
+
+/* New Agency Task */
+
+.new-agency.rejection.form {
+    border-color: $color-red;
+}
+
+.new-agency.approval.form {
+    border-color: $color-green;
+    @include row;
+    overflow: hidden;
+    .id_name, .id_aliases, .id_address {
+        @include full;
+    }
+    .id_address, .id_url, .id_fax {
+        @include omega;
+    }
+    fieldset {
+        @include grid-columns(4, 3, 6);
+        input {
+            width: 100%;
+        }
+        .help-text {
+            margin: $vertical-rhythm/4 0 0 0;
+        }
+    }
+
+}
+
+/* Response Task */
+
+.response.task {
+    #id_status {
+        margin-bottom: $vertical-rhythm;
+    }
+    .file {
+        margin-bottom: $vertical-rhythm/4;
+        border: 1px solid $color-grey;
+        padding: $vertical-rhythm/4;
+    }
+    .task-extra-context {
+        margin: 0;
+    }
+    .task-extra-context dd {
+        margin-bottom: $vertical-rhythm;
+        &:last-child { margin-bottom: 0; }
+    }
+    .communication {
+        // margin: $vertical-rhythm/2 0;
+        border: 1px solid $color-grey;
+        border-left-width: 9px;
+        padding: $vertical-rhythm/2;
+        header {
+            @include row;
+            @extend dfn;
+            p, time { @include half; }
+            p { margin: 0; }
+            @include media($medium-layout) {
+                time { text-align: right; }
+            }
+        }
+        p { margin-bottom: 0; }
+    }
+}
+
+/* Snail Mail Task */
+
+
+.task-post-actions input[type=checkbox] {
+    width: 20%;
+    float: left;
+    margin-top: .4em;
+    & + label {
+        width: 80%;
+        float: right;
+        line-height: 1.5em;
+    }
+}
+
+.extra-context textarea {
+    height: 15em;
+    overflow: none;
+}

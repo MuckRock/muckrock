@@ -1,0 +1,172 @@
+    ///////////////////////////////
+   //                           //
+  //    T Y P O G R A P H Y    //
+ //                           //
+///////////////////////////////
+
+// Font Families
+
+$font-sans-serif:       'Source Sans Pro', 'Helvetica Neue', sans-serif;
+$font-monospace:        'Source Code Pro', 'Courier Prime', monospace;
+
+$font-family:           $font-sans-serif;
+
+// Font Weights
+
+$font-weight-bold:      500;
+$font-weight-normal:    400;
+$font-weight-light:     300;
+
+$font-weight:           $font-weight-normal;
+
+// Type Scale
+
+$font-size-1:           0.6875rem;
+$font-size-2:           0.8125rem;
+$font-size-3:           1.0000rem;
+$font-size-4:           1.1875rem;
+$font-size-5:           1.4375rem;
+$font-size-6:           1.6875rem;
+$font-size-7:           2.0625rem;
+$font-size-8:           2.5000rem;
+$font-size-9:           3.0000rem;
+
+$font-size:             $font-size-3;
+
+// Type Vertical Rhythm
+
+$font-line-height:      1.4375em;
+$vertical-rhythm:       1.1875rem;
+%vertical-rhythm {
+    margin-top: 0;
+    margin-bottom: $vertical-rhythm;
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+// Display Sizes
+
+$font-size-display-1:   $font-size-7;
+$font-size-display-2:   $font-size-8;
+$font-size-display-3:   $font-size-9;
+
+// Headings
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: $font-weight-normal;
+    line-height: 1.1875em;
+    @extend %vertical-rhythm;
+}
+h1, .h1 { font-size: $font-size-7; }
+h2, .h2 { font-size: $font-size-6; }
+h3, .h3 { font-size: $font-size-5; }
+h4, .h4 { font-size: $font-size-4; }
+h5, .h5 { font-size: $font-size-3; }
+h6, .h6 { font-size: $font-size-2; }
+
+.display {
+    font-size: $font-size-7;
+    font-weight: $font-weight-light;
+    &.h1 {
+        font-size: $font-size-7;
+    }
+    &.h2 {
+        font-size: $font-size-6;
+    }
+    @include media($medium-layout) {
+        &.h1 {
+            font-size: $font-size-8;
+        }
+        &.h2 {
+            font-size: $font-size-7;
+        }
+    }
+    @include media($large-layout) {
+        &.h1 {
+            font-size: $font-size-9;
+        }
+        &.h2 {
+            font-size: $font-size-8;
+        }
+    }
+}
+
+// Body
+
+article, aside, blockquote, body, br, button, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+    @extend %vertical-rhythm;
+}
+
+body {
+    font-size: 16px;
+    font-family: $font-family;
+    font-weight: $font-weight;
+    line-height: $font-line-height;
+    @include font-feature-settings('liga', 'kern');
+}
+
+b, strong { font-weight: $font-weight-bold; }
+
+a {
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+}
+
+blockquote {
+    margin-left: 0;
+    padding-left: $vertical-rhythm;
+    border-left: 1px solid $color-grey;
+    font-style: italic;
+    i, em { font-style: normal; }
+}
+
+small {
+    font-size: 0.8125em;
+    font-style: normal;
+}
+
+dfn, dt {
+    display: block;
+    font-size: $font-size-1;
+    font-style: normal;
+    font-weight: $font-weight-bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+dd {
+    -webkit-margin-start: 0;
+    & + dt {
+        margin-top: $vertical-rhythm;
+    }
+}
+
+code {
+    padding: .2em .4em;
+    border-radius: $base-border-radius;
+    font-family: $font-monospace;
+    font-size: $font-size-2;
+}
+
+hr {
+    border-top: none;
+    border-bottom: 1px solid $color-grey;
+}
+
+img, audio, video, embed, iframe {
+    max-width: 100%;
+}
+
+figcaption {
+    font-size: $font-size-2;
+}
+
+th {
+    font-size: $font-size-2;
+    font-weight: $font-weight-bold;
+    text-align: left;
+    vertical-align: top;
+}
+
+td { vertical-align: top; }
