@@ -2,10 +2,10 @@
 
 {% load humanize %}
 {% load static from staticfiles %}
-{% load tags %}
+{% load crowdfund_tags %}
 
 {% block content %}
-{% crowdfund crowdfundrequest.foia.pk %}
+{% crowdfund_project crowdfundproject.pk %}
 {% endblock %}
 
 {% block scripts %}

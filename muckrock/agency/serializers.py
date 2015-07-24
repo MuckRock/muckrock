@@ -10,7 +10,7 @@ from muckrock.agency.models import Agency
 
 class AgencySerializer(serializers.ModelSerializer):
     """Serializer for Agency model"""
-    types = serializers.RelatedField(many=True)
+    types = serializers.StringRelatedField(many=True)
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=no-member

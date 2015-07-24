@@ -4,12 +4,16 @@ $crowdfund-color-light: desaturate(lighten($color-green, 30%), 15%);
 $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
 .crowdfund.widget {
-    overflow: hidden;
+    overflow: visible;
     @include row;
     max-width: 60em;
     margin: 0 auto $vertical-rhythm;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
+
+    *:last-child {
+        @include border-bottom-radius($base-border-radius);
+    }
 
     a {
         color: $crowdfund-color;
@@ -68,14 +72,16 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         p {
             @include third;
             margin-bottom: 0;
+            text-align: center;
             @include media($medium-layout) {
-                text-align: center;
+                text-align: left;
             }
         }
     }
 
     .contributors p {
         margin-bottom: $vertical-rhythm/4;
+        padding-left: $vertical-rhythm;
     }
     .contributor-list {
         margin-top: 0;
@@ -124,6 +130,37 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         }
         @include media($medium-layout) {
             .action { padding-left: $vertical-rhythm/2; }
+        }
+    }
+}
+
+.crowdfund.widget {
+    .contributors {
+        position: relative;
+    }
+    .contributor {
+        &.summary {
+            cursor: default;
+            text-decoration: underline;
+        }
+        &.dropdown {
+            display: none;
+            position: absolute;
+            top: 2*$vertical-rhythm;
+            left: $vertical-rhythm;
+            z-index: 1;
+            border-radius: $base-border-radius;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            background-color: $color-black;
+            color: $color-white;
+            opacity: 0;
+            list-style-type: none;
+            font-size: $font-size-2;
+            @include transition(opacity .25s .25s linear);
+        }
+        &.summary:hover + .contributor.dropdown {
+            display: block;
+            opacity: .9;
         }
     }
 }

@@ -3,6 +3,7 @@
 {% load markdown_deux_tags %}
 {% load mathfilters %}
 {% load static from staticfiles %}
+{% load crowdfund_tags %}
 {% load tags %}
 
 {% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
@@ -161,7 +162,7 @@
 
 {% block main %}
 {% if foia.has_crowdfund %}
-    {% crowdfund foia.pk %}
+    {% crowdfund_request foia.crowdfund.pk %}
 {% endif %}
 
 {% if foia.files.all or foia.user == user or user.is_staff %}
