@@ -7,10 +7,16 @@ $color-agency: darken($color-jurisdiction-picker, 10%);
     @include outer-container;
     @include row;
     header {
-        @include third;
+        @include full;
+        h1 {
+            @include two-thirds;
+        }
+        summary {
+            @include third;
+        }
     }
     .create-request {
-        @include two-thirds;
+        @include full;
         @include border-radius;
         background-color: $color-grey-7;
     }
