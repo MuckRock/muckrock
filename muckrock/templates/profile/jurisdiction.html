@@ -1,11 +1,12 @@
-{% extends 'details/base_profile.html' %}
+{% extends 'base_profile.html' %}
 {% load markdown_deux_tags %}
 {% load thumbnail %}
-{% block title %}MuckRock &bull; {{ agency.name }}{% endblock title %}
+{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
 {% block type %}jurisdiction{% endblock type %}
 
 {% block metadata %}
 <aside class="metadata">
+    <dfn>Jurisdiction</dfn>
     {% if jurisdiction.image %}
     <figure class="jurisdiction image">
         <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
