@@ -104,8 +104,7 @@ $sidebar-width: 250px;
     }
 
     .requests {
-        margin-top: $vertical-rhythm/2;
-        padding: 0 $vertical-rhythm/2;
+        padding: $vertical-rhythm/2;
 
         .my-requests {
             display: block;
