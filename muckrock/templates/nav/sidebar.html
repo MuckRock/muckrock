@@ -9,6 +9,11 @@
         {% endif %}
     </header>
 
+    {% if user.is_staff %}
+    <section>
+        <a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a>
+    </section>
+    {% endif %}
 
     {% if user.is_authenticated %}
     <section class="requests">
