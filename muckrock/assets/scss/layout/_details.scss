@@ -1,7 +1,6 @@
 /* Details */
 
 .detail {
-    @include outer-container;
 
     .header {
         margin-bottom: 0;
@@ -34,17 +33,86 @@
     }
 
     &.news {
-        @include outer-container;
-        $article-body-width: 33em;
+        .news-article {
+            @include display(flex);
+            @include flex-wrap(wrap);
+        }
 
-        .news-image {
-            @include full;
-            @include omega;
-            margin-bottom: $vertical-rhythm;
+        .news-article-header {
+            @include flex(1 100%);
+            @include order(1);
+
+            .news-image {
+                display: block;
+                width: 100%;
+            }
+
+            .news-article-title, .news-article-kicker {
+            font-weight: $font-weight-bold;
+            }
+
+            .news-article-title {
+                font-size: $font-size-6;
+            }
+
+            .news-article-kicker {
+                font-size: $font-size-4;
+            }
+
             @include media($medium-layout) {
-                margin-bottom: $vertical-rhythm*2;
+                .news-article-title {
+                    font-size: $font-size-7;
+                }
+                .news-article-kicker {
+                    font-size: $font-size-5;
+                }
+            }
+
+            .secondary {
+                color: $color-grey-3;
+                & > * {
+                    display: inline-block;
+                    margin-bottom: 0;
+                }
+                .news-article-authors {
+                    font-weight: $font-weight-bold;
+                    font-size: $font-size-4;
+                }
+                .news-article-date {
+                    margin-left: $vertical-rhythm;
+                }
             }
         }
+
+        .news-article-body {
+            @include order(2);
+            @include media($medium-layout) {
+                @include order(3);
+                @include flex(2 0px);
+            }
+            max-width: 100%;
+            p {
+                overflow: hidden;
+            }
+        }
+
+        .news-aside {
+            @include order(3);
+            @include media($medium-layout) {
+                @include order(2);
+                @include flex(1 auto);
+            }
+        }
+
+        .news-article-footer {
+            @include order(4);
+            @include media($medium-layout) {
+                @include flex(1 auto);
+            }
+        }
+
+
+        /*
         .news-article {
             @include row;
             @include span-columns(12);
@@ -61,48 +129,17 @@
             @include grid-columns(12, 2, 3);
         }
 
-        .news-article-header, .news-article-body, .news-article-footer {
-            max-width: $article-body-width;
-        }
-
-        .news-article-header {
-            margin-bottom: $vertical-rhythm;
-            border-bottom: $base-border-width solid $color-grey;
-            @include media($medium-layout) {
-                margin-bottom: 0;
-            }
-        }
-
-        .news-article-title {
-            margin-top: 0;
-            font-size: 2.0625em;
-            font-weight: $font-weight-bold;
-            @include media($large-layout) {
-                max-width: 150%;
-            }
-        }
-
         .news-article-kicker {
-            margin: $vertical-rhythm/2 0;
-            font-size: 1.4375em;
+            font-size: $font-size-5;
             font-weight: $font-weight-bold;
-            line-height: 1.5em;
-            @include media($large-layout) {
-                max-width: 150%;
-            }
         }
 
         .news-article-authors {
-            font-size: 1em;
             font-weight: $font-weight-normal;
             margin-bottom: $vertical-rhythm;
         }
 
         .news-article-body {
-            @include font-sizing(1, 1.2);
-            @include media($medium-layout) {
-                @include font-sizing(1.2, 1.4);
-            }
             margin: $vertical-rhythm 0;
             padding-top: 0;
             p {
@@ -116,6 +153,7 @@
                 }
             }
         }
+        */
 
         // Fixes for embedded content
         div[id^='viewer'] {
