@@ -103,24 +103,22 @@ $sidebar-width: 250px;
         }
     }
 
-    .requests {
-        margin-top: $vertical-rhythm/2;
-        padding: 0 $vertical-rhythm/2;
-
-        .my-requests {
-            display: block;
-            width: 100%;
-            padding: $vertical-rhythm/2;
-            color: $color-white;
-            font-size: $font-size-3;
-            font-weight: $font-weight-bold;
-            @include border-radius;
-            @include transition(color .25s linear);
-            &:hover {
-                color: $color-blue;
-                text-decoration: none;
-            }
+    .my-requests, .admin {
+        display: block;
+        width: 100%;
+        // padding: $vertical-rhythm/2;
+        color: $color-white;
+        font-size: $font-size-3;
+        font-weight: $font-weight-bold;
+        @include border-radius;
+        @include transition(color .25s linear);
+        &:hover {
+            color: $color-blue;
+            text-decoration: none;
         }
+    }
+
+    .requests {
 
         .actionable {
             display: block;

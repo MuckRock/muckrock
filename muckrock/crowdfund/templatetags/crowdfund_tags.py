@@ -53,14 +53,9 @@ def crowdfund_user(context):
 
 def contributor_summary(crowdfund):
     """Returns a summary of the contributors to the project"""
-    anonymous = 0
-    contributor_names = []
+    anonymous = len(crowdfund.anonymous_contributors())
+    contributor_names = [x.get_full_name() for x in crowdfund.named_contributors()]
     unnamed_string = ''
-    for contributor in crowdfund.contributors():
-        if contributor.is_anonymous():
-            anonymous += 1
-        else:
-            contributor_names.append(contributor.get_full_name())
     named_limit = 4
     num_unnamed = len(contributor_names) - named_limit
     # prevents num_unnamed from being a negative value

@@ -19,7 +19,6 @@
             <li><a href="{% url 'question-index'%}">Q &amp; A Forum</a></li>
             {% if user.is_staff %}
             <li><a href="{% url 'task-list' %}">Tasks</a></li>
-            <li><a href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a></li>
             {% endif %}
             <li><a href="/about/">About</a></li>
         </ul>

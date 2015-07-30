@@ -77,8 +77,9 @@ class CrowdfundABC(models.Model):
         return [x for x in self.contributors() if x.is_anonymous()]
 
     def named_contributors(self):
-        """Return named contributors only."""
-        return [x for x in self.contributors() if not x.is_anonymous()]
+        """Return unique named contributors only."""
+        # returns the list of a set of a list to remove duplicates
+        return list(set([x for x in self.contributors() if not x.is_anonymous()]))
 
     def get_crowdfund_object(self):
         """Return the object being crowdfunded. Should be implemented by subclasses."""
