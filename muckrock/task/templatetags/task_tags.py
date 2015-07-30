@@ -103,6 +103,7 @@ class NewAgencyTaskNode(TaskNode):
         extra_context = super(NewAgencyTaskNode, self).get_extra_context(the_task)
         other_agencies = agency.models.Agency.objects.filter(jurisdiction=the_task.agency.jurisdiction)
         other_agencies = other_agencies.exclude(id=the_task.agency.id)
+        other_agencies = other_agencies.order_by('name')
         extra_context['agency_form'] = agency.forms.AgencyForm(instance=the_task.agency)
         extra_context['other_agencies'] = other_agencies
         extra_context['foias'] = foia.models.FOIARequest.objects.filter(agency=the_task.agency)
