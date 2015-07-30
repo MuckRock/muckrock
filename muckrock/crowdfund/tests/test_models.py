@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Tests for crowdfunding models
 """
@@ -5,7 +6,7 @@ Tests for crowdfunding models
 from django.test import TestCase
 
 from datetime import date, timedelta
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 
 from muckrock.crowdfund import models
 from muckrock.foia.models import FOIARequest
@@ -41,6 +42,13 @@ class TestCrowdfundProject(TestCase):
     def test_unicode(self):
         """The crowdfund should express itself concisely."""
         eq_('%s' % self.crowdfund, 'Crowdfunding for Test Project')
+
+    def test_unicode_characters(self):
+        """The unicode method should support unicode characters"""
+        project_title = unicode('Test¢s Request')
+        self.project = Project.objects.create(title=project_title)
+        self.crowdfund.project = self.project
+        ok_('%s' % self.crowdfund)
 
     def test_get_crowdfund_object(self):
         """The crowdfund should have a project being crowdfunded."""
