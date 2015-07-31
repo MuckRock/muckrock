@@ -104,7 +104,7 @@ class CrowdfundRequest(CrowdfundABC):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Crowdfunding for %s' % self.foia.title
+        return u'Crowdfunding for %s' % self.foia.title
 
     @models.permalink
     def get_absolute_url(self):
@@ -120,7 +120,7 @@ class CrowdfundRequestPayment(CrowdfundPaymentABC):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Payment of $%.2f by %s on %s for %s' % \
+        return u'Payment of $%.2f by %s on %s for %s' % \
             (self.amount, self.user, self.date.date(), self.crowdfund.foia)
 
 class CrowdfundProject(CrowdfundABC):
@@ -129,7 +129,7 @@ class CrowdfundProject(CrowdfundABC):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Crowdfunding for %s' % self.project.title
+        return u'Crowdfunding for %s' % self.project.title
 
     @models.permalink
     def get_absolute_url(self):
@@ -145,5 +145,5 @@ class CrowdfundProjectPayment(CrowdfundPaymentABC):
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Payment of $%.2f by %s on %s for %s' % \
+        return u'Payment of $%.2f by %s on %s for %s' % \
             (self.amount, self.user, self.date.date(), self.crowdfund.project)
