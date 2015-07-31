@@ -152,7 +152,7 @@ class CrowdfundDetailView(DetailView):
                 else:
                     messages.success(request, 'Thank you for your contribution!')
                     return redirect(self.get_redirect_url())
-        self.return_error(request)
+        return self.return_error(request)
 
 class CrowdfundRequestDetail(CrowdfundDetailView):
     """Specificies a detail view for crowdfunding requests."""
