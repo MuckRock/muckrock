@@ -24,10 +24,12 @@ class TestCrowdfundRequest(TestCase):
         self.foia = FOIARequest.objects.get(pk=1)
         self.crowdfund.foia = self.foia
 
-    def testUnicode(self):
+    def test_unicode(self):
         """The crowdfund should express itself concisely."""
         eq_('%s' % self.crowdfund, 'Crowdfunding for %s' % self.foia)
-
+        self.crowdfund.foia.title = u'Test¢Unicode'
+        self.crowdfund.foia.save()
+        eq_('%s' % self.crowdfund, 'Crowdfunding for %s' % self.foia)
 
 class TestCrowdfundProject(TestCase):
     """Test crowdfunding a project"""
@@ -45,7 +47,7 @@ class TestCrowdfundProject(TestCase):
 
     def test_unicode_characters(self):
         """The unicode method should support unicode characters"""
-        project_title = unicode('Test¢s Request')
+        project_title = u'Test¢s Request'
         self.project = Project.objects.create(title=project_title)
         self.crowdfund.project = self.project
         ok_('%s' % self.crowdfund)
