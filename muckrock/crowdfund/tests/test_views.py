@@ -201,6 +201,17 @@ class TestCrowdfundRequestView(TestCase):
         eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
             'A new crowdfund task should be created.')
 
+    def test_invalid_positive_integer(self):
+        """The crowdfund should accept payments with cents."""
+        self.crowdfund.payment_required = Decimal('257.05')
+        self.crowdfund.payment_received = Decimal('150.00')
+        self.crowdfund.save()
+        cent_payment = 105 # $1.05
+        self.data['amount'] = cent_payment
+        self.post(self.data)
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        eq_(payment.amount, Decimal('01.05'))
+
 
 class TestCrowdfundProjectDetailView(TestCase):
     """Tests for the crowdfund project detail view."""

@@ -209,24 +209,21 @@ def buy_requests(request):
     """Buy more requests"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
     if request.POST.get('stripe_token', False):
+        user_profile = request.user.profile
         try:
-            user_profile = request.user.profile
             stripe_token = request.POST['stripe_token']
             user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
-            user_profile.num_requests += 4
-            user_profile.save()
-            request.session['ga'] = 'request_purchase'
-            msg = 'Purchase successful. 4 requests have been added to your account.'
-            messages.success(request, msg)
-            logger.info('%s has purchased requests', request.user.username)
-        except stripe.CardError as exc:
-            msg = 'Payment error. Your card has not been charged.'
+        except (stripe.CardError, ValueError) as exc:
+            msg = 'Payment error: %s Your card has not been charged.' % exc
             messages.error(request, msg)
             logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
-        except ValueError as exc:
-            msg = 'Payment error. Your card has not been charged.'
-            messages.error(request, msg)
-            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            return redirect(url_redirect)
+        user_profile.num_requests += 4
+        user_profile.save()
+        request.session['ga'] = 'request_purchase'
+        msg = 'Purchase successful. 4 requests have been added to your account.'
+        messages.success(request, msg)
+        logger.info('%s has purchased requests', request.user.username)
     return redirect(url_redirect)
 
 @login_required

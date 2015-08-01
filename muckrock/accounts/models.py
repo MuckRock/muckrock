@@ -263,12 +263,15 @@ class Profile(models.Model):
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         # pylint: disable=no-member
-        stripe.Charge.create(
-            amount=amount,
-            currency='usd',
-            card=token,
-            description='%s: %s' % (self.user.username, desc)
-        )
+        try:
+            stripe.Charge.create(
+                amount=amount,
+                currency='usd',
+                card=token,
+                description='%s: %s' % (self.user.username, desc)
+            )
+        except stripe.CardError as exception:
+            raise ValueError(exception)
 
     def api_pay(self, amount, desc):
         """Create a stripe charge for the user through the API"""
