@@ -203,15 +203,14 @@ class TestCrowdfundRequestView(TestCase):
 
     def test_invalid_positive_integer(self):
         """The crowdfund should accept payments with cents."""
-        self.crowdfund.payment_required = Decimal(257.05)
-        self.crowdfund.payment_received = Decimal(150.00)
+        self.crowdfund.payment_required = Decimal('257.05')
+        self.crowdfund.payment_received = Decimal('150.00')
         self.crowdfund.save()
-        cent_payment = 10005 # $100.05
+        cent_payment = 105 # $1.05
         self.data['amount'] = cent_payment
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
-        eq_(payment.amount, Decimal(100.05),
-            "Should be able to make contributions with an arbitrary cent value.")
+        eq_(payment.amount, Decimal('01.05'))
 
 
 class TestCrowdfundProjectDetailView(TestCase):
