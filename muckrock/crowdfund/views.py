@@ -109,7 +109,7 @@ class CrowdfundDetailView(DetailView):
         token = request.POST.get('token')
         user = request.user if request.user.is_authenticated() else None
         crowdfund_object = get_object_or_404(self.model, pk=crowdfund)
-        amount = Decimal(float(amount)/100)
+        amount = Decimal(amount)/100
         # check if the amount is greater than the amount required
         # if it is, only charge the amount required
         if amount > crowdfund_object.amount_remaining():
@@ -152,7 +152,7 @@ class CrowdfundDetailView(DetailView):
                 else:
                     messages.success(request, 'Thank you for your contribution!')
                     return redirect(self.get_redirect_url())
-        self.return_error(request)
+        return self.return_error(request)
 
 class CrowdfundRequestDetail(CrowdfundDetailView):
     """Specificies a detail view for crowdfunding requests."""
