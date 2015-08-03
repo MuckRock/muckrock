@@ -2,7 +2,6 @@
 Models for the tags application
 """
 
-from django.contrib.auth.models import User
 from django.db import models
 
 import autocomplete_light
