@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="tag-master">
+    <form method="get" class="filter-tags">
+        <input type="search" placeholder="Filter tags" />
+    </form>
+    <table>
+    {% for tag_item in tags %}
+        <tr>
+            <td><a href="{% url 'tag-detail' slug=tag_item.slug %}">{{ tag_item.name }}</a></td>
+        </tr>
+    {% endfor %}
+        </tbody>
+    </table>
+</section>
+<section class="tag-detail">
+    {% if tag.name %}
+    <h1>{{ tag.name }}</h1>
+    {% else %}
+    <h1>Tags</h1>
+    {% endif %}
+</section>
+{% endblock %}

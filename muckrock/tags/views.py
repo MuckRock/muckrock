@@ -2,7 +2,7 @@
 Views for tags
 """
 from django.http import HttpResponse
-from django.views.generic import View
+from django.views.generic import TemplateView, DetailView
 
 from . import models
 
@@ -16,14 +16,23 @@ def filter_tags(filter_string):
     tags = models.Tag.objects.filter(name__icontains=filter_string)
     return tags
 
-class TagListView(View):
+class TagListView(TemplateView):
     """Presents a list of all tags"""
-    def get(self, request, *args, **kwargs):
-        """Returns a list of tags"""
-        return HttpResponse('Hello, World')
+    template_name = 'tags/tag_list.html'
 
-class TagDetailView(View):
+    def get_context_data(self, **kwargs):
+        """Adds all tags to context data"""
+        context = super(TagListView, self).get_context_data(**kwargs)
+        context['tags'] = list_all_tags()
+        return context
+
+class TagDetailView(DetailView):
     """Presents the details of a tag"""
-    def get(self, request, *args, **kwargs):
-        """Returns a detail of the tag"""
-        return HttpResponse('Hello, World')
+    model = models.Tag
+    template_name = 'tags/tag_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds all tags to context data"""
+        context = super(TagDetailView, self).get_context_data(**kwargs)
+        context['tags'] = list_all_tags()
+        return context
