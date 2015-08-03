@@ -5,7 +5,7 @@
 {% block content %}
 <div class="master-detail">
     <section class="master">
-        <h1>Tags</h1>
+        <h1>{{ tags|length }} Tag{{ tags|length|pluralize }}</h1>
         <div id="tags">
             <input class="search" type="search" placeholder="Filter tags" />
             <div class="tag-table">
