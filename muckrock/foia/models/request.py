@@ -583,7 +583,7 @@ class FOIARequest(models.Model):
             tag = Tag.normalize(tag)
             if not tag:
                 continue
-            new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': self.user})
+            new_tag, _ = Tag.objects.get_or_create(name=tag)
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
