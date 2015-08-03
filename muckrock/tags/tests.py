@@ -55,7 +55,7 @@ class TestTagDetailView(test.TestCase):
 
     def test_resolve_url(self):
         """The tag detail url should resolve."""
-        tag_url = reverse('tag-detail', kwargs={'name': self.tag_foo.name})
+        tag_url = reverse('tag-detail', kwargs={'slug': self.tag_foo.slug})
         response = self.client.get(tag_url)
         eq_(response.status_code, 200)
 
