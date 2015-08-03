@@ -1,24 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="tag-master">
-    <form method="get" class="filter-tags">
-        <input type="search" placeholder="Filter tags" />
-    </form>
-    <table>
-    {% for tag_item in tags %}
-        <tr>
-            <td><a href="{% url 'tag-detail' slug=tag_item.slug %}">{{ tag_item.name }}</a></td>
-        </tr>
-    {% endfor %}
-        </tbody>
-    </table>
-</section>
-<section class="tag-detail">
-    {% if tag.name %}
-    <h1>{{ tag.name }}</h1>
+<div class="master-detail">
+    <section class="master">
+        <h1>Tags</h1>
+        <div id="tags">
+            <input class="search" type="search" placeholder="Filter tags" />
+            <div class="tag-table">
+                <table>
+                    <tbody class="list">
+                    {% for tag_item in tags %}
+                        <tr>
+                            <td class="name">
+                                <a href="{% url 'tag-detail' slug=tag_item.slug %}" {% if tag and tag_item.name == tag.name %}class="active"{% endif %}>{{ tag_item.name }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    {% if tag %}
+    <section class="detail">
+        <h1>{{ tag.name }}</h1>
+    </section>
     {% else %}
-    <h1>Tags</h1>
+    <section class="detail">
+    </section>
     {% endif %}
-</section>
-{% endblock %}
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script src="http://listjs.com/no-cdn/list.js"></script>
+<script type="text/javascript">
+    var options = {
+      valueNames: [ 'name' ]
+    };
+
+    var tagList = new List('tags', options);
+</script>
+{% endblock scripts %}
