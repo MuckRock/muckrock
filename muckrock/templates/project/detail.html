@@ -17,7 +17,7 @@ MuckRock &bull; {{ project.title }}
 
 {% block header %}
     {% if project.image %}
-    <img src="{{ MEDIA_URL }}{{ project.image }}">
+    <img src="{% static project.image %}">
     {% endif %}
     <h1>{{ project.title }}</h1>
     <p>{{ project.description|markdown:"trusted" }}</p>
