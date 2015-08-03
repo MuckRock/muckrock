@@ -12,7 +12,6 @@ from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 
 class Tag(TaggitTag):
     """Custom Tag Class"""
-    user = models.ForeignKey(User, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """Normalize name before saving"""
