@@ -17,6 +17,9 @@ class TestTagListView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
+        self.foo = models.Tag.objects.create(name=u'foo')
+        self.bar = models.Tag.objects.create(name=u'bar')
+        self.baz = models.Tag.objects.create(name=u'baz')
 
     def test_resolve_url(self):
         """The tag list url should resolve."""
@@ -26,11 +29,13 @@ class TestTagListView(test.TestCase):
 
     def test_list_all_tags(self):
         """The tag list should list all the tags (duh!)."""
-        # first we create three tag objects
-        models.Tag.objects.create(name=u'foo')
-        models.Tag.objects.create(name=u'bar')
-        models.Tag.objects.create(name=u'baz')
-        # next we get a list of all the tags
         tag_list = views.list_all_tags()
-        # the list should have three items
         eq_(len(tag_list), 3)
+
+    def test_filter_tags(self):
+        """The tag list should filter tags against a string."""
+        filter_string = 'ba'
+        filtered_tag_list = views.filter_tags(filter_string)
+        eq_(len(filtered_tag_list), 2)
+        ok_(self.bar in filtered_tag_list)
+        ok_(self.baz in filtered_tag_list)
