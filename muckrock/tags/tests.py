@@ -18,6 +18,6 @@ class TestTagListView(test.TestCase):
 
     def test_resolve_url(self):
         """The tag list url should resolve."""
-        tag_url = reverse('/index')
+        tag_url = reverse('tag-list')
         response = self.client.get(tag_url)
         ok_(response.status_code == 200)
