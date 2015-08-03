@@ -6,6 +6,10 @@ from django.views.generic import TemplateView, DetailView
 
 from . import models
 
+from muckrock.foia.models import FOIARequest
+from muckrock.news.models import Article
+from muckrock.project.models import Project
+
 def list_all_tags():
     """Should list all tags that exist"""
     tags = models.Tag.objects.all()
@@ -35,4 +39,8 @@ class TagDetailView(DetailView):
         """Adds all tags to context data"""
         context = super(TagDetailView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
+        this_tag = self.get_object().name
+        context['tagged_projects'] = Project.objects.filter(tags__name__in=[this_tag])
+        context['tagged_requests'] = FOIARequest.objects.filter(tags__name__in=[this_tag])
+        context['tagged_articles'] = Article.objects.filter(tags__name__in=[this_tag])
         return context

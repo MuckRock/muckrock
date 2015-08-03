@@ -36,5 +36,8 @@
     }
     .detail {
         @include grid-columns(4, 4, 9);
+        h1 {
+            font-weight: $font-weight-bold;
+        }
     }
 }
