@@ -9,6 +9,7 @@ from . import models
 from muckrock.foia.models import FOIARequest
 from muckrock.news.models import Article
 from muckrock.project.models import Project
+from muckrock.qanda.models import Question
 
 def list_all_tags():
     """Should list all tags that exist"""
@@ -43,4 +44,5 @@ class TagDetailView(DetailView):
         context['tagged_projects'] = Project.objects.filter(tags__name__in=[this_tag])
         context['tagged_requests'] = FOIARequest.objects.filter(tags__name__in=[this_tag])
         context['tagged_articles'] = Article.objects.filter(tags__name__in=[this_tag])
+        context['tagged_questions'] = Question.objects.filter(tags__name__in=[this_tag])
         return context

@@ -50,6 +50,14 @@
             {% endfor %}
         </table>
         {% endif %}
+        {% if tagged_questions %}
+        <h2>{{ tagged_questions|length }} Question{{ tagged_questions|length|pluralize }}</h2>
+        <table>
+            {% for question in tagged_questions %}
+            <tr><td><a href="{{ question.get_absolute_url }}">{{ question.title }}</a></td></tr>
+            {% endfor %}
+        </table>
+        {% endif %}
     </section>
     {% else %}
     <section class="no-tag detail">
