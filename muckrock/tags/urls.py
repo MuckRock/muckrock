@@ -6,5 +6,6 @@ from . import views
 
 urlpatterns = patterns(
     '',
-    url(r'^$', views.TagListView.as_view(), name='tag-list')
+    url(r'^$', views.TagListView.as_view(), name='tag-list'),
+    url(r'^(?P<name>[\w-]+)/$',views.TagDetailView.as_view(), name='tag-detail'),
 )

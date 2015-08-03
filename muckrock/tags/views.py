@@ -21,3 +21,9 @@ class TagListView(View):
     def get(self, request, *args, **kwargs):
         """Returns a list of tags"""
         return HttpResponse('Hello, World')
+
+class TagDetailView(View):
+    """Presents the details of a tag"""
+    def get(self, request, *args, **kwargs):
+        """Returns a detail of the tag"""
+        return HttpResponse('Hello, World')

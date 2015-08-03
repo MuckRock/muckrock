@@ -8,6 +8,7 @@ from nose.tools import ok_, eq_
 
 from . import models, views
 
+
 class TestTagListView(test.TestCase):
     """
     The tag list view should display each tag in a filterable list.
@@ -40,3 +41,21 @@ class TestTagListView(test.TestCase):
         eq_(len(filtered_tag_list), 2)
         ok_(self.tag_bar in filtered_tag_list)
         ok_(self.tag_baz in filtered_tag_list)
+
+
+class TestTagDetailView(test.TestCase):
+    """
+    The tag detail view should display the projects, requests, articles and questions
+    attached to the current tag.
+    """
+
+    def setUp(self):
+        self.client = test.Client()
+        self.tag_foo = models.Tag.objects.create(name=u'foo')
+
+    def test_resolve_url(self):
+        """The tag detail url should resolve."""
+        tag_url = reverse('tag-detail', kwargs={'name': self.tag_foo.name})
+        response = self.client.get(tag_url)
+        eq_(response.status_code, 200)
+
