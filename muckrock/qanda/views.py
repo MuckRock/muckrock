@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from muckrock.qanda.models import Question, Answer
 from muckrock.qanda.forms import QuestionForm, AnswerForm
 from muckrock.qanda.serializers import QuestionSerializer, QuestionPermissions
+from muckrock.tags.models import Tag
 from muckrock.views import MRFilterableListView
 
 class QuestionList(MRFilterableListView):
@@ -65,6 +66,19 @@ class Detail(DetailView):
                 self._answer(request)
             except Answer.DoesNotExist:
                 pass
+
+        tags = request.POST.get('tags')
+        if tags:
+            tag_set = set()
+            for tag in tags.split(','):
+                tag = Tag.normalize(tag)
+                if not tag:
+                    continue
+                new_tag, _ = Tag.objects.get_or_create(name=tag)
+                tag_set.add(new_tag)
+            self.get_object().tags.set(*tag_set)
+            self.get_object().save()
+            messages.success(request, 'Your tags have been saved to this question.')
 
         return redirect(question)
 

@@ -1,5 +1,7 @@
 {% extends 'details/base_detail.html' %}
 {% load markdown_deux_tags %}
+{% load tags %}
+
 {% block title %}MuckRock &bull; {{ object.title }}{% endblock title %}
 {% block type %}question{% endblock type %}
 
@@ -7,7 +9,7 @@
 <h2>On {{ object.date | date:"F j, Y" }}, <a href="{% url "acct-profile" object.user.username %}">{{ object.user.get_full_name }}</a> asked</h2>
     <h1>{{ object.title }}</h1>
     {% if not question.answers.all|length_is:"0" %}
-    <h2>and got {{ question.answers.all | length }} answer{{ question.answers.all | length | pluralize }} from 
+    <h2>and got {{ question.answers.all | length }} answer{{ question.answers.all | length | pluralize }} from
         {% for user in question.get_answer_users %}
             {% if forloop.first and forloop.last %}
                 <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}.
@@ -16,9 +18,9 @@
 					and <a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>.
                 {% else %}
                     {% if forloop.revcounter0 == 1 %}
-						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a> 
+						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>
                     {% else %}
-						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>, 
+						<a href="{% url "acct-profile" user.username %}">{{ user.get_full_name }}</a>,
                     {% endif %}
                 {% endif %}
             {% endif %}
@@ -46,8 +48,9 @@
 
 {% block aside %}
 {% include 'lib/social.html' with title=object.title %}
+{% tag_manager object %}
 {% if object.foia %}
     <dfn>Related request</dfn>
     {% include 'lib/foia.html' with foia=object.foia %}
-{% endif %}        
+{% endif %}
 {% endblock aside %}
