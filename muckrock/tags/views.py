@@ -19,4 +19,5 @@ def filter_tags(filter_string):
 class TagListView(View):
     """Presents a list of all tags"""
     def get(self, request, *args, **kwargs):
+        """Returns a list of tags"""
         return HttpResponse('Hello, World')

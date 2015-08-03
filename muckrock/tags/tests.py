@@ -17,9 +17,9 @@ class TestTagListView(test.TestCase):
 
     def setUp(self):
         self.client = test.Client()
-        self.foo = models.Tag.objects.create(name=u'foo')
-        self.bar = models.Tag.objects.create(name=u'bar')
-        self.baz = models.Tag.objects.create(name=u'baz')
+        self.tag_foo = models.Tag.objects.create(name=u'foo')
+        self.tag_bar = models.Tag.objects.create(name=u'bar')
+        self.tag_baz = models.Tag.objects.create(name=u'baz')
 
     def test_resolve_url(self):
         """The tag list url should resolve."""
@@ -29,6 +29,7 @@ class TestTagListView(test.TestCase):
 
     def test_list_all_tags(self):
         """The tag list should list all the tags (duh!)."""
+        # pylint: disable=no-self-use
         tag_list = views.list_all_tags()
         eq_(len(tag_list), 3)
 
@@ -37,5 +38,5 @@ class TestTagListView(test.TestCase):
         filter_string = 'ba'
         filtered_tag_list = views.filter_tags(filter_string)
         eq_(len(filtered_tag_list), 2)
-        ok_(self.bar in filtered_tag_list)
-        ok_(self.baz in filtered_tag_list)
+        ok_(self.tag_bar in filtered_tag_list)
+        ok_(self.tag_baz in filtered_tag_list)
