@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load static from staticfiles %}
+
 {% block content %}
 <div class="master-detail">
     <section class="master">
@@ -57,12 +59,8 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="http://listjs.com/no-cdn/list.js"></script>
+<script src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
 <script type="text/javascript">
-    var options = {
-      valueNames: [ 'name' ]
-    };
-
-    var tagList = new List('tags', options);
+    $('#tags .search').quicksearch('.tag-table tr');
 </script>
 {% endblock scripts %}
