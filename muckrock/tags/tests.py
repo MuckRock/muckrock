@@ -4,7 +4,7 @@ Tests for tags
 from django import test
 from django.core.urlresolvers import reverse
 
-from nose.tools import ok_, eq_
+from nose.tools import eq_
 
 from . import models, views
 
