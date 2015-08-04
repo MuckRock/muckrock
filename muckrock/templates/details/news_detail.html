@@ -29,7 +29,7 @@
         <footer class="news-article-footer">
         {% if article.foias.exists %}
             <dfn>Related Requests</dfn>
-            {% include 'lib/foia.html' with foias=article.foias.all %}
+            {% include 'lib/foia_group.html' with foias=article.foias.all %}
         {% endif %}
         </footer>
     </article>
