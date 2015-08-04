@@ -5,6 +5,13 @@
     background-color: $color-blue;
     color: $color-white;
     font-size: $font-size-2;
+    text-decoration: none;
+    @include transition(background-color .25s linear);
+    &:hover {
+        color: $color-white;
+        background-color: $color-blue-dark;
+        text-decoration: none;
+    }
 }
 
 button.tag, .button.tag {
@@ -22,4 +29,14 @@ button.tag, .button.tag {
     background: none;
     border: none;
     button { margin-left: $vertical-rhythm/4; }
+}
+
+.tag-manager {
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        display: inline-block;
+    }
 }

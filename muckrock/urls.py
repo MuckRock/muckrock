@@ -19,7 +19,7 @@ import dbsettings.urls
 import muckrock.accounts.urls, muckrock.foia.urls, muckrock.news.urls, muckrock.agency.urls, \
        muckrock.jurisdiction.urls, muckrock.mailgun.urls, muckrock.qanda.urls, \
        muckrock.crowdfund.urls, muckrock.organization.urls, muckrock.task.urls, \
-       muckrock.project.urls
+       muckrock.project.urls, muckrock.tags.urls
 import muckrock.agency.views, muckrock.foia.viewsets, muckrock.jurisdiction.views, \
        muckrock.accounts.views, muckrock.task.viewsets
 import muckrock.settings as settings
@@ -97,6 +97,7 @@ urlpatterns = patterns(
     url(r'^questions/', include(muckrock.qanda.urls)),
     url(r'^crowdfund/', include(muckrock.crowdfund.urls)),
     url(r'^task/', include(muckrock.task.urls)),
+    url(r'^tags/', include(muckrock.tags.urls)),
     url(r'^organization/', include(muckrock.organization.urls)),
     url(r'^project/', include(muckrock.project.urls)),
     url(r'^admin/', include(admin.site.urls)),

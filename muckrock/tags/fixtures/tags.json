@@ -2,36 +2,26 @@
     {
         "pk": 1,
         "model": "tags.tag",
-        "fields": {
-            "user": 1
-        }
+        "fields": {}
     },
     {
         "pk": 2,
         "model": "tags.tag",
-        "fields": {
-            "user": 1
-        }
+        "fields": {}
     },
     {
         "pk": 3,
         "model": "tags.tag",
-        "fields": {
-            "user": 1
-        }
+        "fields": {}
     },
     {
         "pk": 4,
         "model": "tags.tag",
-        "fields": {
-            "user": 1
-        }
+        "fields": {}
     },
     {
         "pk": 5,
         "model": "tags.tag",
-        "fields": {
-            "user": null
-        }
+        "fields": {}
     }
 ]

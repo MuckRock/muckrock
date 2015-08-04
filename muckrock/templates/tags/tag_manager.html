@@ -11,12 +11,14 @@
     {% else %}
     <dfn>Tags</dfn>
     {% endif %}
-    <form method="GET" action="{% url 'foia-list' %}">
+    <ul>
         {% for tag in tags %}
-        <button class="tag" name="tags" value="{{tag.name}}">{{tag.name}}</button>
+        <li>
+            <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>
+        </li>
         {% empty %}
         <p>No tags. Add some!</p>
         {% endfor %}
-    </form>
+    </ul>
 </div>
 {% endif %}
