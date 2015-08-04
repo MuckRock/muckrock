@@ -5,9 +5,11 @@ Views for the project application
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse_lazy
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
+
+from actstream import action
 
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
@@ -41,6 +43,12 @@ class ProjectCreateView(CreateView):
         """Sets current user as a default contributor"""
         queryset = User.objects.filter(pk=self.request.user.pk)
         return {'contributors': queryset}
+
+    def form_valid(self, form):
+        """Saves an activity stream action when creating the object"""
+        self.object = form.save()
+        action.send(self.request.user, verb='created', target=self.object)
+        return HttpResponseRedirect(self.get_success_url())
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
