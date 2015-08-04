@@ -94,7 +94,7 @@ h6, .h6 { font-size: $font-size-2; }
 
 // Body
 
-article, aside, blockquote, body, br, button, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
+article, aside, blockquote, body, br, button, caption, col, colgroup, div, dl, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, img, map, nav, object, ol, output, p, pre, section, summary, table, tbody, textarea, tfoot, th, thead, tr, ul, video {
     @extend %vertical-rhythm;
 }
 

@@ -1,7 +1,6 @@
 /* Details */
 
 .detail {
-    @include outer-container;
 
     .header {
         margin-bottom: 0;
@@ -31,114 +30,6 @@
 
     &.flatpage {
         max-width: 45em;
-    }
-
-    &.news {
-        @include outer-container;
-        $article-body-width: 33em;
-
-        .news-image {
-            @include full;
-            @include omega;
-            margin-bottom: $vertical-rhythm;
-            @include media($medium-layout) {
-                margin-bottom: $vertical-rhythm*2;
-            }
-        }
-        .news-article {
-            @include row;
-            @include span-columns(12);
-            @include media($medium-layout) {
-                @include span-columns(4);
-                padding-right: $vertical-rhythm;
-            }
-            @include media($large-layout) {
-                @include span-columns(8);
-                @include shift(1);
-            }
-        }
-        .news-aside {
-            @include grid-columns(12, 2, 3);
-        }
-
-        .news-article-header, .news-article-body, .news-article-footer {
-            max-width: $article-body-width;
-        }
-
-        .news-article-header {
-            margin-bottom: $vertical-rhythm;
-            border-bottom: $base-border-width solid $color-grey;
-            @include media($medium-layout) {
-                margin-bottom: 0;
-            }
-        }
-
-        .news-article-title {
-            margin-top: 0;
-            font-size: 2.0625em;
-            font-weight: $font-weight-bold;
-            @include media($large-layout) {
-                max-width: 150%;
-            }
-        }
-
-        .news-article-kicker {
-            margin: $vertical-rhythm/2 0;
-            font-size: 1.4375em;
-            font-weight: $font-weight-bold;
-            line-height: 1.5em;
-            @include media($large-layout) {
-                max-width: 150%;
-            }
-        }
-
-        .news-article-authors {
-            font-size: 1em;
-            font-weight: $font-weight-normal;
-            margin-bottom: $vertical-rhythm;
-        }
-
-        .news-article-body {
-            @include font-sizing(1, 1.2);
-            @include media($medium-layout) {
-                @include font-sizing(1.2, 1.4);
-            }
-            margin: $vertical-rhythm 0;
-            padding-top: 0;
-            p {
-                margin-bottom: 1.4em;
-            }
-            ul { padding-left: $vertical-rhythm; }
-            img, figure, .pullquote {
-                max-width: 100%;
-                @include media($medium-layout) {
-                    max-width: 140%;
-                }
-            }
-        }
-
-        // Fixes for embedded content
-        div[id^='viewer'] {
-            max-width: 90%;
-            margin: $vertical-rhythm auto;
-            @include media($large-layout) {
-                margin: $vertical-rhythm auto $vertical-rhythm 0;
-            }
-
-        }
-        .iframe-container {
-            position: relative;
-            padding-bottom: 75%;
-            height: 0;
-            overflow: hidden;
-            & > iframe {
-                position: absolute;
-                top:0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
-        }
     }
 
     &.organization {
@@ -335,3 +226,5 @@
         }
     }
 }
+
+@import 'news_detail';

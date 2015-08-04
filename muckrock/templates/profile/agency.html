@@ -99,7 +99,7 @@
     <section class="interesting-requests">
     {% for req in agency.interesting_requests %}
         <h3>{{req.headline}}</h3>
-        {% include 'lib/foia.html' with foias=req %}
+        {% include 'lib/foia_group.html' with foias=req %}
     {% endfor %}
     </section>
     {% endcomment %}
