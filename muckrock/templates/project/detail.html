@@ -4,6 +4,7 @@
 {% load crowdfund_tags %}
 {% load tags %}
 {% load markdown_deux_tags %}
+{% load thumbnail %}
 
 {% block title %}
 MuckRock &bull; {{ project.title }}
@@ -17,7 +18,7 @@ MuckRock &bull; {{ project.title }}
 
 {% block header %}
     {% if project.image %}
-    <img src="{% static project.image %}">
+    <img src="{% thumbnail project.image 600x400 crop=smart %}">
     {% endif %}
     <h1>{{ project.title }}</h1>
     <p>{{ project.description|markdown:"trusted" }}</p>
