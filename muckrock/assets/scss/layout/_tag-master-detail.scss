@@ -63,3 +63,20 @@
         font-weight: $font-weight-bold;
     }
 }
+
+.no-tag {
+    @include align-self(center);
+    text-align: center;
+    .call-to-action {
+        font-size: $font-size-5;
+    }
+    .tag {
+        font-size: $font-size-3;
+    }
+    ul {
+        list-style-type: none;
+    }
+    li {
+        display: inline-block;
+    }
+}
