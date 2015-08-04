@@ -2,6 +2,7 @@
 Views for tags
 """
 
+from django.db.models import Count
 from django.views.generic import TemplateView, DetailView
 
 from . import models
@@ -29,6 +30,8 @@ class TagListView(TemplateView):
         """Adds all tags to context data"""
         context = super(TagListView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
+        tags_with_count = models.Tag.objects.annotate(num_times=Count('tags_taggeditembase_items'))
+        context['popular_tags'] = tags_with_count.order_by('-num_times')[:10]
         return context
 
 class TagDetailView(DetailView):

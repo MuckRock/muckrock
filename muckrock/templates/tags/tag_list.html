@@ -61,6 +61,13 @@
     </section>
     {% else %}
     <section class="no-tag detail">
+        <p class="call-to-action">Search or browse for projects, articles, requests, or questions by their tags.</p>
+        <p>Or, check out our most popular tags:</p>
+        <ul>
+            {% for each_tag in popular_tags %}
+            <li><a class="tag" href="{% url 'tag-detail' slug=each_tag.slug %}">{{ each_tag.name }}</a> ({{ each_tag.num_times }})</li>
+            {% endfor %}
+        </ul>
     </section>
     {% endif %}
 </div>
