@@ -82,6 +82,9 @@ class TestProjectCreateView(TestCase):
         logging.debug('There are %s projects.', Project.objects.count())
         logging.debug('Projects: %s', Project.objects.all())
         eq_(Project.objects.count(), 1, 'There should now be one project.')
+        # An action should also be created with this project as the target
+        project = Project.objects.get(pk=1)
+        ok_(project.target_actions.all(), 'An activity stream action should be created.')
         logging.debug('Projects: %s', Project.objects.all())
         eq_(response.status_code, 302,
             'Should redirect to the newly created project.')
