@@ -19,11 +19,6 @@ def list_all_tags():
     tags = tags.exclude(num_times=0)
     return tags
 
-def filter_tags(filter_string):
-    """Should list all tags that match the filter"""
-    tags = models.Tag.objects.filter(name__icontains=filter_string)
-    return tags
-
 class TagListView(TemplateView):
     """Presents a list of all tags"""
     template_name = 'tags/tag_list.html'
