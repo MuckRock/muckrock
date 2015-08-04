@@ -29,18 +29,13 @@ class TestTagListView(test.TestCase):
         eq_(response.status_code, 200)
 
     def test_list_all_tags(self):
-        """The tag list should list all the tags (duh!)."""
+        """The tag list should list all the tags that are used."""
         # pylint: disable=no-self-use
         tag_list = views.list_all_tags()
-        eq_(len(tag_list), 3)
-
-    def test_filter_tags(self):
-        """The tag list should filter tags against a string."""
-        filter_string = 'ba'
-        filtered_tag_list = views.filter_tags(filter_string)
-        eq_(len(filtered_tag_list), 2)
-        ok_(self.tag_bar in filtered_tag_list)
-        ok_(self.tag_baz in filtered_tag_list)
+        eq_(len(models.Tag.objects.all()), 3,
+            "There should be 3 tag items.")
+        eq_(len(tag_list), 0,
+            "But none should be listed since they aren't used")
 
 
 class TestTagDetailView(test.TestCase):
