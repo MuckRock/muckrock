@@ -55,7 +55,7 @@ MuckRock &bull; {{ project.title }}
     <dfn>Tags</dfn>
     <ul class="tags">
     {% for tag in project.tags.all %}
-        <li class="tag">{{ tag.name }}</li>
+        <li><a href="{% url 'tag-detail' slug=tag.slug %}" class="tag">{{ tag.name }}</a></li>
     {% endfor %}
     </ul>
     {% endif %}
