@@ -13,8 +13,10 @@ from muckrock.project.models import Project
 from muckrock.qanda.models import Question
 
 def list_all_tags():
-    """Should list all tags that exist"""
+    """Should list all tags that exist and that have at least one object"""
     tags = models.Tag.objects.all()
+    tags = tags.annotate(num_times=Count('tags_taggeditembase_items'))
+    tags = tags.exclude(num_times=0)
     return tags
 
 def filter_tags(filter_string):
@@ -30,8 +32,7 @@ class TagListView(TemplateView):
         """Adds all tags to context data"""
         context = super(TagListView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
-        tags_with_count = models.Tag.objects.annotate(num_times=Count('tags_taggeditembase_items'))
-        context['popular_tags'] = tags_with_count.order_by('-num_times')[:10]
+        context['popular_tags'] = list_all_tags().order_by('-num_times')[:10]
         return context
 
 class TagDetailView(DetailView):
