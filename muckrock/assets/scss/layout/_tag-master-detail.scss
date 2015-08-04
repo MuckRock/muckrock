@@ -1,43 +1,65 @@
 .master-detail {
-    @include row;
+    @include display(flex);
+    @include flex-wrap(wrap);
     .master {
-        @include grid-columns(4, 2, 3);
-        input.search {
-            width: 100%;
-            display: block;
-            margin-bottom: $vertical-rhythm;
-            border-radius: 0;
-            outline: none;
+        @include flex(0 0 100%);
+        @include media($medium-layout) {
+            @include flex(1);
         }
-        .tag-table {
-            max-height: 25em;
-            overflow-y: scroll;
-            -webkit-overflow-scrolling: touch;
-            .list {
-                display: table-row-group;
+    }
+    .detail {
+        @include flex(0 0 100%);
+        @include order(-1);
+        margin-bottom: $vertical-rhythm;
+        @include media($medium-layout) {
+            @include flex(3);
+            @include order(2);
+            margin-bottom: 0;
+            margin-left: $vertical-rhythm;
+        }
+    }
+}
+
+.tag-list {
+    input.search {
+        width: 100%;
+        display: block;
+        margin-bottom: $vertical-rhythm;
+        border-radius: 0;
+        outline: none;
+    }
+    .tag-table {
+        @include border;
+        max-height: 25em;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+        .list {
+            display: table-row-group;
+        }
+        table {
+            border: none;
+        }
+        tr {
+            background-color: $color-white;
+            &:first-child {
+                border-top: none;
             }
-            tr {
+        }
+        td {
+            padding: 0;
+            a {
+                display: block;
+                padding: $vertical-rhythm/2;
                 background-color: $color-white;
-            }
-            td {
-                padding: 0;
-                a {
-                    display: block;
-                    padding: $vertical-rhythm/2 $vertical-rhythm;
-                    background-color: $color-white;
-                    &.active, &:hover {
-                        text-decoration: none;
-                        color: $color-white;
-                        background-color: $color-blue;
-                    }
+                &.active, &:hover {
+                    text-decoration: none;
+                    color: $color-white;
+                    background-color: $color-blue;
                 }
             }
         }
     }
-    .detail {
-        @include grid-columns(4, 4, 9);
-        h1 {
-            font-weight: $font-weight-bold;
-        }
+    .detail h1 {
+        font-weight: $font-weight-bold;
     }
 }
