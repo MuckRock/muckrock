@@ -15,6 +15,7 @@ boto==2.27.0
 celery==3.1.10
 coverage==3.7.1
 cssselect==0.7.1
+django-activity-stream==0.6.0
 django-adaptors==0.2.3
 django-appconf==0.6
 django-autocomplete-light==2.2.3
