@@ -41,8 +41,12 @@ class TagDetailView(DetailView):
         context = super(TagDetailView, self).get_context_data(**kwargs)
         context['tags'] = list_all_tags()
         this_tag = self.get_object().name
-        context['tagged_projects'] = Project.objects.filter(tags__name__in=[this_tag])
-        context['tagged_requests'] = FOIARequest.objects.filter(tags__name__in=[this_tag])
-        context['tagged_articles'] = Article.objects.filter(tags__name__in=[this_tag])
+        context['tagged_projects'] = Project.objects\
+                                    .filter(tags__name__in=[this_tag], private=False)
+        context['tagged_requests'] = FOIARequest.objects\
+                                    .filter(tags__name__in=[this_tag])\
+                                    .get_viewable(self.request.user)
+        context['tagged_articles'] = Article.objects\
+                                    .filter(tags__name__in=[this_tag], publish=True)
         context['tagged_questions'] = Question.objects.filter(tags__name__in=[this_tag])
         return context
