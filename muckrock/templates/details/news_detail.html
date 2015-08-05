@@ -11,39 +11,47 @@
 
 {% block content %}
 <div class="news detail">
-    {% if article.image %}
-    <img src="{% thumbnail article.image 1200x400 crop %}" class="news-image">
-    {% endif %}
     <article class="news-article">
         <header class="news-article-header">
+            {% if article.image %}
+            <img src="{% thumbnail article.image 1200x400 crop %}" class="news-image">
+            {% endif %}
             <h1 class="news-article-title">{{ article.title }}</h1>
             {% if article.kicker %}
             <summary class="news-article-kicker">{{ article.kicker }}</summary>
             {% endif %}
+            <div class="secondary">
+                {% if article.authors.all %}
+                <div class="news-article-authors">by
+                    {% for author in article.authors.all %}
+                        <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <time title="{{ article.pub_date|date:'c' }}" datetime="{{ article.pub_date|date:'c' }}" class="news-article-date">{{ article.pub_date | date:"F j, Y" }}</time>
+                {% if article.editors.all %}
+                <div class="news-article-editors">edited by
+                    {% for editor in article.editors.all %}
+                        <a href="{{ editor.profile.get_absolute_url }}" title="{{ editor.get_full_name }}">{{ editor.get_full_name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
         </header>
         <section class="news-article-body">
         {% with article.body|markdown:"trusted" as copy %}
             {% evaluate copy %}
         {% endwith %}
         </section>
-        <footer class="news-article-footer">
-        {% if article.foias.exists %}
+        <aside class="news-aside">
+            {% include 'lib/social.html' with title=article.title %}
+            {% tag_manager article %}
+            {% if article.foias.exists %}
             <dfn>Related Requests</dfn>
-            {% include 'lib/foia.html' with foias=article.foias.all %}
-        {% endif %}
-        </footer>
+                {% include 'lib/foia_group.html' with foias=article.foias.all %}
+            {% endif %}
+        </aside>
     </article>
-    <aside class="news-aside">
-        <div class="news-article-date">{{ article.pub_date | date:"F j, Y" }}</div>
-        <div class="news-article-authors">by
-            {% for author in article.authors.all %}
-                <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
-                {% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </div>
-        {% include 'lib/social.html' with title=article.title %}
-        {% tag_manager article %}
-    </aside>
 </div>
 {% endblock %}
 

@@ -51,7 +51,7 @@ class NewsDetail(DateDetailView):
                 tag = Tag.normalize(tag)
                 if not tag:
                     continue
-                new_tag, _ = Tag.objects.get_or_create(name=tag, defaults={'user': request.user})
+                new_tag, _ = Tag.objects.get_or_create(name=tag)
                 tag_set.add(new_tag)
             self.get_object().tags.set(*tag_set)
             self.get_object().save()

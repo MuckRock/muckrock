@@ -2,7 +2,6 @@
 Models for the tags application
 """
 
-from django.contrib.auth.models import User
 from django.db import models
 
 import autocomplete_light
@@ -12,7 +11,6 @@ from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 
 class Tag(TaggitTag):
     """Custom Tag Class"""
-    user = models.ForeignKey(User, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """Normalize name before saving"""

@@ -118,7 +118,7 @@
 {% if featured and not clone %}
 <div class="clone-candidates" id="clone">
     <h2>Looking for inspiration? Clone a request below, then tweak it how you want.</h2>
-    {% include 'lib/foia.html' with foias=featured %}
+    {% include 'lib/foia_group.html' with foias=featured %}
 </div>
 {% endif %}
 {% endblock %}

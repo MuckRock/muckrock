@@ -4,6 +4,7 @@
 {% load crowdfund_tags %}
 {% load tags %}
 {% load markdown_deux_tags %}
+{% load thumbnail %}
 
 {% block title %}
 MuckRock &bull; {{ project.title }}
@@ -17,7 +18,7 @@ MuckRock &bull; {{ project.title }}
 
 {% block header %}
     {% if project.image %}
-    <img src="{{ MEDIA_URL }}{{ project.image }}">
+    <img src="{% thumbnail project.image 600x400 crop=smart %}">
     {% endif %}
     <h1>{{ project.title }}</h1>
     <p>{{ project.description|markdown:"trusted" }}</p>
@@ -54,7 +55,7 @@ MuckRock &bull; {{ project.title }}
     <dfn>Tags</dfn>
     <ul class="tags">
     {% for tag in project.tags.all %}
-        <li class="tag">{{ tag.name }}</li>
+        <li><a href="{% url 'tag-detail' slug=tag.slug %}" class="tag">{{ tag.name }}</a></li>
     {% endfor %}
     </ul>
     {% endif %}
