@@ -40,16 +40,22 @@
 
         .secondary {
             color: $color-grey-3;
-            & > * {
-                display: inline-block;
-                margin-bottom: 0;
-            }
+            @include display(flex);
+            @include flex-direction(column);
+            @include justify-content(space-between);
+            @include border;
+            border-left: none;
+            border-right: none;
+            padding: $vertical-rhythm/2 0;
             .news-article-authors {
                 font-weight: $font-weight-bold;
                 font-size: $font-size-4;
             }
-            .news-article-date {
-                margin-left: $vertical-rhythm;
+            @include media($medium-layout) {
+                @include flex-direction(row);
+                & > * {
+                    margin-bottom: 0;
+                }
             }
         }
     }
@@ -61,7 +67,7 @@
             @include flex(1);
             margin: 0 $vertical-rhythm $vertical-rhythm;
         }
-        max-width: 100%;
+        max-width: 40em;
         p {
             overflow: hidden;
         }
@@ -74,14 +80,7 @@
         @include order(3);
         @media screen and (min-width: $news-layout-breakpoint) {
             @include order(2);
-            @include flex(0 0 10em);
-        }
-    }
-
-    .news-article-footer {
-        @include order(4);
-        @media screen and (min-width: $news-layout-breakpoint) {
-            @include flex(0 0 10em);
+            @include flex(0 0 15em);
         }
     }
 
