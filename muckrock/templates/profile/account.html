@@ -1,6 +1,8 @@
 {% extends 'base_profile.html' %}
+{% load activity_tags %}
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
+
 {% block title %}MuckRock &bull; {{ user_obj.username|capfirst }}{% endblock title %}
 {% block type %}account{% endblock type %}
 
@@ -77,6 +79,14 @@
             {% endif %}
         {% endwith %}
         </div>
+    </section>
+    {% else %}
+    <section class="action">
+        {% if request.user|is_following:user_obj %}
+        <a href="{% follow_url user_obj %}?next={{ user_obj.get_absolute_url }}" class="unfollow failure button">Unfollow</a>
+        {% else %}
+        <a href="{% follow_url user_obj %}?next={{ user_obj.get_absolute_url }}" class="follow primary button">Follow</a>
+        {% endif %}
     </section>
     {% endif %}
     {% if recent_requests or recent_completed %}
