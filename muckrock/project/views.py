@@ -10,6 +10,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django.utils.decorators import method_decorator
 
 from actstream import action
+from actstream.models import followers
 
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
@@ -56,11 +57,12 @@ class ProjectDetailView(DetailView):
     template_name = 'project/detail.html'
 
     def get_context_data(self, **kwargs):
-        """Filters project requests to only show those that are visible"""
+        """Adds visible requests and followers to project context"""
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         project = self.get_object()
         user = self.request.user
         context['visible_requests'] = project.requests.get_viewable(user)
+        context['followers'] = followers(project)
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -71,6 +73,7 @@ class ProjectDetailView(DetailView):
         if project.private and not contributor_or_staff:
             raise Http404()
         return super(ProjectDetailView, self).dispatch(*args, **kwargs)
+
 
 class ProjectPermissionsMixin(object):
     """
