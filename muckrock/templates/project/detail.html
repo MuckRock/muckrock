@@ -1,6 +1,7 @@
 {% extends 'details/base_detail.html' %}
 {% load static from staticfiles %}
 
+{% load activity_tags %}
 {% load crowdfund_tags %}
 {% load tags %}
 {% load markdown_deux_tags %}
@@ -25,17 +26,19 @@ MuckRock &bull; {{ project.title }}
 {% endblock %}
 
 {% block aside %}
-    {% if request.user.is_staff or request.user in project.contributors.all %}
+    {% if request.user.is_authenticated %}
     <div class="controls">
-        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
-            Crowdfund
-        </a>
-        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
-            Update
-        </a>
-        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
-            Delete
-        </a>
+        {% if request.user|is_following:project %}
+        <a href="{% follow_url project %}?next={{ project.get_absolute_url }}" class="unfollow failure button">Unfollow</a>
+        {% else %}
+        <a href="{% follow_url project %}?next={{ project.get_absolute_url }}" class="follow primary button">Follow</a>
+        {% endif %}
+
+        {% if request.user.is_staff or request.user in project.contributors.all %}
+        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">Crowdfund</a>
+        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">Update</a>
+        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">Delete</a>
+        {% endif %}
     </div>
     {% endif %}
     {% if project.private %}
@@ -50,6 +53,9 @@ MuckRock &bull; {{ project.title }}
         <li>{{ contributor.get_full_name }}</li>
     {% endfor %}
     </ul>
+    {% endif %}
+    {% if followers %}
+    <p>{{ followers|length }} follower{{ followers|length|pluralize }}</p>
     {% endif %}
     {% if project.tags.count > 0 %}
     <dfn>Tags</dfn>

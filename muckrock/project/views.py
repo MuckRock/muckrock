@@ -11,6 +11,7 @@ from django.views.generic import ListView, CreateView, DetailView, UpdateView, D
 from django.utils.decorators import method_decorator
 
 from actstream import action
+from actstream.models import followers
 
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
@@ -47,6 +48,12 @@ class ProjectDetailView(DetailView):
     """View a project instance"""
     model = Project
     template_name = 'project/detail.html'
+
+    def get_context_data(self, **kwargs):
+        """Adds followers to project context"""
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        context['followers'] = followers(self.object)
+        return context
 
 class ProjectPermissionsMixin(object):
     """
