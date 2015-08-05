@@ -51,10 +51,25 @@
                 font-weight: $font-weight-bold;
                 font-size: $font-size-4;
             }
-            @include media($medium-layout) {
+            .news-article-editors {
+                margin-bottom: $vertical-rhythm;
+            }
+            .news-article-date {
+                @include order(2);
+            }
+            @media screen and (min-width: $news-layout-breakpoint) {
                 @include flex-direction(row);
+                @include align-items(center);
                 & > * {
+                    max-width: 15em;
                     margin-bottom: 0;
+                }
+                .news-article-date {
+                    @include order(1);
+                }
+                .news-article-editors {
+                    margin-bottom: 0;
+                    @include order(2);
                 }
             }
         }
