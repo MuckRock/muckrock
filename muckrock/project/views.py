@@ -77,6 +77,11 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
 
+    def form_valid(self, form):
+        """Sends an activity stream action when project is updated."""
+        action.send(self.request.user, verb='updated', target=self.object)
+        return super(ProjectUpdateView, self).form_valid(form)
+
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
