@@ -66,6 +66,8 @@
             @include order(3);
             @include flex(1);
             margin: 0 $vertical-rhythm $vertical-rhythm;
+            font-size: $font-size-4;
+            line-height: $font-line-height;
         }
         max-width: 40em;
         p {
@@ -73,6 +75,9 @@
         }
         img {
             text-align: center;
+        }
+        .widget {
+            font-size: initial;
         }
     }
 
