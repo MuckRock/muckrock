@@ -18,6 +18,14 @@ class ProjectListView(ListView):
     template_name = 'project/list.html'
     paginate_by = 25
 
+    def get_queryset(self):
+        """Only returns projects that are visible to the current user."""
+        user = self.request.user
+        if user.is_anonymous():
+            return Project.objects.get_public()
+        else:
+            return Project.objects.get_visible(user)
+
 class ProjectCreateView(CreateView):
     """Create a project instance"""
     form_class = ProjectCreateForm
@@ -38,6 +46,15 @@ class ProjectDetailView(DetailView):
     """View a project instance"""
     model = Project
     template_name = 'project/detail.html'
+
+    def dispatch(self, *args, **kwargs):
+        """If the project is private it is only visible to contributors and staff."""
+        project = self.get_object()
+        user = self.request.user
+        contributor_or_staff = user.is_staff or project.has_contributor(user)
+        if project.private and not contributor_or_staff:
+            raise exceptions.PermissionDenied()
+        return super(ProjectDetailView, self).dispatch(*args, **kwargs)
 
 class ProjectPermissionsMixin(object):
     """
