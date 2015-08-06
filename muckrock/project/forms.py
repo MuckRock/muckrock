@@ -20,7 +20,7 @@ class ProjectCreateForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'image', 'contributors', 'tags', 'private']
+        fields = ['title', 'summary', 'description', 'image', 'contributors', 'tags', 'private']
         widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('StaffAutocomplete')}
         help_texts = {
             'contributors': ('As the project creator, you are'
@@ -38,7 +38,7 @@ class ProjectUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Project
-        fields = ['description', 'image', 'contributors', 'tags', 'requests', 'articles', 'private']
+        fields = ['summary', 'description', 'image', 'contributors', 'tags', 'requests', 'articles', 'private']
         widgets = {
             'contributors': autocomplete_light.MultipleChoiceWidget('StaffAutocomplete'),
             'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAdminAutocomplete'),
