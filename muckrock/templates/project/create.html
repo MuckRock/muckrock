@@ -91,7 +91,7 @@
     $("#id_title").on("keydown keyup change", function(){
         $('.social.preview .title').text(this.value);
     });
-    $("#id_description").on("keydown keyup change", function(){
+    $("#id_summary").on("keydown keyup change", function(){
         var desc = this.value.trunc(200);
         $('.social.preview .description').text(desc);
     });

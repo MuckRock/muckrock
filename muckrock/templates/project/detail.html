@@ -102,7 +102,7 @@ MuckRock &bull; {{ project.title }}
 {% block open_graph %}
 <meta property="og:type" content="article" />
 <meta property="og:title" content="{{ project.title }}" />
-<meta property="og:description" content="{{ project.description }}" />
+<meta property="og:description" content="{{ project.summary }}" />
 <meta property="og:url" content="{{ project.get_absolute_url }}" />
 <meta property="og:site_name" content="MuckRock" />
 {% if article.image %}
@@ -114,7 +114,7 @@ MuckRock &bull; {{ project.title }}
 <meta name="twitter:site" content="@muckrock" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="{{ project.title }}" />
-<meta name="twitter:description" content="{{ project.description }}" />
+<meta name="twitter:description" content="{{ project.summary }}" />
 {% if project.image %}
 <meta name="twitter:image:src" content="{{ project.image }}" />
 {% endif %}
