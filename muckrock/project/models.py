@@ -11,8 +11,28 @@ from muckrock.news.models import Article
 
 import taggit
 
+
+class ProjectQuerySet(models.QuerySet):
+    """Object manager for projects"""
+    def get_public(self):
+        """Only return nonprivate projects"""
+        return self.filter(private=False)
+
+    def get_for_contributor(self, user):
+        """Only return projects which the user is a contributor on"""
+        return self.filter(contributors=user)
+
+    def get_visible(self, user):
+        """Only return projects which the user is permitted to see"""
+        projects = self.all()
+        if not user.is_staff:
+            # show public projects and projects the user is a contributor to
+            projects = projects.filter(models.Q(private=False)|models.Q(contributors=user))
+        return projects
+
 class Project(models.Model):
     """Projects are a mixture of general and specific information on a broad subject."""
+    objects = ProjectQuerySet.as_manager()
     title = models.CharField(
         unique=True,
         max_length=100,
