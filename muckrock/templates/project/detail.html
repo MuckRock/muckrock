@@ -16,18 +16,23 @@ MuckRock &bull; {{ project.title }}
 
 {% block content %}
     <article class="project detail">
+        {% if project.image %}
+        <header class="project-header" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');">
+        {% else %}
         <header class="project-header">
+        {% endif %}
             {% if project.private %}
             <div class="project-private">
                 <p>This project is private. It is only visible to its contributors.</p>
             </div>
             {% endif %}
+            <div class="project-gradient"></div>
             <h1 class="project-title">{{ project.title }}</h1>
-            <div class="project-overview">
-                <p class="project-contributors">People contribute to this project.</p>
-                <p class="project-items">It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.</p>
-            </div>
         </header>
+        <section class="project-overview">
+            <p class="project-contributors">People contribute to this project.</p>
+            <p class="project-items">It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.</p>
+        </div>
         <section class="project-summary">
             {{ project.summary|markdown:"trusted" }}
         </section>
