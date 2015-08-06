@@ -74,15 +74,7 @@ MuckRock &bull; {{ project.title }}
 
     {% if project.requests.count > 0 %}
     <h2>Requests</h2>
-    <ul class="requests">
-        {% for request in project.requests.all %}
-        <li class="request">
-            <a href="{{ request.get_absolute_url }}" title="{{ request.title }}">
-                {{ request.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
+    {% include 'lib/foia_table.html' with requests=project.requests.all %}
     {% endif %}
 
     {% if project.articles.count > 0 %}
