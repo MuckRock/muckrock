@@ -9,6 +9,8 @@ from autocomplete_light.contrib.taggit_field import TaggitField, TaggitWidget
 
 from muckrock.project.models import Project
 
+# pylint: disable=line-too-long
+
 class ProjectCreateForm(forms.ModelForm):
     """Form for creating a new project"""
 
