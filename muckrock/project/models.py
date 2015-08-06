@@ -21,6 +21,7 @@ class Project(models.Model):
         unique=True,
         max_length=255,
         help_text='The slug is automatically generated based on the title.')
+    summary = models.TextField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='project_images', blank=True, null=True)
     private = models.BooleanField(
