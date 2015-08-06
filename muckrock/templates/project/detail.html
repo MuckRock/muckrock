@@ -14,14 +14,40 @@ MuckRock &bull; {{ project.title }}
 <meta name="description" content="{{ project.description }}" />
 {% endblock %}
 
-{% block type %}project{% endblock %}
+{% block content %}
+    <article class="project detail">
+        <header class="project-header">
+            {% if project.private %}
+            <div class="project-private">
+                <p>This project is private. It is only visible to its contributors.</p>
+            </div>
+            {% endif %}
+            <h1 class="project-title">{{ project.title }}</h1>
+            <div class="project-overview">
+                <p class="project-contributors">People contribute to this project.</p>
+                <p class="project-items">It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.</p>
+            </div>
+        </header>
+        <section class="project-summary">
+            {{ project.summary|markdown:"trusted" }}
+        </section>
+        <section class="project-crowdfunds">
+            {% if project.crowdfund.count > 0 %}
+                {% for crowdfund in project.crowdfund.all %}
+            {% crowdfund_project crowdfund.pk %}
+                {% endfor %}
+            {% endif %}
+        </section>
+    </article>
+{% endblock %}
 
+{% comment %}
 {% block header %}
     {% if project.image %}
     <img src="{% thumbnail project.image 600x400 crop=smart %}">
     {% endif %}
     <h1>{{ project.title }}</h1>
-    <p>{{ project.description|markdown:"trusted" }}</p>
+
 {% endblock %}
 
 {% block aside %}
@@ -38,11 +64,7 @@ MuckRock &bull; {{ project.title }}
         </a>
     </div>
     {% endif %}
-    {% if project.private %}
-    <div class="privacy notification">
-        <p>This project is private. It is only visible to its contributors.</p>
-    </div>
-    {% endif %}
+
     {% if project.contributors.count > 0 %}
     <dfn>Contributors</dfn>
     <ul class="contributors">
@@ -90,6 +112,7 @@ MuckRock &bull; {{ project.title }}
     </ul>
     {% endif %}
 {% endblock main %}
+{% endcomment %}
 
 {% block open_graph %}
 <meta property="og:type" content="article" />
