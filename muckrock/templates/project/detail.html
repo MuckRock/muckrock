@@ -92,34 +92,35 @@ MuckRock &bull; {{ project.title }}
                 {% include 'lib/social.html' with title=project.title %}
             </aside>
         </section>
+        {% if project.articles.count > 0 %}
         <section class="project-articles" id="articles">
-            {% if project.articles.count > 0 %}
             <h2>Articles</h2>
-            <ul class="articles">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Pub. Date</th>
+                    <tr>
+                </thead>
+                <tbody>
                 {% for article in project.articles.all %}
-                <li class="article">
-                    <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
-                        {{ article.title }}
-                    </a>
-                </li>
+                    <tr>
+                        <td><a href="{{ article.get_absolute_url }}" title="{{ article.title }}">{{ article.title }}</a></td>
+                        <td>{{ article.pub_date|date:"m/d/Y" }}</td>
+                    </tr>
                 {% endfor %}
-            </ul>
-            {% endif %}
+                </tbody>
+            </table>
         </section>
+        {% endif %}
+        {% if project.requests.count > 0 %}
         <section class="project-requests" id="requests">
-            {% if project.requests.count > 0 %}
             <h2>Requests</h2>
             {% include 'lib/foia_table.html' with requests=project.requests.all %}
-            {% endif %}
         </section>
+        {% endif %}
     </article>
 {% endblock %}
-
-{% comment %}
-{% block aside %}
-
-{% endblock %}
-{% endcomment %}
 
 {% block open_graph %}
 <meta property="og:type" content="article" />
