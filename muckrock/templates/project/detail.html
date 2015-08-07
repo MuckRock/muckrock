@@ -14,82 +14,115 @@ MuckRock &bull; {{ project.title }}
 <meta name="description" content="{{ project.description }}" />
 {% endblock %}
 
-{% block type %}project{% endblock %}
+{% block content %}
+    <article class="project detail">
+        {% if project.image %}
+        <header class="project-header with-image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');">
+        {% else %}
+        <header class="project-header">
+        {% endif %}
+            {% if request.user.is_staff or request.user in project.contributors.all %}
+            <div class="project-admin">
+                {% if project.private %}
+                <p class="project-private">This project is private and only visible to its contributors.</p>
+                {% else %}
+                <p class="project-private">This project is public and visible to the public.</p>
+                {% endif %}
+                <div class="project-controls">
+                    <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
+                        Crowdfund
+                    </a>
+                    <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
+                        Update
+                    </a>
+                    <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
+                        Delete
+                    </a>
+                </div>
 
-{% block header %}
-    {% if project.image %}
-    <img src="{% thumbnail project.image 600x400 crop=smart %}">
-    {% endif %}
-    <h1>{{ project.title }}</h1>
-    <p>{{ project.description|markdown:"trusted" }}</p>
-{% endblock %}
-
-{% block aside %}
-    {% if request.user.is_staff or request.user in project.contributors.all %}
-    <div class="controls">
-        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
-            Crowdfund
-        </a>
-        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
-            Update
-        </a>
-        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
-            Delete
-        </a>
-    </div>
-    {% endif %}
-    {% if project.private %}
-    <div class="privacy notification">
-        <p>This project is private. It is only visible to its contributors.</p>
-    </div>
-    {% endif %}
-    {% if project.contributors.count > 0 %}
-    <dfn>Contributors</dfn>
-    <ul class="contributors">
-    {% for contributor in project.contributors.all %}
-        <li>{{ contributor.get_full_name }}</li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% if project.tags.count > 0 %}
-    <dfn>Tags</dfn>
-    <ul class="tags">
-    {% for tag in project.tags.all %}
-        <li><a href="{% url 'tag-detail' slug=tag.slug %}" class="tag">{{ tag.name }}</a></li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% include 'lib/social.html' with title=project.title %}
-{% endblock %}
-
-{% block main %}
-
-    <div class="crowdfunds">
-    {% if project.crowdfund.count > 0 %}
-        {% for crowdfund in project.crowdfund.all %}
+            </div>
+            {% endif %}
+            {% if project.image %}
+            <div class="project-gradient"></div>
+            {% endif %}
+            <h1 class="project-title">{{ project.title }}</h1>
+        </header>
+        <section class="project-overview">
+            <div class="project-quick-links">
+                <div class="project-contributors">
+                    <dfn>Contributors</dfn>
+                {% if not project.contributors.all %}
+                    <p>Nobody contributes to this project.</p>
+                {% else %}
+                    <ul>
+                        {% for contributor in project.contributors.all %}
+                        <li class="project-contributor"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">{{ contributor.get_full_name }}</a></p>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                </div>
+                <div class="project-references">
+                    <dfn>References</dfn>
+                    <p>
+                        {% if not project.articles.all or not project.requests.all %}
+                        It doesn't reference anything.
+                        {% elif project.articles.all and project.requests.all %}
+                        It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a> and <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.
+                        {% else %}
+                        {% if project.articles.all %}It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>.{% else %}It references <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.{% endif %}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="project-summary">
+                {{ project.summary|markdown:"trusted" }}
+            </div>
+        </section>
+        <section class="project-crowdfunds">
+            {% if project.crowdfund.count > 0 %}
+                {% for crowdfund in project.crowdfund.all %}
             {% crowdfund_project crowdfund.pk %}
-        {% endfor %}
-    {% endif %}
-    </div>
-
-    {% if project.requests.count > 0 %}
-    <h2>Requests</h2>
-    {% include 'lib/foia_table.html' with requests=project.requests.all %}
-    {% endif %}
-
-    {% if project.articles.count > 0 %}
-    <h2>Articles</h2>
-    <ul class="articles">
-        {% for article in project.articles.all %}
-        <li class="article">
-            <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
-                {{ article.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-{% endblock main %}
+                {% endfor %}
+            {% endif %}
+        </section>
+        <section class="project-body">
+            <section class="project-description">
+                {{ project.description|markdown:"trusted" }}
+            </section>
+            <aside class="project-metadata">
+                {% tag_manager project %}
+                {% include 'lib/social.html' with title=project.title %}
+            </aside>
+        </section>
+        {% if project.articles.count > 0 %}
+        <section class="project-articles" id="articles">
+            <h2>Articles</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Pub. Date</th>
+                    <tr>
+                </thead>
+                <tbody>
+                {% for article in project.articles.all %}
+                    <tr>
+                        <td><a href="{{ article.get_absolute_url }}" title="{{ article.title }}">{{ article.title }}</a></td>
+                        <td>{{ article.pub_date|date:"m/d/Y" }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+        {% if project.requests.count > 0 %}
+        <section class="project-requests" id="requests">
+            <h2>Requests</h2>
+            {% include 'lib/foia_table.html' with requests=project.requests.all %}
+        </section>
+        {% endif %}
+    </article>
+{% endblock %}
 
 {% block open_graph %}
 <meta property="og:type" content="article" />

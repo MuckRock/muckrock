@@ -1,20 +1,20 @@
 {% if requests %}
     <table class="foia-table">
-        <tr>
-            <th width="50%">Title</th>
-            <th width="20%">Status</th>
-            <th width="30%">Jurisdiction</th>
-        </tr>
-        {% for foia in requests %}
-        <tr>
-            <td>
-                <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a>
-            </td>
-            <td>
-            <span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span>
-            </td>
-            <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th width="50%">Title</th>
+                <th width="20%">Status</th>
+                <th width="30%">Jurisdiction</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for foia in requests %}
+            <tr>
+                <td><a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.pk slug=foia.slug %}">{{ foia.title }}</a></td>
+                <td><span class="{{ foia.color_code }}">{{ foia.get_status_display }}</span></td>
+                <td><a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
-{% endif %}  
+{% endif %}
