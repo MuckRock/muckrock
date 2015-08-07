@@ -1,0 +1,15 @@
+.action-container {
+    @include display(flex);
+    @include justify-content(space-between);
+    @include border;
+    @include border-radius;
+    padding: $vertical-rhythm/2;
+}
+
+.action {
+    margin-bottom: 0;
+}
+
+.action-time {
+    font-size: $font-size-2;
+}

@@ -78,6 +78,15 @@ MuckRock &bull; {{ project.title }}
     {% endif %}
     </div>
 
+    {% if project.target_actions.count > 0 %}
+    <section class="activity">
+        <h2>Activity</h2>
+        {% for action in project.target_actions.all %}
+            {% include 'lib/action.html' with action=action %}
+        {% endfor %}
+    </section>
+    {% endif %}
+
     {% if project.requests.count > 0 %}
     <h2>Requests</h2>
     <ul class="requests">
