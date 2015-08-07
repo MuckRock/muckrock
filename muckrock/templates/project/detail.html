@@ -127,6 +127,14 @@ MuckRock &bull; {{ project.title }}
             {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
         {% endif %}
+        {% if project.target_actions.count > 0 %}
+        <section class="activity">
+            <h2>Activity</h2>
+            {% for action in project.target_actions.all %}
+                {% include 'lib/action.html' with action=action %}
+            {% endfor %}
+        </section>
+        {% endif %}
     </article>
 {% endblock %}
 
