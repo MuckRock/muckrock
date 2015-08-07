@@ -17,7 +17,7 @@ MuckRock &bull; {{ project.title }}
 {% block content %}
     <article class="project detail">
         {% if project.image %}
-        <header class="project-header" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');">
+        <header class="project-header with-image" style="background-image:url('{% thumbnail project.image 2000x1000 crop=smart %}');">
         {% else %}
         <header class="project-header">
         {% endif %}
@@ -42,7 +42,9 @@ MuckRock &bull; {{ project.title }}
 
             </div>
             {% endif %}
+            {% if project.image %}
             <div class="project-gradient"></div>
+            {% endif %}
             <h1 class="project-title">{{ project.title }}</h1>
         </header>
         <section class="project-overview">

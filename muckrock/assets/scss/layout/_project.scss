@@ -75,25 +75,38 @@
 
 .project.detail {
     .project-header {
-        position: relative;
         margin: 0 -1*$vertical-rhythm/2;
+        @include media($medium-layout) {
+            margin: 0 -1*$vertical-rhythm;
+        }
+    }
+    .project-header.with-image {
+        position: relative;
         height: 20em;
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         @include media($medium-layout) {
             height: 24em;
-            margin: 0 -1*$vertical-rhythm;
         }
         @include media($large-layout) {
             height: 32em;
         }
+        .project-admin {
+            position: absolute;
+            top: 0;
+        }
+        .project-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
     }
     .project-admin {
-        position: absolute;
-        top: 0;
         width: 100%;
         padding: $vertical-rhythm/2;
+        color: $color-white;
         background-color: rgba(0, 0, 0, .75);
         @include display(flex);
         @include flex-wrap(wrap);
@@ -103,7 +116,6 @@
             margin-bottom: 0;
         }
         .project-private {
-            color: $color-white;
             font-weight: $font-weight-bold;
         }
         @include media($medium-layout) {
@@ -122,13 +134,10 @@
     .project-title {
         font-size: $font-size-8;
         font-weight: $font-weight-bold;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        padding: $vertical-rhythm/2;
+        padding: 0 $vertical-rhythm/2;
         @include media($medium-layout) {
-            padding: $vertical-rhythm;
+            padding: 0 $vertical-rhythm;
+            margin-bottom: $vertical-rhythm;
         }
     }
     .project-overview {
