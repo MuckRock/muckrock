@@ -122,12 +122,23 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
         project = self.object
         requests = clean_data['requests']
         articles = clean_data['articles']
+        existing_requests = project.requests.all()
+        existing_articles = project.articles.all()
+        # generate actions for added objects
         for request in requests:
-            if request not in project.requests.all():
+            if request not in existing_requests:
                 action.send(user, verb='added', action_object=request, target=project)
         for article in articles:
-            if article not in project.articles.all():
+            if article not in existing_articles:
                 action.send(user, verb='added', action_object=article, target=project)
+        # generate actions for removing objects
+        for existing_request in existing_requests:
+            if existing_request not in requests:
+                action.send(user, verb='removed', action_object=existing_request, target=project)
+        for existing_article in existing_articles:
+            if existing_article not in articles:
+                action.send(user, verb='removed', action_object=existing_article, target=project)
+        # generate a generic action
         action.send(user, verb='updated', target=project)
 
     def form_valid(self, form):
