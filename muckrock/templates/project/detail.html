@@ -81,9 +81,7 @@ MuckRock &bull; {{ project.title }}
     {% if project.target_actions.count > 0 %}
     <section class="activity">
         <h2>Activity</h2>
-        {% for action in project.target_actions.all %}
-            {% include 'lib/action.html' with action=action %}
-        {% endfor %}
+        {% include 'lib/action_group.html' with actions=project.target_actions.all %}
     </section>
     {% endif %}
 
