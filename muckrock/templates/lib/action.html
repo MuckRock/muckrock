@@ -18,7 +18,13 @@
             {% endif %}
         {% endif %}
         </span>
-        {% if action.action_object and action.target %}to{% endif %}
+        {% if action.action_object and action.target %}
+            {% if action.verb == 'removed' %}
+            from
+            {% else %}
+            to
+            {% endif %}
+        {% endif %}
         <span class="action-target">
         {% if action.target %}
             {% if action.target.get_absolute_url %}
