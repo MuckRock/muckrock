@@ -158,6 +158,9 @@
                 @include media($medium-layout) {
                     margin-left: 0;
                 }
+                a {
+                    font-weigth: $font-weight-bold;
+                }
             }
         }
         @include media($medium-layout) {
@@ -175,5 +178,15 @@
     .project-contributors ul {
         padding-left: 0;
         list-style-type: none;
+    }
+    .project-body {
+        @include display(flex);
+        .project-description {
+            @include flex(2);
+        }
+        .project-metadata {
+            @include flex(1);
+            margin-left: 2*$vertical-rhythm;
+        }
     }
 }

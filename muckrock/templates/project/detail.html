@@ -62,13 +62,13 @@ MuckRock &bull; {{ project.title }}
                 <div class="project-references">
                     <dfn>References</dfn>
                     <p>
-                {% if not project.articles.all or not project.requests.all %}
-                It doesn't reference anything.
-                {% elif project.articles.all and project.requests.all %}
-                It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.
-                {% else %}
-                {% if project.articles.all %}It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}.{% else %}It references {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.{% endif %}
-                {% endif %}
+                        {% if not project.articles.all or not project.requests.all %}
+                        It doesn't reference anything.
+                        {% elif project.articles.all and project.requests.all %}
+                        It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a> and <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.
+                        {% else %}
+                        {% if project.articles.all %}It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>.{% else %}It references <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.{% endif %}
+                        {% endif %}
                     </p>
                 </div>
             </div>
@@ -83,67 +83,42 @@ MuckRock &bull; {{ project.title }}
                 {% endfor %}
             {% endif %}
         </section>
+        <section class="project-body">
+            <section class="project-description">
+                {{ project.description|markdown:"trusted" }}
+            </section>
+            <aside class="project-metadata">
+                {% tag_manager project %}
+                {% include 'lib/social.html' with title=project.title %}
+            </aside>
+        </section>
+        <section class="project-articles" id="articles">
+            {% if project.articles.count > 0 %}
+            <h2>Articles</h2>
+            <ul class="articles">
+                {% for article in project.articles.all %}
+                <li class="article">
+                    <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
+                        {{ article.title }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+        <section class="project-requests" id="requests">
+            {% if project.requests.count > 0 %}
+            <h2>Requests</h2>
+            {% include 'lib/foia_table.html' with requests=project.requests.all %}
+            {% endif %}
+        </section>
     </article>
 {% endblock %}
 
 {% comment %}
-{% block header %}
-    {% if project.image %}
-    <img src="{% thumbnail project.image 600x400 crop=smart %}">
-    {% endif %}
-    <h1>{{ project.title }}</h1>
-
-{% endblock %}
-
 {% block aside %}
 
-    {% if project.contributors.count > 0 %}
-    <dfn>Contributors</dfn>
-    <ul class="contributors">
-    {% for contributor in project.contributors.all %}
-        <li>{{ contributor.get_full_name }}</li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% if project.tags.count > 0 %}
-    <dfn>Tags</dfn>
-    <ul class="tags">
-    {% for tag in project.tags.all %}
-        <li><a href="{% url 'tag-detail' slug=tag.slug %}" class="tag">{{ tag.name }}</a></li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% include 'lib/social.html' with title=project.title %}
 {% endblock %}
-
-{% block main %}
-
-    <div class="crowdfunds">
-    {% if project.crowdfund.count > 0 %}
-        {% for crowdfund in project.crowdfund.all %}
-            {% crowdfund_project crowdfund.pk %}
-        {% endfor %}
-    {% endif %}
-    </div>
-
-    {% if project.requests.count > 0 %}
-    <h2>Requests</h2>
-    {% include 'lib/foia_table.html' with requests=project.requests.all %}
-    {% endif %}
-
-    {% if project.articles.count > 0 %}
-    <h2>Articles</h2>
-    <ul class="articles">
-        {% for article in project.articles.all %}
-        <li class="article">
-            <a href="{{ article.get_absolute_url }}" title="{{ article.title }}">
-                {{ article.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-{% endblock main %}
 {% endcomment %}
 
 {% block open_graph %}
