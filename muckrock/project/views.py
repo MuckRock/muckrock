@@ -84,9 +84,26 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
 
+    def generate_actions(self, clean_data):
+        """
+        Generates a specific set of actions based on the update form. Should create an
+        action for each request and article that is added or removed from the project.
+        """
+        user = self.request.user
+        project = self.object
+        requests = clean_data['requests']
+        articles = clean_data['articles']
+        for request in requests:
+            if request not in project.requests.all():
+                action.send(user, verb='added', action_object=request, target=project)
+        for article in articles:
+            if article not in project.articles.all():
+                action.send(user, verb='added', action_object=article, target=project)
+        action.send(user, verb='updated', target=project)
+
     def form_valid(self, form):
         """Sends an activity stream action when project is updated."""
-        action.send(self.request.user, verb='updated', target=self.object)
+        self.generate_actions(form.cleaned_data)
         return super(ProjectUpdateView, self).form_valid(form)
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
