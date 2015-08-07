@@ -21,20 +21,60 @@ MuckRock &bull; {{ project.title }}
         {% else %}
         <header class="project-header">
         {% endif %}
-            {% if project.private %}
-            <div class="project-private">
-                <p>This project is private. It is only visible to its contributors.</p>
+            {% if request.user.is_staff or request.user in project.contributors.all %}
+            <div class="project-admin">
+                {% if project.private %}
+                <p class="project-private">This project is private and only visible to its contributors.</p>
+                {% else %}
+                <p class="project-private">This project is public and visible to the public.</p>
+                {% endif %}
+                <div class="project-controls">
+                    <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
+                        Crowdfund
+                    </a>
+                    <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
+                        Update
+                    </a>
+                    <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
+                        Delete
+                    </a>
+                </div>
+
             </div>
             {% endif %}
             <div class="project-gradient"></div>
             <h1 class="project-title">{{ project.title }}</h1>
         </header>
         <section class="project-overview">
-            <p class="project-contributors">People contribute to this project.</p>
-            <p class="project-items">It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.</p>
-        </div>
-        <section class="project-summary">
-            {{ project.summary|markdown:"trusted" }}
+            <div class="project-quick-links">
+                <div class="project-contributors">
+                    <dfn>Contributors</dfn>
+                {% if not project.contributors.all %}
+                    <p>Nobody contributes to this project.</p>
+                {% else %}
+                    <ul>
+                        {% for contributor in project.contributors.all %}
+                        <li class="project-contributor"><a href="{{ contributor.get_absolute_url }}" title="{{ contributor}}'s profile page">{{ contributor.get_full_name }}</a></p>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                </div>
+                <div class="project-references">
+                    <dfn>References</dfn>
+                    <p>
+                {% if not project.articles.all or not project.requests.all %}
+                It doesn't reference anything.
+                {% elif project.articles.all and project.requests.all %}
+                It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }} and {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.
+                {% else %}
+                {% if project.articles.all %}It references {{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}.{% else %}It references {{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}.{% endif %}
+                {% endif %}
+                    </p>
+                </div>
+            </div>
+            <div class="project-summary">
+                {{ project.summary|markdown:"trusted" }}
+            </div>
         </section>
         <section class="project-crowdfunds">
             {% if project.crowdfund.count > 0 %}
@@ -56,19 +96,6 @@ MuckRock &bull; {{ project.title }}
 {% endblock %}
 
 {% block aside %}
-    {% if request.user.is_staff or request.user in project.contributors.all %}
-    <div class="controls">
-        <a href="{% url 'project-crowdfund' slug=project.slug pk=project.pk %}" class="crowdfund success button">
-            Crowdfund
-        </a>
-        <a href="{% url 'project-update' slug=project.slug pk=project.pk %}" class="update primary button">
-            Update
-        </a>
-        <a href="{% url 'project-delete' slug=project.slug pk=project.pk %}" class="delete failure button">
-            Delete
-        </a>
-    </div>
-    {% endif %}
 
     {% if project.contributors.count > 0 %}
     <dfn>Contributors</dfn>

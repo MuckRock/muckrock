@@ -76,17 +76,39 @@
 .project.detail {
     .project-header {
         position: relative;
-        margin: 0 -1*$vertical-rhythm $vertical-rhythm;
+        margin: 0 -1*$vertical-rhythm/2;
         height: 20em;
         background-size: cover;
+        background-position: center;
         background-repeat: no-repeat;
+        @include media($medium-layout) {
+            height: 24em;
+            margin: 0 -1*$vertical-rhythm;
+        }
+        @include media($large-layout) {
+            height: 32em;
+        }
     }
-    .project-private {
+    .project-admin {
         position: absolute;
         top: 0;
         width: 100%;
-        padding: $vertical-rhythm;
-        background-color: $color-yellow;
+        padding: $vertical-rhythm/2;
+        background-color: rgba(0, 0, 0, .75);
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include align-items(center);
+        .project-controls, .project-private {
+            margin-bottom: 0;
+        }
+        .project-private {
+            color: $color-white;
+            font-weight: $font-weight-bold;
+        }
+        @include media($medium-layout) {
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+        }
     }
     .project-gradient {
         position: absolute;
@@ -98,9 +120,60 @@
         @include background(linear-gradient(rgba(247, 248, 250, 0), rgba(247, 248, 250, 100)));
     }
     .project-title {
+        font-size: $font-size-8;
+        font-weight: $font-weight-bold;
         position: absolute;
         bottom: 0;
-        padding: $vertical-rhythm;
-        font-weight: $font-weight-bold;
+        left: 0;
+        right: 0;
+        padding: $vertical-rhythm/2;
+        @include media($medium-layout) {
+            padding: $vertical-rhythm;
+        }
+    }
+    .project-overview {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        .project-summary, .project-quick-links {
+            @include flex(100%);
+        }
+        .project-quick-links {
+            @include display(flex);
+            border-bottom: 1px dashed $color-grey;
+            padding-bottom: $vertical-rhythm;
+            @include media($medium-layout) {
+                display: block;
+                border-bottom: 0;
+                padding-bottom: 0;
+            }
+            .project-contributors, .project-references {
+                margin-bottom: 0;
+                @include media($medium-layout) {
+                    margin-bottom: $vertical-rhythm;
+                }
+            }
+            .project-references {
+                margin-left: 2*$vertical-rhythm;;
+                @include media($medium-layout) {
+                    margin-left: 0;
+                }
+            }
+        }
+        @include media($medium-layout) {
+            .project-summary {
+                @include flex(2);
+            }
+            .project-quick-links {
+                @include flex(1);
+                @include order(1);
+                margin-left: 2*$vertical-rhythm;
+            }
+        }
+
+    }
+    .project-contributors ul {
+        padding-left: 0;
+        list-style-type: none;
     }
 }
