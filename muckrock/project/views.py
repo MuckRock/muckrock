@@ -47,9 +47,9 @@ class ProjectCreateView(CreateView):
 
     def form_valid(self, form):
         """Saves an activity stream action when creating the object"""
-        self.object = form.save()
-        action.send(self.request.user, verb='created', target=self.object)
-        return HttpResponseRedirect(self.get_success_url())
+        project = form.save()
+        action.send(self.request.user, verb='created', target=project)
+        return HttpResponseRedirect(project.get_absolute_url())
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
