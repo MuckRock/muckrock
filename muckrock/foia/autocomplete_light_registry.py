@@ -10,6 +10,7 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking FOIA requests"""
     search_fields = ['title']
     attrs = {
+        'placeholder': 'Search for requests',
         'data-autocomplete-minimum-characters': 1
     }
     def choices_for_request(self):
