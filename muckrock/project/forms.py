@@ -43,6 +43,6 @@ class ProjectUpdateForm(forms.ModelForm):
         fields = ['summary', 'description', 'image', 'contributors', 'tags', 'requests', 'articles', 'private']
         widgets = {
             'contributors': autocomplete_light.MultipleChoiceWidget('ProjectContributorAutocomplete'),
-            'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAdminAutocomplete'),
+            'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
             'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
         }

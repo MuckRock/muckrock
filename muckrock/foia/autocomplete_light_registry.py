@@ -6,6 +6,20 @@ from muckrock.foia.models import FOIARequest
 
 import autocomplete_light
 
+class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelBase):
+    """Creates an autocomplete field for picking FOIA requests"""
+    search_fields = ['title']
+    attrs = {
+        'data-autocomplete-minimum-characters': 1
+    }
+    def choices_for_request(self):
+        query = self.request.GET.get('q', '')
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
+        choices = self.choices.get_viewable(self.request.user)
+        return self.order_choices(choices)[0:self.limit_choices]
+
+autocomplete_light.register(FOIARequest, FOIARequestAutocomplete)
+
 autocomplete_light.register(
     FOIARequest,
     name='FOIARequestAdminAutocomplete',
@@ -14,3 +28,4 @@ autocomplete_light.register(
     attrs={
         'placeholder': 'Search for requests',
         'data-autocomplete-minimum-characters': 1})
+
