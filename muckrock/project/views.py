@@ -47,6 +47,14 @@ class ProjectDetailView(DetailView):
     model = Project
     template_name = 'project/detail.html'
 
+    def get_context_data(self, **kwargs):
+        """Filters project requests to only show those that are visible"""
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        context['visible_requests'] = project.requests.get_viewable(user)
+        return context
+
     def dispatch(self, *args, **kwargs):
         """If the project is private it is only visible to contributors and staff."""
         project = self.get_object()
@@ -84,6 +92,15 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     model = Project
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
+
+    def get_context_data(self, **kwargs):
+        """Add a list of viewable requests to the context data"""
+        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        viewable_requests = project.requests.get_viewable(user)
+        context['viewable_request_ids'] = [request.id for request in viewable_requests]
+        return context
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
