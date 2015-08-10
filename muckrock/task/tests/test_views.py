@@ -96,7 +96,6 @@ class TaskListViewPOSTTests(TestCase):
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        print updated_task.resolved
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
 
