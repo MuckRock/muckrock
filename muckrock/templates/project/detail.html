@@ -64,12 +64,12 @@ MuckRock &bull; {{ project.title }}
                 <div class="project-references">
                     <dfn>References</dfn>
                     <p>
-                        {% if not project.articles.all or not project.requests.all %}
+                        {% if not project.articles.all or not visible_requests %}
                         It doesn't reference anything.
-                        {% elif project.articles.all and project.requests.all %}
-                        It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a> and <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.
+                        {% elif project.articles.all and visible_requests %}
+                        It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a> and <a href="#requests">{{ visible_requests|length }} request{{ visible_requests|length|pluralize }}</a>.
                         {% else %}
-                        {% if project.articles.all %}It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>.{% else %}It references <a href="#requests">{{ project.requests.all|length }} request{{ project.requests.all|length|pluralize }}</a>.{% endif %}
+                        {% if project.articles.all %}It references <a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>.{% else %}It references <a href="#requests">{{ visible_requests|length }} request{{ visible_requests|length|pluralize }}</a>.{% endif %}
                         {% endif %}
                     </p>
                 </div>
@@ -118,7 +118,7 @@ MuckRock &bull; {{ project.title }}
         {% if project.requests.count > 0 %}
         <section class="project-requests" id="requests">
             <h2>Requests</h2>
-            {% include 'lib/foia_table.html' with requests=project.requests.all %}
+            {% include 'lib/foia_table.html' with requests=visible_requests %}
         </section>
         {% endif %}
     </article>

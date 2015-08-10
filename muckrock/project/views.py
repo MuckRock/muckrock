@@ -47,6 +47,14 @@ class ProjectDetailView(DetailView):
     model = Project
     template_name = 'project/detail.html'
 
+    def get_context_data(self, **kwargs):
+        """Filters project requests to only show those that are visible"""
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        context['visible_requests'] = project.requests.get_viewable(user)
+        return context
+
     def dispatch(self, *args, **kwargs):
         """If the project is private it is only visible to contributors and staff."""
         project = self.get_object()
