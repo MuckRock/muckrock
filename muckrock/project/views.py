@@ -93,6 +93,15 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
 
+    def get_context_data(self, **kwargs):
+        """Add a list of viewable requests to the context data"""
+        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        viewable_requests = project.requests.get_viewable(user)
+        context['viewable_request_ids'] = [request.id for request in viewable_requests]
+        return context
+
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
     model = Project
