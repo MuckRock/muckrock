@@ -285,7 +285,7 @@ class MultiRequestTask(Task):
         return u'Multi-Request: %s' % self.multirequest
 
 
-# Not a task, but use by tasks
+# Not a task, but used by tasks
 class BlacklistDomain(models.Model):
     """A domain to be blacklisted from sending us emails"""
     domain = models.CharField(max_length=255)
