@@ -64,7 +64,10 @@
         from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is received.</small></h4>
     {% endif %}
     <h1>{{ foia.title }}</h1>
-	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{% endif %}{{ foia.agency.name }}{% if foia.agency.approved %}</a>{% endif %} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% endif %}.{% if foia.parent %}<br>It was inspired by <a href="{{ foia.parent.get_absolute_url }}">this request</a>.{% endif %}</h2>
+	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{% endif %}{{ foia.agency.name }}{% if foia.agency.approved %}</a>{% endif %} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
+	{% if foia.parent %}
+	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
+	{% endif %}
     {% if foia.tracking_id and user.is_staff %}
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
