@@ -96,7 +96,8 @@ class OrphanTaskTests(TestCase):
     def test_blacklist(self):
         """A blacklisted email should be automatically resolved"""
         # pylint: disable=no-self-use
-        task.models.BlacklistDomain.objects.create(domain='spam.com')
+        blacklist_domain = task.models.BlacklistDomain.objects.create(domain='spam.com')
+        blacklist_domain.save()
         comm = FOIACommunication.objects.create(
                 date=datetime.now(),
                 from_who='spammer',
@@ -105,7 +106,8 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=comm,
             address='orphan-address')
-        nose.tools.ok_(orphan.resolved)
+        updated_orphan = task.models.OrphanTask.objects.get(pk=orphan.pk)
+        nose.tools.ok_(updated_orphan.resolved)
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
