@@ -15,7 +15,7 @@ class FOIARequestAutocomplete(autocomplete_light.AutocompleteModelBase):
     def choices_for_request(self):
         query = self.request.GET.get('q', '')
         conditions = self._choices_for_request_conditions(query, self.search_fields)
-        choices = self.choices.get_viewable(self.request.user)
+        choices = self.choices.get_viewable(self.request.user).filter(conditions)
         return self.order_choices(choices)[0:self.limit_choices]
 
 autocomplete_light.register(FOIARequest, FOIARequestAutocomplete)
