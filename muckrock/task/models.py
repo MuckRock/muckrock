@@ -93,13 +93,11 @@ class SnailMailTask(Task):
     def set_status(self, status):
         """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
-        foia = comm.foia
-        foia.status = status
-        foia.update()
-        foia.save()
-        comm.status = foia.status
-        #comm.date = datetime.now()
+        comm.status = status
         comm.save()
+        comm.foia.status = status
+        comm.foia.save()
+        comm.foia.update()
 
     def update_date(self):
         """Sets the date of the communication to today"""
