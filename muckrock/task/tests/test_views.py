@@ -269,7 +269,7 @@ class ResponseTaskListViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('response-task-list')
         self.task = task.models.ResponseTask.objects.get(pk=8)
         self.client = Client()
         self.client.login(username='adam', password='abc')

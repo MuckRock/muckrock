@@ -200,7 +200,7 @@ class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
 
-    def task_post_handler(self, request, task):
+    def task_post_helper(self, request, task):
         """Special post helper exclusive to ResponseTask"""
         error_happened = False
         form = ResponseTaskForm(request.POST)
