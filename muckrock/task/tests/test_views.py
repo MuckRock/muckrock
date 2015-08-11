@@ -137,7 +137,7 @@ class OrphanTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('orphan-task-list')
         self.task = task.models.OrphanTask.objects.get(pk=2)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -219,7 +219,7 @@ class NewAgencyTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('new-agency-task-list')
         self.task = task.models.NewAgencyTask.objects.get(pk=7)
         self.task.agency.approved = False
         self.task.agency.save()
