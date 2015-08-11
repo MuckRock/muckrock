@@ -10,8 +10,6 @@ from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
-import logging
-
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -96,6 +94,8 @@ class TaskList(MRFilterableListView):
         """Every request should specify the task or tasks it is updating as PKs"""
         POST = self.request.POST
         task_pks = [POST.get('task')] + POST.getlist('tasks')
+        # clean the list of task_pks
+        task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
             messages.warning(self.request, 'No tasks were selected, so there\'s nothing to do!')
             return redirect(self.get_redirect_url())
@@ -113,7 +113,6 @@ class TaskList(MRFilterableListView):
     def post(self, request):
         """Handle general cases for updating Task objects"""
         tasks = self.get_tasks()
-        logging.info(tasks)
         for task in tasks:
             self.task_post_helper(request, task)
         return redirect(self.get_redirect_url())

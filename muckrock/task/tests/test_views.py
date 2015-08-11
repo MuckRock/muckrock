@@ -122,13 +122,6 @@ class TaskListViewBatchedPOSTTests(TestCase):
             eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
-    def test_batch_assign_tasks(self):
-        self.client.post(self.url, {'assign': 1, 'tasks': [1, 2, 3]})
-        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
-        for updated_task in updated_tasks:
-            eq_(updated_task.assigned.pk, 1,
-                'Task %d should be assigned when doing a batched assign' % updated_task.pk)
-
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
