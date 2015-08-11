@@ -85,183 +85,176 @@ class TaskList(MRFilterableListView):
         """Dispatch overriden to limit access"""
         return super(TaskList, self).dispatch(*args, **kwargs)
 
+    def get_redirect_url(self):
+        """Returns the url to redirect to"""
+        resolved_url = resolve(self.request.path)
+        return resolved_url.url_name
+
+    def get_tasks(self):
+        """Every request should specify the task or tasks it is updating as PKs"""
+        POST = self.request.POST
+        task_pks = [POST.get('task')] + POST.getlist('tasks')
+        # clean the list of task_pks
+        task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
+        if not task_pks:
+            messages.warning(self.request, 'No tasks were selected, so there\'s nothing to do!')
+            return redirect(self.get_redirect_url())
+        tasks = [get_object_or_404(self.model, pk=each_pk) for each_pk in task_pks]
+        return tasks
+
+    def task_post_helper(self, request, task):
+        """Specific actions to apply to the task"""
+        if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
+            # dont resolve response tasks here, do it in
+            # the handler below after checking for errors
+            task.resolve(request.user)
+        return
+
     def post(self, request):
         """Handle general cases for updating Task objects"""
-        # pylint: disable=no-self-use
-        # every request should specify the task it is updating
-        task_pk = request.POST.get('task')
-        tasks_pks = request.POST.getlist('tasks')
-        if task_pk or tasks_pks:
-            if task_pk:
-                tasks = [get_object_or_404(Task, pk=task_pk)]
-            else:
-                tasks = [get_object_or_404(Task, pk=each_pk) for each_pk in tasks_pks]
-        else:
-            messages.warning(request, 'No tasks were selected, so there\'s nothing to do!')
-            return redirect('task-list')
-
+        tasks = self.get_tasks()
         for task in tasks:
-            # These actions are shared between all Task objects
-            # resolve will either be True or None
-            # the task will only resolve if True
-            if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
-                # dont resolve response tasks here
-                # do it in the handler below after checking for errors
-                task.resolve(request.user)
-            if request.POST.get('assign'):
-                user_pk = request.POST.get('assign')
-                user = get_object_or_404(User, pk=user_pk)
-                task.assign(user)
+            self.task_post_helper(request, task)
+        return redirect(self.get_redirect_url())
 
-        orphan_task_post_handler(request, task_pk)
-        snail_mail_task_post_handler(request, task_pk)
-        new_agency_task_post_handler(request, task_pk)
-        response_task_post_handler(request, task_pk)
-
-        match = resolve(request.path)
-        return redirect(match.url_name)
-
-def orphan_task_post_handler(request, task_pk):
-    """Special post handlers exclusive to OrphanTasks"""
-    try:
-        orphan_task = OrphanTask.objects.get(pk=task_pk)
-    except OrphanTask.DoesNotExist:
-        return
-
-    if request.POST.get('reject'):
-        orphan_task.reject()
-        orphan_task.resolve(request.user)
-    elif request.POST.get('move'):
-        foia_pks = request.POST.get('move', '')
-        foia_pks = foia_pks.split(', ')
-        try:
-            orphan_task.move(foia_pks)
-            orphan_task.resolve(request.user)
-            messages.success(request, 'The communication was moved to the specified requests.')
-        except ValueError:
-            messages.error(request, 'No valid requests to move communication to.')
-    return
-
-def snail_mail_task_post_handler(request, task_pk):
-    """Special post handlers exclusive to SnailMailTasks"""
-    try:
-        snail_mail_task = SnailMailTask.objects.get(pk=task_pk)
-    except SnailMailTask.DoesNotExist:
-        return
-    if request.POST.get('status'):
-        status = request.POST.get('status')
-        if status in dict(STATUS):
-            snail_mail_task.set_status(status)
-    if request.POST.get('update_date'):
-        snail_mail_task.update_date()
-    return
-
-def new_agency_task_post_handler(request, task_pk):
-    """Special post handlers exclusive to NewAgencyTasks"""
-    try:
-        new_agency_task = NewAgencyTask.objects.get(pk=task_pk)
-    except NewAgencyTask.DoesNotExist:
-        return
-    if request.POST.get('approve'):
-        new_agency_form = AgencyForm(request.POST, instance=new_agency_task.agency)
-        if new_agency_form.is_valid():
-            new_agency_form.save()
-        else:
-            messages.error(request, 'The agency info form was invalid. Sorry!')
-            return
-        new_agency_task.approve()
-        new_agency_task.resolve(request.user)
-    if request.POST.get('reject'):
-        replacement_agency_id = request.POST.get('replacement')
-        replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
-        new_agency_task.reject(replacement_agency)
-        new_agency_task.resolve(request.user)
-    return
-
-def response_task_post_handler(request, task_pk):
-    """Special post handlers exclusive to ResponseTask"""
-    try:
-        response_task = ResponseTask.objects.get(pk=task_pk)
-    except ResponseTask.DoesNotExist:
-        return
-    error_happened = False
-    form = ResponseTaskForm(request.POST)
-    if not form.is_valid():
-        messages.error(request, 'Form is invalid')
-        return
-    cleaned_data = form.cleaned_data
-    status = cleaned_data['status']
-    move = cleaned_data['move']
-    tracking_number = cleaned_data['tracking_number']
-    # make sure that the move is executed first, so that the status
-    # and tracking operations are applied to the correct FOIA request
-    if move:
-        try:
-            response_task.move(move)
-        except (Http404, ValueError):
-            messages.error(request, 'No valid destination for moving the request.')
-            error_happened = True
-    if status:
-        try:
-            response_task.set_status(status)
-        except ValueError:
-            messages.error(request, 'You tried to set an invalid status. How did you manage that?')
-            error_happened = True
-    if tracking_number:
-        try:
-            response_task.set_tracking_id(tracking_number)
-        except ValueError:
-            messages.error(request,
-                'You tried to set an invalid tracking id. Just use a string of characters.')
-            error_happened = True
-    if (move or status or tracking_number) and not error_happened:
-        response_task.resolve(request.user)
-    return
 
 class OrphanTaskList(TaskList):
     title = 'Orphans'
     model = OrphanTask
     bulk_actions = ['reject']
 
+    def task_post_helper(self, request, task):
+        """Special post helper exclusive to OrphanTasks"""
+        if request.POST.get('reject'):
+            task.reject()
+            task.resolve(request.user)
+        elif request.POST.get('move'):
+            foia_pks = request.POST.get('move', '')
+            foia_pks = foia_pks.split(', ')
+            try:
+                task.move(foia_pks)
+                task.resolve(request.user)
+                messages.success(request, 'The communication was moved to the specified requests.')
+            except ValueError:
+                messages.error(request, 'No valid requests to move communication to.')
+        return
+
+
 class SnailMailTaskList(TaskList):
     title = 'Snail Mails'
     model = SnailMailTask
+
+    def task_post_helper(self, request, task):
+        """Special post helper exclusive to SnailMailTasks"""
+        if request.POST.get('status'):
+            status = request.POST.get('status')
+            if status in dict(STATUS):
+                task.set_status(status)
+                task.resolve(request.user)
+            # updating the date is an option and not an action
+            if request.POST.get('update_date'):
+                task.update_date()
+        return
+
 
 class RejectedEmailTaskList(TaskList):
     title = 'Rejected Emails'
     model = RejectedEmailTask
 
+
 class StaleAgencyTaskList(TaskList):
     title = 'Stale Agencies'
     model = StaleAgencyTask
+
 
 class FlaggedTaskList(TaskList):
     title = 'Flagged'
     model = FlaggedTask
 
+
 class NewAgencyTaskList(TaskList):
     title = 'New Agencies'
     model = NewAgencyTask
+
+    def task_post_helper(self, request, task):
+        """Special post handlers exclusive to NewAgencyTasks"""
+        if request.POST.get('approve'):
+            new_agency_form = AgencyForm(request.POST, instance=task.agency)
+            if new_agency_form.is_valid():
+                new_agency_form.save()
+            else:
+                messages.error(request, 'The agency info form is invalid.')
+                return
+            task.approve()
+            task.resolve(request.user)
+        if request.POST.get('reject'):
+            replacement_agency_id = request.POST.get('replacement')
+            replacement_agency = get_object_or_404(Agency, id=replacement_agency_id)
+            task.reject(replacement_agency)
+            task.resolve(request.user)
+        return
+
 
 class ResponseTaskList(TaskList):
     title = 'Responses'
     model = ResponseTask
 
+    def task_post_helper(self, request, task):
+        """Special post helper exclusive to ResponseTask"""
+        error_happened = False
+        form = ResponseTaskForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, 'Form is invalid')
+            return
+        cleaned_data = form.cleaned_data
+        status = cleaned_data['status']
+        move = cleaned_data['move']
+        tracking_number = cleaned_data['tracking_number']
+        # move is executed first, so that the status and tracking
+        # operations are applied to the correct FOIA request
+        if move:
+            try:
+                task.move(move)
+            except (Http404, ValueError):
+                messages.error(request, 'No valid destination for moving the request.')
+                error_happened = True
+        if status:
+            try:
+                task.set_status(status)
+            except ValueError:
+                messages.error(request, 'You tried to set an invalid status. How did you manage that?')
+                error_happened = True
+        if tracking_number:
+            try:
+                task.set_tracking_id(tracking_number)
+            except ValueError:
+                messages.error(request,
+                    'You tried to set an invalid tracking id. Just use a string of characters.')
+                error_happened = True
+        if (move or status or tracking_number) and not error_happened:
+            task.resolve(request.user)
+        return
+
+
 class StatusChangeTaskList(TaskList):
     title = 'Status Change'
     model = StatusChangeTask
+
 
 class PaymentTaskList(TaskList):
     title = 'Payments'
     model = PaymentTask
 
+
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
     model = CrowdfundTask
 
+
 class MultiRequestTaskList(TaskList):
     title = 'Multi-Requests'
     model = MultiRequestTask
+
 
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'

@@ -92,24 +92,11 @@ class TaskListViewPOSTTests(TestCase):
         eq_(updated_task.resolved_by, user,
             'Task should record the logged in user who resolved it.')
 
-
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
-
-    def test_post_assign_task(self):
-        # the PK for 'adam' is 1
-        self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        eq_(updated_task.assigned.pk, 1,
-            'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
-
-    def test_bad_assign(self):
-        # there is no user with a PK of 99
-        response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
-        eq_(response.status_code, 404)
 
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
@@ -135,13 +122,6 @@ class TaskListViewBatchedPOSTTests(TestCase):
             eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
-    def test_batch_assign_tasks(self):
-        self.client.post(self.url, {'assign': 1, 'tasks': [1, 2, 3]})
-        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
-        for updated_task in updated_tasks:
-            eq_(updated_task.assigned.pk, 1,
-                'Task %d should be assigned when doing a batched assign' % updated_task.pk)
-
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
@@ -150,7 +130,7 @@ class OrphanTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('orphan-task-list')
         self.task = task.models.OrphanTask.objects.get(pk=2)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -199,7 +179,7 @@ class SnailMailTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('snail-mail-task-list')
         self.task = task.models.SnailMailTask.objects.get(pk=3)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -217,12 +197,12 @@ class SnailMailTaskViewTests(TestCase):
     def test_post_update_date(self):
         """Should update the date of the communication to today."""
         comm_date = self.task.communication.date
-        self.client.post(self.url, {'update_date': 'true', 'task': self.task.pk})
+        self.client.post(self.url, {'status': 'ack', 'update_date': 'true', 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
         ok_(updated_task.communication.date > comm_date,
             'Should update the communication date.')
         eq_(updated_task.communication.date.day, datetime.now().day,
-            'Should update teh communication to today\'s date.')
+            'Should update the communication to today\'s date.')
 
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
@@ -232,7 +212,7 @@ class NewAgencyTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('new-agency-task-list')
         self.task = task.models.NewAgencyTask.objects.get(pk=7)
         self.task.agency.approved = False
         self.task.agency.save()
@@ -282,7 +262,7 @@ class ResponseTaskListViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('response-task-list')
         self.task = task.models.ResponseTask.objects.get(pk=8)
         self.client = Client()
         self.client.login(username='adam', password='abc')
