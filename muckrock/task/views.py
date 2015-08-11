@@ -4,7 +4,6 @@ Views for the Task application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.models import User
 from django.core.urlresolvers import resolve
 from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
@@ -92,8 +91,8 @@ class TaskList(MRFilterableListView):
 
     def get_tasks(self):
         """Every request should specify the task or tasks it is updating as PKs"""
-        POST = self.request.POST
-        task_pks = [POST.get('task')] + POST.getlist('tasks')
+        post_data = self.request.POST
+        task_pks = [post_data.get('task')] + post_data.getlist('tasks')
         # clean the list of task_pks
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
@@ -104,9 +103,8 @@ class TaskList(MRFilterableListView):
 
     def task_post_helper(self, request, task):
         """Specific actions to apply to the task"""
-        if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
-            # dont resolve response tasks here, do it in
-            # the handler below after checking for errors
+        # pylint: disable=no-self-use
+        if request.POST.get('resolve'):
             task.resolve(request.user)
         return
 
@@ -222,7 +220,7 @@ class ResponseTaskList(TaskList):
             try:
                 task.set_status(status)
             except ValueError:
-                messages.error(request, 'You tried to set an invalid status. How did you manage that?')
+                messages.error(request, 'You tried to set the request to an invalid status.')
                 error_happened = True
         if tracking_number:
             try:
