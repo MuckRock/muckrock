@@ -186,7 +186,7 @@ class SnailMailTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('snail-mail-task-list')
         self.task = task.models.SnailMailTask.objects.get(pk=3)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -204,12 +204,12 @@ class SnailMailTaskViewTests(TestCase):
     def test_post_update_date(self):
         """Should update the date of the communication to today."""
         comm_date = self.task.communication.date
-        self.client.post(self.url, {'update_date': 'true', 'task': self.task.pk})
+        self.client.post(self.url, {'status': 'ack', 'update_date': 'true', 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
         ok_(updated_task.communication.date > comm_date,
             'Should update the communication date.')
         eq_(updated_task.communication.date.day, datetime.now().day,
-            'Should update teh communication to today\'s date.')
+            'Should update the communication to today\'s date.')
 
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""

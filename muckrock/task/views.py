@@ -10,6 +10,8 @@ from django.http import Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
+import logging
+
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -111,6 +113,7 @@ class TaskList(MRFilterableListView):
     def post(self, request):
         """Handle general cases for updating Task objects"""
         tasks = self.get_tasks()
+        logging.info(tasks)
         for task in tasks:
             self.task_post_helper(request, task)
         return redirect(self.get_redirect_url())
