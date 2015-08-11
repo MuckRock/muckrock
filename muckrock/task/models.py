@@ -14,6 +14,18 @@ from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
+
+class TaskQuerySet(models.QuerySet):
+    """Object manager for all tasks"""
+    def get_unresolved(self):
+        """Get all unresolved tasks"""
+        return self.filter(resolved=False)
+
+    def get_resolved(self):
+        """Get all resolved tasks"""
+        return self.filter(resolved=True)
+
+
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
@@ -21,6 +33,8 @@ class Task(models.Model):
     resolved = models.BooleanField(default=False)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+
+    objects = TaskQuerySet.as_manager()
 
     class Meta:
         ordering = ['date_created']
