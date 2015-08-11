@@ -1,5 +1,6 @@
 {% load humanize %}
 {% load static from staticfiles %}
+{% load markdown_deux_tags %}
 
 <section class="crowdfund widget">
     <div class="overlay hidden"></div>
@@ -8,7 +9,7 @@
         <!--<a href="/docs/crowdfund/">What is this?</a>-->
     </header>
     <section class="description">
-        <p>{{ crowdfund.description }}</p>
+        {{ crowdfund.description|markdown }}
     </section>
     <section class="stats">
         <div class="contributors">
