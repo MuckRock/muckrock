@@ -92,24 +92,11 @@ class TaskListViewPOSTTests(TestCase):
         eq_(updated_task.resolved_by, user,
             'Task should record the logged in user who resolved it.')
 
-
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
-
-    def test_post_assign_task(self):
-        # the PK for 'adam' is 1
-        self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        eq_(updated_task.assigned.pk, 1,
-            'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
-
-    def test_bad_assign(self):
-        # there is no user with a PK of 99
-        response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
-        eq_(response.status_code, 404)
 
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""

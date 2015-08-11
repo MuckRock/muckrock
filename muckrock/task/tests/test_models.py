@@ -54,11 +54,6 @@ class TaskTests(TestCase):
         eq_(self.task.resolved_by, user,
             'The resolving user should be recorded by the task.')
 
-    def test_assign(self):
-        user = User.objects.get(pk=1)
-        self.task.assign(user)
-        ok_(self.task.assigned is user,
-            'Should assign the task to the specified user')
 
 class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""

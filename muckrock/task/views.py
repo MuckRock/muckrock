@@ -88,7 +88,8 @@ class TaskList(MRFilterableListView):
     def post(self, request):
         """Handle general cases for updating Task objects"""
         # pylint: disable=no-self-use
-        # every request should specify the task it is updating
+
+        # every request should specify the task or tasks it is updating
         task_pk = request.POST.get('task')
         tasks_pks = request.POST.getlist('tasks')
         if task_pk or tasks_pks:
@@ -100,18 +101,12 @@ class TaskList(MRFilterableListView):
             messages.warning(request, 'No tasks were selected, so there\'s nothing to do!')
             return redirect('task-list')
 
+        # These actions are shared between all Task objects
         for task in tasks:
-            # These actions are shared between all Task objects
-            # resolve will either be True or None
-            # the task will only resolve if True
             if request.POST.get('resolve') and not hasattr(task, 'responsetask'):
-                # dont resolve response tasks here
-                # do it in the handler below after checking for errors
+                # dont resolve response tasks here, do it in
+                # the handler below after checking for errors
                 task.resolve(request.user)
-            if request.POST.get('assign'):
-                user_pk = request.POST.get('assign')
-                user = get_object_or_404(User, pk=user_pk)
-                task.assign(user)
 
         orphan_task_post_handler(request, task_pk)
         snail_mail_task_post_handler(request, task_pk)

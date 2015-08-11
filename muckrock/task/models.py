@@ -49,11 +49,6 @@ class Task(models.Model):
         self.date_done = datetime.now()
         self.save()
 
-    def assign(self, user):
-        """Assign the task"""
-        self.assigned = user
-        self.save()
-
 
 class GenericTask(Task):
     """A generic task"""
