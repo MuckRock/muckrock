@@ -86,13 +86,13 @@ MuckRock &bull; {{ project.title }}
             {% endif %}
         </section>
         <section class="project-body">
-            <section class="project-description">
-                {{ project.description|markdown:"trusted" }}
-            </section>
             <aside class="project-metadata">
                 {% tag_manager project %}
                 {% include 'lib/social.html' with title=project.title %}
             </aside>
+            <section class="project-description">
+                {{ project.description|markdown:"trusted" }}
+            </section>
         </section>
         {% if project.articles.count > 0 %}
         <section class="project-articles" id="articles">

@@ -190,12 +190,19 @@
     }
     .project-body {
         @include display(flex);
-        .project-description {
-            @include flex(2);
+        @include flex-wrap(wrap);
+        .project-description, .project-metadata {
+            @include flex(100%);
         }
-        .project-metadata {
-            @include flex(1);
-            margin-left: 2*$vertical-rhythm;
+        @include media($medium-layout) {
+            .project-description {
+                @include flex(2);
+            }
+            .project-metadata {
+                @include flex(1);
+                @include order(1);
+                margin-left: 2*$vertical-rhythm;
+            }
         }
     }
 }
