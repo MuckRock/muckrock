@@ -245,6 +245,16 @@ class ResponseTask(Task):
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
 
+    def set_price(self, price):
+        """Sets the price of the communication's request"""
+        price = float(price)
+        comm = self.communication
+        if not comm.foia:
+            raise ValueError('This tasks\'s communication is an orphan.')
+        foia = comm.foia
+        foia.price = price
+        foia.save()
+
 
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
