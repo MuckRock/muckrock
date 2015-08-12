@@ -233,8 +233,6 @@ class ResponseTask(Task):
             raise ValueError('Invalid status.')
         # save comm first
         comm.status = status
-        #if status in ['ack', 'processed', 'appealing']:
-        #    comm.date = datetime.now()
         comm.save()
         # save foia next
         foia = comm.foia
