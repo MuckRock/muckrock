@@ -48,7 +48,10 @@ $message-layout: new-breakpoint(min-width $large-breakpoint+200px 12);
     .attachments {
         width: 100%;
         @include border-bottom-radius($base-border-radius - 1px);
-        .attachment-list { margin: 0; }
+        .attachment-list {
+            margin: 0;
+            padding-left: 0;
+        }
         .attachment {
             padding: $vertical-rhythm/2 $vertical-rhythm;
             border-top-width: $base-border-width;
