@@ -92,24 +92,11 @@ class TaskListViewPOSTTests(TestCase):
         eq_(updated_task.resolved_by, user,
             'Task should record the logged in user who resolved it.')
 
-
     def test_post_do_not_resolve_task(self):
         self.client.post(self.url, {'task': self.task.pk})
         updated_task = task.models.Task.objects.get(pk=self.task.pk)
         eq_(updated_task.resolved, False,
             'Tasks should not be resolved when no "resolve" data is POSTed.')
-
-    def test_post_assign_task(self):
-        # the PK for 'adam' is 1
-        self.client.post(self.url, {'assign': 1, 'task': self.task.pk})
-        updated_task = task.models.Task.objects.get(pk=self.task.pk)
-        eq_(updated_task.assigned.pk, 1,
-            'Tasks should be assigned by posting the task ID and user ID with an "assign" request.')
-
-    def test_bad_assign(self):
-        # there is no user with a PK of 99
-        response = self.client.post(self.url, {'assign': 99, 'task': self.task.pk})
-        eq_(response.status_code, 404)
 
 class TaskListViewBatchedPOSTTests(TestCase):
     """Tests batched POST requests for all tasks"""
@@ -135,13 +122,6 @@ class TaskListViewBatchedPOSTTests(TestCase):
             eq_(updated_task.resolved, True,
                 'Task %d should be resolved when doing a batched resolve' % updated_task.pk)
 
-    def test_batch_assign_tasks(self):
-        self.client.post(self.url, {'assign': 1, 'tasks': [1, 2, 3]})
-        updated_tasks = [task.models.Task.objects.get(pk=t.pk) for t in self.tasks]
-        for updated_task in updated_tasks:
-            eq_(updated_task.assigned.pk, 1,
-                'Task %d should be assigned when doing a batched assign' % updated_task.pk)
-
 class OrphanTaskViewTests(TestCase):
     """Tests OrphanTask-specific POST handlers"""
 
@@ -150,7 +130,7 @@ class OrphanTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('orphan-task-list')
         self.task = task.models.OrphanTask.objects.get(pk=2)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -158,16 +138,20 @@ class OrphanTaskViewTests(TestCase):
     def test_move(self):
         foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
+        starting_date = self.task.communication.date
         self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
         updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        ending_date = updated_task.communication.date
         eq_(updated_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
         eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
             'Communication should be added to FOIA')
         eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
             'Communication should be added to FOIA')
+        eq_(starting_date, ending_date,
+            'The date of the communication should not change.')
 
     def test_reject(self):
         self.client.post(self.url, {'reject': True, 'task': self.task.pk})
@@ -199,7 +183,7 @@ class SnailMailTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('snail-mail-task-list')
         self.task = task.models.SnailMailTask.objects.get(pk=3)
         self.client = Client()
         self.client.login(username='adam', password='abc')
@@ -217,12 +201,12 @@ class SnailMailTaskViewTests(TestCase):
     def test_post_update_date(self):
         """Should update the date of the communication to today."""
         comm_date = self.task.communication.date
-        self.client.post(self.url, {'update_date': 'true', 'task': self.task.pk})
+        self.client.post(self.url, {'status': 'ack', 'update_date': 'true', 'task': self.task.pk})
         updated_task = task.models.SnailMailTask.objects.get(pk=self.task.pk)
         ok_(updated_task.communication.date > comm_date,
             'Should update the communication date.')
         eq_(updated_task.communication.date.day, datetime.now().day,
-            'Should update teh communication to today\'s date.')
+            'Should update the communication to today\'s date.')
 
 class NewAgencyTaskViewTests(TestCase):
     """Tests NewAgencyTask-specific POST handlers"""
@@ -232,7 +216,7 @@ class NewAgencyTaskViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('new-agency-task-list')
         self.task = task.models.NewAgencyTask.objects.get(pk=7)
         self.task.agency.approved = False
         self.task.agency.save()
@@ -282,10 +266,23 @@ class ResponseTaskListViewTests(TestCase):
                 'test_foiacommunications.json', 'test_task.json']
 
     def setUp(self):
-        self.url = reverse('task-list')
+        self.url = reverse('response-task-list')
         self.task = task.models.ResponseTask.objects.get(pk=8)
         self.client = Client()
         self.client.login(username='adam', password='abc')
+
+    def test_post_set_price(self):
+        """Setting the price should update the price on the response's request."""
+        price = 1
+        self.client.post(self.url, {
+            'status': 'done',
+            'price': price,
+            'task': self.task.pk
+        })
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_price = updated_task.communication.foia.price
+        eq_(foia_price, float(price), 'The price on the FOIA should be set.')
+        ok_(updated_task.resolved, 'Setting the price should resolve the task.')
 
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
@@ -319,13 +316,17 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_move(self):
         """Moving the response should save it to a new request."""
         move_to_id = 2
+        starting_date = self.task.communication.date
         self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_id = updated_task.communication.foia.id
+        ending_date = updated_task.communication.date
         eq_(foia_id, move_to_id,
             'The response should be moved to a different FOIA.')
         ok_(updated_task.resolved,
             'Moving the status should resolve the task')
+        eq_(starting_date, ending_date,
+            'Moving the communication should not change its date.')
 
     def test_post_move_multiple(self):
         """Moving the response to multiple requests should only modify the first request."""

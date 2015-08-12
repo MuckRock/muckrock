@@ -62,11 +62,8 @@
         width: 100%;
         margin-bottom: $vertical-rhythm;
     }
-    input, select, button {
-        margin-bottom: $vertical-rhythm/2;
-    }
-    .task-assign {
-        margin-bottom: $vertical-rhythm/2;
+    label {
+        margin-bottom: 0;
     }
 }
 

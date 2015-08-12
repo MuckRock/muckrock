@@ -74,11 +74,11 @@ def contributor_summary(crowdfund):
             else:
                 unnamed_string += ' person'
     if len(crowdfund.contributors()) > 0:
-        summary = ('Supported by '
+        summary = ('Backed by '
                    + list_to_english_string(contributor_names[:named_limit] + [unnamed_string])
                    + '.')
     else:
-        summary = 'No contributors yet. Be the first!'
+        summary = 'No backers yet. Be the first!'
     return summary
 
 def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_context):
