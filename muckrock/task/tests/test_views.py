@@ -274,7 +274,7 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_set_price(self):
         """Setting the price should update the price on the response's request."""
         price = 1
-        response = self.client.post(self.url, {
+        self.client.post(self.url, {
             'status': 'done',
             'price': price,
             'task': self.task.pk
