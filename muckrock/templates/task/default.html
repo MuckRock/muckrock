@@ -26,7 +26,7 @@
     {% endblock %}
 
     <div class="task-actions">
-        <form method="POST" class="task-post-actions">
+        <form method="POST" action="{{ endpoint }}" class="task-post-actions">
             {% csrf_token %}
             <input type="hidden" name="task" value="{{task.pk}}">
     {% block task-actions %}
