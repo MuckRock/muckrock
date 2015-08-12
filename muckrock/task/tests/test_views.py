@@ -138,16 +138,20 @@ class OrphanTaskViewTests(TestCase):
     def test_move(self):
         foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
+        starting_date = self.task.communication.date
         self.client.post(self.url, {'move': '1, 2', 'task': self.task.pk})
         updated_foia_1_comm_count = FOIARequest.objects.get(pk=1).communications.all().count()
         updated_foia_2_comm_count = FOIARequest.objects.get(pk=2).communications.all().count()
         updated_task = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        ending_date = updated_task.communication.date
         eq_(updated_task.resolved, True,
             'Orphan task should be moved by posting the FOIA pks and task ID.')
         eq_(updated_foia_1_comm_count, foia_1_comm_count + 1,
             'Communication should be added to FOIA')
         eq_(updated_foia_2_comm_count, foia_2_comm_count + 1,
             'Communication should be added to FOIA')
+        eq_(starting_date, ending_date,
+            'The date of the communication should not change.')
 
     def test_reject(self):
         self.client.post(self.url, {'reject': True, 'task': self.task.pk})
@@ -312,13 +316,17 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_move(self):
         """Moving the response should save it to a new request."""
         move_to_id = 2
+        starting_date = self.task.communication.date
         self.client.post(self.url, {'move': move_to_id, 'status': 'done', 'task': self.task.pk})
         updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
         foia_id = updated_task.communication.foia.id
+        ending_date = updated_task.communication.date
         eq_(foia_id, move_to_id,
             'The response should be moved to a different FOIA.')
         ok_(updated_task.resolved,
             'Moving the status should resolve the task')
+        eq_(starting_date, ending_date,
+            'Moving the communication should not change its date.')
 
     def test_post_move_multiple(self):
         """Moving the response to multiple requests should only modify the first request."""
