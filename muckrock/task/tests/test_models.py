@@ -228,6 +228,12 @@ class ResponseTaskTests(TestCase):
         eq_(self.task.communication.foia.tracking_id, new_tracking,
             'Should update the tracking number on the request.')
 
+    def test_set_price(self):
+        price = 1.23
+        self.task.set_price(price)
+        eq_(self.task.communication.foia.price, price,
+            'Should update the price on the request.')
+
     def test_move(self):
         move_to = 2
         self.task.move(2)
@@ -248,3 +254,10 @@ class ResponseTaskTests(TestCase):
     def test_bad_move(self):
         """Should raise a 404 if non-existant move destination."""
         self.task.move(111111)
+
+    @raises(ValueError)
+    def test_bad_price(self):
+        """Should raise an error if not given a value convertable to a float"""
+        self.task.set_price(1)
+        self.task.set_price('1')
+        self.task.set_price('foo')

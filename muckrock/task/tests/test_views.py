@@ -267,6 +267,19 @@ class ResponseTaskListViewTests(TestCase):
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
+    def test_post_set_price(self):
+        """Setting the price should update the price on the response's request."""
+        price = 1
+        response = self.client.post(self.url, {
+            'status': 'done',
+            'price': price,
+            'task': self.task.pk
+        })
+        updated_task = task.models.ResponseTask.objects.get(pk=self.task.pk)
+        foia_price = updated_task.communication.foia.price
+        eq_(foia_price, float(price), 'The price on the FOIA should be set.')
+        ok_(updated_task.resolved, 'Setting the price should resolve the task.')
+
     def test_post_set_status(self):
         """Setting the status should save it to the response and request, then resolve task."""
         status_change = 'done'

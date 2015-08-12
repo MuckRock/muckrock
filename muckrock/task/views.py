@@ -208,6 +208,7 @@ class ResponseTaskList(TaskList):
         status = cleaned_data['status']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
+        price = cleaned_data['price']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
         if move:
@@ -229,7 +230,13 @@ class ResponseTaskList(TaskList):
                 messages.error(request,
                     'You tried to set an invalid tracking id. Just use a string of characters.')
                 error_happened = True
-        if (move or status or tracking_number) and not error_happened:
+        if price:
+            try:
+                task.set_price(price)
+            except ValueError:
+                messages.error(request, 'You tried to set a non-numeric price.')
+                error_happened = True
+        if (move or status or tracking_number or price) and not error_happened:
             task.resolve(request.user)
         return
 
