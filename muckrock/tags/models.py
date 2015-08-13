@@ -20,7 +20,7 @@ class Tag(TaggitTag):
     @staticmethod
     def normalize(name):
         """Normalize tag name"""
-        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
+        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', '\''])
         return name.translate(html_remove).strip().lower()
 
     class Meta:
