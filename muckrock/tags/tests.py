@@ -38,6 +38,13 @@ class TestTagModel(test.TestCase):
         clean_string = self.tag.normalize(dirty_string)
         eq_(clean_string, expected_clean_string, 'The tag should strip extra whitespace from the beginning and end of the name. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
 
+    def test_collapse_whitespace(self):
+        """The tag should remove extra whitespace from between words."""
+        dirty_string = u'hello    world'
+        expected_clean_string = u'hello world'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string, 'The tag should strip extra whitespace from between words. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
+
 
 class TestTagListView(test.TestCase):
     """
