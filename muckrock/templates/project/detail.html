@@ -67,7 +67,7 @@ MuckRock &bull; {{ project.title }}
                         {% if not project.articles.all and not visible_requests %}
                         It doesn't reference anything.
                         {% else %}
-                        It references {% if project.articles.all %}<a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>{% endif %} {% if projects.articles.all and visible_requests %}and{% endif %} {% if visible_requests %}<a href="#requests">{{ visible_requests|length }} request{{ visible_requests|length|pluralize }}</a>{% endif %}.
+                        It references {% if project.articles.all %}<a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>{% endif %} {% if project.articles.all and visible_requests %}and {% endif %} {% if visible_requests %}<a href="#requests">{{ visible_requests|length }} request{{ visible_requests|length|pluralize }}</a>{% endif %}.
                         {% endif %}
                     </p>
                 </div>
