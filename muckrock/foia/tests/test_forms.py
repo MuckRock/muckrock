@@ -13,6 +13,7 @@ class TestAdminFixForm(test.TestCase):
 
     def test_email_cleaning(self):
         """The email addresses should be stripped of extra white space."""
+        # pylint: disable=no-self-use
         data = {
             'from_email': 'tester@tester.com',
             'email': 'extra@space.com',

@@ -4,7 +4,6 @@ Views for the project application
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView

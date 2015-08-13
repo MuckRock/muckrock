@@ -212,6 +212,7 @@ class FOIAAdminFixForm(forms.ModelForm):
     snail_mail = forms.BooleanField(required=False, label='Snail Mail Only')
 
     def clean_other_emails(self):
+        """Strips extra whitespace from email list"""
         other_emails = self.cleaned_data['other_emails']
         other_emails = other_emails.strip()
         return other_emails
