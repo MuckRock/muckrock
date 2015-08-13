@@ -9,6 +9,21 @@ from nose.tools import eq_
 from . import models, views
 
 
+class TestTagModel(test.TestCase):
+    """
+    Test the methods attached to tags.
+    """
+
+    def setUp(self):
+        self.tag = models.Tag.objects.create(name=u'foo')
+
+    def test_sanitize_html(self):
+        """The tag should sanitize the name for HTML."""
+        html_string = u'<p>hello</p>'
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(html_string)
+        eq_(clean_string, expected_clean_string, 'The tag should strip HTML tags from strings. %s should be cleaned to %s, but instead it is %s' % (html_string, expected_clean_string, clean_string))
+
 class TestTagListView(test.TestCase):
     """
     The tag list view should display each tag in a filterable list.
