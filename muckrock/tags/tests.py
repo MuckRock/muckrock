@@ -19,10 +19,18 @@ class TestTagModel(test.TestCase):
 
     def test_sanitize_html(self):
         """The tag should sanitize the name for HTML."""
-        html_string = u'<p>hello</p>'
+        dirty_string = u'<p>hello</p>'
         expected_clean_string = u'hello'
-        clean_string = self.tag.normalize(html_string)
-        eq_(clean_string, expected_clean_string, 'The tag should strip HTML tags from strings. %s should be cleaned to %s, but instead it is %s' % (html_string, expected_clean_string, clean_string))
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string, 'The tag should strip HTML tags from strings. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
+
+    def test_convert_to_lowercase(self):
+        """The tag should be entirely lowercase"""
+        dirty_string = u'HELLO'
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string, 'The tag should lowercase its name. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
+
 
 class TestTagListView(test.TestCase):
     """
