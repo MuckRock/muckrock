@@ -9,6 +9,47 @@ from nose.tools import eq_
 from . import models, views
 
 
+class TestTagModel(test.TestCase):
+    """
+    Test the methods attached to tags.
+    """
+
+    def setUp(self):
+        self.tag = models.Tag.objects.create(name=u'foo')
+
+    def test_sanitize_html(self):
+        """The tag should sanitize the name for HTML."""
+        dirty_string = u'<p>hello</p>'
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string,
+            'The tag should strip HTML tags from strings.')
+
+    def test_convert_to_lowercase(self):
+        """The tag should be entirely lowercase"""
+        dirty_string = u'HELLO'
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string,
+            'The tag should lowercase its name.')
+
+    def test_strip_whitespace(self):
+        """The tag should strip extra whitespace from the beginning and end of the name."""
+        dirty_string = u' hello '
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string,
+            'The tag should strip extra whitespace from the beginning and end of the name.')
+
+    def test_collapse_whitespace(self):
+        """The tag should remove extra whitespace from between words."""
+        dirty_string = u'hello    world'
+        expected_clean_string = u'hello world'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string,
+            'The tag should strip extra whitespace from between words.')
+
+
 class TestTagListView(test.TestCase):
     """
     The tag list view should display each tag in a filterable list.
