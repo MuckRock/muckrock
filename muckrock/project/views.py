@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
+from django.http import Http404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
@@ -61,7 +62,7 @@ class ProjectDetailView(DetailView):
         user = self.request.user
         contributor_or_staff = user.is_staff or project.has_contributor(user)
         if project.private and not contributor_or_staff:
-            raise exceptions.PermissionDenied()
+            raise Http404()
         return super(ProjectDetailView, self).dispatch(*args, **kwargs)
 
 class ProjectPermissionsMixin(object):
@@ -84,7 +85,7 @@ class ProjectPermissionsMixin(object):
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
         if not self._is_editable_by(self.request.user):
-            raise exceptions.PermissionDenied()
+            raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
