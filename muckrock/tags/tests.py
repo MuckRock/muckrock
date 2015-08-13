@@ -31,6 +31,13 @@ class TestTagModel(test.TestCase):
         clean_string = self.tag.normalize(dirty_string)
         eq_(clean_string, expected_clean_string, 'The tag should lowercase its name. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
 
+    def test_strip_whitespace(self):
+        """The tag should strip extra whitespace from the beginning and end of the name."""
+        dirty_string = u' hello '
+        expected_clean_string = u'hello'
+        clean_string = self.tag.normalize(dirty_string)
+        eq_(clean_string, expected_clean_string, 'The tag should strip extra whitespace from the beginning and end of the name. %s should be cleaned to %s, but instead it is %s' % (dirty_string, expected_clean_string, clean_string))
+
 
 class TestTagListView(test.TestCase):
     """
