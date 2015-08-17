@@ -25,32 +25,6 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
-def process_payment(request, amount, token, crowdfund):
-    """Helper function to create a Stripe charge and handle errors"""
-    # double -> int conversion
-    # http://stackoverflow.com/a/13528445/4256689
-    amount = int(amount) * 100
-    logging.debug(amount)
-    try:
-        stripe.Charge.create(
-            amount=amount,
-            source=token,
-            currency='usd',
-            description='Contribute to Crowdfunding: %s %s' %
-                (crowdfund, crowdfund.pk),
-        )
-        return True
-    except (
-        stripe.InvalidRequestError,
-        stripe.CardError,
-        stripe.APIConnectionError,
-        stripe.AuthenticationError
-    ) as exception:
-        logging.error('Processing a Stripe charge: %s', exception)
-        messages.error(request, ('We encountered an error processing your card.'
-                                ' Your card has not been charged.'))
-        return False
-
 
 class CrowdfundDetailView(DetailView):
     """
@@ -97,61 +71,50 @@ class CrowdfundDetailView(DetailView):
         Next, we charge their card. Finally, use the validated payment form to create and
         return a CrowdfundRequestPayment object.
         """
-        crowdfund = request.POST.get('crowdfund')
-        if crowdfund != kwargs['pk']:
-            error_msg = ('The crowdfund associated with the payment and the crowdfund '
-                         'associated with this page do not match.')
-            logging.error(error_msg)
-            self.return_error(request)
-        amount = request.POST.get('amount')
-        show = request.POST.get('show')
-        email = request.POST.get('email')
         token = request.POST.get('token')
-        user = request.user if request.user.is_authenticated() else None
-        crowdfund_object = get_object_or_404(self.model, pk=crowdfund)
-        amount = Decimal(amount)/100
-        # check if the amount is capped. if it is, check if the amount is greater
-        # than the amount required. if it is, only charge the amount required
-        if crowdfund_object.payment_capped and amount > crowdfund_object.amount_remaining():
-            amount = crowdfund_object.amount_remaining()
-        payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
-        payment_form = self.get_form()
+
         try:
             # pylint:disable=not-callable
             # pylint disabled because calling payment data on
             # the form throws an error if the form is None
-            payment_form = payment_form(payment_data)
+            payment_form = self.get_form()
+            payment_form = payment_form(request.POST)
             # pylint:enable=not-callable
         except TypeError:
             logging.error(('The subclassed object does not have a form attribute '
                            'so no payments can be made.'))
             raise ValueError('%s does not have its form attribute set.' % self.__class__)
-        payment_object = None
-        if payment_form.is_valid() and email and token:
-            if process_payment(request, amount, token, crowdfund_object):
-                payment_object = payment_form.save(commit=False)
-                payment_object.user = user
-                payment_object.save()
-                logging.info(payment_object)
-                crowdfund_object.update_payment_received()
-                # log the payment
-                log_msg = """
-                    -:- Crowdfund Payment -:-
-                    Amount:      %s
-                    Email:       %s
-                    Token:       %s
-                    Show:        %s
-                    Crowdfund:   %s
-                    User:        %s
-                """
-                logging.info(log_msg, amount, email, token, show, crowdfund, user)
-                # if AJAX, return HTTP 200 OK
-                # else, add a message to the session
-                if request.is_ajax():
-                    return HttpResponse(200)
-                else:
-                    messages.success(request, 'Thank you for your contribution!')
-                    return redirect(self.get_redirect_url())
+        if payment_form.is_valid() and token:
+            cleaned_data = payment_form.cleaned_data
+            crowdfund = cleaned_data['crowdfund']
+            amount = cleaned_data['amount']
+            show = cleaned_data['show']
+            user = request.user if request.user.is_authenticated() else None
+            if crowdfund != kwargs['pk']:
+                error_msg = ('The crowdfund associated with the payment and the crowdfund '
+                             'associated with this page do not match.')
+                logging.error(error_msg)
+                self.return_error(request)
+            crowdfund = get_object_or_404(self.model, pk=crowdfund)
+            stripe_exceptions = (
+                stripe.InvalidRequestError,
+                stripe.CardError,
+                stripe.APIConnectionError,
+                stripe.AuthenticationError
+            )
+            try:
+                payment_object = crowdfund.make_payment(token, amount, show, user)
+            except stripe_exceptions as payment_error:
+                logging.error(payment_error)
+                return_error(request)
+            crowdfund_object.update_payment_received()
+            # if AJAX, return HTTP 200 OK
+            # else, add a message to the session
+            if request.is_ajax():
+                return HttpResponse(200)
+            else:
+                messages.success(request, 'Thank you for your contribution!')
+                return redirect(self.get_redirect_url())
         return self.return_error(request)
 
 class CrowdfundRequestDetail(CrowdfundDetailView):
