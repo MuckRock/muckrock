@@ -152,13 +152,19 @@ class CrowdfundProject(CrowdfundABC):
     def get_crowdfund_object(self):
         return self.project
 
-    def make_payment(self, token, amount, user=None, show=True):
+    def make_payment(self, token, amount, show=False, user=None):
         """Creates a payment for the crowdfund"""
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
         # Try processing the payment using Stripe.
         # If the payment fails, raise an error.
+        stripe_exceptions = (
+            stripe.InvalidRequestError,
+            stripe.CardError,
+            stripe.APIConnectionError,
+            stripe.AuthenticationError
+        )
         try:
             # Stripe represents currency as integers
             stripe_amount = int(amount) * 100
@@ -168,11 +174,7 @@ class CrowdfundProject(CrowdfundABC):
                 currency='usd',
                 description='Crowdfund contribution: %s' % self,
             )
-        except (stripe.InvalidRequestError,
-                stripe.CardError,
-                stripe.APIConnectionError,
-                stripe.AuthenticationError
-        ) as payment_error:
+        except stripe_exceptions as payment_error:
             raise payment_error
         payment = CrowdfundProjectPayment.objects.create(
             amount=amount,
@@ -181,6 +183,7 @@ class CrowdfundProject(CrowdfundABC):
             show=show
         )
         payment.save()
+        logging.info(payment)
         return payment
 
 class CrowdfundProjectPayment(CrowdfundPaymentABC):
