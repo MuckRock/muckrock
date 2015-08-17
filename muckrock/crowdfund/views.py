@@ -6,12 +6,11 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, CreateView
 
 from datetime import date, timedelta
-from decimal import Decimal
 import logging
 import stripe
 
@@ -74,12 +73,8 @@ class CrowdfundDetailView(DetailView):
         token = request.POST.get('token')
 
         try:
-            # pylint:disable=not-callable
-            # pylint disabled because calling payment data on
-            # the form throws an error if the form is None
             payment_form = self.get_form()
             payment_form = payment_form(request.POST)
-            # pylint:enable=not-callable
         except TypeError:
             logging.error(('The subclassed object does not have a form attribute '
                            'so no payments can be made.'))
@@ -97,7 +92,7 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             )
             try:
-                payment_object = crowdfund.make_payment(token, amount, show, user)
+                crowdfund.make_payment(token, amount, show, user)
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
                 self.return_error(request)

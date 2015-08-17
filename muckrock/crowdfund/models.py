@@ -7,23 +7,11 @@ from django.db import models
 
 from datetime import date
 from decimal import Decimal
-from exceptions import NotImplementedError
 import logging
 import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock import task
-
-def process_payment(request, amount, token, crowdfund):
-    """Helper function to create a Stripe charge and handle errors"""
-    amount = int(amount) * 100
-    stripe.Charge.create(
-        amount=amount,
-        source=token,
-        currency='usd',
-        description='Crowdfund contribution: %s' % crowdfund,
-    )
-    return
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -120,9 +108,9 @@ class CrowdfundABC(models.Model):
         )
         try:
             # Stripe represents currency as integers
-            stripe_amount = int(amount) * 100
+            stripe_amount = int(float(amount) * 100)
             stripe.Charge.create(
-                amount=amount,
+                amount=stripe_amount,
                 source=token,
                 currency='usd',
                 description='Crowdfund contribution: %s' % self,

@@ -9,7 +9,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 from mock import patch, Mock
 from nose.tools import eq_, ok_
-import stripe
 
 from muckrock.crowdfund import models
 from muckrock.foia.models import FOIARequest
