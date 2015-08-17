@@ -136,8 +136,12 @@ class CrowdfundProjectPaymentForm(forms.ModelForm):
         }
 
     def clean_amount(self):
-        """Ensure the amount of the payment is greater than zero"""
+        """
+        Ensure the amount of the payment is greater than zero and
+        translate the format from integer to Decimal
+        """
         amount = self.cleaned_data['amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
+        amount = Decimal(amount)/100
         return amount
