@@ -8,7 +8,7 @@ from django.test import TestCase, Client
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 import logging
-from mock import Mock
+from mock import Mock, patch
 from nose.tools import ok_, eq_
 import stripe
 
@@ -65,6 +65,7 @@ class TestCrowdfundDetailView(TestCase):
             ('The function should return the index url as a fallback '
             'if the url cannot be reversed.'))
 
+@patch('stripe.Charge', Mock())
 class TestCrowdfundRequestView(TestCase):
     """Tests the Detail view for CrowdfundRequest objects"""
 
@@ -90,7 +91,8 @@ class TestCrowdfundRequestView(TestCase):
             'amount': 200,
             'show': '',
             'crowdfund': self.crowdfund.pk,
-            'email': 'test@example.com'
+            'email': 'test@example.com',
+            'token': Mock()
         }
 
     def test_view(self):
@@ -157,9 +159,8 @@ class TestCrowdfundRequestView(TestCase):
         """
         self.post(self.data)
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
-        amount = Decimal(float(self.data['amount'])/100)
-        eq_(payment.amount, amount,
-            'Payment object should clean and transform the amount')
+        amount = Decimal(self.data['amount']/100)
+        eq_(payment.amount, amount)
 
     def test_contributors(self):
         """The crowdfund can get a list of all its contibutors by parsing its list of payments."""

@@ -90,12 +90,6 @@ class CrowdfundDetailView(DetailView):
             amount = cleaned_data['amount']
             show = cleaned_data['show']
             user = request.user if request.user.is_authenticated() else None
-            if crowdfund != kwargs['pk']:
-                error_msg = ('The crowdfund associated with the payment and the crowdfund '
-                             'associated with this page do not match.')
-                logging.error(error_msg)
-                self.return_error(request)
-            crowdfund = get_object_or_404(self.model, pk=crowdfund)
             stripe_exceptions = (
                 stripe.InvalidRequestError,
                 stripe.CardError,
@@ -106,8 +100,8 @@ class CrowdfundDetailView(DetailView):
                 payment_object = crowdfund.make_payment(token, amount, show, user)
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
-                return_error(request)
-            crowdfund_object.update_payment_received()
+                self.return_error(request)
+            crowdfund.update_payment_received()
             # if AJAX, return HTTP 200 OK
             # else, add a message to the session
             if request.is_ajax():

@@ -77,6 +77,7 @@ class CrowdfundRequestPaymentForm(forms.ModelForm):
         amount = self.cleaned_data['amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
+        amount = Decimal(amount)/100
         return amount
 
 class CrowdfundProjectForm(forms.ModelForm):
