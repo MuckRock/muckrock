@@ -20,6 +20,7 @@ class CrowdfundABC(models.Model):
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    payment_capped = models.BooleanField(default=False)
     payment_required = models.DecimalField(
         max_digits=14,
         decimal_places=2,

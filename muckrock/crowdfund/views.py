@@ -110,16 +110,16 @@ class CrowdfundDetailView(DetailView):
         user = request.user if request.user.is_authenticated() else None
         crowdfund_object = get_object_or_404(self.model, pk=crowdfund)
         amount = Decimal(amount)/100
-        # check if the amount is greater than the amount required
-        # if it is, only charge the amount required
-        if amount > crowdfund_object.amount_remaining():
+        # check if the amount is capped. if it is, check if the amount is greater
+        # than the amount required. if it is, only charge the amount required
+        if crowdfund_object.payment_capped and amount > crowdfund_object.amount_remaining():
             amount = crowdfund_object.amount_remaining()
         payment_data = {'amount': amount, 'show': show, 'crowdfund': crowdfund}
         payment_form = self.get_form()
         try:
             # pylint:disable=not-callable
-            # pylint disabled because calling payment data on the form
-            # throws an error if the form is None
+            # pylint disabled because calling payment data on
+            # the form throws an error if the form is None
             payment_form = payment_form(payment_data)
             # pylint:enable=not-callable
         except TypeError:

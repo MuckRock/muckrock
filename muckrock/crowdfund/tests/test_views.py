@@ -180,8 +180,20 @@ class TestCrowdfundRequestView(TestCase):
         eq_(sum(contributor.is_anonymous() is True for contributor in contributors), 2,
             'There should only be two anonymous users in this list')
 
+    def test_unlimit_amount(self):
+        """The amount paid should be able to exceed the amount required."""
+        data = self.data
+        amount_paid = 20000
+        data['amount'] = amount_paid
+        self.post(data)
+        payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
+        eq_(payment.amount, 200.00,
+            'The payment should be made in full despite exceeding the amount required.')
+
     def test_limit_amount(self):
-        """No more than the amount required should be paid."""
+        """No more than the amount required should be paid if the crowdfund is capped."""
+        self.crowdfund.payment_capped = True
+        self.crowdfund.save()
         data = self.data
         data['amount'] = 20000
         self.post(data)
