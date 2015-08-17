@@ -7,6 +7,7 @@ from django.db import models
 
 from datetime import date
 from decimal import Decimal
+from exceptions import NotImplementedError
 import logging
 import stripe
 
@@ -94,10 +95,50 @@ class CrowdfundABC(models.Model):
         # returns the list of a set of a list to remove duplicates
         return list(set([x for x in self.contributors() if not x.is_anonymous()]))
 
+    def get_crowdfund_payment_object(self):
+        """Return the crowdfund payment object. Should be implemented by subclasses."""
+        # pylint:disable=no-self-use
+        raise NotImplementedError
+
     def get_crowdfund_object(self):
         """Return the object being crowdfunded. Should be implemented by subclasses."""
         # pylint:disable=no-self-use
-        return None
+        raise NotImplementedError
+
+    def make_payment(self, token, amount, show=False, user=None):
+        """Creates a payment for the crowdfund"""
+        amount = Decimal(amount)
+        if self.payment_capped and amount > self.amount_remaining():
+            amount = self.amount_remaining()
+        # Try processing the payment using Stripe.
+        # If the payment fails, raise an error.
+        stripe_exceptions = (
+            stripe.InvalidRequestError,
+            stripe.CardError,
+            stripe.APIConnectionError,
+            stripe.AuthenticationError
+        )
+        try:
+            # Stripe represents currency as integers
+            stripe_amount = int(amount) * 100
+            stripe.Charge.create(
+                amount=amount,
+                source=token,
+                currency='usd',
+                description='Crowdfund contribution: %s' % self,
+            )
+        except stripe_exceptions as payment_error:
+            raise payment_error
+        payment_object = self.get_crowdfund_payment_object()
+        payment = payment_object.objects.create(
+            amount=amount,
+            crowdfund=self,
+            user=user,
+            show=show
+        )
+        payment.save()
+        logging.info(payment)
+        return payment
 
 class CrowdfundPaymentABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -124,6 +165,9 @@ class CrowdfundRequest(CrowdfundABC):
         """The url for this object"""
         return ('crowdfund-request', [], {'pk': self.pk})
 
+    def get_crowdfund_payment_object(self):
+        return CrowdfundRequestPayment
+
     def get_crowdfund_object(self):
         return self.foia
 
@@ -149,42 +193,12 @@ class CrowdfundProject(CrowdfundABC):
         """The url for this object"""
         return ('crowdfund-project', [], {'pk': self.pk})
 
+    def get_crowdfund_payment_object(self):
+        return CrowdfundProjectPayment
+
     def get_crowdfund_object(self):
         return self.project
 
-    def make_payment(self, token, amount, show=False, user=None):
-        """Creates a payment for the crowdfund"""
-        amount = Decimal(amount)
-        if self.payment_capped and amount > self.amount_remaining():
-            amount = self.amount_remaining()
-        # Try processing the payment using Stripe.
-        # If the payment fails, raise an error.
-        stripe_exceptions = (
-            stripe.InvalidRequestError,
-            stripe.CardError,
-            stripe.APIConnectionError,
-            stripe.AuthenticationError
-        )
-        try:
-            # Stripe represents currency as integers
-            stripe_amount = int(amount) * 100
-            stripe.Charge.create(
-                amount=amount,
-                source=token,
-                currency='usd',
-                description='Crowdfund contribution: %s' % self,
-            )
-        except stripe_exceptions as payment_error:
-            raise payment_error
-        payment = CrowdfundProjectPayment.objects.create(
-            amount=amount,
-            crowdfund=self,
-            user=user,
-            show=show
-        )
-        payment.save()
-        logging.info(payment)
-        return payment
 
 class CrowdfundProjectPayment(CrowdfundPaymentABC):
     """Individual payments made to a project crowdfund"""
