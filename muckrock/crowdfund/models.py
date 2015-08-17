@@ -39,7 +39,7 @@ class CrowdfundABC(models.Model):
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised"""
-        return self.payment_required - self.payment_received
+        return Decimal(self.payment_required) - Decimal(self.payment_received)
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
@@ -142,6 +142,9 @@ class CrowdfundProject(CrowdfundABC):
 
     def make_payment(self, amount, user=None):
         """Creates a payment for the crowdfund"""
+        amount = Decimal(amount)
+        if self.payment_capped and amount > self.amount_remaining():
+            amount = self.amount_remaining()
         payment = CrowdfundProjectPayment.objects.create(
             amount=amount,
             crowdfund=self,

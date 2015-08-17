@@ -17,6 +17,7 @@ def create_project_crowdfund():
     """Helper function to create a project crowdfund"""
     crowdfund = models.CrowdfundProject.objects.create(
         name='Cool project please help',
+        payment_required=Decimal(50),
         date_due=(date.today() + timedelta(30)),
         project=Project.objects.create(title='Test Project')
     )
@@ -74,6 +75,22 @@ class TestCrowdfundPayment(TestCase):
     def test_make_payment(self):
         """Should make and return a payment object"""
         amount = Decimal(100)
-        payment_object = self.crowdfund.make_payment(amount)
-        ok_(isinstance(payment_object, models.CrowdfundProjectPayment),
+        payment = self.crowdfund.make_payment(amount)
+        ok_(isinstance(payment, models.CrowdfundProjectPayment),
             'Making a payment should create and return a payment object')
+
+    def test_unlimit_amount(self):
+        """The amount paid should be able to exceed the amount required."""
+        amount = Decimal(100)
+        payment = self.crowdfund.make_payment(amount)
+        eq_(payment.amount, amount,
+            'The payment should be made in full despite exceeding the amount required.')
+
+    def test_limit_amount(self):
+        """No more than the amount required should be paid if the crowdfund is capped."""
+        self.crowdfund.payment_capped = True
+        self.crowdfund.save()
+        amount = Decimal(100)
+        payment = self.crowdfund.make_payment(amount)
+        eq_(payment.amount, self.crowdfund.payment_required,
+            'The amount should be capped at the crowdfund\'s required payment.')
