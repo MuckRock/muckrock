@@ -140,11 +140,12 @@ class CrowdfundProject(CrowdfundABC):
     def get_crowdfund_object(self):
         return self.project
 
-    def make_payment(self, amount):
+    def make_payment(self, amount, user=None):
         """Creates a payment for the crowdfund"""
         payment = CrowdfundProjectPayment.objects.create(
             amount=amount,
-            crowdfund=self
+            crowdfund=self,
+            user=user
         )
         payment.save()
         return payment
