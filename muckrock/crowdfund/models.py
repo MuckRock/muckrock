@@ -140,6 +140,15 @@ class CrowdfundProject(CrowdfundABC):
     def get_crowdfund_object(self):
         return self.project
 
+    def make_payment(self, amount):
+        """Creates a payment for the crowdfund"""
+        payment = CrowdfundProjectPayment.objects.create(
+            amount=amount,
+            crowdfund=self
+        )
+        payment.save()
+        return payment
+
 class CrowdfundProjectPayment(CrowdfundPaymentABC):
     """Individual payments made to a project crowdfund"""
     crowdfund = models.ForeignKey(CrowdfundProject, related_name='payments')
