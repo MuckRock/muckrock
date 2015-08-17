@@ -10,7 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication
 
 def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False):
     """Save the FOI Communication"""
