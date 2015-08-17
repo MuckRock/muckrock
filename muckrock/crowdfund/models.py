@@ -8,9 +8,21 @@ from django.db import models
 from datetime import date
 from decimal import Decimal
 import logging
+import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock import task
+
+def process_payment(request, amount, token, crowdfund):
+    """Helper function to create a Stripe charge and handle errors"""
+    amount = int(amount) * 100
+    stripe.Charge.create(
+        amount=amount,
+        source=token,
+        currency='usd',
+        description='Crowdfund contribution: %s' % crowdfund,
+    )
+    return
 
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -140,15 +152,33 @@ class CrowdfundProject(CrowdfundABC):
     def get_crowdfund_object(self):
         return self.project
 
-    def make_payment(self, amount, user=None):
+    def make_payment(self, token, amount, user=None, show=True):
         """Creates a payment for the crowdfund"""
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
+        # Try processing the payment using Stripe.
+        # If the payment fails, raise an error.
+        try:
+            # Stripe represents currency as integers
+            stripe_amount = int(amount) * 100
+            stripe.Charge.create(
+                amount=amount,
+                source=token,
+                currency='usd',
+                description='Crowdfund contribution: %s' % self,
+            )
+        except (stripe.InvalidRequestError,
+                stripe.CardError,
+                stripe.APIConnectionError,
+                stripe.AuthenticationError
+        ) as payment_error:
+            raise payment_error
         payment = CrowdfundProjectPayment.objects.create(
             amount=amount,
             crowdfund=self,
-            user=user
+            user=user,
+            show=show
         )
         payment.save()
         return payment

@@ -7,7 +7,9 @@ from django.test import TestCase
 
 from datetime import date, timedelta
 from decimal import Decimal
+from mock import patch, Mock
 from nose.tools import eq_, ok_
+import stripe
 
 from muckrock.crowdfund import models
 from muckrock.foia.models import FOIARequest
@@ -65,24 +67,25 @@ class TestCrowdfundProject(TestCase):
         """The crowdfund should have a project being crowdfunded."""
         eq_(self.crowdfund.get_crowdfund_object(), self.project)
 
-
+@patch('stripe.Charge', Mock())
 class TestCrowdfundPayment(TestCase):
     """Test making a payment to a crowdfund"""
 
     def setUp(self):
         self.crowdfund = create_project_crowdfund()
+        self.token = Mock()
 
     def test_make_payment(self):
         """Should make and return a payment object"""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(amount)
+        payment = self.crowdfund.make_payment(self.token, amount)
         ok_(isinstance(payment, models.CrowdfundProjectPayment),
             'Making a payment should create and return a payment object')
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(amount)
+        payment = self.crowdfund.make_payment(self.token, amount)
         eq_(payment.amount, amount,
             'The payment should be made in full despite exceeding the amount required.')
 
@@ -91,6 +94,6 @@ class TestCrowdfundPayment(TestCase):
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(amount)
+        payment = self.crowdfund.make_payment(self.token, amount)
         eq_(payment.amount, self.crowdfund.payment_required,
             'The amount should be capped at the crowdfund\'s required payment.')
