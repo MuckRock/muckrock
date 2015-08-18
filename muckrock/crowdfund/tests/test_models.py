@@ -13,6 +13,7 @@ from nose.tools import eq_, ok_
 from muckrock.crowdfund import models
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
+from muckrock.task.models import GenericCrowdfundTask
 
 def create_project_crowdfund():
     """Helper function to create a project crowdfund"""
@@ -24,6 +25,23 @@ def create_project_crowdfund():
     )
     crowdfund.save()
     return crowdfund
+
+
+class TestCrowdfundAbstract(TestCase):
+    """Test methods on the abstract base class"""
+
+    def setUp(self):
+        self.crowdfund = create_project_crowdfund()
+
+    def test_close_crowdfund(self):
+        """Closing a crowdfund should raise a flag and create a task."""
+        crowdfund_task_count = GenericCrowdfundTask.objects.count()
+        self.crowdfund.close_crowdfund()
+        updated_crowdfund = models.CrowdfundProject.objects.get(pk=self.crowdfund.pk)
+        ok_(updated_crowdfund.closed, 'The closed flag should be raised.')
+        eq_(GenericCrowdfundTask.objects.count(), crowdfund_task_count + 1,
+            'A new crowdfund task should be created.')
+
 
 class TestCrowdfundRequest(TestCase):
     """Test crowdfund a request"""
@@ -43,6 +61,7 @@ class TestCrowdfundRequest(TestCase):
         self.crowdfund.foia.title = u'Test¢Unicode'
         self.crowdfund.foia.save()
         eq_('%s' % self.crowdfund, 'Crowdfunding for %s' % self.foia)
+
 
 class TestCrowdfundProject(TestCase):
     """Test crowdfunding a project"""
@@ -98,4 +117,3 @@ class TestCrowdfundPayment(TestCase):
             'The amount should be capped at the crowdfund\'s required payment.')
         ok_(self.crowdfund.closed,
             'Once the cap has been reached, the crowdfund should close.')
-

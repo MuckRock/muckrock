@@ -17,7 +17,6 @@ from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment,
 from muckrock.crowdfund.views import CrowdfundDetailView
 from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
-from muckrock.task.models import CrowdfundTask
 from muckrock.settings import STRIPE_SECRET_KEY
 
 def get_stripe_token():
@@ -201,18 +200,6 @@ class TestCrowdfundRequestView(TestCase):
         payment = CrowdfundRequestPayment.objects.get(crowdfund=self.crowdfund)
         eq_(payment.amount, self.crowdfund.payment_required,
             'The amount should be capped at the crowdfund\'s required payment.')
-
-    def test_completion(self):
-        """The crowdfund should fast-forward its due date and create a task when completed."""
-        crowdfund_task_count = CrowdfundTask.objects.count()
-        data = self.data
-        data['amount'] = int(self.crowdfund.payment_required)*100
-        self.post(data)
-        updated_crowdfund = CrowdfundRequest.objects.get(pk=self.crowdfund.pk)
-        eq_(updated_crowdfund.date_due, date.today(),
-            'The due date should be the same as today.')
-        eq_(CrowdfundTask.objects.count(), crowdfund_task_count + 1,
-            'A new crowdfund task should be created.')
 
     def test_invalid_positive_integer(self):
         """The crowdfund should accept payments with cents."""
