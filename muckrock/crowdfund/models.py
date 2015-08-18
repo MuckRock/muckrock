@@ -55,12 +55,14 @@ class CrowdfundABC(models.Model):
         if self.payment_received >= self.payment_required and self.payment_capped:
             self.close_crowdfund()
             logging.info('Crowdfund %d reached its goal.', self.id)
+        return
 
     def close_crowdfund(self):
         """Close the crowdfund and create a new task for it once it reaches its goal."""
         self.closed = True
         self.save()
         task.models.GenericCrowdfundTask.objects.create(crowdfund=self)
+        return
 
     def contributors(self):
         """Return a list of all the contributors to a crowdfund"""
