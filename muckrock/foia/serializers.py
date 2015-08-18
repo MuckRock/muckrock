@@ -94,12 +94,13 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         if not request.user.is_staff and 'raw_email' in self.fields['communications'].fields:
             self.fields['communications'].fields.pop('raw_email')
 
-        if foia and not foia.editable_by(foia.user) and not request.user.is_staff:
-            self.fields.pop('notes')
-        if not foia:
+        #if foia and not foia.editable_by(request.user) and not request.user.is_staff:
+        #    self.fields.pop('notes')
+        if (not foia) or 1: # always remove notes for now
             self.fields.pop('notes')
 
-        if foia and request.method == 'PATCH' and foia.editable_by(foia.user) \
+        #if foia and request.method == 'PATCH' and foia.editable_by(request.user) \
+        if foia and request.method == 'PATCH' \
                 and not request.user.is_staff:
             allowed = ['notes', 'tags', 'embargo']
             for field in self.fields.keys():
