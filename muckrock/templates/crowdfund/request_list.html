@@ -1,0 +1,18 @@
+{% extends 'lists/base_list.html' %}
+{% load markdown_deux_tags %}
+
+{% block list-content %}
+{% include 'lib/pagination.html' %}
+<ul class="crowdfund-list">
+    {% for crowdfund in object_list %}
+    <li class="crowdfund">
+        <h2><a href="{{ crowdfund.foia.get_absolute_url }}">{{ crowdfund.foia.title }}</a></h2>
+        <p>{{ crowdfund.description|markdown }}</p>
+        <p>Raised {{ crowdfund.payment_received }} of {{ crowdfund.payment_required }}</p>
+        <p>{{ crowdfund.date_due | timeuntil }} remaining</p>
+        <p><a href="{{ crowdfund.foia.get_absolute_url }}">See this request</a></p>
+    </li>
+    {% endfor %}
+</ul>
+{% include 'lib/pagination.html' %}
+{% endblock %}

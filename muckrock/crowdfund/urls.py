@@ -8,6 +8,9 @@ from muckrock.crowdfund import views
 
 urlpatterns = patterns(
     '',
+    url(r'^request/$',
+        views.CrowdfundRequestListView.as_view(),
+        name='crowdfund-request-list'),
     url(r'^request/(?P<pk>\d+)/$',
         views.CrowdfundRequestDetail.as_view(),
         name='crowdfund-request'),
