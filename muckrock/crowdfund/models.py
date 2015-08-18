@@ -33,6 +33,7 @@ class CrowdfundABC(models.Model):
         default='0.00'
     )
     date_due = models.DateField()
+    closed = models.BooleanField(default=False)
 
     def expired(self):
         """Has this crowdfuning run out of time?"""
