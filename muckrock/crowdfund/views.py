@@ -33,7 +33,7 @@ class CrowdfundRequestListView(ListView):
     def get_context_data(self, **kwargs):
         """Add title and other data to context"""
         context = super(CrowdfundRequestListView, self).get_context_data(**kwargs)
-        context['title'] = 'Requests with active crowdfunds'
+        context['title'] = 'Requests needing funding'
         return context
 
     def get_queryset(self):
