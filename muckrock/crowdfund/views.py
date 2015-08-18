@@ -74,7 +74,9 @@ class CrowdfundDetailView(DetailView):
 
         try:
             payment_form = self.get_form()
+            # pylint:disable=not-callable
             payment_form = payment_form(request.POST)
+            # pylint:enable=not-callable
         except TypeError:
             logging.error(('The subclassed object does not have a form attribute '
                            'so no payments can be made.'))
