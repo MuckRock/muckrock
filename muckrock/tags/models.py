@@ -2,17 +2,17 @@
 Models for the tags application
 """
 
-from django.contrib.auth.models import User
 from django.db import models
 
 import autocomplete_light
+import bleach
+import re
 from taggit.models import Tag as TaggitTag, GenericTaggedItemBase
 
 # pylint: disable=model-missing-unicode
 
 class Tag(TaggitTag):
     """Custom Tag Class"""
-    user = models.ForeignKey(User, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         """Normalize name before saving"""
@@ -22,8 +22,9 @@ class Tag(TaggitTag):
     @staticmethod
     def normalize(name):
         """Normalize tag name"""
-        html_remove = dict((ord(c), None) for c in ['<', '>', '&', '"', "'"])
-        return name.translate(html_remove).strip().lower()
+        clean_name = bleach.clean(name, tags=[], strip=True)
+        clean_name = re.sub(r'\s+', ' ', clean_name)
+        return clean_name.strip().lower()
 
     class Meta:
         # pylint: disable=too-few-public-methods

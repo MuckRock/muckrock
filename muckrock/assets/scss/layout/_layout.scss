@@ -1,0 +1,42 @@
+    ///////////////////////
+   //                   //
+  //    L A Y O U T    //
+ //                   //
+///////////////////////
+
+html, body {
+    // Allows for full-height elements with CSS
+    min-height: 100%;
+}
+
+.container {
+    @include display(flex);
+    @include flex-direction(column);
+    min-height: 100vh;
+    margin-bottom: 0;
+    background-color: $color-white;
+}
+
+.content {
+    @include flex(1);
+    margin: $vertical-rhythm 0 0 0;
+    padding: 0 $vertical-rhythm/2;
+    @include media($medium-layout) { padding: 0 $vertical-rhythm; }
+}
+
+@mixin edge-to-edge() {
+    // Ignore container padding
+    margin: 0 -1*$vertical-rhythm/2;
+    @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
+}
+
+@import 'details';
+@import 'profile';
+@import 'front-page';
+@import 'new-request';
+@import 'draft-request';
+@import 'crowdfund';
+@import 'project';
+@import 'tag-master-detail';
+@import 'list/list';
+@import 'nav/nav';

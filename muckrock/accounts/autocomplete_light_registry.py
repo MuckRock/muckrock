@@ -14,8 +14,8 @@ autocomplete_light.register(User, name='UserAdminAutocomplete',
 
 autocomplete_light.register(
     User,
-    name="StaffAutocomplete",
-    choices=User.objects.filter(is_staff=True),
+    name="ProjectContributorAutocomplete",
+    choices=User.objects.filter(),
     search_fields=('username', 'first_name', 'last_name'),
-    attrs={'placeholder': 'Search staff users'}
+    attrs={'placeholder': 'Search users'}
 )

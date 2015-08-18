@@ -150,8 +150,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
-    'muckrock.sidebar.context_processors.sidebar_user_info',
-    'muckrock.sidebar.context_processors.sidebar_message',
+    'muckrock.sidebar.context_processors.sidebar_info',
     'muckrock.context_processors.google_analytics',
 )
 

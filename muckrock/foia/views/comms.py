@@ -10,7 +10,7 @@ from django.shortcuts import redirect, get_object_or_404
 
 from datetime import datetime
 
-from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.foia.models import FOIACommunication
 
 def save_foia_comm(foia, from_who, comm, formset=None, appeal=False, snail=False):
     """Save the FOI Communication"""
@@ -39,11 +39,9 @@ def move_comm(request, next_):
     try:
         comm_pk = request.POST['comm_pk']
         comm = FOIACommunication.objects.get(pk=comm_pk)
-        new_foia_pks = request.POST['new_foia_pk_%s' % comm_pk].split(',')
+        new_foia_pks = request.POST['new_foia_pks'].split(',')
         comm.move(new_foia_pks)
-        msg = 'Communication moved to the following requests: '
-        href = lambda f: '<a href="%s">%s</a>' % (f.get_absolute_url(), f.pk)
-        msg += ', '.join(href(FOIARequest.objects.get(foia_pk)) for foia_pk in new_foia_pks)
+        msg = 'Communication moved successfully'
         messages.success(request, msg)
     except (KeyError, FOIACommunication.DoesNotExist):
         messages.error(request, 'The communication does not exist.')

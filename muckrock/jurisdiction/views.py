@@ -62,7 +62,7 @@ def detail(request, fed_slug, state_slug, local_slug):
 
     collect_stats(jurisdiction, context)
 
-    return render_to_response('details/jurisdiction_detail.html', context,
+    return render_to_response('profile/jurisdiction.html', context,
                               context_instance=RequestContext(request))
 
 class List(MRFilterableListView):

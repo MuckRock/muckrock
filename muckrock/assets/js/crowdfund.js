@@ -8,35 +8,37 @@ var amount = 'input[name=amount]';
 var button = '.crowdfund-form #crowdfund-button';
 var prettyInput = 'input[name=pretty-input]';
 
-function submitForm() {
+function submitForm(form) {
 
-    var f = $(form);
-    var c = f.parents('.crowdfund');
-    var overlay = c.children('.overlay');
-    var formFields = f.serializeArray();
+    var c = $(form).parents('.crowdfund');
+    console.log(c);
+    var overlay = $(c).children('.overlay');
+    console.log(overlay);
+    var formFields = $(form).serializeArray();
     var data = {};
     for (var i = 0; i < formFields.length; i++) {
-      var field = formFields[i];
-      data[field.name] = field.value;
+        var field = formFields[i];
+        data[field.name] = field.value;
     }
     $(document).ajaxStart(function(){
-        overlay.removeClass('hidden');
-        c.addClass('pending');
-        overlay.empty();
+        $(overlay).removeClass('hidden');
+        $(c).addClass('pending');
+        $(overlay).empty();
         var heading = '<h1>Loading...</h1>';
-        overlay.append(heading);
-    }).ajaxComplete(function(){
-        c.removeClass('pending').addClass('complete');
-        overlay.empty();
-        var heading = '<h1>Thank you!</h1>';
-        overlay.append(heading);
+        $(overlay).append(heading);
     }).ajaxError(function(){
-        c.removeClass('pending').addCLass('error');
+        $(c).removeClass('pending').addCLass('error');
         var heading = '<h1>Oops!</h1>';
         $(overlay).append(heading);
+    }).ajaxComplete(function(e){
+        $(c).removeClass('pending').addClass('complete');
+        $(overlay).empty();
+        var heading = '<h1>Thank you!</h1>';
+        $(overlay).append(heading);
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     });
     $.ajax({
-        url: f.attr('action'),
+        url: $(form).attr('action'),
         type: 'post',
         data: data,
         success: null,
@@ -44,16 +46,15 @@ function submitForm() {
     });
 }
 
-// Stripe (should figure out how to divorce this from the file
-function checkoutCrowdfund(event) {
-    event.preventDefault();
-    var a = $(amount).val();
+// Stripe (should figure out how to divorce this from the file)
+function checkoutCrowdfund(crowdfund) {
+    // Passes in the button that was clicked
+    var b = $(crowdfund).find(button);
+    var a = $(crowdfund).find(amount).val();
     if (!a) {
         return false;
     }
-
-    var b = $(button);
-    var f = $(form);
+    var f = $(crowdfund).find(form);
     var key = b.data('key');
     var icon = b.data('icon');
     var email = b.data('email');
@@ -62,8 +63,7 @@ function checkoutCrowdfund(event) {
     var token = function(token) {
         f.append('<input type="hidden" name="token" value="' + token.id + '" />');
         f.append('<input type="hidden" name="email" value="' + token.email + '" />');
-        submitForm();
-
+        submitForm(f);
     }
     StripeCheckout.open({
         key: key,
@@ -76,7 +76,6 @@ function checkoutCrowdfund(event) {
         panelLabel: label,
         token: token
     });
-
     return true;
 }
 
@@ -97,5 +96,8 @@ function prettifyAmountInput(input, pretty) {
 
 prettifyAmountInput(amount, prettyInput);
 $(button).click(function(e){
-    checkoutCrowdfund(e);
+    // get the crowdfund associated with this button
+    e.preventDefault();
+    var crowdfund = $(this).closest('.crowdfund.widget');
+    checkoutCrowdfund(crowdfund);
 });

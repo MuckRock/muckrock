@@ -4,8 +4,8 @@ Views for the project application
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core import exceptions
 from django.core.urlresolvers import reverse_lazy
+from django.http import Http404
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
@@ -17,6 +17,14 @@ class ProjectListView(ListView):
     model = Project
     template_name = 'project/list.html'
     paginate_by = 25
+
+    def get_queryset(self):
+        """Only returns projects that are visible to the current user."""
+        user = self.request.user
+        if user.is_anonymous():
+            return Project.objects.get_public()
+        else:
+            return Project.objects.get_visible(user)
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
@@ -39,6 +47,23 @@ class ProjectDetailView(DetailView):
     model = Project
     template_name = 'project/detail.html'
 
+    def get_context_data(self, **kwargs):
+        """Filters project requests to only show those that are visible"""
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        context['visible_requests'] = project.requests.get_viewable(user)
+        return context
+
+    def dispatch(self, *args, **kwargs):
+        """If the project is private it is only visible to contributors and staff."""
+        project = self.get_object()
+        user = self.request.user
+        contributor_or_staff = user.is_staff or project.has_contributor(user)
+        if project.private and not contributor_or_staff:
+            raise Http404()
+        return super(ProjectDetailView, self).dispatch(*args, **kwargs)
+
 class ProjectPermissionsMixin(object):
     """
     This mixin provides a test to see if the current user is either
@@ -59,7 +84,7 @@ class ProjectPermissionsMixin(object):
     def dispatch(self, *args, **kwargs):
         """Overrides the dispatch function to include permissions checking."""
         if not self._is_editable_by(self.request.user):
-            raise exceptions.PermissionDenied()
+            raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
 class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
@@ -67,6 +92,15 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     model = Project
     form_class = ProjectUpdateForm
     template_name = 'project/update.html'
+
+    def get_context_data(self, **kwargs):
+        """Add a list of viewable requests to the context data"""
+        context = super(ProjectUpdateView, self).get_context_data(**kwargs)
+        project = self.get_object()
+        user = self.request.user
+        viewable_requests = project.requests.get_viewable(user)
+        context['viewable_request_ids'] = [request.id for request in viewable_requests]
+        return context
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""

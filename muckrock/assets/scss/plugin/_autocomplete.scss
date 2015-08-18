@@ -1,0 +1,20 @@
+.autocomplete-light-widget {
+    font-family: $font-family !important;
+    color: $color-black !important;
+
+}
+
+.yourlabs-autocomplete {
+    background-color: $color-white !important;
+    border-radius: $base-border-radius !important;
+    .hilight {
+        background-color: $color-blue !important;
+        background-image: none !important;
+    }
+    .choice, [data-value], em {
+        color: $color-black !important;
+        width: 100%;
+    }
+}
+
+input.autocomplete.xhr-pending { background-image: none !important; }

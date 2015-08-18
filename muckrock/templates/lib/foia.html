@@ -1,39 +1,18 @@
-{% comment %}
-Pass a 'foia' object or 'foias' list and it'll render a group of them.
-{% endcomment %}
 {% if foia %}
-    <section class="foia-single">
-        <div class="foia-body">
-            <h3><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h3>
-            {% if foia.requested_docs %}
-            <p>{{ foia.requested_docs | truncatewords:10 }}</p>
-            {% else %}
-            <p>{{ foia.description | truncatewords:10 }}</p>
-            {% endif %}
-        </div>
-        <div class="foia-actions">
-            <a href="{% url 'foia-clone' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="button">Clone</a>
-            <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="button">View</a>
-        </div>
-    </section>
-{% endif %}
-{% if foias %}
-<div class="foia-group">
-{% for foia in foias %}
-    <section class="foia-single">
-        <div class="foia-body">
-            <h3><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h3>
-            {% if foia.requested_docs %}
-            <p>{{ foia.requested_docs | truncatewords:10 }}</p>
-            {% else %}
-            <p>{{ foia.description | truncatewords:10 }}</p>
-            {% endif %}
-        </div>
-        <div class="foia-actions">
-            <a href="{% url 'foia-clone' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="button">Clone</a>
-            <a href="{% url 'foia-detail' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="button">View</a>
-        </div>
-    </section>
-{% endfor %}
+<div class="foia-single">
+    <div class="foia-info">
+        <p class="status {{ foia.color_code }}">{{ foia.get_status_display }}</p>
+        {% if foia.public_documents %}
+        <p class="files">{{ foia.public_documents|length }} file{{ foia.public_documents|length|pluralize }}</p>
+        {% else %}
+        <p class="files">No files</p>
+        {% endif %}
+        <p class="title"><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></p>
+        <p class="summary">{{ foia.user.get_full_name }} sent this request to the {{ foia.agency }} on {{ foia.date_submitted|date:"F j, Y" }}</p>
+    </div>
+    <div class="foia-actions">
+        <a href="{{ foia.get_absolute_url }}" class="view">View</a>
+        <a href="{% url 'foia-clone' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="clone">Clone</a>
+    </div>
 </div>
 {% endif %}

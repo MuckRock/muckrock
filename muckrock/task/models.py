@@ -14,6 +14,18 @@ from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
+
+class TaskQuerySet(models.QuerySet):
+    """Object manager for all tasks"""
+    def get_unresolved(self):
+        """Get all unresolved tasks"""
+        return self.filter(resolved=False)
+
+    def get_resolved(self):
+        """Get all resolved tasks"""
+        return self.filter(resolved=True)
+
+
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
@@ -21,6 +33,8 @@ class Task(models.Model):
     resolved = models.BooleanField(default=False)
     assigned = models.ForeignKey(User, blank=True, null=True, related_name="assigned_tasks")
     resolved_by = models.ForeignKey(User, blank=True, null=True, related_name="resolved_tasks")
+
+    objects = TaskQuerySet.as_manager()
 
     class Meta:
         ordering = ['date_created']
@@ -33,11 +47,6 @@ class Task(models.Model):
         self.resolved = True
         self.resolved_by = user
         self.date_done = datetime.now()
-        self.save()
-
-    def assign(self, user):
-        """Assign the task"""
-        self.assigned = user
         self.save()
 
 
@@ -93,13 +102,11 @@ class SnailMailTask(Task):
     def set_status(self, status):
         """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
-        foia = comm.foia
-        foia.status = status
-        foia.update()
-        foia.save()
-        comm.status = foia.status
-        #comm.date = datetime.now()
+        comm.status = status
         comm.save()
+        comm.foia.status = status
+        comm.foia.save()
+        comm.foia.update()
 
     def update_date(self):
         """Sets the date of the communication to today"""
@@ -226,8 +233,6 @@ class ResponseTask(Task):
             raise ValueError('Invalid status.')
         # save comm first
         comm.status = status
-        #if status in ['ack', 'processed', 'appealing']:
-        #    comm.date = datetime.now()
         comm.save()
         # save foia next
         foia = comm.foia
@@ -237,6 +242,16 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
+
+    def set_price(self, price):
+        """Sets the price of the communication's request"""
+        price = float(price)
+        comm = self.communication
+        if not comm.foia:
+            raise ValueError('This tasks\'s communication is an orphan.')
+        foia = comm.foia
+        foia.price = price
+        foia.save()
 
 
 class FailedFaxTask(Task):
@@ -285,7 +300,7 @@ class MultiRequestTask(Task):
         return u'Multi-Request: %s' % self.multirequest
 
 
-# Not a task, but use by tasks
+# Not a task, but used by tasks
 class BlacklistDomain(models.Model):
     """A domain to be blacklisted from sending us emails"""
     domain = models.CharField(max_length=255)

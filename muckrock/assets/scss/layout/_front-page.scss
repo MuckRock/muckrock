@@ -1,0 +1,138 @@
+.homepage {
+    overflow: hidden;
+    margin: 0 -.5 * $vertical-rhythm;
+    margin-bottom: 0;
+    section {
+        margin-bottom: 0;
+    }
+    @include media($medium-layout) {
+        margin: 0 -1 * $vertical-rhythm;
+    }
+    @include media($large-layout) {
+        margin: 0 -24px 0 -1 * $vertical-rhythm;
+    }
+    .banner {
+        display: block;
+        width: 100%;
+        background-size: cover;
+        background-position: center;
+        color: $color-white;
+        @include media($small-layout) { height: 26em; }
+        @include media($medium-layout) { height: 32.5em; }
+        @include media($large-layout) { height: 35em; }
+
+        .banner-container {
+            height: 100%;
+            overflow: hidden;
+            padding: $vertical-rhythm/2;
+            @include media($medium-layout) { padding: $vertical-rhythm; }
+            @include row;
+            @include background(
+                linear-gradient(
+                    rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.75)
+            ));
+            text-align: center;
+            padding-top: 3.5em;
+            @include media($medium-layout) {
+                padding-top: 9em;
+            }
+        }
+
+        h1 {
+            margin: 0 auto $vertical-rhythm;
+            max-width: 15em;
+        }
+
+        .call-to-action {
+            margin: $vertical-rhythm*2 auto;
+        }
+
+        a.dotted {
+            color: $color-white;
+            text-decoration: none;
+            border-bottom: 1px dotted $color-white;
+            &:hover {
+                border-bottom: 1px solid $color-white;
+            }
+        }
+        .button {
+            display: inline-block;
+            margin: 0 auto $vertical-rhythm;
+            clear: both;
+            @include media($small-layout) {
+                display: block;
+                max-width: 15em;
+            }
+        }
+        .image-attribution {
+            position: absolute;
+            bottom: $vertical-rhythm;
+            right: $vertical-rhythm;
+            color: $color-white;
+        }
+        #learn-more {
+            margin-left: $vertical-rhythm/4;
+        }
+    }
+    .articles {
+        @include outer-container;
+        margin-bottom: $vertical-rhythm;
+    }
+    .featured-article {
+        @include row;
+        padding: $vertical-rhythm/2;
+        .image {
+            @include half;
+            @include media($small-layout) {
+                margin-bottom: $vertical-rhythm/3;
+            }
+        }
+        .body { @include half; }
+    }
+    .article {
+        @include half;
+        &:nth-child(even) { clear: left; }
+        &:nth-child(odd) { clear: none; }
+        padding: 0 $vertical-rhythm $vertical-rhythm;
+        h1 { @include font-sizing(1.5); }
+    }
+
+    .stats {
+        padding: $vertical-rhythm/2;
+        @include media($medium-layout) { padding: $vertical-rhythm; }
+        width: 100%;
+        color: $color-white;
+        @include background(linear-gradient($color-blue-dark, $color-blue));
+        h1 {
+            @include font-sizing(1.25);
+            font-weight: $font-weight-normal;
+            text-align: center;
+            margin: $vertical-rhythm auto;
+        }
+        ul {
+            @include row;
+            padding-left: 0;
+            text-align: center;
+        }
+        li { @include third; }
+        .stat {
+            display: block;
+            @include font-sizing(2.5);
+            margin-bottom: 0;
+            font-weight: $font-weight-light;
+        }
+        .legend {
+            display: block;
+            max-width: 50%;
+            margin: $vertical-rhythm/2 auto;
+            border-top: $base-border-width solid $color-white;
+            padding-top: $vertical-rhythm/2;
+        }
+
+    }
+
+    .footer-container {
+        padding: 0 $vertical-rhythm/2;
+        @include media($medium-layout) { padding: 0 $vertical-rhythm; }
+    }
+}

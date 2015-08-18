@@ -1,0 +1,99 @@
+{% extends 'base_profile.html' %}
+{% load markdown_deux_tags %}
+{% load thumbnail %}
+{% block title %}MuckRock &bull; {{ jurisdiction.name }}{% endblock title %}
+{% block type %}jurisdiction{% endblock type %}
+
+{% block metadata %}
+<aside class="metadata">
+    <dfn>Jurisdiction</dfn>
+    {% if jurisdiction.image %}
+    <figure class="jurisdiction image">
+        <img src="{% thumbnail jurisdiction.image 600x600 %}" class="header-image">
+        {% if jurisdiction.image_attr_line %}
+        <figcaption>{{ jurisdiction.image_attr_line | safe }}</figcaption>
+        {% endif %}
+    </figure>
+    {% endif %}
+    <h1>{{jurisdiction.name}}</h1>
+    {% if jurisdiction.parent %}
+    <h2><a href="{{ jurisdiction.parent.get_absolute_url }}">{{ jurisdiction.parent }}</a></h2>
+    {% endif %}
+
+    {% include 'lib/request_stats.html' %}
+    {% include 'lib/appeal_stats.html' %}
+
+    <dl class="stats">
+        <dt>Allowed Response Time</dt>
+        {% with jurisdiction.get_days as days %}
+            {% if days %}
+            <dd>{{days}} day{{days|pluralize}}</dd>
+            {% else %}
+            <dd>No limit</dd>
+            {% endif %}
+        {% endwith %}
+        <dt>Average Response Time</dt>
+        <dd>{{ jurisdiction.average_response_time }} day{{ jurisdiction.average_response_time | pluralize }}</dd>
+    </dl>
+</aside>
+{% endblock metadata %}
+{% block activity %}
+<main class="activity">
+    {% if user.is_authenticated %}
+    <section class="actions">
+        <span class="modal-button button">Submit a Change</span>
+        <div class="hidden-modal">
+            <form action="" method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <object class="failure panel">
+                {{ form.non_field_errors }}
+                </object>
+                {% endif %}
+                {% for field in form.hidden_fields %}
+                    {{ field }}
+                {% endfor %}
+                {% for field in form.visible_fields %}
+
+                        <h1>{{ field.label }}</h1>
+                        <h2>{{ field.help_text }}</h2>
+                        {{ field }}
+                        {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
+                {% endfor %}
+                <input type="submit" name="submit" value="Submit" class="primary button" />
+            </form>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="notes">
+        {{ jurisdiction.public_notes|markdown:"trusted" }}
+    </section>
+
+    <h3>Recent Requests <small><a href="{% url 'foia-list' %}?jurisdiction={{ jurisdiction.pk }}">See All</a></small></h3>
+    {% include 'lib/foia_table.html' with requests=foia_requests %}
+
+    {% if jurisdiction.agencies.count %}
+    <h3>Documented Agencies</h3>
+    <table>
+        <tr>
+            <th width="50%">Agency</th>
+            <th width="20%">Requests</th>
+            <th width="30%">Pages Released</th>
+        </tr>
+        {% for agency in jurisdiction.agencies.get_approved %}
+        <tr>
+            <td><a href="{% url 'agency-detail' jurisdiction=jurisdiction.slug jidx=jurisdiction.pk slug=agency.slug idx=agency.pk %}">{{ agency.name }}</a></td>
+            <td>{{ agency.foiarequest_set.count }}</td>
+            <td>{{ agency.total_pages }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <h3>No agencies have been documented for this jurisdiction.</h3>
+    {% endif %}
+
+    <h3>Recent Requests <small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small></h3>
+    {% include 'lib/foia_table.html' with requests=foia_requests %}
+</main>
+{% endblock activity %}

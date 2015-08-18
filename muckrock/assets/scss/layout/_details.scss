@@ -1,0 +1,230 @@
+/* Details */
+
+.detail {
+
+    .header {
+        margin-bottom: 0;
+    }
+
+    .header-container {
+        @include row;
+        .main {
+            @include two-thirds;
+        }
+        .aside {
+            @include third;
+        }
+    }
+
+    .body {
+        @include row;
+    }
+
+    .actions {
+        @include panel;
+    }
+
+    &.agency {
+        aside dl { @include third; }
+    }
+
+    &.flatpage {
+        max-width: 45em;
+    }
+
+    &.organization {
+        .add-members, .members, .controls {
+            @include row;
+        }
+        .add-members {
+            @include row;
+            margin-bottom: $vertical-rhythm;
+            button {
+                @include quarter;
+                @include omega(n);
+                margin-top: 0;
+                padding: .5em 1em;
+            }
+            #id_add_members-wrapper {
+                @include three-quarters;
+                border: $base-border-width solid $color-grey;
+                border-radius: $base-border-radius;
+                background: white;
+                cursor: text;
+            }
+            input.autocomplete {
+                vertical-align: middle;
+                margin: .25em;
+                padding: .25em;
+                border: none;
+                border-radius: $base-border-radius;
+                background: none;
+            }
+            .deck .hilight {
+                margin: .25em;
+                border-radius: $base-border-radius;
+                padding: .25em;
+                padding-right: .75em;
+                background: $color-blue;
+                color: $color-white;
+            }
+        }
+        .members {
+            th:first-child, td:first-child {
+                width: 5%;
+            }
+            th:last-child, th:last-child {
+                width: 95%;
+            }
+        }
+        .controls {
+            @include panel;
+            .user-controls, .org-controls {
+                @include half;
+            }
+            .user-controls {
+                text-align: left;
+            }
+            @include media($medium-layout){
+                .user-controls + .org-controls {
+                    text-align: right;
+                }
+            }
+        }
+    }
+
+    &.question {
+        .messages-container {
+            @include row;
+        }
+    }
+
+    &.request {
+        .draft {
+            @include row;
+        }
+        .status-badge {
+            display: inline-block;
+            color: $color-grey-4;
+            font-size: $font-size-2;
+            font-weight: $font-weight-bold;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            @mixin colorize($status, $color) {
+                &.#{$status} {
+                    color: $color;
+                    border-color: $color;
+                }
+            }
+            @include colorize(success, $color-green);
+            @include colorize(failure, $color-red);
+            @include colorize(warning, $color-yellow);
+        }
+        .status-form {
+            display: none;
+            background: none;
+            border: none;
+            button { margin-left: $vertical-rhythm; }
+        }
+        .tabs {
+            list-style-type: none;
+            overflow: hidden;
+            border-bottom: $base-border-width solid $color-grey;
+            input[type="radio"] { display: none; }
+            label {
+                display: block;
+                float: left;
+                padding: $vertical-rhythm/4 $vertical-rhythm/2;
+                @include border;
+                border-left: none;
+                border-bottom: none;
+                cursor: pointer;
+                &:first-of-type {
+                    border-top-left-radius: $base-border-radius;
+                    border-left: $base-border-width solid $color-grey;
+                }
+                &:last-of-type {
+                    border-top-right-radius: $base-border-radius;
+                }
+                &:hover {
+                    color: $color-white;
+                    background-color: $color-grey;
+                }
+                &.active {
+                    color: $color-white;
+                    background-color: $color-blue;
+                    border-color: $color-blue;
+                }
+            }
+
+        }
+        .tab-section {
+            display: none;
+            &.active { display: block; }
+            margin-bottom: 0;
+        }
+        .files {
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+                @include row;
+                li {
+                    @include half;
+                    margin-bottom: $vertical-rhythm/2;
+                    border: $base-border-width solid $color-blue;
+                    @include border-radius;
+                    padding: $vertical-rhythm/2 $vertical-rhythm;
+                    &.active {
+                        background-color: $color-blue;
+                        color: $color-white;
+                        a { color: $color-white; }
+                        .embed.modal { color: $color-black; }
+                    }
+                }
+            }
+            .viewer {
+                position: relative;
+                width: 100%;
+                height: 66em;
+                margin: $vertical-rhythm auto;
+            }
+        }
+        .notes {
+            .note {
+                @include row;
+                margin: $vertical-rhythm 0 0;
+                padding: 0 0 $vertical-rhythm/2;
+                border-bottom: $base-border-width solid $color-grey;
+                .note-date {
+                    @include quarter;
+                    color: $color-grey;
+                    text-align: right;
+                }
+                .note-body { @include three-quarters; }
+            }
+
+            .button {
+                display: block;
+                width: 10em;
+                margin: 1.5em auto;
+            }
+        }
+        .request.controls {
+            position: relative;
+            clear: both;
+            .hidden-reply {
+                display: block;
+                padding: $vertical-rhythm;
+                margin-bottom: 0;
+                textarea {
+                    height: 10em;
+                    overflow-y: scroll;
+                    resize: vertical;
+                }
+                button { float: right; }
+            }
+        }
+    }
+}
+
+@import 'news_detail';

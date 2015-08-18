@@ -24,14 +24,13 @@
             <br>
             Out of ideas? <a href="#clone">Try cloning a request.</a>
             <br>
-            Want to send a multirequest? 
+            Want to send a multirequest?
             <a href="{% url 'foia-create-multi' %}">Click here.</a>
             <br>
             <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
         {% endif %}
-    </header>
-    {% if form.non_field_errors or form.errors %}
+        {% if form.non_field_errors or form.errors %}
         <section class="failure panel">
             <p>The form could not be submitted due to the following errors:</p>
             {{ form.non_field_errors }}
@@ -43,7 +42,8 @@
             {% endfor %}
             </ul>
         </section>
-    {% endif %}
+        {% endif %}
+    </header>
     <form action="" method="post" class="create-request">
         {% csrf_token %}
         {% for field in form.hidden_fields %}
@@ -100,7 +100,7 @@
                 {% endif %}
             </fieldset>
         {% endfor %}
-		
+
 
         <footer class="buttons">
         {% if clone %}
@@ -118,7 +118,7 @@
 {% if featured and not clone %}
 <div class="clone-candidates" id="clone">
     <h2>Looking for inspiration? Clone a request below, then tweak it how you want.</h2>
-    {% include 'lib/foia.html' with foias=featured %}
+    {% include 'lib/foia_group.html' with foias=featured %}
 </div>
 {% endif %}
 {% endblock %}
@@ -127,7 +127,7 @@
 {% include 'autocomplete_light/static.html' %}
 <script>
 $(document).ready(function(){
-    
+
     var localField = $('fieldset.local');
     var stateField = $('fieldset.state');
     var localRadio = $('li.local input:radio');
@@ -147,7 +147,7 @@ $(document).ready(function(){
             jurisdictionId: jurisdictionSelectElement.val()
         }
     }
-    
+
     function agencyToggle(value) {
         if (value) {
             agencyField.show();
@@ -157,7 +157,7 @@ $(document).ready(function(){
             agencyField.hide();
         }
     }
-    
+
     /* Check if prefilled by cloning */
     if (localChecked.length > 0) {
         localChecked.parent().addClass('active');
@@ -178,7 +178,7 @@ $(document).ready(function(){
         agencyByJurisdiction(federalRadio);
         agencyToggle(true);
     }
-    
+
     /* Bind changes to actions */
     localRadio.change(function() {
         $(this).parent().addClass('active');
@@ -188,7 +188,7 @@ $(document).ready(function(){
         agencyToggle(localSelect.val());
         agencyInput.val('');
     });
-    
+
     stateRadio.change(function() {
         $(this).parent().addClass('active');
         $(this).parent().siblings().removeClass('active');
@@ -197,7 +197,7 @@ $(document).ready(function(){
         agencyToggle(stateSelect.val());
         agencyInput.val('');
     });
-    
+
     federalRadio.change(function() {
         $(this).parent().addClass('active');
         $(this).parent().siblings().removeClass('active');
@@ -207,17 +207,17 @@ $(document).ready(function(){
         agencyInput.val('');
         agencyByJurisdiction(federalRadio);
     });
-    
+
     function selectChange(select) {
         agencyByJurisdiction(select);
         agencyToggle(select.val());
         agencyInput.val('');
     }
-    
+
     localSelect.change(function(){
         selectChange($(this));
     });
-    
+
     stateSelect.change(function(){
         selectChange($(this));
     });

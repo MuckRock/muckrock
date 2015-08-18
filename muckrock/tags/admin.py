@@ -13,8 +13,7 @@ class TagAdmin(admin.ModelAdmin):
     # pylint: disable=too-many-public-methods
 
     prepopulated_fields = {'slug': ('name',)}
-    list_display = ('name', 'user')
-    list_filter = ['user']
+    list_display = ['name']
 
 admin.site.register(Tag, TagAdmin)
 admin.site.unregister(TaggitTag)

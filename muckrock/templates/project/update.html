@@ -2,4 +2,22 @@
 
 {% block scripts %}
     {% include 'autocomplete_light/static.html' %}
+    <script type="text/javascript">
+        var limitToViewableRequests = function(requests, viewableRequests) {
+            // hides any requests that the user doesn't have permission to see
+            $(requests).each(function(index, element) {
+                var requestId = $(element).data('value');
+                var isViewable = viewableRequests.indexOf(requestId);
+                /* We use `indexOf` to determine whether or not the request is a
+                member of the `viewableRequests` array. if it isn't, we hide it. */
+                if (isViewable == -1) {
+                    $(this).hide();
+                }
+            });
+        }
+        var requests = $('#id_requests-deck span');
+        // we get the list of viewable requests from the server
+        var viewableRequests = {{ viewable_request_ids }};
+        limitToViewableRequests(requests, viewableRequests);
+    </script>
 {% endblock scripts %}

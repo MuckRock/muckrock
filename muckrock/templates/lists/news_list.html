@@ -4,7 +4,7 @@
 {% load thumbnail %}
 
 {% block title %}MuckRock &bull; News{% endblock title %}
-{% block list-title %}Reporting{% endblock list-title %}
+{% block list-title %}News{% endblock list-title %}
 {% block list-type %}news{% endblock list-type %}
 
 {% block list-content %}
@@ -26,7 +26,7 @@
                     {{ article.summary|markdown:"trusted" }}
                 </div>
                 <div class="news-list-article-authors">
-                    by 
+                    by
                     {% for author in article.authors.all %}
                         <a href="{{ author.profile.get_absolute_url }}" title="{{ author.get_full_name }}">{{ author.get_full_name }}</a>
                         {% if not forloop.last %}, {% endif %}

@@ -9,8 +9,8 @@
 <div class="homepage">
     <section class="banner" style="background-image: url('{% static 'img/homepage.jpg' %}');">
         <div class="banner-container">
-            <h1>MuckRock brings public records requests into the 21<sup><small>st</small></sup> Century</h1>
-            <h2>File, track, and share public records requests</h2>
+            <h1 class="h1 display">MuckRock brings public records requests into the 21<sup><small>st</small></sup> Century</h1>
+            <h2 class="h2 display">File, track, and share public records requests</h2>
             <div class="call-to-action"><a href="{% url 'foia-create' %}" class="primary button">Create a FOIA request</a>&emsp;or <a href="/about/how-we-work/" class="dotted" id="learn-more">learn how we work.</a></div>
         </div>
     </section>
@@ -48,7 +48,7 @@
         </section>
         {% endfor %}
     </section>
-    
+
     <!--
     {% if featured_reqs %}
     <section class="featured-requests">
@@ -67,5 +67,5 @@
     </section>
     {% endif %}
     -->
-
+</div>
 {% endblock content %}

@@ -1,0 +1,208 @@
+.project-create.form {
+    fieldset {
+        &.title, &.description {
+            @include full;
+        }
+    }
+    .social.preview {
+        @include row;
+        margin: 0 0 $vertical-rhythm;
+        padding: .5em;
+        border: 1px solid $color-grey;
+        section {
+            @include half;
+        }
+        .image {
+            height: 15em;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    }
+
+    // We style the social previews like they would appear on their respective
+    // social networks.
+
+    .social.preview .facebook {
+        border: 1px solid $color-grey;
+        background: #FFF;
+        p { margin-top: 0; }
+        .textarea {
+            padding: .5em;
+        }
+        .title {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            font-weight: 500;
+            line-height: 22px;
+        }
+        .description, .attribution {
+            font-family: 'Helvetica', sans-serif;
+        }
+        .description {
+            font-size: 12px;
+            line-height: 16px;
+        }
+        .attribution {
+            margin-bottom: 0;
+            font-size: 11px;
+            line-height: 11px;
+            text-transform: uppercase;
+            color: #9197a3;
+        }
+    }
+
+    .social.preview .twitter {
+        padding: 1em;
+        padding-top: 0;
+        background-color: #FFF;
+        border: 1px solid #666;
+        border-radius: 6px;
+        .title {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 16px;
+        }
+        .attribution {
+            font-family: 'Helvetica', sans-serif;
+            font-size: 13px;
+            color: #666;
+        }
+        .image {
+            border-radius: 6px;
+        }
+    }
+}
+
+.project.detail {
+    .project-header {
+        margin: 0 -1*$vertical-rhythm/2;
+        @include media($medium-layout) {
+            margin: 0 -1*$vertical-rhythm;
+        }
+    }
+    .project-header.with-image {
+        position: relative;
+        height: 20em;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        @include media($medium-layout) {
+            height: 24em;
+        }
+        @include media($large-layout) {
+            height: 32em;
+        }
+        .project-admin {
+            position: absolute;
+            top: 0;
+        }
+        .project-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+    }
+    .project-admin {
+        width: 100%;
+        padding: $vertical-rhythm/2;
+        color: $color-white;
+        background-color: rgba(0, 0, 0, .75);
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include align-items(center);
+        .project-controls, .project-private {
+            margin-bottom: 0;
+        }
+        .project-private {
+            font-weight: $font-weight-bold;
+        }
+        @include media($medium-layout) {
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+        }
+    }
+    .project-gradient {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 75%;
+        margin-bottom: 0;
+        // rgba equivalent of $color-white
+        @include background(linear-gradient(rgba(247, 248, 250, 0), rgba(247, 248, 250, 100)));
+    }
+    .project-title {
+        font-size: $font-size-8;
+        font-weight: $font-weight-bold;
+        padding: 0 $vertical-rhythm/2;
+        @include media($medium-layout) {
+            padding: 0 $vertical-rhythm;
+            margin-bottom: $vertical-rhythm;
+        }
+    }
+    .project-overview {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        .project-summary, .project-quick-links {
+            @include flex(100%);
+        }
+        .project-quick-links {
+            @include display(flex);
+            border-bottom: 1px dashed $color-grey;
+            padding-bottom: $vertical-rhythm;
+            @include media($medium-layout) {
+                display: block;
+                border-bottom: 0;
+                padding-bottom: 0;
+            }
+            .project-contributors, .project-references {
+                margin-bottom: 0;
+                @include media($medium-layout) {
+                    margin-bottom: $vertical-rhythm;
+                }
+            }
+            .project-references {
+                margin-left: 2*$vertical-rhythm;;
+                @include media($medium-layout) {
+                    margin-left: 0;
+                }
+                a {
+                    font-weigth: $font-weight-bold;
+                }
+            }
+        }
+        @include media($medium-layout) {
+            .project-summary {
+                @include flex(2);
+            }
+            .project-quick-links {
+                @include flex(1);
+                @include order(1);
+                margin-left: 2*$vertical-rhythm;
+            }
+        }
+
+    }
+    .project-contributors ul {
+        padding-left: 0;
+        list-style-type: none;
+    }
+    .project-body {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        .project-description, .project-metadata {
+            @include flex(100%);
+        }
+        @include media($medium-layout) {
+            .project-description {
+                @include flex(2);
+            }
+            .project-metadata {
+                @include flex(1);
+                @include order(1);
+                margin-left: 2*$vertical-rhythm;
+            }
+        }
+    }
+}

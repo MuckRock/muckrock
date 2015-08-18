@@ -1,0 +1,54 @@
+.foia-single {
+    width: 100%;
+    @include display(flex);
+    @include flex-direction(column);
+    .foia-info {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        padding: $vertical-rhythm/2;
+        @include border;
+        border-bottom: 0;
+        @include border-top-radius($base-border-radius);
+        margin-bottom: 0;
+        .status, .files {
+            @include flex(1 1 50%);
+            font-size: $font-size-2;
+        }
+        .files {
+            text-align: right;
+        }
+        .title, .summary {
+            @include flex(2 2 100%);
+        }
+        .title {
+            font-size: $font-size-4;
+            font-weight: $font-weight-bold;
+        }
+    }
+    .foia-actions {
+        @include display(flex);
+        .clone, .view {
+            @include flex(1);
+            @include border;
+            border-color: $color-blue-dark;
+            padding: $vertical-rhythm/2;
+            background-color: $color-blue;
+            color: $color-white;
+            font-weight: $font-weight-bold;
+            text-align: center;
+            @include transition(background-color .25s linear);
+            &:hover {
+                color: $color-white;
+                background-color: $color-blue-dark;
+                text-decoration: none;
+            }
+        }
+        .view {
+            border-bottom-left-radius: $base-border-radius;
+            border-right: none;
+        }
+        .clone {
+            border-bottom-right-radius: $base-border-radius;
+        }
+    }
+}
