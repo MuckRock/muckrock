@@ -1,0 +1,24 @@
+{% extends 'lists/base_list.html' %}
+{% load markdown_deux_tags %}
+
+{% block list-content %}
+{% include 'lib/pagination.html' %}
+<ul class="crowdfund-list">
+    {% for crowdfund in object_list %}
+    <li class="crowdfund">
+        <div class="left">
+            <h2><a href="{{ crowdfund.project.get_absolute_url }}">{{ crowdfund.project.title }}</a></h2>
+            {{ crowdfund.description|markdown }}
+        </div>
+        <div class="right">
+            <div>
+                <p>Raised ${{ crowdfund.payment_received }} of ${{ crowdfund.payment_required }}</p>
+                <p>{{ crowdfund.date_due | timeuntil }} remaining</p>
+            </div>
+            <p class="view"><a href="{{ crowdfund.project.get_absolute_url }}">View this project</a></p>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% include 'lib/pagination.html' %}
+{% endblock %}

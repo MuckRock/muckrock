@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView
 
 from datetime import date, timedelta
 import logging
@@ -23,6 +23,42 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
+
+
+class CrowdfundRequestListView(ListView):
+    """Lists active request crowdfunds"""
+    model = CrowdfundRequest
+    template_name = 'crowdfund/request_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Add title and other data to context"""
+        context = super(CrowdfundRequestListView, self).get_context_data(**kwargs)
+        context['title'] = 'Requests needing funding'
+        return context
+
+    def get_queryset(self):
+        """Only list open crowdfunds"""
+        queryset = super(CrowdfundRequestListView, self).get_queryset()
+        queryset.filter(closed=False)
+        return queryset
+
+
+class CrowdfundProjectListView(ListView):
+    """Lists active project crowdfunds"""
+    model = CrowdfundProject
+    template_name = 'crowdfund/project_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Add title and other data to context"""
+        context = super(CrowdfundProjectListView, self).get_context_data(**kwargs)
+        context['title'] = 'Projects needing funding'
+        return context
+
+    def get_queryset(self):
+        """Only list open crowdfunds"""
+        queryset = super(CrowdfundProjectListView, self).get_queryset()
+        queryset.filter(closed=False)
+        return queryset
 
 
 class CrowdfundDetailView(DetailView):
