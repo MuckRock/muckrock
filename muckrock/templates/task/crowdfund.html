@@ -10,15 +10,6 @@
 
 {% block task-data %}
 <summary class="task-data">
-    <p><a href="{% url 'admin:crowdfund_crowdfundrequest_change' task.crowdfund.id %}">{{task.crowdfund}}</a> has finished. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
-    {% if task.crowdfund.foia.amount %}
-    {% if task.crowdfund.payment_received > task.crowdfund.foia.amount %}
-    <p>The crowdfund raised more than the full price of the request, which is {{task.crowdfund.foia.amount}}.</p>
-    {% elif task.crowdfund.payment_received < task.crowdfund.foia.amount %}
-    <p>The crowdfund raised less than the full price of the request, which is {{task.crowdfund.foia.amount}}.</p>
-    {% else %}
-    <p>The crowdfund raised the exact price of the request! Amazing!!!</p>
-    {% endif %}
-    {% endif %}
+    <p>{% if task.crowdfund.foia %}<a href="{% url 'admin:crowdfund_crowdfundrequest_change' task.crowdfund.id %}">{% elif task.crowdfund.project %}<a href="{% url 'admin:crowdfund_crowdfundproject_change' task.crowdfund.id %}">{{task.crowdfund}}</a>{% endif %}{{task.crowdfund}}</a> has closed. It was requesting {{task.crowdfund.payment_required}} and received {{task.crowdfund.payment_received}}.</p>
 </summary>
 {% endblock %}
