@@ -5,7 +5,6 @@ Test recurring crowdfund tasks
 from django import test
 
 from datetime import date, timedelta
-from mock import Mock
 from nose.tools import ok_
 
 from muckrock.crowdfund import models, tasks
@@ -17,6 +16,7 @@ class TestRecurringTasks(test.TestCase):
         self.project = Project.objects.create(title='Cool project')
 
     def test_close_expired(self):
+        """Projects past their due date should be closed"""
         crowdfund = models.CrowdfundProject.objects.create(
             name='Cool project please help',
             date_due=(date.today() - timedelta(1)),
@@ -29,6 +29,7 @@ class TestRecurringTasks(test.TestCase):
         ok_(updated_crowdfund.closed, 'Any crowdfund past its date due should be closed.')
 
     def test_do_not_close_today(self):
+        """Projects with a due date of today should not be clsoed."""
         crowdfund = models.CrowdfundProject.objects.create(
             name='Cool project please help',
             date_due=(date.today()),

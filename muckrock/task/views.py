@@ -15,8 +15,8 @@ from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 PaymentTask, GenericCrowdfundTask, MultiRequestTask, StatusChangeTask, \
-                                 FailedFaxTask
+                                 PaymentTask, GenericCrowdfundTask, MultiRequestTask, \
+                                 StatusChangeTask, FailedFaxTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
