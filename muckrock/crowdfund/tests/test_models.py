@@ -96,3 +96,6 @@ class TestCrowdfundPayment(TestCase):
         payment = self.crowdfund.make_payment(self.token, amount)
         eq_(payment.amount, self.crowdfund.payment_required,
             'The amount should be capped at the crowdfund\'s required payment.')
+        ok_(self.crowdfund.closed,
+            'Once the cap has been reached, the crowdfund should close.')
+
