@@ -71,7 +71,7 @@ This is the parent style for a collection of objects: a collection of blog posts
                     {% for item in object_list %}
                     <tr class="list-table-item">
                     {% block list-table-item %}
-                        <td><a href="{{ item.get_absolute_url }}">{{ item.title }}</a></td>
+                        <td><a href="{{ item.get_absolute_url }}">{{ item }}</a></td>
                     {% endblock list-table-item %}
                     </tr>
                     {% endfor %}
