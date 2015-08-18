@@ -88,7 +88,7 @@ class PaymentTaskNode(TaskNode):
 
 class CrowdfundTaskNode(TaskNode):
     """Renders a crowdfund task."""
-    model = task.models.CrowdfundTask
+    model = task.models.GenericCrowdfundTask
     task_template = 'task/crowdfund.html'
     endpoint_name = 'crowdfund-task-list'
 
