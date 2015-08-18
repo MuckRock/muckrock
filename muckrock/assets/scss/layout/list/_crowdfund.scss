@@ -5,6 +5,7 @@
         @include display(flex);
         @include flex-direction(column);
         @include justify-content(space-between);
+        margin-bottom: $vertical-rhythm;
         @include border;
         @include border-radius;
         .left, .right {
@@ -29,7 +30,7 @@
                 border-top: none;
                 border-left: 1px solid $color-grey;
             }
-            .view-request {
+            .view {
                 font-size: $font-size-4;
             }
         }

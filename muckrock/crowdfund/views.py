@@ -43,6 +43,24 @@ class CrowdfundRequestListView(ListView):
         return queryset
 
 
+class CrowdfundProjectListView(ListView):
+    """Lists active project crowdfunds"""
+    model = CrowdfundProject
+    template_name = 'crowdfund/project_list.html'
+
+    def get_context_data(self, **kwargs):
+        """Add title and other data to context"""
+        context = super(CrowdfundProjectListView, self).get_context_data(**kwargs)
+        context['title'] = 'Projects needing funding'
+        return context
+
+    def get_queryset(self):
+        """Only list open crowdfunds"""
+        queryset = super(CrowdfundProjectListView, self).get_queryset()
+        queryset.filter(closed=False)
+        return queryset
+
+
 class CrowdfundDetailView(DetailView):
     """
     Presents details about a crowdfunding campaign,
