@@ -218,7 +218,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
                 &.twitter, &.facebook, &.email {
                     background-color: transparent;
                     &:hover {
-                        background-color: $color-green;
+                        background-color: rgba(255, 255, 255, .25);
                     }
                 }
             }
