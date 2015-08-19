@@ -23,7 +23,7 @@ class CrowdfundRequestForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundRequest
-        fields = ['name', 'description', 'payment_required', 'date_due', 'foia']
+        fields = ['name', 'description', 'payment_required', 'payment_capped', 'date_due', 'foia']
         widgets = {
             'foia': forms.HiddenInput()
         }
@@ -32,6 +32,13 @@ class CrowdfundRequestForm(forms.ModelForm):
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
+    )
+
+    payment_capped = forms.BooleanField(
+        label='Limit Amount',
+        required=False,
+        help_text='If checked, this prevents you from collecting more than your stated amount.',
+        widget=forms.CheckboxInput()
     )
 
     date_due = forms.DateField(
@@ -87,7 +94,7 @@ class CrowdfundProjectForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundProject
-        fields = ['name', 'description', 'payment_required', 'date_due', 'project']
+        fields = ['name', 'description', 'payment_required', 'payment_capped', 'date_due', 'project']
         widgets = {
             'project': forms.HiddenInput()
         }
@@ -96,6 +103,12 @@ class CrowdfundProjectForm(forms.ModelForm):
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
+    )
+
+    payment_capped = forms.BooleanField(
+        label='Limit Amount',
+        help_text='If checked, this prevents you from collecting more than your stated amount.',
+        widget=forms.CheckboxInput()
     )
 
     date_due = forms.DateField(
