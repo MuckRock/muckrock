@@ -23,7 +23,14 @@ class CrowdfundRequestForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundRequest
-        fields = ['name', 'description', 'payment_required', 'payment_capped', 'date_due', 'foia']
+        fields = [
+            'name',
+            'description',
+            'payment_required',
+            'payment_capped',
+            'date_due',
+            'foia'
+        ]
         widgets = {
             'foia': forms.HiddenInput()
         }
@@ -94,7 +101,14 @@ class CrowdfundProjectForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundProject
-        fields = ['name', 'description', 'payment_required', 'payment_capped', 'date_due', 'project']
+        fields = [
+            'name',
+            'description',
+            'payment_required',
+            'payment_capped',
+            'date_due',
+            'project'
+        ]
         widgets = {
             'project': forms.HiddenInput()
         }
