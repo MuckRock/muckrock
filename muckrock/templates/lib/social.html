@@ -1,6 +1,6 @@
 <div class="social sharing">
     <dfn>Share</dfn>
-    <a href="mailto:?subject={{ title }}&amp;body=http://{{ request.get_host }}{{ request.path }}" class="share email" onclick="ga('send', 'event', 'Share', 'Email', '{{ title }}');"><svg width="25px" height="25px" viewBox="0 0 20 20" class="svg-icon">
+    <a href="mailto:?subject={{ title }}&amp;body=http://{{ request.get_host }}{{ request.path }}" class="share email" onclick="ga('send', 'event', 'Share', 'Email', window.location.pathname);"><svg width="25px" height="25px" viewBox="0 0 20 20" class="svg-icon">
             <title>Envelope Icon</title>
             <path d="M19.291,3.026c0.002-0.15-0.053-0.301-0.167-0.415c-0.122-0.122-0.286-0.172-0.444-0.161H1.196
                         c-0.16-0.011-0.322,0.039-0.444,0.161C0.637,2.725,0.583,2.875,0.585,3.026c0,0.003-0.002,0.006-0.002,0.009v14.032
@@ -9,11 +9,11 @@
                         c-0.323,0-0.585-0.261-0.585-0.584V4.292l7.732,6.704c0.013,0.017,0.019,0.035,0.034,0.052c0.115,0.114,0.268,0.169,0.419,0.166
                         c0.151,0.003,0.304-0.052,0.419-0.166c0.015-0.017,0.021-0.035,0.034-0.052l7.731-6.704V15.896z" class="email-icon sharing-icon"></path>
         </svg> Email</a>
-    <a href="javascript:window.open('http://twitter.com/intent/tweet?text={{ title|urlencode }}&amp;url=http://{{ request.get_host }}{{ request.path }}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no');" class="share twitter" onclick="ga('send', 'event', 'Share', 'Twitter', '{{ title }}')"><svg width="25px" height="25px" viewBox="0 0 59 48" class="svg-icon">
+    <a href="javascript:window.open('http://twitter.com/intent/tweet?text={{ title|urlencode }}&amp;url=http://{{ request.get_host }}{{ request.path }}&amp;via=muckrock', 'Share on Twitter', 'width=500,height=253,location=no,menubar=no,status=no');" class="share twitter" onclick="ga('send', 'event', 'Share', 'Twitter', window.location.pathname)"><svg width="25px" height="25px" viewBox="0 0 59 48" class="svg-icon">
             <title>Twitter Icon</title>
             <path d="M56.8,1.5 C54.5,2.9 51.9,3.9 49.2,4.4 C47.1,2.1 43.9,0.7 40.6,0.7 C34.1,0.7 28.7,6 28.7,12.6 C28.7,13.5 28.7,14.5 29,15.3 C19.1,14.8 10.3,10.1 4.5,2.9 C3.5,4.7 2.8,6.8 2.8,8.9 C2.8,13 4.8,16.6 8,18.8 C6,18.8 4.1,18.2 2.3,17.3 C2.3,23.2 6.6,27.9 12.1,29 C11.1,29.3 10.3,29.5 9.2,29.5 C8.5,29.5 7.7,29.4 7,29.3 C8.5,34 12.9,37.4 18.1,37.6 C14,40.7 8.9,42.7 3.4,42.7 C2.4,42.7 1.5,42.7 0.6,42.5 C5.9,45.9 12.1,47.8 18.8,47.8 C40.6,47.8 52.6,29.7 52.6,14.1 L52.6,12.5 C54.9,10.9 56.9,8.8 58.5,6.3 C56.2,7.2 53.9,7.8 51.5,8.1 C54,6.6 55.8,4.2 56.8,1.5 Z" class="twitter-icon"></path>
         </svg> Tweet</a>
-    <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=http://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="share facebook" onclick="ga('send', 'event', 'Share', 'Facebook', '{{ title }}')"><svg width="25px" height="25px" viewBox="0 0 35 73" class="svg-icon">
+    <a href="javascript:window.open('https://www.facebook.com/sharer/sharer.php?u=http://{{ request.get_host }}{{ request.path }}', 'Share on Facebook', 'width=500,height=140,location=no,menubar=no,status=no');" class="share facebook" onclick="ga('send', 'event', 'Share', 'Facebook', window.location.pathname)"><svg width="25px" height="25px" viewBox="0 0 35 73" class="svg-icon">
             <title>Facebook Icon</title>
             <path d="M23,24.2 L23,18.1 C23,14.9 23.3,13.1 27.9,13.1 L34.1,13.1 L34.1,0.7 L24.2,0.7 C12.4,0.7 8.2,6.7 8.2,16.8 L8.2,24.2 L0.8,24.2 L0.8,36.6 L8.2,36.6 L8.2,72.5 L23,72.5 L23,36.6 L32.9,36.6 L34.2,24.2 L23,24.2 Z" class="facebook-icon"></path>
         </svg> Share</a>
