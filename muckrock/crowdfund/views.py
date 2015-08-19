@@ -134,7 +134,6 @@ class CrowdfundDetailView(DetailView):
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
                 self.return_error(request)
-            crowdfund.update_payment_received()
             # if AJAX, return HTTP 200 OK
             # else, add a message to the session
             if request.is_ajax():
