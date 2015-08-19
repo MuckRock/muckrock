@@ -6,7 +6,6 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 .crowdfund.widget {
     overflow: visible;
     @include row;
-    max-width: 60em;
     margin: 0 auto $vertical-rhythm;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
@@ -66,23 +65,24 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
 
     .stats {
-        @include row;
-        border-top: $crowdfund-border;
+        @include display(flex);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
         margin-bottom: 0;
-        p {
-            @include third;
+        border-top: $crowdfund-border;
+        text-align: left;
+        & > * {
             margin-bottom: 0;
-            text-align: center;
-            @include media($medium-layout) {
-                text-align: left;
-            }
+        }
+        .contributors p {
+            margin-bottom: 0;
         }
     }
 
-    .contributors p {
-        margin-bottom: $vertical-rhythm/4;
-        padding-left: $vertical-rhythm;
-    }
     .contributor-list {
         margin-top: 0;
         li {
@@ -146,8 +146,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         &.dropdown {
             display: none;
             position: absolute;
-            top: 2*$vertical-rhythm;
-            left: $vertical-rhythm;
+            top: $vertical-rhythm;
             z-index: 1;
             border-radius: $base-border-radius;
             padding: $vertical-rhythm/4 $vertical-rhythm/2;
