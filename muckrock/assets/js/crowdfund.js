@@ -11,32 +11,28 @@ var prettyInput = 'input[name=pretty-input]';
 function submitForm(form) {
 
     var c = $(form).parents('.crowdfund');
-    console.log(c);
-    var overlay = $(c).children('.overlay');
-    console.log(overlay);
+    var pendingOverlay = $(c).children('.pending.overlay');
+    var completeOverlay = $(c).children('.complete.overlay');
+    var errorOverlay = $(c).children('.error.overlay');
+
     var formFields = $(form).serializeArray();
     var data = {};
     for (var i = 0; i < formFields.length; i++) {
         var field = formFields[i];
         data[field.name] = field.value;
     }
+
     $(document).ajaxStart(function(){
-        $(overlay).removeClass('hidden');
-        $(c).addClass('pending');
-        $(overlay).empty();
-        var heading = '<h1>Loading...</h1>';
-        $(overlay).append(heading);
+        $(pendingOverlay).addClass('visible');
     }).ajaxError(function(){
-        $(c).removeClass('pending').addCLass('error');
-        var heading = '<h1>Oops!</h1>';
-        $(overlay).append(heading);
+        $(pendingOverlay).removeClass('visible');
+        $(errorOverlay).addClass('visible');
     }).ajaxComplete(function(e){
-        $(c).removeClass('pending').addClass('complete');
-        $(overlay).empty();
-        var heading = '<h1>Thank you!</h1>';
-        $(overlay).append(heading);
+        $(pendingOverlay).removeClass('visible');
+        $(completeOverlay).addClass('visible');
         $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     });
+
     $.ajax({
         url: $(form).attr('action'),
         type: 'post',

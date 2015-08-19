@@ -23,7 +23,14 @@ class CrowdfundRequestForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundRequest
-        fields = ['name', 'description', 'payment_required', 'date_due', 'foia']
+        fields = [
+            'name',
+            'description',
+            'payment_required',
+            'payment_capped',
+            'date_due',
+            'foia'
+        ]
         widgets = {
             'foia': forms.HiddenInput()
         }
@@ -32,6 +39,13 @@ class CrowdfundRequestForm(forms.ModelForm):
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
+    )
+
+    payment_capped = forms.BooleanField(
+        label='Limit Amount',
+        required=False,
+        help_text='If checked, this prevents you from collecting more than your stated amount.',
+        widget=forms.CheckboxInput()
     )
 
     date_due = forms.DateField(
@@ -77,6 +91,7 @@ class CrowdfundRequestPaymentForm(forms.ModelForm):
         amount = self.cleaned_data['amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
+        amount = Decimal(amount)/100
         return amount
 
 class CrowdfundProjectForm(forms.ModelForm):
@@ -86,7 +101,14 @@ class CrowdfundProjectForm(forms.ModelForm):
 
     class Meta:
         model = CrowdfundProject
-        fields = ['name', 'description', 'payment_required', 'date_due', 'project']
+        fields = [
+            'name',
+            'description',
+            'payment_required',
+            'payment_capped',
+            'date_due',
+            'project'
+        ]
         widgets = {
             'project': forms.HiddenInput()
         }
@@ -95,6 +117,12 @@ class CrowdfundProjectForm(forms.ModelForm):
         label='Amount',
         help_text='We will add 15% to this amount, which goes towards our operating costs.',
         widget=NumberInput()
+    )
+
+    payment_capped = forms.BooleanField(
+        label='Limit Amount',
+        help_text='If checked, this prevents you from collecting more than your stated amount.',
+        widget=forms.CheckboxInput()
     )
 
     date_due = forms.DateField(
@@ -136,8 +164,12 @@ class CrowdfundProjectPaymentForm(forms.ModelForm):
         }
 
     def clean_amount(self):
-        """Ensure the amount of the payment is greater than zero"""
+        """
+        Ensure the amount of the payment is greater than zero and
+        translate the format from integer to Decimal
+        """
         amount = self.cleaned_data['amount']
         if not amount > 0:
             raise forms.ValidationError('Cannot contribute zero dollars')
+        amount = Decimal(amount)/100
         return amount
