@@ -91,6 +91,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
     payment_form = crowdfund_form(the_crowdfund, the_form)
     logged_in, user_email = crowdfund_user(the_context)
     contrib_sum = contributor_summary(the_crowdfund)
+    the_request = the_context.request
     return {
         'crowdfund': the_crowdfund,
         'contributor_summary': contrib_sum,
@@ -98,6 +99,7 @@ def generate_crowdfund_context(the_crowdfund, the_url_name, the_form, the_contex
         'logged_in': logged_in,
         'user_email': user_email,
         'payment_form': payment_form,
+        'request': the_request,
         'stripe_pk': STRIPE_PUB_KEY
     }
 
