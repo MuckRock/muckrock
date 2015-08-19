@@ -1,5 +1,6 @@
 {% load tags %}
 
+{% if page_obj %}
 <nav class="pagination">
     <form method="get" class="pagination-form">
         <p class="pagination-info">Showing {{page_obj.start_index}} to {{page_obj.end_index}} of {{page_obj.paginator.count}}</p>
@@ -47,3 +48,4 @@
     {% endif %}
     </div>
 </nav>
+{% endif %}

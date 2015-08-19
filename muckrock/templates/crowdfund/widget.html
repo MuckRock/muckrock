@@ -23,8 +23,8 @@
                 <li>{{ crowdfund.anonymous_contributors|length }} anonymous backer{{ crowdfund.anonymous_contributors|length|pluralize }}</li>
             {% endif %}
             </ul>
-        </div>
         {% endif %}
+        </div>
         <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
         <p class="time-remaining">
         {% if not crowdfund.expired %}

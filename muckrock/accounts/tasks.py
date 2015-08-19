@@ -17,7 +17,7 @@ from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 GenericTask, PaymentTask, CrowdfundTask, FailedFaxTask
+                                 GenericTask, PaymentTask, GenericCrowdfundTask, FailedFaxTask
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +88,9 @@ def store_statstics():
         total_unresolved_faxfail_tasks=FailedFaxTask.objects.filter(resolved=False).count(),
         total_payment_tasks=PaymentTask.objects.count(),
         total_unresolved_payment_tasks=PaymentTask.objects.filter(resolved=False).count(),
-        total_crowdfundpayment_tasks=CrowdfundTask.objects.count(),
+        total_crowdfundpayment_tasks=GenericCrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
-            CrowdfundTask.objects.filter(resolved=False).count(),
+            GenericCrowdfundTask.objects.filter(resolved=False).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

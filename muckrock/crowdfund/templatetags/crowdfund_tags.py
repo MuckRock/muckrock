@@ -32,17 +32,21 @@ def list_to_english_string(the_list):
         ret_str = (', ').join(sans_last_str) + ', and ' + last_str
     return ret_str
 
+def get_initial_amount(crowdfund):
+    """Dynamically compute an initial amount for the payment form."""
+    initial_amount = 2500
+    amount_remaining = int(crowdfund.amount_remaining() * 100)
+    if crowdfund.payment_capped and amount_remaining < initial_amount:
+        initial_amount = amount_remaining
+    return initial_amount
+
 def crowdfund_form(crowdfund, form):
     """Returns a form initialized with crowdfund data"""
     initial_data = {
         'show': True,
-        'crowdfund': crowdfund.pk
+        'crowdfund': crowdfund.pk,
+        'amount': get_initial_amount(crowdfund)
     }
-    default_amount = 25
-    if crowdfund.amount_remaining() < default_amount:
-        initial_data['amount'] = int(crowdfund.amount_remaining()) * 100
-    else:
-        initial_data['amount'] = default_amount * 100
     return form(initial=initial_data)
 
 def crowdfund_user(context):
