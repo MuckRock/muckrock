@@ -94,6 +94,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     footer {
         @include full;
         @include border-bottom-radius($base-border-radius);
+        margin-bottom: 0;
         border-top: $crowdfund-border;
         form { @include row; }
         form > section {
@@ -170,35 +171,121 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     position: relative;
 
     .overlay {
-        z-index: 1;
-        opacity: .9;
+        z-index: -1;
+        opacity: 0;
         display: block;
-        background-color: $color-grey;
-        transition-property: background-color, opacity;
-        transition-duration: .5s;
-        transition-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+        @include transition(opacity, .5s, linear);
         position: absolute;
         top: 0;
         left: 0;
         height: 100%;
         width: 100%;
+        @include border-radius;
 
-        h1 {
-            font-weight: $font-weight-bold;
-            text-align: center;
+        color: $color-white;
+        text-align: center;
+        font-weight: $font-weight-bold;
+
+        a {
             color: $color-white;
-            position: relative;
+        }
+
+        &.visible {
+            z-index: 1;
+            opacity: .9;
+        }
+
+        &.pending  { background-color: $color-grey;    }
+        &.complete { background-color: $color-green;   }
+        &.error    { background-color: $color-red;     }
+
+        .loader, .dialog {
+            width: 100%;
+            position: absolute;
             top: 50%;
             transform: translateY(-50%);
         }
 
-        &.hidden {
-            z-index: -1;
-            opacity: 0;
+        .sharing {
+            margin: 0 auto;
+            width: 22em;
+            dfn {
+                display: none;
+            }
+            .share {
+                border: 2px solid $color-white;
+                text-decoration: none;
+                &.twitter, &.facebook, &.email {
+                    background-color: transparent;
+                    &:hover {
+                        background-color: rgba(255, 255, 255, .25);
+                    }
+                }
+            }
         }
     }
-
-    &.pending .overlay  { background-color: $color-grey;    }
-    &.complete .overlay { background-color: $color-green;   }
-    &.error .overlay    { background-color: $color-red;     }
 }
+
+// Loader animation via https://github.com/ConnorAtherton/loaders.css
+
+.line-scale-pulse-out > div {
+  background-color: #fff;
+  width: 4px;
+  height: 35px;
+  border-radius: 2px;
+  margin: 2px;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+  display: inline-block;
+  -webkit-animation: line-scale-pulse-out 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85);
+          animation: line-scale-pulse-out 0.9s -0.6s infinite cubic-bezier(.85, .25, .37, .85); }
+  .line-scale-pulse-out > div:nth-child(2), .line-scale-pulse-out > div:nth-child(4) {
+    -webkit-animation-delay: -0.4s !important;
+            animation-delay: -0.4s !important; }
+  .line-scale-pulse-out > div:nth-child(1), .line-scale-pulse-out > div:nth-child(5) {
+    -webkit-animation-delay: -0.2s !important;
+            animation-delay: -0.2s !important; }
+
+@-webkit-keyframes line-scale-pulse-out-rapid {
+  0% {
+    -webkit-transform: scaley(1);
+            transform: scaley(1); }
+
+  80% {
+    -webkit-transform: scaley(0.3);
+            transform: scaley(0.3); }
+
+  90% {
+    -webkit-transform: scaley(1);
+            transform: scaley(1); } }
+
+@keyframes line-scale-pulse-out-rapid {
+  0% {
+    -webkit-transform: scaley(1);
+            transform: scaley(1); }
+
+  80% {
+    -webkit-transform: scaley(0.3);
+            transform: scaley(0.3); }
+
+  90% {
+    -webkit-transform: scaley(1);
+            transform: scaley(1); } }
+
+.line-scale-pulse-out-rapid > div {
+  background-color: #fff;
+  width: 4px;
+  height: 35px;
+  border-radius: 2px;
+  margin: 2px;
+  -webkit-animation-fill-mode: both;
+          animation-fill-mode: both;
+  display: inline-block;
+  -webkit-animation: line-scale-pulse-out-rapid 0.9s -0.5s infinite cubic-bezier(.11, .49, .38, .78);
+          animation: line-scale-pulse-out-rapid 0.9s -0.5s infinite cubic-bezier(.11, .49, .38, .78); }
+  .line-scale-pulse-out-rapid > div:nth-child(2), .line-scale-pulse-out-rapid > div:nth-child(4) {
+    -webkit-animation-delay: -0.25s !important;
+            animation-delay: -0.25s !important; }
+  .line-scale-pulse-out-rapid > div:nth-child(1), .line-scale-pulse-out-rapid > div:nth-child(5) {
+    -webkit-animation-delay: 0s !important;
+            animation-delay: 0s !important; }
