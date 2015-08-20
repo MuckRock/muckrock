@@ -1,23 +1,27 @@
-var csrftoken = $.cookie('csrftoken');
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
-    }
-});
+// Task.js
+//
+// Logic for client interactions with the MuckRock task system.
 
-var tasks = $('.task');
-var resolved = $('.resolved.task');
+function authenticateAjax() {
+    // Sets up authentication for AJAX transactions
+    var csrftoken = $.cookie('csrftoken');
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+}
 
 function resolve(taskForm) {
     taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
     taskData = $(taskForm).serialize() + '&resolve=true'
-    console.log(taskData);
+    // console.log(taskData);
     $.ajax({
         type: 'POST',
         data: taskData,
@@ -28,8 +32,8 @@ function resolve(taskForm) {
 function reject(taskForm) {
     taskData = $(taskForm).serializeArray()
     taskID = '#' + getTaskID(taskData) + '-task';
-    console.log($(taskForm).serialize());
-    console.log(taskID);
+    // console.log($(taskForm).serialize());
+    // console.log(taskID);
     $.ajax({
         type: 'POST',
         data: 'resolve=true&task=' + getTaskID(taskData),
@@ -48,15 +52,11 @@ function getTaskID(taskFormData) {
     return taskID;
 }
 
-function markAsResolved(taskID) {
-    $(taskID).addClass('resolved');
-    $(taskID).find(':input').attr('disabled', true).addClass('disabled');
-    $(taskID).find('.task-type').text('Resolved');
+function markAsResolved(task) {
+    $(task).addClass('resolved');
+    $(task).find(':input').attr('disabled', true).addClass('disabled');
+    $(task).find('.task-type').text('Resolved');
 }
-
-resolved.each(function(){
-    markAsResolved(this);
-});
 
 function formHasAction(taskForm, action) {
     // checks whether the task form has a 'Resolve' action or not
@@ -68,12 +68,42 @@ function formHasAction(taskForm, action) {
     return actionExists;
 }
 
+function rebindCheckboxes(){
+    // Rebinds the toggle all checkbox to only select checkboxes in task headers
+    $('#toggle-all').off('click');
+    $('#toggle-all').click(function(){
+        var toggleAll = this;
+        $('.task header :checkbox').not('#toggle-all').not('.list-filters-fields').each(function(){
+            $(this).click(function(){
+                toggleAll.checked = false;
+            });
+            if (!$(this).data('ignore-toggle-all')) {
+                this.checked = toggleAll.checked;
+                toggleBatchedButtons();
+            }
+        });
+    });
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+authenticateAjax();
+rebindCheckboxes();
+
+var tasks = $('.task');
+
+// Hide all the resolved tasks
+$('.resolved.task')
+    .each(function(){
+        markAsResolved(this);
+    })
+    .addClass('collapsed');
+
 $('button[name="resolve"]').click(function(e){
-    e.preventDefault;
-    // if the button clicked is the "resolve all" button,
-    // then get forms for all the currently checked tasks
-    // else,
-    // just get the form for the task that owns the button
+    /* If the button clicked is the "resolve all" button, then get forms
+    for all the currently checked tasks. Else, just get the form for the
+    task that owns the button. */
+    e.preventDefault();
     var forms = [];
     if ($(this).attr('id') == 'batched-resolve') {
         $(':checked[form=batched]').each(function() {
@@ -93,7 +123,7 @@ $('button[name="resolve"]').click(function(e){
 });
 
 $('button[name="reject"]').click(function(e){
-    e.preventDefault;
+    e.preventDefault();
     var forms = [];
     if ($(this).attr('id') == 'batched-reject') {
         $(':checked[form=batched]').each(function() {
@@ -112,7 +142,6 @@ $('button[name="reject"]').click(function(e){
     return false;
 });
 
-resolved.addClass('collapsed');
 tasks.find('header').click(function() {
     $(this).parent().toggleClass('collapsed');
 });
@@ -138,20 +167,7 @@ batchedButtons.attr('disabled', true);
 checkboxes.click(function(){
     toggleBatchedButtons();
 });
-// Rebinds the toggle all checkbox to only select checkboxes in task headers
-$('#toggle-all').unbind('click');
-$('#toggle-all').click(function(){
-    var toggleAll = this;
-    $('.task header :checkbox').not('#toggle-all').not('.list-filters-fields').each(function(){
-        $(this).click(function(){
-            toggleAll.checked = false;
-        });
-        if (!$(this).data('ignore-toggle-all')) {
-            this.checked = toggleAll.checked;
-            toggleBatchedButtons();
-        }
-    });
-});
+
 
 
 $('#collapse-all').click(function(e){
