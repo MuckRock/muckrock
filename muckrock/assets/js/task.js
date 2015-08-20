@@ -19,13 +19,32 @@ function authenticateAjax() {
 }
 
 function resolve(taskForm) {
-    taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    taskData = $(taskForm).serialize() + '&resolve=true'
-    // console.log(taskData);
+    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    var taskData = $(taskForm).serialize() + '&resolve=true';
+    var taskEndpoint = $(taskForm).attr('action');
+
+    var task = $(taskID);
+    var pendingOverlay = $(task).children('.pending.overlay');
+    var errorOverlay = $(task).children('.error.overlay');
+
+    $(document).ajaxStart(function(){
+        $(pendingOverlay).addClass('visible');
+    }).ajaxError(function(){
+        $(pendingOverlay).removeClass('visible');
+        $(errorOverlay).addClass('visible');
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
+    }).ajaxComplete(function(){
+        $(pendingOverlay).removeClass('visible');
+        markAsResolved(task);
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
+    });
+
     $.ajax({
-        type: 'POST',
+        url: taskEndpoint,
+        type: 'post',
         data: taskData,
-        success: markAsResolved(taskID)
+        success: null,
+        dataType: 'json'
     });
 }
 
