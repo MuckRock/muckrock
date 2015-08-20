@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.http import Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
@@ -113,7 +113,10 @@ class TaskList(MRFilterableListView):
         tasks = self.get_tasks()
         for task in tasks:
             self.task_post_helper(request, task)
-        return redirect(self.get_redirect_url())
+        if request.is_ajax():
+            return HttpResponse(200)
+        else:
+            return redirect(self.get_redirect_url())
 
 
 class OrphanTaskList(TaskList):
