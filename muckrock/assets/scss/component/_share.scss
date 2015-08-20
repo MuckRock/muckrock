@@ -20,7 +20,7 @@ $button-width: 7em;
     padding: $vertical-rhythm/2 $vertical-rhythm;
     @include border-radius;
     color: $color-white;
-    font-weight: bold;
+    font-weight: $font-weight-bold;
     text-align: center;
     text-decoration: none;
     @include transition(background-color, .25s, linear);
