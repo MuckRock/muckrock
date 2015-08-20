@@ -27,6 +27,7 @@ function submitForm(form) {
     }).ajaxError(function(){
         $(pendingOverlay).removeClass('visible');
         $(errorOverlay).addClass('visible');
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     }).ajaxComplete(function(e){
         $(pendingOverlay).removeClass('visible');
         $(completeOverlay).addClass('visible');
