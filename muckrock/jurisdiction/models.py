@@ -193,6 +193,14 @@ class Jurisdiction(models.Model, RequestHelper):
         else:
             return self.waiver
 
+    def get_law_name(self):
+        """The law name for the jurisdiction"""
+        # pylint: disable=no-member
+        if self.level == 'l':
+            return self.parent.law_name
+        else:
+            return self.law_name
+
     def get_calendar(self):
         """Get a calendar of business days for the jurisdiction"""
         # pylint: disable=no-member

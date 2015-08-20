@@ -69,15 +69,19 @@ class FOIARequestQuerySet(models.QuerySet):
         """Get all overdue FOIA requests"""
         return self.filter(status__in=['ack', 'processed'], date_due__lt=date.today())
 
-    def get_followup(self):
-        """Get requests which require us to follow up on with the agency"""
+    def get_manual_followup(self):
+        """Get old requests which require us to follow up on with the agency"""
 
         return [
             f for f in self.get_overdue()
             if f.communications.all().reverse()[0].date + timedelta(15) < datetime.now()
         ]
-        # Change to this after all follow ups have been resolved
-        #return self.filter(status='processed', date_followup__lte=date.today())
+
+    def get_followup(self):
+        """Get requests that need follow up emails sent"""
+        return self.filter(status__in=['ack', 'processed'],
+                           date_followup__lte=date.today(),
+                           disable_autofollowups=False)
 
     def get_open(self):
         """Get requests which we are awaiting a response from"""
@@ -135,6 +139,8 @@ class FOIARequest(models.Model):
     date_due = models.DateField(blank=True, null=True)
     days_until_due = models.IntegerField(blank=True, null=True)
     date_followup = models.DateField(blank=True, null=True)
+    date_estimate = models.DateField(blank=True, null=True,
+            verbose_name='Estimated Date Completed')
     embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
     permanent_embargo = models.BooleanField(default=False)
@@ -445,10 +451,18 @@ class FOIARequest(models.Model):
         # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
 
+        if self.date_estimate and date.today() < self.date_estimate:
+            estimate = 'future'
+        elif self.date_estimate:
+            estimate = 'past'
+        else:
+            estimate = 'none'
+
         comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
             date=datetime.now(), response=False, full_html=False,
-            communication=render_to_string('text/foia/followup.txt', {'request': self}))
+            communication=render_to_string('text/foia/followup.txt',
+                {'request': self, 'estimate': estimate}))
 
         if not self.email and self.agency:
             self.email = self.agency.get_email()
@@ -473,12 +487,13 @@ class FOIARequest(models.Model):
         # self.email should be set before calling this method
 
         from_addr = 'fax' if self.email.endswith('faxaway.com') else self.get_mail_id()
+        law_name = self.jurisdiction.get_law_name()
         if self.tracking_id:
-            subject = 'RE: Freedom of Information Request #%s' % self.tracking_id
+            subject = 'RE: %s Request #%s' % (law_name, self.tracking_id)
         elif self.communications.count() > 1:
-            subject = 'RE: Freedom of Information Request: %s' % self.title
+            subject = 'RE: %s Request: %s' % (law_name, self.title)
         else:
-            subject = 'Freedom of Information Request: %s' % self.title
+            subject = '%s Request: %s' % (law_name, self.title)
 
         # get last comm to set delivered and raw_email
         comm = self.communications.reverse()[0]
@@ -571,6 +586,8 @@ class FOIARequest(models.Model):
     def _followup_days(self):
         """How many days do we wait until we follow up?"""
         # pylint: disable=no-member
+        if self.date_estimate and date.today() < self.date_estimate:
+            return 183
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:

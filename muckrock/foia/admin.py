@@ -224,7 +224,7 @@ class FOIARequestAdmin(NestedModelAdmin, VersionAdmin):
     def followup(self, request):
         """List all the requests that need to be followed up"""
         # pylint: disable=no-self-use
-        foias = list(FOIARequest.objects.get_followup())
+        foias = list(FOIARequest.objects.get_manual_followup())
         return self._list_helper(request, foias, 'Follow Up')
 
     def undated(self, request):
