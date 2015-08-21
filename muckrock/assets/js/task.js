@@ -18,46 +18,49 @@ function authenticateAjax() {
     });
 }
 
-function resolve(taskForm) {
-    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
-    var taskData = $(taskForm).serialize() + '&resolve=true';
-    var taskEndpoint = $(taskForm).attr('action');
-
-    var task = $(taskID);
+function ajaxPost(task, endpoint, data) {
     var pendingOverlay = $(task).children('.pending.overlay');
     var errorOverlay = $(task).children('.error.overlay');
-
     $(document).ajaxStart(function(){
         $(pendingOverlay).addClass('visible');
-    }).ajaxError(function(){
+    }).ajaxError(function(event, response){
         $(pendingOverlay).removeClass('visible');
         $(errorOverlay).addClass('visible');
+        setTimeout(function(){
+            $(errorOverlay).removeClass('visible');
+        }, 3000);
         $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     }).ajaxComplete(function(){
         $(pendingOverlay).removeClass('visible');
         markAsResolved(task);
         $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     });
-
     $.ajax({
-        url: taskEndpoint,
+        url: endpoint,
         type: 'post',
-        data: taskData,
+        data: data,
         success: null,
         dataType: 'json'
     });
 }
 
+/*
+Need to add the action as a value since the button is being overridden.
+In a non-JS form submission, the button would also include its value in the posted data.
+*/
+
+function resolve(taskForm) {
+    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    var taskData = $(taskForm).serialize() + '&resolve=true';
+    var taskEndpoint = $(taskForm).attr('action');
+    ajaxPost(taskID, taskEndpoint, taskData);
+}
+
 function reject(taskForm) {
-    taskData = $(taskForm).serializeArray()
-    taskID = '#' + getTaskID(taskData) + '-task';
-    // console.log($(taskForm).serialize());
-    // console.log(taskID);
-    $.ajax({
-        type: 'POST',
-        data: 'resolve=true&task=' + getTaskID(taskData),
-        success: markAsResolved(taskID)
-    });
+    var taskID = '#' + getTaskID($(taskForm).serializeArray()) + '-task';
+    var taskData = $(taskForm).serialize() + '&reject=true';
+    var taskEndpoint = $(taskForm).attr('action');
+    ajaxPost(taskID, taskEndpoint, taskData);
 }
 
 function getTaskID(taskFormData) {
