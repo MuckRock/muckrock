@@ -29,9 +29,12 @@ function resolve(taskForm) {
 
     $(document).ajaxStart(function(){
         $(pendingOverlay).addClass('visible');
-    }).ajaxError(function(){
+    }).ajaxError(function(event, response){
         $(pendingOverlay).removeClass('visible');
         $(errorOverlay).addClass('visible');
+        setTimeout(function(){
+            $(errorOverlay).removeClass('visible');
+        }, 3000);
         $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
     }).ajaxComplete(function(){
         $(pendingOverlay).removeClass('visible');
