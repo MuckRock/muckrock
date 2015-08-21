@@ -35,6 +35,7 @@
     <form method="POST" action="{{ endpoint }}" class="new-agency rejection form">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
+        <input type="hidden" name="reject" value="true">
         <label>Move this agency’s requests to</label>
         <select name="replacement">
         {% for other_agency in other_agencies %}
@@ -46,6 +47,7 @@
     <form method="POST" action="{{ endpoint }}" class="new-agency approval form">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
+        <input type="hidden" name="approve" value="true">
         {% for field in agency_form %}
         <fieldset class="{{field.id_for_label}}">
             {{ field.label_tag }}
