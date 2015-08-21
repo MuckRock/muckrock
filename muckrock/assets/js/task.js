@@ -49,14 +49,32 @@ function resolve(taskForm) {
 }
 
 function reject(taskForm) {
-    taskData = $(taskForm).serializeArray()
-    taskID = '#' + getTaskID(taskData) + '-task';
-    // console.log($(taskForm).serialize());
-    // console.log(taskID);
+    var taskData = $(taskForm).serializeArray()
+    var taskID = '#' + getTaskID(taskData) + '-task';
+    var taskEndpoint = $(taskForm).attr('action');
+
+    var task = $(taskID);
+    var pendingOverlay = $(task).children('.pending.overlay');
+    var errorOverlay = $(task).children('.error.overlay');
+
+    $(document).ajaxStart(function(){
+        $(pendingOverlay).addClass('visible');
+    }).ajaxError(function(){
+        $(pendingOverlay).removeClass('visible');
+        $(errorOverlay).addClass('visible');
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
+    }).ajaxComplete(function(){
+        $(pendingOverlay).removeClass('visible');
+        markAsResolved(task);
+        $(document).off('ajaxStart').off('ajaxError').off('ajaxComplete');
+    });
+
     $.ajax({
-        type: 'POST',
-        data: 'resolve=true&task=' + getTaskID(taskData),
-        success: markAsResolved(taskID)
+        url: taskEndpoint,
+        type: 'post',
+        data: taskData,
+        success: null,
+        dataType: 'json'
     });
 }
 
