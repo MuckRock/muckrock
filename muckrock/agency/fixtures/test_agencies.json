@@ -67,7 +67,7 @@
             "other_emails": "", 
             "jurisdiction": 1, 
             "expires": null, 
-            "approved": false, 
+            "approved": true, 
             "phone": "", 
             "user": 1, 
             "address": "457 Nowhere\r\nBoston, MA 02140", 

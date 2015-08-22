@@ -310,8 +310,7 @@ ABSOLUTE_URL_OVERRIDES = {
 DBSETTINGS_USE_SITES = False
 
 if DEBUG:
-    pass
-    #TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TINYMCE_DEFAULT_CONFIG = {
     'theme': 'advanced',

@@ -19,6 +19,7 @@ from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.task.models import SnailMailTask
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
 
 # MockDate breaks pylint-django
@@ -73,20 +74,19 @@ class TestFOIARequestUnit(TestCase):
         self.foia.status = 'submitted'
         self.foia.save()
         self.foia.submit()
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[0].to, ['requests@muckrock.com'])
+        nose.tools.eq_(len(mail.outbox), 0)
 
         self.foia.status = 'processed'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 2)
-        nose.tools.eq_(mail.outbox[1].to, [self.foia.user.email])
+        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(mail.outbox[0].to, [self.foia.user.email])
 
         # already updated, no additional email
         self.foia.status = 'fix'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 3)
+        nose.tools.eq_(len(mail.outbox), 2)
 
         # if the user views it and clears the updated flag, we do get another email
         self.foia.updated = False
@@ -94,7 +94,7 @@ class TestFOIARequestUnit(TestCase):
         self.foia.status = 'rejected'
         self.foia.save()
         self.foia.update()
-        nose.tools.eq_(len(mail.outbox), 4)
+        nose.tools.eq_(len(mail.outbox), 3)
 
         foia = FOIARequest.objects.get(pk=6)
         foia.status = 'submitted'
@@ -459,10 +459,10 @@ class TestFOIAIntegration(TestCase):
             response=False, communication=u'Test communication')
         foia.submit()
 
-        # check that a notification has been sent to requests
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.ok_(mail.outbox[-1].subject.startswith('[NEW]'))
-        nose.tools.eq_(mail.outbox[-1].to, ['requests@muckrock.com'])
+        # check that a snail mail task was created
+        nose.tools.ok_(
+            SnailMailTask.objects.filter(
+                communication=comm, category='n').exists())
 
         ## two days pass, then the admin mails in the request
         self.set_today(datetime.date.today() + datetime.timedelta(2))
@@ -479,7 +479,7 @@ class TestFOIAIntegration(TestCase):
                                           datetime.timedelta(foia._followup_days())))
         nose.tools.ok_(foia.days_until_due is None)
         # no more mail should have been sent
-        nose.tools.eq_(len(mail.outbox), 1)
+        nose.tools.eq_(len(mail.outbox), 0)
 
         old_date_due = foia.date_due
 
@@ -493,7 +493,7 @@ class TestFOIAIntegration(TestCase):
         foia.update(comm.anchor())
 
         # check that a notification has been sent to the user
-        nose.tools.eq_(len(mail.outbox), 2)
+        nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.ok_(mail.outbox[-1].subject.startswith('[MuckRock]'))
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
         # make sure dates were set correctly
@@ -514,10 +514,10 @@ class TestFOIAIntegration(TestCase):
         foia.save()
         foia.submit()
 
-        # check that a notification has been sent to requests
-        nose.tools.eq_(len(mail.outbox), 3)
-        nose.tools.ok_(mail.outbox[-1].subject.startswith('[UPDATED]'))
-        nose.tools.eq_(mail.outbox[-1].to, ['requests@muckrock.com'])
+        # check that another snail mail task is created
+        nose.tools.ok_(
+            SnailMailTask.objects.filter(
+                communication=comm, category='u').exists())
 
         foia.status = 'processed'
 
@@ -546,7 +546,7 @@ class TestFOIAIntegration(TestCase):
 
         # check that a notification has not been sent to the user since they habe not
         # cleared the updated flag yet by viewing it
-        nose.tools.eq_(len(mail.outbox), 4)
+        nose.tools.eq_(len(mail.outbox), 2)
         # make sure dates were set correctly
         nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
         nose.tools.eq_(foia.date_due, old_date_due)
