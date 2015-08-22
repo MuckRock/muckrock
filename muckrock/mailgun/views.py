@@ -21,6 +21,7 @@ from localflavor.us.us_states import STATE_CHOICES
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEmail
 from muckrock.foia.tasks import upload_document_cloud
+from muckrock.mailgun.models import WhitelistDomain
 from muckrock.settings import MAILGUN_ACCESS_KEY
 from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FailedFaxTask
 
@@ -299,19 +300,32 @@ def _allowed_email(email, foia=None):
         '@muckrock.com',
         ] + state_tlds
 
+    # from the same domain as the FOIA email
     if foia and foia.email and '@' in foia.email and \
             email.endswith(foia.email.split('@')[1].lower()):
         return True
+
+    # the email is a known email for this FOIA's agency
     if foia and foia.agency and email in [i.lower() for i in foia.agency.get_other_emails()]:
         return True
+
+    # the email is a known email for this FOIA
     if foia and email in [i.lower() for i in foia.get_other_emails()]:
         return True
 
+    # it is from any known government TLD
     if any(email.endswith(tld) for tld in allowed_tlds):
         return True
 
+    # if not associated with any FOIA,
+    # checked if the email is known for any agency
     if not foia and (Agency.objects.filter(email__iexact=email).exists() or
             Agency.objects.filter(other_emails__icontains=email).exists()):
+        return True
+
+    # check the email domain against the whitelist
+    if '@' in email and WhitelistDomain.objects.filter(
+            domain__iexact=email.split('@')[1]).exists():
         return True
 
     return False
