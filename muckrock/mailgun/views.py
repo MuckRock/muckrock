@@ -289,6 +289,7 @@ def _forward(post, files, title='', extra_content=''):
 
 def _allowed_email(email, foia=None):
     """Is this an allowed email?"""
+    # pylint: disable=too-many-return-statements
 
     email = email.lower()
     state_tlds = ['.%s.us' % a.lower() for (a, _) in STATE_CHOICES
