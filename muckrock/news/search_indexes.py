@@ -10,7 +10,7 @@ from muckrock.news.models import Article
 class ArticleIndex(CelerySearchIndex, Indexable):
     """Search index for news articles"""
     text = CharField(document=True, use_template=True)
-    authors = CharField(model_attr='authors')
+    #authors = CharField(model_attr='authors')
     pub_date = DateTimeField(model_attr='pub_date')
 
     def get_model(self):
