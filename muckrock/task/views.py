@@ -5,7 +5,7 @@ Views for the Task application
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import resolve
-from django.http import Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
@@ -15,8 +15,8 @@ from muckrock import foia
 from muckrock.task.forms import TaskFilterForm, ResponseTaskForm
 from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
                                  StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 PaymentTask, CrowdfundTask, MultiRequestTask, StatusChangeTask, \
-                                 FailedFaxTask
+                                 PaymentTask, GenericCrowdfundTask, MultiRequestTask, \
+                                 StatusChangeTask, FailedFaxTask
 from muckrock.views import MRFilterableListView
 
 STATUS = foia.models.STATUS
@@ -36,7 +36,7 @@ def count_tasks():
     count['response'] = ResponseTask.objects.exclude(resolved=True).count()
     count['status_change'] = StatusChangeTask.objects.exclude(resolved=True).count()
     count['payment'] = PaymentTask.objects.exclude(resolved=True).count()
-    count['crowdfund'] = CrowdfundTask.objects.exclude(resolved=True).count()
+    count['crowdfund'] = GenericCrowdfundTask.objects.exclude(resolved=True).count()
     count['multirequest'] = MultiRequestTask.objects.exclude(resolved=True).count()
     count['failed_fax'] = FailedFaxTask.objects.exclude(resolved=True).count()
     return count
@@ -113,7 +113,10 @@ class TaskList(MRFilterableListView):
         tasks = self.get_tasks()
         for task in tasks:
             self.task_post_helper(request, task)
-        return redirect(self.get_redirect_url())
+        if request.is_ajax():
+            return HttpResponse(200)
+        else:
+            return redirect(self.get_redirect_url())
 
 
 class OrphanTaskList(TaskList):
@@ -253,7 +256,7 @@ class PaymentTaskList(TaskList):
 
 class CrowdfundTaskList(TaskList):
     title = 'Crowdfunds'
-    model = CrowdfundTask
+    model = GenericCrowdfundTask
 
 
 class MultiRequestTaskList(TaskList):

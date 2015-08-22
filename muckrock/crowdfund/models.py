@@ -8,6 +8,7 @@ from django.db import models
 from datetime import date
 from decimal import Decimal
 import logging
+import stripe
 
 from muckrock.foia.models import FOIARequest
 from muckrock import task
@@ -20,6 +21,7 @@ class CrowdfundABC(models.Model):
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    payment_capped = models.BooleanField(default=False)
     payment_required = models.DecimalField(
         max_digits=14,
         decimal_places=2,
@@ -31,14 +33,15 @@ class CrowdfundABC(models.Model):
         default='0.00'
     )
     date_due = models.DateField()
+    closed = models.BooleanField(default=False)
 
     def expired(self):
         """Has this crowdfuning run out of time?"""
-        return date.today() >= self.date_due
+        return date.today() >= self.date_due or self.closed
 
     def amount_remaining(self):
         """Reports the amount still needed to be raised"""
-        return self.payment_required - self.payment_received
+        return Decimal(self.payment_required) - Decimal(self.payment_received)
 
     def update_payment_received(self):
         """Combine the amounts of all the payments"""
@@ -49,15 +52,17 @@ class CrowdfundABC(models.Model):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
-        if self.payment_received >= self.payment_required:
-            self.complete_crowdfund()
+        if self.payment_received >= self.payment_required and self.payment_capped:
+            self.close_crowdfund()
+            logging.info('Crowdfund %d reached its goal.', self.id)
+        return
 
-    def complete_crowdfund(self):
-        """Once the crowdfund reaches its goal: expire it, log it, and create a new task for it."""
-        self.date_due = date.today()
+    def close_crowdfund(self):
+        """Close the crowdfund and create a new task for it once it reaches its goal."""
+        self.closed = True
         self.save()
-        logging.info('Crowdfund %d reached its goal.', self.id)
-        task.models.CrowdfundTask.objects.create(crowdfund=self)
+        task.models.GenericCrowdfundTask.objects.create(crowdfund=self)
+        return
 
     def contributors(self):
         """Return a list of all the contributors to a crowdfund"""
@@ -81,10 +86,51 @@ class CrowdfundABC(models.Model):
         # returns the list of a set of a list to remove duplicates
         return list(set([x for x in self.contributors() if not x.is_anonymous()]))
 
+    def get_crowdfund_payment_object(self):
+        """Return the crowdfund payment object. Should be implemented by subclasses."""
+        # pylint:disable=no-self-use
+        raise NotImplementedError
+
     def get_crowdfund_object(self):
         """Return the object being crowdfunded. Should be implemented by subclasses."""
         # pylint:disable=no-self-use
-        return None
+        raise NotImplementedError
+
+    def make_payment(self, token, amount, show=False, user=None):
+        """Creates a payment for the crowdfund"""
+        amount = Decimal(amount)
+        if self.payment_capped and amount > self.amount_remaining():
+            amount = self.amount_remaining()
+        # Try processing the payment using Stripe.
+        # If the payment fails, raise an error.
+        stripe_exceptions = (
+            stripe.InvalidRequestError,
+            stripe.CardError,
+            stripe.APIConnectionError,
+            stripe.AuthenticationError
+        )
+        try:
+            # Stripe represents currency as integers
+            stripe_amount = int(float(amount) * 100)
+            stripe.Charge.create(
+                amount=stripe_amount,
+                source=token,
+                currency='usd',
+                description='Crowdfund contribution: %s' % self,
+            )
+        except stripe_exceptions as payment_error:
+            raise payment_error
+        payment_object = self.get_crowdfund_payment_object()
+        payment = payment_object.objects.create(
+            amount=amount,
+            crowdfund=self,
+            user=user,
+            show=show
+        )
+        payment.save()
+        logging.info(payment)
+        self.update_payment_received()
+        return payment
 
 class CrowdfundPaymentABC(models.Model):
     """Abstract base class for crowdfunding objects"""
@@ -111,6 +157,9 @@ class CrowdfundRequest(CrowdfundABC):
         """The url for this object"""
         return ('crowdfund-request', [], {'pk': self.pk})
 
+    def get_crowdfund_payment_object(self):
+        return CrowdfundRequestPayment
+
     def get_crowdfund_object(self):
         return self.foia
 
@@ -136,8 +185,12 @@ class CrowdfundProject(CrowdfundABC):
         """The url for this object"""
         return ('crowdfund-project', [], {'pk': self.pk})
 
+    def get_crowdfund_payment_object(self):
+        return CrowdfundProjectPayment
+
     def get_crowdfund_object(self):
         return self.project
+
 
 class CrowdfundProjectPayment(CrowdfundPaymentABC):
     """Individual payments made to a project crowdfund"""

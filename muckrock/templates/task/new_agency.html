@@ -32,9 +32,10 @@
 
 {% block task-extra-context %}
 <div class="task-extra-context">
-    <form method="POST" class="new-agency rejection form">
+    <form method="POST" action="{{ endpoint }}" class="new-agency rejection form">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
+        <input type="hidden" name="reject" value="true">
         <label>Move this agency’s requests to</label>
         <select name="replacement">
         {% for other_agency in other_agencies %}
@@ -43,9 +44,10 @@
         </select>
         <button type="submit" name="reject" value="true" class="failure">Reject</button>
     </form>
-    <form method="POST" class="new-agency approval form">
+    <form method="POST" action="{{ endpoint }}" class="new-agency approval form">
         {% csrf_token %}
         <input type="hidden" name="task" value="{{task.pk}}">
+        <input type="hidden" name="approve" value="true">
         {% for field in agency_form %}
         <fieldset class="{{field.id_for_label}}">
             {{ field.label_tag }}

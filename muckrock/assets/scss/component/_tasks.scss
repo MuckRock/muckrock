@@ -69,9 +69,9 @@
 
 .task .task-extra-context {
     @include span-columns(12);
+    margin-bottom: 0;
     padding: $vertical-rhythm/2;
     background: $color-grey-7;
-
     button {
         display: block;
         width: 10em;
@@ -91,6 +91,39 @@
 .collapsed.task {
     .task-data, .task-actions, .task-extra-context {
         display: none;
+    }
+}
+
+.task {
+    position: relative;
+    .overlay {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        color: $color-white;
+        text-align: center;
+        font-weight: $font-weight-bold;
+        a {
+            color: $color-white;
+        }
+        z-index: -1;
+        opacity: 0;
+        @include transition(opacity, .5s, linear);
+        &.visible {
+            z-index: 1;
+            opacity: .9;
+        }
+        &.pending  { background-color: $color-grey;    }
+        &.error    { background-color: $color-red;     }
+        .loader, .dialog {
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
     }
 }
 

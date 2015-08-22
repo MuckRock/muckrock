@@ -1,33 +1,55 @@
-.social.sharing {
-    width: 100%;
-    margin: 0 0 $vertical-rhythm 0;
-    text-align: left;
+$darken-amount: 10%;
+$button-width: 7em;
+
+.sharing {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    dfn {
+        @include flex(100%);
+    }
+    @include media($medium-layout) {
+        width: $button-width;
+    }
 }
 
-.sharing > a {
-    &.facebook {  @include colorize-icon($color-facebook); }
-    &.twitter { @include colorize-icon($color-twitter); }
-    &.email { @include colorize-icon($color-email); }
-    width: 33%;
-    margin: 0 $vertical-rhythm/8;
-    &:first-of-type {
-        margin-left: 0;
-        svg { margin-left: 0; }
-    }
-    &:last-of-type {
-        margin-right: 0;
-        svg { margin-right: 0; }
-    }
+
+.share {
+    @include flex(1 1 $button-width);
+    display: block;
+    margin: 0 $vertical-rhythm/4 $vertical-rhythm/4 0;
+    padding: $vertical-rhythm/2 $vertical-rhythm;
+    @include border-radius;
+    color: $color-white;
+    font-weight: $font-weight-bold;
+    text-align: center;
     text-decoration: none;
-    text-align: left;
-    .svg-icon {
-        height: 24px;
-        width: 24px;
+    @include transition(background-color, .25s, linear);
+    &:hover {
+        color: $color-white;
+        text-decoration: none;
     }
-}
-
-.sharing > a:hover {
-   &.facebook {  @include colorize-icon(darken($color-facebook, 20%)); }
-    &.twitter { @include colorize-icon(darken($color-twitter, 20%)); }
-    &.email { @include colorize-icon(darken($color-email, 20%)); }
+    &.facebook {
+        background-color: $color-facebook;
+        &:hover {
+            background-color: darken($color-facebook, $darken-amount);
+        }
+    }
+    &.twitter {
+        background-color: $color-twitter;
+        &:hover {
+            background-color: darken($color-twitter, $darken-amount);
+        }
+    }
+    &.email {
+        background-color: $color-email;
+        &:hover {
+            background-color: darken($color-email, $darken-amount);
+        }
+    }
+    @include colorize-icon($color-white);
+    .svg-icon {
+        height: 1rem;
+        width: 1rem;
+        margin-left: 0;
+    }
 }

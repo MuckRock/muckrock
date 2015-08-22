@@ -77,14 +77,16 @@
 
     .news-article-body {
         @include order(2);
+        max-width: 100%;
         @media screen and (min-width: $news-layout-breakpoint) {
             @include order(3);
             @include flex(1);
+            max-width: 40em;
             margin: 0 $vertical-rhythm $vertical-rhythm;
             font-size: $font-size-4;
             line-height: $font-line-height;
         }
-        max-width: 40em;
+
         p {
             overflow: hidden;
         }
