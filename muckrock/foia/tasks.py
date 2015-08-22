@@ -246,9 +246,12 @@ def autoimport():
     """Auto import documents from S3"""
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    p_name = re.compile(r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
-                        r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
-                        r'(?: ID#(?P<id>\S+))?', re.I)
+    p_name = re.compile(
+            r'(?P<month>\d\d?)-(?P<day>\d\d?)-(?P<year>\d\d) '
+            r'(?P<docs>(?:mr\d+ )+)(?P<code>[a-z-]+)(?:\$(?P<arg>\S+))?'
+            r'(?: ID#(?P<id>\S+))?'
+            r'(?: EST(?P<estm>\d\d?)-(?P<estd>\d\d?)-(?P<esty>\d\d))?'
+            , re.I)
     log = ['Start Time: %s' % datetime.now()]
 
     def s3_copy(bucket, key_or_pre, dest_name):
@@ -297,8 +300,15 @@ def autoimport():
         title, status, body = CODES[code]
         arg = m_name.group('arg')
         id_ = m_name.group('id')
+        if m_name.group('esty'):
+            est_date = datetime(int(m_name.group('esty')) + 2000,
+                                int(m_name.group('estm')),
+                                int(m_name.group('estd')))
+        else:
+            est_date = None
 
-        return foia_pks, file_date, code, title, status, body, arg, id_
+        return (foia_pks, file_date, code, title,
+                status, body, arg, id_, est_date)
 
     def import_key(key, comm, log, title=None):
         """Import a key"""
@@ -349,7 +359,8 @@ def autoimport():
         file_name = key.name[6:]
 
         try:
-            foia_pks, file_date, code, title, status, body, arg, id_ = parse_name(file_name)
+            foia_pks, file_date, code, title, status, body, arg, id_, est_date \
+                = parse_name(file_name)
         except ValueError as exc:
             s3_copy(bucket, key, 'review/%s' % file_name)
             s3_delete(bucket, key)
@@ -375,6 +386,8 @@ def autoimport():
                     foia.price = Decimal(arg)
                 if id_:
                     foia.tracking_id = id_
+                if est_date:
+                    foia.date_estimate = est_date
 
                 if key.name.endswith('/'):
                     import_prefix(key, bucket, comm, log)
