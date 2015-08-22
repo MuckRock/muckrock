@@ -3,7 +3,6 @@
 {% load markdown_deux_tags %}
 
 <section class="crowdfund widget">
-    <div class="overlay hidden"></div>
     <header>
         <h1>{{ crowdfund.name }}</h1>
         <!--<a href="/docs/crowdfund/">What is this?</a>-->
@@ -23,8 +22,8 @@
                 <li>{{ crowdfund.anonymous_contributors|length }} anonymous backer{{ crowdfund.anonymous_contributors|length|pluralize }}</li>
             {% endif %}
             </ul>
-        </div>
         {% endif %}
+        </div>
         <p class="amount-raised">${{ crowdfund.payment_received|intcomma }} raised out of ${{ crowdfund.payment_required|intcomma }}.</p>
         <p class="time-remaining">
         {% if not crowdfund.expired %}
@@ -62,4 +61,34 @@
         </form>
     </footer>
     {% endif %}
+    <div class="pending overlay">
+        <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
+        <div class="loader">
+            <div class="loader-inner line-scale-pulse-out-rapid">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <div class="complete overlay">
+        <div class="dialog">
+            <h1>Thank you!</h1>
+            <p>Help this crowdfund find more supporters:</p>
+            {% if crowdfund.foia %}
+            {% include 'lib/social.html' with title="Help me free these docs" %}
+            {% elif crowdfund.project %}
+            {% include 'lib/social.html' with title="I just funded this project" %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="error overlay">
+        <div class="dialog">
+            <h1>An error occurred.</h1>
+            <p>Don't worry, your card has not been charged.</p>
+            <p>Refresh the page to try again. If the error persists, <a href="mailto:info@muckrock.com?subject=Crowdfund%20Error">contact us</a>.</p>
+        </div>
+    </div>
 </section>

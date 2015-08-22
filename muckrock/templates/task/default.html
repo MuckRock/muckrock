@@ -38,4 +38,23 @@
     {% block task-extra-context %}
     {% endblock %}
 
+    <div class="pending ajax overlay">
+        <!-- Loader animation via https://github.com/ConnorAtherton/loaders.css -->
+        <div class="loader">
+            <div class="loader-inner line-scale-pulse-out-rapid">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+    <div class="error ajax overlay">
+        <div class="dialog">
+            <h1>An error occurred.</h1>
+            <p class="error-message">Sorry about this! If the error persists, please report it.</p>
+        </div>
+    </div>
+
 </section>

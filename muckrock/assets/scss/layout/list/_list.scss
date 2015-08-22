@@ -147,8 +147,11 @@
         @include display(flex);
         @include flex-direction(row);
         @include flex-wrap(wrap);
-        align-content: center;
-        justify-content: space-between;
+        @include align-items(center);
+        @include justify-content(space-between);
+        & > * {
+            margin-bottom: 0;
+        }
     }
     .list-table {
         @include row;
@@ -242,5 +245,6 @@
     }
 }
 
+@import 'crowdfund';
 @import 'search';
 @import 'news';
