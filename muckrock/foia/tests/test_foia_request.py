@@ -105,7 +105,7 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.eq_(mail.outbox[-1].bcc,
                        ['other_a@agency1.gov', 'other_b@agency1.gov', 'diagnostics@muckrock.com'])
         nose.tools.eq_(mail.outbox[-1].subject,
-                       'Freedom of Information Request: %s' % foia.title)
+                       'Mass Law Request: %s' % foia.title)
         nose.tools.eq_(foia.status, 'ack')
         nose.tools.eq_(foia.date_submitted, datetime.date.today())
         nose.tools.ok_(foia.date_due > datetime.date.today())
@@ -177,8 +177,21 @@ class TestFOIARequestUnit(TestCase):
         # pylint: disable=protected-access
         foia = FOIARequest.objects.get(pk=15)
         foia.followup()
+        nose.tools.assert_in('I can expect', mail.outbox[-1].body)
         nose.tools.eq_(foia.date_followup,
                        datetime.date.today() + datetime.timedelta(foia._followup_days()))
+
+        nose.tools.eq_(foia._followup_days(), 15)
+
+        foia.date_estimate = datetime.date(2100, 1, 1)
+        foia.followup()
+        nose.tools.assert_in('I am still', mail.outbox[-1].body)
+        nose.tools.eq_(foia._followup_days(), 183)
+
+        foia.date_estimate = datetime.date(2000, 1, 1)
+        foia.followup()
+        nose.tools.assert_in('check on the status', mail.outbox[-1].body)
+        nose.tools.eq_(foia._followup_days(), 15)
 
      # manager
     def test_manager_get_submitted(self):

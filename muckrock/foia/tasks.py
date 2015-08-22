@@ -182,17 +182,12 @@ def submit_multi_request(req_pk, **kwargs):
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
     """Follow up on any requests that need following up on"""
-    # change to this after all follows up have been resolved
-    #for foia in FOIARequest.objects.get_followup():
     log = []
     error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
     if options.enable_followup and (options.enable_weekend_followup or is_weekday):
-        foia_requests = FOIARequest.objects.filter(status__in=['ack', 'processed'],
-                                                   date_followup__lte=date.today(),
-                                                   disable_autofollowups=False)
-        for foia in foia_requests:
+        for foia in FOIARequest.objects.get_followup():
             try:
                 foia.followup()
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
