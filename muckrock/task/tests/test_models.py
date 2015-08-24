@@ -112,7 +112,9 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=self.comm,
             address='orphan-address')
-        new_orphan_updated = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
+        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        updated_task_2 = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
+        eq_(updated_task_1.resolved, True)
         eq_(new_orphan_updated.resolved, True)
 
 
