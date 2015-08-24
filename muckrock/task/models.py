@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Q
 
 from datetime import datetime
+import email
 
 import logging
 
@@ -85,8 +86,17 @@ class OrphanTask(Task):
         return
 
     def reject(self):
-        """Simply resolves the request. Should do something to spam addresses."""
+        """Should do something to spam addresses."""
         # pylint: disable=no-self-use
+        return
+
+    def blacklist(self):
+        """Adds the communication's sender's domain to the email blacklist."""
+        _, email_address = email.utils.parseaddr(self.communication.priv_from_who)
+        if '@' not in email_address:
+            return
+        domain = email_address.split('@')[1]
+        BlacklistDomain.objects.create(domain=domain)
         return
 
 
