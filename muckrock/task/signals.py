@@ -1,7 +1,6 @@
 """Signals for the task application"""
 from django.db.models.signals import post_save
 
-import email
 import logging
 
 from muckrock.task.models import OrphanTask, BlacklistDomain
