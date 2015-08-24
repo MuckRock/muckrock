@@ -94,10 +94,16 @@ class OrphanTaskTests(TestCase):
         self.task.blacklist()
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
-    def test_from_sender(self):
-        """The orphan manager should be able to filter orphan tasks by sender."""
-        tasks = task.models.OrphanTask.objects.get_from_sender('muckrock.com')
-        ok_(self.task in tasks)
+    def test_resolve_after_blacklisting(self):
+        """After blacklisting, other orphan tasks from the sender should be resolved."""
+        other_task = task.models.OrphanTask.objects.create(
+            reason='ib',
+            communication=self.comm,
+            address='Whatever Who Cares')
+        self.task.blacklist()
+        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        updated_task_2 = task.models.OrphanTask.objects.get(pk=other_task.pk)
+        ok_(updated_task_1.resolved and updated_task_2.resolved)
 
 
 class SnailMailTaskTests(TestCase):

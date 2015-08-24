@@ -104,7 +104,8 @@ class OrphanTask(Task):
         if '@' not in email_address:
             return
         domain = email_address.split('@')[1]
-        BlacklistDomain.objects.create(domain=domain)
+        blacklist, _ = BlacklistDomain.objects.get_or_create(domain=domain)
+        blacklist.resolve_matches()
         return
 
 
@@ -337,3 +338,9 @@ class BlacklistDomain(models.Model):
 
     def __unicode__(self):
         return self.domain
+
+    def resolve_matches(self):
+        tasks_to_resolve = OrphanTask.objects.get_from_sender(self.domain)
+        for task in tasks_to_resolve:
+            task.resolve()
+        return
