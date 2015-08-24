@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Q
 
 from datetime import datetime
+import email
 
 import logging
 
@@ -26,6 +27,13 @@ class TaskQuerySet(models.QuerySet):
     def get_resolved(self):
         """Get all resolved tasks"""
         return self.filter(resolved=True)
+
+
+class OrphanTaskQuerySet(models.QuerySet):
+    """Object manager for orphan tasks"""
+    def get_from_sender(self, sender):
+        """Get all orphan tasks from a specific sender"""
+        return self.filter(communication__priv_from_who__icontains=sender)
 
 
 class Task(models.Model):
@@ -50,6 +58,7 @@ class Task(models.Model):
         self.resolved_by = user
         self.date_done = datetime.now()
         self.save()
+        logging.info('User %s resolved task %s', user, self.pk)
 
 
 class GenericTask(Task):
@@ -72,6 +81,7 @@ class OrphanTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
     address = models.CharField(max_length=255)
 
+    objects = OrphanTaskQuerySet.as_manager()
     template_name = 'task/orphan.html'
 
     def __unicode__(self):
@@ -85,8 +95,18 @@ class OrphanTask(Task):
         return
 
     def reject(self):
-        """Simply resolves the request. Should do something to spam addresses."""
+        """Should do something to spam addresses."""
         # pylint: disable=no-self-use
+        return
+
+    def blacklist(self):
+        """Adds the communication's sender's domain to the email blacklist."""
+        _, email_address = email.utils.parseaddr(self.communication.priv_from_who)
+        if '@' not in email_address:
+            return
+        domain = email_address.split('@')[1]
+        blacklist, _ = BlacklistDomain.objects.get_or_create(domain=domain)
+        blacklist.resolve_matches()
         return
 
 
@@ -319,3 +339,10 @@ class BlacklistDomain(models.Model):
 
     def __unicode__(self):
         return self.domain
+
+    def resolve_matches(self):
+        """Resolves any orphan tasks that match this blacklisted domain."""
+        tasks_to_resolve = OrphanTask.objects.get_from_sender(self.domain)
+        for task in tasks_to_resolve:
+            task.resolve()
+        return
