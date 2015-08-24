@@ -32,7 +32,9 @@
     <input type="text" name="move" placeholder="MuckRock №">
     {% endif %}
     <button type="submit" class="primary">Move</button>
+    {% if domain %}
     <input type="checkbox" name="blacklist" id="blacklist-orphan-{{ task.pk }}">
     <label for="blacklist-orphan-{{ task.pk }}">Blacklist {{ domain }}</label>
+    {% endif %}
     <button type="submit" name="reject" value="true">Reject</button>
 {% endblock %}
