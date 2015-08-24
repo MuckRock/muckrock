@@ -29,6 +29,13 @@ class TaskQuerySet(models.QuerySet):
         return self.filter(resolved=True)
 
 
+class OrphanTaskQuerySet(models.QuerySet):
+    """Object manager for orphan tasks"""
+    def get_from_sender(self, sender):
+        """Get all orphan tasks from a specific sender"""
+        return self.filter(communication__priv_from_who__icontains=sender)
+
+
 class Task(models.Model):
     """A base task model for fields common to all tasks"""
     date_created = models.DateTimeField(auto_now_add=True)
@@ -73,6 +80,7 @@ class OrphanTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
     address = models.CharField(max_length=255)
 
+    objects = OrphanTaskQuerySet.as_manager()
     template_name = 'task/orphan.html'
 
     def __unicode__(self):

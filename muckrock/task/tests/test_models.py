@@ -94,6 +94,11 @@ class OrphanTaskTests(TestCase):
         self.task.blacklist()
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
+    def test_from_sender(self):
+        """The orphan manager should be able to filter orphan tasks by sender."""
+        tasks = task.models.OrphanTask.objects.get_from_sender('muckrock.com')
+        ok_(self.task in tasks)
+
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
