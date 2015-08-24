@@ -94,9 +94,10 @@ class OrphanTask(Task):
             ResponseTask.objects.create(communication=moved_comm)
         return
 
-    def reject(self):
-        """Should do something to spam addresses."""
-        # pylint: disable=no-self-use
+    def reject(self, blacklist=False):
+        """If blacklist is true, should blacklist the sender's domain."""
+        if blacklist:
+            self.blacklist()
         return
 
     def blacklist(self):
