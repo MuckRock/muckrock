@@ -48,6 +48,7 @@ class OrphanTaskNode(TaskNode):
         """Adds sender domain to the context"""
         extra_context = super(OrphanTaskNode, self).get_extra_context(the_task)
         extra_context['domain'] = the_task.get_sender_domain()
+        extra_context['attachments'] = the_task.communication.files.all()
         return extra_context
 
 class SnailMailTaskNode(TaskNode):
