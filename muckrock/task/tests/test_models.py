@@ -85,6 +85,10 @@ class OrphanTaskTests(TestCase):
         eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.')
 
+    def test_get_sender_domain(self):
+        """Should return the domain of the orphan's sender."""
+        eq_(self.task.get_sender_domain(), 'muckrock.com')
+
     def test_reject(self):
         """Shouldn't do anything, ATM. Revisit later."""
         self.task.reject()
@@ -112,8 +116,10 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=self.comm,
             address='orphan-address')
-        new_orphan_updated = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
-        eq_(new_orphan_updated.resolved, True)
+        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        updated_task_2 = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
+        eq_(updated_task_1.resolved, True)
+        eq_(updated_task_2.resolved, True)
 
 
 class SnailMailTaskTests(TestCase):

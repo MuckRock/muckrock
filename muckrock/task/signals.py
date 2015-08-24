@@ -15,10 +15,9 @@ def domain_blacklist(sender, instance, created, **kwargs):
         # if this isn't being created for the first time, just return
         # to avoid an infinite loop from when we resolve the task
         return
-    _, email_address = email.utils.parseaddr(instance.communication.priv_from_who)
-    if '@' not in email_address:
+    domain = instance.get_sender_domain()
+    if domain is None:
         return
-    domain = email_address.split('@')[1]
     logger.info('Checking domain %s against blacklist', domain)
     if BlacklistDomain.objects.filter(domain=domain).exists():
         instance.resolve()

@@ -94,17 +94,25 @@ class OrphanTask(Task):
             ResponseTask.objects.create(communication=moved_comm)
         return
 
-    def reject(self):
-        """Should do something to spam addresses."""
-        # pylint: disable=no-self-use
+    def reject(self, blacklist=False):
+        """If blacklist is true, should blacklist the sender's domain."""
+        if blacklist:
+            self.blacklist()
         return
+
+    def get_sender_domain(self):
+        """Gets the domain of the sender's email address."""
+        _, email_address = email.utils.parseaddr(self.communication.priv_from_who)
+        if '@' not in email_address:
+            return None
+        else:
+            return email_address.split('@')[1]
 
     def blacklist(self):
         """Adds the communication's sender's domain to the email blacklist."""
-        _, email_address = email.utils.parseaddr(self.communication.priv_from_who)
-        if '@' not in email_address:
+        domain = self.get_sender_domain()
+        if domain is None:
             return
-        domain = email_address.split('@')[1]
         blacklist, _ = BlacklistDomain.objects.get_or_create(domain=domain)
         blacklist.resolve_matches()
         return
