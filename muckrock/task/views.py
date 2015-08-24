@@ -127,7 +127,8 @@ class OrphanTaskList(TaskList):
     def task_post_helper(self, request, task):
         """Special post helper exclusive to OrphanTasks"""
         if request.POST.get('reject'):
-            task.reject()
+            blacklist = request.POST.get('blacklist', False)
+            task.reject(blacklist)
             task.resolve(request.user)
         elif request.POST.get('move'):
             foia_pks = request.POST.get('move', '')
