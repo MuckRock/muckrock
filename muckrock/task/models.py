@@ -341,6 +341,7 @@ class BlacklistDomain(models.Model):
         return self.domain
 
     def resolve_matches(self):
+        """Resolves any orphan tasks that match this blacklisted domain."""
         tasks_to_resolve = OrphanTask.objects.get_from_sender(self.domain)
         for task in tasks_to_resolve:
             task.resolve()
