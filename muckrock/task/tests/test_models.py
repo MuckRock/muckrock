@@ -105,6 +105,16 @@ class OrphanTaskTests(TestCase):
         updated_task_2 = task.models.OrphanTask.objects.get(pk=other_task.pk)
         ok_(updated_task_1.resolved and updated_task_2.resolved)
 
+    def test_create_with_blacklisted_sender(self):
+        """An orphan created from a blacklisted sender should be automatically resolved."""
+        self.task.blacklist()
+        new_orphan = task.models.OrphanTask.objects.create(
+            reason='ib',
+            communication=self.comm,
+            address='orphan-address')
+        new_orphan_updated = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
+        eq_(new_orphan_updated.resolved, True)
+
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""

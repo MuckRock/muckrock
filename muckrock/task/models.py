@@ -58,6 +58,7 @@ class Task(models.Model):
         self.resolved_by = user
         self.date_done = datetime.now()
         self.save()
+        logging.info('User %s resolved task %s', user, self.pk)
 
 
 class GenericTask(Task):
