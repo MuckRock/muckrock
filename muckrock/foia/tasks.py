@@ -405,6 +405,7 @@ def autoimport():
             except Exception as exc:
                 s3_copy(bucket, key, 'review/%s' % file_name)
                 log.append('ERROR: %s has caused an unknown error. %s' % (file_name, exc))
+                logger.error('Autoimport error: %s', exc, exc_info=sys.exc_info())
         # delete key after processing all requests for it
         s3_delete(bucket, key)
     log.append('End Time: %s' % datetime.now())
