@@ -15,6 +15,7 @@ import json
 import logging
 import os.path
 import re
+import sys
 import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime, timedelta
