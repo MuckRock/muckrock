@@ -5,11 +5,13 @@ Models for the FOIA application
 
 import datetime
 
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import validate_email
 from django.db import models
 from django.shortcuts import get_object_or_404
 
+import email
 import logging
 
 from muckrock.foia.models.request import FOIARequest, STATUS
@@ -161,7 +163,7 @@ class FOIACommunication(models.Model):
             logging.info('Communication #%d cloned to request #%d', original_pk, this_clone.foia.id)
         return cloned_comms
 
-    def resend(self, email=None):
+    def resend(self, email_address=None):
         """Resend the communication"""
         foia = self.foia
         if not foia:
@@ -170,11 +172,11 @@ class FOIACommunication(models.Model):
         snail = False
         self.date = datetime.datetime.now()
         self.save()
-        if email:
+        if email_address:
             # responsibility for handling validation errors
             # is on the caller of the resend method
-            validate_email(email)
-            foia.email = email
+            validate_email(email_address)
+            foia.email = email_address
             foia.save()
         else:
             snail = True
@@ -186,6 +188,27 @@ class FOIACommunication(models.Model):
         raw_email = RawEmail.objects.get_or_create(communication=self)[0]
         raw_email.raw_email = msg
         raw_email.save()
+
+    def get_sender_email(self):
+        """Get the email this communication was sent from."""
+        sender_name, sender_email = email.utils.parseaddr(self.priv_from_who)
+        try:
+            validate_email(sender_email)
+        except ValidationError:
+            # if the sender email is invalid, don't return anything
+            sender_email = None
+        return sender_email
+
+    def make_sender_primary_contact(self):
+        """Makes the communication's sender the primary email of its FOIA."""
+        sender_email = self.get_sender_email()
+        if not sender_email:
+            raise ValueError('Communication was not sent from a valid email.')
+        if not self.foia:
+            raise ValueError('Communication is an orphan and has no associated request.')
+        self.foia.email = sender_email
+        self.foia.save()
+        return
 
     def _presave_special_handling(self):
         """Special handling before saving

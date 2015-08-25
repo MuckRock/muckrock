@@ -19,6 +19,54 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
+class TestCommunication(test.TestCase):
+    """Tests communication methods"""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json', 'test_foiafiles.json']
+
+    def setUp(self):
+        self.foia = FOIARequest.objects.get(id=1)
+        self.comm = FOIACommunication.objects.get(id=1)
+        self.comm.priv_from_who = u'Test Email <test@email.com>'
+        self.comm.save()
+        # add a file to the communication
+        self.file = FOIAFile.objects.get(id=1)
+        self.file.comm = self.comm
+        self.file.ffile = SimpleUploadedFile('test_file.txt', 'This is a test file.')
+        self.file.save()
+        eq_(self.comm.files.count(), 1)
+
+    def test_get_sender_email(self):
+        """Returns the email address the communication came from."""
+        eq_(self.comm.get_sender_email(), 'test@email.com')
+
+    def test_get_bad_sender_email(self):
+        """If the sender email is invalid, get_sender_email should return None."""
+        self.comm.priv_from_who = u'Test Email <foobar>'
+        self.comm.save()
+        eq_(self.comm.get_sender_email(), None)
+
+    def test_make_sender_primary_contact(self):
+        """Makes the primary email of the FOIA to the email the communication was sent from."""
+        self.comm.make_sender_primary_contact()
+        foia = FOIARequest.objects.get(pk=self.foia.pk)
+        eq_(foia.email, self.comm.get_sender_email())
+
+    @raises(ValueError)
+    def test_orphan_error(self):
+        """Orphans should raise an error"""
+        self.comm.foia = None
+        self.comm.make_sender_primary_contact()
+
+    @raises(ValueError)
+    def test_bad_sender_error(self):
+        """Comms with bad sender email should raise an error"""
+        self.comm.priv_from_who = u'Test Email <foobar>'
+        self.comm.save()
+        self.comm.make_sender_primary_contact()
+
 class TestCommunicationMove(test.TestCase):
     """Tests the move method"""
 
