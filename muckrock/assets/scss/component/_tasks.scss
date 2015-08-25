@@ -11,8 +11,7 @@
 }
 
 .task-header {
-    @include span-columns(12);
-    @include row;
+    overflow: hidden;
     position: relative;
     margin-bottom: 0;
     background-color: $color-black;
@@ -93,8 +92,11 @@
 }
 
 .collapsed.task {
-    .task-data, .task-actions, .task-extra-context {
+    & > * {
         display: none;
+    }
+    .task-header {
+        display: block;
     }
 }
 
@@ -192,6 +194,11 @@
             }
         }
         p { margin-bottom: 0; }
+    }
+    .created-from-orphan {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+        background-color: $color-yellow;
     }
 }
 
