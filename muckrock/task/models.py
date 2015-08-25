@@ -91,7 +91,10 @@ class OrphanTask(Task):
         """Moves the comm and creates a ResponseTask for it"""
         moved_comms = self.communication.move(foia_pks)
         for moved_comm in moved_comms:
-            ResponseTask.objects.create(communication=moved_comm)
+            ResponseTask.objects.create(
+                communication=moved_comm,
+                created_from_orphan=True
+            )
         return
 
     def reject(self, blacklist=False):
