@@ -157,10 +157,8 @@ class MRFilterableListView(ListView):
             order = get.get('order', 'asc')
             if order != 'asc':
                 sort = '-' + sort
-            try:
+            if sort in ['title', 'status', 'date_submitted']:
                 objects = objects.order_by(sort)
-            except FieldError:
-                pass
         return objects
 
     def get_context_data(self, **kwargs):
