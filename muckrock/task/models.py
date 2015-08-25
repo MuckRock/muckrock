@@ -95,6 +95,7 @@ class OrphanTask(Task):
                 communication=moved_comm,
                 created_from_orphan=True
             )
+            moved_comm.make_sender_primary_contact()
         return
 
     def reject(self, blacklist=False):

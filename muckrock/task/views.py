@@ -137,8 +137,8 @@ class OrphanTaskList(TaskList):
                 task.move(foia_pks)
                 task.resolve(request.user)
                 messages.success(request, 'The communication was moved to the specified requests.')
-            except ValueError:
-                messages.error(request, 'No valid requests to move communication to.')
+            except ValueError as exception:
+                messages.error(request, 'Error when moving: %s', exception)
             except Http404:
                 messages.error(request, 'Tried to move to a nonexistant request.')
         return
