@@ -9,6 +9,9 @@
 {% endblock %}
 
 {% block task-data %}
+{% if task.created_from_orphan %}
+<p class="created-from-orphan">This response was created from an orphan task.</p>
+{% endif %}
 <dl class="task-data">
     {% with task.communication as comm %}
     {% if comm.priv_from_who %}

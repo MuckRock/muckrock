@@ -9,6 +9,8 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 
+import logging
+
 from muckrock.agency.forms import AgencyForm
 from muckrock.agency.models import Agency
 from muckrock import foia
@@ -127,7 +129,8 @@ class OrphanTaskList(TaskList):
     def task_post_helper(self, request, task):
         """Special post helper exclusive to OrphanTasks"""
         if request.POST.get('reject'):
-            task.reject()
+            blacklist = request.POST.get('blacklist', False)
+            task.reject(blacklist)
             task.resolve(request.user)
         elif request.POST.get('move'):
             foia_pks = request.POST.get('move', '')
@@ -136,8 +139,12 @@ class OrphanTaskList(TaskList):
                 task.move(foia_pks)
                 task.resolve(request.user)
                 messages.success(request, 'The communication was moved to the specified requests.')
-            except ValueError:
-                messages.error(request, 'No valid requests to move communication to.')
+            except ValueError as exception:
+                messages.error(request, 'Error when moving: %s', exception)
+                logging.debug('Error moving communications: %s', exception)
+            except Http404:
+                messages.error(request, 'Tried to move to a nonexistant request.')
+                logging.debug('Tried to move to a nonexistant request.')
         return
 
 
