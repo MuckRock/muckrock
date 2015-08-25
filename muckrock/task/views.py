@@ -139,6 +139,8 @@ class OrphanTaskList(TaskList):
                 messages.success(request, 'The communication was moved to the specified requests.')
             except ValueError:
                 messages.error(request, 'No valid requests to move communication to.')
+            except Http404:
+                messages.error(request, 'Tried to move to a nonexistant request.')
         return
 
 
