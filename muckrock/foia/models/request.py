@@ -11,6 +11,7 @@ from django.db.models import Q, Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
+import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
@@ -389,10 +390,6 @@ class FOIARequest(models.Model):
         self.updated = True
         self.save()
 
-        for profile in chain(self.followed_by.all(), [self.user.profile]):
-            if self.is_viewable(profile.user):
-                profile.notify(self)
-
         self.update_dates()
 
     def submit(self, appeal=False, snail=False):
@@ -441,10 +438,21 @@ class FOIARequest(models.Model):
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
         self.save()
-
-        # whether it is automailed or not, notify the followers (but not the owner)
-        for profile in self.followed_by.all():
-            profile.notify(self)
+        # the user submitted the request
+        if appeal:
+            actstream.action.send(
+                self.user,
+                verb='appealed',
+                action_object=self,
+                target=self.agency
+            )
+        else:
+            actstream.action.send(
+                self.user,
+                verb='submitted',
+                action_object=self,
+                target=self.agency
+            )
 
     def followup(self):
         """Send a follow up email for this request"""
@@ -626,7 +634,8 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.user == user
         can_follow = user.is_authenticated() and not is_owner
-        is_following = user.is_authenticated() and self.followed_by.filter(user=user)
+        followers = actstream.models.followers(self)
+        is_following = user in followers
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,
