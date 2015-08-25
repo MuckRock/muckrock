@@ -62,6 +62,10 @@
         width: 100%;
         margin-bottom: $vertical-rhythm;
     }
+    input[type="checkbox"] {
+        width: auto;
+        margin-right: $vertical-rhythm;
+    }
     label {
         margin-bottom: 0;
     }
@@ -199,9 +203,8 @@
     float: left;
     margin-top: .4em;
     & + label {
-        width: 80%;
-        float: right;
         line-height: 1.5em;
+        margin-bottom: $vertical-rhythm;
     }
 }
 
