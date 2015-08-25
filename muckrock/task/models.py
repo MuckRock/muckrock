@@ -236,6 +236,7 @@ class ResponseTask(Task):
     """A response has been received and needs its status set"""
     # pylint: disable=no-member
     communication = models.ForeignKey('foia.FOIACommunication')
+    created_from_orphan = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u'Response: %s' % (self.communication.foia)
