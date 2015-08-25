@@ -70,11 +70,6 @@ class Profile(models.Model):
     )
     zip_code = models.CharField(max_length=10, blank=True)
     phone = PhoneNumberField(blank=True)
-    follows_question = models.ManyToManyField(
-        'qanda.Question',
-        related_name='followed_by',
-        blank=True
-    )
     notifications = models.ManyToManyField(
         FOIARequest,
         related_name='notify',

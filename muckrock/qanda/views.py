@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
 
+import actstream
 from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -139,16 +140,16 @@ def create_question(request):
 @login_required
 def follow(request, slug, idx):
     """Follow or unfollow a question"""
-
     question = get_object_or_404(Question, slug=slug, id=idx)
-
-    if question.followed_by.filter(user=request.user):
-        question.followed_by.remove(request.user.profile)
-        messages.success(request, 'You are no longer following %s' % question.title)
+    followers = actstream.models.followers(question)
+    if question.user == request.user:
+        messages.error(request, 'You automatically follow questions you ask.')
+    elif request.user in followers:
+        actstream.actions.unfollow(request.user, question)
+        messages.success(request, 'You are no longer following this question.')
     else:
-        question.followed_by.add(request.user.profile)
-        msg = 'You are now following %s. We will notify you of any replies.' % question.title
-        messages.success(request, msg)
+        actstream.actions.follow(request.user, question, actor_only=False)
+        messages.success(request, 'You are now following this question.')
     return redirect(question)
 
 @login_required
