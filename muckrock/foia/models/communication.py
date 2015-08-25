@@ -191,7 +191,7 @@ class FOIACommunication(models.Model):
 
     def get_sender_email(self):
         """Get the email this communication was sent from."""
-        sender_name, sender_email = email.utils.parseaddr(self.priv_from_who)
+        _, sender_email = email.utils.parseaddr(self.priv_from_who)
         try:
             validate_email(sender_email)
         except ValidationError:

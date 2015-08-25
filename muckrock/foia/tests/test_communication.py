@@ -48,7 +48,7 @@ class TestCommunication(test.TestCase):
         self.comm.save()
         eq_(self.comm.get_sender_email(), None)
 
-    def test_make_sender_primary_contact(self):
+    def test_primary_contact(self):
         """Makes the primary email of the FOIA to the email the communication was sent from."""
         self.comm.make_sender_primary_contact()
         foia = FOIARequest.objects.get(pk=self.foia.pk)
