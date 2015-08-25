@@ -75,8 +75,8 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         # pylint: disable=no-member
         # pylint: disable=super-on-old-class
         super(FOIARequestSerializer, self).__init__(*args, **kwargs)
-        if args:
-            foia = args[0]
+        if self.instance and isinstance(self.instance, FOIARequest):
+            foia = self.instance
         else:
             foia = None
 
@@ -91,16 +91,13 @@ class FOIARequestSerializer(serializers.ModelSerializer):
         if not request.user.is_staff:
             self.fields.pop('mail_id')
             self.fields.pop('email')
-        if not request.user.is_staff and 'raw_email' in self.fields['communications'].fields:
-            self.fields['communications'].fields.pop('raw_email')
 
-        #if foia and not foia.editable_by(request.user) and not request.user.is_staff:
-        #    self.fields.pop('notes')
-        if (not foia) or 1: # always remove notes for now
+        if foia and not foia.editable_by(request.user) and not request.user.is_staff:
+            self.fields.pop('notes')
+        if not foia and not request.user.is_staff:
             self.fields.pop('notes')
 
-        #if foia and request.method == 'PATCH' and foia.editable_by(request.user) \
-        if foia and request.method == 'PATCH' \
+        if foia and request.method == 'PATCH' and foia.editable_by(request.user) \
                 and not request.user.is_staff:
             allowed = ['notes', 'tags', 'embargo']
             for field in self.fields.keys():
