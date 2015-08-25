@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
+import actstream
 from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
@@ -239,18 +240,15 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if foia.user != request.user:
-        followers = foia.followed_by
-        if followers.filter(user=request.user): # If following, unfollow
-            followers.remove(request.user.profile)
-            msg = 'You are no longer following %s' % foia.title
-        else: # If not following, follow
-            followers.add(request.user.profile)
-            msg = ('You are now following %s. '
-                   'We will notify you when it is updated.') % foia.title
-        messages.success(request, msg)
+    followers = actstream.models.followers(foia)
+    if foia.user == request.user:
+        messages.error(request, 'You automatically follow requests you own.')
+    elif request.user in followers:
+        actstream.actions.unfollow(request.user, foia)
+        messages.success(request, 'You are no longer following this request.')
     else:
-        messages.error(request, 'You may not follow your own request.')
+        actstream.actions.follow(request.user, foia, actor_only=False)
+        messages.success(request, 'You are now following this request.')
     return redirect(foia)
 
 @login_required
