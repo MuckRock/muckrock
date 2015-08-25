@@ -15,6 +15,7 @@ from actstream.models import followers
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
 
+
 class ProjectListView(ListView):
     """List all projects"""
     model = Project
@@ -28,6 +29,7 @@ class ProjectListView(ListView):
             return Project.objects.get_public()
         else:
             return Project.objects.get_visible(user)
+
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
@@ -50,6 +52,7 @@ class ProjectCreateView(CreateView):
         project = form.save()
         action.send(self.request.user, verb='created', target=project)
         return HttpResponseRedirect(project.get_absolute_url())
+
 
 class ProjectDetailView(DetailView):
     """View a project instance"""
@@ -97,6 +100,7 @@ class ProjectPermissionsMixin(object):
         if not self._is_editable_by(self.request.user):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
+
 
 class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
