@@ -48,11 +48,6 @@ urlpatterns = patterns(
         name='question-follow'
     ),
     url(
-        r'^change-subscription/$',
-        views.subscribe,
-        name='question-subscribe'
-    ),
-    url(
         r'^feed/$',
         LatestQuestions(),
         name='question-feed'

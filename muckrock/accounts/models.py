@@ -75,7 +75,6 @@ class Profile(models.Model):
         related_name='notify',
         blank=True
     )
-    follow_questions = models.BooleanField(default=False)
     acct_type = models.CharField(max_length=10, choices=ACCT_TYPES)
     organization = models.ForeignKey(
         Organization,
