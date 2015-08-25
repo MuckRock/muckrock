@@ -247,7 +247,7 @@ class TestFOIAFunctional(TestCase):
     def test_foia_sorted_list(self):
         """Test sorting on foia-list view"""
 
-        for field in ['title', 'date_submitted', 'times_viewed']:
+        for field in ['title', 'date_submitted', 'status']:
             for order in ['asc', 'desc']:
                 response = get_allowed(self.client, reverse('foia-list') +
                                        '?sort=%s&order=%s' % (field, order),
