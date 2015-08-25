@@ -11,8 +11,7 @@
 }
 
 .task-header {
-    @include span-columns(12);
-    @include row;
+    overflow: hidden;
     position: relative;
     margin-bottom: 0;
     background-color: $color-black;
@@ -62,6 +61,10 @@
         width: 100%;
         margin-bottom: $vertical-rhythm;
     }
+    input[type="checkbox"] {
+        width: auto;
+        margin-right: $vertical-rhythm;
+    }
     label {
         margin-bottom: 0;
     }
@@ -89,8 +92,11 @@
 }
 
 .collapsed.task {
-    .task-data, .task-actions, .task-extra-context {
+    & > * {
         display: none;
+    }
+    .task-header {
+        display: block;
     }
 }
 
@@ -189,6 +195,11 @@
         }
         p { margin-bottom: 0; }
     }
+    .created-from-orphan {
+        margin-bottom: 0;
+        padding: $vertical-rhythm/2;
+        background-color: $color-yellow;
+    }
 }
 
 /* Snail Mail Task */
@@ -199,9 +210,8 @@
     float: left;
     margin-top: .4em;
     & + label {
-        width: 80%;
-        float: right;
         line-height: 1.5em;
+        margin-bottom: $vertical-rhythm;
     }
 }
 

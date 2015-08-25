@@ -64,7 +64,8 @@ class OrphanTaskTests(TestCase):
     def setUp(self):
         self.comm = FOIACommunication.objects.create(
                 date=datetime.now(),
-                from_who='God',
+                from_who='Michael Morisy',
+                priv_from_who='Michael Morisy <michael@muckrock.com>',
                 full_html=False,
                 opened=False,
                 response=True)
@@ -84,25 +85,42 @@ class OrphanTaskTests(TestCase):
         eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.')
 
+    def test_get_sender_domain(self):
+        """Should return the domain of the orphan's sender."""
+        eq_(self.task.get_sender_domain(), 'muckrock.com')
+
     def test_reject(self):
         """Shouldn't do anything, ATM. Revisit later."""
         self.task.reject()
 
     def test_blacklist(self):
-        """A blacklisted email should be automatically resolved"""
-        # pylint: disable=no-self-use
-        blacklist_domain = task.models.BlacklistDomain.objects.create(domain='spam.com')
-        blacklist_domain.save()
-        comm = FOIACommunication.objects.create(
-                date=datetime.now(),
-                from_who='spammer',
-                priv_from_who='evil@spam.com')
-        orphan = task.models.OrphanTask.objects.create(
+        """A blacklisted orphan should add its sender's domain to the blacklist"""
+        self.task.blacklist()
+        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
+
+    def test_resolve_after_blacklisting(self):
+        """After blacklisting, other orphan tasks from the sender should be resolved."""
+        other_task = task.models.OrphanTask.objects.create(
             reason='ib',
-            communication=comm,
+            communication=self.comm,
+            address='Whatever Who Cares')
+        self.task.blacklist()
+        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        updated_task_2 = task.models.OrphanTask.objects.get(pk=other_task.pk)
+        ok_(updated_task_1.resolved and updated_task_2.resolved)
+
+    def test_create_blacklist_sender(self):
+        """An orphan created from a blacklisted sender should be automatically resolved."""
+        self.task.blacklist()
+        new_orphan = task.models.OrphanTask.objects.create(
+            reason='ib',
+            communication=self.comm,
             address='orphan-address')
-        updated_orphan = task.models.OrphanTask.objects.get(pk=orphan.pk)
-        nose.tools.ok_(updated_orphan.resolved)
+        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
+        updated_task_2 = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
+        eq_(updated_task_1.resolved, True)
+        eq_(updated_task_2.resolved, True)
+
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""

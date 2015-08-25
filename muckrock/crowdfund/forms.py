@@ -121,6 +121,7 @@ class CrowdfundProjectForm(forms.ModelForm):
 
     payment_capped = forms.BooleanField(
         label='Limit Amount',
+        required=False,
         help_text='If checked, this prevents you from collecting more than your stated amount.',
         widget=forms.CheckboxInput()
     )
