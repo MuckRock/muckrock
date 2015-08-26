@@ -96,7 +96,6 @@
 {% endblock header %}
 
 {% block aside %}
-    {% include 'lib/social.html' with title=foia.title %}
     {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
