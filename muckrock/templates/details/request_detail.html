@@ -30,20 +30,21 @@
 {% endblock twitter_card %}
 
 {% block header %}
-    <div class="status-badge {{ foia.color_code }}" id="request-status">
-        {{foia.get_status_display}}
+    <div class="status-manager" id="request-status">
+        <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
         {% if foia.status != 'started' and foia.status != 'submitted' %}
         {% if foia.user == user or user.is_staff %}
-            <span class="edit" id="edit-status">Change</span>
-            <form method="post" class="status-form" id="status-form">
-                {% csrf_token %}
-                <select name="status">
-                {% for choice in choices %}
-                    <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
-                {% endfor %}
-                </select>
-                <button type="submit" name="action" value="status" class="primary button">Save</button>
-            </form>
+        <div class="edit" id="edit-status">Edit</div>
+        <form method="post" class="status-form" id="status-form">
+            {% csrf_token %}
+            <select name="status">
+            {% for choice in choices %}
+                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+            {% endfor %}
+            </select>
+            <button type="submit" name="action" value="status" class="primary button">Save</button>
+            <button id="cancel-status">Cancel</button>
+        </form>
         {% endif %}
         {% endif %}
     </div>
@@ -398,11 +399,6 @@
         e.preventDefault();
         textAreaReply($(this).next());
         return false;
-    });
-
-    /* Status changer */
-    $('#edit-status').click(function() {
-        $('#status-form').toggle();
     });
 
     /* CHECKOUT */

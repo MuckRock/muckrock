@@ -97,6 +97,25 @@ $('#edit-tags').click(function() {
     });
 });
 
+// Status Manager
+
+$('#edit-status').click(function() {
+    var editButton = this;
+    var statusManager = $(editButton).closest('.status-manager');
+    var statusForm = $(statusManager).find('.status-form');
+    var statusTag = $(statusManager).find('.status');
+    $(statusForm).addClass('visible');
+    $(statusTag).hide();
+    $(editButton).hide();
+    $('#cancel-status').click(function(e){
+        e.preventDefault();
+        console.log('cancel');
+        $(statusForm).removeClass('visible');
+        $(statusTag).show();
+        $(editButton).show();
+    });
+});
+
 // MESSAGES
 $('.message .visibility').click(function() {
     var header = $(this).parent();
