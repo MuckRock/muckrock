@@ -1,14 +1,14 @@
 function modal(nextSelector) {
-    var overlay = '<div class="overlay"></div>';
-    $(overlay).insertBefore($('.container')).fadeIn();
-    nextSelector.removeClass('hidden-modal').addClass('modal');
-    $('.overlay').click(function(){
-        $('.overlay').fadeOut().remove();
-        $('.modal').removeClass('modal').addClass('hidden-modal');
+    var overlay = '#modal-overlay';
+    $(overlay).addClass('visible');
+    $(nextSelector).addClass('visible');
+    $(overlay).click(function(){
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
     });
     $('.close-modal').click(function(){
-        $('.overlay').fadeOut().remove();
-        $('.modal').removeClass('modal').addClass('hidden-modal');
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
     });
 }
 

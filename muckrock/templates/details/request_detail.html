@@ -103,7 +103,7 @@
     </form>
     {% endif %}
     {% if user.is_authenticated %}
-    <form method="POST" class="controls panel">
+    <form method="post">
     {% csrf_token %}
     {% for action in user_actions %}
         {% if action.is_possible %}
@@ -112,7 +112,7 @@
             {% endif %}
             {% if action.class_name == 'modal' %}
                 <span class="text-area modal-button button">{{ action.title }}</span>
-                <div class="hidden-modal">
+                <div class="modal">
                     <h1>{{ action.title }}</h1>
                     <h2>{{ action.desc }}</h2>
                     <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
@@ -138,7 +138,7 @@
                 {% endif %}
                 {% if action.class_name == 'modal' %}
                     <span class="text-area modal-button button">{{ action.title }}</span>
-                    <div class="hidden-modal">
+                    <div class="modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
                         <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
@@ -157,7 +157,7 @@
     {% else %}
     <section class="panel">
         <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-        <small><a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a></small>
+        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
     </section>
     {% endif %}
 {% endblock aside %}
@@ -195,7 +195,7 @@
             {% if action.is_possible %}
                 {% if action.class_name == 'modal' %}
                     <span class="text-area modal-button button">{{ action.title }}</span>
-                    <div class="hidden-modal">
+                    <div class="modal">
                         <h1>{{ action.title }}</h1>
                         <h2>{{ action.desc }}</h2>
                         <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
@@ -272,7 +272,8 @@
     function textAreaModal(nextSelector) {
         modal(nextSelector);
         $('<textarea name="text"></textarea>').insertBefore(nextSelector.children('button'));
-        $('.overlay').click(function(){
+        $('#modal-overlay').click(function(){
+            console.log('Click!');
             nextSelector.children('textarea').remove();
         });
         $('.close-modal').click(function(){
