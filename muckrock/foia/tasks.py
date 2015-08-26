@@ -303,9 +303,9 @@ def autoimport():
         arg = m_name.group('arg')
         id_ = m_name.group('id')
         if m_name.group('esty'):
-            est_date = datetime(int(m_name.group('esty')) + 2000,
-                                int(m_name.group('estm')),
-                                int(m_name.group('estd')))
+            est_date = date(int(m_name.group('esty')) + 2000,
+                            int(m_name.group('estm')),
+                            int(m_name.group('estd')))
         else:
             est_date = None
 
