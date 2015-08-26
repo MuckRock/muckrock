@@ -82,8 +82,19 @@ $('#toggle-all').click(function(){
 // Tag Manager
 
 $('#edit-tags').click(function() {
-    $('#tag-form').show();
-    $(this).hide();
+    var editButton = this;
+    var tagManager = $(editButton).closest('.tag-manager');
+    var tagForm = $(tagManager).find('.tag-form');
+    var tagList = $(tagManager).find('.tag-list');
+    $(tagForm).addClass('visible');
+    $(editButton).hide();
+    $(tagList).hide();
+    $('#cancel-tags').click(function(e){
+        e.preventDefault();
+        $(tagForm).removeClass('visible');
+        $(editButton).show();
+        $(tagList).show();
+    });
 });
 
 // MESSAGES

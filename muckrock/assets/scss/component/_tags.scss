@@ -25,18 +25,34 @@ button.tag, .button.tag {
 
 .tag-form {
     display: none;
-    font-size: $font-size-2;
-    background: none;
-    border: none;
-    button { margin-left: $vertical-rhythm/4; }
+    @include flex-wrap(wrap);
+    @include justify-content(space-between);
+    @include border;
+    @include border-radius;
+    padding: $vertical-rhythm/2;
+    &.visible {
+        @include display(flex);
+    }
+    input, p {
+        @include flex(100%);
+        margin-bottom: 0;
+    }
+    .tag-form-button {
+        margin-bottom: $vertical-rhythm/4;
+    }
 }
 
 .tag-manager {
-    ul {
+    header {
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: 0;
+    }
+    .tag-list {
         list-style-type: none;
         padding: 0;
     }
-    li {
+    .tag-list li {
         display: inline-block;
     }
 }
