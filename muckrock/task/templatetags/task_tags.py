@@ -44,6 +44,13 @@ class OrphanTaskNode(TaskNode):
     task_template = 'task/orphan.html'
     endpoint_name = 'orphan-task-list'
 
+    def get_extra_context(self, the_task):
+        """Adds sender domain to the context"""
+        extra_context = super(OrphanTaskNode, self).get_extra_context(the_task)
+        extra_context['domain'] = the_task.get_sender_domain()
+        extra_context['attachments'] = the_task.communication.files.all()
+        return extra_context
+
 class SnailMailTaskNode(TaskNode):
     """Renders a snail mail task."""
     model = task.models.SnailMailTask

@@ -30,20 +30,20 @@
             <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>
         {% endif %}
-        {% if form.non_field_errors or form.errors %}
-        <section class="failure panel">
-            <p>The form could not be submitted due to the following errors:</p>
-            {{ form.non_field_errors }}
-            <ul>
-            {% for field in form.visible_fields %}
-                {% if field.errors %}
-                <li>{{ field.label }} field: {{ field.errors }}</li>
-                {% endif %}
-            {% endfor %}
-            </ul>
-        </section>
-        {% endif %}
     </header>
+    {% if form.non_field_errors or form.errors %}
+    <section class="failure panel">
+        <p>The form could not be submitted due to the following errors:</p>
+        {{ form.non_field_errors }}
+        <ul>
+        {% for field in form.visible_fields %}
+            {% if field.errors %}
+            <li>{{ field.label }} field: {{ field.errors }}</li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
     <form action="" method="post" class="create-request">
         {% csrf_token %}
         {% for field in form.hidden_fields %}

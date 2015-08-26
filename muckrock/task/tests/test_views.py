@@ -132,6 +132,8 @@ class OrphanTaskViewTests(TestCase):
     def setUp(self):
         self.url = reverse('orphan-task-list')
         self.task = task.models.OrphanTask.objects.get(pk=2)
+        self.task.communication.priv_from_who = u'Test Email <test@email.com>'
+        self.task.communication.save()
         self.client = Client()
         self.client.login(username='adam', password='abc')
 
@@ -174,6 +176,15 @@ class OrphanTaskViewTests(TestCase):
         eq_(likely_foia_comm_count, updated_likely_foia_comm_count,
                 ('Rejecting an orphan with a likely FOIA should not move'
                 ' the communication to that FOIA'))
+
+    def test_reject_and_blacklist(self):
+        self.task.communication.priv_from_who = 'Michael Morisy <michael@muckrock.com>'
+        self.task.communication.save()
+        self.client.post(self.url, {
+            'reject': 'true',
+            'blacklist': True,
+            'task': self.task.pk})
+        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
 class SnailMailTaskViewTests(TestCase):
     """Tests SnailMailTask-specific POST handlers"""
