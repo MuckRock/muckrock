@@ -71,7 +71,6 @@
     {% if foia.tracking_id and user.is_staff %}
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
-    {% tag_manager foia %}
     <dl>
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
@@ -96,6 +95,7 @@
 {% endblock header %}
 
 {% block aside %}
+    {% tag_manager foia %}
     {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
