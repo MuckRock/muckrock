@@ -117,35 +117,25 @@ class Detail(DetailView):
         """If request is a draft, then redirect to drafting interface"""
         if request.POST:
             return self.post(request)
-        foia = get_foia(
-            self.kwargs['jurisdiction'],
-            self.kwargs['jidx'],
-            self.kwargs['slug'],
-            self.kwargs['idx']
-        )
+        foia = self.get_object()
         if foia.status == 'started':
             return redirect(
                 'foia-draft',
-                jurisdiction=self.kwargs['jurisdiction'],
-                jidx=self.kwargs['jidx'],
-                slug=self.kwargs['slug'],
-                idx=self.kwargs['idx']
+                jurisdiction=foia.jurisdiction.slug,
+                jidx=foia.jurisdiction.id,
+                slug=foia.slug,
+                idx=foia.id
             )
         else:
             return super(Detail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
-        # pylint: disable=unused-argument
-        foia = get_foia(
-            self.kwargs['jurisdiction'],
-            self.kwargs['jidx'],
-            self.kwargs['slug'],
-            self.kwargs['idx']
-        )
-        if not foia.is_viewable(self.request.user):
+        foia = super(Detail, self).get_object(queryset)
+        user = self.request.user
+        if not foia.is_viewable(user):
             raise Http404()
-        if foia.user == self.request.user:
+        if foia.user == user:
             if foia.updated:
                 foia.updated = False
                 foia.save()
