@@ -255,7 +255,7 @@ nav.website-navigation {
             position: fixed;
             z-index: 300;
             left: 5vw;
-            top: 5vh;
+            top: 2.5vh;
             overflow-y: scroll;
             background-color: $color-white;
             @include border;
@@ -279,10 +279,9 @@ nav.website-navigation {
                 }
             }
             // State changes
-            @include transition(transform .3s ease-in-out);
-            @include transform(translateY(-150vh));
+            display: none;
             &.visible {
-                @include transform(translateY(0));
+                display: block;
             }
         }
     }
