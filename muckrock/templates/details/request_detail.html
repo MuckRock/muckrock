@@ -66,6 +66,11 @@
         {% else %}
         <p>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}30 days after it is completed{% endif %}.</p>
         {% endif %}
+        <svg class="svgIcon options" width="16px" height="16px" viewBox="0 0 16 16">
+            <title>Options</title>
+            <desc>A circular gear.</desc>
+            <path fill-rule="evenodd" d="M2.34314575,5.65685425 L-4.52970994e-14,8 L2.34314575,10.3431458 L2.34314575,13.6568542 L5.65685425,13.6568542 L8,16 L10.3431458,13.6568542 L13.6568542,13.6568542 L13.6568542,10.3431458 L16,8 L13.6568542,5.65685425 L13.6568542,2.34314575 L10.3431458,2.34314575 L8,1.0658141e-14 L5.65685425,2.34314575 L2.34314575,2.34314575 L2.34314575,5.65685425 L2.34314575,5.65685425 Z M8,11 C9.65685425,11 11,9.65685425 11,8 C11,6.34314575 9.65685425,5 8,5 C6.34314575,5 5,6.34314575 5,8 C5,9.65685425 6.34314575,11 8,11 Z"></path>
+        </svg>
     </div>
     {% endif %}
 

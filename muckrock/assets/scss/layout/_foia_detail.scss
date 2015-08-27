@@ -107,6 +107,13 @@
     h1 {
         font-weight: $font-weight-bold;
     }
+    .svgIcon.options {
+        cursor: pointer;
+        fill: $color-grey-2;
+        &:hover {
+            fill: $color-blue;
+        }
+    }
 }
 
 .request.stats {
