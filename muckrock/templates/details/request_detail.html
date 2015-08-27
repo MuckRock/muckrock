@@ -51,6 +51,9 @@
 
     <h1>{{ foia.title }}</h1>
 	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
+
+
+
 	{% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}
     <p>It is past due by {{ foia.date_due|timesince }}.</p>
@@ -110,6 +113,26 @@
 {% endblock header %}
 
 {% block aside %}
+    <section class="request stats">
+
+        <section class="counters">
+            <figure class="communication counter">
+                <p class="count">{{ foia.communications.count }}</p>
+                <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
+            </figure>
+            <figure class="file counter">
+                <p class="count">{{ foia.files.count }}</p>
+                <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
+            </figure>
+            {% if user_can_edit %}
+            <figure class="note counter">
+                <p class="count">{{ foia.notes.count }}</p>
+                <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
+            </figure>
+            {% endif %}
+	    </section>
+
+	</section>
     {% tag_manager foia %}
 
     {% if foia.is_payable and foia.user == user %}
