@@ -153,7 +153,7 @@ class Detail(DetailView):
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
-        context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
+        context['status_choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['ack', 'done', 'rejected']
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))

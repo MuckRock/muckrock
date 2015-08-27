@@ -38,7 +38,7 @@
         <form method="post" class="status-form" id="status-form">
             {% csrf_token %}
             <select name="status">
-            {% for choice in choices %}
+            {% for choice in status_choices %}
                 <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
             {% endfor %}
             </select>
