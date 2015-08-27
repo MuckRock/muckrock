@@ -37,9 +37,11 @@ class CrowdfundRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        """Only list open crowdfunds"""
+        """Only list open crowdfunds on unembargoed requests"""
         queryset = super(CrowdfundRequestListView, self).get_queryset()
-        queryset.filter(closed=False)
+        queryset = queryset.exclude(closed=True)\
+                           .exclude(date_due__lt=date.today())\
+                           .exclude(foia__embargo=True)
         return queryset
 
 
@@ -55,9 +57,11 @@ class CrowdfundProjectListView(ListView):
         return context
 
     def get_queryset(self):
-        """Only list open crowdfunds"""
+        """Only list open crowdfunds on public projects"""
         queryset = super(CrowdfundProjectListView, self).get_queryset()
-        queryset.filter(closed=False)
+        queryset = queryset.exclude(closed=True)\
+                           .exclude(date_due__lt=date.today())\
+                           .exclude(project__private=True)
         return queryset
 
 
