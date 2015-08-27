@@ -32,111 +32,6 @@
 {% block header %}
     <h1>{{ foia.title }}</h1>
 	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
-    {% tag_manager foia %}
-    {% if foia.is_payable and foia.user == user %}
-    <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
-        {% csrf_token %}
-        <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
-    </form>
-    {% endif %}
-    {% if user.is_authenticated %}
-    <dfn>Actions</dfn>
-    <form method="post">
-    {% csrf_token %}
-    {% for action in user_actions %}
-        {% if action.is_possible %}
-            {% if action.link %}
-                <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-            {% endif %}
-            {% if action.class_name == 'modal' %}
-                <span class="text-area modal-button button">{{ action.title }}</span>
-                <div class="modal">
-                    <h1>{{ action.title }}</h1>
-                    <h2>{{ action.desc }}</h2>
-                    <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                    <span class="close-modal button">Close</span>
-                </div>
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-    {% for action in noncontextual_request_actions %}
-        {% if action.is_possible %}
-             {% if action.title == 'Pay' %}
-            <button data-amount="{{ foia.get_stripe_amount }}"
-                    data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-                    data-email="{{ user.email }}"
-                    data-form="#payment-form"
-                    data-label=""
-                    class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
-                {{ action.title }}
-            </button>
-            {% else %}
-                {% if action.link %}
-                    <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-                {% endif %}
-                {% if action.class_name == 'modal' %}
-                    <span class="text-area modal-button button">{{ action.title }}</span>
-                    <div class="modal">
-                        <h1>{{ action.title }}</h1>
-                        <h2>{{ action.desc }}</h2>
-                        <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                        <span class="close-modal button">Close</span>
-                    </div>
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endfor %}
-    {% for action in admin_actions %}
-        {% if action.is_possible %}
-            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-        {% endif %}
-    {% endfor %}
-    </form>
-    {% else %}
-    <section class="panel">
-        <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
-    </section>
-    {% endif %}
-{% endblock header %}
-
-{% block aside %}
-    <section class="request stats">
-        <section class="status-manager" id="request-status">
-            <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
-            {% if foia.status != 'started' and foia.status != 'submitted' %}
-            {% if foia.user == user or user.is_staff %}
-            <div class="edit" id="edit-status">Edit</div>
-            <form method="post" class="status-form" id="status-form">
-                {% csrf_token %}
-                <select name="status">
-                {% for choice in status_choices %}
-                    <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
-                {% endfor %}
-                </select>
-                <button type="submit" name="action" value="status" class="primary button">Save</button>
-                <button id="cancel-status">Cancel</button>
-            </form>
-            {% endif %}
-            {% endif %}
-        </section>
-        <section class="counters">
-            <figure class="communication counter">
-                <p class="count">{{ foia.communications.count }}</p>
-                <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
-            </figure>
-            <figure class="file counter">
-                <p class="count">{{ foia.files.count }}</p>
-                <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
-            </figure>
-            {% if user_can_edit %}
-            <figure class="note counter">
-                <p class="count">{{ foia.notes.count }}</p>
-                <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
-            </figure>
-            {% endif %}
-	    </section>
-	</section>
     {% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}
     <p>It is past due by {{ foia.date_due|timesince }}.</p>
@@ -193,9 +88,117 @@
             {% endif %}
         {% endif %}
     {% endif %}
+{% endblock header %}
+
+{% block aside %}
+    <section class="request stats">
+        <section class="status-manager" id="request-status">
+            <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
+            {% if foia.status != 'started' and foia.status != 'submitted' %}
+            {% if foia.user == user or user.is_staff %}
+            <div class="edit" id="edit-status">Edit</div>
+            <form method="post" class="status-form" id="status-form">
+                {% csrf_token %}
+                <select name="status">
+                {% for choice in status_choices %}
+                    <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+                {% endfor %}
+                </select>
+                <button type="submit" name="action" value="status" class="primary button">Save</button>
+                <button id="cancel-status">Cancel</button>
+            </form>
+            {% endif %}
+            {% endif %}
+        </section>
+        <section class="counters">
+            <figure class="communication counter">
+                <p class="count">{{ foia.communications.count }}</p>
+                <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
+            </figure>
+            <figure class="file counter">
+                <p class="count">{{ foia.files.count }}</p>
+                <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
+            </figure>
+            {% if user_can_edit %}
+            <figure class="note counter">
+                <p class="count">{{ foia.notes.count }}</p>
+                <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
+            </figure>
+            {% endif %}
+	    </section>
+	    {% tag_manager foia %}
+	</section>
 {% endblock aside %}
 
 {% block main %}
+
+{% if foia.is_payable and foia.user == user %}
+<form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
+    {% csrf_token %}
+    <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
+</form>
+{% endif %}
+{% if user.is_authenticated %}
+<dfn>Actions</dfn>
+<form method="post">
+{% csrf_token %}
+{% for action in user_actions %}
+    {% if action.is_possible %}
+        {% if action.link %}
+            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+        {% endif %}
+        {% if action.class_name == 'modal' %}
+            <span class="text-area modal-button button">{{ action.title }}</span>
+            <div class="modal">
+                <h1>{{ action.title }}</h1>
+                <h2>{{ action.desc }}</h2>
+                <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
+                <span class="close-modal button">Close</span>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+{% for action in noncontextual_request_actions %}
+    {% if action.is_possible %}
+         {% if action.title == 'Pay' %}
+        <button data-amount="{{ foia.get_stripe_amount }}"
+                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
+                data-email="{{ user.email }}"
+                data-form="#payment-form"
+                data-label=""
+                class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
+            {{ action.title }}
+        </button>
+        {% else %}
+            {% if action.link %}
+                <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+            {% endif %}
+            {% if action.class_name == 'modal' %}
+                <span class="text-area modal-button button">{{ action.title }}</span>
+                <div class="modal">
+                    <h1>{{ action.title }}</h1>
+                    <h2>{{ action.desc }}</h2>
+                    <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
+                    <span class="close-modal button">Close</span>
+                </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+{% for action in admin_actions %}
+    {% if action.is_possible %}
+        <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
+    {% endif %}
+{% endfor %}
+</form>
+{% else %}
+<section class="panel">
+    <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
+    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+</section>
+{% endif %}
+
+
 {% if foia.has_crowdfund %}
     {% crowdfund_request foia.crowdfund.pk %}
 {% endif %}
