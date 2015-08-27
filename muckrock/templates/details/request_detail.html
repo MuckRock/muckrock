@@ -218,12 +218,7 @@
 
 <section class="tab-section communications active" id="request">
     {% for comm in foia.communications.all %}
-        {% if comm.full_html %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails %}
-        {% else %}
-            {% include 'lib/message.html' with user=comm.from_who response=comm.response date=comm.date uid=comm.anchor files=comm.files.all body=comm.communication|redact_emails|urlize|linebreaks %}
-        {% endif %}
-        {% include 'lib/comm_actions.html' %}
+        {% include 'foia/communication.html' with communication=comm %}
     {% endfor %}
     {% if foia.user == user or user.is_staff %}
     <form method="post" class="request controls panel">

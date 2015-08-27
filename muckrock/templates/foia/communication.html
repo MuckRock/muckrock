@@ -1,0 +1,44 @@
+{% load tags %}
+
+{% if communication %}
+<section class="{% if communication.response %}received{% else %}sent{% endif %} communication" id="{{ communication.anchor }}">
+    <header class="communication-header">
+        <p class="from">{{ communication.from_who }}</p>
+        <div class="actionables">
+            <p><a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a></p>
+            {% if request.user.is_staff %}
+            <div class="options">
+                {% include 'lib/icons/options.svg' %}
+                <ul>
+                    {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
+                    <li onClick="$('#move-{{comm.pk}}-form').show();" class="option">Move</li>
+                    <li onClick="$('#resend-{{comm.pk}}-form').show();" class="option">Resend</li>
+                    <li onClick="$('#delete-{{comm.pk}}-form').show();" class="option">Delete</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    {% if communication.communication %}
+    <section class="body">
+        {% if communication.subject %}
+        <h1 class="subject">{{ communication.subject }}</h1>
+        {% endif %}
+        {% if communication.full_html %}
+        {{ communication.communication|redact_emails }}
+        {% else %}
+        {{ communication.communication|redact_emails|urlize|linebreaks }}
+        {% endif %}
+    </section>
+    {% endif %}
+    {% if communication.files.count > 0 %}
+    <section>
+        <ul class="files">
+        {% for file in communication.files.all %}
+            <li class="file">{% include 'lib/file.html' %}</li>
+        {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+</section>
+{% endif %}
