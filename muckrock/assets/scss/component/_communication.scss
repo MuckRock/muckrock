@@ -15,6 +15,14 @@
             background-color: $color-blue;
         }
     }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            @include display(flex);
+        }
+    }
     .communication-header {
         @include display(flex);
         @include justify-content(space-between);
