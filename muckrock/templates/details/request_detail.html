@@ -30,111 +30,9 @@
 {% endblock twitter_card %}
 
 {% block header %}
-    <div class="status-manager" id="request-status">
-        <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
-        {% if foia.status != 'started' and foia.status != 'submitted' %}
-        {% if foia.user == user or user.is_staff %}
-        <div class="edit" id="edit-status">Edit</div>
-        <form method="post" class="status-form" id="status-form">
-            {% csrf_token %}
-            <select name="status">
-            {% for choice in status_choices %}
-                <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
-            {% endfor %}
-            </select>
-            <button type="submit" name="action" value="status" class="primary button">Save</button>
-            <button id="cancel-status">Cancel</button>
-        </form>
-        {% endif %}
-        {% endif %}
-    </div>
-
     <h1>{{ foia.title }}</h1>
 	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
-
-
-
-	{% if foia.date_due and foia.status == "processed" %}
-        {% if past_due %}
-    <p>It is past due by {{ foia.date_due|timesince }}.</p>
-        {% else %}
-    <p>It is due in {{ foia.date_due|timeuntil }}.</p>
-        {% endif %}
-    {% endif %}
-    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
-    <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
-    {% endif %}
-
-    {% if show_estimated_date and foia.date_estimate %}
-    <div class="estimated-completion date">
-        <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-        {% if user_can_edit %}
-        <div>
-            <a>Update</a>
-            <a>Remove</a>
-        </div>
-        {% endif %}
-    </div>
-    {% elif show_estimated_date and user_can_edit and not foia.date_estimate %}
-    <div class="estimated-completion date">
-        <p><a>Set the estimated completion date.</a></p>
-    </div>
-    {% endif %}
-
-    {% if foia.is_embargo %}
-    <div class="embargo">
-        {% if foia.is_permanently_embargoed %}
-        <p>This request is permanently embargoed.</p>
-        {% else %}
-        <p>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}30 days after it is completed{% endif %}.</p>
-        {% endif %}
-    </div>
-    {% endif %}
-
-	{% if foia.parent %}
-	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
-	{% endif %}
-    {% if foia.tracking_id and user.is_staff %}
-    <code>Tracking ID: {{ foia.tracking_id }}</code>
-    {% endif %}
-    <dl>
-    {% if user_can_edit %}
-        {% if foia.user == user %}
-            {% if foia.status == "ack" or foia.status == "processed" %}
-        <dt>Follow-Ups</dt>
-                {% if foia.disable_autofollowups %}
-        <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
-                {% else %}
-        <dd>We'll automatically send a follow up to this request{% if foia.date_followup %} on {{ foia.date_followup|date:"F d, Y" }}{% endif %}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endif %}
-{% endblock header %}
-
-{% block aside %}
-    <section class="request stats">
-
-        <section class="counters">
-            <figure class="communication counter">
-                <p class="count">{{ foia.communications.count }}</p>
-                <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
-            </figure>
-            <figure class="file counter">
-                <p class="count">{{ foia.files.count }}</p>
-                <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
-            </figure>
-            {% if user_can_edit %}
-            <figure class="note counter">
-                <p class="count">{{ foia.notes.count }}</p>
-                <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
-            </figure>
-            {% endif %}
-	    </section>
-
-	</section>
     {% tag_manager foia %}
-
     {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
@@ -199,6 +97,101 @@
         <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
         <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
     </section>
+    {% endif %}
+{% endblock header %}
+
+{% block aside %}
+    <section class="request stats">
+        <section class="status-manager" id="request-status">
+            <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
+            {% if foia.status != 'started' and foia.status != 'submitted' %}
+            {% if foia.user == user or user.is_staff %}
+            <div class="edit" id="edit-status">Edit</div>
+            <form method="post" class="status-form" id="status-form">
+                {% csrf_token %}
+                <select name="status">
+                {% for choice in status_choices %}
+                    <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
+                {% endfor %}
+                </select>
+                <button type="submit" name="action" value="status" class="primary button">Save</button>
+                <button id="cancel-status">Cancel</button>
+            </form>
+            {% endif %}
+            {% endif %}
+        </section>
+        <section class="counters">
+            <figure class="communication counter">
+                <p class="count">{{ foia.communications.count }}</p>
+                <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
+            </figure>
+            <figure class="file counter">
+                <p class="count">{{ foia.files.count }}</p>
+                <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
+            </figure>
+            {% if user_can_edit %}
+            <figure class="note counter">
+                <p class="count">{{ foia.notes.count }}</p>
+                <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
+            </figure>
+            {% endif %}
+	    </section>
+	</section>
+    {% if foia.date_due and foia.status == "processed" %}
+        {% if past_due %}
+    <p>It is past due by {{ foia.date_due|timesince }}.</p>
+        {% else %}
+    <p>It is due in {{ foia.date_due|timeuntil }}.</p>
+        {% endif %}
+    {% endif %}
+    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
+    <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
+    {% endif %}
+
+    {% if show_estimated_date and foia.date_estimate %}
+    <div class="estimated-completion date">
+        <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
+        {% if user_can_edit %}
+        <div>
+            <a>Update</a>
+            <a>Remove</a>
+        </div>
+        {% endif %}
+    </div>
+    {% elif show_estimated_date and user_can_edit and not foia.date_estimate %}
+    <div class="estimated-completion date">
+        <p><a>Set the estimated completion date.</a></p>
+    </div>
+    {% endif %}
+
+    {% if foia.is_embargo %}
+    <div class="embargo">
+        {% if foia.is_permanently_embargoed %}
+        <p>This request is permanently embargoed.</p>
+        {% else %}
+        <p>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}30 days after it is completed{% endif %}.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+	{% if foia.parent %}
+	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
+	{% endif %}
+    {% if foia.tracking_id and user.is_staff %}
+    <code>Tracking ID: {{ foia.tracking_id }}</code>
+    {% endif %}
+    <dl>
+    {% if user_can_edit %}
+        {% if foia.user == user %}
+            {% if foia.status == "ack" or foia.status == "processed" %}
+        <dt>Follow-Ups</dt>
+                {% if foia.disable_autofollowups %}
+        <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
+                {% else %}
+        <dd>We'll automatically send a follow up to this request{% if foia.date_followup %} on {{ foia.date_followup|date:"F d, Y" }}{% endif %}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
+                {% endif %}
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endblock aside %}
 
