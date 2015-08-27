@@ -61,8 +61,20 @@
     {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
     <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
     {% endif %}
-    {% if foia.date_estimate and show_estimated_date %}
-    <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
+    {% if show_estimated_date %}
+    <div class="estimated-completion date">
+        {% if foia.date_estimate %}
+        <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
+            {% if user_can_edit %}
+        <a>Update</a>
+        <a>Remove</a>
+            {% endif %}
+        {% else %}
+            {% if user_can_edit %}
+        <a>Set an estimated completion date.</a>
+            {% endif %}
+        {% endif %}
+    </div>
     {% endif %}
 	{% if foia.parent %}
 	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
