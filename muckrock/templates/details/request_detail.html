@@ -217,7 +217,7 @@
 {% endif %}
 
 <section class="tab-section communications active" id="request">
-    {% for comm in foia.communications.all %}
+    {% for comm in foia.communications.all reversed %}
         {% include 'foia/communication.html' with communication=comm %}
     {% endfor %}
     {% if foia.user == user or user.is_staff %}
