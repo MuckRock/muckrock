@@ -3,7 +3,7 @@
 {% if communication %}
 <section class="{% if communication.response %}received{% else %}sent{% endif %} communication" id="{{ communication.anchor }}">
     <header class="communication-header">
-        <p class="from">{{ communication.from_who }}</p>
+        <p class="from">From: {{ communication.from_who }}</p>
         <div class="actionables">
             <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
             {% if request.user.is_staff %}
@@ -20,9 +20,11 @@
         </div>
     </header>
     {% if communication.communication %}
-    <section class="body">
+    <section class="communication-body">
         {% if communication.subject %}
-        <h1 class="subject">{{ communication.subject }}</h1>
+        <header class="communication-body-header">
+            <h1 class="subject">Subject: {{ communication.subject }}</h1>
+        </header>
         {% endif %}
         {% if communication.full_html %}
         {{ communication.communication|redact_emails }}

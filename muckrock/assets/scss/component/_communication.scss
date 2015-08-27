@@ -30,29 +30,38 @@
         .from {
             font-weight: $font-weight-bold;
         }
-
-    }
-    .actionables {
-        @include display(flex);
-        @include justify-content(space-between);
-        @include align-items(center);
-    }
-    .permalink {
-        line-height: 1em;
-        color: $color-white;
-    }
-    .options {
-        vertical-align: middle;
-        svg {
-            margin-left: $vertical-rhythm;
-            cursor: pointer;
-            fill: $color-white;
-            &:hover {
-                fill: $color-blue-dark;
+        .actionables {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .permalink {
+            line-height: 1em;
+            color: $color-white;
+        }
+        .options {
+            vertical-align: middle;
+            svg {
+                margin-left: $vertical-rhythm;
+                cursor: pointer;
+                fill: $color-white;
+                &:hover {
+                    fill: $color-blue-dark;
+                }
+            }
+            .options.dropdown {
+                display: none;
             }
         }
-        .options.dropdown {
-            display: none;
+    }
+    .communication-body {
+        header {
+            @include display(flex);
+            padding: 0;
+            h1 {
+                font-size: $font-size-3;
+                font-weight: $font-weight-bold;
+            }
         }
     }
 }
