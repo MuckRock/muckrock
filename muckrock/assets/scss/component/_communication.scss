@@ -59,6 +59,9 @@
             }
             .options.dropdown {
                 display: none;
+                &.visible {
+                    display: block;
+                }
             }
         }
     }
