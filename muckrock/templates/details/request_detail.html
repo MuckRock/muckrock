@@ -61,21 +61,33 @@
     {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
     <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
     {% endif %}
-    {% if show_estimated_date %}
+
+    {% if show_estimated_date and foia.date_estimate %}
     <div class="estimated-completion date">
-        {% if foia.date_estimate %}
         <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-            {% if user_can_edit %}
-        <a>Update</a>
-        <a>Remove</a>
-            {% endif %}
+        {% if user_can_edit %}
+        <div>
+            <a>Update</a>
+            <a>Remove</a>
+        </div>
+        {% endif %}
+    </div>
+    {% elif show_estimated_date and user_can_edit and not foia.date_estimate %}
+    <div class="estimated-completion date">
+        <p><a>Set the estimated completion date.</a></p>
+    </div>
+    {% endif %}
+
+    {% if foia.is_embargo %}
+    <div class="embargo">
+        {% if foia.is_permanently_embargoed %}
+        <p>This request is permanently embargoed.</p>
         {% else %}
-            {% if user_can_edit %}
-        <a>Set an estimated completion date.</a>
-            {% endif %}
+        <p>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}30 days after it is completed{% endif %}.</p>
         {% endif %}
     </div>
     {% endif %}
+
 	{% if foia.parent %}
 	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
 	{% endif %}
@@ -83,15 +95,7 @@
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
     <dl>
-    {% if foia.user == user or user.is_staff %}
-        {% if foia.is_embargo %}
-        <dt>Embargo</dt>
-            {% if foia.is_permanently_embargoed %}
-        <dd>This request is permanently embargoed.</dd>
-            {% else %}
-        <dd>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}it is completed{% endif %}.</dd>
-            {% endif %}
-        {% endif %}
+    {% if user_can_edit %}
         {% if foia.user == user %}
             {% if foia.status == "ack" or foia.status == "processed" %}
         <dt>Follow-Ups</dt>
@@ -107,6 +111,7 @@
 
 {% block aside %}
     {% tag_manager foia %}
+
     {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
@@ -114,6 +119,7 @@
     </form>
     {% endif %}
     {% if user.is_authenticated %}
+    <dfn>Actions</dfn>
     <form method="post">
     {% csrf_token %}
     {% for action in user_actions %}
