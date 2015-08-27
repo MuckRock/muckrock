@@ -1,0 +1,58 @@
+.communication {
+    @include border;
+    header, section, footer {
+        padding: $vertical-rhythm/2;
+    }
+    &.received {
+        border-color: $color-black;
+        .communication-header {
+            background-color: $color-black;
+        }
+    }
+    &.sent {
+        border-color: $color-blue;
+        .communication-header {
+            background-color: $color-blue;
+        }
+    }
+    .communication-header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+        }
+        margin-bottom: 0;
+        color: $color-white;
+        p {
+            margin-bottom: 0;
+        }
+        .from {
+            font-weight: $font-weight-bold;
+        }
+
+    }
+    .actionables {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include align-items(center);
+    }
+    .permalink {
+        line-height: 1em;
+        color: $color-white;
+    }
+    .options {
+        vertical-align: middle;
+        svg {
+            margin-left: $vertical-rhythm;
+            cursor: pointer;
+            fill: $color-white;
+            &:hover {
+                fill: $color-blue-dark;
+            }
+        }
+        .options.dropdown {
+            display: none;
+        }
+    }
+}
