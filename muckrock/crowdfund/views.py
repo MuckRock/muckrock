@@ -42,10 +42,11 @@ class CrowdfundRequestListView(ListView):
         queryset = super(CrowdfundRequestListView, self).get_queryset()
         queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
         user = self.request.user
-        if user.is_authenticated():
-            queryset = queryset.filter(Q(foia__embargo=False)|Q(foia__user=user))
-        else:
-            queryset = queryset.filter(foia__embargo=False)
+        if not user.is_staff:
+            if user.is_authenticated():
+                queryset = queryset.filter(Q(foia__embargo=False)|Q(foia__user=user))
+            else:
+                queryset = queryset.filter(foia__embargo=False)
         return queryset
 
 
@@ -65,10 +66,11 @@ class CrowdfundProjectListView(ListView):
         queryset = super(CrowdfundProjectListView, self).get_queryset()
         queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
         user = self.request.user
-        if user.is_authenticated():
-            queryset = queryset.filter(Q(project__private=False)|Q(project__contributors=user))
-        else:
-            queryset = queryset.filter(project__private=False)
+        if not user.is_staff:
+            if user.is_authenticated():
+                queryset = queryset.filter(Q(project__private=False)|Q(project__contributors=user))
+            else:
+                queryset = queryset.filter(project__private=False)
         return queryset
 
 
