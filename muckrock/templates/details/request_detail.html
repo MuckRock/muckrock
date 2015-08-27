@@ -217,11 +217,8 @@
 {% endif %}
 
 <section class="tab-section communications active" id="request">
-    {% for comm in foia.communications.all reversed %}
-        {% include 'foia/communication.html' with communication=comm %}
-    {% endfor %}
-    {% if foia.user == user or user.is_staff %}
-    <form method="post" class="request controls panel">
+    {% if user_can_edit %}
+    <form method="post">
         {% csrf_token %}
         {% for action in contextual_request_actions %}
             {% if action.is_possible %}
@@ -249,6 +246,9 @@
         {% endfor %}
     </form>
     {% endif %}
+    {% for comm in foia.communications.all reversed %}
+        {% include 'foia/communication.html' with communication=comm %}
+    {% endfor %}
 </section>
 
 {% if foia.files.all %}
