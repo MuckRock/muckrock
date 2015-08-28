@@ -31,7 +31,7 @@
 
 {% block header %}
     <h1>{{ foia.title }}</h1>
-	<h2><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
+	<h2 class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
     {% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}
     <p>It is past due by {{ foia.date_due|timesince }}.</p>
@@ -112,7 +112,7 @@
             {% endif %}
         </section>
         <section class="counters">
-            <figure class="communication counter">
+            <figure class="comm counter">
                 <p class="count">{{ foia.communications.count }}</p>
                 <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
             </figure>
@@ -218,34 +218,16 @@
 
 <section class="tab-section communications active" id="request">
     <div class="communications-controls">
+        <div class="communications-settings">
+            <p>Automatic follow ups are enabled.</p>
+            <p>Messages are ordered newest first.</p>
+        </div>
         {% if user_can_edit %}
-        <form method="post" class="communications-next-steps">
-            {% csrf_token %}
-            {% for action in contextual_request_actions %}
-                {% if action.is_possible %}
-                    {% if action.class_name == 'modal' %}
-                        <span class="text-area modal-button button">{{ action.title }}</span>
-                        <div class="modal">
-                            <h1>{{ action.title }}</h1>
-                            <h2>{{ action.desc }}</h2>
-                            <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                            <span class="close-modal button">Close</span>
-                        </div>
-                    {% endif %}
-                    {% if action.class_name == 'reply' %}
-                        <span class="text-area reply-button button">{{ action.title }}</span>
-                        <div class="hidden-reply">
-                            <h1>{{ action.title }}</h1>
-                            <h2>{{ action.desc }}</h2>
-                            <div class="buttons">
-                                <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                                <span class="close-reply button">Close</span>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </form>
+        <div class="communication-actions">
+            <button>Get Advice</button>
+            <button>Follow Up</button>
+            <button>Appeal</button>
+        </div>
         {% endif %}
     </div>
     {% for comm in foia.communications.all reversed %}
