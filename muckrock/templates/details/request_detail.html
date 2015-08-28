@@ -216,7 +216,6 @@
             <p>Automatic follow ups are enabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></p>
             {% endif %}
         {% endif %}
-            <p>Messages are ordered newest first. <a href="">Reverse</a></p>
         </div>
         {% if user_can_edit %}
         <div class="communications-actions">

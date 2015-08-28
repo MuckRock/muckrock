@@ -45,17 +45,13 @@
         .communications-controls {
             @include display(flex);
             @include justify-content(space-between);
+            @include align-items(center);
             @include flex-wrap(wrap);
-            @include media($medium-layout) {
-                margin-bottom: 0;
-            }
         }
         .communications-settings {
+            margin-bottom: 0;
             p {
                 margin-bottom: 0;
-            }
-            @include media($medium-layout) {
-                font-size: $font-size-2;
             }
         }
         .communications-list {
