@@ -217,35 +217,37 @@
 {% endif %}
 
 <section class="tab-section communications active" id="request">
-    {% if user_can_edit %}
-    <form method="post">
-        {% csrf_token %}
-        {% for action in contextual_request_actions %}
-            {% if action.is_possible %}
-                {% if action.class_name == 'modal' %}
-                    <span class="text-area modal-button button">{{ action.title }}</span>
-                    <div class="modal">
-                        <h1>{{ action.title }}</h1>
-                        <h2>{{ action.desc }}</h2>
-                        <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                        <span class="close-modal button">Close</span>
-                    </div>
-                {% endif %}
-                {% if action.class_name == 'reply' %}
-                    <span class="text-area reply-button button">{{ action.title }}</span>
-                    <div class="hidden-reply">
-                        <h1>{{ action.title }}</h1>
-                        <h2>{{ action.desc }}</h2>
-                        <div class="buttons">
+    <div class="communications-controls">
+        {% if user_can_edit %}
+        <form method="post" class="communications-next-steps">
+            {% csrf_token %}
+            {% for action in contextual_request_actions %}
+                {% if action.is_possible %}
+                    {% if action.class_name == 'modal' %}
+                        <span class="text-area modal-button button">{{ action.title }}</span>
+                        <div class="modal">
+                            <h1>{{ action.title }}</h1>
+                            <h2>{{ action.desc }}</h2>
                             <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                            <span class="close-reply button">Close</span>
+                            <span class="close-modal button">Close</span>
                         </div>
-                    </div>
+                    {% endif %}
+                    {% if action.class_name == 'reply' %}
+                        <span class="text-area reply-button button">{{ action.title }}</span>
+                        <div class="hidden-reply">
+                            <h1>{{ action.title }}</h1>
+                            <h2>{{ action.desc }}</h2>
+                            <div class="buttons">
+                                <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
+                                <span class="close-reply button">Close</span>
+                            </div>
+                        </div>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        {% endfor %}
-    </form>
-    {% endif %}
+            {% endfor %}
+        </form>
+        {% endif %}
+    </div>
     {% for comm in foia.communications.all reversed %}
         {% include 'foia/communication.html' with communication=comm %}
     {% endfor %}

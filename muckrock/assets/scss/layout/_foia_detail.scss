@@ -40,6 +40,12 @@
         &.active { display: block; }
         margin-bottom: 0;
     }
+    .communications {
+        .communications-controls {
+            @include display(flex);
+            @include justify-content(flex-end);
+        }
+    }
     .files {
         ul {
             list-style-type: none;
