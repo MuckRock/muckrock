@@ -49,6 +49,18 @@ MuckRock &bull; {{ project.title }}
         </header>
         <section class="project-overview">
             <div class="project-quick-links">
+                <div class="project-references">
+                    <section class="counters">
+                        <a href="#articles" class="article counter">
+                            <span class="count">{{ project.articles.count }}</span>
+                            <span class="label">Article{{ project.articles.count|pluralize }}</spam>
+                        </a>
+                        <a href="#requests" class="request counter">
+                            <span class="count">{{ visible_requests|length }}</span>
+                            <span class="label">Request{{ visible_requests|length|pluralize }}</span>
+                        </a>
+                    </section>
+                </div>
                 <div class="project-contributors">
                     <dfn>Contributors</dfn>
                 {% if not project.contributors.all %}
@@ -61,16 +73,7 @@ MuckRock &bull; {{ project.title }}
                     </ul>
                 {% endif %}
                 </div>
-                <div class="project-references">
-                    <dfn>References</dfn>
-                    <p>
-                        {% if not project.articles.all and not visible_requests %}
-                        It doesn't reference anything.
-                        {% else %}
-                        It references {% if project.articles.all %}<a href="#articles">{{ project.articles.all|length }} article{{ project.articles.all|length|pluralize }}</a>{% endif %} {% if project.articles.all and visible_requests %}and {% endif %} {% if visible_requests %}<a href="#requests">{{ visible_requests|length }} request{{ visible_requests|length|pluralize }}</a>{% endif %}.
-                        {% endif %}
-                    </p>
-                </div>
+
             </div>
             <div class="project-summary">
                 {{ project.summary|markdown:"trusted" }}
