@@ -53,21 +53,6 @@
         </div>
         {% endif %}
     </div>
-    {% elif show_estimated_date and user_can_edit and not foia.date_estimate %}
-    <div class="estimated-completion date">
-        <p><a>Set the estimated completion date.</a></p>
-    </div>
-    {% endif %}
-
-    {% if foia.is_embargo %}
-    <div class="embargo">
-        {% if foia.is_permanently_embargoed %}
-        <p>This request is permanently embargoed.</p>
-        {% else %}
-        <p>This request is embargoed and will not be made public until {% if foia.date_embargo %}{{ foia.date_embargo|date }}{% else %}30 days after it is completed{% endif %}.</p>
-        {% endif %}
-        {% include 'lib/icons/options.svg' %}
-    </div>
     {% endif %}
 
 	{% if foia.parent %}
@@ -82,6 +67,7 @@
 
 {% block aside %}
     <section class="request stats">
+        {% include 'foia/foia_actions.html' %}
         <section class="status-manager" id="request-status">
             <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
             {% if foia.status != 'started' and foia.status != 'submitted' %}
@@ -100,86 +86,11 @@
             {% endif %}
             {% endif %}
         </section>
-        {% if user_can_edit %}
-        <section class="embargo-manager" id="request-embargo">
-            {% if foia.embargo %}
-            <p>This request is embargoed.</p>
-            {% else %}
-            <p>Embargo this request.</p>
-            {% endif %}
-        </section>
-        {% endif %}
 	    {% tag_manager foia %}
 	</section>
 {% endblock aside %}
 
 {% block main %}
-
-{% if foia.is_payable and foia.user == user %}
-<form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
-    {% csrf_token %}
-    <input name="amount" value="{{ foia.get_stripe_amount }}" hidden>
-</form>
-{% endif %}
-{% if user.is_authenticated %}
-<form method="post">
-{% csrf_token %}
-{% for action in user_actions %}
-    {% if action.is_possible %}
-        {% if action.link %}
-            <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-        {% endif %}
-        {% if action.class_name == 'modal' %}
-            <span class="text-area modal-button button">{{ action.title }}</span>
-            <div class="modal">
-                <h1>{{ action.title }}</h1>
-                <h2>{{ action.desc }}</h2>
-                <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                <span class="close-modal button">Close</span>
-            </div>
-        {% endif %}
-    {% endif %}
-{% endfor %}
-{% for action in noncontextual_request_actions %}
-    {% if action.is_possible %}
-         {% if action.title == 'Pay' %}
-        <button data-amount="{{ foia.get_stripe_amount }}"
-                data-description="Request Fee (${{ foia.price|mul:1.05|floatformat:2 }})"
-                data-email="{{ user.email }}"
-                data-form="#payment-form"
-                data-label=""
-                class="checkout-button{% if action.class_name %} {{ action.class_name }}{% endif %}">
-            {{ action.title }}
-        </button>
-        {% else %}
-            {% if action.link %}
-                <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-            {% endif %}
-            {% if action.class_name == 'modal' %}
-                <span class="text-area modal-button button">{{ action.title }}</span>
-                <div class="modal">
-                    <h1>{{ action.title }}</h1>
-                    <h2>{{ action.desc }}</h2>
-                    <button type="submit" name="action" value="{{ action.action }}" class="primary">{{ action.title }}</button>
-                    <span class="close-modal button">Close</span>
-                </div>
-            {% endif %}
-        {% endif %}
-    {% endif %}
-{% endfor %}
-{% for action in admin_actions %}
-    {% if action.is_possible %}
-        <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-    {% endif %}
-{% endfor %}
-</form>
-{% else %}
-<section class="panel">
-    <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-    <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
-</section>
-{% endif %}
-
 
 {% if foia.has_crowdfund %}
     {% crowdfund_request foia.crowdfund.pk %}
