@@ -65,14 +65,18 @@
             }
         }
     }
+    .from {
+        font-size: $font-size-3;
+        font-weight: $font-weight-bold;
+    }
+    .subject {
+        @extend .from;
+        margin-bottom: 0;
+    }
     .communication-body {
         header {
             @include display(flex);
             padding: 0;
-            h1 {
-                font-size: $font-size-3;
-                font-weight: $font-weight-bold;
-            }
         }
     }
 }
