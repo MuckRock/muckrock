@@ -155,34 +155,6 @@
     }
 }
 
-.request {
-    .counters {
-        @include display(flex);
-        @include justify-content(flex-start);
-        @include border;
-        border-left: none;
-        border-right: none;
-        display: none;
-    }
-    .counter {
-        @include flex(1);
-        margin: 0;
-        padding: $vertical-rhythm/2 0;
-        text-align: center;
-        border-left: 1px solid $color-grey;
-        figcaption {
-            color: $color-grey;
-        }
-        &:last-child {
-            border-right: 1px solid $color-grey;
-        }
-    }
-    .count {
-        font-size: $font-size-5;
-        margin-bottom: 0;
-    }
-}
-
 .status-manager {
     @include display(flex);
     @include justify-content(space-between);

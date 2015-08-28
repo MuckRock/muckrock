@@ -185,23 +185,6 @@
     {% crowdfund_request foia.crowdfund.pk %}
 {% endif %}
 
-<section class="counters">
-    <figure class="comm counter">
-        <p class="count">{{ foia.communications.count }}</p>
-        <figcaption>Comm{{ foia.communications.count|pluralize }}</figcaption>
-    </figure>
-    <figure class="file counter">
-        <p class="count">{{ foia.files.count }}</p>
-        <figcaption>File{{ foia.files.count|pluralize }}</figcaption>
-    </figure>
-    {% if user_can_edit %}
-    <figure class="note counter">
-        <p class="count">{{ foia.notes.count }}</p>
-        <figcaption>Note{{ foia.notes.count|pluralize }}</figcaption>
-    </figure>
-    {% endif %}
-</section>
-
 {% if foia.files.all or foia.user == user or user.is_staff %}
 <div class="tabs">
     <label for="request-radio" class="active">Request<input type="radio" name="request" id="request-radio" /></label>
