@@ -6,39 +6,25 @@
     }
     .tabs {
         list-style-type: none;
-        overflow: hidden;
-        border-bottom: $base-border-width solid $color-grey;
-        input[type="radio"] { display: none; }
-        label {
-            display: block;
-            float: left;
-            padding: $vertical-rhythm/4 $vertical-rhythm/2;
-            @include border;
-            border-left: none;
+        padding-left: 0;
+        border-bottom: 1px solid $color-grey;
+        .tab {
+            display: inline-block;
+            margin-bottom: -1px;
+            padding: $vertical-rhythm/2;
+            border: 1px solid transparent;
             border-bottom: none;
+            // @include border-top-radius($base-border-radius);
             cursor: pointer;
-            &:first-of-type {
-                border-top-left-radius: $base-border-radius;
-                border-left: $base-border-width solid $color-grey;
-            }
-            &:last-of-type {
-                border-top-right-radius: $base-border-radius;
-            }
-            &:hover {
-                color: $color-white;
-                background-color: $color-grey;
-            }
             &.active {
-                color: $color-white;
-                background-color: $color-blue;
-                border-color: $color-blue;
+                border-color: $color-grey;
+                border-bottom: 1px solid $color-white;
             }
         }
-
     }
     .tab-section {
         display: none;
-        &.active { display: block; }
+        &.visible { display: block; }
         margin-bottom: 0;
     }
     .communications {

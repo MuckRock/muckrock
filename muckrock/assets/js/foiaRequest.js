@@ -1,7 +1,3 @@
-var target = window.location.hash;
-var n = target.indexOf('-');
-target = target.substring(0, n != -1 ? n : target.length);
-
 $('.hidden-reply').hide();
 $('.embed textarea').trigger('autosize.destroy');
 
@@ -80,29 +76,38 @@ function displayDefaultDoc() {
 
 /* Tab Bar */
 
-$('input:radio').change(function() {
-    $(this).parent().addClass( 'active' );
-    $(this).parent().siblings().removeClass( "active" );
+$('#tab-request').click(function() {
+    $(this).addClass('active');
+    $(this).siblings().removeClass('active');
+    $('#request').addClass('visible');
+    $('#request').siblings().removeClass('visible');
 });
-$('#request-radio').change(function() {
-    hideAllExcept($('#request'));
+
+$('#tab-files').click(function() {
+    $(this).addClass('active');
+    $(this).siblings().removeClass('active');
+    $('#files').addClass('visible');
+    $('#files').siblings().removeClass('visible');
 });
-$('#files-radio').change(function() {
-    hideAllExcept($('#files'));
-    displayDefaultDoc();
-});
-$('#notes-radio').change(function() {
-    hideAllExcept($('#notes'));
+
+$('#tab-notes').click(function() {
+    $(this).addClass('active');
+    $(this).siblings().removeClass('active');
+    $('#notes').addClass('visible');
+    $('#notes').siblings().removeClass('visible');
 });
 
 /* Deep link into tab */
 
+var target = window.location.hash;
+var n = target.indexOf('-');
+target = target.substring(0, n != -1 ? n : target.length);
 if (target == '#comm' || target == '#comms') {
-    $('#request-radio').trigger('click');
+    $('#tab-request').trigger('click');
 } else if (target == '#file' || target == '#files') {
-    $('#files-radio').trigger('click');
+    $('#tab-files').trigger('click');
 } else if (target == '#note' || target == '#notes') {
-    $('#notes-radio').trigger('click');
+    $('#tab-notes').trigger('click');
 }
 
 /* Documents */
