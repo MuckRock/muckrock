@@ -77,18 +77,7 @@
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
     <dl>
-    {% if user_can_edit %}
-        {% if foia.user == user %}
-            {% if foia.status == "ack" or foia.status == "processed" %}
-        <dt>Follow-Ups</dt>
-                {% if foia.disable_autofollowups %}
-        <dd>Automatic follow ups are disabled for this request. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></small></dd>
-                {% else %}
-        <dd>We'll automatically send a follow up to this request{% if foia.date_followup %} on {{ foia.date_followup|date:"F d, Y" }}{% endif %}. <small><a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></small></dd>
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endif %}
+
 {% endblock header %}
 
 {% block aside %}
@@ -220,20 +209,33 @@
 <section class="tab-section communications active" id="request">
     <div class="communications-controls">
         <div class="communications-settings">
-            <p>Automatic follow ups are enabled.</p>
-            <p>Messages are ordered newest first.</p>
+        {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
+            {% if foia.disable_autofollowups %}
+            <p>Automatic follow ups are disabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></p>
+            {% else %}
+            <p>Automatic follow ups are enabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></p>
+            {% endif %}
+        {% endif %}
+            <p>Messages are ordered newest first. <a href="">Reverse</a></p>
         </div>
         {% if user_can_edit %}
-        <div class="communication-actions">
+        <div class="communications-actions">
             <button>Get Advice</button>
-            <button>Follow Up</button>
-            <button>Appeal</button>
+            <button class="primary">Follow Up</button>
+            <button class="failure">Appeal</button>
         </div>
         {% endif %}
     </div>
+    <div class="communications-list">
+    {% if not foia.disable_autofollowups %}
+        <div class="auto-follow-up">
+            <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.<p>
+        </div>
+    {% endif %}
     {% for comm in foia.communications.all reversed %}
         {% include 'foia/communication.html' with communication=comm %}
     {% endfor %}
+    </div>
 </section>
 
 {% if foia.files.all %}

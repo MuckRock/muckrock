@@ -53,6 +53,16 @@
                 margin-bottom: 0;
             }
         }
+        .communications-list {
+            .auto-follow-up {
+                padding: $vertical-rhythm/2;
+                border: 1px solid $color-blue;
+                color: $color-blue;
+                p {
+                    margin-bottom: 0;
+                }
+            }
+        }
     }
     .files {
         ul {
