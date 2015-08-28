@@ -35,35 +35,28 @@
 
     {% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}
-    <p class="date-due">It was due {{ foia.date_due|timesince }} ago.</p>
+    <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
         {% else %}
-    <p class="date-due">It will be due in {{ foia.date_due|timeuntil }}.</p>
+    <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
         {% endif %}
-    {% endif %}
-
-    {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
-    <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
     {% endif %}
 
     {% if show_estimated_date and foia.date_estimate %}
     <div class="estimated-completion date">
         <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-        {% if user_can_edit %}
-        <div>
-            <a>Update</a>
-            <a>Remove</a>
-        </div>
-        {% endif %}
     </div>
     {% endif %}
 
 	{% if foia.parent %}
-	<p>It was cloned from <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
+	<p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
 	{% endif %}
-    {% if foia.tracking_id and user.is_staff %}
-    <code>Tracking ID: {{ foia.tracking_id }}</code>
+
+    {% if user.is_staff %}
+    <p class="muckrock-no">MuckRock &#8470; <code>{{ foia.id }}</code></p>
+    {% if foia.tracking_id %}
+    <p class="tracking-id">Tracking &#8470; <code>{{ foia.tracking_id }}</code></p>
     {% endif %}
-    <dl>
+    {% endif %}
 
 {% endblock header %}
 
