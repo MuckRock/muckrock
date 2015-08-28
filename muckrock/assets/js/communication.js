@@ -7,6 +7,10 @@ $('.communication-header').find('a').click(function(){
     return false;
 });
 
+$('.communication-header').find('.dropdown').click(function(){
+    return false;
+});
+
 $('.communication .options .svgIcon').click(function(){
     $(this).siblings('.dropdown').toggleClass('visible');
     return false;

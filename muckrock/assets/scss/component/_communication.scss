@@ -48,6 +48,7 @@
             color: $color-white;
         }
         .options {
+            position: relative;
             vertical-align: middle;
             svg {
                 margin-left: $vertical-rhythm;
@@ -62,6 +63,21 @@
                 &.visible {
                     display: block;
                 }
+                position: absolute;
+                z-index: 1;
+                right: 0;
+                background-color: $color-white;
+                @include border;
+                color: $color-black;
+                li {
+                    padding: $vertical-rhythm/4;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: $color-grey-7;
+                    }
+                }
+                list-style-type: none;
+                padding-left: 0;
             }
         }
     }

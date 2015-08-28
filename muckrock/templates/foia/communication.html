@@ -11,9 +11,9 @@
                 {% include 'lib/icons/options.svg' %}
                 <ul class="options dropdown">
                     {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
-                    <li onClick="$('#move-{{comm.pk}}-form').show();" class="option">Move</li>
-                    <li onClick="$('#resend-{{comm.pk}}-form').show();" class="option">Resend</li>
-                    <li onClick="$('#delete-{{comm.pk}}-form').show();" class="option">Delete</li>
+                    <li onClick="console.log('Move');" class="option">Move</li>
+                    <li onClick="console.log('Resend');" class="option">Resend</li>
+                    <li onClick="console.log('Delete');" class="option">Delete</li>
                 </ul>
             </div>
             {% endif %}
