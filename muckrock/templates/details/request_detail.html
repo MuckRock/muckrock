@@ -88,6 +88,21 @@
             {% endif %}
             {% endif %}
         </section>
+        {% if user_can_edit %}
+        <section class="embargo-manager">
+            <header>
+                <dfn>Visibility</dfn>
+                {% if user_can_embargo %}
+                <div class="edit" id="edit-embargo">Edit</div>
+                {% endif %}
+            </header>
+            {% if foia.embargo %}
+            <p>This request is embargoed.</p>
+            {% else %}
+            <p>This request is public.</p>
+            {% endif %}
+        </section>
+        {% endif %}
 	    {% tag_manager foia %}
 	</section>
 {% endblock aside %}
@@ -130,14 +145,14 @@
         {% endif %}
     </div>
     <div class="communications-list">
+    {% for comm in foia.communications.all %}
+        {% include 'foia/communication.html' with communication=comm %}
+    {% endfor %}
     {% if not foia.disable_autofollowups %}
         <div class="auto-follow-up">
             <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.<p>
         </div>
     {% endif %}
-    {% for comm in foia.communications.all reversed %}
-        {% include 'foia/communication.html' with communication=comm %}
-    {% endfor %}
     </div>
 </section>
 
