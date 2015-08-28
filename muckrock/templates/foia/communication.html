@@ -1,7 +1,7 @@
 {% load tags %}
 
 {% if communication %}
-<section class="{% if communication.response %}received{% else %}sent{% endif %} communication" id="{{ communication.anchor }}">
+<section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
     <header class="communication-header">
         <h1 class="subject">Subject: {{ communication.subject }}</h1>
         <div class="actionables">
