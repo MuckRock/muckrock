@@ -162,6 +162,7 @@
         @include border;
         border-left: none;
         border-right: none;
+        display: none;
     }
     .counter {
         @include flex(1);
