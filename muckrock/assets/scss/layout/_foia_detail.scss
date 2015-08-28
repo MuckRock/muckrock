@@ -157,8 +157,18 @@
 
 .status-manager {
     @include display(flex);
+    @include flex-wrap(wrap);
     @include justify-content(space-between);
     margin-bottom: 0;
+    header {
+        @include flex(100%);
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: 0;
+        .edit {
+            margin-bottom: 0;
+        }
+    }
     .status {
         display: inline-block;
         color: $color-grey-4;

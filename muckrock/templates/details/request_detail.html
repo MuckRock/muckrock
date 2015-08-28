@@ -69,10 +69,17 @@
     <section class="request stats">
         {% include 'foia/foia_actions.html' %}
         <section class="status-manager" id="request-status">
+            <header>
+                <dfn>Status</dfn>
+                {% if foia.status != 'started' and foia.status != 'submitted' %}
+                {% if foia.user == user or user.is_staff %}
+                <div class="edit" id="edit-status">Edit</div>
+                {% endif %}
+                {% endif %}
+            </header>
             <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
             {% if foia.status != 'started' and foia.status != 'submitted' %}
             {% if foia.user == user or user.is_staff %}
-            <div class="edit" id="edit-status">Edit</div>
             <form method="post" class="status-form" id="status-form">
                 {% csrf_token %}
                 <select name="status">
