@@ -167,9 +167,33 @@
                 @include media($medium-layout) {
                     margin-left: 0;
                 }
-                a {
-                    font-weigth: $font-weight-bold;
+                .counters {
+                    @include display(flex);
+                    @include justify-content(flex-start);
                 }
+                .counter {
+                    @include flex(1);
+                    margin: 0;
+                    padding: $vertical-rhythm/2;
+                    color: $color-black;
+                    &:hover {
+                        text-decoration: none;
+                        background-color: $color-blue;
+                        color: $color-white;
+                        .label {
+                            color: $color-white;
+                        }
+                    }
+                    .count {
+                        font-size: $font-size-5;
+                        margin-bottom: 0;
+                        display: block;
+                    }
+                    .label {
+                        color: $color-grey;
+                    }
+                }
+
             }
         }
         @include media($medium-layout) {
