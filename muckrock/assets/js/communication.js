@@ -7,11 +7,11 @@ $('.communication-header').find('a').click(function(){
     return false;
 });
 
-$('.communication-header').find('.dropdown').click(function(){
+$('.communication-header').find('.dropdown-list').click(function(){
     return false;
 });
 
 $('.communication .options .svgIcon').click(function(){
-    $(this).siblings('.dropdown').toggleClass('visible');
+    $(this).closest('.dropdown').toggleClass('visible');
     return false;
 });

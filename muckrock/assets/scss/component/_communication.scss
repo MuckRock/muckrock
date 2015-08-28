@@ -47,22 +47,20 @@
             line-height: 1em;
             color: $color-white;
         }
-        .options {
+        .options.dropdown {
             position: relative;
-            vertical-align: middle;
             svg {
                 margin-left: $vertical-rhythm;
+                vertical-align: middle;
                 cursor: pointer;
                 fill: $color-white;
+                opacity: .7;
                 &:hover {
-                    fill: $color-blue-dark;
+                    opacity: .9;
                 }
             }
-            .options.dropdown {
+            .dropdown-list {
                 display: none;
-                &.visible {
-                    display: block;
-                }
                 position: absolute;
                 z-index: 1;
                 right: 0;
@@ -78,6 +76,11 @@
                 }
                 list-style-type: none;
                 padding-left: 0;
+            }
+            &.visible {
+                .dropdown-list {
+                    display: block;
+                }
             }
         }
     }

@@ -7,9 +7,9 @@
         <div class="actionables">
             <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
             {% if request.user.is_staff %}
-            <div class="options">
+            <div class="options dropdown">
                 {% include 'lib/icons/options.svg' %}
-                <ul class="options dropdown">
+                <ul class="options dropdown-list">
                     {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
                     <li onClick="console.log('Move');" class="option">Move</li>
                     <li onClick="console.log('Resend');" class="option">Resend</li>
