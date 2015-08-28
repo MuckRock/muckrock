@@ -32,13 +32,15 @@
 {% block header %}
     <h1>{{ foia.title }}</h1>
 	<h2 class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
+
     {% if foia.date_due and foia.status == "processed" %}
         {% if past_due %}
-    <p>It is past due by {{ foia.date_due|timesince }}.</p>
+    <p class="date-due">It was due {{ foia.date_due|timesince }} ago.</p>
         {% else %}
-    <p>It is due in {{ foia.date_due|timeuntil }}.</p>
+    <p class="date-due">It will be due in {{ foia.date_due|timeuntil }}.</p>
         {% endif %}
     {% endif %}
+
     {% if foia.days_until_due and foia.status == 'fix' or foia.days_until_due and foia.status == 'payment' %}
     <p>{% if foia.days_until_due < 0 %}Will be {{ foia.days_until_due|abs }} day{{foia.days_until_due|pluralize}} past due {% else %}Due {{ foia.days_until_due }} day{{foia.days_until_due|pluralize}} {% endif %}from when the {% if foia.status == 'fix' %}fix{% else %}payment{% endif %} is made.</p>
     {% endif %}
