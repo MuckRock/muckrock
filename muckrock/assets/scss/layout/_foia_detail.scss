@@ -46,14 +46,21 @@
             @include display(flex);
             @include justify-content(space-between);
             @include flex-wrap(wrap);
-            margin-bottom: 0;
+            @include media($medium-layout) {
+                margin-bottom: 0;
+            }
         }
         .communications-settings {
             p {
                 margin-bottom: 0;
             }
+            @include media($medium-layout) {
+                font-size: $font-size-2;
+            }
         }
         .communications-list {
+            @include display(flex);
+            @include flex-direction(column);
             .auto-follow-up {
                 padding: $vertical-rhythm/2;
                 border: 1px solid $color-blue;
