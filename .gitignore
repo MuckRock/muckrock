@@ -14,8 +14,6 @@ apache
 *.sw*
 *.pyc
 local_settings.py
-fabfile.py
-coverage.sh
 dump.rdb
 .bundle
 .noseids
