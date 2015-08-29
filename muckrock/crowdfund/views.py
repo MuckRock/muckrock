@@ -5,6 +5,7 @@ Views for the crowdfund application
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -37,9 +38,15 @@ class CrowdfundRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        """Only list open crowdfunds"""
+        """Only list open crowdfunds on unembargoed requests"""
         queryset = super(CrowdfundRequestListView, self).get_queryset()
-        queryset.filter(closed=False)
+        queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
+        user = self.request.user
+        if not user.is_staff:
+            if user.is_authenticated():
+                queryset = queryset.filter(Q(foia__embargo=False)|Q(foia__user=user))
+            else:
+                queryset = queryset.filter(foia__embargo=False)
         return queryset
 
 
@@ -55,9 +62,15 @@ class CrowdfundProjectListView(ListView):
         return context
 
     def get_queryset(self):
-        """Only list open crowdfunds"""
+        """Only list open crowdfunds on public projects"""
         queryset = super(CrowdfundProjectListView, self).get_queryset()
-        queryset.filter(closed=False)
+        queryset = queryset.exclude(closed=True).exclude(date_due__lt=date.today())
+        user = self.request.user
+        if not user.is_staff:
+            if user.is_authenticated():
+                queryset = queryset.filter(Q(project__private=False)|Q(project__contributors=user))
+            else:
+                queryset = queryset.filter(project__private=False)
         return queryset
 
 
