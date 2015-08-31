@@ -174,17 +174,13 @@
 {% if foia.user == user or user.is_staff %}
 <!-- NOTES -->
 <section class="tab-section notes" id="notes">
+    <header class="notes-controls">
+        <p>Notes are a private way to remember information about this request.</p>
+        <a class="primary button" href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Add a Note</a>
+    </header>
     {% for note in foia.notes.all %}
-    <div class="note">
-        <div class="note-date">{{note.date|date}}</div>
-        <div class="note-body">{{note.note|linebreaks}}</div>
-    </div>
-    {% empty %}
-    <p>Notes are private and can be used to store information about this request.</p>
+        {% include 'foia/note.html' with note=note %}
     {% endfor %}
-    <a class="primary button"
-       href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">
-    Add a Note</a>
 </section>
     {% endif %}
 {% endblock main %}

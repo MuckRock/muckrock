@@ -80,23 +80,26 @@
         }
     }
     .notes {
+        .notes-controls {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+            p {
+                margin-bottom: 0;
+            }
+        }
         .note {
-            @include row;
-            margin: $vertical-rhythm 0 0;
-            padding: 0 0 $vertical-rhythm/2;
-            border-bottom: $base-border-width solid $color-grey;
+            @include border;
+            border-color: $color-yellow;
             .note-date {
-                @include quarter;
-                color: $color-grey;
+                margin-bottom: 0;
+                padding: $vertical-rhythm/2;
+                background-color: $color-yellow;
                 text-align: right;
             }
-            .note-body { @include three-quarters; }
-        }
-
-        .button {
-            display: block;
-            width: 10em;
-            margin: 1.5em auto;
+            .note-body {
+                padding: $vertical-rhythm/2;
+            }
         }
     }
     .request.controls {

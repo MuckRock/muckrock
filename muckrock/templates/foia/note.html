@@ -1,0 +1,6 @@
+{% if note %}
+<div class="note">
+    <div class="note-date">{{note.date|date}}</div>
+    <div class="note-body">{{note.note|linebreaks}}</div>
+</div>
+{% endif %}
