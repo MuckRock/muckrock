@@ -35,9 +35,7 @@
         p {
             margin-bottom: 0;
         }
-        .from {
-            font-weight: $font-weight-bold;
-        }
+
         .actionables {
             @include display(flex);
             @include justify-content(space-between);
@@ -92,6 +90,12 @@
         @extend .from;
         margin-bottom: 0;
         @include overflow-ellipsis;
+        &:hover {
+            cursor: default;
+        }
+    }
+    &:hover .subject {
+        text-decoration: underline;
     }
     .communication-body {
         header {
