@@ -107,6 +107,8 @@ STATUS = (
     ('abandoned', 'Withdrawn'),
 )
 
+END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
+
 class Action():
     """A helper class to provide interfaces for request actions"""
     # pylint: disable=too-many-arguments
@@ -142,8 +144,8 @@ class FOIARequest(models.Model):
     date_estimate = models.DateField(blank=True, null=True,
             verbose_name='Estimated Date Completed')
     embargo = models.BooleanField(default=False)
-    date_embargo = models.DateField(blank=True, null=True)
     permanent_embargo = models.BooleanField(default=False)
+    date_embargo = models.DateField(blank=True, null=True)
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
     description = models.TextField(blank=True)
