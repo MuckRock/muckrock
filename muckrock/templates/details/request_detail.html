@@ -201,10 +201,21 @@
 <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
 {% endif %}
 <script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}" ></script>
 <script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
 <script type="text/javascript">
     $('#comms-filter').quicksearch('#request .communications-list .communication');
     $('#notes-filter').quicksearch('#notes .note');
+    $('.datepicker').datepicker({
+        maxDate: '+1m',
+        minDate: 0,
+        firstDay: 1,
+        hideIfNoPrevNext: true,
+        numberOfMonths: 1,
+        {% if foia.date_embargo %}
+        defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
+        {% endif %}
+    });
 </script>
 {% endblock scripts %}
