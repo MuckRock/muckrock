@@ -27,6 +27,9 @@
         &.visible { display: block; }
         margin-bottom: 0;
     }
+    .filter {
+        margin-bottom: 0;
+    }
     .communications {
         .communications-controls {
             @include display(flex);

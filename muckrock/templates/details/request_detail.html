@@ -127,6 +127,9 @@
 
 <section class="tab-section communications visible" id="request">
     <div class="communications-controls">
+        <div class="communications filter">
+            <input id="comms-filter" type="search" placeholder="Filter communications" />
+        </div>
         <div class="communications-settings">
         {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
             {% if foia.disable_autofollowups %}
@@ -175,11 +178,15 @@
 <!-- NOTES -->
 <section class="tab-section notes" id="notes">
     <header class="notes-controls">
-        <p>Notes are a private way to remember information about this request.</p>
+        <div class="notes filter">
+            <input id="notes-filter" type="search" placeholder="Filter notes" />
+        </div>
         <a class="primary button" href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Add a Note</a>
     </header>
     {% for note in foia.notes.all %}
         {% include 'foia/note.html' with note=note %}
+    {% empty %}
+        <p>Notes are a private way to remember information about this request.</p>
     {% endfor %}
 </section>
     {% endif %}
@@ -193,6 +200,11 @@
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
 <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
 {% endif %}
+<script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
+<script type="text/javascript">
+    $('#comms-filter').quicksearch('#request .communications-list .communication');
+    $('#notes-filter').quicksearch('#notes .note');
+</script>
 {% endblock scripts %}
