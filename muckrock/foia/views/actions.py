@@ -138,29 +138,6 @@ def delete(request, jurisdiction, jidx, slug, idx):
     return _foia_action(request, foia, action)
 
 @login_required
-def permanent_embargo(request, jurisdiction, jidx, slug, idx):
-    """Toggle the permanant embargo on the FOIA Request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    is_org_member = request.user == foia.user and request.user.profile.organization != None
-    if foia.editable_by(request.user) and is_org_member or request.user.is_staff:
-        if foia.embargo == True:
-            if foia.is_permanently_embargoed():
-                foia.permanent_embargo = False
-                msg = 'The permanent embargo on this request has been lifted.'
-            else:
-                foia.permanent_embargo = True
-                msg = 'The request is now permanently embargoed.'
-            messages.success(request, msg)
-            foia.save()
-        else:
-            messages.error(request, 'You may only permanently embargo requests that '
-                                    'already have an embargo.')
-    else:
-        messages.error(request, 'Only staff and org members may permanently embargo '
-                                'their requests.')
-    return redirect(foia)
-
-@login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
     def form_actions(_, foia, form):
