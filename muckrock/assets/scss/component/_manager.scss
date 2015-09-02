@@ -6,6 +6,9 @@
     }
     form {
         display: none;
+        @include border;
+        @include border-radius;
+        padding: $vertical-rhythm/2;
         &.visible {
             display: block;
         }

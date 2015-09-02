@@ -168,9 +168,6 @@
         @include flex-wrap(wrap);
         @include justify-content(space-between);
         margin-bottom: $vertical-rhythm;
-        @include border;
-        @include border-radius;
-        padding: $vertical-rhythm/2;
         &.visible {
             @include display(flex);
         }
