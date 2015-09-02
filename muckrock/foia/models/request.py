@@ -341,7 +341,6 @@ class FOIARequest(models.Model):
     def get_to_who(self):
         """Who communications are to"""
         # pylint: disable=no-member
-
         if self.agency:
             return self.agency.name
         else:
@@ -349,7 +348,6 @@ class FOIARequest(models.Model):
 
     def get_saved(self):
         """Get the old model that is saved in the db"""
-
         try:
             return FOIARequest.objects.get(pk=self.pk)
         except FOIARequest.DoesNotExist:
@@ -360,20 +358,16 @@ class FOIARequest(models.Model):
         # pylint: disable=no-member
         return self.communications.reverse()[0]
 
-    def last_comm_date(self):
-        """Return the date of the latest communication or doc or file"""
-        # pylint: disable=no-member
-
-        qsets = [self.communications.all().order_by('-date'),
-                 self.files.exclude(date=None).order_by('-date')]
-
-        dates = []
-        for qset in qsets:
-            if qset:
-                # convert datetimes to dates
-                dates.append(qset[0].date.date() if hasattr(qset[0].date, 'date') else qset[0].date)
-
-        return max(dates) if dates else None
+    def last_comm_datetime(self):
+        """Return the datetime of the latest communication or doc or file"""
+        comm = self.communications.all().order_by('-date').first()
+        file_ = self.files.exclude(date=None).order_by('-date').first()
+        dates_to_compare = []
+        if comm:
+            dates_to_compare.append(comm.date)
+        if file_:
+            dates_to_compare.append(file_.date)
+        return max(dates_to_compare) if dates_to_compare else None
 
     def latest_response(self):
         """How many days since the last response"""
@@ -537,38 +531,30 @@ class FOIARequest(models.Model):
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         # pylint: disable=no-member
-
         cal = self.jurisdiction.get_calendar()
-
         # first submit
         if not self.date_submitted:
             self.date_submitted = date.today()
             days = self.jurisdiction.get_days()
             if days:
                 self.date_due = cal.business_days_from(date.today(), days)
-
         # updated from mailgun without setting status or submitted
         if self.status in ['ack', 'processed']:
-
             # unpause the count down
             if self.days_until_due is not None:
                 self.date_due = cal.business_days_from(date.today(), self.days_until_due)
                 self.days_until_due = None
-
             self._update_followup_date()
-
         # if we are no longer waiting on the agency, do not follow up
         if self.status not in ['ack', 'processed'] and self.date_followup:
             self.date_followup = None
-
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            last_date = self.last_comm_date()
-            if not last_date:
-                last_date = date.today()
-            self.days_until_due = cal.business_days_between(last_date, self.date_due)
+            last_datetime = self.last_comm_datetime()
+            if not last_datetime:
+                last_datetime = datetime.now()
+            self.days_until_due = cal.business_days_between(last_datetime.date(), self.date_due)
             self.date_due = None
-
         self.save()
 
     def _update_followup_date(self):
