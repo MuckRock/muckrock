@@ -355,19 +355,7 @@ class FOIARequest(models.Model):
 
     def last_comm(self):
         """Return the last communication"""
-        # pylint: disable=no-member
-        return self.communications.reverse()[0]
-
-    def last_comm_datetime(self):
-        """Return the datetime of the latest communication or doc or file"""
-        comm = self.communications.all().order_by('-date').first()
-        file_ = self.files.exclude(date=None).order_by('-date').first()
-        dates_to_compare = []
-        if comm:
-            dates_to_compare.append(comm.date)
-        if file_:
-            dates_to_compare.append(file_.date)
-        return max(dates_to_compare) if dates_to_compare else None
+        return self.communications.last()
 
     def latest_response(self):
         """How many days since the last response"""
@@ -550,7 +538,7 @@ class FOIARequest(models.Model):
             self.date_followup = None
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            last_datetime = self.last_comm_datetime()
+            last_datetime = self.last_comm().date
             if not last_datetime:
                 last_datetime = datetime.now()
             self.days_until_due = cal.business_days_between(last_datetime.date(), self.date_due)

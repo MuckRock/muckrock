@@ -40,7 +40,7 @@
     <td><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></td>
     <td class="{{ foia.color_code }}">{{ foia.get_status_display }}</td>
     <td>{{ foia.communications.all.0.date|date:"m/d/Y" }}</td>
-    <td>{{ foia.last_comm_datetime|date:"m/d/Y" }}</td>
+    <td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
 </tr>
 {% endfor %}
 {% endblock list-table-body %}

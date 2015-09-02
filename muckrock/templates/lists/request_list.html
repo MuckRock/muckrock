@@ -31,7 +31,7 @@
     <div class="request-from-to">From <a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a> to <a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></div>-->
 
 <td>{{ foia.date_submitted|date:"m/d/Y" }}</td>
-<td>{{ foia.last_comm_datetime|date:"m/d/Y" }}</td>
+<td>{{ foia.last_comm.date|date:"m/d/Y" }}</td>
 
 <!--<td><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a></td>
 <td><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a></td>
