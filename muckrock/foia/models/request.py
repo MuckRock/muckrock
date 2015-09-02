@@ -635,9 +635,6 @@ class FOIARequest(models.Model):
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
         can_edit = self.editable_by(user) or user.is_staff
-        can_embargo = not self.is_editable() and can_edit and user.profile.can_embargo()
-        # pylint: disable=line-too-long
-        can_permanently_embargo = can_embargo and self.is_embargo() and not self.is_permanently_embargoed()
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -646,20 +643,6 @@ class FOIARequest(models.Model):
             'slug': self.slug
         }
         return [
-            Action(
-                test=can_permanently_embargo,
-                link=reverse('foia-embargo-permanent', kwargs=kwargs),
-                title='Permanently Embargo',
-                desc='Permanently embargo this request',
-                class_name='default'
-            ),
-            Action(
-                test=can_embargo,
-                link=reverse('foia-embargo', kwargs=kwargs),
-                title=('Unembargo' if self.embargo else 'Embargo'),
-                desc=('Make this request public' if self.embargo else 'Make this request private'),
-                class_name='default'
-            ),
             Action(
                 test=can_pay,
                 link=reverse('foia-pay', kwargs=kwargs),
