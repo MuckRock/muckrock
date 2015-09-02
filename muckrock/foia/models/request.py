@@ -646,6 +646,12 @@ class FOIARequest(models.Model):
         can_edit = self.editable_by(user) or user.is_staff
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
         return [
             Action(
                 test=user.is_staff,
