@@ -105,6 +105,9 @@
                 <div class="permanent">
                     {{ embargo_form.permanent_embargo.label_tag }}
                     {{ embargo_form.permanent_embargo }}
+                    <label for="{{ embargo_form.permanent_embargo.id_for_label }}">
+                        <span class="checkbox-switch-head"></span>
+                    </label>
                     <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
                 </div>
                 <div class="expiration">
