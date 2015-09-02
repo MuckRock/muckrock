@@ -184,3 +184,10 @@
 .tag.manager .tag-list {
     margin-bottom: $vertical-rhythm;
 }
+
+
+.embargo.manager {
+    .expiration input {
+        margin-bottom: $vertical-rhythm/2;
+    }
+}

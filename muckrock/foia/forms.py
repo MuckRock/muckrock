@@ -151,7 +151,7 @@ class FOIAEmbargoForm(forms.ModelForm):
     """Form to configure an embargo on a request"""
     permanent_embargo = forms.BooleanField(
         required=False,
-        label='Make embargo permanent',
+        label='Make permanent',
         help_text='A permanent embargo will never expire.',
         widget=forms.CheckboxInput(),
     )
@@ -159,7 +159,10 @@ class FOIAEmbargoForm(forms.ModelForm):
         required=False,
         label='Expiration date',
         help_text='Embargo duration are limited to a maximum of 30 days.',
-        widget=forms.DateInput(attrs={'class': 'datepicker'}),
+        widget=forms.DateInput(attrs={
+            'class': 'datepicker',
+            'placeholder': 'Pick a date'
+        }),
     )
 
     class Meta:
