@@ -580,24 +580,6 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    def admin_actions(self, user):
-        '''Provides action interfaces for admins'''
-        kwargs = {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.pk,
-            'idx': self.pk,
-            'slug': self.slug
-        }
-        return [
-            Action(
-                test=user.is_staff,
-                link=reverse('foia-admin-fix', kwargs=kwargs),
-                title='Admin Fix',
-                desc='Open the admin fix form',
-                class_name='default'
-            ),
-        ]
-
     def user_actions(self, user):
         '''Provides action interfaces for users'''
         is_owner = self.user == user
@@ -665,6 +647,13 @@ class FOIARequest(models.Model):
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
         return [
+            Action(
+                test=user.is_staff,
+                link=reverse('foia-admin-fix', kwargs=kwargs),
+                title='Admin Fix',
+                desc='Open the admin fix form',
+                class_name='default'
+            ),
             Action(
                 test=can_edit,
                 title='Get Advice',
