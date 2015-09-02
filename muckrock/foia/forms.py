@@ -152,7 +152,7 @@ class FOIAEmbargoForm(forms.ModelForm):
     permanent_embargo = forms.BooleanField(
         required=False,
         label='Make embargo permanent',
-        help_text='A permanent embargo will never expire.'
+        help_text='A permanent embargo will never expire.',
     )
     date_embargo = forms.DateField(
         required=False,
