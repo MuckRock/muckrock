@@ -1,0 +1,13 @@
+.manager {
+    header {
+        @include display(flex);
+        @include justify-content(space-between);
+        margin-bottom: 0;
+    }
+    form {
+        display: none;
+        &.visible {
+            display: block;
+        }
+    }
+}
