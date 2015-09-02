@@ -91,16 +91,31 @@
         {% if user_can_edit %}
         <section class="embargo-manager">
             <header>
-                <dfn>Visibility</dfn>
-                {% if user_can_embargo %}
+                <dfn>Embargo</dfn>
                 <div class="edit" id="edit-embargo">Edit</div>
-                {% endif %}
             </header>
+            <div class="embargo-status">
             {% if foia.embargo %}
-            <p>This request is embargoed.</p>
+                <p>This request is {% if foia.permanent_embargo %}permanently {% endif %}embargoed{% if foia.date_embargo %} until {{ foia.date_embargo }}{% endif %}.</p>
             {% else %}
-            <p>This request is public.</p>
+                <p>This request has no embargo.</p>
             {% endif %}
+            </div>
+            <form method="post" action="embargo" class="embargo-form" id="embargo-form">
+                <div class="permanent">
+                    {{ embargo_form.permanent_embargo.label }}
+                    {{ embargo_form.permanent_embargo }}
+                    {{ embargo_form.permanent_embargo.help_text }}
+                </div>
+                <div class="expiration">
+                    {{ embargo_form.date_embargo.label }}
+                    {{ embargo_form.date_embargo }}
+                    {{ embargo_form.date_embargo.help_text }}
+                </div>
+                <button class="primary" type="submit" name="embargo" value="apply">Apply</button>
+                <button class="failure" type="submit" name="embargo" value="remove">Remove</button>
+                <button id="cancel-embargo">Cancel</button>
+            </form>
         </section>
         {% endif %}
 	    {% tag_manager foia %}
