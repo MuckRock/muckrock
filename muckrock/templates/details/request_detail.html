@@ -102,18 +102,28 @@
             {% endif %}
             </div>
             <form method="post" action="embargo" class="embargo-form" id="embargo-form">
+                {% if request.user.profile.can_embargo_permanently %}
                 <div class="permanent">
                     {{ embargo_form.permanent_embargo.label_tag }}
                     {{ embargo_form.permanent_embargo }}
                     <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
                 </div>
+                {% endif %}
+                {% if embargo_needs_date %}
                 <div class="expiration">
                     {{ embargo_form.date_embargo.label_tag }}
                     {{ embargo_form.date_embargo }}
                     <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
                 </div>
-                <button class="primary" type="submit" name="embargo" value="apply">Apply</button>
-                <button class="failure" type="submit" name="embargo" value="remove">Remove</button>
+                {% endif %}
+                {% if not foia.embargo %}
+                <button class="primary" type="submit" name="embargo" value="create">Embargo</button>
+                {% else %}
+                    {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
+                <button class="primary" type="submit" name="embargo" value="update">Update</button>
+                    {% endif %}
+                <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
+                {% endif %}
                 <button class="cancel" id="cancel-embargo">Cancel</button>
             </form>
         </section>
