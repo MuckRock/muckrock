@@ -153,7 +153,7 @@ class FOIAEmbargoForm(forms.ModelForm):
         required=False,
         label='Make embargo permanent',
         help_text='A permanent embargo will never expire.',
-        widget=forms.CheckboxInput(attrs={'class': 'switch'}),
+        widget=forms.CheckboxInput(),
     )
     date_embargo = forms.DateField(
         required=False,
