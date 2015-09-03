@@ -682,3 +682,24 @@ class FOIAEmbargoTests(TestCase):
             'An expiration date should be set on the request.')
         nose.tools.assert_true(self.foia.permanent_embargo,
             'A permanent embargo should be set on the request.')
+
+    def test_cannot_permanent_embargo(self):
+        """Users who cannot set permanent embargoes shouldn't be able to."""
+        user_without_permission = User.objects.get(pk=2)
+        self.foia.user = user_without_permission
+        self.foia.save()
+        embargo_form = FOIAEmbargoForm({'permanent_embargo': True})
+        nose.tools.assert_true(user_without_permission.profile.can_embargo())
+        nose.tools.assert_false(user_without_permission.profile.can_embargo_permanently())
+        nose.tools.assert_true(embargo_form.is_valid(), 'Form should validate.')
+        data = {'embargo': 'create'}
+        data.update(embargo_form.data)
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'An embargo should be set on the request.')
+        nose.tools.assert_false(self.foia.permanent_embargo,
+            'A permanent embargo should not be set on the request.')
