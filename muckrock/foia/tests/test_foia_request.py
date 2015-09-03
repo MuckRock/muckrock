@@ -18,6 +18,7 @@ import re
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
+from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
@@ -656,3 +657,19 @@ class FOIAEmbargoTests(TestCase):
         nose.tools.assert_false(self.foia.embargo,
             'The embargo should be removed from the request.')
 
+    def test_embargo_date(self):
+        """If the request is in a closed state, it needs a date to be applied."""
+        self.foia.status = 'rejected'
+        self.foia.save()
+        default_expiration_date = datetime.date.today() + datetime.timedelta(30)
+        embargo_form = FOIAEmbargoForm(instance=self.foia, initial={'date_embargo': default_expiration_date})
+        nose.tools.assert_true(embargo_form.is_valid(), 'Errors: %s' % embargo_form.errors)
+        data = {'embargo': 'create'}
+        data.update(embargo_form.data)
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'An embargo should be set on the request.')
+        nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
+            'An expiration date should be set on the request.')
