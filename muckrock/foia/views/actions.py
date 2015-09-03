@@ -141,18 +141,22 @@ def delete(request, jurisdiction, jidx, slug, idx):
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
 
-    def create_embargo(foia):
-        """Apply an embargo to the request"""
-        foia.embargo = True
-        foia.save()
-        logger.info('The request %s was embargoed.', foia)
+    def create_embargo(request, foia):
+        """Apply an embargo to the FOIA"""
+        if request.user.profile.can_embargo():
+            foia.embargo = True
+            foia.save()
+            logger.info('%s embargoed %s', request.user, foia)
+        else:
+            logger.error('%s was forbidden from embargoing %s', request.user, foia)
+            messages.error(request, 'You cannot embargo requests.')
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
     if request.method == 'POST' and foia.editable_by(request.user):
         embargo_action = request.POST.get('embargo')
         if embargo_action == 'create':
-            create_embargo(foia)
+            create_embargo(request, foia)
     return redirect(foia)
 
 @login_required
