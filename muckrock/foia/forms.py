@@ -10,7 +10,8 @@ from datetime import date, timedelta
 
 from muckrock.forms import MRFilterForm
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, \
+                                 FOIANote, STATUS, END_STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 
 class RequestForm(forms.Form):
@@ -147,14 +148,15 @@ class RequestFilterForm(MRFilterForm):
         required=False
     )
 
-class FOIAEmbargoForm(forms.ModelForm):
+class FOIAEmbargoForm(forms.Form):
     """Form to configure an embargo on a request"""
     permanent_embargo = forms.BooleanField(
         required=False,
         label='Make permanent',
         help_text='A permanent embargo will never expire.',
-        widget=forms.CheckboxInput(),
+        widget=forms.CheckboxInput()
     )
+
     date_embargo = forms.DateField(
         required=False,
         label='Expiration date',
@@ -162,12 +164,18 @@ class FOIAEmbargoForm(forms.ModelForm):
         widget=forms.DateInput(attrs={
             'class': 'datepicker',
             'placeholder': 'Pick a date'
-        }),
+        })
     )
 
-    class Meta:
-        model = FOIARequest
-        fields = ['permanent_embargo', 'date_embargo']
+    def clean_date_embargo(self):
+        """Checks if date embargo is within 30 days"""
+        date_embargo = self.cleaned_data['date_embargo']
+        max_duration = date.today() + timedelta(30)
+        if date_embargo and date_embargo > max_duration:
+            error_msg = 'Embargo expiration date must be within 30 days of today'
+            self._errors['date_embargo'] = self.error_class([error_msg])
+        return self.cleaned_data
+
 
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""

@@ -102,6 +102,8 @@
             {% endif %}
             </div>
             <form method="post" action="embargo" class="embargo-form" id="embargo-form">
+                {{ embargo_form.errors }}
+                {{ embargo_form.non_field_errors }}
                 {% if request.user.profile.can_embargo_permanently %}
                 <div class="permanent">
                     {{ embargo_form.permanent_embargo.label_tag }}
