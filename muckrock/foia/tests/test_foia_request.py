@@ -634,3 +634,16 @@ class FOIAEmbargoTests(TestCase):
         self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 200)
         nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
+
+    def test_basic_unembargo(self):
+        """The unembargo should be able to be turned off by editors of the request."""
+        self.foia.embargo = True
+        self.foia.save()
+        nose.tools.assert_true(self.foia.embargo)
+        nose.tools.assert_true(self.foia.editable_by(self.user))
+        data = {'embargo': 'delete'}
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_false(self.foia.embargo,
+            'The embargo should be removed from the request.')
