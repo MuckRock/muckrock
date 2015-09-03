@@ -16,11 +16,11 @@ import logging
 import stripe
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestFilterForm
+from muckrock.foia.forms import RequestFilterForm, FOIAEmbargoForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
-    STATUS
+    STATUS, END_STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
@@ -150,7 +150,11 @@ class Detail(DetailView):
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = foia.editable_by(user)
-        context['admin_actions'] = foia.admin_actions(user)
+        context['embargo_form'] = FOIAEmbargoForm(initial={
+            'permanent_embargo': foia.permanent_embargo,
+            'date_embargo': foia.date_embargo
+        })
+        context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
         context['contextual_request_actions'] = foia.contextual_request_actions(user)

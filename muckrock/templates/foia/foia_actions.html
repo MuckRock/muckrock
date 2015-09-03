@@ -52,11 +52,6 @@
         {% endif %}
     {% endif %}
 {% endfor %}
-{% for action in admin_actions %}
-    {% if action.is_possible %}
-        <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
-    {% endif %}
-{% endfor %}
 </form>
 {% else %}
 <section class="panel">

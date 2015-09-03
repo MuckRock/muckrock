@@ -13,22 +13,17 @@ def foia_update_embargo(sender, **kwargs):
     """When embargo has possibly been switched, update the document cloud permissions"""
     # pylint: disable=no-member
     # pylint: disable=unused-argument
-
     request = kwargs['instance']
     old_request = request.get_saved()
-
-    if not old_request:
-        # if we are saving a new FOIA Request, there are no docs to update
-        return
-
-    if request.is_embargo(save=False) != old_request.is_embargo(save=False):
-        access = 'private' if request.is_embargo(save=False) else 'public'
+    # if we are saving a new FOIA Request, there are no docs to update
+    if old_request and request.embargo != old_request.embargo:
+        access = 'private' if request.embargo else 'public'
         for doc in request.files.all():
             if doc.is_doccloud() and doc.access != access:
                 doc.access = access
                 doc.save()
                 upload_document_cloud.apply_async(args=[doc.pk, True], countdown=3)
-
+    return
 
 def foia_file_delete_s3(sender, **kwargs):
     """Delete file from S3 after the model is deleted"""

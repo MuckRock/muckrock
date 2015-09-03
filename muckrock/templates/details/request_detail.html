@@ -63,16 +63,16 @@
 {% block aside %}
     <section class="request stats">
         {% include 'foia/foia_actions.html' %}
-        <section class="status-manager" id="request-status">
+        <section class="status manager" id="request-status">
             <header>
                 <dfn>Status</dfn>
                 {% if foia.status != 'started' and foia.status != 'submitted' %}
                 {% if foia.user == user or user.is_staff %}
-                <div class="edit" id="edit-status">Edit</div>
+                <div class="edit" id="edit-status" data-manager=".status-manager">Edit</div>
                 {% endif %}
                 {% endif %}
             </header>
-            <p class="status {{ foia.color_code }}">{{foia.get_status_display}}</p>
+            <p class="status state {{ foia.color_code }}">{{foia.get_status_display}}</p>
             {% if foia.status != 'started' and foia.status != 'submitted' %}
             {% if foia.user == user or user.is_staff %}
             <form method="post" class="status-form" id="status-form">
@@ -83,24 +83,51 @@
                 {% endfor %}
                 </select>
                 <button type="submit" name="action" value="status" class="primary button">Save</button>
-                <button id="cancel-status">Cancel</button>
+                <button class="cancel" id="cancel-status">Cancel</button>
             </form>
             {% endif %}
             {% endif %}
         </section>
         {% if user_can_edit %}
-        <section class="embargo-manager">
+        <section class="embargo manager">
             <header>
-                <dfn>Visibility</dfn>
-                {% if user_can_embargo %}
-                <div class="edit" id="edit-embargo">Edit</div>
-                {% endif %}
+                <dfn>Embargo</dfn>
+                <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
             </header>
+            <div class="embargo state">
             {% if foia.embargo %}
-            <p>This request is embargoed.</p>
+                <p>This request is {% if foia.permanent_embargo %}permanently {% endif %}embargoed{% if foia.date_embargo %} until {{ foia.date_embargo }}{% endif %}.</p>
             {% else %}
-            <p>This request is public.</p>
+                <p>This request has no embargo.</p>
             {% endif %}
+            </div>
+            <form method="post" action="embargo" class="embargo-form" id="embargo-form">
+                {{ embargo_form.errors }}
+                {{ embargo_form.non_field_errors }}
+                {% if request.user.profile.can_embargo_permanently %}
+                <div class="permanent">
+                    {{ embargo_form.permanent_embargo.label_tag }}
+                    {{ embargo_form.permanent_embargo }}
+                    <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
+                </div>
+                {% endif %}
+                {% if embargo_needs_date %}
+                <div class="expiration">
+                    {{ embargo_form.date_embargo.label_tag }}
+                    {{ embargo_form.date_embargo }}
+                    <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
+                </div>
+                {% endif %}
+                {% if not foia.embargo %}
+                <button class="primary" type="submit" name="embargo" value="create">Embargo</button>
+                {% else %}
+                    {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
+                <button class="primary" type="submit" name="embargo" value="update">Update</button>
+                    {% endif %}
+                <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
+                {% endif %}
+                <button class="cancel" id="cancel-embargo">Cancel</button>
+            </form>
         </section>
         {% endif %}
 	    {% tag_manager foia %}
@@ -162,7 +189,7 @@
 {% if foia.files.all %}
 <!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
-    {% if not foia.is_embargo and foia.total_pages > 0 %}
+    {% if not foia.embargo and foia.total_pages > 0 %}
     <h2 id="doc-title"></h2>
     <div class="viewer" id="viewer"></div>
     {% endif %}
@@ -201,10 +228,21 @@
 <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
 {% endif %}
 <script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}" ></script>
 <script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
 <script type="text/javascript">
     $('#comms-filter').quicksearch('#request .communications-list .communication');
     $('#notes-filter').quicksearch('#notes .note');
+    $('.datepicker').datepicker({
+        maxDate: '+1m',
+        minDate: 0,
+        firstDay: 1,
+        hideIfNoPrevNext: true,
+        numberOfMonths: 1,
+        {% if foia.date_embargo %}
+        defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
+        {% endif %}
+    });
 </script>
 {% endblock scripts %}

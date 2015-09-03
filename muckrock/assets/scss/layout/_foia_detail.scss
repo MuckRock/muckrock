@@ -147,20 +147,8 @@
     }
 }
 
-.status-manager {
-    @include display(flex);
-    @include flex-wrap(wrap);
-    @include justify-content(space-between);
+.status.manager {
     margin-bottom: 0;
-    header {
-        @include flex(100%);
-        @include display(flex);
-        @include justify-content(space-between);
-        margin-bottom: 0;
-        .edit {
-            margin-bottom: 0;
-        }
-    }
     .status {
         display: inline-block;
         color: $color-grey-4;
@@ -180,9 +168,6 @@
         @include flex-wrap(wrap);
         @include justify-content(space-between);
         margin-bottom: $vertical-rhythm;
-        @include border;
-        @include border-radius;
-        padding: $vertical-rhythm/2;
         &.visible {
             @include display(flex);
         }
@@ -196,12 +181,13 @@
     }
 }
 
-.tag-manager .tag-list {
+.tag.manager .tag-list {
     margin-bottom: $vertical-rhythm;
 }
 
-.embargo-manager {
-    header {
-        margin-bottom: 0;
+
+.embargo.manager {
+    .expiration input {
+        margin-bottom: $vertical-rhythm/2;
     }
 }

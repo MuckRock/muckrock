@@ -3,7 +3,7 @@
     <img src="{{ SITE_ROOT }}{{ file.get_thumbnail }}" class="thumbnail">
     <div class="title">{{ file.title }}</div>
     <div class="file-actions">
-        {% if file.is_doccloud and not file.get_foia.is_embargo %}
+        {% if file.is_doccloud and not file.get_foia.embargo %}
         <a href="{{ SITE_ROOT }}{{ file.foia.get_absolute_url }}#{{ file.anchor }}" class="view-file" data-doc-id="{{ file.doc_id }}" data-doc-title="{{ file.title }}" data-doc-anchor="{{ file.anchor }}">View</a>
         <a href="#" class=" modal-button">Embed</a>
         <div class="hidden-modal embed">

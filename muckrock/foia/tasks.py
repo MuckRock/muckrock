@@ -320,7 +320,7 @@ def autoimport():
         file_name = os.path.split(key.name)[1]
 
         title = title or file_name
-        access = 'private' if foia.is_embargo() else 'public'
+        access = 'private' if foia.embargo else 'public'
 
         foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
                              source=comm.from_who[:70], access=access)

@@ -10,13 +10,15 @@ from django.test import TestCase, Client
 import nose.tools
 
 import datetime
-import re
 from datetime import date as real_date
+import logging
 from operator import attrgetter
+import re
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
+from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
@@ -572,3 +574,157 @@ class TestFOIAIntegration(TestCase):
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
+
+
+class FOIAEmbargoTests(TestCase):
+    """Embargoing a request hides it from public view."""
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        self.foia = FOIARequest.objects.get(pk=3)
+        self.user = self.foia.user
+        self.client = Client()
+        self.client.login(username=self.user.username, password='abc')
+        self.url = reverse('foia-embargo', kwargs={
+            'jurisdiction': self.foia.jurisdiction.slug,
+            'jidx': self.foia.jurisdiction.pk,
+            'idx': self.foia.pk,
+            'slug': self.foia.slug
+        })
+
+    def test_basic_embargo(self):
+        """The embargo should be accepted if the owner can embargo and edit the request."""
+        nose.tools.ok_(self.foia.editable_by(self.user),
+            'The request should be editable by the user.')
+        nose.tools.ok_(self.user.profile.can_embargo(),
+            'The user should be allowed to embargo.')
+        nose.tools.ok_(self.foia.status not in END_STATUS,
+            'The request should not be closed.')
+        data = {'embargo': 'create'}
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(self.foia.embargo, 'An embargo should be set on the request.')
+
+    def test_no_permission_to_edit(self):
+        """Users without permission to edit the request should not be able to change the embargo"""
+        user_without_permission = User.objects.get(pk=2)
+        nose.tools.ok_(not self.foia.editable_by(user_without_permission))
+        nose.tools.ok_(user_without_permission.profile.can_embargo())
+        data = {'embargo': 'create'}
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
+
+    def test_no_permission_to_embargo(self):
+        """Users without permission to embargo the request should not be allowed to do so."""
+        user_without_permission = User.objects.get(pk=5)
+        self.foia.user = user_without_permission
+        self.foia.save()
+        nose.tools.ok_(self.foia.editable_by(user_without_permission))
+        nose.tools.ok_(not user_without_permission.profile.can_embargo())
+        data = {'embargo': 'create'}
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
+
+    def test_unembargo(self):
+        """
+        The embargo should be removable by editors of the request.
+        Any user should be allowed to remove an embargo, even if they cannot apply one.
+        """
+        user_without_permission = User.objects.get(pk=5)
+        self.foia.user = user_without_permission
+        self.foia.embargo = True
+        self.foia.save()
+        nose.tools.assert_true(self.foia.embargo)
+        nose.tools.assert_true(self.foia.editable_by(user_without_permission))
+        nose.tools.assert_false(user_without_permission.profile.can_embargo())
+        data = {'embargo': 'delete'}
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_false(self.foia.embargo,
+            'The embargo should be removed from the request.')
+
+    def test_embargo_details(self):
+        """
+        If the request is in a closed state, it needs a date to be applied.
+        If the user has permission, apply a permanent embargo.
+        """
+        self.foia.status = 'rejected'
+        self.foia.save()
+        default_expiration_date = datetime.date.today() + datetime.timedelta(1)
+        embargo_form = FOIAEmbargoForm({
+            'permanent_embargo': True,
+            'date_embargo': default_expiration_date
+        })
+        nose.tools.assert_true(embargo_form.is_valid(), 'Form should validate.')
+        nose.tools.assert_true(self.user.profile.can_embargo_permanently())
+        data = {'embargo': 'create'}
+        data.update(embargo_form.data)
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'An embargo should be set on the request.')
+        nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
+            'An expiration date should be set on the request.')
+        nose.tools.assert_true(self.foia.permanent_embargo,
+            'A permanent embargo should be set on the request.')
+
+    def test_cannot_permanent_embargo(self):
+        """Users who cannot set permanent embargoes shouldn't be able to."""
+        user_without_permission = User.objects.get(pk=2)
+        self.foia.user = user_without_permission
+        self.foia.save()
+        embargo_form = FOIAEmbargoForm({'permanent_embargo': True})
+        nose.tools.assert_true(user_without_permission.profile.can_embargo())
+        nose.tools.assert_false(user_without_permission.profile.can_embargo_permanently())
+        nose.tools.assert_true(embargo_form.is_valid(), 'Form should validate.')
+        data = {'embargo': 'create'}
+        data.update(embargo_form.data)
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'An embargo should be set on the request.')
+        nose.tools.assert_false(self.foia.permanent_embargo,
+            'A permanent embargo should not be set on the request.')
+
+    def test_update_embargo(self):
+        """The embargo should be able to be updated."""
+        self.foia.embargo = True
+        self.foia.embargo_permanent = True
+        self.foia.date_embargo = datetime.date.today() + datetime.timedelta(5)
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo)
+        expiration = datetime.date.today() + datetime.timedelta(15)
+        embargo_form = FOIAEmbargoForm({
+            'date_embargo': expiration
+        })
+        data = {'embargo': 'update'}
+        data.update(embargo_form.data)
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should stay applied to the request.')
+        nose.tools.assert_false(self.foia.permanent_embargo,
+            'The permanent embargo should be repealed.')
+        nose.tools.eq_(self.foia.date_embargo, expiration,
+            'The embargo expiration date should be updated.')

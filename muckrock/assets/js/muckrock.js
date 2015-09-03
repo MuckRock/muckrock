@@ -79,39 +79,20 @@ $('#toggle-all').click(function(){
     });
 });
 
-// Tag Manager
-
-$('#edit-tags').click(function() {
+// Manager Component
+// A manager presents a state and a form that can modify that state.
+$('.edit').click(function(){
     var editButton = this;
-    var tagManager = $(editButton).closest('.tag-manager');
-    var tagForm = $(tagManager).find('.tag-form');
-    var tagList = $(tagManager).find('.tag-list');
-    $(tagForm).addClass('visible');
+    var manager = $(editButton).closest('.manager');
+    var form = $(manager).find('form');
+    var display = $(manager).find('.state');
+    $(form).addClass('visible');
+    $(display).hide();
     $(editButton).hide();
-    $(tagList).hide();
-    $('#cancel-tags').click(function(e){
+    $(manager).find('.cancel').click(function(e){
         e.preventDefault();
-        $(tagForm).removeClass('visible');
-        $(editButton).show();
-        $(tagList).show();
-    });
-});
-
-// Status Manager
-
-$('#edit-status').click(function() {
-    var editButton = this;
-    var statusManager = $(editButton).closest('.status-manager');
-    var statusForm = $(statusManager).find('.status-form');
-    var statusTag = $(statusManager).find('.status');
-    $(statusForm).addClass('visible');
-    $(statusTag).hide();
-    $(editButton).hide();
-    $('#cancel-status').click(function(e){
-        e.preventDefault();
-        console.log('cancel');
-        $(statusForm).removeClass('visible');
-        $(statusTag).show();
+        $(form).removeClass('visible');
+        $(display).show();
         $(editButton).show();
     });
 });
