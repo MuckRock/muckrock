@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 def _upload_file(foia, comm, file_, sender):
     """Upload a file to attach to a FOIA request"""
 
-    access = 'private' if foia and foia.is_embargo() else 'public'
+    access = 'private' if foia and foia.embargo else 'public'
     source = foia.agency.name if foia and foia.agency else sender
 
     foia_file = FOIAFile(

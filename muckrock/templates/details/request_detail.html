@@ -189,7 +189,7 @@
 {% if foia.files.all %}
 <!-- DOCUMENTS -->
 <section class="tab-section files" id="files">
-    {% if not foia.is_embargo and foia.total_pages > 0 %}
+    {% if not foia.embargo and foia.total_pages > 0 %}
     <h2 id="doc-title"></h2>
     <div class="viewer" id="viewer"></div>
     {% endif %}

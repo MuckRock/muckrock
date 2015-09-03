@@ -238,28 +238,11 @@ class FOIARequest(models.Model):
         return user.is_staff or self.user == user or \
             self.read_collaborators.filter(pk=user.pk).exists() or \
             self.edit_collaborators.filter(pk=user.pk).exists() or \
-            (self.status != 'started' and not self.is_embargo())
+            (self.status != 'started' and not self.embargo)
 
     def is_public(self):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
-
-    def is_embargo(self, save=True):
-        """Is this request currently on an embargo?"""
-        if not self.embargo:
-            return False
-
-        if self.is_permanently_embargoed() or not self.embargo_date() or \
-                date.today() < self.embargo_date():
-            return True
-
-        if save:
-            logger.info('Embargo expired for FOI Request %d - %s on %s',
-                        self.pk, self.title, self.embargo_date())
-            self.embargo = False
-            self.save()
-
-        return False
 
     def embargo_date(self):
         """The date this request comes off of embargo"""
