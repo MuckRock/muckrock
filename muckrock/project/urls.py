@@ -10,7 +10,7 @@ from muckrock.project import views
 urlpatterns = patterns('',
     url(r'^$',
         views.ProjectListView.as_view(),
-        name='project-create'),
+        name='project-list'),
     url(r'^create/$',
         views.ProjectCreateView.as_view(),
         name='project-create'),

@@ -58,7 +58,7 @@ ipython==0.10
 iron-cache==0.3.2
 iron-celery==0.3.1
 iron-core==1.1.1
-iron-mq==0.6
+iron-mq==0.7
 kombu==3.0.14
 logilab-common==0.63.2
 lxml==3.1.0
