@@ -34,11 +34,31 @@
         .communications-controls {
             @include display(flex);
             @include justify-content(space-between);
-            @include align-items(center);
+            @include align-items(flex-start);
             @include flex-wrap(wrap);
+        }
+        .communications.filter {
+            margin-top: $vertical-rhythm/4;
+            margin-bottom: $vertical-rhythm;
+            input {
+                width: 90%;
+            }
+        }
+        .communications-actions {
+            margin-bottom: 0;
+            @include media($medium-layout) {
+                text-align: right;
+            }
+        }
+        .communications.filter, .communications-actions {
+            @include flex(1 100%);
+            @include media($medium-layout) {
+                @include flex(1 50%);
+            }
         }
         .communications-settings {
             margin-bottom: 0;
+            margin-top: $vertical-rhythm;
             p {
                 margin-bottom: 0;
             }

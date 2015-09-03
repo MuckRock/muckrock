@@ -158,22 +158,29 @@
         <div class="communications filter">
             <input id="comms-filter" type="search" placeholder="Filter communications" />
         </div>
-        <div class="communications-settings">
-        {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
-            {% if foia.disable_autofollowups %}
-            <p>Automatic follow ups are disabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></p>
-            {% else %}
-            <p>Automatic follow ups are enabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></p>
-            {% endif %}
-        {% endif %}
-        </div>
         {% if user_can_edit %}
         <div class="communications-actions">
-            <button class="primary">Follow Up</button>
-            <button class="failure">Appeal</button>
-            <button>Get Advice</button>
+            <button class="primary" id="follow-up">Follow Up</button>
+            <button class="failure" id="appeal">Appeal</button>
+            {% if request.user.is_staff %}
+            <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
+            {% else %}
+            <button id="get-advice">Get Advice</button>
+            {% endif %}
+            <div class="communications-settings">
+                {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
+                {% if foia.disable_autofollowups %}
+                <p class="follow-ups">Automatic follow ups are disabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></p>
+                {% else %}
+                <p class="follow-ups">Automatic follow ups are enabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></p>
+                {% endif %}
+                {% endif %}
+            </div>
         </div>
         {% endif %}
+    </div>
+    <div class="communications-forms">
+
     </div>
     <div class="communications-list">
     {% for comm in foia.communications.all %}
