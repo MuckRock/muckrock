@@ -174,7 +174,7 @@ class FOIAEmbargoForm(forms.Form):
         if date_embargo and date_embargo > max_duration:
             error_msg = 'Embargo expiration date must be within 30 days of today'
             self._errors['date_embargo'] = self.error_class([error_msg])
-        return self.cleaned_data
+        return date_embargo
 
 
 class FOIADeleteForm(forms.Form):

@@ -664,7 +664,7 @@ class FOIAEmbargoTests(TestCase):
         default_expiration_date = datetime.date.today() + datetime.timedelta(1)
         embargo_form = FOIAEmbargoForm({
             'permanent_embargo': True,
-            'date_embargo': datetime.date.today()
+            'date_embargo': default_expiration_date
         })
         nose.tools.assert_true(embargo_form.is_valid(), 'Form should validate.')
         data = {'embargo': 'create'}

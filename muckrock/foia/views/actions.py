@@ -23,7 +23,7 @@ from muckrock.foia.forms import \
     FOIANoteForm, \
     FOIAEmbargoForm, \
     FOIAFileFormSet
-from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
@@ -141,12 +141,31 @@ def delete(request, jurisdiction, jidx, slug, idx):
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
 
+    def fine_tune_embargo(request, foia):
+        """Adds an expiration date or makes permanent if necessary."""
+        permanent = request.POST.get('permanent_embargo')
+        expiration = request.POST.get('date_embargo')
+        form = FOIAEmbargoForm({
+            'permanent_embargo': request.POST.get('permanent_embargo'),
+            'date_embargo': request.POST.get('date_embargo')
+        })
+        if form.is_valid():
+            permanent = form.cleaned_data['permanent_embargo']
+            expiration = form.cleaned_data['date_embargo']
+            if permanent and request.user.profile.can_embargo_permanently():
+                foia.permanent_embargo = True
+            if expiration and foia.status in END_STATUS:
+                foia.date_embargo = expiration
+            foia.save()
+        return
+
     def create_embargo(request, foia):
         """Apply an embargo to the FOIA"""
         if request.user.profile.can_embargo():
             foia.embargo = True
             foia.save()
             logger.info('%s embargoed %s', request.user, foia)
+            fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from embargoing %s', request.user, foia)
             messages.error(request, 'You cannot embargo requests.')
