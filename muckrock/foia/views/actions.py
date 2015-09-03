@@ -140,7 +140,19 @@ def delete(request, jurisdiction, jidx, slug, idx):
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
+
+    def create_embargo(foia):
+        """Apply an embargo to the request"""
+        foia.embargo = True
+        foia.save()
+        logger.info('The request %s was embargoed.', foia)
+        return
+
     foia = _get_foia(jurisdiction, jidx, slug, idx)
+    if request.method == 'POST':
+        embargo_action = request.POST.get('embargo')
+        if embargo_action == 'create':
+            create_embargo(foia)
     return redirect(foia)
 
 @login_required
