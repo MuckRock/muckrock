@@ -590,10 +590,10 @@ class FOIARequest(models.Model):
             ),
             Action(
                 test=True,
-                title='Report',
+                title='Get Help',
                 action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
-                class_name='modal'
+                class_name='failure modal'
             ),
         ]
 

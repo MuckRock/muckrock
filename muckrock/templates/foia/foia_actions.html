@@ -14,8 +14,8 @@
         {% if action.link %}
             <a href={{ action.link }} class="button{% if action.class_name %} {{ action.class_name }}{% endif %}" title="{{ action.desc }}">{{ action.title }}</a>
         {% endif %}
-        {% if action.class_name == 'modal' %}
-            <span class="text-area modal-button button">{{ action.title }}</span>
+        {% if 'modal' in action.class_name %}
+            <span class="text-area modal-button button {% if action.title == 'Get Help' %}failure{% endif %}">{{ action.title }}</span>
             <div class="modal">
                 <h1>{{ action.title }}</h1>
                 <h2>{{ action.desc }}</h2>
