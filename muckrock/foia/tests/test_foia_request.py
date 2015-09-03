@@ -619,3 +619,18 @@ class FOIAEmbargoTests(TestCase):
         self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 200)
         nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
+
+    def test_no_permission_to_embargo(self):
+        """Users without permission to embargo the request should not be allowed to do so."""
+        user_without_permission = User.objects.get(pk=5)
+        self.foia.user = user_without_permission
+        self.foia.save()
+        nose.tools.ok_(self.foia.editable_by(user_without_permission))
+        nose.tools.ok_(not user_without_permission.profile.can_embargo())
+        data = {'embargo': 'create'}
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
