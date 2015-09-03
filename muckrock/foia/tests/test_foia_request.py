@@ -657,8 +657,11 @@ class FOIAEmbargoTests(TestCase):
         nose.tools.assert_false(self.foia.embargo,
             'The embargo should be removed from the request.')
 
-    def test_embargo_date(self):
-        """If the request is in a closed state, it needs a date to be applied."""
+    def test_embargo_details(self):
+        """
+        If the request is in a closed state, it needs a date to be applied.
+        If the user has permission, apply a permanent embargo.
+        """
         self.foia.status = 'rejected'
         self.foia.save()
         default_expiration_date = datetime.date.today() + datetime.timedelta(1)
@@ -667,6 +670,7 @@ class FOIAEmbargoTests(TestCase):
             'date_embargo': default_expiration_date
         })
         nose.tools.assert_true(embargo_form.is_valid(), 'Form should validate.')
+        nose.tools.assert_true(self.user.profile.can_embargo_permanently())
         data = {'embargo': 'create'}
         data.update(embargo_form.data)
         response = self.client.post(self.url, data, follow=True)
@@ -676,3 +680,5 @@ class FOIAEmbargoTests(TestCase):
             'An embargo should be set on the request.')
         nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
             'An expiration date should be set on the request.')
+        nose.tools.assert_true(self.foia.permanent_embargo,
+            'A permanent embargo should be set on the request.')
