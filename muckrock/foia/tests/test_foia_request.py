@@ -10,13 +10,14 @@ from django.test import TestCase, Client
 import nose.tools
 
 import datetime
-import re
 from datetime import date as real_date
+import logging
 from operator import attrgetter
+import re
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
@@ -572,3 +573,32 @@ class TestFOIAIntegration(TestCase):
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
+
+
+class FOIAEmbargoTests(TestCase):
+    """Embargoing a request hides it from public view."""
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
+                'test_foiacommunications.json']
+
+    def setUp(self):
+        self.foia = FOIARequest.objects.get(pk=1)
+        self.user = self.foia.user
+        self.client = Client()
+        self.client.login(username=self.user.username, password='abc')
+        self.url = reverse('foia-embargo', kwargs={
+            'jurisdiction': self.foia.jurisdiction.slug,
+            'jidx': self.foia.jurisdiction.pk,
+            'idx': self.foia.pk,
+            'slug': self.foia.slug
+        })
+
+    def test_basic_embargo(self):
+        """The embargo should be accepted if the owner can embargo."""
+        nose.tools.ok_(self.user.profile.can_embargo(), 'The user should be allowed to embargo.')
+        nose.tools.ok_(self.foia.status not in END_STATUS, 'The request should not be closed.')
+        data = {'embargo': 'create'}
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(self.foia.embargo, 'An embargo should be set on the request.')

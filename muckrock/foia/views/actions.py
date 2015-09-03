@@ -140,43 +140,8 @@ def delete(request, jurisdiction, jidx, slug, idx):
 @login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
-    def form_actions(_, foia, form):
-        """Update the embargo date"""
-        foia.embargo = True
-        foia.date_embargo = form.cleaned_data.get('date_embargo')
-        foia.permanent_embargo = False
-        foia.save()
-        logger.info(
-            'Embargo set by user for FOI Request %d %s to %s',
-            foia.pk,
-            foia.title,
-            foia.embargo
-        )
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
-    if foia.embargo or foia.status not in finished_status:
-        foia.embargo = not foia.embargo
-        foia.permanent_embargo = False
-        foia.date_embargo = None
-        foia.save()
-        return redirect(foia)
-    else:
-        action = RequestAction(
-            form_actions=form_actions,
-            msg='embargo',
-            tests=[(
-                lambda f: f.user.profile.can_embargo(),
-                'You may not embargo requests with your account type'
-            )],
-            form_class=lambda r, f: FOIAEmbargoForm,
-            return_url=lambda r, f: f.get_absolute_url(),
-            heading='Update the Embargo Date',
-            value='Update',
-            must_own=True,
-            template='forms/foia/embargo.html',
-            extra_context=lambda f: {}
-        )
-        return _foia_action(request, foia, action)
+    return redirect(foia)
 
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):
