@@ -149,7 +149,7 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if request.method == 'POST':
+    if request.method == 'POST' and foia.editable_by(request.user):
         embargo_action = request.POST.get('embargo')
         if embargo_action == 'create':
             create_embargo(foia)

@@ -582,7 +582,7 @@ class FOIAEmbargoTests(TestCase):
                 'test_foiacommunications.json']
 
     def setUp(self):
-        self.foia = FOIARequest.objects.get(pk=1)
+        self.foia = FOIARequest.objects.get(pk=3)
         self.user = self.foia.user
         self.client = Client()
         self.client.login(username=self.user.username, password='abc')
@@ -594,11 +594,28 @@ class FOIAEmbargoTests(TestCase):
         })
 
     def test_basic_embargo(self):
-        """The embargo should be accepted if the owner can embargo."""
-        nose.tools.ok_(self.user.profile.can_embargo(), 'The user should be allowed to embargo.')
-        nose.tools.ok_(self.foia.status not in END_STATUS, 'The request should not be closed.')
+        """The embargo should be accepted if the owner can embargo and edit the request."""
+        nose.tools.ok_(self.foia.editable_by(self.user),
+            'The request should be editable by the user.')
+        nose.tools.ok_(self.user.profile.can_embargo(),
+            'The user should be allowed to embargo.')
+        nose.tools.ok_(self.foia.status not in END_STATUS,
+            'The request should not be closed.')
         data = {'embargo': 'create'}
         response = self.client.post(self.url, data, follow=True)
         self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 200)
         nose.tools.ok_(self.foia.embargo, 'An embargo should be set on the request.')
+
+    def test_no_permission_to_edit(self):
+        """Users without permission to edit the request should not be able to change the embargo"""
+        user_without_permission = User.objects.get(pk=2)
+        nose.tools.ok_(not self.foia.editable_by(user_without_permission))
+        nose.tools.ok_(user_without_permission.profile.can_embargo())
+        data = {'embargo': 'create'}
+        client_without_permission = Client()
+        client_without_permission.login(username=user_without_permission.username, password='abc')
+        response = client_without_permission.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.ok_(not self.foia.embargo, 'The embargo should not be set on the request.')
