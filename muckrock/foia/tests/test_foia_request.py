@@ -709,12 +709,12 @@ class FOIAEmbargoTests(TestCase):
         self.foia.embargo = True
         self.foia.embargo_permanent = True
         self.foia.date_embargo = datetime.date.today() + datetime.timedelta(5)
+        self.foia.status = 'rejected'
         self.foia.save()
         self.foia.refresh_from_db()
         nose.tools.assert_true(self.foia.embargo)
         expiration = datetime.date.today() + datetime.timedelta(15)
         embargo_form = FOIAEmbargoForm({
-            'permanent_embargo': False,
             'date_embargo': expiration
         })
         data = {'embargo': 'update'}

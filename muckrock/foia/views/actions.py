@@ -152,8 +152,8 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         if form.is_valid():
             permanent = form.cleaned_data['permanent_embargo']
             expiration = form.cleaned_data['date_embargo']
-            if permanent and request.user.profile.can_embargo_permanently():
-                foia.permanent_embargo = True
+            if request.user.profile.can_embargo_permanently():
+                foia.permanent_embargo = permanent
             if expiration and foia.status in END_STATUS:
                 foia.date_embargo = expiration
             foia.save()
@@ -171,6 +171,16 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             messages.error(request, 'You cannot embargo requests.')
         return
 
+    def update_embargo(request, foia):
+        """Update an embargo to the FOIA"""
+        if request.user.profile.can_embargo():
+            print 'updating embargo'
+            fine_tune_embargo(request, foia)
+        else:
+            logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)
+            messages.error(request, 'You cannot update this embargo.')
+        return
+
     def delete_embargo(request, foia):
         """Remove an embargo from the FOIA"""
         foia.embargo = False
@@ -183,6 +193,8 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         embargo_action = request.POST.get('embargo')
         if embargo_action == 'create':
             create_embargo(request, foia)
+        elif embargo_action == 'update':
+            update_embargo(request, foia)
         elif embargo_action == 'delete':
             delete_embargo(request, foia)
     return redirect(foia)
