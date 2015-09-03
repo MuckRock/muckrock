@@ -703,3 +703,28 @@ class FOIAEmbargoTests(TestCase):
             'An embargo should be set on the request.')
         nose.tools.assert_false(self.foia.permanent_embargo,
             'A permanent embargo should not be set on the request.')
+
+    def test_update_embargo(self):
+        """The embargo should be able to be updated."""
+        self.foia.embargo = True
+        self.foia.embargo_permanent = True
+        self.foia.date_embargo = datetime.date.today() + datetime.timedelta(5)
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo)
+        expiration = datetime.date.today() + datetime.timedelta(15)
+        embargo_form = FOIAEmbargoForm({
+            'permanent_embargo': False,
+            'date_embargo': expiration
+        })
+        data = {'embargo': 'update'}
+        data.update(embargo_form.data)
+        response = self.client.post(self.url, data, follow=True)
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 200)
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should stay applied to the request.')
+        nose.tools.assert_false(self.foia.permanent_embargo,
+            'The permanent embargo should be repealed.')
+        nose.tools.eq_(self.foia.date_embargo, expiration,
+            'The embargo expiration date should be updated.')
