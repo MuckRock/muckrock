@@ -96,9 +96,13 @@
             </header>
             <div class="embargo state">
             {% if foia.embargo %}
-                <p>This request is {% if foia.permanent_embargo %}permanently {% endif %}embargoed{% if foia.date_embargo %} until {{ foia.date_embargo }}{% endif %}.</p>
+                {% if foia.permanent_embargo %}
+                <p>This request is permanently embargoed.</p>
+                {% else %}
+                <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.</p>
+                {% endif %}
             {% else %}
-                <p>This request is unembargoed.</p>
+                <p>This request has no embargo.</p>
             {% endif %}
             </div>
             <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
