@@ -17,6 +17,7 @@ import re
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.foia import tasks
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
 from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.agency.models import Agency
@@ -728,3 +729,94 @@ class FOIAEmbargoTests(TestCase):
             'The permanent embargo should be repealed.')
         nose.tools.eq_(self.foia.date_embargo, expiration,
             'The embargo expiration date should be updated.')
+
+    def test_expire_embargo(self):
+        """Any requests with an embargo date before today should be unembargoed"""
+        self.foia.embargo = True
+        self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_false(self.foia.embargo,
+            'The embargo should be repealed.')
+
+    def test_do_not_expire_permanent(self):
+        """A request with a permanent embargo should stay embargoed."""
+        self.foia.embargo = True
+        self.foia.permanent_embargo = True
+        self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
+
+    def test_do_not_expire_no_date(self):
+        """A request without an expiration date should not expire."""
+        self.foia.embargo = True
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
+
+    def test_expire_after_date(self):
+        """Only after the date_embargo passes should the embargo expire."""
+        self.foia.embargo = True
+        self.foia.date_embargo = datetime.date.today()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
+
+    def test_set_date_on_status_change(self):
+        """
+        If the request status is changed to an end status and it is embargoed,
+        set the embargo expiration date to 30 days from today.
+        """
+        default_expiration_date = datetime.date.today() + datetime.timedelta(30)
+        self.foia.embargo = True
+        self.foia.save()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
+            'The embargo should be given an expiration date.')
+
+    def test_set_date_exception(self):
+        """
+        If the request is changed to an inactive state, it is embargoed, and there is no
+        previously set expiration date, then set the embargo expiration to its default value.
+        """
+        extended_expiration_date = datetime.date.today() + datetime.timedelta(15)
+        self.foia.embargo = True
+        self.foia.date_embargo = extended_expiration_date
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.eq_(self.foia.date_embargo, extended_expiration_date,
+            'The embargo should not change the extended expiration date.')
+
+    def test_remove_date(self):
+        """The embargo date should be removed if the request is changed to an active state."""
+        default_expiration_date = datetime.date.today() + datetime.timedelta(30)
+        self.foia.embargo = True
+        self.foia.save()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
+            'The embargo should be given an expiration date.')
+        self.foia.status = 'appealing'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_false(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.ok_(not self.foia.date_embargo,
+            'The embargo date should be removed.')

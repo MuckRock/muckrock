@@ -196,9 +196,16 @@ class FOIARequest(models.Model):
         })
 
     def save(self, *args, **kwargs):
-        """Normalize fields before saving"""
+        """Normalize fields before saving and set the embargo expiration if necessary"""
         self.slug = slugify(self.slug)
         self.title = self.title.strip()
+        if self.embargo:
+            if self.status in END_STATUS:
+                default_date = date.today() + timedelta(30)
+                existing_date = self.date_embargo
+                self.date_embargo = default_date if not existing_date else existing_date
+            else:
+                self.date_embargo = None
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
