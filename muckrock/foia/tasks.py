@@ -215,9 +215,16 @@ def embargo_warn():
                   'info@muckrock.com',
                   [foia.user.email])
 
+# @periodic_task(run_every=crontab(hour=0, minute=0), name='muckrock.foia.tasks.embargo_warn')
 def embargo_expire():
     """Expire requests that have a date_embargo before today"""
-    pass
+    for foia in FOIARequest.objects.filter(embargo=True, permanent_embargo=False, date_embargo__lt=date.today()):
+        foia.embargo = False
+        foia.save()
+        send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
+                  render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
+                  'info@muckrock.com',
+                  [foia.user.email])
 
 @periodic_task(run_every=crontab(hour=0, minute=0),
                name='muckrock.foia.tasks.set_all_document_cloud_pages')
