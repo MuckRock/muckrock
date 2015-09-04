@@ -209,11 +209,11 @@ def followup_requests():
 @periodic_task(run_every=crontab(hour=6, minute=0), name='muckrock.foia.tasks.embargo_warn')
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
-    for foia in FOIARequest.objects.filter(embargo=True,
-                                           date_embargo=date.today()+timedelta(1)):
+    for foia in FOIARequest.objects.filter(embargo=True, date_embargo=date.today()):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_will_expire.txt', {'request': foia}),
-                  'info@muckrock.com', [foia.user.email])
+                  'info@muckrock.com',
+                  [foia.user.email])
 
 def embargo_expire():
     """Expire requests that have a date_embargo before today"""
