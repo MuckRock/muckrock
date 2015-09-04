@@ -17,6 +17,7 @@ import re
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.foia import tasks
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
 from muckrock.foia.forms import FOIAEmbargoForm
 from muckrock.agency.models import Agency
@@ -728,3 +729,14 @@ class FOIAEmbargoTests(TestCase):
             'The permanent embargo should be repealed.')
         nose.tools.eq_(self.foia.date_embargo, expiration,
             'The embargo expiration date should be updated.')
+
+    def test_expire_embargo(self):
+        """Any requests with an embargo date before today should be unembargoed"""
+        self.foia.embargo = True
+        self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_false(self.foia.embargo,
+            'The embargo should be repealed.')
