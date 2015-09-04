@@ -790,11 +790,10 @@ class FOIAEmbargoTests(TestCase):
 
     def test_set_date_exception(self):
         """
-        If the request status is changed to an end status and it is embargoed,
-        and if there is an existing expiration date greater than the default expiration duration,
-        do not set the expiration date.
+        If the request status is changed to an end status, it is embargoed, and there is no
+        previously set expiration date, then set the embargo expiration to its default value.
         """
-        extended_expiration_date = datetime.date.today() + datetime.timedelta(300)
+        extended_expiration_date = datetime.date.today() + datetime.timedelta(15)
         self.foia.embargo = True
         self.foia.date_embargo = extended_expiration_date
         self.foia.save()
