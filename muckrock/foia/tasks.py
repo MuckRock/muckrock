@@ -212,7 +212,7 @@ def embargo_warn():
     for foia in FOIARequest.objects.filter(embargo=True,
                                            date_embargo=date.today()+timedelta(1)):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
-                  render_to_string('text/foia/embargo.txt', {'request': foia}),
+                  render_to_string('text/foia/embargo_will_expire.txt', {'request': foia}),
                   'info@muckrock.com', [foia.user.email])
 
 def embargo_expire():
