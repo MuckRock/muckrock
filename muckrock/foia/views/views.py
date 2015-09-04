@@ -22,7 +22,6 @@ from muckrock.foia.models import \
     FOIAMultiRequest, \
     STATUS, END_STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
-from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
@@ -147,6 +146,7 @@ class Detail(DetailView):
         foia = context['foia']
         user = self.request.user
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
+        include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
         context['user_can_edit'] = foia.editable_by(user)
@@ -158,7 +158,7 @@ class Detail(DetailView):
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
-        context['status_choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
+        context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))

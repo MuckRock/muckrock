@@ -10,8 +10,7 @@ from datetime import date, timedelta
 
 from muckrock.forms import MRFilterForm
 from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, \
-                                 FOIANote, STATUS, END_STATUS
+from muckrock.foia.models import FOIARequest, FOIAMultiRequest, FOIAFile, FOIANote, STATUS
 from muckrock.jurisdiction.models import Jurisdiction
 
 class RequestForm(forms.Form):

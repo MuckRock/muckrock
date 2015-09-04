@@ -345,6 +345,7 @@ class FOIARequest(models.Model):
 
     def last_comm(self):
         """Return the last communication"""
+        # pylint: disable=no-member
         return self.communications.last()
 
     def latest_response(self):

@@ -18,7 +18,7 @@ import re
 import sys
 import urllib2
 from boto.s3.connection import S3Connection
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
 
