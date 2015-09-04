@@ -174,7 +174,6 @@ def embargo(request, jurisdiction, jidx, slug, idx):
     def update_embargo(request, foia):
         """Update an embargo to the FOIA"""
         if request.user.profile.can_embargo():
-            print 'updating embargo'
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)

@@ -772,3 +772,35 @@ class FOIAEmbargoTests(TestCase):
         self.foia.refresh_from_db()
         nose.tools.assert_true(self.foia.embargo,
             'The embargo should remain embargoed.')
+
+    def test_set_date_on_status_change(self):
+        """
+        If the request status is changed to an end status and it is embargoed,
+        set the embargo expiration date to 30 days from today.
+        """
+        default_expiration_date = datetime.date.today() + datetime.timedelta(30)
+        self.foia.embargo = True
+        self.foia.save()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.eq_(self.foia.date_embargo, default_expiration_date,
+            'The embargo should be given an expiration date.')
+
+    def test_set_date_exception(self):
+        """
+        If the request status is changed to an end status and it is embargoed,
+        and if there is an existing expiration date greater than the default expiration duration,
+        do not set the expiration date.
+        """
+        extended_expiration_date = datetime.date.today() + datetime.timedelta(300)
+        self.foia.embargo = True
+        self.foia.date_embargo = extended_expiration_date
+        self.foia.save()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo and self.foia.status in END_STATUS)
+        nose.tools.eq_(self.foia.date_embargo, extended_expiration_date,
+            'The embargo should not change the extended expiration date.')
