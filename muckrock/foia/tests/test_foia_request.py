@@ -740,3 +740,35 @@ class FOIAEmbargoTests(TestCase):
         self.foia.refresh_from_db()
         nose.tools.assert_false(self.foia.embargo,
             'The embargo should be repealed.')
+
+    def test_do_not_expire_permanent(self):
+        """A request with a permanent embargo should stay embargoed."""
+        self.foia.embargo = True
+        self.foia.permanent_embargo = True
+        self.foia.date_embargo = datetime.date.today() - datetime.timedelta(1)
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
+
+    def test_do_not_expire_no_date(self):
+        """A request without an expiration date should not expire."""
+        self.foia.embargo = True
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
+
+    def test_expire_after_date(self):
+        """Only after the date_embargo passes should the embargo expire."""
+        self.foia.embargo = True
+        self.foia.date_embargo = datetime.date.today()
+        self.foia.status = 'rejected'
+        self.foia.save()
+        tasks.embargo_expire()
+        self.foia.refresh_from_db()
+        nose.tools.assert_true(self.foia.embargo,
+            'The embargo should remain embargoed.')
