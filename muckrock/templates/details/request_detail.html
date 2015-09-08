@@ -99,7 +99,7 @@
                 {% if foia.permanent_embargo %}
                 <p>This request is permanently embargoed.</p>
                 {% else %}
-                <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.</p>
+                <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.{% endif %}</p>
                 {% endif %}
             {% else %}
                 <p>This request has no embargo.</p>
