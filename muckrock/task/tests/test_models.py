@@ -355,5 +355,5 @@ class TestTaskManager(TestCase):
         returned_tasks = task.models.Task.objects.filter_by_foia(self.foia)
         logging.debug(returned_tasks)
         logging.debug(self.tasks)
-        eq_(list(returned_tasks), self.tasks,
+        eq_(returned_tasks, self.tasks,
             'The manager should return all the tasks that incorporate this FOIA.')

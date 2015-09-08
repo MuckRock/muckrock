@@ -30,7 +30,21 @@ class TaskQuerySet(models.QuerySet):
 
     def filter_by_foia(self, foia):
         """Get all tasks that relate to the provided FOIA request."""
-        return self.all()
+        tasks = []
+        # infer foia from communication
+        tasks += [task.responsetask for task in self.filter(responsetask__communication__foia=foia)]
+        tasks += [task.snailmailtask for task in self.filter(snailmailtask__communication__foia=foia)]
+        tasks += [task.failedfaxtask for task in self.filter(failedfaxtask__communication__foia=foia)]
+        # these tasks have a direct foia attribute
+        tasks += [task.rejectedemailtask for task in self.filter(rejectedemailtask__foia=foia)]
+        tasks += [task.flaggedtask for task in self.filter(flaggedtask__foia=foia)]
+        tasks += [task.statuschangetask for task in self.filter(statuschangetask__foia=foia)]
+        tasks += [task.paymenttask for task in self.filter(paymenttask__foia=foia)]
+        # try matching foia agency with task agency
+        if (foia.agency):
+            tasks += [task.newagencytask for task in self.filter(newagencytask__agency=foia.agency)]
+            tasks += [task.staleagencytask for task in self.filter(staleagencytask__agency=foia.agency)]
+        return tasks
 
 
 class OrphanTaskQuerySet(models.QuerySet):
