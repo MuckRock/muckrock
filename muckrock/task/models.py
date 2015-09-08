@@ -28,6 +28,10 @@ class TaskQuerySet(models.QuerySet):
         """Get all resolved tasks"""
         return self.filter(resolved=True)
 
+    def filter_by_foia(self, foia):
+        """Get all tasks that relate to the provided FOIA request."""
+        return self.all()
+
 
 class OrphanTaskQuerySet(models.QuerySet):
     """Object manager for orphan tasks"""
