@@ -10,15 +10,17 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
 
-    *:last-child {
+    & > *:last-child {
         @include border-bottom-radius($base-border-radius);
     }
 
     a {
-        color: $crowdfund-color;
-        text-decoration: underline;
+        color: $color-green-dark;
+        text-decoration: none;
+        border-bottom: 1px dotted;
         &:hover {
-            color: $crowdfund-color-dark;
+            color: $color-black;
+            border-bottom: 1px solid;
         }
     }
 
@@ -26,29 +28,35 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         padding: $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
+        a {
+            display: inline-block;
+            &:hover {
+                color: $color-black;
+                border-bottom: 1px solid;
+            }
+        }
     }
 
     header {
-        @include full;
-        overflow: hidden;
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include align-items(flex-start);
         @include border-top-radius($base-border-radius);
         border-bottom: $crowdfund-border;
-
         h1 {
-            font-size: 1rem;
+            font-size: $font-size-3;
+            line-height: $font-line-height;
             font-weight: $font-weight-bold;
+            margin: 0;
         }
-
+        a {
+            font-size: $font-size-2;
+        }
         @include media($medium-layout) {
-            h1 {
-                margin: 0;
-                width: 75%;
-                float: left;
-            }
+            @include flex-direction(row);
+            @include align-items(center);
             a {
-                display: block;
-                width: 25%;
-                float: right;
                 text-align: right;
             }
         }
