@@ -17,7 +17,6 @@ from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
-
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
     def get_unresolved(self):
@@ -70,9 +69,7 @@ class Task(models.Model):
         ordering = ['date_created']
 
     def __unicode__(self):
-        return u'Task: %d' % (self.pk)
-
-    def task_class(self):
+        # pylint:disable=no-self-use
         return u'Task'
 
     def resolve(self, user=None):
@@ -91,9 +88,6 @@ class GenericTask(Task):
     body = models.TextField(blank=True)
 
     def __unicode__(self):
-        return self.subject
-
-    def task_class(self):
         return u'Generic Task'
 
 
@@ -111,9 +105,6 @@ class OrphanTask(Task):
     template_name = 'task/orphan.html'
 
     def __unicode__(self):
-        return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
-
-    def task_class(self):
         return u'Orphan Task'
 
     def move(self, foia_pks):
@@ -160,9 +151,6 @@ class SnailMailTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
-        return u'%s: %s' % (self.get_category_display(), self.communication.foia)
-
-    def task_class(self):
         return u'Snail Mail Task'
 
     def set_status(self, status):
@@ -191,9 +179,6 @@ class RejectedEmailTask(Task):
     error = models.TextField(blank=True)
 
     def __unicode__(self):
-        return u'%s: %s' % (self.get_category_display(), self.foia)
-
-    def task_class(self):
         return u'Rejected Email Task'
 
     def agencies(self):
@@ -215,9 +200,6 @@ class StaleAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return u'Stale Agency: %s' % (self.agency)
-
-    def task_class(self):
         return u'Stale Agency Task'
 
 
@@ -230,16 +212,8 @@ class FlaggedTask(Task):
     jurisdiction = models.ForeignKey(Jurisdiction, blank=True, null=True)
 
     def __unicode__(self):
-        if self.foia:
-            return u'Flagged: %s' % (self.foia)
-        if self.agency:
-            return u'Flagged: %s' % (self.agency)
-        if self.jurisdiction:
-            return u'Flagged: %s' % (self.jurisdiction)
-        return u'Flagged: <None>'
-
-    def task_class(self):
         return u'Flagged Task'
+
 
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
@@ -247,9 +221,6 @@ class NewAgencyTask(Task):
     agency = models.ForeignKey(Agency)
 
     def __unicode__(self):
-        return u'New Agency: %s' % (self.agency)
-
-    def task_class(self):
         return u'New Agency Task'
 
     def pending_requests(self):
@@ -286,10 +257,7 @@ class ResponseTask(Task):
     created_from_orphan = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return u'Response: %s' % (self.communication.foia)
-
-    def task_class(self):
-        return u'Response Task'
+        return u'New Agency Task'
 
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
@@ -341,9 +309,6 @@ class FailedFaxTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
 
     def __unicode__(self):
-        return u'Failed Fax: %s' % (self.communication.foia)
-
-    def task_class(self):
         return u'Failed Fax Task'
 
 
@@ -355,9 +320,6 @@ class StatusChangeTask(Task):
     foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
-        return u'StatusChange: %s' % self.foia
-
-    def task_class(self):
         return u'Status Change Task'
 
 
@@ -368,9 +330,6 @@ class PaymentTask(Task):
     foia = models.ForeignKey('foia.FOIARequest')
 
     def __unicode__(self):
-        return u'Payment: %s for %s' % (self.amount, self.foia)
-
-    def task_class(self):
         return u'Payment Task'
 
 class CrowdfundTask(Task):
@@ -378,9 +337,6 @@ class CrowdfundTask(Task):
     crowdfund = models.ForeignKey('crowdfund.CrowdfundRequest')
 
     def __unicode__(self):
-        return u'Crowdfund: %s' % self.crowdfund
-
-    def task_class(self):
         return u'Crowdfund Task'
 
 
@@ -391,9 +347,6 @@ class GenericCrowdfundTask(Task):
     crowdfund = GenericForeignKey('content_type', 'object_id')
 
     def __unicode__(self):
-        return u'Crowdfund: %s' % self.crowdfund
-
-    def task_class(self):
         return u'Crowdfund Task'
 
 
@@ -402,9 +355,6 @@ class MultiRequestTask(Task):
     multirequest = models.ForeignKey('foia.FOIAMultiRequest')
 
     def __unicode__(self):
-        return u'Multi-Request: %s' % self.multirequest
-
-    def task_class(self):
         return u'Multi-Request Task'
 
 
