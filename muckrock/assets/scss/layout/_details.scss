@@ -10,7 +10,8 @@
         @include media($medium-layout) {
             @include flex-direction(row);
             .aside .button {
-                display: block;
+                float: right;
+                clear: right;
                 margin-bottom: $vertical-rhythm/2;
             }
             .tag-manager {
@@ -18,7 +19,7 @@
             }
         }
         .main {
-            @include flex(1);
+            @include flex(2);
             @include display(flex);
             @include flex-direction(column);
             @justify-content(space-between);
@@ -27,6 +28,7 @@
             padding-right: $vertical-rhythm;
         }
         .aside {
+            @include flex(1);
             @include display(flex);
             @include flex-direction(column);
             @include justify-content(flex-end);
@@ -136,6 +138,13 @@
             @include colorize(success, $color-green);
             @include colorize(failure, $color-red);
             @include colorize(warning, $color-yellow);
+        }
+        .signup-prompt {
+            @include border;
+            padding: $vertical-rhythm/2;
+            .button {
+                float: left;
+            }
         }
         .status-form {
             display: none;

@@ -155,9 +155,9 @@
     {% endfor %}
     </form>
     {% else %}
-    <section class="panel">
+    <section class="signup-prompt">
         <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-        <small><a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a></small>
+        <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
     </section>
     {% endif %}
 {% endblock aside %}
