@@ -4,6 +4,31 @@
     .draft {
         @include row;
     }
+    .signup-prompt {
+        @include border;
+        padding: $vertical-rhythm/2;
+        .button {
+            float: left;
+        }
+    }
+    .task-link {
+        display: inline-block;
+        margin-bottom: $vertical-rhythm;
+        padding: $vertical-rhythm/2;
+        @include border;
+        @include border-radius;
+        border-color: $color-blue-dark;
+        background-color: lighten($color-blue, 25%);
+        color: $color-blue-dark;
+        font-weight: $font-weight-bold;
+        @include transition(all .25s linear);
+        &:hover {
+            background-color: lighten($color-blue, 5%);
+            border-color: $color-black;
+            color: $color-black;
+            text-decoration: none;
+        }
+    }
     .tabs {
         list-style-type: none;
         padding-left: 0;

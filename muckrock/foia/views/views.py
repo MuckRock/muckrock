@@ -25,7 +25,7 @@ from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, re
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
-from muckrock.task.models import FlaggedTask, StatusChangeTask
+from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
 
 # pylint: disable=too-many-ancestors
@@ -160,6 +160,8 @@ class Detail(DetailView):
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
+        context['tasks'] = Task.objects.filter_by_foia(foia)
+        context['open_task_count'] = len(Task.objects.get_unresolved().filter_by_foia(foia))
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         if foia.sidebar_html:

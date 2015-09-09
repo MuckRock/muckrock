@@ -4,10 +4,6 @@
     multirequest
 {% endblock %}
 
-{% block task-type %}
-    Multi-Request
-{% endblock %}
-
 {% block task-data %}
 <summary class="task-data">
     <p><a href="{% url 'admin:foia_foiamultirequest_change' task.multirequest.id %}">{{task.multirequest}}</a> was created by <a href="{% url 'admin:auth_user_change' task.multirequest.user.id %}">{{task.multirequest.user}}</a> and requires approval.</p>

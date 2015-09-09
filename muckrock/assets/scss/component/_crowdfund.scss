@@ -10,15 +10,17 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     border: $crowdfund-border;
     border-radius: $base-border-radius;
 
-    *:last-child {
+    & > *:last-child {
         @include border-bottom-radius($base-border-radius);
     }
 
     a {
-        color: $crowdfund-color;
-        text-decoration: underline;
+        color: $color-green-dark;
+        text-decoration: none;
+        border-bottom: 1px dotted;
         &:hover {
-            color: $crowdfund-color-dark;
+            color: $color-black;
+            border-bottom: 1px solid;
         }
     }
 
@@ -26,29 +28,35 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         padding: $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
+        a {
+            display: inline-block;
+            &:hover {
+                color: $color-black;
+                border-bottom: 1px solid;
+            }
+        }
     }
 
     header {
-        @include full;
-        overflow: hidden;
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include align-items(flex-start);
         @include border-top-radius($base-border-radius);
         border-bottom: $crowdfund-border;
-
         h1 {
-            font-size: 1rem;
+            font-size: $font-size-3;
+            line-height: $font-line-height;
             font-weight: $font-weight-bold;
+            margin: 0;
         }
-
+        a {
+            font-size: $font-size-2;
+        }
         @include media($medium-layout) {
-            h1 {
-                margin: 0;
-                width: 75%;
-                float: left;
-            }
+            @include flex-direction(row);
+            @include align-items(center);
             a {
-                display: block;
-                width: 25%;
-                float: right;
                 text-align: right;
             }
         }
@@ -76,10 +84,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         border-top: $crowdfund-border;
         text-align: left;
         & > * {
-            margin-bottom: 0;
-        }
-        .contributors p {
-            margin-bottom: 0;
+            @include flex(1);
+            @include media($medium-layout) {
+                margin-bottom: 0;
+                margin-right: $vertical-rhythm;
+            }
         }
     }
 
@@ -90,48 +99,48 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             padding: 0 $vertical-rhythm/2 0 0;
         }
     }
+}
 
-    footer {
-        @include full;
-        @include border-bottom-radius($base-border-radius);
-        margin-bottom: 0;
-        border-top: $crowdfund-border;
-        form { @include row; }
-        form > section {
-            @include third;
-            @include media($medium-layout) {
-                margin-bottom: 0;
-            }
-            &.action {
-                margin-bottom: 0;
-            }
-        }
-        .anonymity p {
-            margin: 0;
-        }
-        .anonymity input {
-            margin: $vertical-rhythm/4;
-        }
-        .action button, .amount input {
-            display: block;
-            width: 100%;
-        }
-        .action button {
-            @extend .success.button;
-        }
-        .amount input {
-            @include appearance(none);
-            transform: translateY(4px);
-            border: $crowdfund-border;
-            box-shadow: inset 0px 3px 3px 0px $color-grey;
-            padding: 0.325em;
-            font-size: 1.25em;
-            font-weight: $font-weight-bold;
-            text-align: center;
-        }
+.crowdfund.widget footer {
+    @include full;
+    @include border-bottom-radius($base-border-radius);
+    margin-bottom: 0;
+    border-top: $crowdfund-border;
+    form { @include row; }
+    form > section {
+        @include third;
         @include media($medium-layout) {
-            .action { padding-left: $vertical-rhythm/2; }
+            margin-bottom: 0;
         }
+        &.action {
+            margin-bottom: 0;
+        }
+    }
+    .anonymity p {
+        margin: 0;
+    }
+    .anonymity input {
+        margin: $vertical-rhythm/4;
+    }
+    .action button, .amount input {
+        display: block;
+        width: 100%;
+    }
+    .action button {
+        @extend .success.button;
+    }
+    .amount input {
+        @include appearance(none);
+        transform: translateY(4px);
+        border: $crowdfund-border;
+        box-shadow: inset 0px 3px 3px 0px $color-grey;
+        padding: 0.325em;
+        font-size: 1.25em;
+        font-weight: $font-weight-bold;
+        text-align: center;
+    }
+    @include media($medium-layout) {
+        .action { padding-left: $vertical-rhythm/2; }
     }
 }
 
@@ -141,8 +150,9 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     }
     .contributor {
         &.summary {
+            margin-bottom: 0;
+            font-weight: $font-weight-bold;
             cursor: default;
-            text-decoration: underline;
         }
         &.dropdown {
             display: none;
@@ -158,7 +168,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             font-size: $font-size-2;
             @include transition(opacity .25s .25s linear);
         }
-        &.summary:hover + .contributor.dropdown {
+        &.summary:hover + .dropdown, &.dropdown:hover {
             display: block;
             opacity: .9;
         }

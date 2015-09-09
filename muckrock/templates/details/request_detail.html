@@ -135,11 +135,21 @@
             </form>
         </section>
         {% endif %}
+        {% if user.is_anonymous %}
+        <section class="signup-prompt">
+            <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
+            <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
+        </section>
+        {% endif %}
 	    {% tag_manager foia %}
 	</section>
 {% endblock aside %}
 
 {% block main %}
+
+{% if user.is_staff and tasks|length > 0 %}
+    <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
+{% endif %}
 
 {% if foia.has_crowdfund %}
     {% crowdfund_request foia.crowdfund.pk %}
