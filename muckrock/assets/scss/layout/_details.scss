@@ -2,17 +2,34 @@
 
 .detail {
 
-    .header {
-        margin-bottom: 0;
-    }
-
     .header-container {
-        @include row;
+        @include display(flex);
+        @include align-items(stretch);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+            .aside .button {
+                display: block;
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .tag-manager {
+                margin-bottom: 0;
+            }
+        }
         .main {
-            @include two-thirds;
+            @include flex(1);
+            @include display(flex);
+            @include flex-direction(column);
+            @justify-content(space-between);
+            max-width:38rem;
+            margin-bottom: 0;
+            padding-right: $vertical-rhythm;
         }
         .aside {
-            @include third;
+            @include display(flex);
+            @include flex-direction(column);
+            @include justify-content(flex-end);
         }
     }
 
@@ -125,6 +142,24 @@
             background: none;
             border: none;
             button { margin-left: $vertical-rhythm; }
+        }
+        .task-link {
+            display: inline-block;
+            margin-bottom: $vertical-rhythm;
+            padding: $vertical-rhythm/2;
+            @include border;
+            @include border-radius;
+            border-color: $color-blue-dark;
+            background-color: lighten($color-blue, 25%);
+            color: $color-blue-dark;
+            font-weight: $font-weight-bold;
+            @include transition(all .25s linear);
+            &:hover {
+                background-color: lighten($color-blue, 5%);
+                border-color: $color-black;
+                color: $color-black;
+                text-decoration: none;
+            }
         }
         .tabs {
             list-style-type: none;

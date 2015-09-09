@@ -71,7 +71,6 @@
     {% if foia.tracking_id and user.is_staff %}
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
-    {% tag_manager foia %}
     <dl>
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
@@ -93,10 +92,10 @@
             {% endif %}
         {% endif %}
     {% endif %}
+    {% tag_manager foia %}
 {% endblock header %}
 
 {% block aside %}
-    {% include 'lib/social.html' with title=foia.title %}
     {% if foia.is_payable and foia.user == user %}
     <form method="post" action="{% url 'foia-pay' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" class="hidden-stripe-handler" id="payment-form">
         {% csrf_token %}
@@ -104,7 +103,7 @@
     </form>
     {% endif %}
     {% if user.is_authenticated %}
-    <form method="POST" class="controls panel">
+    <form method="POST" class="controls">
     {% csrf_token %}
     {% for action in user_actions %}
         {% if action.is_possible %}
@@ -164,6 +163,11 @@
 {% endblock aside %}
 
 {% block main %}
+
+{% if user.is_staff and tasks|length > 0 %}
+    <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
+{% endif %}
+
 {% if foia.has_crowdfund %}
     {% crowdfund_request foia.crowdfund.pk %}
 {% endif %}
