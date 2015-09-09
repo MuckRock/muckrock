@@ -2,17 +2,34 @@
 
 .detail {
 
-    .header {
-        margin-bottom: 0;
-    }
-
     .header-container {
-        @include row;
+        @include display(flex);
+        @include align-items(stretch);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+            .aside .button {
+                display: block;
+                margin-bottom: $vertical-rhythm/2;
+            }
+            .tag-manager {
+                margin-bottom: 0;
+            }
+        }
         .main {
-            @include two-thirds;
+            @include flex(1);
+            @include display(flex);
+            @include flex-direction(column);
+            @justify-content(space-between);
+            max-width:38rem;
+            margin-bottom: 0;
+            padding-right: $vertical-rhythm;
         }
         .aside {
-            @include third;
+            @include display(flex);
+            @include flex-direction(column);
+            @include justify-content(flex-end);
         }
     }
 

@@ -71,7 +71,6 @@
     {% if foia.tracking_id and user.is_staff %}
     <code>Tracking ID: {{ foia.tracking_id }}</code>
     {% endif %}
-    {% tag_manager foia %}
     <dl>
     {% if foia.user == user or user.is_staff %}
         {% if foia.is_embargo %}
@@ -93,6 +92,7 @@
             {% endif %}
         {% endif %}
     {% endif %}
+    {% tag_manager foia %}
 {% endblock header %}
 
 {% block aside %}
@@ -103,7 +103,7 @@
     </form>
     {% endif %}
     {% if user.is_authenticated %}
-    <form method="POST" class="controls panel">
+    <form method="POST" class="controls">
     {% csrf_token %}
     {% for action in user_actions %}
         {% if action.is_possible %}
