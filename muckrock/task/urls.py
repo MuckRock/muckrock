@@ -25,5 +25,7 @@ urlpatterns = patterns(
     url(r'^payment/$', views.PaymentTaskList.as_view(), name='payment-task-list'),
     url(r'^crowdfund/$', views.CrowdfundTaskList.as_view(), name='crowdfund-task-list'),
     url(r'^multirequest/$', views.MultiRequestTaskList.as_view(), name='multirequest-task-list'),
-    url(r'^failed-fax/$', views.FailedFaxTaskList.as_view(), name='failed-fax-task-list')
+    url(r'^failed-fax/$', views.FailedFaxTaskList.as_view(), name='failed-fax-task-list'),
+    # tasks for a specific request
+    url(r'^request/(?P<pk>\d+)/$', views.RequestTaskList.as_view(), name='request-task-last')
 )
