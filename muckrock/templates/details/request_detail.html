@@ -31,11 +31,13 @@
 
 {% block content %}
 <article class="request detail">
-    <section class="request overview">
+    <section class="request properties">
         <header>
-            <h1>{{ foia.title }}</h1>
-            <section class="actions">
-                {% include 'foia/foia_actions.html' %}
+            <section class="identity">
+                {% if user.is_staff %}
+                <p><span class="muckrock-no"><code>MuckRock # {{ foia.id }}</code></span>{% if foia.tracking_id %}<span class="tracking-id"><code>Tracking # {{ foia.tracking_id }}</code></span>{% endif %}</p>
+                {% endif %}
+                <h1>{{ foia.title }}</h1>
             </section>
         </header>
         <section class="basic-information">
@@ -43,12 +45,9 @@
             {% if foia.parent %}
             <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
-            {% if user.is_staff %}
-            <p class="muckrock-no"><code>MuckRock # {{ foia.id }}</code></p>
-            {% if foia.tracking_id %}
-            <p class="tracking-id"><code>Tracking # {{ foia.tracking_id }}</code></p>
-            {% endif %}
-            {% endif %}
+        </section>
+        <section class="actions">
+            {% include 'foia/foia_actions.html' %}
         </section>
         <section class="states">
             <section class="status manager" id="request-status">
@@ -125,39 +124,13 @@
             {% endif %}
             {% tag_manager foia %}
         </section>
-
-        {% if foia.date_due or foia.date_estimate %}
-        <section class="dates">
-            {% if foia.date_due and foia.status == "processed" %}
-                {% if past_due %}
-            <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
-                {% else %}
-            <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
-                {% endif %}
-            {% endif %}
-
-            {% if show_estimated_date and foia.date_estimate %}
-            <div class="estimated-completion date">
-                <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-            </div>
-            {% endif %}
-        </section>
-        {% endif %}
-
-    </header>
+    </section>
     <main class="request main">
-
-        {% if user.is_staff and tasks|length > 0 %}
-            <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
-        {% endif %}
-
-        {% if foia.has_crowdfund %}
-            {% crowdfund_request foia.crowdfund.pk %}
-        {% endif %}
 
         {% if foia.files.count > 0 or user_can_edit %}
         <ul class="tabs">
-            <li class="tab active" id="tab-request">Request</li>
+            <li class="tab active" id="tab-overview">Overview</li>
+            <li class="tab" id="tab-request">Request</li>
             {% if foia.files.count > 0 %}
             <li class="tab" id="tab-files">Files</li>
             {% endif %}
@@ -167,7 +140,34 @@
         </ul>
         {% endif %}
 
-        <section class="tab-section communications visible" id="request">
+        <section class="tab-section overview visible" id="overview">
+            {% if foia.date_due or foia.date_estimate %}
+            <section class="dates">
+                {% if foia.date_due and foia.status == "processed" %}
+                    {% if past_due %}
+                <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
+                    {% else %}
+                <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
+                    {% endif %}
+                {% endif %}
+
+                {% if show_estimated_date and foia.date_estimate %}
+                <div class="estimated-completion date">
+                    <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
+                </div>
+                {% endif %}
+            </section>
+            {% endif %}
+            {% if user.is_staff and tasks|length > 0 %}
+                <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
+            {% endif %}
+
+            {% if foia.has_crowdfund %}
+                {% crowdfund_request foia.crowdfund.pk %}
+            {% endif %}
+        </section>
+
+        <section class="tab-section communications" id="request">
             <div class="communications-controls">
                 <div class="communications filter">
                     <input id="comms-filter" type="search" placeholder="Filter communications" />

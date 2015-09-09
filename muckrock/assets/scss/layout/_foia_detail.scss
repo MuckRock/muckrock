@@ -1,33 +1,47 @@
-.request.overview {
+.request.detail {
     @include display(flex);
-    @include flex-wrap(wrap);
-    header {
-        @include flex(4 100%);
-        @include display(flex);
-        @include justify-content(space-between);
-        @include flex-wrap(wrap);
-        h1 {
-            margin-bottom: 0;
-            @include flex(60%);
-        }
+    @include align-items(stretch);
+    .request.properties {
+        @include flex(1);
+        padding: $vertical-rhythm;
     }
-    .basic-information {
-        @include flex(2 40%);
-        .synopsis {
-            font-size: $font-size-5;
-            line-height: $font-line-height;
-            a {
-                border-bottom: 1px dotted $color-blue;
-                &:hover {
-                    border-bottom: 1px solid $color-blue-dark;
-                    text-decoration: none;
-                }
+    .request.main {
+        @include flex(3);
+    }
+}
+
+.request.properties {
+    @include display(flex);
+    @include flex-direction(column);
+    margin-bottom: 0;
+    h1 {
+        font-size: $font-size-6;
+        font-weight: $font-weight-bold;
+    }
+    background-color: $color-grey-7;
+    .synopsis {
+        font-size: $font-size-4;
+        line-height: $font-line-height*1.2;
+        a {
+            border-bottom: 1px dotted $color-blue;
+            &:hover {
+                border-bottom: 1px solid $color-blue-dark;
+                text-decoration: none;
             }
         }
     }
-    .states, .dates {
-        @include flex(1 30%);
-        padding-left: $vertical-rhythm;
+}
+
+.request.main {
+    @include border;
+    border-left: none;
+    border-top: none;
+    .tabs {
+        margin-right: -1px;
+        border-right: 1px solid $color-white;
+    }
+    .tab-section {
+        padding: $vertical-rhythm;
     }
 }
 
@@ -45,7 +59,7 @@
         }
     }
     .task-link {
-        display: inline-block;
+        display: block;
         margin-bottom: $vertical-rhythm;
         padding: $vertical-rhythm/2;
         @include border;
@@ -64,7 +78,7 @@
     }
     .tabs {
         list-style-type: none;
-        padding-left: 0;
+        padding-left: $vertical-rhythm;
         border-bottom: 1px solid $color-grey;
         .tab {
             display: inline-block;

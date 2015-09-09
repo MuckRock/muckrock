@@ -76,6 +76,13 @@ function displayDefaultDoc() {
 
 /* Tab Bar */
 
+$('#tab-overview').click(function() {
+    $(this).addClass('active');
+    $(this).siblings().removeClass('active');
+    $('#overview').addClass('visible');
+    $('#overview').siblings().removeClass('visible');
+});
+
 $('#tab-request').click(function() {
     $(this).addClass('active');
     $(this).siblings().removeClass('active');
