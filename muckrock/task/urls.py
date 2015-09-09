@@ -27,5 +27,5 @@ urlpatterns = patterns(
     url(r'^multirequest/$', views.MultiRequestTaskList.as_view(), name='multirequest-task-list'),
     url(r'^failed-fax/$', views.FailedFaxTaskList.as_view(), name='failed-fax-task-list'),
     # tasks for a specific request
-    url(r'^request/(?P<pk>\d+)/$', views.RequestTaskList.as_view(), name='request-task-last')
+    url(r'^request/(?P<pk>\d+)/$', views.RequestTaskList.as_view(), name='request-task-list')
 )
