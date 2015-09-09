@@ -137,7 +137,10 @@ class OrphanTask(Task):
         domain = self.get_sender_domain()
         if domain is None:
             return
-        blacklist, _ = BlacklistDomain.objects.get_or_create(domain=domain)
+        try:
+            blacklist, _ = BlacklistDomain.objects.get_or_create(domain=domain)
+        except BlacklistDomain.MultipleObjectsReturned:
+            blacklist = BlacklistDomain.objects.filter(domain=domain).first()
         blacklist.resolve_matches()
         return
 
