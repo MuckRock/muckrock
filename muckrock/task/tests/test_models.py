@@ -34,8 +34,8 @@ class TaskTests(TestCase):
             'Tasks given no arguments should create successfully')
 
     def test_unicode(self):
-        eq_(str(self.task), 'Task: %d' % self.task.pk,
-            'Unicode string should return the classname and PK of the task')
+        eq_(str(self.task), 'Task' % self.task.pk,
+            'Unicode string should return the classname of the task')
 
     def test_resolve(self):
         """Tasks should be resolvable, updating their state when that happens."""
