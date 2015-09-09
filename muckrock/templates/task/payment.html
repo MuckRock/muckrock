@@ -4,10 +4,6 @@
     payment
 {% endblock %}
 
-{% block task-type %}
-    Payment
-{% endblock %}
-
 {% block task-data %}
 <summary class="task-data">
     <p><a href="{% url 'admin:auth_user_change' task.user.pk %}">{{task.user}}</a> paid ${{task.amount}} for <a href="{% url 'admin:foia_foiarequest_change' task.foia.pk %}">{{task.foia}}</a>.</p>
