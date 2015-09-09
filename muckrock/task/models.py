@@ -30,6 +30,9 @@ class TaskQuerySet(models.QuerySet):
 
     def filter_by_foia(self, foia):
         """Get all tasks that relate to the provided FOIA request."""
+        # pylint:disable=line-too-long
+        # I disabled pylint line length checking here because it's like 4 characters and
+        # I think that shortening these lines would reduce the overall legibility.
         tasks = []
         # infer foia from communication
         tasks += [task.responsetask for task in self.filter(responsetask__communication__foia=foia)]
@@ -41,7 +44,7 @@ class TaskQuerySet(models.QuerySet):
         tasks += [task.statuschangetask for task in self.filter(statuschangetask__foia=foia)]
         tasks += [task.paymenttask for task in self.filter(paymenttask__foia=foia)]
         # try matching foia agency with task agency
-        if (foia.agency):
+        if foia.agency:
             tasks += [task.newagencytask for task in self.filter(newagencytask__agency=foia.agency)]
             tasks += [task.staleagencytask for task in self.filter(staleagencytask__agency=foia.agency)]
         return tasks
