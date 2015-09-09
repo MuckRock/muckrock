@@ -34,8 +34,7 @@ class TaskTests(TestCase):
             'Tasks given no arguments should create successfully')
 
     def test_unicode(self):
-        eq_(str(self.task), 'Task: %d' % self.task.pk,
-            'Unicode string should return the classname and PK of the task')
+        eq_(unicode(self.task), u'Task', 'Unicode string should return the classname of the task')
 
     def test_resolve(self):
         """Tasks should be resolvable, updating their state when that happens."""
@@ -95,6 +94,13 @@ class OrphanTaskTests(TestCase):
 
     def test_blacklist(self):
         """A blacklisted orphan should add its sender's domain to the blacklist"""
+        self.task.blacklist()
+        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
+
+    def test_blacklist_duplicate(self):
+        """The blacklist method should not crash when a domain is dupliacted."""
+        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
+        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
         self.task.blacklist()
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
@@ -305,7 +311,7 @@ class TestTaskManager(TestCase):
 
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
-        # StatusChangeTask, PaymentTask, NewAgencyTask, StaleAgencyTask
+        # StatusChangeTask, PaymentTask, NewAgencyTask
         self.tasks = []
         # ResponseTask
         self.tasks.append(task.models.ResponseTask.objects.create(communication=self.comm))
@@ -344,8 +350,6 @@ class TestTaskManager(TestCase):
             user=self.user,
             agency=self.agency
         ))
-        # StaleAgencyTask
-        self.tasks.append(task.models.StaleAgencyTask.objects.create(agency=self.agency))
 
     def test_tasks_for_foia(self):
         """
