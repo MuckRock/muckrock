@@ -305,7 +305,7 @@ class TestTaskManager(TestCase):
 
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
-        # StatusChangeTask, PaymentTask, NewAgencyTask, StaleAgencyTask
+        # StatusChangeTask, PaymentTask, NewAgencyTask
         self.tasks = []
         # ResponseTask
         self.tasks.append(task.models.ResponseTask.objects.create(communication=self.comm))
@@ -344,8 +344,6 @@ class TestTaskManager(TestCase):
             user=self.user,
             agency=self.agency
         ))
-        # StaleAgencyTask
-        self.tasks.append(task.models.StaleAgencyTask.objects.create(agency=self.agency))
 
     def test_tasks_for_foia(self):
         """

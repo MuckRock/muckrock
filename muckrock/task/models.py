@@ -43,7 +43,6 @@ class TaskQuerySet(models.QuerySet):
         # try matching foia agency with task agency
         if (foia.agency):
             tasks += [task.newagencytask for task in self.filter(newagencytask__agency=foia.agency)]
-            tasks += [task.staleagencytask for task in self.filter(staleagencytask__agency=foia.agency)]
         return tasks
 
 
