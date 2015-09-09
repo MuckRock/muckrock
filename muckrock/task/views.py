@@ -278,6 +278,7 @@ class FailedFaxTaskList(TaskList):
 class RequestTaskList(TaskList):
     """Displays all the tasks for a given request."""
     title = 'Request Tasks'
+    template_name = 'lists/request_task_list.html'
 
     def get_queryset(self):
         foia_request = get_object_or_404(foia.models.FOIARequest, pk=self.kwargs['pk'])
