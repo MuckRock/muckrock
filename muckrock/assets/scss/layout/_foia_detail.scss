@@ -1,3 +1,36 @@
+.request.overview {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    header {
+        @include flex(4 100%);
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-wrap(wrap);
+        h1 {
+            margin-bottom: 0;
+            @include flex(60%);
+        }
+    }
+    .basic-information {
+        @include flex(2 40%);
+        .synopsis {
+            font-size: $font-size-5;
+            line-height: $font-line-height;
+            a {
+                border-bottom: 1px dotted $color-blue;
+                &:hover {
+                    border-bottom: 1px solid $color-blue-dark;
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+    .states, .dates {
+        @include flex(1 30%);
+        padding-left: $vertical-rhythm;
+    }
+}
+
 
 
 .detail.request {
@@ -171,17 +204,7 @@
     h1 {
         font-size: $font-size-7;
     }
-    .synopsis {
-        font-size: $font-size-5;
-        line-height: $font-line-height;
-        a {
-            border-bottom: 1px dotted $color-blue;
-            &:hover {
-                border-bottom: 1px solid $color-blue-dark;
-                text-decoration: none;
-            }
-        }
-    }
+
 
     .svgIcon.options {
         cursor: pointer;

@@ -31,38 +31,26 @@
 
 {% block content %}
 <article class="request detail">
-    <header class="request header">
-        <h1>{{ foia.title }}</h1>
-        <h2 class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</h2>
-
-        {% if foia.date_due and foia.status == "processed" %}
-            {% if past_due %}
-        <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
-            {% else %}
-        <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
+    <section class="request overview">
+        <header>
+            <h1>{{ foia.title }}</h1>
+            <section class="actions">
+                {% include 'foia/foia_actions.html' %}
+            </section>
+        </header>
+        <section class="basic-information">
+            <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
+            {% if foia.parent %}
+            <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
             {% endif %}
-        {% endif %}
-
-        {% if show_estimated_date and foia.date_estimate %}
-        <div class="estimated-completion date">
-            <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-        </div>
-        {% endif %}
-
-        {% if foia.parent %}
-        <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
-        {% endif %}
-
-        {% if user.is_staff %}
-        <p class="muckrock-no">MuckRock &#8470; <code>{{ foia.id }}</code></p>
-        {% if foia.tracking_id %}
-        <p class="tracking-id">Tracking &#8470; <code>{{ foia.tracking_id }}</code></p>
-        {% endif %}
-        {% endif %}
-    </header>
-    <aside class="request aside">
-        <section class="request stats">
-            {% include 'foia/foia_actions.html' %}
+            {% if user.is_staff %}
+            <p class="muckrock-no"><code>MuckRock # {{ foia.id }}</code></p>
+            {% if foia.tracking_id %}
+            <p class="tracking-id"><code>Tracking # {{ foia.tracking_id }}</code></p>
+            {% endif %}
+            {% endif %}
+        </section>
+        <section class="states">
             <section class="status manager" id="request-status">
                 <header>
                     <dfn>Status</dfn>
@@ -135,15 +123,28 @@
                 </form>
             </section>
             {% endif %}
-            {% if user.is_anonymous %}
-            <section class="signup-prompt">
-                <p>MuckRock users can create, duplicate, track, and share public records requests like this one.</p>
-                <a href="{% url 'acct-register' %}" class="primary button">Sign Up Today</a>
-            </section>
-            {% endif %}
             {% tag_manager foia %}
         </section>
-    </aside>
+
+        {% if foia.date_due or foia.date_estimate %}
+        <section class="dates">
+            {% if foia.date_due and foia.status == "processed" %}
+                {% if past_due %}
+            <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
+                {% else %}
+            <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
+                {% endif %}
+            {% endif %}
+
+            {% if show_estimated_date and foia.date_estimate %}
+            <div class="estimated-completion date">
+                <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+    </header>
     <main class="request main">
 
         {% if user.is_staff and tasks|length > 0 %}

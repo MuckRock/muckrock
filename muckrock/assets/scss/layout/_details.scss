@@ -39,10 +39,6 @@
         @include row;
     }
 
-    .actions {
-        @include panel;
-    }
-
     &.agency {
         aside dl { @include third; }
     }
