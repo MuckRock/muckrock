@@ -1,0 +1,14 @@
+{% extends 'lists/task_list.html' %}
+
+{% block list-navigation %}
+<h1>Request Tasks</h1>
+<h2><a href="{{ foia.get_absolute_url }}">{{ foia.title }}</a></h2>
+<dl>
+    <dt>User</dt>
+    <dd><a href="{{ foia.user.profile.get_absolute_url }}">{{ foia.user.get_full_name }}</a></dd>
+    <dt>Agency</dt>
+    <dd><a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency }}</a></dd>
+    <dt>Status</dt>
+    <dd class="{{ foia.color_code }}">{{ foia.get_status_display }}</dd>
+</dl>
+{% endblock %}
