@@ -70,6 +70,9 @@ class Task(models.Model):
     def __unicode__(self):
         return u'Task: %d' % (self.pk)
 
+    def task_class(self):
+        return u'Task'
+
     def resolve(self, user=None):
         """Resolve the task"""
         self.resolved = True
@@ -88,6 +91,9 @@ class GenericTask(Task):
     def __unicode__(self):
         return self.subject
 
+    def task_class(self):
+        return u'Generic Task'
+
 
 class OrphanTask(Task):
     """A communication that needs to be approved before showing it on the site"""
@@ -104,6 +110,9 @@ class OrphanTask(Task):
 
     def __unicode__(self):
         return u'%s: %s' % (self.get_reason_display(), self.communication.foia)
+
+    def task_class(self):
+        return u'Orphan Task'
 
     def move(self, foia_pks):
         """Moves the comm and creates a ResponseTask for it"""
@@ -151,6 +160,9 @@ class SnailMailTask(Task):
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.communication.foia)
 
+    def task_class(self):
+        return u'Snail Mail Task'
+
     def set_status(self, status):
         """Set the status of the comm and FOIA affiliated with this task"""
         comm = self.communication
@@ -179,6 +191,9 @@ class RejectedEmailTask(Task):
     def __unicode__(self):
         return u'%s: %s' % (self.get_category_display(), self.foia)
 
+    def task_class(self):
+        return u'Rejected Email Task'
+
     def agencies(self):
         """Get the agencies who use this email address"""
         return Agency.objects.filter(Q(email__iexact=self.email) |
@@ -200,6 +215,9 @@ class StaleAgencyTask(Task):
     def __unicode__(self):
         return u'Stale Agency: %s' % (self.agency)
 
+    def task_class(self):
+        return u'Stale Agency Task'
+
 
 class FlaggedTask(Task):
     """A user has flagged a request, agency or jurisdiction"""
@@ -218,6 +236,8 @@ class FlaggedTask(Task):
             return u'Flagged: %s' % (self.jurisdiction)
         return u'Flagged: <None>'
 
+    def task_class(self):
+        return u'Flagged Task'
 
 class NewAgencyTask(Task):
     """A new agency has been created and needs approval"""
@@ -226,6 +246,9 @@ class NewAgencyTask(Task):
 
     def __unicode__(self):
         return u'New Agency: %s' % (self.agency)
+
+    def task_class(self):
+        return u'New Agency Task'
 
     def pending_requests(self):
         """Returns the requests to be acted on"""
@@ -262,6 +285,9 @@ class ResponseTask(Task):
 
     def __unicode__(self):
         return u'Response: %s' % (self.communication.foia)
+
+    def task_class(self):
+        return u'Response Task'
 
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
@@ -315,6 +341,9 @@ class FailedFaxTask(Task):
     def __unicode__(self):
         return u'Failed Fax: %s' % (self.communication.foia)
 
+    def task_class(self):
+        return u'Failed Fax Task'
+
 
 class StatusChangeTask(Task):
     """A user has the status on a request"""
@@ -326,6 +355,9 @@ class StatusChangeTask(Task):
     def __unicode__(self):
         return u'StatusChange: %s' % self.foia
 
+    def task_class(self):
+        return u'Status Change Task'
+
 
 class PaymentTask(Task):
     """Created when the fee for a request has been paid"""
@@ -336,6 +368,8 @@ class PaymentTask(Task):
     def __unicode__(self):
         return u'Payment: %s for %s' % (self.amount, self.foia)
 
+    def task_class(self):
+        return u'Payment Task'
 
 class CrowdfundTask(Task):
     """Created when a crowdfund is finished"""
@@ -343,6 +377,9 @@ class CrowdfundTask(Task):
 
     def __unicode__(self):
         return u'Crowdfund: %s' % self.crowdfund
+
+    def task_class(self):
+        return u'Crowdfund Task'
 
 
 class GenericCrowdfundTask(Task):
@@ -354,6 +391,9 @@ class GenericCrowdfundTask(Task):
     def __unicode__(self):
         return u'Crowdfund: %s' % self.crowdfund
 
+    def task_class(self):
+        return u'Crowdfund Task'
+
 
 class MultiRequestTask(Task):
     """Created when a multirequest is created and needs approval."""
@@ -361,6 +401,9 @@ class MultiRequestTask(Task):
 
     def __unicode__(self):
         return u'Multi-Request: %s' % self.multirequest
+
+    def task_class(self):
+        return u'Multi-Request Task'
 
 
 # Not a task, but used by tasks
