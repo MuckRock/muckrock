@@ -220,16 +220,40 @@
             <div class="communications-composer">
                 <div class="composer-actions">
                     <button class="primary" id="follow-up">Follow Up</button>
+                    {% if foia.is_appealable %}
                     <button class="failure" id="appeal">Appeal</button>
+                    {% endif %}
                     {% if request.user.is_staff %}
                     <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
                     {% else %}
                     <button id="get-advice">Get Advice</button>
                     {% endif %}
                 </div>
-                <form class="composer-input">
-                    <textarea disabled>You may follow up {% if not foia.disable_autofollowups %}manually {% endif %}with the agency or appeal their decision.</textarea>
+                <div class="inactive composer-input visible">
+                    <p>You may <span id="inactive-follow-up">follow up</span> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency or <span id="inactive-appeal">appeal</span> their decision.</p>
+                </div>
+                <form class="follow-up composer-input" method="post">
+                    <label for="follow-up-composer">Send a follow up to the {{ foia.agency.name }}</label>
+                    <textarea id="follow-up-composer"></textarea>
+                    <div class="buttons">
+                        <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                        <span class="button cancel">Cancel</span>
+                    </div>
                 </form>
+                {% if foia.is_appealable %}
+                <form class="appeal composer-input" method="post">
+                    {% if foia.agency.appeal_agency %}
+                    <label for="appeal-composer">Send an appeal to the {{ foia.agency.appeal_agency.name }}</label>
+                    {% else %}
+                    <label for="appeal-composer">Send an appeal to the {{ foia.agency.name }}</label>
+                    {% endif %}
+                    <textarea id="appeal-composer"></textarea>
+                    <div class="buttons">
+                        <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                        <span class="button cancel">Cancel</span>
+                    </div>
+                </form>
+                {% endif %}
             </div>
             {% endif %}
 

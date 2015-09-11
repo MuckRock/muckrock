@@ -119,14 +119,38 @@ if (target == '#comm' || target == '#comms') {
 
 /* Follow up and appeal */
 
+var composeResponse = function(target, composerForm) {
+    var composer = $(target).closest('.communications-composer');
+    var inactiveComposerForm = $(composer).find('.inactive.composer-input');
+    var activeComposerForm = $(composer).find(composerForm);
+    $(activeComposerForm).siblings().removeClass('visible');
+    $(activeComposerForm).addClass('visible');
+    var textarea = $(activeComposerForm).children('textarea');
+    $(textarea).focus();
+    $(activeComposerForm).find('.button.cancel').click(function(e){
+        e.preventDefault();
+        $(inactiveComposerForm).siblings().removeClass('visible');
+        $(inactiveComposerForm).addClass('visible');
+    });
+}
+
 $('#follow-up').click(function(e){
     e.preventDefault();
-    console.log('Follow up');
+    composeResponse(this, '.follow-up.composer-input');
 });
 
 $('#appeal').click(function(e){
     e.preventDefault();
-    console.log('Appeal');
+    composeResponse(this, '.appeal.composer-input');
+});
+
+$('.inactive.composer-input').click(function(){
+    $('#follow-up').click();
+});
+
+$('#inactive-appeal').click(function(){
+    $('#appeal').click();
+    return false;
 });
 
 /* Documents */

@@ -174,13 +174,45 @@
         }
         .composer-input {
             @include flex(1);
+            display: none;
+            &.visible {
+                display: block;
+            }
             margin-left: $vertical-rhythm;
+            margin-bottom: 0;
+            @include border;
             textarea {
+                display: block;
                 height: 15em;
-                &:disabled {
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+            }
+            label {
+                display: block;
+                padding: $vertical-rhythm/2;
+                border-bottom: 1px solid $color-grey;
+            }
+            .buttons {
+                padding: $vertical-rhythm/2;
+                border-top: 1px solid $color-grey;
+                @include display(flex);
+                @include justify-content(space-between);
+            }
+            &.inactive {
+                p {
+                    height: 15em;
+                    padding: $vertical-rhythm/2;
+                    background-color: #FFF;
                     color: $color-grey;
-                    border-color: $color-grey;
-                    border-radius: 0;
+                }
+                span {
+                    border-bottom: 1px dotted;
+                    cursor: pointer;
+                    &:hover {
+                        color: $color-blue;
+                        border-bottom: 1px solid;
+                    }
                 }
             }
         }
