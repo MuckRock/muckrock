@@ -5,6 +5,7 @@
     @media all and (min-width: 768px) {
         @include flex-direction(row);
     }
+    margin: 0 -1*$vertical-rhythm -1*$vertical-rhythm;
     .request.properties {
         @include flex(1);
         padding: $vertical-rhythm;
