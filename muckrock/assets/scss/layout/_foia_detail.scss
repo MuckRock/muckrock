@@ -145,12 +145,43 @@
     .communications-list {
         @include display(flex);
         @include flex-direction(column);
-        .auto-follow-up {
-            padding: $vertical-rhythm/2;
-            border: 1px solid $color-blue;
-            color: $color-blue;
-            p {
-                margin-bottom: 0;
+    }
+    .auto-follow-up {
+        @include display(flex);
+        @include justify-content(space-between);
+        padding: $vertical-rhythm/2;
+        border: 1px solid $color-blue;
+        color: $color-blue;
+        p {
+            margin-bottom: 0;
+        }
+        a {
+            color: $color-blue-dark;
+            border-bottom: 1px dotted;
+            &:hover {
+                color: $color-black;
+                border-bottom: 1px solid;
+                text-decoration: none;
+            }
+        }
+    }
+    .communications-composer {
+        @include display(flex);
+        @include align-items(stretch);
+        .composer-actions {
+            @include display(flex);
+            @include flex-direction(column);
+        }
+        .composer-input {
+            @include flex(1);
+            margin-left: $vertical-rhythm;
+            textarea {
+                height: 15em;
+                &:disabled {
+                    color: $color-grey;
+                    border-color: $color-grey;
+                    border-radius: 0;
+                }
             }
         }
     }

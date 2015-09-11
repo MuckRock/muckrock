@@ -194,26 +194,6 @@
                 <div class="communications filter">
                     <input id="comms-filter" type="search" placeholder="Filter communications" />
                 </div>
-                {% if user_can_edit %}
-                <div class="communications-actions">
-                    <button class="primary" id="follow-up">Follow Up</button>
-                    <button class="failure" id="appeal">Appeal</button>
-                    {% if request.user.is_staff %}
-                    <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
-                    {% else %}
-                    <button id="get-advice">Get Advice</button>
-                    {% endif %}
-                    <div class="communications-settings">
-                        {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
-                        {% if foia.disable_autofollowups %}
-                        <p class="follow-ups">Automatic follow ups are disabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a></p>
-                        {% else %}
-                        <p class="follow-ups">Automatic follow ups are enabled. <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a></p>
-                        {% endif %}
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
             <div class="communications-forms">
 
@@ -222,12 +202,37 @@
             {% for comm in foia.communications.all %}
                 {% include 'foia/communication.html' with communication=comm %}
             {% endfor %}
-            {% if not foia.disable_autofollowups %}
-                <div class="auto-follow-up">
-                    <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.<p>
-                </div>
-            {% endif %}
             </div>
+
+            {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
+            <div class="auto-follow-up">
+                {% if foia.disable_autofollowups %}
+                <p>Automatic follow ups are disabled.</p>
+                <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a>
+                {% else %}
+                <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.</p>
+                <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if user_can_edit %}
+            <div class="communications-composer">
+                <div class="composer-actions">
+                    <button class="primary" id="follow-up">Follow Up</button>
+                    <button class="failure" id="appeal">Appeal</button>
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
+                    {% else %}
+                    <button id="get-advice">Get Advice</button>
+                    {% endif %}
+                </div>
+                <form class="composer-input">
+                    <textarea disabled>You may follow up {% if not foia.disable_autofollowups %}manually {% endif %}with the agency or appeal their decision.</textarea>
+                </form>
+            </div>
+            {% endif %}
+
         </section>
 
         {% if foia.files.all %}
