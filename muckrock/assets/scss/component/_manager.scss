@@ -7,10 +7,92 @@
     form {
         display: none;
         @include border;
-        @include border-radius;
         padding: $vertical-rhythm/2;
         &.visible {
             display: block;
+        }
+    }
+}
+
+.status.manager {
+    margin-bottom: 0;
+    .status {
+        display: inline-block;
+        color: $color-grey-4;
+        font-weight: $font-weight-bold;
+        @mixin colorize($status, $color) {
+            &.#{$status} {
+                color: $color;
+                border-color: $color;
+            }
+        }
+        @include colorize(success, $color-green);
+        @include colorize(failure, $color-red);
+        @include colorize(warning, $color-yellow);
+    }
+    .status-form {
+        display: none;
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        margin-bottom: $vertical-rhythm;
+        &.visible {
+            @include display(flex);
+        }
+        select {
+            @include flex(100%);
+            margin-bottom: $vertical-rhythm/2;
+        }
+        button {
+            margin-bottom: $vertical-rhythm/4;
+        }
+    }
+}
+
+.embargo.manager {
+    .expiration input {
+        margin-bottom: $vertical-rhythm/2;
+    }
+}
+
+.tag.manager {
+    .tag-list {
+        list-style-type: none;
+        margin-bottom: $vertical-rhythm;
+        padding: 0;
+    }
+    .tag-list li {
+        display: inline-block;
+    }
+    .tag-form {
+        display: none;
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        @include border;
+        padding: $vertical-rhythm/2;
+        &.visible {
+            @include display(flex);
+        }
+        input, p {
+            @include flex(100%);
+            margin-bottom: 0;
+        }
+        .tag-form-button {
+            margin-bottom: $vertical-rhythm/4;
+        }
+    }
+    .tag {
+        display: inline-block;
+        margin: $vertical-rhythm/4 $vertical-rhythm/6;
+        padding: $vertical-rhythm/6 $vertical-rhythm/3 $vertical-rhythm/6 $vertical-rhythm/3;
+        background-color: $color-blue;
+        color: $color-white;
+        font-size: $font-size-2;
+        text-decoration: none;
+        @include transition(background-color .25s linear);
+        &:hover {
+            color: $color-white;
+            background-color: $color-blue-dark;
+            text-decoration: none;
         }
     }
 }
