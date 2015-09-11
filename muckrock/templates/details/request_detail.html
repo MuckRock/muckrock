@@ -150,25 +150,37 @@
             <p class="acknowledged">The agency acknowledged the request.</p>
             {% endif %}
 
-            {% if foia.date_due or foia.date_estimate %}
-            <section class="dates">
+            <table class="dates">
+                <tr class="submitted">
+                    <td class="label">Date Submitted</td>
+                    <td class="date">{{ foia.date_submitted }}</td>
+                </tr>
+                {% if foia.last_response %}
+                <tr class="last-response">
+                    <td class="label">Last Response Date</td>
+                    <td class="date">{{ foia.last_response.date|timesince }} ago</td>
+                </tr>
+                {% endif %}
                 {% if foia.date_due and foia.status == "processed" %}
+                <tr class="due">
+                    <td class="label">Date Due</td>
                     {% if past_due %}
-                <p class="due date">The request was due {{ foia.date_due|timesince }} ago.</p>
+                    <td class="date">{{ foia.date_due|timesince }} ago</td>
                     {% else %}
-                <p class="due date">The request will be due in {{ foia.date_due|timeuntil }}.</p>
+                    <td class="date">{{ foia.date_due|timeuntil }}</td>
                     {% endif %}
+                </tr>
                 {% endif %}
-
                 {% if show_estimated_date and foia.date_estimate %}
-                <div class="estimated-completion date">
-                    <p>The agency estimated a completion date of {{ foia.date_estimate|date }}.</p>
-                </div>
+                <tr class="estimated-completion">
+                    <td class="label">Completion Date Estimate</td>
+                    <td class="date">{{ foia.date_estimate|date }}</td>
+                </tr>
                 {% endif %}
-            </section>
-            {% endif %}
+            </table>
+
             {% if user.is_staff and tasks|length > 0 %}
-                <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
+            <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
             {% endif %}
 
             {% if foia.has_crowdfund %}

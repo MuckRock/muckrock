@@ -302,6 +302,10 @@ class FOIARequest(models.Model):
         except IndexError:
             return ''
 
+    def last_response(self):
+        """Return the most recent response"""
+        return self.communications.filter(response=True).order_by('-date').first()
+
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
         # pylint: disable=no-member
