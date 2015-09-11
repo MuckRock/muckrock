@@ -47,12 +47,16 @@
     .requested-docs {
         @include border;
         padding: $vertical-rhythm/2;
+        header {
+            @include display(flex);
+            @include justify-content(space-between);
+            font-weight: $font-weight-bold;
+        }
     }
     .dates {
 
     }
 }
-
 
 .detail.request {
     .draft {
