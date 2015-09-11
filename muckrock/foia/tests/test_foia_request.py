@@ -275,7 +275,7 @@ class TestFOIAFunctional(TestCase):
                     reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
                                                    'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk}),
-                    ['details/request_detail.html', 'details/base_detail.html'],
+                    ['foia/detail.html', 'details/base_detail.html'],
                     context = {'foia': foia})
 
     def test_feeds(self):
@@ -385,7 +385,7 @@ class TestFOIAFunctional(TestCase):
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
                                             'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
-                    ['details/request_detail.html', 'details/base_detail.html'])
+                    ['foia/detail.html', 'details/base_detail.html'])
 
 
 class TestFOIAIntegration(TestCase):

@@ -50,7 +50,7 @@ urlpatterns = patterns(
 
     # Detail View
     url(r'^%s/$' % foia_url,
-        views.Detail.as_view(template_name='details/request_detail.html'),
+        views.Detail.as_view(template_name='foia/detail.html'),
         name='foia-detail'),
 
     url(r'^%s/clone/$' % foia_url,
