@@ -141,6 +141,11 @@
         {% endif %}
 
         <section class="tab-section overview visible" id="overview">
+
+            {% if foia.description %}
+            <p class="description">{{ foia.description }}</p>
+            {% endif %}
+
             {% if foia.date_due or foia.date_estimate %}
             <section class="dates">
                 {% if foia.date_due and foia.status == "processed" %}
