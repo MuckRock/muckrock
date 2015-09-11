@@ -117,6 +117,18 @@ if (target == '#comm' || target == '#comms') {
     $('#tab-notes').trigger('click');
 }
 
+/* Follow up and appeal */
+
+$('#follow-up').click(function(e){
+    e.preventDefault();
+    console.log('Follow up');
+});
+
+$('#appeal').click(function(e){
+    e.preventDefault();
+    console.log('Appeal');
+});
+
 /* Documents */
 
 $('a.view-file').click(function() {
@@ -137,14 +149,6 @@ if (target == '#file') {
 $('.text-area.modal-button').click(function(e){
     e.preventDefault();
     textAreaModal($(this).next());
-    return false;
-});
-
-/* Replies */
-
-$('.text-area.reply-button').click(function(e){
-    e.preventDefault();
-    textAreaReply($(this).next());
     return false;
 });
 
