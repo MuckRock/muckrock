@@ -14,6 +14,7 @@
     @include display(flex);
     @include flex-direction(column);
     margin-bottom: 0;
+    border-top: 1px solid $color-grey-7;
     h1 {
         font-size: $font-size-6;
         font-weight: $font-weight-bold;
@@ -33,18 +34,24 @@
 }
 
 .request.main {
-    @include border;
-    border-left: none;
-    border-top: none;
     .tabs {
-        margin-right: -1px;
-        border-right: 1px solid $color-white;
+        margin: $vertical-rhythm/2 0 0;
+        padding-left: $vertical-rhythm/2;
     }
     .tab-section {
         padding: $vertical-rhythm;
     }
 }
 
+.request .overview {
+    .requested-docs {
+        @include border;
+        padding: $vertical-rhythm/2;
+    }
+    .dates {
+
+    }
+}
 
 
 .detail.request {
@@ -78,7 +85,6 @@
     }
     .tabs {
         list-style-type: none;
-        padding-left: $vertical-rhythm;
         border-bottom: 1px solid $color-grey;
         .tab {
             display: inline-block;

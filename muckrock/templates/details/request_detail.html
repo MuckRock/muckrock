@@ -142,12 +142,12 @@
 
         <section class="tab-section overview visible" id="overview">
 
-            {% if foia.description %}
-            <p class="description">{{ foia.description }}</p>
+            {% if user.is_staff and tasks|length > 0 %}
+            <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
             {% endif %}
 
-            {% if foia.has_ack %}
-            <p class="acknowledged">The agency acknowledged the request.</p>
+            {% if foia.has_crowdfund %}
+                {% crowdfund_request foia.crowdfund.pk %}
             {% endif %}
 
             <table class="dates">
@@ -179,12 +179,14 @@
                 {% endif %}
             </table>
 
-            {% if user.is_staff and tasks|length > 0 %}
-            <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
-            {% endif %}
-
-            {% if foia.has_crowdfund %}
-                {% crowdfund_request foia.crowdfund.pk %}
+            {% if foia.requested_docs %}
+            <div class="requested-docs">
+                <header>
+                    <p>Requested Documents</p>
+                    <button id="toggle-requested-docs">Collapse</button>
+                </header>
+                {{ foia.requested_docs|linebreaks }}
+            </div>
             {% endif %}
         </section>
 
