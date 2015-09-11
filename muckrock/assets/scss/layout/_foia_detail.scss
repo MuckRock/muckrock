@@ -1,6 +1,10 @@
 .request.detail {
     @include display(flex);
     @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: 768px) {
+        @include flex-direction(row);
+    }
     .request.properties {
         @include flex(1);
         padding: $vertical-rhythm;
