@@ -218,11 +218,13 @@
                     {% endif %}
                 </div>
                 <div class="inactive composer-input visible">
-                    <p>You may <span id="inactive-follow-up">follow up</span> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency or <span id="inactive-appeal">appeal</span> their decision.</p>
+                    <p>You may <span id="inactive-follow-up">follow up</span> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <span id="inactive-appeal">appeal</span> their decision{% endif %}.</p>
                 </div>
                 <form class="follow-up composer-input" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="follow_up" />
                     <label for="follow-up-composer">Send a follow up to the {{ foia.agency.name }}</label>
-                    <textarea id="follow-up-composer"></textarea>
+                    <textarea name="text" id="follow-up-composer"></textarea>
                     <div class="buttons">
                         <button class="primary" type="submit" name="appeal" value="1">Send</button>
                         <span class="button cancel">Cancel</span>
@@ -230,12 +232,14 @@
                 </form>
                 {% if foia.is_appealable %}
                 <form class="appeal composer-input" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="appeal" />
                     {% if foia.agency.appeal_agency %}
                     <label for="appeal-composer">Send an appeal to the {{ foia.agency.appeal_agency.name }}</label>
                     {% else %}
                     <label for="appeal-composer">Send an appeal to the {{ foia.agency.name }}</label>
                     {% endif %}
-                    <textarea id="appeal-composer"></textarea>
+                    <textarea name="text" id="appeal-composer"></textarea>
                     <div class="buttons">
                         <button class="primary" type="submit" name="appeal" value="1">Send</button>
                         <span class="button cancel">Cancel</span>
