@@ -124,6 +124,24 @@ if (target == '#comm' || target == '#comms') {
     $('#tab-notes').trigger('click');
 }
 
+/* Communications */
+
+$('#toggle-communication-collapse').click(function(e){
+    var state = $(this).data('state');
+    var tab = $(this).closest('.tab-section.communications');
+    var communications = $(tab).find('.communications-list').children();
+    if (state == 0) {
+        $(communications).addClass('collapsed');
+        $(this).data('state', 1);
+        $(this).text('Expand All');
+    }
+    else {
+        $(communications).removeClass('collapsed');
+        $(this).data('state', 0);
+        $(this).text('Collapse All');
+    }
+});
+
 /* Follow up and appeal */
 
 var composeResponse = function(target, composerForm) {

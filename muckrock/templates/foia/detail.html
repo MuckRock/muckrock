@@ -184,6 +184,7 @@
                 <div class="communications filter">
                     <input id="comms-filter" type="search" placeholder="Filter communications" />
                 </div>
+                <button id="toggle-communication-collapse" data-state="0">Collapse All</button>
             </div>
             <div class="communications-list">
             {% for comm in foia.communications.all %}

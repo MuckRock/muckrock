@@ -110,7 +110,7 @@
     .communications-controls {
         @include display(flex);
         @include justify-content(space-between);
-        @include align-items(flex-start);
+        @include align-items(center);
         @include flex-wrap(wrap);
     }
 
