@@ -4,11 +4,12 @@
     @include flex-direction(column);
     @media all and (min-width: 768px) {
         @include flex-direction(row);
+        .request.main {
+            margin-left: $vertical-rhythm * 2;
+        }
     }
-    margin: 0 -1*$vertical-rhythm -1*$vertical-rhythm;
     .request.properties {
         @include flex(1);
-        padding: $vertical-rhythm;
     }
     .request.main {
         @include flex(3);
@@ -19,12 +20,10 @@
     @include display(flex);
     @include flex-direction(column);
     margin-bottom: 0;
-    border-top: 1px solid $color-grey-7;
     h1 {
         font-size: $font-size-6;
         font-weight: $font-weight-bold;
     }
-    background-color: $color-grey-7;
     .synopsis {
         font-size: $font-size-4;
         line-height: $font-line-height*1.2;
@@ -40,21 +39,21 @@
 
 .request.main {
     .tabs {
+        display: inline-block;
         list-style-type: none;
-        margin: $vertical-rhythm/2 0 0;
-        padding-left: $vertical-rhythm/2;
-        border-bottom: 1px solid $color-grey;
+        padding-left: 0;
+        @include border;
+        border-color: $color-black;
+        background-color: $color-white;
+        color: $color-black;
         .tab {
             display: inline-block;
-            margin-bottom: -1px;
             padding: $vertical-rhythm/2;
-            border: 1px solid transparent;
-            border-bottom: none;
-            @include border-top-radius(1px);
+            color: $color-blue;
             cursor: pointer;
             &.active {
-                border-color: $color-grey;
-                border-bottom: 1px solid $color-white;
+                background-color: $color-blue;
+                color: $color-black;
             }
         }
     }
@@ -62,7 +61,6 @@
         display: none;
         &.visible { display: block; }
         margin-bottom: 0;
-        padding: $vertical-rhythm;
     }
     .filter {
         margin-bottom: 0;
@@ -70,6 +68,11 @@
 }
 
 .request .overview {
+    .dates {
+        tr {
+            background-color: $color-white;
+        }
+    }
     .signup-prompt {
         @include border;
         padding: $vertical-rhythm/2;
@@ -95,18 +98,6 @@
             text-decoration: none;
         }
     }
-    .requested-docs {
-        @include border;
-        padding: $vertical-rhythm/2;
-        header {
-            @include display(flex);
-            @include justify-content(space-between);
-            font-weight: $font-weight-bold;
-        }
-    }
-    .dates {
-
-    }
 }
 
 .request .communications {
@@ -115,13 +106,6 @@
         @include justify-content(space-between);
         @include align-items(flex-start);
         @include flex-wrap(wrap);
-    }
-    .communications.filter {
-        margin-top: $vertical-rhythm/4;
-        margin-bottom: $vertical-rhythm;
-        input {
-            width: 90%;
-        }
     }
     .communications-actions {
         margin-bottom: 0;

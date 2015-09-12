@@ -178,15 +178,6 @@
                 </tr>
                 {% endif %}
             </table>
-
-            {% if foia.requested_docs %}
-            <div class="requested-docs">
-                <header>
-                    <p>Initial Request</p>
-                </header>
-                {{ foia.requested_docs|linebreaks }}
-            </div>
-            {% endif %}
         </section>
 
         <section class="tab-section communications" id="request">
