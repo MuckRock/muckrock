@@ -137,14 +137,13 @@
             {% if user_can_edit %}
             <li class="tab" id="tab-notes">Notes</li>
             {% endif %}
+            {% if user.is_staff %}
+            <li class="tab" id="tab-tasks">Tasks</li>
+            {% endif %}
         </ul>
         {% endif %}
 
         <section class="tab-section overview visible" id="overview">
-
-            {% if user.is_staff and tasks|length > 0 %}
-            <a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">There {{ tasks|length|pluralize:"is,are" }} {{ tasks|length }} task{{ tasks|length|pluralize}} for this request. {% if open_task_count > 0 %}{{ open_task_count }} {{ open_task_count|pluralize:"is,are" }}{% else %}None are{% endif %} unresolved.</a>
-            {% endif %}
 
             {% if foia.has_crowdfund %}
                 {% crowdfund_request foia.crowdfund.pk %}
@@ -281,7 +280,23 @@
                 <p>Notes are a private way to remember information about this request.</p>
             {% endfor %}
         </section>
-            {% endif %}
+        {% endif %}
+
+        {% if user.is_staff %}
+        <!-- TASKS -->
+        <section class="tab-section tasks" id="tasks">
+            <header class="tasks-control">
+                <p>{% if open_task_count > 0 %}Showing {{ open_task_count }} unresolved tasks. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
+            </header>
+            {% for task in tasks %}
+                {% if not task.resolved %}
+                    {% include 'lib/task.html' with task=task %}
+                {% endif %}
+            {% empty %}
+            <p>No open tasks.</p>
+            {% endfor %}
+        </section>
+        {% endif %}
     </main>
 </article>
 {% endblock content %}
@@ -297,6 +312,7 @@
 <script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}" ></script>
 <script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/task.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
 <script type="text/javascript">
     $('#comms-filter').quicksearch('#request .communications-list .communication');

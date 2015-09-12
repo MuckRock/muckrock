@@ -104,6 +104,13 @@ $('#tab-notes').click(function() {
     $('#notes').siblings().removeClass('visible');
 });
 
+$('#tab-tasks').click(function() {
+    $(this).addClass('active');
+    $(this).siblings().removeClass('active');
+    $('#tasks').addClass('visible');
+    $('#tasks').siblings().removeClass('visible');
+});
+
 /* Deep link into tab */
 
 var target = window.location.hash;
