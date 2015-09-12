@@ -15,9 +15,9 @@
 }
 
 .status.manager {
-    margin-bottom: 0;
     .status {
         display: inline-block;
+        margin-bottom: 0;
         color: $color-grey-4;
         font-weight: $font-weight-bold;
         @mixin colorize($status, $color) {
@@ -34,7 +34,7 @@
         display: none;
         @include flex-wrap(wrap);
         @include justify-content(space-between);
-        margin-bottom: $vertical-rhythm;
+        margin-bottom: 0;
         &.visible {
             @include display(flex);
         }
