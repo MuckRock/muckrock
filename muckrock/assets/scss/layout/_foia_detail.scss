@@ -39,21 +39,23 @@
 
 .request.main {
     .tabs {
-        display: inline-block;
         list-style-type: none;
         padding-left: 0;
-        @include border;
-        border-color: $color-black;
-        background-color: $color-white;
-        color: $color-black;
+        border-bottom: 1px solid $color-grey;
         .tab {
             display: inline-block;
-            padding: $vertical-rhythm/2;
-            color: $color-blue;
+            margin-bottom: -1px;
+            padding: $vertical-rhythm/2 $vertical-rhythm;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            color: $color-grey-3;
             cursor: pointer;
             &.active {
-                background-color: $color-blue;
                 color: $color-black;
+                border-color: $color-grey;
+                border-bottom: 1px solid $color-white;
             }
         }
     }
