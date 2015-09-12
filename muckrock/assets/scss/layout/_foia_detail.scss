@@ -66,6 +66,9 @@
     }
     .filter {
         margin-bottom: 0;
+        input {
+            width: 100%;
+        }
     }
 }
 
@@ -103,22 +106,22 @@
 }
 
 .request .communications {
+
     .communications-controls {
         @include display(flex);
         @include justify-content(space-between);
         @include align-items(flex-start);
         @include flex-wrap(wrap);
     }
+
+    .communications.filter {
+        @include flex(0 1 50%);
+    }
+
     .communications-actions {
         margin-bottom: 0;
         @include media($medium-layout) {
             text-align: right;
-        }
-    }
-    .communications.filter, .communications-actions {
-        @include flex(1 100%);
-        @include media($medium-layout) {
-            @include flex(1 50%);
         }
     }
     .communications-settings {
@@ -231,6 +234,7 @@
     }
 }
 .request .notes {
+
     .notes-controls {
         @include display(flex);
         @include justify-content(space-between);
@@ -239,6 +243,11 @@
             margin-bottom: 0;
         }
     }
+
+    .notes.filter {
+        @include flex(0 1 50%);
+    }
+
     .note {
         @include border;
         border-color: $color-yellow;

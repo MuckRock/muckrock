@@ -186,9 +186,6 @@
                     <input id="comms-filter" type="search" placeholder="Filter communications" />
                 </div>
             </div>
-            <div class="communications-forms">
-
-            </div>
             <div class="communications-list">
             {% for comm in foia.communications.all %}
                 {% include 'foia/communication.html' with communication=comm %}
