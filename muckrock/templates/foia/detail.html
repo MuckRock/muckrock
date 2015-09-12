@@ -286,7 +286,7 @@
         <!-- TASKS -->
         <section class="tab-section tasks" id="tasks">
             <header class="tasks-control">
-                <p>{% if open_task_count > 0 %}Showing {{ open_task_count }} unresolved tasks. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
+                <p>{% if open_task_count > 0 %}Showing {{ open_task_count }} unresolved task{{ open_task_count|pluralize }}. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
             </header>
             {% for task in tasks %}
                 {% if not task.resolved %}
