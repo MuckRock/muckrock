@@ -260,7 +260,7 @@ class ResponseTask(Task):
     created_from_orphan = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return u'New Agency Task'
+        return u'Response Task'
 
     def move(self, foia_pks):
         """Moves the associated communication to a new request"""
