@@ -212,10 +212,6 @@ class FOIARequest(models.Model):
         """Can this request be updated?"""
         return self.status == 'started'
 
-    def is_fixable(self):
-        """Can this request be ammended by the user?"""
-        return self.status == 'fix'
-
     def is_appealable(self):
         """Can this request be appealed by the user?"""
         if self.status in ['processed', 'appealing']:
@@ -251,16 +247,6 @@ class FOIARequest(models.Model):
         """Is this document viewable to everyone"""
         return self.is_viewable(AnonymousUser())
 
-    def embargo_date(self):
-        """The date this request comes off of embargo"""
-        if self.embargo:
-            return self.date_embargo
-
-    def is_permanently_embargoed(self):
-        """The request is permanently embargoed"""
-        if self.embargo:
-            return self.permanent_embargo
-
     def editable_by(self, user):
         """Can this user edit this request"""
         return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() \
@@ -273,14 +259,6 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         return self.files.filter(access='public')
-
-    def percent_complete(self):
-        """Get percent complete for the progress bar"""
-        percents = {'started':   25, 'submitted':  50, 'ack':       65,
-                    'processed': 75, 'fix':        75, 'payment':   75,
-                    'rejected': 100, 'no_docs':   100, 'done':     100,
-                    'partial':   90, 'abandoned': 100, 'appealing': 75}
-        return percents.get(self.status, 0)
 
     def color_code(self):
         """Get the color code for the current status"""
