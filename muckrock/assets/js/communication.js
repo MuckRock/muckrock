@@ -12,6 +12,16 @@ $('.communication-header').find('.dropdown-list').click(function(){
 });
 
 $('.communication .options .svgIcon').click(function(){
-    $(this).closest('.dropdown').toggleClass('visible');
+    var thisDropdown = $(this).closest('.options.dropdown');
+    var thisDropdownMenu = $(thisDropdown).find('.dropdown-list');
+    var allOtherCommunications = $(thisDropdown).closest('.communication').siblings();
+    var allOtherDropdowns = $(allOtherCommunications).find('.options.dropdown');
+    $(allOtherDropdowns).removeClass('visible');
+    $(thisDropdown).toggleClass('visible');
+    $(document).click(function(e){
+        if (e.target != $(thisDropdownMenu)) {
+            $(thisDropdown).removeClass('visible');
+        }
+    });
     return false;
 });
