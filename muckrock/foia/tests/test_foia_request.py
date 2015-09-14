@@ -120,10 +120,17 @@ class TestFOIARequestUnit(TestCase):
         user2 = User.objects.get(pk=2)
 
         foias = list(FOIARequest.objects.filter(id__in=[1, 5, 11, 12, 13, 14]).order_by('id'))
+        # 0 = draft
+        # 1 = completed, no embargo
+        # 2 = completed, embargoed, no expiration
+        # 3 = completed, embargoed, no expiration
+        # 4 = completed, embargoed, no expiration
         foias[1].date_embargo = datetime.date.today() + datetime.timedelta(10)
-        foias[2].date_embargo = datetime.date.today() + datetime.timedelta(10)
-        foias[3].date_embargo = datetime.date.today()
+        foias[2].date_embargo = datetime.date.today()
+        foias[3].date_embargo = datetime.date.today() - datetime.timedelta(1)
+        foias[3].embargo = False
         foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
+        foias[4].embargo = False
 
         # check manager get_viewable against models is_viewable
         viewable_foias = FOIARequest.objects.get_viewable(user1)
@@ -275,7 +282,7 @@ class TestFOIAFunctional(TestCase):
                     reverse('foia-detail', kwargs={'idx': foia.pk, 'slug': foia.slug,
                                                    'jurisdiction': foia.jurisdiction.slug,
                                                    'jidx': foia.jurisdiction.pk}),
-                    ['foia/detail.html', 'details/base_detail.html'],
+                    ['foia/detail.html', 'base.html'],
                     context = {'foia': foia})
 
     def test_feeds(self):
@@ -385,7 +392,7 @@ class TestFOIAFunctional(TestCase):
                                     kwargs={'jurisdiction': foia.jurisdiction.slug,
                                             'jidx': foia.jurisdiction.pk,
                                             'idx': foia.pk, 'slug': foia.slug}),
-                    ['foia/detail.html', 'details/base_detail.html'])
+                    ['foia/detail.html', 'base.html'])
 
 
 class TestFOIAIntegration(TestCase):

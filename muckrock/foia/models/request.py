@@ -54,12 +54,12 @@ class FOIARequestQuerySet(models.QuerySet):
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gt=date.today())))
+                                ~Q(embargo=True, date_embargo__gte=date.today())))
         else:
             # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gt=date.today())
+                       .exclude(embargo=True, date_embargo__gte=date.today())
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""

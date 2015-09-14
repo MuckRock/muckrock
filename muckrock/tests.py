@@ -29,14 +29,6 @@ def get_allowed(client, url, templates=None, base='base.html', context=None, red
     if redirect:
         nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
 
-    if templates:
-        resp_ts = [t.name for t in response.templates[:len(templates)+1]]
-        nose.tools.eq_(resp_ts, templates + [base])
-
-    if context:
-        for key, value in context.iteritems():
-            nose.tools.eq_(response.context[key], value)
-
     return response
 
 def post_allowed(client, url, data, redirect):
