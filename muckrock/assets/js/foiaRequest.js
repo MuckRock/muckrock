@@ -74,6 +74,21 @@ function displayDefaultDoc() {
     }
 }
 
+/* Side Bar */
+
+$('#toggle-specific-information').click(function(e){
+    e.preventDefault();
+    console.log('click');
+    $('.specific-information').toggleClass('visible');
+    if ($(this).data('state') == 0) {
+        $(this).data('state', 1);
+        $(this).text('Hide details');
+    } else {
+        $(this).data('state', 0);
+        $(this).text('Show details');
+    }
+});
+
 /* Tab Bar */
 
 $('#tab-overview').click(function() {

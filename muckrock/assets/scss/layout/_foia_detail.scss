@@ -1,8 +1,10 @@
+$request-breakpoint: 768px;
+
 .request.detail {
     @include display(flex);
     @include align-items(stretch);
     @include flex-direction(column);
-    @media all and (min-width: 768px) {
+    @media all and (min-width: $request-breakpoint) {
         @include flex-direction(row);
         .request.main {
             margin-left: $vertical-rhythm * 2;
@@ -35,9 +37,55 @@
             }
         }
     }
+    .dates {
+        font-size: $font-size-2;
+        tr {
+            background-color: $color-white;
+        }
+    }
+    .toggle-details {
+        display: block;
+        margin-bottom: $vertical-rhythm;
+        border-bottom: 1px dotted;
+        color: $color-blue;
+        font-weight: $font-weight-bold;
+        cursor: pointer;
+        &:hover {
+            color: $color-blue-dark;
+            border-bottom: 1px solid;
+        }
+        @media screen and (min-width: $request-breakpoint) {
+            display: none;
+        }
+    }
+    .specific-information {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        @media screen and (min-width: $request-breakpoint) {
+            display: block;
+        }
+    }
 }
 
 .request.main {
+    .signup-prompt {
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include align-items(flex-start);
+        @include border;
+        @include border-radius;
+        padding: $vertical-rhythm/2;
+        @include media($medium-layout) {
+            @include flex-direction(row);
+            p {
+                @include flex(0 1 60%);
+                margin-bottom: 0;
+            }
+        }
+    }
     .tabs {
         list-style-type: none;
         padding-left: 0;
@@ -68,39 +116,6 @@
         margin-bottom: 0;
         input {
             width: 100%;
-        }
-    }
-}
-
-.request .overview {
-    .dates {
-        tr {
-            background-color: $color-white;
-        }
-    }
-    .signup-prompt {
-        @include border;
-        padding: $vertical-rhythm/2;
-        .button {
-            float: left;
-        }
-    }
-    .task-link {
-        display: block;
-        margin-bottom: $vertical-rhythm;
-        padding: $vertical-rhythm/2;
-        @include border;
-        @include border-radius;
-        border-color: $color-blue-dark;
-        background-color: lighten($color-blue, 25%);
-        color: $color-blue-dark;
-        font-weight: $font-weight-bold;
-        @include transition(all .25s linear);
-        &:hover {
-            background-color: lighten($color-blue, 5%);
-            border-color: $color-black;
-            color: $color-black;
-            text-decoration: none;
         }
     }
 }
@@ -207,6 +222,7 @@
         }
     }
 }
+
 .request .files {
     ul {
         list-style-type: none;
@@ -233,6 +249,7 @@
         margin: $vertical-rhythm auto;
     }
 }
+
 .request .notes {
 
     .notes-controls {
