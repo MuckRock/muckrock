@@ -16,7 +16,7 @@ import logging
 import stripe
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestFilterForm, FOIAEmbargoForm
+from muckrock.foia.forms import RequestFilterForm, FOIAEmbargoForm, FOIAEstimatedCompletionDateForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -160,6 +160,7 @@ class Detail(DetailView):
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
+        context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
         context['task_count'] = len(Task.objects.filter_by_foia(foia))
         context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
         context['stripe_pk'] = STRIPE_PUB_KEY

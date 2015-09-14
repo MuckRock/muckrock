@@ -43,6 +43,9 @@ $request-breakpoint: 768px;
             background-color: $color-white;
         }
     }
+    .change-date {
+        display: none;
+    }
     .toggle-details {
         display: block;
         margin-bottom: $vertical-rhythm;

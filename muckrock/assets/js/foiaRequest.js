@@ -89,6 +89,18 @@ $('#toggle-specific-information').click(function(e){
     }
 });
 
+$('.estimated-completion .edit').click(function(){
+    var button = $(this);
+    $('.dates').hide();
+    $('.change-date').show();
+    $('.change-date .cancel').click(function(e){
+        e.preventDefault();
+        $('.change-date').hide();
+        $('.dates').show();
+        $(button).show();
+    });
+});
+
 /* Tab Bar */
 
 $('#tab-overview').click(function() {

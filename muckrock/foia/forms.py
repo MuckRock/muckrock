@@ -147,6 +147,12 @@ class RequestFilterForm(MRFilterForm):
         required=False
     )
 
+class FOIAEstimatedCompletionDateForm(forms.ModelForm):
+    """Form to change an estimaged completion date."""
+    class Meta:
+        model = FOIARequest
+        fields = ['date_estimate']
+
 class FOIAEmbargoForm(forms.Form):
     """Form to configure an embargo on a request"""
     permanent_embargo = forms.BooleanField(

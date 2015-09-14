@@ -53,11 +53,13 @@
                 <tr class="submitted">
                     <td class="label">Date Submitted</td>
                     <td class="date">{{ foia.date_submitted }}</td>
+                    <td></td>
                 </tr>
                 {% if foia.last_response %}
                 <tr class="last-response">
                     <td class="label">Last Response Date</td>
                     <td class="date">{{ foia.last_response.date|timesince }} ago</td>
+                    <td></td>
                 </tr>
                 {% endif %}
                 {% if foia.date_due and foia.status == "processed" %}
@@ -68,15 +70,28 @@
                     {% else %}
                     <td class="date">{{ foia.date_due|timeuntil }}</td>
                     {% endif %}
+                    <td></td>
                 </tr>
                 {% endif %}
                 {% if show_estimated_date and foia.date_estimate %}
                 <tr class="estimated-completion">
                     <td class="label">Completion Date Estimate</td>
                     <td class="date">{{ foia.date_estimate|date }}</td>
+                    {% if user_can_edit %}
+                    <td class="edit">Edit</td>
+                    {% endif %}
                 </tr>
                 {% endif %}
             </table>
+            {% if user_can_edit %}
+            <form class="change-date" id="change-estimated-completion-date" method="post">
+                {% csrf_token %}
+                <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
+                {{ change_estimated_date.date_estimate }}
+                <button class="primary" type="submit" name="action" value="date_estimate">Save</button>
+                <button class="cancel" id="cancel-date-estimate">Cancel</button>
+            </form>
+            {% endif %}
             <section class="states">
                 <section class="status manager" id="request-status">
                     <header>
