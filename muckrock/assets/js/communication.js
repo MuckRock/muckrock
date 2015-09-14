@@ -1,7 +1,7 @@
 function showCommForm(selector) {
     $('.options.dropdown').removeClass('visible');
     $('.communication-actions').show();
-    $(selector).addClass('visible');
+    $(selector).addClass('visible').siblings().removeClass('visible');
     $(selector).find('button.cancel').click(function(e){
         e.preventDefault();
         $(selector).removeClass('visible');
