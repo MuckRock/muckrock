@@ -37,14 +37,29 @@ $request-breakpoint: 768px;
             }
         }
     }
-    .dates {
+    .numbers, .dates {
         font-size: $font-size-2;
         tr {
             background-color: $color-white;
         }
+        .edit {
+            margin-left: $vertical-rhythm/2;
+        }
     }
     .change-date {
         display: none;
+        @include border;
+        padding: $vertical-rhythm/2;
+        @include align-items(flex-start);
+        @include flex-wrap(wrap);
+        @include justify-content(space-between);
+        label, input[type="text"] {
+            @include flex(0 1 100%);
+            margin-bottom: $vertical-rhythm/2;
+        }
+        &.visible {
+            @include display(flex);
+        }
     }
     .toggle-details {
         display: block;

@@ -92,10 +92,10 @@ $('#toggle-specific-information').click(function(e){
 $('.estimated-completion .edit').click(function(){
     var button = $(this);
     $('.dates').hide();
-    $('.change-date').show();
+    $('.change-date').addClass('visible');
     $('.change-date .cancel').click(function(e){
         e.preventDefault();
-        $('.change-date').hide();
+        $('.change-date').removeClass('visible');
         $('.dates').show();
         $(button).show();
     });

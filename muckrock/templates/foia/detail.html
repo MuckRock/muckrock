@@ -46,40 +46,42 @@
         <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
         <section class="specific-information">
             {% if user.is_staff %}
-            <p class="muckrock-no"><code>MuckRock # {{ foia.id }}</code></p>
-            {% if foia.tracking_id %}<p class="tracking-id"><code>Tracking # {{ foia.tracking_id }}</code></p>{% endif %}
+            <table class="numbers">
+                <tr class="muckrock-number">
+                    <td>MuckRock #</td>
+                    <td>{{ foia.id }}</td>
+                </tr>
+                <tr class="tracking-number">
+                    <td>Tracking #</td>
+                    <td>{{ foia.tracking_id }}</td>
+                </tr>
+            </table>
             {% endif %}
             <table class="dates">
                 <tr class="submitted">
-                    <td class="label">Date Submitted</td>
+                    <td class="label">Submitted</td>
                     <td class="date">{{ foia.date_submitted }}</td>
-                    <td></td>
                 </tr>
-                {% if foia.last_response %}
-                <tr class="last-response">
-                    <td class="label">Last Response Date</td>
-                    <td class="date">{{ foia.last_response.date|timesince }} ago</td>
-                    <td></td>
-                </tr>
-                {% endif %}
                 {% if foia.date_due and foia.status == "processed" %}
                 <tr class="due">
-                    <td class="label">Date Due</td>
+                    <td class="label">Due</td>
                     {% if past_due %}
-                    <td class="date">{{ foia.date_due|timesince }} ago</td>
+                    <td class="date failure">{{ foia.date_due }}</td>
                     {% else %}
-                    <td class="date">{{ foia.date_due|timeuntil }}</td>
+                    <td class="date">{{ foia.date_due }}</td>
                     {% endif %}
-                    <td></td>
+                </tr>
+                {% endif %}
+                {% if foia.last_response %}
+                <tr class="last-response">
+                    <td class="label">Last Response</td>
+                    <td class="date">{{ foia.last_response.date.date }}</td>
                 </tr>
                 {% endif %}
                 {% if show_estimated_date and foia.date_estimate %}
                 <tr class="estimated-completion">
-                    <td class="label">Completion Date Estimate</td>
-                    <td class="date">{{ foia.date_estimate|date }}</td>
-                    {% if user_can_edit %}
-                    <td class="edit">Edit</td>
-                    {% endif %}
+                    <td class="label">Est. Completion</td>
+                    <td class="date">{{ foia.date_estimate|date }}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
