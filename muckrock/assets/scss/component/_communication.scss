@@ -1,0 +1,145 @@
+.communication {
+    @include border;
+    position: relative;
+    header, section, footer {
+        padding: $vertical-rhythm/2;
+    }
+    &.received {
+        border-color: $color-black;
+        .communication-header {
+            background-color: $color-black;
+        }
+    }
+    &.sent {
+        border-color: $color-blue;
+        .communication-header {
+            background-color: $color-blue;
+        }
+    }
+    &.collapsed {
+        & > * {
+            display: none;
+        }
+        .communication-header {
+            @include display(flex);
+        }
+    }
+    .communication-header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($medium-layout) {
+            @include flex-direction(row);
+        }
+        margin-bottom: 0;
+        color: $color-white;
+        p {
+            margin-bottom: 0;
+        }
+
+        .actionables {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .permalink {
+            line-height: 1em;
+            color: $color-white;
+        }
+        .options.dropdown {
+            position: relative;
+            svg {
+                margin-left: $vertical-rhythm;
+                vertical-align: middle;
+                cursor: pointer;
+                fill: $color-white;
+                opacity: .7;
+                &:hover {
+                    opacity: .9;
+                }
+            }
+            .dropdown-list {
+                display: none;
+                position: absolute;
+                z-index: 200;
+                right: 0;
+                background-color: $color-white;
+                @include border;
+                color: $color-black;
+                li {
+                    padding: $vertical-rhythm/4;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: $color-grey-7;
+                    }
+                }
+                list-style-type: none;
+                padding-left: 0;
+            }
+            &.visible {
+                .dropdown-list {
+                    display: block;
+                }
+            }
+        }
+    }
+    .from, .subject {
+        margin-bottom: 0;
+        @include overflow-ellipsis;
+        &:hover {
+            cursor: default;
+        }
+        font-size: $font-size-3;
+        font-weight: $font-weight-bold;
+    }
+    .communication-body {
+        header {
+            @include display(flex);
+            padding: 0;
+        }
+    }
+    .files {
+        list-style-type: none;
+        padding-left: 0;
+        & > li {
+            display: block;
+            padding: $vertical-rhythm/2;
+            border-top: 1px dotted;
+        }
+    }
+    .communication-actions, .communication-action {
+        display: none;
+    }
+    .communication-actions {
+        position: relative;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        color: $color-white;
+    }
+    .communication-action {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-grey-2;
+        color: $color-white;
+        &.visible {
+            display: block;
+        }
+        label, input {
+            display: block;
+            width: 100%;
+            margin-bottom: $vertical-rhythm/2;
+        }
+        label {
+            font-weight: $font-weight-bold;
+        }
+        input {
+            color: $color-black;
+        }
+    }
+}

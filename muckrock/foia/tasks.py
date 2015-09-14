@@ -18,7 +18,7 @@ import re
 import sys
 import urllib2
 from boto.s3.connection import S3Connection
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
 
@@ -209,12 +209,24 @@ def followup_requests():
 @periodic_task(run_every=crontab(hour=6, minute=0), name='muckrock.foia.tasks.embargo_warn')
 def embargo_warn():
     """Warn users their requests are about to come off of embargo"""
-    for foia in FOIARequest.objects.filter(embargo=True,
-                                           date_embargo=date.today()+timedelta(1)):
+    for foia in FOIARequest.objects.filter(embargo=True, date_embargo=date.today()):
         send_mail('[MuckRock] Embargo about to expire for FOI Request "%s"' % foia.title,
-                  render_to_string('text/foia/embargo.txt', {'request': foia}),
-                  'info@muckrock.com', [foia.user.email])
+                  render_to_string('text/foia/embargo_will_expire.txt', {'request': foia}),
+                  'info@muckrock.com',
+                  [foia.user.email])
 
+@periodic_task(run_every=crontab(hour=0, minute=0), name='muckrock.foia.tasks.embargo_expire')
+def embargo_expire():
+    """Expire requests that have a date_embargo before today"""
+    for foia in FOIARequest.objects.filter(embargo=True,
+                                           permanent_embargo=False,
+                                           date_embargo__lt=date.today()):
+        foia.embargo = False
+        foia.save()
+        send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
+                  render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
+                  'info@muckrock.com',
+                  [foia.user.email])
 
 @periodic_task(run_every=crontab(hour=0, minute=0),
                name='muckrock.foia.tasks.set_all_document_cloud_pages')
@@ -320,7 +332,7 @@ def autoimport():
         file_name = os.path.split(key.name)[1]
 
         title = title or file_name
-        access = 'private' if foia.is_embargo() else 'public'
+        access = 'private' if foia.embargo else 'public'
 
         foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
                              source=comm.from_who[:70], access=access)

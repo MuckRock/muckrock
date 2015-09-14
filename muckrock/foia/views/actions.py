@@ -23,7 +23,7 @@ from muckrock.foia.forms import \
     FOIANoteForm, \
     FOIAEmbargoForm, \
     FOIAFileFormSet
-from muckrock.foia.models import FOIARequest, FOIAFile
+from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.settings import STRIPE_SECRET_KEY
@@ -138,68 +138,65 @@ def delete(request, jurisdiction, jidx, slug, idx):
     return _foia_action(request, foia, action)
 
 @login_required
-def permanent_embargo(request, jurisdiction, jidx, slug, idx):
-    """Toggle the permanant embargo on the FOIA Request"""
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    is_org_member = request.user == foia.user and request.user.profile.organization != None
-    if foia.editable_by(request.user) and is_org_member or request.user.is_staff:
-        if foia.embargo == True:
-            if foia.is_permanently_embargoed():
-                foia.permanent_embargo = False
-                msg = 'The permanent embargo on this request has been lifted.'
-            else:
-                foia.permanent_embargo = True
-                msg = 'The request is now permanently embargoed.'
-            messages.success(request, msg)
-            foia.save()
-        else:
-            messages.error(request, 'You may only permanently embargo requests that '
-                                    'already have an embargo.')
-    else:
-        messages.error(request, 'Only staff and org members may permanently embargo '
-                                'their requests.')
-    return redirect(foia)
-
-@login_required
 def embargo(request, jurisdiction, jidx, slug, idx):
     """Change the embargo on a request"""
-    def form_actions(_, foia, form):
-        """Update the embargo date"""
-        foia.embargo = True
-        foia.date_embargo = form.cleaned_data.get('date_embargo')
-        foia.permanent_embargo = False
+
+    def fine_tune_embargo(request, foia):
+        """Adds an expiration date or makes permanent if necessary."""
+        permanent = request.POST.get('permanent_embargo')
+        expiration = request.POST.get('date_embargo')
+        form = FOIAEmbargoForm({
+            'permanent_embargo': request.POST.get('permanent_embargo'),
+            'date_embargo': request.POST.get('date_embargo')
+        })
+        if form.is_valid():
+            permanent = form.cleaned_data['permanent_embargo']
+            expiration = form.cleaned_data['date_embargo']
+            if request.user.profile.can_embargo_permanently():
+                foia.permanent_embargo = permanent
+            if expiration and foia.status in END_STATUS:
+                foia.date_embargo = expiration
+            foia.save()
+        return
+
+    def create_embargo(request, foia):
+        """Apply an embargo to the FOIA"""
+        if request.user.profile.can_embargo():
+            foia.embargo = True
+            foia.save()
+            logger.info('%s embargoed %s', request.user, foia)
+            fine_tune_embargo(request, foia)
+        else:
+            logger.error('%s was forbidden from embargoing %s', request.user, foia)
+            messages.error(request, 'You cannot embargo requests.')
+        return
+
+    def update_embargo(request, foia):
+        """Update an embargo to the FOIA"""
+        if request.user.profile.can_embargo():
+            fine_tune_embargo(request, foia)
+        else:
+            logger.error('%s was forbidden from updating the embargo on %s', request.user, foia)
+            messages.error(request, 'You cannot update this embargo.')
+        return
+
+    def delete_embargo(request, foia):
+        """Remove an embargo from the FOIA"""
+        foia.embargo = False
         foia.save()
-        logger.info(
-            'Embargo set by user for FOI Request %d %s to %s',
-            foia.pk,
-            foia.title,
-            foia.embargo
-        )
+        logger.info('%s unembargoed %s', request.user, foia)
+        return
+
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
-    if foia.embargo or foia.status not in finished_status:
-        foia.embargo = not foia.embargo
-        foia.permanent_embargo = False
-        foia.date_embargo = None
-        foia.save()
-        return redirect(foia)
-    else:
-        action = RequestAction(
-            form_actions=form_actions,
-            msg='embargo',
-            tests=[(
-                lambda f: f.user.profile.can_embargo(),
-                'You may not embargo requests with your account type'
-            )],
-            form_class=lambda r, f: FOIAEmbargoForm,
-            return_url=lambda r, f: f.get_absolute_url(),
-            heading='Update the Embargo Date',
-            value='Update',
-            must_own=True,
-            template='forms/foia/embargo.html',
-            extra_context=lambda f: {}
-        )
-        return _foia_action(request, foia, action)
+    if request.method == 'POST' and foia.editable_by(request.user):
+        embargo_action = request.POST.get('embargo')
+        if embargo_action == 'create':
+            create_embargo(request, foia)
+        elif embargo_action == 'update':
+            update_embargo(request, foia)
+        elif embargo_action == 'delete':
+            delete_embargo(request, foia)
+    return redirect(foia)
 
 @login_required
 def pay_request(request, jurisdiction, jidx, slug, idx):

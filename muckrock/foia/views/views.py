@@ -16,13 +16,12 @@ import logging
 import stripe
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestFilterForm
+from muckrock.foia.forms import RequestFilterForm, FOIAEmbargoForm, FOIAEstimatedCompletionDateForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
-    STATUS
+    STATUS, END_STATUS
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
-from muckrock.foia.views.composers import get_foia
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
 from muckrock.tags.models import Tag
@@ -117,35 +116,25 @@ class Detail(DetailView):
         """If request is a draft, then redirect to drafting interface"""
         if request.POST:
             return self.post(request)
-        foia = get_foia(
-            self.kwargs['jurisdiction'],
-            self.kwargs['jidx'],
-            self.kwargs['slug'],
-            self.kwargs['idx']
-        )
+        foia = self.get_object()
         if foia.status == 'started':
             return redirect(
                 'foia-draft',
-                jurisdiction=self.kwargs['jurisdiction'],
-                jidx=self.kwargs['jidx'],
-                slug=self.kwargs['slug'],
-                idx=self.kwargs['idx']
+                jurisdiction=foia.jurisdiction.slug,
+                jidx=foia.jurisdiction.id,
+                slug=foia.slug,
+                idx=foia.id
             )
         else:
             return super(Detail, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
-        # pylint: disable=unused-argument
-        foia = get_foia(
-            self.kwargs['jurisdiction'],
-            self.kwargs['jidx'],
-            self.kwargs['slug'],
-            self.kwargs['idx']
-        )
-        if not foia.is_viewable(self.request.user):
+        foia = super(Detail, self).get_object(queryset)
+        user = self.request.user
+        if not foia.is_viewable(user):
             raise Http404()
-        if foia.user == self.request.user:
+        if foia.user == user:
             if foia.updated:
                 foia.updated = False
                 foia.save()
@@ -157,15 +146,23 @@ class Detail(DetailView):
         foia = context['foia']
         user = self.request.user
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
+        include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
-        context['admin_actions'] = foia.admin_actions(user)
+        context['user_can_edit'] = foia.editable_by(user)
+        context['embargo_form'] = FOIAEmbargoForm(initial={
+            'permanent_embargo': foia.permanent_embargo,
+            'date_embargo': foia.date_embargo
+        })
+        context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
-        context['choices'] = STATUS if user.is_staff or foia.status == 'started' else STATUS_NODRAFT
-        context['tasks'] = Task.objects.filter_by_foia(foia)
-        context['open_task_count'] = len(Task.objects.get_unresolved().filter_by_foia(foia))
+        context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
+        context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
+        context['change_estimated_date'] = FOIAEstimatedCompletionDateForm(instance=foia)
+        context['task_count'] = len(Task.objects.filter_by_foia(foia))
+        context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         if foia.sidebar_html:
@@ -182,6 +179,7 @@ class Detail(DetailView):
             'question': self._question,
             'flag': self._flag,
             'appeal': self._appeal,
+            'date_estimate': self._update_estimate,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm
@@ -261,6 +259,19 @@ class Detail(DetailView):
         if foia.editable_by(request.user) and foia.is_appealable() and text:
             save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
             messages.success(request, 'Appeal successfully sent.')
+        return redirect(foia)
+
+    def _update_estimate(self, request, foia):
+        """Change the estimated completion date"""
+        form = FOIAEstimatedCompletionDateForm(request.POST, instance=foia)
+        if foia.editable_by(request.user):
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully changed the estimated completion date.')
+            else:
+                messages.error(request, 'Invalid date provided.')
+        else:
+            messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
