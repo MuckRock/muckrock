@@ -275,6 +275,20 @@ $request-breakpoint: 768px;
 }
 
 .request .files {
+    .active-document {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        header {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(baseline);
+            h3 {
+                margin-bottom: 0;
+            }
+        }
+    }
     .files-list {
         list-style-type: none;
         padding-left: 0;

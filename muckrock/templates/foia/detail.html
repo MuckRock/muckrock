@@ -272,11 +272,16 @@
         <section class="tab-section files" id="files">
             {% if not foia.embargo or user_can_edit %}
             {% if foia.total_pages > 0 %}
-            <h2 id="doc-title"></h2>
-            <div class="viewer" id="viewer"></div>
+            <div class="active-document">
+                <header>
+                    <h3 id="doc-title"></h3>
+                    <a href="#all-files">All Files</a>
+                </header>
+                <div class="viewer" id="viewer"></div>
+            </div>
             {% endif %}
             {% if foia.files.count > 0 %}
-            <ul class="files-list">
+            <ul class="files-list" id="all-files">
                 {% for file in foia.files.all %}
                 <li>{% include "lib/file.html" %}</li>
                 {% endfor %}

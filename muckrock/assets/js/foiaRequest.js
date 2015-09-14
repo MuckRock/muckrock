@@ -42,38 +42,6 @@ function get_thumbnail(doc_id) {
         return 'https://s3.amazonaws.com/s3.documentcloud.org/documents/' + num + '/pages/' + name + '-p1-small.gif';
 }
 
-function displayDoc(docId, docTitle, docAnchor) {
-    var title;
-    if (!!docTitle) {
-        title = docTitle;
-    } else {
-        title = 'Untitled';
-    }
-    $('#doc-title').empty().text(title);
-    $('.file').parent('li').removeClass('active');
-    if (!!docAnchor) {
-        var fileListItem = $('#files ul li > #' + docAnchor).parent('li');
-        $(fileListItem).addClass('active');
-    }
-    DV.load(
-        'https://www.documentcloud.org/documents/' + docId + '.js',
-        {
-            sidebar: false,
-            container: "#viewer"
-        }
-    );
-}
-
-function displayDefaultDoc() {
-    var defaultDoc = $('a.view-file').first();
-    if (!!defaultDoc) {
-        var defaultDocId = defaultDoc.data('docId');
-        var defaultDocTitle = defaultDoc.data('docTitle');
-        var defaultDocAnchor = defaultDoc.data('docAnchor');
-        displayDoc(defaultDocId, defaultDocTitle, defaultDocAnchor);
-    }
-}
-
 /* Side Bar */
 
 $('#toggle-specific-information').click(function(e){
@@ -206,17 +174,41 @@ $('#inactive-appeal').click(function(){
 
 /* Documents */
 
+function displayDoc(docId, docTitle, docAnchor) {
+    var title;
+    if (!!docTitle) {
+        title = docTitle;
+    } else {
+        title = 'Untitled';
+    }
+    $('#doc-title').empty().text(title);
+    $('.file').parent('li').removeClass('active');
+    if (!!docAnchor) {
+        var fileListItem = $('#files ul li > #' + docAnchor).parent('li');
+        $(fileListItem).addClass('active');
+    }
+    DV.load(
+        'https://www.documentcloud.org/documents/' + docId + '.js',
+        {
+            sidebar: false,
+            container: "#viewer"
+        }
+    );
+    $('.active-document').addClass('visible');
+    window.scrollTo(0, $('.active-document').offset().top);
+}
+
 $('a.view-file').click(function() {
     var docId = $(this).data('docId');
     var docTitle = $(this).data('docTitle');
     var docAnchor = $(this).data('docAnchor');
-    $('#files-radio').trigger('click');
+    $('#tab-files').click();
     displayDoc(docId, docTitle, docAnchor);
 });
 
 if (target == '#file') {
     var specificFile = window.location.hash;
-    $(specificFile + ' .view-file').trigger('click');
+    $(specificFile + ' .view-file').click();
 }
 
 $('.toggle-embed').click(function(){
