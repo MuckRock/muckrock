@@ -78,7 +78,6 @@ function displayDefaultDoc() {
 
 $('#toggle-specific-information').click(function(e){
     e.preventDefault();
-    console.log('click');
     $('.specific-information').toggleClass('visible');
     if ($(this).data('state') == 0) {
         $(this).data('state', 1);
