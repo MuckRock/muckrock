@@ -179,6 +179,7 @@ class Detail(DetailView):
             'question': self._question,
             'flag': self._flag,
             'appeal': self._appeal,
+            'date_estimate': self._update_estimate,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm
@@ -258,6 +259,19 @@ class Detail(DetailView):
         if foia.editable_by(request.user) and foia.is_appealable() and text:
             save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
             messages.success(request, 'Appeal successfully sent.')
+        return redirect(foia)
+
+    def _update_estimate(self, request, foia):
+        """Change the estimated completion date"""
+        form = FOIAEstimatedCompletionDateForm(request.POST, instance=foia)
+        if foia.editable_by(request.user):
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Successfully changed the estimated completion date.')
+            else:
+                messages.error(request, 'Invalid date provided.')
+        else:
+            messages.error(request, 'You cannot do that, stop it.')
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
