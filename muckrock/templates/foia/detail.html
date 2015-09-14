@@ -262,7 +262,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <h2>There are no files associated with this request.</h2>
+            <h3>There are no files associated with this request.</h3>
             {% endif %}
         </section>
 
@@ -287,14 +287,16 @@
         <!-- TASKS -->
         <section class="tab-section tasks" id="tasks">
             <header class="tasks-control">
-                <p>{% if open_task_count > 0 %}Showing {{ open_task_count }} unresolved task{{ open_task_count|pluralize }}. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
+                <p>{% if open_tasks|length > 0 %}Showing {{ open_tasks|length }} unresolved task{{ open_tasks|length|pluralize }}. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
             </header>
-            {% for task in tasks %}
-                {% if not task.resolved %}
-                    {% include 'lib/task.html' with task=task %}
-                {% endif %}
+            {% for task in open_tasks %}
+                {% include 'lib/task.html' with task=task %}
             {% empty %}
-            <p>No open tasks.</p>
+                {% if task_count > 0 %}
+            <h3>All the tasks for this request are resolved.</h3>
+                {% else %}
+            <h3>There are no tasks for this request.</h3>
+                {% endif %}
             {% endfor %}
         </section>
         {% endif %}

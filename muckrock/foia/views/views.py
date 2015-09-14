@@ -160,8 +160,8 @@ class Detail(DetailView):
         context['contextual_request_actions'] = foia.contextual_request_actions(user)
         context['status_choices'] = STATUS if include_draft else STATUS_NODRAFT
         context['show_estimated_date'] = foia.status not in ['submitted', 'ack', 'done', 'rejected']
-        context['tasks'] = Task.objects.filter_by_foia(foia)
-        context['open_task_count'] = len(Task.objects.get_unresolved().filter_by_foia(foia))
+        context['task_count'] = len(Task.objects.filter_by_foia(foia))
+        context['open_tasks'] = Task.objects.get_unresolved().filter_by_foia(foia)
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['sidebar_admin_url'] = reverse('admin:foia_foiarequest_change', args=(foia.pk,))
         if foia.sidebar_html:
