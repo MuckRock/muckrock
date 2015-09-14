@@ -78,10 +78,10 @@
                     <td class="date">{{ foia.last_response.date.date }}</td>
                 </tr>
                 {% endif %}
-                {% if show_estimated_date and foia.date_estimate %}
+                {% if show_estimated_date %}
                 <tr class="estimated-completion">
                     <td class="label">Est. Completion</td>
-                    <td class="date">{{ foia.date_estimate|date }}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
                 </tr>
                 {% endif %}
             </table>
@@ -90,6 +90,7 @@
                 {% csrf_token %}
                 <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
                 {{ change_estimated_date.date_estimate }}
+                <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
                 <button class="primary" type="submit" name="action" value="date_estimate">Save</button>
                 <button class="cancel" id="cancel-date-estimate">Cancel</button>
             </form>
