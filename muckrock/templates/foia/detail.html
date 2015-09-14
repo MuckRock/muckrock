@@ -164,12 +164,9 @@
             {% crowdfund_request foia.crowdfund.pk %}
         {% endif %}
 
-        {% if foia.files.count > 0 or user_can_edit %}
         <ul class="tabs">
             <li class="tab active" id="tab-request">Request</li>
-            {% if foia.files.count > 0 %}
             <li class="tab" id="tab-files">Files</li>
-            {% endif %}
             {% if user_can_edit %}
             <li class="tab" id="tab-notes">Notes</li>
             {% endif %}
@@ -177,7 +174,6 @@
             <li class="tab" id="tab-tasks">Tasks</li>
             {% endif %}
         </ul>
-        {% endif %}
 
         <section class="tab-section communications visible" id="request">
             <div class="communications-controls">
@@ -251,20 +247,22 @@
 
         </section>
 
-        {% if foia.files.all %}
         <!-- DOCUMENTS -->
         <section class="tab-section files" id="files">
             {% if not foia.embargo and foia.total_pages > 0 %}
             <h2 id="doc-title"></h2>
             <div class="viewer" id="viewer"></div>
             {% endif %}
-            <ul>
-            {% for file in foia.files.all %}
+            {% if foia.files.count > 0 %}
+            <ul class="files-list">
+                {% for file in foia.files.all %}
                 <li>{% include "lib/file.html" %}</li>
-            {% endfor %}
+                {% endfor %}
             </ul>
+            {% else %}
+            <h2>There are no files associated with this request.</h2>
+            {% endif %}
         </section>
-        {% endif %}
 
         {% if foia.user == user or user.is_staff %}
         <!-- NOTES -->
