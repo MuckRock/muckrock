@@ -82,20 +82,14 @@
             }
         }
     }
-    .from {
-        font-size: $font-size-3;
-        font-weight: $font-weight-bold;
-    }
-    .subject {
-        @extend .from;
+    .from, .subject {
         margin-bottom: 0;
         @include overflow-ellipsis;
         &:hover {
             cursor: default;
         }
-    }
-    &:hover .subject {
-        text-decoration: underline;
+        font-size: $font-size-3;
+        font-weight: $font-weight-bold;
     }
     .communication-body {
         header {
