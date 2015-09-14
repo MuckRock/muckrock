@@ -42,8 +42,16 @@ $request-breakpoint: 768px;
         tr {
             background-color: $color-white;
         }
+        td {
+            width: 50%;
+        }
+        .label {
+            max-width: 0;
+            @include overflow-ellipsis;
+        }
         .edit {
             margin-left: $vertical-rhythm/2;
+            float: right;
         }
     }
     .change-date {

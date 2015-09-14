@@ -149,6 +149,11 @@ class RequestFilterForm(MRFilterForm):
 
 class FOIAEstimatedCompletionDateForm(forms.ModelForm):
     """Form to change an estimaged completion date."""
+    date_estimate = forms.DateField(
+        label='Estimated completion date',
+        widget=forms.DateInput(format='%m/%d/%Y')
+    )
+
     class Meta:
         model = FOIARequest
         fields = ['date_estimate']
