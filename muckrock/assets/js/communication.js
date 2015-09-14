@@ -1,3 +1,14 @@
+function showCommForm(selector) {
+    $('.options.dropdown').removeClass('visible');
+    $('.communication-actions').show();
+    $(selector).addClass('visible');
+    $(selector).find('button.cancel').click(function(e){
+        e.preventDefault();
+        $(selector).removeClass('visible');
+        $('.communication-actions').hide();
+    });
+}
+
 $('.communication-header').click(function(){
     $(this).closest('.communication').toggleClass('collapsed');
 });
@@ -19,9 +30,7 @@ $('.communication .options .svgIcon').click(function(){
     $(allOtherDropdowns).removeClass('visible');
     $(thisDropdown).toggleClass('visible');
     $(document).click(function(e){
-        if (e.target != $(thisDropdownMenu)) {
-            $(thisDropdown).removeClass('visible');
-        }
+        $(thisDropdown).removeClass('visible');
     });
     return false;
 });

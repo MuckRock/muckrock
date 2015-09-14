@@ -1,5 +1,6 @@
 .communication {
     @include border;
+    position: relative;
     header, section, footer {
         padding: $vertical-rhythm/2;
     }
@@ -60,7 +61,7 @@
             .dropdown-list {
                 display: none;
                 position: absolute;
-                z-index: 1;
+                z-index: 200;
                 right: 0;
                 background-color: $color-white;
                 @include border;
@@ -104,6 +105,41 @@
             display: block;
             padding: $vertical-rhythm/2;
             border-top: 1px dotted;
+        }
+    }
+    .communication-actions, .communication-action {
+        display: none;
+    }
+    .communication-actions {
+        position: relative;
+        z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        color: $color-white;
+    }
+    .communication-action {
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: $vertical-rhythm;
+        background-color: $color-grey-2;
+        color: $color-white;
+        &.visible {
+            display: block;
+        }
+        label, input {
+            display: block;
+            width: 100%;
+            margin-bottom: $vertical-rhythm/2;
+        }
+        label {
+            font-weight: $font-weight-bold;
+        }
+        input {
+            color: $color-black;
         }
     }
 }
