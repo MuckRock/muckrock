@@ -144,6 +144,10 @@ $request-breakpoint: 768px;
             width: 100%;
         }
     }
+    .empty {
+        margin-top: 2*$vertical-rhythm;
+        text-align: center;
+    }
 }
 
 .request .communications {

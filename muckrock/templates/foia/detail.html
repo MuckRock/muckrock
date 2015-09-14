@@ -279,7 +279,7 @@
                 {% endfor %}
             </ul>
             {% else %}
-            <h3>There are no files associated with this request.</h3>
+            <h3 class="empty">There are no files associated with this request.</h3>
             {% endif %}
         </section>
 
@@ -295,7 +295,7 @@
             {% for note in foia.notes.all %}
                 {% include 'foia/note.html' with note=note %}
             {% empty %}
-                <p>Notes are a private way to remember information about this request.</p>
+                <h3 class="empty">There are no notes attached to this request.</h3>
             {% endfor %}
         </section>
         {% endif %}
@@ -310,9 +310,9 @@
                 {% include 'lib/task.html' with task=task %}
             {% empty %}
                 {% if task_count > 0 %}
-            <h3>All the tasks for this request are resolved.</h3>
+            <h3 class="empty">All the tasks for this request are resolved.</h3>
                 {% else %}
-            <h3>There are no tasks for this request.</h3>
+            <h3 class="empty">There are no tasks for this request.</h3>
                 {% endif %}
             {% endfor %}
         </section>
