@@ -220,6 +220,16 @@ if (target == '#file') {
     $(specificFile + ' .view-file').trigger('click');
 }
 
+$('.toggle-embed').click(function(){
+    var file = $(this).closest('.file');
+    var embed = $(file).find('.file-embed');
+    $(embed).toggleClass('visible');
+    $(embed).children('textarea').select();
+    $(embed).children('.close-embed').click(function(){
+        $(embed).removeClass('visible');
+    });
+});
+
 /* Modals */
 
 $('.text-area.modal-button').click(function(e){

@@ -254,29 +254,31 @@ $request-breakpoint: 768px;
 }
 
 .request .files {
-    ul {
+    .files-list {
         list-style-type: none;
         padding-left: 0;
-        @include row;
-        li {
-            @include half;
+        .file {
             margin-bottom: $vertical-rhythm/2;
             border: $base-border-width solid $color-blue;
             @include border-radius;
-            padding: $vertical-rhythm/2 $vertical-rhythm;
-            &.active {
-                background-color: $color-blue;
-                color: $color-white;
-                a { color: $color-white; }
-                .embed.modal { color: $color-black; }
+            padding: $vertical-rhythm/2;
+        }
+        .active .file {
+            border-color: $color-blue-dark;
+            background-color: lighten($color-blue, 30%);
+            color: $color-blue-dark;
+            a, span {
+                color: $color-blue-dark;
+                &:hover {
+                    color: $color-black;
+                }
+            }
+            .file-embed {
+                border-color: $color-blue-dark;
+                color: $color-black;
+                background-color: $color-white;
             }
         }
-    }
-    .viewer {
-        position: relative;
-        width: 100%;
-        height: 66em;
-        margin: $vertical-rhythm auto;
     }
 }
 

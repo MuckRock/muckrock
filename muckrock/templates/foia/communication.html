@@ -34,13 +34,11 @@
     </section>
     {% endif %}
     {% if communication.files.count > 0 %}
-    <section>
-        <ul class="files">
-        {% for file in communication.files.all %}
-            <li class="file">{% include 'lib/file.html' %}</li>
-        {% endfor %}
-        </ul>
-    </section>
+    <ul class="files">
+    {% for file in communication.files.all %}
+        <li>{% include 'lib/file.html' %}</li>
+    {% endfor %}
+    </ul>
     {% endif %}
 </section>
 {% endif %}

@@ -98,6 +98,12 @@
         }
     }
     .files {
+        list-style-type: none;
         padding-left: 0;
+        & > li {
+            display: block;
+            padding: $vertical-rhythm/2;
+            border-top: 1px dotted;
+        }
     }
 }
