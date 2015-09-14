@@ -188,7 +188,8 @@
             {% endfor %}
             </div>
 
-            {% if user_can_edit and foia.status == "ack" or foia.status == "processed" %}
+            {% if user_can_edit %}
+            {% if foia.status == "ack" or foia.status == "processed" %}
             <div class="auto-follow-up">
                 {% if foia.disable_autofollowups %}
                 <p>Automatic follow ups are disabled.</p>
@@ -198,6 +199,7 @@
                 <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a>
                 {% endif %}
             </div>
+            {% endif %}
             {% endif %}
 
             {% if user_can_edit %}
