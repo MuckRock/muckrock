@@ -21,6 +21,7 @@ from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
     STATUS, END_STATUS
+from muckrock.foia.views.composers import get_foia
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.qanda.models import Question
 from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
@@ -130,7 +131,13 @@ class Detail(DetailView):
 
     def get_object(self, queryset=None):
         """Get the FOIA Request"""
-        foia = super(Detail, self).get_object(queryset)
+        # pylint: disable=unused-argument
+        foia = get_foia(
+            self.kwargs['jurisdiction'],
+            self.kwargs['jidx'],
+            self.kwargs['slug'],
+            self.kwargs['idx']
+        )
         user = self.request.user
         if not foia.is_viewable(user):
             raise Http404()
