@@ -333,7 +333,6 @@
 {% block scripts %}
 <script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
 <script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
-{% compress js %}
 {% if foia.has_crowdfund %}
 <script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
 <script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
@@ -358,5 +357,4 @@
         {% endif %}
     });
 </script>
-{% endcompress %}
 {% endblock scripts %}
