@@ -143,7 +143,7 @@ class Detail(DetailView):
             self.kwargs['slug'],
             self.kwargs['idx']
         )
-        if not foia.is_viewable(self.request.user):
+        if not foia.viewable_by(self.request.user):
             raise Http404()
         if foia.user == self.request.user:
             if foia.updated:

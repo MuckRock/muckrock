@@ -123,45 +123,45 @@ class TestFOIARequestUnit(TestCase):
         foias[3].date_embargo = datetime.date.today()
         foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
 
-        # check manager get_viewable against models is_viewable
+        # check manager get_viewable against models viewable_by
         viewable_foias = FOIARequest.objects.get_viewable(user1)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(user1))
+                nose.tools.assert_true(foia.viewable_by(user1))
             else:
-                nose.tools.assert_false(foia.is_viewable(user1))
+                nose.tools.assert_false(foia.viewable_by(user1))
 
         viewable_foias = FOIARequest.objects.get_viewable(user2)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(user2))
+                nose.tools.assert_true(foia.viewable_by(user2))
             else:
-                nose.tools.assert_false(foia.is_viewable(user2))
+                nose.tools.assert_false(foia.viewable_by(user2))
 
         viewable_foias = FOIARequest.objects.get_public()
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(AnonymousUser()))
+                nose.tools.assert_true(foia.viewable_by(AnonymousUser()))
             else:
-                nose.tools.assert_false(foia.is_viewable(AnonymousUser()))
+                nose.tools.assert_false(foia.viewable_by(AnonymousUser()))
 
-        nose.tools.assert_true(foias[0].is_viewable(user1))
-        nose.tools.assert_true(foias[1].is_viewable(user1))
-        nose.tools.assert_true(foias[2].is_viewable(user1))
-        nose.tools.assert_true(foias[3].is_viewable(user1))
-        nose.tools.assert_true(foias[4].is_viewable(user1))
+        nose.tools.assert_true(foias[0].viewable_by(user1))
+        nose.tools.assert_true(foias[1].viewable_by(user1))
+        nose.tools.assert_true(foias[2].viewable_by(user1))
+        nose.tools.assert_true(foias[3].viewable_by(user1))
+        nose.tools.assert_true(foias[4].viewable_by(user1))
 
-        nose.tools.assert_false(foias[0].is_viewable(user2))
-        nose.tools.assert_true (foias[1].is_viewable(user2))
-        nose.tools.assert_false(foias[2].is_viewable(user2))
-        nose.tools.assert_true (foias[3].is_viewable(user2))
-        nose.tools.assert_true (foias[4].is_viewable(user2))
+        nose.tools.assert_false(foias[0].viewable_by(user2))
+        nose.tools.assert_true (foias[1].viewable_by(user2))
+        nose.tools.assert_false(foias[2].viewable_by(user2))
+        nose.tools.assert_true (foias[3].viewable_by(user2))
+        nose.tools.assert_true (foias[4].viewable_by(user2))
 
-        nose.tools.assert_false(foias[0].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[1].is_viewable(AnonymousUser()))
-        nose.tools.assert_false(foias[2].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[3].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[4].is_viewable(AnonymousUser()))
+        nose.tools.assert_false(foias[0].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[1].viewable_by(AnonymousUser()))
+        nose.tools.assert_false(foias[2].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[3].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[4].viewable_by(AnonymousUser()))
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""

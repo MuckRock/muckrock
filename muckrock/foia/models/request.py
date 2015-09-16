@@ -230,17 +230,9 @@ class FOIARequest(models.Model):
         """Can this request be deleted?"""
         return self.status == 'started'
 
-    def is_viewable(self, user):
-        """Is this request viewable?"""
-        # pylint: disable=unexpected-keyword-arg
-        return user.is_staff or self.user == user or \
-            self.read_collaborators.filter(pk=user.pk).exists() or \
-            self.edit_collaborators.filter(pk=user.pk).exists() or \
-            (self.status != 'started' and not self.is_embargo())
-
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.is_viewable(AnonymousUser())
+        return self.viewable_by(AnonymousUser())
 
     def is_embargo(self, save=True):
         """Is this request currently on an embargo?"""
@@ -465,7 +457,7 @@ class FOIARequest(models.Model):
         self.save()
 
         for profile in chain(self.followed_by.all(), [self.user.profile]):
-            if self.is_viewable(profile.user):
+            if self.viewable_by(profile.user):
                 profile.notify(self)
 
         self.update_dates()
