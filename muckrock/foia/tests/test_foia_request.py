@@ -634,7 +634,13 @@ class TestRequestSharing(TestCase):
 
     def test_remove_viewer(self):
         """Editors should be able to remove viewers from the request."""
-        nose.tools.ok_(False)
+        viewer_to_remove = UserFactory()
+        # first we add the viewer, otherwise we would have nothing to remove!
+        self.foia.add_viewer(viewer_to_remove)
+        nose.tools.ok_(self.foia.has_viewer(viewer_to_remove))
+        # now we remove the viewer we just added
+        self.foia.remove_viewer(viewer_to_remove)
+        nose.tools.assert_false(self.foia.has_viewer(viewer_to_remove))
 
     def test_viewer_permission(self):
         """Viewers should be able to see the request if it is embargoed."""

@@ -314,6 +314,13 @@ class FOIARequest(models.Model):
             self.save()
         return
 
+    def remove_viewer(self, user):
+        """Revokes the user's permission to view this request."""
+        if self.has_viewer(user):
+            self.read_collaborators.remove(user)
+            self.save()
+        return
+
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
         return hasattr(self, 'crowdfund')
