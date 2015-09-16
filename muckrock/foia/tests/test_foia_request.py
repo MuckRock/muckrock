@@ -594,9 +594,8 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIARequest
 
-    user = UserFactory(username='test')
-    jurisdiction = JurisdictionFactory()
-
+    user = factory.SubFactory(UserFactory)
+    jurisdiction = factory.SubFactory(JurisdictionFactory)
 
 
 class TestRequestSharing(TestCase):
