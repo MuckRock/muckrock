@@ -575,10 +575,26 @@ class TestFOIAIntegration(TestCase):
         nose.tools.ok_(foia.days_until_due is None)
 
 
-class FOIARequestFactory(factory.Factory):
+class UserFactory(factory.django.DjangoModelFactory):
+    """A factory for creating User test objects."""
+    class Meta:
+        model = User
+
+
+class JurisdictionFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Jurisdiction test objects."""
+    class Meta:
+        model = Jurisdiction
+
+
+class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
     class Meta:
         model = FOIARequest
+
+    user = UserFactory()
+    jurisdiction = JurisdictionFactory()
+
 
 
 class TestRequestSharing(TestCase):
