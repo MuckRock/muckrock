@@ -8,16 +8,15 @@ from django.db import models
 from django.template.loader import render_to_string
 
 import dbsettings
-import string
 import stripe
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
-from random import choice
 from sesame.utils import get_parameters
 from urllib import urlencode
 
+from muckrock import utils
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
@@ -288,7 +287,7 @@ class Profile(models.Model):
 
     def generate_confirmation_key(self):
         """Generate random key"""
-        key = ''.join(choice(string.ascii_letters) for _ in range(24))
+        key = utils.generate_key(24)
         self.confirmation_key = key
         self.save()
         return key
