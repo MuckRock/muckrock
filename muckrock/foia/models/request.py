@@ -308,7 +308,7 @@ class FOIARequest(models.Model):
 
     def editable_by(self, user):
         """Can this user edit this request?"""
-        return self.user == user or self.has_editor(user) or user.is_staff
+        return self.created_by(user) or self.has_editor(user) or user.is_staff
 
     ## Viewers
 
@@ -699,7 +699,7 @@ class FOIARequest(models.Model):
 
     def user_actions(self, user):
         '''Provides action interfaces for users'''
-        is_owner = self.user == user
+        is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
         is_following = user.is_authenticated() and self.followed_by.filter(user=user)
         kwargs = {
