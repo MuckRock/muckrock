@@ -604,7 +604,9 @@ class TestRequestSharing(TestCase):
 
     def test_add_editor(self):
         """Editors should be able to add editors to the request."""
-        nose.tools.ok_(False)
+        new_editor = UserFactory()
+        self.foia.add_editor(new_editor)
+        nose.tools.assert_true(self.foia.has_editor(new_editor))
 
     def test_remove_editor(self):
         """Editors should be able to remove editors from the request."""
