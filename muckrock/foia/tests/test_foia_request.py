@@ -626,16 +626,18 @@ class TestRequestSharing(TestCase):
         self.foia.add_editor(new_editor)
         nose.tools.ok_(self.foia.editable_by(new_editor))
 
-    def test_viewer_permission(self):
-        """Viewers should be able to see the request if it is embargoed."""
-        nose.tools.ok_(False)
-
     def test_add_viewer(self):
         """Editors should be able to add viewers to the request."""
-        nose.tools.ok_(False)
+        new_viewer = UserFactory()
+        self.foia.add_viewer(new_viewer)
+        nose.tools.ok_(self.foia.has_viewer(new_viewer))
 
     def test_remove_viewer(self):
         """Editors should be able to remove viewers from the request."""
+        nose.tools.ok_(False)
+
+    def test_viewer_permission(self):
+        """Viewers should be able to see the request if it is embargoed."""
         nose.tools.ok_(False)
 
     def test_promote_viewer(self):

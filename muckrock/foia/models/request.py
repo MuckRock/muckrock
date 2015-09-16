@@ -269,6 +269,10 @@ class FOIARequest(models.Model):
         if self.embargo:
             return self.permanent_embargo
 
+    # Request Sharing and Permissions
+
+    ## Editors
+
     def has_editor(self, user):
         """Checks whether the given user is an editor."""
         user_is_editor = False
@@ -293,6 +297,22 @@ class FOIARequest(models.Model):
     def editable_by(self, user):
         """Can this user edit this request"""
         return self.user == user or self.has_editor(user) or user.is_staff
+
+    ## Viewers
+
+    def has_viewer(self, user):
+        """Checks whether the given user is a viewer."""
+        user_is_viewer = False
+        if self.read_collaborators.filter(pk=user.pk).exists():
+            user_is_viewer = True
+        return user_is_viewer
+
+    def add_viewer(self, user):
+        """Grants the user permission to view this request."""
+        if not self.has_viewer(user):
+            self.read_collaborators.add(user)
+            self.save()
+        return
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
