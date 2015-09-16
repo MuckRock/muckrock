@@ -620,10 +620,6 @@ class TestRequestSharing(TestCase):
         self.foia.remove_editor(editor_to_remove)
         nose.tools.assert_false(self.foia.has_editor(editor_to_remove))
 
-    def test_creator_privelidge(self):
-        """Creators are a special type of editor and cannot be removed or demoted."""
-        nose.tools.ok_(False)
-
     def test_editor_permission(self):
         """Editors should have the same abilities and permissions as creators."""
         nose.tools.ok_(False)
