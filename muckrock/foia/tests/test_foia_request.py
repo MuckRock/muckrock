@@ -10,6 +10,7 @@ from django.test import TestCase, Client
 import nose.tools
 
 import datetime
+import factory
 import re
 from datetime import date as real_date
 from operator import attrgetter
@@ -572,3 +573,18 @@ class TestFOIAIntegration(TestCase):
         nose.tools.eq_(foia.date_due, old_date_due)
         nose.tools.ok_(foia.date_followup is None)
         nose.tools.ok_(foia.days_until_due is None)
+
+
+class FOIARequestFactory(factory.Factory):
+    """A factory for creating FOIA Request test objects."""
+    class Meta:
+        model = FOIARequest
+
+
+class TestRequestFactory(TestCase):
+    """Does the factory work?"""
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+
+    def test_request_factory(self):
+        nose.tools.ok_(isinstance(self.foia, FOIARequest))
