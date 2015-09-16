@@ -300,6 +300,12 @@ class FOIARequest(models.Model):
             self.save()
         return
 
+    def demote_editor(self, user):
+        """Reduces the editor's access to that of a viewer."""
+        self.remove_editor(user)
+        self.add_viewer(user)
+        return
+
     def editable_by(self, user):
         """Can this user edit this request?"""
         return self.user == user or self.has_editor(user) or user.is_staff
@@ -325,6 +331,12 @@ class FOIARequest(models.Model):
         if self.has_viewer(user):
             self.read_collaborators.remove(user)
             self.save()
+        return
+
+    def promote_viewer(self, user):
+        """Enhances the viewer's access to that of an editor."""
+        self.remove_viewer(user)
+        self.add_editor(user)
         return
 
     def viewable_by(self, user):

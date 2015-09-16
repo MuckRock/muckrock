@@ -653,11 +653,23 @@ class TestRequestSharing(TestCase):
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""
-        nose.tools.ok_(False)
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        viewer = UserFactory()
+        embargoed_foia.add_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
+        nose.tools.assert_false(embargoed_foia.editable_by(viewer))
+        embargoed_foia.promote_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.editable_by(viewer))
 
     def test_demote_editor(self):
         """Editors should be able to demote editors to viewers."""
-        nose.tools.ok_(False)
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        editor = UserFactory()
+        embargoed_foia.add_editor(editor)
+        nose.tools.assert_true(embargoed_foia.viewable_by(editor))
+        nose.tools.assert_true(embargoed_foia.editable_by(editor))
+        embargoed_foia.demote_editor(editor)
+        nose.tools.assert_false(embargoed_foia.editable_by(editor))
 
     def test_sharing_link(self):
         """Editors should be able to generate a secure link to view an embargoed request."""
