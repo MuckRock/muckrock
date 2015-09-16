@@ -673,4 +673,10 @@ class TestRequestSharing(TestCase):
 
     def test_sharing_link(self):
         """Editors should be able to generate a secure link to view an embargoed request."""
-        nose.tools.ok_(False)
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        access_key = embargoed_foia.generate_access_key()
+        nose.tools.assert_true(access_key == embargoed_foia.access_key,
+            'The key in the URL should match the key saved to the request.')
+        embargoed_foia.generate_access_key()
+        nose.tools.assert_false(access_key == embargoed_foia.access_key,
+            'After regenerating the link, the key should no longer match.')

@@ -14,9 +14,9 @@ from django.template.loader import render_to_string
 from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
+import logging
 from taggit.managers import TaggableManager
 from unidecode import unidecode
-import logging
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -24,6 +24,7 @@ from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
 from muckrock import fields
+from muckrock import utils
 
 logger = logging.getLogger(__name__)
 
@@ -174,6 +175,7 @@ class FOIARequest(models.Model):
         related_name='edit_access',
         blank=True,
     )
+    access_key = models.CharField(blank=True, max_length=255)
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -340,6 +342,15 @@ class FOIARequest(models.Model):
         if request_is_private and not user_has_access:
             viewable_by_user = False
         return viewable_by_user
+
+    ## Access key
+
+    def generate_access_key(self):
+        """Generates a random key for accessing the request when it is private."""
+        key = utils.generate_key(24)
+        self.access_key = key
+        self.save()
+        return key
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
