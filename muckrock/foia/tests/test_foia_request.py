@@ -622,7 +622,9 @@ class TestRequestSharing(TestCase):
 
     def test_editor_permission(self):
         """Editors should have the same abilities and permissions as creators."""
-        nose.tools.ok_(False)
+        new_editor = self.editor
+        self.foia.add_editor(new_editor)
+        nose.tools.ok_(self.foia.editable_by(new_editor))
 
     def test_viewer_permission(self):
         """Viewers should be able to see the request if it is embargoed."""
