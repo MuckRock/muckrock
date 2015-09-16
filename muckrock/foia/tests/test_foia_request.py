@@ -580,6 +580,8 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
+    username = factory.Sequence(lambda n: "user_%d" % n)
+
 
 class JurisdictionFactory(factory.django.DjangoModelFactory):
     """A factory for creating Jurisdiction test objects."""
