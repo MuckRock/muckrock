@@ -644,7 +644,12 @@ class TestRequestSharing(TestCase):
 
     def test_viewer_permission(self):
         """Viewers should be able to see the request if it is embargoed."""
-        nose.tools.ok_(False)
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        viewer = UserFactory()
+        normie = UserFactory()
+        embargoed_foia.add_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
+        nose.tools.assert_false(embargoed_foia.viewable_by(normie))
 
     def test_promote_viewer(self):
         """Editors should be able to promote viewers to editors."""

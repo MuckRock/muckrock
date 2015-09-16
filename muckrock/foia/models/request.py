@@ -271,6 +271,12 @@ class FOIARequest(models.Model):
 
     # Request Sharing and Permissions
 
+    ## Creator
+
+    def created_by(self, user):
+        """Did this user create this request?"""
+        return self.user == user
+
     ## Editors
 
     def has_editor(self, user):
@@ -295,7 +301,7 @@ class FOIARequest(models.Model):
         return
 
     def editable_by(self, user):
-        """Can this user edit this request"""
+        """Can this user edit this request?"""
         return self.user == user or self.has_editor(user) or user.is_staff
 
     ## Viewers
@@ -320,6 +326,16 @@ class FOIARequest(models.Model):
             self.read_collaborators.remove(user)
             self.save()
         return
+
+    def viewable_by(self, user):
+        """Can this user view this request?"""
+        user_has_access = user.is_staff or self.created_by(user) \
+                          or self.has_editor(user) or self.has_viewer(user)
+        request_is_private = self.status == 'started' or self.embargo
+        viewable_by_user = True
+        if request_is_private and not user_has_access:
+            viewable_by_user = False
+        return viewable_by_user
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
