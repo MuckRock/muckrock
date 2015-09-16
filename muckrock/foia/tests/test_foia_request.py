@@ -594,7 +594,7 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = FOIARequest
 
-    user = UserFactory()
+    user = UserFactory(username='test')
     jurisdiction = JurisdictionFactory()
 
 
@@ -603,16 +603,23 @@ class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""
     def setUp(self):
         self.foia = FOIARequestFactory()
+        self.editor = UserFactory()
 
     def test_add_editor(self):
         """Editors should be able to add editors to the request."""
-        new_editor = UserFactory()
+        new_editor = self.editor
         self.foia.add_editor(new_editor)
         nose.tools.assert_true(self.foia.has_editor(new_editor))
 
     def test_remove_editor(self):
         """Editors should be able to remove editors from the request."""
-        nose.tools.ok_(False)
+        editor_to_remove = self.editor
+        # first we add the editor, otherwise we would have nothing to remove!
+        self.foia.add_editor(editor_to_remove)
+        nose.tools.assert_true(self.foia.has_editor(editor_to_remove))
+        # now we remove the editor we just added
+        self.foia.remove_editor(editor_to_remove)
+        nose.tools.assert_false(self.foia.has_editor(editor_to_remove))
 
     def test_creator_privelidge(self):
         """Creators are a special type of editor and cannot be removed or demoted."""

@@ -269,18 +269,26 @@ class FOIARequest(models.Model):
         if self.embargo:
             return self.permanent_embargo
 
-    def add_editor(self, user):
-        """Gives the user permission to edit this request."""
-        self.edit_collaborators.add(user)
-        self.save()
-        return
-
     def has_editor(self, user):
         """Checks whether the given user is an editor."""
         user_is_editor = False
-        if (self.edit_collaborators.filter(pk=user.pk).exists()):
+        if self.edit_collaborators.filter(pk=user.pk).exists():
             user_is_editor = True
         return user_is_editor
+
+    def add_editor(self, user):
+        """Grants the user permission to edit this request."""
+        if not self.has_editor(user):
+            self.edit_collaborators.add(user)
+            self.save()
+        return
+
+    def remove_editor(self, user):
+        """Revokes the user's permission to edit this request."""
+        if self.has_editor(user):
+            self.edit_collaborators.remove(user)
+            self.save()
+        return
 
     def editable_by(self, user):
         """Can this user edit this request"""
