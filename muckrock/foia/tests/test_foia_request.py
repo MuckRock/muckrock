@@ -576,15 +576,52 @@ class TestFOIAIntegration(TestCase):
 
 
 class FOIARequestFactory(factory.Factory):
-    """A factory for creating FOIA Request test objects."""
+    """A factory for creating FOIARequest test objects."""
     class Meta:
         model = FOIARequest
 
 
-class TestRequestFactory(TestCase):
-    """Does the factory work?"""
+class TestRequestSharing(TestCase):
+    """Allow people to edit and view another user's request."""
     def setUp(self):
         self.foia = FOIARequestFactory()
 
-    def test_request_factory(self):
-        nose.tools.ok_(isinstance(self.foia, FOIARequest))
+    def test_add_editor(self):
+        """Editors should be able to add editors to the request."""
+        nose.tools.ok_(False)
+
+    def test_remove_editor(self):
+        """Editors should be able to remove editors from the request."""
+        nose.tools.ok_(False)
+
+    def test_creator_privelidge(self):
+        """Creators are a special type of editor and cannot be removed or demoted."""
+        nose.tools.ok_(False)
+
+    def test_editor_permission(self):
+        """Editors should have the same abilities and permissions as creators."""
+        nose.tools.ok_(False)
+
+    def test_viewer_permission(self):
+        """Viewers should be able to see the request if it is embargoed."""
+        nose.tools.ok_(False)
+
+    def test_add_viewer(self):
+        """Editors should be able to add viewers to the request."""
+        nose.tools.ok_(False)
+
+    def test_remove_viewer(self):
+        """Editors should be able to remove viewers from the request."""
+        nose.tools.ok_(False)
+
+    def test_promote_viewer(self):
+        """Editors should be able to promote viewers to editors."""
+        nose.tools.ok_(False)
+
+    def test_demote_editor(self):
+        """Editors should be able to demote editors to viewers."""
+        nose.tools.ok_(False)
+
+    def test_sharing_link(self):
+        """Editors should be able to generate a secure link to view an embargoed request."""
+        nose.tools.ok_(False)
