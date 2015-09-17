@@ -810,3 +810,47 @@ class TestRequestSharingViews(TestCase):
         )
         nose.tools.eq_(view_response.status_code, 302)
         nose.tools.assert_true(self.foia.has_viewer(user1) and self.foia.has_viewer(user2))
+
+    def test_demote_editor(self):
+        """Editors should be able to demote editors to viewers."""
+        user = UserFactory()
+        self.foia.add_editor(user)
+        nose.tools.assert_true(self.foia.has_editor(user))
+        data = {
+            'action': 'demote',
+            'user': user.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_editor(user))
+        nose.tools.assert_true(self.foia.has_viewer(user))
+
+    def test_promote_viewer(self):
+        """Editors should be able to promote viewers to editors."""
+        user = UserFactory()
+        self.foia.add_viewer(user)
+        nose.tools.assert_true(self.foia.has_viewer(user))
+        data = {
+            'action': 'promote',
+            'user': user.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_viewer(user))
+        nose.tools.assert_true(self.foia.has_editor(user))
