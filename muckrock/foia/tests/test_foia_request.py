@@ -697,18 +697,26 @@ class TestRequestSharingViews(TestCase):
         self.editor = UserFactory()
         self.viewer = UserFactory()
         self.staff = UserFactory(is_staff=True)
+        self.normie = UserFactory()
         self.foia.add_editor(self.editor)
         self.foia.add_viewer(self.viewer)
         self.foia.save()
 
-    def test_access_key(self):
+    def reset_access_key(self):
+        """Simple helper to reset access key betweeen tests"""
+        self.foia.access_key = None
+        nose.tools.assert_false(self.foia.access_key)
+        return
+
+    def test_access_key_allowed(self):
         """
         A POST request for a private share link should generate and return an access key.
         Editors and staff should be allowed to do this.
         """
+        self.reset_access_key()
         data = {'action': 'access_link'}
-        nose.tools.assert_false(self.foia.access_key)
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        # editors should be able to generate the key
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -719,3 +727,45 @@ class TestRequestSharingViews(TestCase):
         )
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_true(self.foia.access_key)
+        # staff should be able to generate the key
+        self.reset_access_key()
+        request.user = self.staff
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.access_key)
+
+    def test_access_key_not_allowed(self):
+        """Visitors and normies should not be allowed to generate an access key."""
+        self.reset_access_key()
+        data = {'action': 'access_link'}
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        # viewers should not be able to generate the key
+        request.user = self.viewer
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.access_key)
+        # normies should not be able to generate the key
+        self.reset_access_key()
+        request.user = self.normie
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.access_key)
+
