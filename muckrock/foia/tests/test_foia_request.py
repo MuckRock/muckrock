@@ -7,10 +7,11 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse, resolve
 from django.core import mail
 from django.test import TestCase, Client
-import nose.tools
+from django.utils.text import slugify
 
 import datetime
 import factory
+import nose.tools
 import re
 from datetime import date as real_date
 from operator import attrgetter
@@ -588,12 +589,16 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Jurisdiction
 
+    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
     class Meta:
         model = FOIARequest
 
+    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory(JurisdictionFactory)
 
