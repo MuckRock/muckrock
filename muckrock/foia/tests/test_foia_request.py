@@ -854,3 +854,43 @@ class TestRequestSharingViews(TestCase):
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_false(self.foia.has_viewer(user))
         nose.tools.assert_true(self.foia.has_editor(user))
+
+    def test_revoke_edit_access(self):
+        """Editors should be able to revoke access from an editor."""
+        an_editor = UserFactory()
+        self.foia.add_editor(an_editor)
+        data = {
+            'action': 'revoke_access',
+            'user': an_editor.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_editor(an_editor))
+
+    def test_revoke_view_access(self):
+        """Editors should be able to revoke access from a viewer."""
+        a_viewer = UserFactory()
+        self.foia.add_viewer(a_viewer)
+        data = {
+            'action': 'revoke_access',
+            'user': a_viewer.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_viewer(a_viewer))
