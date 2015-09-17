@@ -769,14 +769,10 @@ class TestRequestSharingViews(TestCase):
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_false(self.foia.access_key)
 
-    def test_grant_access(self):
-        """Editors should be able to add other editors and viewers."""
-        # generate users
+    def test_grant_edit_access(self):
+        """Editors should be able to add editors."""
         user1 = UserFactory()
         user2 = UserFactory()
-        user3 = UserFactory()
-        user4 = UserFactory()
-        # try adding editors
         edit_data = {
             'action': 'grant_access',
             'users': [user1, user2],
@@ -793,10 +789,14 @@ class TestRequestSharingViews(TestCase):
         )
         nose.tools.eq_(edit_response.status_code, 302)
         nose.tools.assert_true(self.foia.has_editor(user1) and self.foia.has_editor(user2))
-        # try adding viewers
+
+    def test_grand_view_access(self):
+        """Editors should be able to add viewers."""
+        user1 = UserFactory()
+        user2 = UserFactory()
         view_data = {
             'action': 'grant_access',
-            'users': [user3, user4],
+            'users': [user1, user2],
             'access': 'view'
         }
         view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
@@ -809,4 +809,4 @@ class TestRequestSharingViews(TestCase):
             idx=self.foia.id
         )
         nose.tools.eq_(view_response.status_code, 302)
-        nose.tools.assert_true(self.foia.has_viewer(user4) and self.foia.has_viewer(user3))
+        nose.tools.assert_true(self.foia.has_viewer(user1) and self.foia.has_viewer(user2))
