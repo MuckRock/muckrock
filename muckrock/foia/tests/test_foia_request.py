@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse, resolve
 from django.core import mail
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.utils.text import slugify
 
 import datetime
@@ -19,6 +19,7 @@ from operator import attrgetter
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.models import FOIARequest, FOIACommunication
+from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
@@ -676,8 +677,8 @@ class TestRequestSharing(TestCase):
         embargoed_foia.demote_editor(editor)
         nose.tools.assert_false(embargoed_foia.editable_by(editor))
 
-    def test_sharing_link(self):
-        """Editors should be able to generate a secure link to view an embargoed request."""
+    def test_access_key(self):
+        """Editors should be able to generate a secure access key to view an embargoed request."""
         embargoed_foia = FOIARequestFactory(embargo=True)
         access_key = embargoed_foia.generate_access_key()
         nose.tools.assert_true(access_key == embargoed_foia.access_key,
@@ -685,3 +686,36 @@ class TestRequestSharing(TestCase):
         embargoed_foia.generate_access_key()
         nose.tools.assert_false(access_key == embargoed_foia.access_key,
             'After regenerating the link, the key should no longer match.')
+
+
+class TestRequestSharingViews(TestCase):
+    """Tests access and implementation of view methods for sharing requests."""
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.foia = FOIARequestFactory()
+        self.creator = self.foia.user
+        self.editor = UserFactory()
+        self.viewer = UserFactory()
+        self.staff = UserFactory(is_staff=True)
+        self.foia.add_editor(self.editor)
+        self.foia.add_viewer(self.viewer)
+        self.foia.save()
+
+    def test_access_key(self):
+        """
+        A POST request for a private share link should generate and return an access key.
+        Editors and staff should be allowed to do this.
+        """
+        data = {'action': 'access_link'}
+        nose.tools.assert_false(self.foia.access_key)
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.access_key)
