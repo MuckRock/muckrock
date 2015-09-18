@@ -18,7 +18,7 @@ import logging
 import stripe
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestFilterForm
+from muckrock.foia.forms import RequestFilterForm, FOIAAccessForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -182,7 +182,8 @@ class Detail(DetailView):
             'move_comm': move_comm,
             'delete_comm': delete_comm,
             'resend_comm': resend_comm,
-            'generate_key': self._generate_key
+            'generate_key': self._generate_key,
+            'grant_access': self._grant_access,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -275,6 +276,20 @@ class Detail(DetailView):
             else:
                 return redirect(foia)
 
+    def _grant_access(self, request, foia):
+        """Grant editor access to the specified users."""
+        form = FOIAAccessForm(request.POST)
+        if not foia.editable_by(request.user) or not form.is_valid():
+            return redirect(foia)
+        access = form.cleaned_data['access']
+        users = form.cleaned_data['users']
+        if access == 'edit' and users:
+            for user in users:
+                foia.add_editor(user)
+        if access == 'view' and users:
+            for user in users:
+                foia.add_viewer(user)
+        return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
