@@ -3,6 +3,7 @@ Views for the FOIA application
 """
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -184,6 +185,8 @@ class Detail(DetailView):
             'resend_comm': resend_comm,
             'generate_key': self._generate_key,
             'grant_access': self._grant_access,
+            'demote': self._demote_editor,
+            'promote': self._promote_viewer,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -289,6 +292,22 @@ class Detail(DetailView):
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
+        return redirect(foia)
+
+    def _demote_editor(self, request, foia):
+        """Demote user from editor access to viewer access"""
+        user_pk = request.POST.get('user')
+        user = User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            foia.demote_editor(user)
+        return redirect(foia)
+
+    def _promote_viewer(self, request, foia):
+        """Promote user from viewer access to editor access"""
+        user_pk = request.POST.get('user')
+        user = User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            foia.promote_viewer(user)
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
