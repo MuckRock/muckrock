@@ -341,7 +341,8 @@ class FOIARequest(models.Model):
         """Can this user view this request?"""
         user_has_access = user.is_staff or self.created_by(user) \
                           or self.has_editor(user) or self.has_viewer(user)
-        request_is_private = self.status == 'started' or self.embargo
+        request_is_private = self.status == 'started' or self.is_embargo()
+        # NOTE: switch self.is_embargo() to just self.embargo eventually
         viewable_by_user = True
         if request_is_private and not user_has_access:
             viewable_by_user = False
