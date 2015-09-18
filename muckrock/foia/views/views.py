@@ -4,6 +4,7 @@ Views for the FOIA application
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -12,6 +13,7 @@ from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
 from datetime import datetime
+import json
 import logging
 import stripe
 
@@ -117,12 +119,7 @@ class Detail(DetailView):
         """If request is a draft, then redirect to drafting interface"""
         if request.POST:
             return self.post(request)
-        foia = get_foia(
-            self.kwargs['jurisdiction'],
-            self.kwargs['jidx'],
-            self.kwargs['slug'],
-            self.kwargs['idx']
-        )
+        foia = self.get_object()
         if foia.status == 'started':
             return redirect(
                 'foia-draft',
@@ -184,7 +181,8 @@ class Detail(DetailView):
             'appeal': self._appeal,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
-            'resend_comm': resend_comm
+            'resend_comm': resend_comm,
+            'generate_key': self._generate_key
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -262,6 +260,21 @@ class Detail(DetailView):
             save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
             messages.success(request, 'Appeal successfully sent.')
         return redirect(foia)
+
+    def _generate_key(self, request, foia):
+        """Generate and return an access key, with support for AJAX."""
+        if not foia.editable_by(request.user):
+            if request.is_ajax():
+                return PermissionDenied
+            else:
+                return redirect(foia)
+        else:
+            key = foia.generate_access_key()
+            if request.is_ajax():
+                return HttpResponse(json.dumps({'key': key}), 'application/json')
+            else:
+                return redirect(foia)
+
 
 def redirect_old(request, jurisdiction, slug, idx, action):
     """Redirect old urls to new urls"""
