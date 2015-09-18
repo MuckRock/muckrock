@@ -609,6 +609,7 @@ class TestRequestSharing(TestCase):
     def setUp(self):
         self.foia = FOIARequestFactory()
         self.editor = UserFactory()
+        self.creator = self.foia.user
 
     def test_add_editor(self):
         """Editors should be able to add editors to the request."""
@@ -686,6 +687,16 @@ class TestRequestSharing(TestCase):
         embargoed_foia.generate_access_key()
         nose.tools.assert_false(access_key == embargoed_foia.access_key,
             'After regenerating the link, the key should no longer match.')
+
+    def test_do_not_grant_creator_access(self):
+        """Creators should not be granted access as editors or viewers"""
+        self.foia.add_editor(self.creator)
+        nose.tools.assert_false(self.foia.has_editor(self.creator))
+        self.foia.add_viewer(self.creator)
+        nose.tools.assert_false(self.foia.has_viewer(self.creator))
+        # but the creator should still be able to both view and edit!
+        nose.tools.assert_true(self.foia.editable_by(self.creator))
+        nose.tools.assert_true(self.foia.viewable_by(self.creator))
 
 
 class TestRequestSharingViews(TestCase):
