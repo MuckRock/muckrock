@@ -24,4 +24,5 @@ def get_node(template, context=Context(), name='subject'):
     raise BlockNotFound("Node '%s' could not be found in template." % name)
 
 def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
+    """Generates a random alphanumeric key"""
     return ''.join(random.SystemRandom().choice(chars) for _ in range(size))

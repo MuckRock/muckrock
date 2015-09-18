@@ -3,8 +3,11 @@ Autocomplete registry for Accounts
 """
 
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 
 import autocomplete_light
+
+from muckrock.organization.models import Organization
 
 class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
     """Creates an autocomplete field for picking users"""

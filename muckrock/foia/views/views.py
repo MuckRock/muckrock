@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
@@ -298,7 +298,7 @@ class Detail(DetailView):
     def _revoke_access(self, request, foia):
         """Revoke access from a user."""
         user_pk = request.POST.get('user')
-        user= User.objects.get(pk=user_pk)
+        user = User.objects.get(pk=user_pk)
         if foia.editable_by(request.user) and user:
             if foia.has_editor(user):
                 foia.remove_editor(user)
