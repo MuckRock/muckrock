@@ -185,6 +185,7 @@ class Detail(DetailView):
             'resend_comm': resend_comm,
             'generate_key': self._generate_key,
             'grant_access': self._grant_access,
+            'revoke_access': self._revoke_access,
             'demote': self._demote_editor,
             'promote': self._promote_viewer,
         }
@@ -292,6 +293,17 @@ class Detail(DetailView):
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
+        return redirect(foia)
+
+    def _revoke_access(self, request, foia):
+        """Revoke access from a user."""
+        user_pk = request.POST.get('user')
+        user= User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            if foia.has_editor(user):
+                foia.remove_editor(user)
+            elif foia.has_viewer(user):
+                foia.remove_viewer(user)
         return redirect(foia)
 
     def _demote_editor(self, request, foia):
