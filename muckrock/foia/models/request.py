@@ -286,6 +286,7 @@ class FOIARequest(models.Model):
         if not self.has_editor(user) and not self.created_by(user):
             self.edit_collaborators.add(user)
             self.save()
+            logger.info('%s granted edit access to %s', user, self)
         return
 
     def remove_editor(self, user):
@@ -294,6 +295,7 @@ class FOIARequest(models.Model):
         if self.has_editor(user):
             self.edit_collaborators.remove(user)
             self.save()
+            logger.info('%s revoked edit access from %s', user, self)
         return
 
     def demote_editor(self, user):
@@ -321,6 +323,7 @@ class FOIARequest(models.Model):
         if not self.has_viewer(user) and not self.created_by(user):
             self.read_collaborators.add(user)
             self.save()
+            logger.info('%s granted view access to %s', user, self)
         return
 
     def remove_viewer(self, user):
@@ -328,6 +331,7 @@ class FOIARequest(models.Model):
         # pylint: disable=no-member
         if self.has_viewer(user):
             self.read_collaborators.remove(user)
+            logger.info('%s revoked view access from %s', user, self)
             self.save()
         return
 
@@ -355,6 +359,7 @@ class FOIARequest(models.Model):
         key = utils.generate_key(24)
         self.access_key = key
         self.save()
+        logger.info('New access key generated for %s', self)
         return key
 
     def has_crowdfund(self):
