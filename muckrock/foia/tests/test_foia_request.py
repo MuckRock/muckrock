@@ -714,7 +714,7 @@ class TestRequestSharingViews(TestCase):
         Editors and staff should be allowed to do this.
         """
         self.reset_access_key()
-        data = {'action': 'access_link'}
+        data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         # editors should be able to generate the key
         request.user = self.editor
@@ -725,6 +725,7 @@ class TestRequestSharingViews(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+        self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_true(self.foia.access_key)
         # staff should be able to generate the key
@@ -737,13 +738,14 @@ class TestRequestSharingViews(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+        self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_true(self.foia.access_key)
 
     def test_access_key_not_allowed(self):
         """Visitors and normies should not be allowed to generate an access key."""
         self.reset_access_key()
-        data = {'action': 'access_link'}
+        data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
         # viewers should not be able to generate the key
         request.user = self.viewer
@@ -754,6 +756,7 @@ class TestRequestSharingViews(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+        self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_false(self.foia.access_key)
         # normies should not be able to generate the key
@@ -766,6 +769,7 @@ class TestRequestSharingViews(TestCase):
             slug=self.foia.slug,
             idx=self.foia.id
         )
+        self.foia.refresh_from_db()
         nose.tools.eq_(response.status_code, 302)
         nose.tools.assert_false(self.foia.access_key)
 
