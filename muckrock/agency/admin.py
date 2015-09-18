@@ -35,7 +35,7 @@ class AgencyTypeAdmin(VersionAdmin):
 
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
-    user = autocomplete_light.ModelChoiceField('UserAdminAutocomplete',
+    user = autocomplete_light.ModelChoiceField('UserAutocomplete',
                                                queryset=User.objects.all(),
                                                required=False)
     jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
