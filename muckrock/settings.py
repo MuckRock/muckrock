@@ -20,7 +20,7 @@ DEBUG = boolcheck(os.environ.get('DEBUG', True))
 TEMPLATE_DEBUG = DEBUG
 EMAIL_DEBUG = DEBUG
 THUMBNAIL_DEBUG = DEBUG
-AWS_DEBUG = True
+AWS_DEBUG = False
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
