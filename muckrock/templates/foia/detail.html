@@ -315,7 +315,20 @@
         {% if user_can_edit %}
         <!-- ACCESS -->
         <section class="tab-section access" id="access">
-            <div>Hello, world!</div>
+            {% if foia.embargo %}
+            <form class="generate-private-link" method="post">
+                {% csrf_token %}
+                <h2>Private Link</h2>
+                {% if foia.access_key %}
+                <input type="text" value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}" />
+                <button name="action" value="generate_key">Regenerate</button>
+                {% else %}
+                <input type="text" value="Generate an access key" disabled />
+                <button name="action" value="generate_key">Generate</button>
+                {% endif %}
+                <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
+            </form>
+            {% endif %}
         </section>
         {% endif %}
 
