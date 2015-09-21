@@ -6,10 +6,13 @@ from django.contrib import messages
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.urlresolvers import reverse, resolve
 from django.core import mail
-from django.test import TestCase, Client
-import nose.tools
+from django.test import TestCase, Client, RequestFactory
+from django.utils.text import slugify
 
 import datetime
+import factory
+import nose.tools
+import re
 from datetime import date as real_date
 import logging
 from operator import attrgetter
@@ -19,7 +22,8 @@ from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia import tasks
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
-from muckrock.foia.forms import FOIAEmbargoForm
+from muckrock.foia.forms import FOIAEmbargoForm, FOIAAccessForm
+from muckrock.foia.views import Detail
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.task.models import SnailMailTask
@@ -132,45 +136,45 @@ class TestFOIARequestUnit(TestCase):
         foias[4].date_embargo = datetime.date.today() - datetime.timedelta(10)
         foias[4].embargo = False
 
-        # check manager get_viewable against models is_viewable
+        # check manager get_viewable against models viewable_by
         viewable_foias = FOIARequest.objects.get_viewable(user1)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(user1))
+                nose.tools.assert_true(foia.viewable_by(user1))
             else:
-                nose.tools.assert_false(foia.is_viewable(user1))
+                nose.tools.assert_false(foia.viewable_by(user1))
 
         viewable_foias = FOIARequest.objects.get_viewable(user2)
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(user2))
+                nose.tools.assert_true(foia.viewable_by(user2))
             else:
-                nose.tools.assert_false(foia.is_viewable(user2))
+                nose.tools.assert_false(foia.viewable_by(user2))
 
         viewable_foias = FOIARequest.objects.get_public()
         for foia in FOIARequest.objects.all():
             if foia in viewable_foias:
-                nose.tools.assert_true(foia.is_viewable(AnonymousUser()))
+                nose.tools.assert_true(foia.viewable_by(AnonymousUser()))
             else:
-                nose.tools.assert_false(foia.is_viewable(AnonymousUser()))
+                nose.tools.assert_false(foia.viewable_by(AnonymousUser()))
 
-        nose.tools.assert_true(foias[0].is_viewable(user1))
-        nose.tools.assert_true(foias[1].is_viewable(user1))
-        nose.tools.assert_true(foias[2].is_viewable(user1))
-        nose.tools.assert_true(foias[3].is_viewable(user1))
-        nose.tools.assert_true(foias[4].is_viewable(user1))
+        nose.tools.assert_true(foias[0].viewable_by(user1))
+        nose.tools.assert_true(foias[1].viewable_by(user1))
+        nose.tools.assert_true(foias[2].viewable_by(user1))
+        nose.tools.assert_true(foias[3].viewable_by(user1))
+        nose.tools.assert_true(foias[4].viewable_by(user1))
 
-        nose.tools.assert_false(foias[0].is_viewable(user2))
-        nose.tools.assert_true (foias[1].is_viewable(user2))
-        nose.tools.assert_false(foias[2].is_viewable(user2))
-        nose.tools.assert_true (foias[3].is_viewable(user2))
-        nose.tools.assert_true (foias[4].is_viewable(user2))
+        nose.tools.assert_false(foias[0].viewable_by(user2))
+        nose.tools.assert_true (foias[1].viewable_by(user2))
+        nose.tools.assert_false(foias[2].viewable_by(user2))
+        nose.tools.assert_true (foias[3].viewable_by(user2))
+        nose.tools.assert_true (foias[4].viewable_by(user2))
 
-        nose.tools.assert_false(foias[0].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[1].is_viewable(AnonymousUser()))
-        nose.tools.assert_false(foias[2].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[3].is_viewable(AnonymousUser()))
-        nose.tools.assert_true (foias[4].is_viewable(AnonymousUser()))
+        nose.tools.assert_false(foias[0].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[1].viewable_by(AnonymousUser()))
+        nose.tools.assert_false(foias[2].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[3].viewable_by(AnonymousUser()))
+        nose.tools.assert_true (foias[4].viewable_by(AnonymousUser()))
 
     def test_foia_set_mail_id(self):
         """Test the set_mail_id function"""
@@ -827,3 +831,337 @@ class FOIAEmbargoTests(TestCase):
         nose.tools.assert_false(self.foia.embargo and self.foia.status in END_STATUS)
         nose.tools.ok_(not self.foia.date_embargo,
             'The embargo date should be removed.')
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    """A factory for creating User test objects."""
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: "user_%d" % n)
+
+
+class JurisdictionFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Jurisdiction test objects."""
+    class Meta:
+        model = Jurisdiction
+
+    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+
+class FOIARequestFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIARequest test objects."""
+    class Meta:
+        model = FOIARequest
+
+    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+    user = factory.SubFactory(UserFactory)
+    jurisdiction = factory.SubFactory(JurisdictionFactory)
+
+
+class TestRequestSharing(TestCase):
+    """Allow people to edit and view another user's request."""
+    def setUp(self):
+        self.foia = FOIARequestFactory()
+        self.editor = UserFactory()
+        self.creator = self.foia.user
+
+    def test_add_editor(self):
+        """Editors should be able to add editors to the request."""
+        new_editor = self.editor
+        self.foia.add_editor(new_editor)
+        nose.tools.assert_true(self.foia.has_editor(new_editor))
+
+    def test_remove_editor(self):
+        """Editors should be able to remove editors from the request."""
+        editor_to_remove = self.editor
+        # first we add the editor, otherwise we would have nothing to remove!
+        self.foia.add_editor(editor_to_remove)
+        nose.tools.assert_true(self.foia.has_editor(editor_to_remove))
+        # now we remove the editor we just added
+        self.foia.remove_editor(editor_to_remove)
+        nose.tools.assert_false(self.foia.has_editor(editor_to_remove))
+
+    def test_editor_permission(self):
+        """Editors should have the same abilities and permissions as creators."""
+        new_editor = self.editor
+        self.foia.add_editor(new_editor)
+        nose.tools.ok_(self.foia.editable_by(new_editor))
+
+    def test_add_viewer(self):
+        """Editors should be able to add viewers to the request."""
+        new_viewer = UserFactory()
+        self.foia.add_viewer(new_viewer)
+        nose.tools.ok_(self.foia.has_viewer(new_viewer))
+
+    def test_remove_viewer(self):
+        """Editors should be able to remove viewers from the request."""
+        viewer_to_remove = UserFactory()
+        # first we add the viewer, otherwise we would have nothing to remove!
+        self.foia.add_viewer(viewer_to_remove)
+        nose.tools.ok_(self.foia.has_viewer(viewer_to_remove))
+        # now we remove the viewer we just added
+        self.foia.remove_viewer(viewer_to_remove)
+        nose.tools.assert_false(self.foia.has_viewer(viewer_to_remove))
+
+    def test_viewer_permission(self):
+        """Viewers should be able to see the request if it is embargoed."""
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        viewer = UserFactory()
+        normie = UserFactory()
+        embargoed_foia.add_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
+        nose.tools.assert_false(embargoed_foia.viewable_by(normie))
+
+    def test_promote_viewer(self):
+        """Editors should be able to promote viewers to editors."""
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        viewer = UserFactory()
+        embargoed_foia.add_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.viewable_by(viewer))
+        nose.tools.assert_false(embargoed_foia.editable_by(viewer))
+        embargoed_foia.promote_viewer(viewer)
+        nose.tools.assert_true(embargoed_foia.editable_by(viewer))
+
+    def test_demote_editor(self):
+        """Editors should be able to demote editors to viewers."""
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        editor = UserFactory()
+        embargoed_foia.add_editor(editor)
+        nose.tools.assert_true(embargoed_foia.viewable_by(editor))
+        nose.tools.assert_true(embargoed_foia.editable_by(editor))
+        embargoed_foia.demote_editor(editor)
+        nose.tools.assert_false(embargoed_foia.editable_by(editor))
+
+    def test_access_key(self):
+        """Editors should be able to generate a secure access key to view an embargoed request."""
+        embargoed_foia = FOIARequestFactory(embargo=True)
+        access_key = embargoed_foia.generate_access_key()
+        nose.tools.assert_true(access_key == embargoed_foia.access_key,
+            'The key in the URL should match the key saved to the request.')
+        embargoed_foia.generate_access_key()
+        nose.tools.assert_false(access_key == embargoed_foia.access_key,
+            'After regenerating the link, the key should no longer match.')
+
+    def test_do_not_grant_creator_access(self):
+        """Creators should not be granted access as editors or viewers"""
+        self.foia.add_editor(self.creator)
+        nose.tools.assert_false(self.foia.has_editor(self.creator))
+        self.foia.add_viewer(self.creator)
+        nose.tools.assert_false(self.foia.has_viewer(self.creator))
+        # but the creator should still be able to both view and edit!
+        nose.tools.assert_true(self.foia.editable_by(self.creator))
+        nose.tools.assert_true(self.foia.viewable_by(self.creator))
+
+
+class TestRequestSharingViews(TestCase):
+    """Tests access and implementation of view methods for sharing requests."""
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.foia = FOIARequestFactory()
+        self.creator = self.foia.user
+        self.editor = UserFactory()
+        self.viewer = UserFactory()
+        self.staff = UserFactory(is_staff=True)
+        self.normie = UserFactory()
+        self.foia.add_editor(self.editor)
+        self.foia.add_viewer(self.viewer)
+        self.foia.save()
+
+    def reset_access_key(self):
+        """Simple helper to reset access key betweeen tests"""
+        self.foia.access_key = None
+        nose.tools.assert_false(self.foia.access_key)
+        return
+
+    def test_access_key_allowed(self):
+        """
+        A POST request for a private share link should generate and return an access key.
+        Editors and staff should be allowed to do this.
+        """
+        self.reset_access_key()
+        data = {'action': 'generate_key'}
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        # editors should be able to generate the key
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.access_key)
+        # staff should be able to generate the key
+        self.reset_access_key()
+        request.user = self.staff
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.access_key)
+
+    def test_access_key_not_allowed(self):
+        """Visitors and normies should not be allowed to generate an access key."""
+        self.reset_access_key()
+        data = {'action': 'generate_key'}
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        # viewers should not be able to generate the key
+        request.user = self.viewer
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.access_key)
+        # normies should not be able to generate the key
+        self.reset_access_key()
+        request.user = self.normie
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.access_key)
+
+    def test_grant_edit_access(self):
+        """Editors should be able to add editors."""
+        user1 = UserFactory()
+        user2 = UserFactory()
+        edit_data = {
+            'action': 'grant_access',
+            'users': [user1.pk, user2.pk],
+            'access': 'edit'
+        }
+        edit_request = self.factory.post(self.foia.get_absolute_url(), edit_data)
+        edit_request.user = self.editor
+        edit_response = Detail.as_view()(
+            edit_request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(edit_response.status_code, 302)
+        nose.tools.assert_true(self.foia.has_editor(user1) and self.foia.has_editor(user2))
+
+    def test_grant_view_access(self):
+        """Editors should be able to add viewers."""
+        user1 = UserFactory()
+        user2 = UserFactory()
+        view_data = {
+            'action': 'grant_access',
+            'users': [user1.pk, user2.pk],
+            'access': 'view'
+        }
+        view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
+        view_request.user = self.editor
+        view_response = Detail.as_view()(
+            view_request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(view_response.status_code, 302)
+        nose.tools.assert_true(self.foia.has_viewer(user1) and self.foia.has_viewer(user2))
+
+    def test_demote_editor(self):
+        """Editors should be able to demote editors to viewers."""
+        user = UserFactory()
+        self.foia.add_editor(user)
+        nose.tools.assert_true(self.foia.has_editor(user))
+        data = {
+            'action': 'demote',
+            'user': user.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_editor(user))
+        nose.tools.assert_true(self.foia.has_viewer(user))
+
+    def test_promote_viewer(self):
+        """Editors should be able to promote viewers to editors."""
+        user = UserFactory()
+        self.foia.add_viewer(user)
+        nose.tools.assert_true(self.foia.has_viewer(user))
+        data = {
+            'action': 'promote',
+            'user': user.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_viewer(user))
+        nose.tools.assert_true(self.foia.has_editor(user))
+
+    def test_revoke_edit_access(self):
+        """Editors should be able to revoke access from an editor."""
+        an_editor = UserFactory()
+        self.foia.add_editor(an_editor)
+        data = {
+            'action': 'revoke_access',
+            'user': an_editor.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_editor(an_editor))
+
+    def test_revoke_view_access(self):
+        """Editors should be able to revoke access from a viewer."""
+        a_viewer = UserFactory()
+        self.foia.add_viewer(a_viewer)
+        data = {
+            'action': 'revoke_access',
+            'user': a_viewer.pk
+        }
+        request = self.factory.post(self.foia.get_absolute_url(), data)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_false(self.foia.has_viewer(a_viewer))

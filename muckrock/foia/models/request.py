@@ -14,9 +14,9 @@ from django.template.loader import render_to_string
 from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
+import logging
 from taggit.managers import TaggableManager
 from unidecode import unidecode
-import logging
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -24,6 +24,7 @@ from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
 from muckrock import fields
+from muckrock import utils
 
 logger = logging.getLogger(__name__)
 
@@ -176,6 +177,7 @@ class FOIARequest(models.Model):
         related_name='edit_access',
         blank=True,
     )
+    access_key = models.CharField(blank=True, max_length=255)
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -235,22 +237,107 @@ class FOIARequest(models.Model):
         """Can this request be deleted?"""
         return self.status == 'started'
 
-    def is_viewable(self, user):
-        """Is this request viewable?"""
-        # pylint: disable=unexpected-keyword-arg
-        return user.is_staff or self.user == user or \
-            self.read_collaborators.filter(pk=user.pk).exists() or \
-            self.edit_collaborators.filter(pk=user.pk).exists() or \
-            (self.status != 'started' and not self.embargo)
-
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.is_viewable(AnonymousUser())
+        return self.viewable_by(AnonymousUser())
+
+    # Request Sharing and Permissions
+
+    ## Creator
+
+    def created_by(self, user):
+        """Did this user create this request?"""
+        return self.user == user
+
+    ## Editors
+
+    def has_editor(self, user):
+        """Checks whether the given user is an editor."""
+        user_is_editor = False
+        if self.edit_collaborators.filter(pk=user.pk).exists():
+            user_is_editor = True
+        return user_is_editor
+
+    def add_editor(self, user):
+        """Grants the user permission to edit this request."""
+        # pylint: disable=no-member
+        if not self.has_editor(user) and not self.created_by(user):
+            self.edit_collaborators.add(user)
+            self.save()
+            logger.info('%s granted edit access to %s', user, self)
+        return
+
+    def remove_editor(self, user):
+        """Revokes the user's permission to edit this request."""
+        # pylint: disable=no-member
+        if self.has_editor(user):
+            self.edit_collaborators.remove(user)
+            self.save()
+            logger.info('%s revoked edit access from %s', user, self)
+        return
+
+    def demote_editor(self, user):
+        """Reduces the editor's access to that of a viewer."""
+        self.remove_editor(user)
+        self.add_viewer(user)
+        return
 
     def editable_by(self, user):
-        """Can this user edit this request"""
-        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() \
-                or user.is_staff
+        """Can this user edit this request?"""
+        return self.created_by(user) or self.has_editor(user) or user.is_staff
+
+    ## Viewers
+
+    def has_viewer(self, user):
+        """Checks whether the given user is a viewer."""
+        user_is_viewer = False
+        if self.read_collaborators.filter(pk=user.pk).exists():
+            user_is_viewer = True
+        return user_is_viewer
+
+    def add_viewer(self, user):
+        """Grants the user permission to view this request."""
+        # pylint: disable=no-member
+        if not self.has_viewer(user) and not self.created_by(user):
+            self.read_collaborators.add(user)
+            self.save()
+            logger.info('%s granted view access to %s', user, self)
+        return
+
+    def remove_viewer(self, user):
+        """Revokes the user's permission to view this request."""
+        # pylint: disable=no-member
+        if self.has_viewer(user):
+            self.read_collaborators.remove(user)
+            logger.info('%s revoked view access from %s', user, self)
+            self.save()
+        return
+
+    def promote_viewer(self, user):
+        """Enhances the viewer's access to that of an editor."""
+        self.remove_viewer(user)
+        self.add_editor(user)
+        return
+
+    def viewable_by(self, user):
+        """Can this user view this request?"""
+        user_has_access = user.is_staff or self.created_by(user) \
+                          or self.has_editor(user) or self.has_viewer(user)
+        request_is_private = self.status == 'started' or self.embargo
+        viewable_by_user = True
+        if request_is_private and not user_has_access:
+            viewable_by_user = False
+        return viewable_by_user
+
+    ## Access key
+
+    def generate_access_key(self):
+        """Generates a random key for accessing the request when it is private."""
+        key = utils.generate_key(24)
+        self.access_key = key
+        self.save()
+        logger.info('New access key generated for %s', self)
+        return key
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
@@ -347,7 +434,7 @@ class FOIARequest(models.Model):
         self.save()
 
         for profile in chain(self.followed_by.all(), [self.user.profile]):
-            if self.is_viewable(profile.user):
+            if self.viewable_by(profile.user):
                 profile.notify(self)
 
         self.update_dates()
@@ -555,7 +642,7 @@ class FOIARequest(models.Model):
 
     def user_actions(self, user):
         '''Provides action interfaces for users'''
-        is_owner = self.user == user
+        is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
         is_following = user.is_authenticated() and self.followed_by.filter(user=user)
         kwargs = {

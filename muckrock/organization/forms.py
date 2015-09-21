@@ -40,8 +40,5 @@ class AddMembersForm(forms.Form):
     add_members = forms.ModelMultipleChoiceField(
         required=True,
         queryset=User.objects.all(),
-        widget=autocomplete_light.MultipleChoiceWidget(
-            'UserOrganizationAutocomplete',
-            attrs={'placeholder': 'Search by MuckRock username'}
-        )
+        widget=autocomplete_light.MultipleChoiceWidget('UserOrganizationAutocomplete')
     )

@@ -16,7 +16,7 @@ from muckrock.organization.models import Organization
 class OrganizationAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
     owner = autocomplete_light.ModelChoiceField(
-        'UserAdminAutocomplete',
+        'UserAutocomplete',
         queryset=User.objects.all(),
         required=False
     )
