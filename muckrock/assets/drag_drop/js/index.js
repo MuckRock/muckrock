@@ -271,7 +271,7 @@ var uploadFile = function(file) {
 
   upload = new s3Stream.upload({
     "Bucket": params.bucket,
-    "Key": file.name,
+    "Key": "scans/" + file.name,
     "ContentType": file.type,
     "ACL": (permissions() ? "public-read" : "private")
   });
