@@ -318,17 +318,77 @@
             {% if foia.embargo %}
             <form class="generate-private-link" method="post">
                 {% csrf_token %}
-                <h2>Private Link</h2>
+                <h3>Private Link</h3>
                 {% if foia.access_key %}
                 <input type="text" value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}" />
-                <button name="action" value="generate_key">Regenerate</button>
+                <button type="submit" name="action" value="generate_key">Regenerate</button>
                 {% else %}
                 <input type="text" value="Generate an access key" disabled />
-                <button name="action" value="generate_key">Generate</button>
+                <button type="submit" name="action" value="generate_key">Generate</button>
                 {% endif %}
                 <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
             </form>
             {% endif %}
+            <form class="grant-access" method="post">
+                {% csrf_token %}
+                <h3>Grant Access</h3>
+                {{ access_form }}
+                <button class="primary" type="submit" name="action" value="grant_access">Save</button>
+            </form>
+            <table class="people with-access">
+                <h3>People with access</h3>
+                <tbody>
+                    <tr class="person with-access">
+                        <td><p class="name">{{ foia.user.get_full_name }}</p></td>
+                        <td><p class="creator access-badge">Creator</p></td>
+                        <td></td>
+                    </tr>
+                    {% for user in foia.edit_collaborators.all %}
+                    <tr class="person with-access">
+                        <td>
+                            <p class="name">{{ user.get_full_name }}</p>
+                        </td>
+                        <td>
+                            <form class="modify-access" method="post">
+                                {% csrf_token %}
+                                <p class="editor access-badge">Editor</p>
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="demote">Demote</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form class="revoke-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% for user in foia.read_collaborators.all %}
+                    <tr class="person with-access">
+                        <td>
+                            <p class="name">{{ user.get_full_name }}</p>
+                        </td>
+                        <td>
+                            <form class="modify" method="post">
+                                {% csrf_token %}
+                                <p class="reader access-badge">Viewer</p>
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="promote">Promote</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form class="revoke-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
         {% endif %}
 

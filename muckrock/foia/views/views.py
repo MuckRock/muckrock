@@ -169,6 +169,7 @@ class Detail(DetailView):
             'permanent_embargo': foia.permanent_embargo,
             'date_embargo': foia.date_embargo
         })
+        context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
