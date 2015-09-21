@@ -11,7 +11,7 @@ def drag_drop(request):
             request,
             'staff/drag_drop.html',
             {
-                'bucket': settings.AWS_STORAGE_BUCKET_NAME,
+                'bucket': settings.AWS_AUTOIMPORT_BUCKET_NAME,
                 'access_key': settings.AWS_ACCESS_KEY_ID,
                 'secret_key': settings.AWS_SECRET_ACCESS_KEY,
             })
