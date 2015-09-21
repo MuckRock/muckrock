@@ -189,6 +189,9 @@
             {% if foia.user == user or user.is_staff %}
             <li class="tab" data-target="#notes">Notes</li>
             {% endif %}
+            {% if user_can_edit %}
+            <li class="tab" data-target="#access">Access</li>
+            {% endif %}
             {% if user.is_staff %}
             <li class="tab" data-target="#tasks">Tasks</li>
             {% endif %}
@@ -306,6 +309,13 @@
             {% empty %}
                 <h3 class="empty">There are no notes attached to this request.</h3>
             {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if user_can_edit %}
+        <!-- ACCESS -->
+        <section class="tab-section access" id="access">
+            <div>Hello, world!</div>
         </section>
         {% endif %}
 
