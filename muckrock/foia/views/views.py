@@ -146,7 +146,8 @@ class Detail(DetailView):
             self.kwargs['idx']
         )
         user = self.request.user
-        if not foia.viewable_by(user):
+        valid_access_key = self.request.GET.get('key') == foia.access_key
+        if not foia.viewable_by(user) and not valid_access_key:
             raise Http404()
         if foia.created_by(user):
             if foia.updated:
