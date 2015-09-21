@@ -245,12 +245,12 @@ class FOIAAdminFixForm(forms.ModelForm):
 
 class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
-    access_choices = [
-        ('view', 'Can View'),
-        ('edit', 'Can Edit')
-    ]
-    access = forms.ChoiceField(choices=access_choices)
     users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
         widget=autocomplete.MultipleChoiceWidget('UserAutocomplete')
     )
+    access_choices = [
+        ('edit', 'Can Edit'),
+        ('view', 'Can View'),
+    ]
+    access = forms.ChoiceField(choices=access_choices)
