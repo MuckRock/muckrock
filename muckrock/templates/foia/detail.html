@@ -184,13 +184,13 @@
         {% endif %}
 
         <ul class="tabs">
-            <li class="tab active" id="tab-request">Request</li>
-            <li class="tab" id="tab-files">Files</li>
-            {% if user_can_edit %}
-            <li class="tab" id="tab-notes">Notes</li>
+            <li class="tab active" data-target="#request">Request</li>
+            <li class="tab" data-target="#files">Files</li>
+            {% if foia.user == user or user.is_staff %}
+            <li class="tab" data-target="#notes">Notes</li>
             {% endif %}
             {% if user.is_staff %}
-            <li class="tab" id="tab-tasks">Tasks</li>
+            <li class="tab" data-target="#tasks">Tasks</li>
             {% endif %}
         </ul>
 

@@ -70,39 +70,14 @@ $('.estimated-completion .edit').click(function(){
 
 /* Tab Bar */
 
-$('#tab-overview').click(function() {
+$('.tab').click(function() {
     $(this).addClass('active');
     $(this).siblings().removeClass('active');
-    $('#overview').addClass('visible');
-    $('#overview').siblings().removeClass('visible');
-});
-
-$('#tab-request').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#request').addClass('visible');
-    $('#request').siblings().removeClass('visible');
-});
-
-$('#tab-files').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#files').addClass('visible');
-    $('#files').siblings().removeClass('visible');
-});
-
-$('#tab-notes').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#notes').addClass('visible');
-    $('#notes').siblings().removeClass('visible');
-});
-
-$('#tab-tasks').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#tasks').addClass('visible');
-    $('#tasks').siblings().removeClass('visible');
+    var tabSection = $(this).data('target');
+    if (tabSection) {
+        $(tabSection).addClass('visible');
+        $(tabSection).siblings().removeClass('visible');
+    }
 });
 
 /* Deep link into tab */
