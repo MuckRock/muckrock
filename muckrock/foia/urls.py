@@ -79,6 +79,8 @@ urlpatterns = patterns(
         views.orphans, name='foia-orphans'),
     url(r'^acronyms/$',
         views.acronyms, name='foia-acronyms'),
+    url(r'^drag_drop/$',
+        views.drag_drop, name='foia-drag-drop'),
     url(r'^raw_email/(?P<idx>\d+)/$',
         views.raw, name='foia-raw'),
 
