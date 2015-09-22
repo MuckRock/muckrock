@@ -306,6 +306,7 @@ class Detail(DetailView):
             if request.is_ajax():
                 return HttpResponse(json.dumps({'key': key}), 'application/json')
             else:
+                messages.success(request, 'New private link created.')
                 return redirect(foia)
 
     def _grant_access(self, request, foia):
@@ -321,6 +322,11 @@ class Detail(DetailView):
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
+        if len(users) > 1:
+            success_msg = '%d people can now %s this request.' % (len(users), access)
+        else:
+            success_msg = '%s can now %s this request.' % (users[0].first_name, access)
+        messages.success(request, success_msg)
         return redirect(foia)
 
     def _revoke_access(self, request, foia):
@@ -332,6 +338,7 @@ class Detail(DetailView):
                 foia.remove_editor(user)
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
+            messages.success(request, '%s no longer has access to this request.' % user.first_name)
         return redirect(foia)
 
     def _demote_editor(self, request, foia):
@@ -340,6 +347,7 @@ class Detail(DetailView):
         user = User.objects.get(pk=user_pk)
         if foia.editable_by(request.user) and user:
             foia.demote_editor(user)
+            messages.success(request, '%s can now only view this request.' % user.first_name)
         return redirect(foia)
 
     def _promote_viewer(self, request, foia):
@@ -348,6 +356,7 @@ class Detail(DetailView):
         user = User.objects.get(pk=user_pk)
         if foia.editable_by(request.user) and user:
             foia.promote_viewer(user)
+            messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):
