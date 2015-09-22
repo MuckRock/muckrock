@@ -407,6 +407,57 @@ $request-breakpoint: 768px;
             }
         }
     }
+    .people.with-access {
+        .person {
+            background-color: $color-white;
+        }
+        .person td {
+            padding: $vertical-rhythm/2;
+            vertical-align: middle;
+            text-align: right;
+            &.name {
+                text-align: left;
+                font-weight: $font-weight-bold;
+            }
+            &.access.nostretch {
+                width:1%;
+                white-space:nowrap;
+            }
+            &.modify {
+                width: 5em;
+            }
+            @include media($medium-layout) {
+                &.nostretch {
+                    width:1%;
+                    white-space:nowrap;
+                }
+            }
+        }
+        .access-badge {
+            width: 5em;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            background: $color-grey;
+            color: $color-white;
+            text-align: center;
+            font-size: $font-size-2;
+            &.editor {
+                background: $color-green;
+            }
+            &.reader {
+                background: $color-blue;
+            }
+            @include media($medium-layout) {
+                font-size: $font-size-3;
+            }
+        }
+        button {
+            padding: $vertical-rhythm/6 $vertical-rhythm/2;
+            width: 5em;
+            @include media($medium-layout) {
+                margin: 0 0 4px;
+            }
+        }
+    }
 }
 
 .request .tasks {

@@ -342,27 +342,23 @@
                 <h3>People with access</h3>
                 <tbody>
                     <tr class="person with-access">
-                        <td><p class="name">{{ foia.user.get_full_name }}</p></td>
-                        <td><p class="creator access-badge">Creator</p></td>
-                        <td></td>
+                        <td class="name"><p>{{ foia.user.get_full_name }}</p></td>
+                        <td class="access nostretch"><p class="creator access-badge">Creator</p></td>
+                        <td class="modify nostretch"></td>
                     </tr>
                     {% for user in foia.edit_collaborators.all %}
                     <tr class="person with-access">
-                        <td>
-                            <p class="name">{{ user.get_full_name }}</p>
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
                         </td>
-                        <td>
+                        <td class="access nostretch">
+                            <p class="editor access-badge">Editor</p>
+                        </td>
+                        <td class="modify nostretch">
                             <form class="modify-access" method="post">
                                 {% csrf_token %}
-                                <p class="editor access-badge">Editor</p>
                                 <input type="hidden" name="user" value="{{ user.id }}" />
                                 <button type="submit" name="action" value="demote">Demote</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form class="revoke-access" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="user" value="{{ user.id }}" />
                                 <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
                             </form>
                         </td>
@@ -370,21 +366,17 @@
                     {% endfor %}
                     {% for user in foia.read_collaborators.all %}
                     <tr class="person with-access">
-                        <td>
-                            <p class="name">{{ user.get_full_name }}</p>
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
                         </td>
-                        <td>
-                            <form class="modify" method="post">
+                        <td class="access nostretch">
+                            <p class="reader access-badge">Viewer</p>
+                        </td>
+                        <td class="modify nostretch">
+                            <form class="modify-access" method="post">
                                 {% csrf_token %}
-                                <p class="reader access-badge">Viewer</p>
                                 <input type="hidden" name="user" value="{{ user.id }}" />
                                 <button type="submit" name="action" value="promote">Promote</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form class="revoke-access" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="user" value="{{ user.id }}" />
                                 <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
                             </form>
                         </td>
