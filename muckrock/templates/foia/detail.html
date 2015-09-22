@@ -331,7 +331,11 @@
             <form class="grant-access" method="post">
                 {% csrf_token %}
                 <h3>Grant Access</h3>
-                {{ access_form }}
+                <div class="user search input">
+                    <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
+                    {{ access_form.users }}
+                </div>
+                {{ access_form.access }}
                 <button class="primary" type="submit" name="action" value="grant_access">Save</button>
             </form>
             <table class="people with-access">

@@ -348,25 +348,63 @@ $request-breakpoint: 768px;
 }
 
 .request .access {
-    .generate-private-link {
+    .generate-private-link, .grant-access {
         @include display(flex);
         @include flex-wrap(wrap);
         @include align-items(flex-start);
         padding: $vertical-rhythm;
         @include border;
-        h3, input[type="text"] {
+        h3 {
+            @include flex(0 1 100%);
+        }
+        button {
+            max-width: 10em;
+            margin: 0;
+        }
+    }
+    .generate-private-link {
+        input[type="text"] {
             @include flex(0 1 100%);
             margin-bottom: $vertical-rhythm;
         }
         button, .help-text {
             @include flex(1);
         }
-        button {
-            max-width: 10em;
-            margin: 0;
-        }
         .help-text {
             padding-left: $vertical-rhythm;
+        }
+    }
+    .grant-access {
+        @include align-items(center);
+        .user.search.input {
+            @include flex(0 1 100%);
+            .users {
+                width: 100%;
+            }
+            input {
+                width: 100%;
+            }
+            label {
+                display: block;
+                font-size: $font-size-2;
+            }
+        }
+        select[name="access"] {
+            @include flex(0 1 100%);
+            margin-bottom: $vertical-rhythm;
+        }
+        button {
+            @include flex(1);
+        }
+        @include media($medium-layout) {
+            .user.search.input {
+                @include flex(0 1 70%);
+            }
+            select[name="access"] {
+                @include flex(0 1 25%);
+                margin-left: 5%;
+                margin-bottom: 0;
+            }
         }
     }
 }
