@@ -261,7 +261,7 @@ class FOIARequest(models.Model):
     def add_editor(self, user):
         """Grants the user permission to edit this request."""
         # pylint: disable=no-member
-        if not self.has_editor(user) and not self.created_by(user):
+        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
             self.edit_collaborators.add(user)
             self.save()
             logger.info('%s granted edit access to %s', user, self)
@@ -298,7 +298,7 @@ class FOIARequest(models.Model):
     def add_viewer(self, user):
         """Grants the user permission to view this request."""
         # pylint: disable=no-member
-        if not self.has_viewer(user) and not self.created_by(user):
+        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
             self.read_collaborators.add(user)
             self.save()
             logger.info('%s granted view access to %s', user, self)
