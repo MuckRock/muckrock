@@ -216,8 +216,7 @@ $('form.generate-private-link').submit(function(e){
         }, 500);
     }
     var handleSuccess = function(data, status, jqXHR) {
-        var linkPrefix = $(linkDisplay).val().split('?key=')[0];
-        var newLink = linkPrefix + '?key=' + data.key;
+        var newLink = window.location.origin + window.location.pathname + '?key=' + data.key;
         $(linkDisplay).val(newLink);
         flashLinkDisplay();
     }
