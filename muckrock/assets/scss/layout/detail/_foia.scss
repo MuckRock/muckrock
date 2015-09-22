@@ -366,6 +366,12 @@ $request-breakpoint: 768px;
         input[type="text"] {
             @include flex(0 1 100%);
             margin-bottom: $vertical-rhythm;
+            @include transition(background-color 1s ease-out);
+            background-color: #FFF;
+            &.success {
+                background-color: $color-green;
+                color: $color-black;
+            }
         }
         button, .help-text {
             @include flex(1);

@@ -203,6 +203,31 @@ $('#id_users-autocomplete').yourlabsAutocomplete().data = {
     foiaId: foiaId
 }
 
+// Generate private link with AJAX
+
+$('form.generate-private-link').submit(function(e){
+    e.preventDefault();
+    var linkDisplay = $(this).children('input[type=text]');
+    var dataToSubmit = 'action=generate_key';
+    var flashLinkDisplay = function() {
+        $(linkDisplay).addClass('success');
+        window.setTimeout(function(){
+            $(linkDisplay).removeClass('success');
+        }, 500);
+    }
+    var handleSuccess = function(data, status, jqXHR) {
+        var linkPrefix = $(linkDisplay).val().split('?key=')[0];
+        var newLink = linkPrefix + '?key=' + data.key;
+        $(linkDisplay).val(newLink);
+        flashLinkDisplay();
+    }
+    $.ajax({
+        method: 'POST',
+        data: dataToSubmit,
+        success: handleSuccess
+    });
+});
+
 /* Modals */
 
 $('.text-area.modal-button').click(function(e){
