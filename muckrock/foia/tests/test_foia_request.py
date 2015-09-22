@@ -11,6 +11,7 @@ from django.utils.text import slugify
 
 import datetime
 import factory
+from mock import Mock
 import nose.tools
 import re
 from datetime import date as real_date
@@ -969,6 +970,12 @@ class TestRequestSharingViews(TestCase):
         self.foia.add_viewer(self.viewer)
         self.foia.save()
 
+    def mockMiddleware(self, request):
+        """Mocks the request with messages and session middleware"""
+        setattr(request, 'session', Mock())
+        setattr(request, '_messages', Mock())
+        return request
+
     def reset_access_key(self):
         """Simple helper to reset access key betweeen tests"""
         self.foia.access_key = None
@@ -983,6 +990,7 @@ class TestRequestSharingViews(TestCase):
         self.reset_access_key()
         data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         # editors should be able to generate the key
         request.user = self.editor
         response = Detail.as_view()(
@@ -1014,6 +1022,7 @@ class TestRequestSharingViews(TestCase):
         self.reset_access_key()
         data = {'action': 'generate_key'}
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         # viewers should not be able to generate the key
         request.user = self.viewer
         response = Detail.as_view()(
@@ -1050,6 +1059,7 @@ class TestRequestSharingViews(TestCase):
             'access': 'edit'
         }
         edit_request = self.factory.post(self.foia.get_absolute_url(), edit_data)
+        edit_request = self.mockMiddleware(edit_request)
         edit_request.user = self.editor
         edit_response = Detail.as_view()(
             edit_request,
@@ -1071,6 +1081,7 @@ class TestRequestSharingViews(TestCase):
             'access': 'view'
         }
         view_request = self.factory.post(self.foia.get_absolute_url(), view_data)
+        view_request = self.mockMiddleware(view_request)
         view_request.user = self.editor
         view_response = Detail.as_view()(
             view_request,
@@ -1092,6 +1103,7 @@ class TestRequestSharingViews(TestCase):
             'user': user.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -1114,6 +1126,7 @@ class TestRequestSharingViews(TestCase):
             'user': user.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -1135,6 +1148,7 @@ class TestRequestSharingViews(TestCase):
             'user': an_editor.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
@@ -1155,6 +1169,7 @@ class TestRequestSharingViews(TestCase):
             'user': a_viewer.pk
         }
         request = self.factory.post(self.foia.get_absolute_url(), data)
+        request = self.mockMiddleware(request)
         request.user = self.editor
         response = Detail.as_view()(
             request,
