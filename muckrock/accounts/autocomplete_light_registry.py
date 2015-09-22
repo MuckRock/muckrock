@@ -50,7 +50,8 @@ class OrganizationAutocomplete(UserAutocomplete):
     def choices_for_request(self):
         # get filters
         query = self.request.GET.get('q', '')
-        foia_id = self.request.GET.get('orgId', '')
+        exclude = self.request.GET.getlist('exclude', '')
+        org_id = self.request.GET.get('orgId', '')
         # get all choices
         choices = self.choices.all()
         # exclude choices based on filters
@@ -59,7 +60,7 @@ class OrganizationAutocomplete(UserAutocomplete):
         for user_id in exclude:
             choices = choices.exclude(pk=int(user_id))
         if org_id: # exclude owner and members from choices
-            foia = get_object_or_404(FOIARequest, pk=foia_id)
+            organization = get_object_or_404(Organization, pk=org_id)
             owner = organization.owner
             profiles = organization.members.all()
             exclude_pks = [owner.pk] + [profile.user.pk for profile in profiles]
