@@ -190,7 +190,7 @@
             <li class="tab" data-target="#notes">Notes</li>
             {% endif %}
             {% if user_can_edit %}
-            <li class="tab" data-target="#access">Access</li>
+            <li class="tab" data-target="#access">Sharing</li>
             {% endif %}
             {% if user.is_staff %}
             <li class="tab" data-target="#tasks">Tasks</li>
@@ -321,11 +321,10 @@
                 <h3>Private Link</h3>
                 {% if foia.access_key %}
                 <input type="text" value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}" />
-                <button type="submit" name="action" value="generate_key">Regenerate</button>
                 {% else %}
-                <input type="text" value="Generate an access key" disabled />
-                <button type="submit" name="action" value="generate_key">Generate</button>
+                <input type="text" value="No private link" disabled />
                 {% endif %}
+                <button type="submit" name="action" value="generate_key">Create new link</button>
                 <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
             </form>
             {% endif %}
