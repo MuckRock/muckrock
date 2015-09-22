@@ -19,6 +19,10 @@ class UserAutocomplete(autocomplete_light.AutocompleteModelBase):
         'data-autocomplete-minimum-characters': 2
     }
 
+    def choice_label(self, choice):
+        """Uses the user's full name as the choice label."""
+        return choice.get_full_name()
+
 class RequestSharingAutocomplete(UserAutocomplete):
     """Adds request sharing filtering for users"""
     def choices_for_request(self):
@@ -26,11 +30,9 @@ class RequestSharingAutocomplete(UserAutocomplete):
         query = self.request.GET.get('q', '')
         foia_id = self.request.GET.get('foiaId', '')
         # get all choices
-        choices = self.choices.all()
-        # exclude choices based on filters
-        if query:
-            choices = choices.filter(username__icontains=query)
-        # exclude creator and existing users with access from choices
+        choices = self.choices
+        conditions = self._choices_for_request_conditions(query, self.search_fields)
+        choices = choices.filter(conditions)
         if foia_id:
             foia = get_object_or_404(FOIARequest, pk=foia_id)
             creator = foia.user
