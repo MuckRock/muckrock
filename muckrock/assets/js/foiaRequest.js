@@ -85,12 +85,16 @@ $('.tab').click(function() {
 var target = window.location.hash;
 var n = target.indexOf('-');
 target = target.substring(0, n != -1 ? n : target.length);
-if (target == '#comm' || target == '#comms') {
-    $('#tab-request').trigger('click');
-} else if (target == '#file' || target == '#files') {
-    $('#tab-files').trigger('click');
-} else if (target == '#note' || target == '#notes') {
-    $('#tab-notes').trigger('click');
+$('.tab').each(function(index, element){
+    var tabTarget = $(this).data('target');
+    if (target == tabTarget) {
+        $(this).click();
+    }
+});
+// deep link to single file
+if (target == '#file') {
+    var specificFile = window.location.hash;
+    $(specificFile + ' .view-file').click();
 }
 
 /* Communications */
@@ -180,11 +184,6 @@ $('a.view-file').click(function() {
     $('#tab-files').click();
     displayDoc(docId, docTitle, docAnchor);
 });
-
-if (target == '#file') {
-    var specificFile = window.location.hash;
-    $(specificFile + ' .view-file').click();
-}
 
 $('.toggle-embed').click(function(){
     var file = $(this).closest('.file');

@@ -190,7 +190,7 @@
             <li class="tab" data-target="#notes">Notes</li>
             {% endif %}
             {% if user_can_edit %}
-            <li class="tab" data-target="#access">Sharing</li>
+            <li class="tab" data-target="#sharing">Sharing</li>
             {% endif %}
             {% if user.is_staff %}
             <li class="tab" data-target="#tasks">Tasks</li>
@@ -314,7 +314,7 @@
 
         {% if user_can_edit %}
         <!-- ACCESS -->
-        <section class="tab-section access" id="access">
+        <section class="tab-section access" id="sharing">
             {% if foia.embargo %}
             <form class="generate-private-link" method="post">
                 {% csrf_token %}
