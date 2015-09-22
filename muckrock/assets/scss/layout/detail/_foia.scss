@@ -347,6 +347,151 @@ $request-breakpoint: 768px;
     }
 }
 
+.request .access {
+    .generate-private-link, .grant-access {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-start);
+        padding: $vertical-rhythm;
+        @include border;
+        h3 {
+            @include flex(0 1 100%);
+        }
+        button {
+            max-width: 10em;
+            margin: 0;
+        }
+    }
+    .generate-private-link {
+        input[type="text"] {
+            @include flex(0 1 100%);
+            margin-bottom: $vertical-rhythm;
+            @include transition(background-color 1s ease-out);
+            background-color: #FFF;
+            &.success {
+                background-color: $color-green;
+                color: $color-black;
+            }
+        }
+        button, .help-text {
+            @include flex(1);
+        }
+        .help-text {
+            padding-left: $vertical-rhythm;
+        }
+    }
+    .grant-access {
+        @include align-items(center);
+        .user.search.input {
+            @include flex(0 1 100%);
+            .users {
+                width: 100%;
+            }
+            input {
+                width: 100%;
+            }
+            label {
+                display: block;
+                font-size: $font-size-2;
+            }
+        }
+        select[name="access"] {
+            @include flex(0 1 100%);
+            margin-bottom: $vertical-rhythm;
+        }
+        button {
+            @include flex(1);
+        }
+        // overrides the autocomplete widget
+        .deck {
+            display: block;
+            margin: $vertical-rhythm 0;
+        }
+        span#id_users-deck .hilight {
+            background-color: $color-blue;
+            margin-right: $vertical-rhythm;
+            padding: $vertical-rhythm/2;
+            color: $color-white;
+            &:hover {
+                background-color: $color-blue-dark;
+            }
+        }
+
+        span#id_users-deck .hilight .remove {
+            vertical-align: middle;
+            margin-right: $vertical-rhythm/2;
+            background: none;
+            color: $color-white;
+            text-align: center;
+            line-height: .9;
+            font-size: $font-size-7;
+            text-indent: 0;
+        }
+
+        @include media($medium-layout) {
+            .user.search.input {
+                @include flex(0 1 70%);
+            }
+            select[name="access"] {
+                @include flex(0 1 25%);
+                margin-left: 5%;
+                margin-bottom: 0;
+            }
+        }
+    }
+    .people.with-access {
+        .person {
+            background-color: $color-white;
+        }
+        .person td {
+            padding: $vertical-rhythm/2;
+            vertical-align: middle;
+            text-align: right;
+            &.name {
+                text-align: left;
+                font-weight: $font-weight-bold;
+            }
+            &.access.nostretch {
+                width:1%;
+                white-space:nowrap;
+            }
+            &.modify {
+                width: 5em;
+            }
+            @include media($medium-layout) {
+                &.nostretch {
+                    width:1%;
+                    white-space:nowrap;
+                }
+            }
+        }
+        .access-badge {
+            width: 5em;
+            padding: $vertical-rhythm/4 $vertical-rhythm/2;
+            background: $color-grey;
+            color: $color-white;
+            text-align: center;
+            font-size: $font-size-2;
+            &.editor {
+                background: $color-green;
+            }
+            &.reader {
+                background: $color-blue;
+            }
+            @include media($medium-layout) {
+                font-size: $font-size-3;
+            }
+        }
+        button {
+            padding: $vertical-rhythm/6 $vertical-rhythm/2;
+            width: 5em;
+            @include media($medium-layout) {
+                margin: 0 0 4px;
+            }
+        }
+    }
+}
+
 .request .tasks {
     .toggle {
         display: none;

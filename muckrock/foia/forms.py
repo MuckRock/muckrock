@@ -242,3 +242,15 @@ class FOIAAdminFixForm(forms.ModelForm):
         other_emails = self.cleaned_data['other_emails']
         other_emails = other_emails.strip()
         return other_emails
+
+class FOIAAccessForm(forms.Form):
+    """Form to add editors or viewers to a request."""
+    users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.MultipleChoiceWidget('UserRequestSharingAutocomplete')
+    )
+    access_choices = [
+        ('edit', 'Can Edit'),
+        ('view', 'Can View'),
+    ]
+    access = forms.ChoiceField(choices=access_choices)

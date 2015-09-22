@@ -3,20 +3,27 @@ Views for the FOIA application
 """
 
 from django.contrib import messages
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.http import Http404
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
 from datetime import datetime
+import json
 import logging
 import stripe
 
 from muckrock.foia.codes import CODES
-from muckrock.foia.forms import RequestFilterForm, FOIAEmbargoForm, FOIAEstimatedCompletionDateForm
+from muckrock.foia.forms import \
+    RequestFilterForm, \
+    FOIAEmbargoForm, \
+    FOIAEstimatedCompletionDateForm, \
+    FOIAAccessForm
 from muckrock.foia.models import \
     FOIARequest, \
     FOIAMultiRequest, \
@@ -139,9 +146,10 @@ class Detail(DetailView):
             self.kwargs['idx']
         )
         user = self.request.user
-        if not foia.is_viewable(user):
+        valid_access_key = self.request.GET.get('key') == foia.access_key
+        if not foia.viewable_by(user) and not valid_access_key:
             raise Http404()
-        if foia.user == user:
+        if foia.created_by(user):
             if foia.updated:
                 foia.updated = False
                 foia.save()
@@ -161,6 +169,7 @@ class Detail(DetailView):
             'permanent_embargo': foia.permanent_embargo,
             'date_embargo': foia.date_embargo
         })
+        context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
         context['noncontextual_request_actions'] = foia.noncontextual_request_actions(user)
@@ -189,7 +198,12 @@ class Detail(DetailView):
             'date_estimate': self._update_estimate,
             'move_comm': move_comm,
             'delete_comm': delete_comm,
-            'resend_comm': resend_comm
+            'resend_comm': resend_comm,
+            'generate_key': self._generate_key,
+            'grant_access': self._grant_access,
+            'revoke_access': self._revoke_access,
+            'demote': self._demote_editor,
+            'promote': self._promote_viewer,
         }
         try:
             return actions[request.POST['action']](request, foia)
@@ -279,6 +293,70 @@ class Detail(DetailView):
                 messages.error(request, 'Invalid date provided.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
+
+    def _generate_key(self, request, foia):
+        """Generate and return an access key, with support for AJAX."""
+        if not foia.editable_by(request.user):
+            if request.is_ajax():
+                return PermissionDenied
+            else:
+                return redirect(foia)
+        else:
+            key = foia.generate_access_key()
+            if request.is_ajax():
+                return HttpResponse(json.dumps({'key': key}), 'application/json')
+            else:
+                messages.success(request, 'New private link created.')
+                return redirect(foia)
+
+    def _grant_access(self, request, foia):
+        """Grant editor access to the specified users."""
+        form = FOIAAccessForm(request.POST)
+        if not foia.editable_by(request.user) or not form.is_valid():
+            return redirect(foia)
+        access = form.cleaned_data['access']
+        users = form.cleaned_data['users']
+        if access == 'edit' and users:
+            for user in users:
+                foia.add_editor(user)
+        if access == 'view' and users:
+            for user in users:
+                foia.add_viewer(user)
+        if len(users) > 1:
+            success_msg = '%d people can now %s this request.' % (len(users), access)
+        else:
+            success_msg = '%s can now %s this request.' % (users[0].first_name, access)
+        messages.success(request, success_msg)
+        return redirect(foia)
+
+    def _revoke_access(self, request, foia):
+        """Revoke access from a user."""
+        user_pk = request.POST.get('user')
+        user = User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            if foia.has_editor(user):
+                foia.remove_editor(user)
+            elif foia.has_viewer(user):
+                foia.remove_viewer(user)
+            messages.success(request, '%s no longer has access to this request.' % user.first_name)
+        return redirect(foia)
+
+    def _demote_editor(self, request, foia):
+        """Demote user from editor access to viewer access"""
+        user_pk = request.POST.get('user')
+        user = User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            foia.demote_editor(user)
+            messages.success(request, '%s can now only view this request.' % user.first_name)
+        return redirect(foia)
+
+    def _promote_viewer(self, request, foia):
+        """Promote user from viewer access to editor access"""
+        user_pk = request.POST.get('user')
+        user = User.objects.get(pk=user_pk)
+        if foia.editable_by(request.user) and user:
+            foia.promote_viewer(user)
+            messages.success(request, '%s can now edit this request.' % user.first_name)
         return redirect(foia)
 
 def redirect_old(request, jurisdiction, slug, idx, action):

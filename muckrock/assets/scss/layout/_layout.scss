@@ -30,7 +30,6 @@ html, body {
     @include media($medium-layout) { margin: 0 -1*$vertical-rhythm; }
 }
 
-@import 'details';
 @import 'profile';
 @import 'front-page';
 @import 'new-request';
@@ -38,5 +37,6 @@ html, body {
 @import 'crowdfund';
 @import 'project';
 @import 'tag-master-detail';
+@import 'detail/detail';
 @import 'list/list';
 @import 'nav/nav';

@@ -31,7 +31,7 @@
 {% endblock twitter_card %}
 
 {% block content %}
-<article class="request detail">
+<article class="request detail" id="foia-{{ foia.id }}">
     <section class="request properties">
         <header>
             <section class="identity">
@@ -184,13 +184,16 @@
         {% endif %}
 
         <ul class="tabs">
-            <li class="tab active" id="tab-request">Request</li>
-            <li class="tab" id="tab-files">Files</li>
+            <li class="tab active" data-target="#request">Request</li>
+            <li class="tab" data-target="#files">Files</li>
+            {% if foia.user == user or user.is_staff %}
+            <li class="tab" data-target="#notes">Notes</li>
+            {% endif %}
             {% if user_can_edit %}
-            <li class="tab" id="tab-notes">Notes</li>
+            <li class="tab" data-target="#sharing">Sharing</li>
             {% endif %}
             {% if user.is_staff %}
-            <li class="tab" id="tab-tasks">Tasks</li>
+            <li class="tab" data-target="#tasks">Tasks</li>
             {% endif %}
         </ul>
 
@@ -306,6 +309,81 @@
             {% empty %}
                 <h3 class="empty">There are no notes attached to this request.</h3>
             {% endfor %}
+        </section>
+        {% endif %}
+
+        {% if user_can_edit %}
+        <!-- ACCESS -->
+        <section class="tab-section access" id="sharing">
+            {% if foia.embargo %}
+            <form class="generate-private-link" method="post">
+                {% csrf_token %}
+                <h3>Private Link</h3>
+                {% if foia.access_key %}
+                <input type="text" value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}" readonly />
+                {% else %}
+                <input type="text" value="No private link" readonly />
+                {% endif %}
+                <button type="submit" name="action" value="generate_key">Create new link</button>
+                <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
+            </form>
+            {% endif %}
+            <form class="grant-access" method="post">
+                {% csrf_token %}
+                <h3>Grant Access</h3>
+                <div class="user search input">
+                    <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
+                    {{ access_form.users }}
+                </div>
+                {{ access_form.access }}
+                <button class="primary" type="submit" name="action" value="grant_access">Save</button>
+            </form>
+            <table class="people with-access">
+                <h3>People with access</h3>
+                <tbody>
+                    <tr class="person with-access">
+                        <td class="name"><p>{{ foia.user.get_full_name }}</p></td>
+                        <td class="access nostretch"><p class="creator access-badge">Creator</p></td>
+                        <td class="modify nostretch"></td>
+                    </tr>
+                    {% for user in foia.edit_collaborators.all %}
+                    <tr class="person with-access">
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
+                        </td>
+                        <td class="access nostretch">
+                            <p class="editor access-badge">Editor</p>
+                        </td>
+                        <td class="modify nostretch">
+                            <form class="modify-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="demote">Demote</button>
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% for user in foia.read_collaborators.all %}
+                    <tr class="person with-access">
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
+                        </td>
+                        <td class="access nostretch">
+                            <p class="reader access-badge">Viewer</p>
+                        </td>
+                        <td class="modify nostretch">
+                            <form class="modify-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="promote">Promote</button>
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </section>
         {% endif %}
 

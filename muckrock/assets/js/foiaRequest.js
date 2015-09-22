@@ -70,39 +70,14 @@ $('.estimated-completion .edit').click(function(){
 
 /* Tab Bar */
 
-$('#tab-overview').click(function() {
+$('.tab').click(function() {
     $(this).addClass('active');
     $(this).siblings().removeClass('active');
-    $('#overview').addClass('visible');
-    $('#overview').siblings().removeClass('visible');
-});
-
-$('#tab-request').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#request').addClass('visible');
-    $('#request').siblings().removeClass('visible');
-});
-
-$('#tab-files').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#files').addClass('visible');
-    $('#files').siblings().removeClass('visible');
-});
-
-$('#tab-notes').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#notes').addClass('visible');
-    $('#notes').siblings().removeClass('visible');
-});
-
-$('#tab-tasks').click(function() {
-    $(this).addClass('active');
-    $(this).siblings().removeClass('active');
-    $('#tasks').addClass('visible');
-    $('#tasks').siblings().removeClass('visible');
+    var tabSection = $(this).data('target');
+    if (tabSection) {
+        $(tabSection).addClass('visible');
+        $(tabSection).siblings().removeClass('visible');
+    }
 });
 
 /* Deep link into tab */
@@ -110,12 +85,16 @@ $('#tab-tasks').click(function() {
 var target = window.location.hash;
 var n = target.indexOf('-');
 target = target.substring(0, n != -1 ? n : target.length);
-if (target == '#comm' || target == '#comms') {
-    $('#tab-request').trigger('click');
-} else if (target == '#file' || target == '#files') {
-    $('#tab-files').trigger('click');
-} else if (target == '#note' || target == '#notes') {
-    $('#tab-notes').trigger('click');
+$('.tab').each(function(index, element){
+    var tabTarget = $(this).data('target');
+    if (target == tabTarget) {
+        $(this).click();
+    }
+});
+// deep link to single file
+if (target == '#file') {
+    var specificFile = window.location.hash;
+    $(specificFile + ' .view-file').click();
 }
 
 /* Communications */
@@ -206,11 +185,6 @@ $('a.view-file').click(function() {
     displayDoc(docId, docTitle, docAnchor);
 });
 
-if (target == '#file') {
-    var specificFile = window.location.hash;
-    $(specificFile + ' .view-file').click();
-}
-
 $('.toggle-embed').click(function(){
     var file = $(this).closest('.file');
     var embed = $(file).find('.file-embed');
@@ -218,6 +192,39 @@ $('.toggle-embed').click(function(){
     $(embed).children('textarea').select();
     $(embed).children('.close-embed').click(function(){
         $(embed).removeClass('visible');
+    });
+});
+
+/* Sharing */
+
+var foiaId = $('.request.detail').attr('id');
+foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
+$('#id_users-autocomplete').yourlabsAutocomplete().data = {
+    foiaId: foiaId
+}
+
+// Generate private link with AJAX
+
+$('form.generate-private-link').submit(function(e){
+    e.preventDefault();
+    var linkDisplay = $(this).children('input[type=text]');
+    var dataToSubmit = 'action=generate_key';
+    var flashLinkDisplay = function() {
+        $(linkDisplay).addClass('success');
+        window.setTimeout(function(){
+            $(linkDisplay).removeClass('success');
+        }, 500);
+    }
+    var handleSuccess = function(data, status, jqXHR) {
+        var linkPrefix = $(linkDisplay).val().split('?key=')[0];
+        var newLink = linkPrefix + '?key=' + data.key;
+        $(linkDisplay).val(newLink);
+        flashLinkDisplay();
+    }
+    $.ajax({
+        method: 'POST',
+        data: dataToSubmit,
+        success: handleSuccess
     });
 });
 
