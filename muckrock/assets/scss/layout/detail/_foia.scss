@@ -347,6 +347,30 @@ $request-breakpoint: 768px;
     }
 }
 
+.request .access {
+    .generate-private-link {
+        @include display(flex);
+        @include flex-wrap(wrap);
+        @include align-items(flex-start);
+        padding: $vertical-rhythm;
+        @include border;
+        h3, input[type="text"] {
+            @include flex(0 1 100%);
+            margin-bottom: $vertical-rhythm;
+        }
+        button, .help-text {
+            @include flex(1);
+        }
+        button {
+            max-width: 10em;
+            margin: 0;
+        }
+        .help-text {
+            padding-left: $vertical-rhythm;
+        }
+    }
+}
+
 .request .tasks {
     .toggle {
         display: none;
