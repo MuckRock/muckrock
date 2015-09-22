@@ -196,6 +196,14 @@ $('.toggle-embed').click(function(){
     });
 });
 
+/* Sharing */
+
+var foiaId = $('.request.detail').attr('id');
+foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
+$('#id_users-autocomplete').yourlabsAutocomplete().data = {
+    foiaId: foiaId
+}
+
 /* Modals */
 
 $('.text-area.modal-button').click(function(e){

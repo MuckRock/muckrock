@@ -247,7 +247,7 @@ class FOIAAccessForm(forms.Form):
     """Form to add editors or viewers to a request."""
     users = forms.ModelMultipleChoiceField(
         queryset=User.objects.all(),
-        widget=autocomplete.MultipleChoiceWidget('UserAutocomplete')
+        widget=autocomplete.MultipleChoiceWidget('UserRequestSharingAutocomplete')
     )
     access_choices = [
         ('edit', 'Can Edit'),
