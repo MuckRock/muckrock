@@ -13,6 +13,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 
 import autocomplete_light
+from concurrency.forms import ConcurrentForm
 from datetime import date, datetime, timedelta
 from reversion import VersionAdmin
 
@@ -87,7 +88,7 @@ class FOIANoteInline(NestedTabularInline):
     extra = 1
 
 
-class FOIARequestAdminForm(forms.ModelForm):
+class FOIARequestAdminForm(ConcurrentForm):
     """Form to include custom choice fields"""
 
     jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',

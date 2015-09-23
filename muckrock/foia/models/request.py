@@ -11,6 +11,7 @@ from django.db.models import Q, Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
+from concurrency.fields import IntegerVersionField
 from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
@@ -174,6 +175,7 @@ class FOIARequest(models.Model):
         related_name='edit_access',
         blank=True,
     )
+    version = IntegerVersionField()
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
