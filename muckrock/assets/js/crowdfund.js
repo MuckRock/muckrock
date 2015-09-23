@@ -10,6 +10,9 @@ var prettyInput = 'input[name=pretty-input]';
 
 function submitForm(form) {
 
+    // track this event using Google Analytics
+    ga('send', 'event', 'Crowdfund', 'Donation', window.location.pathname);
+
     var c = $(form).parents('.crowdfund');
     var pendingOverlay = $(c).children('.pending.overlay');
     var completeOverlay = $(c).children('.complete.overlay');

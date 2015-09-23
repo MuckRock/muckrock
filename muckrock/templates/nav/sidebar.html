@@ -5,7 +5,7 @@
         <a href="{% url 'acct-logout' %}" class="log-out">Log Out</a>
         {% else %}
         <a href="{% url 'acct-register' %}" class="sign-up">Sign&nbsp;Up</a>
-        <a href="{% url 'acct-login' %}" class="log-in">Log&nbsp;In</a>
+        <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}" class="log-in">Log&nbsp;In</a>
         {% endif %}
     </header>
 

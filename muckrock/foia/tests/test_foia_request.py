@@ -193,6 +193,13 @@ class TestFOIARequestUnit(TestCase):
         nose.tools.assert_in('check on the status', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), 15)
 
+    def test_foia_followup_estimated(self):
+        """If request has an estimated date, returns correct number of days"""
+        # pylint: disable=protected-access
+        foia = FOIARequest.objects.get(pk=15)
+        foia.date_estimate = datetime.date.today() + datetime.timedelta(2)
+        nose.tools.eq_(foia._followup_days(), 183)
+
      # manager
     def test_manager_get_submitted(self):
         """Test the FOIA Manager's get_submitted method"""

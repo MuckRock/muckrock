@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% load static from staticfiles %}
+
+{% block title %}MuckRock &bull; Drag n' Drop{% endblock %}
+
+{% block preload %}
+  <link href="{% static 'drag_drop/css/main.css' %}" type="text/css" rel="stylesheet" />
+{% endblock preload %}
+
+{% block content %}
+  <section class="drop-here">
+    <p>DROP A FILE ON A VOYAGE</p>
+  </section>
+
+  <section class="block">
+	<input type="hidden" value="{{bucket}}" class="param bucket" />
+	<input type="hidden" value="{{access_key}}" class="param access-key" />
+	<input type="hidden" value="{{secret_key}}" class="param secret-key" />
+	<input type="hidden" value="false" name="public" id="public" />
+    <p>
+      <a class="linkify s3 test">Test your S3 details.</a>
+      <span class="s3-test loading"><blink>Testing...</blink></span>
+      <span class="s3-test success">Test succeeded! Drop a file any time.</span>
+      <span class="s3-test error cors">Test failed! Wrong bucket name, or you need to configure CORS (see below).</span>
+      <span class="s3-test error credentials">Test failed! Wrong key or secret key.</span>
+    </p>
+  </section>
+
+  <section class="uploads">
+    <h3>
+      Active Upload
+    </h3>
+    <p class="detail">
+      <span class="message">Drop a file to begin. Keep it below ~200GB.</span>
+      <span class="filename"></span>
+      <span class="filesize"></span>
+      <span class="parts"></span>
+      <span class="bytes"></span>
+      <a class="control pause" href="#">Pause</a>
+      <span class="control pausing">Pausing, do not close tab...</span>
+      <a class="control resume" href="#">Resume</a>
+      <!-- <input type="checkbox" class="show-file" /> Show file reading -->
+    </p>
+    <div class="progress">
+      <div class="reading"></div>
+      <div class="voyage"></div>
+    </div>
+  </section>
+
+  <section class="log upload">
+    <h3>
+      Captain's Log
+    </h3>
+    <p id="main-log"></p>
+  </section>
+
+  <div id="dragging">
+    <h2>RELEASE THE FILE YOU HOLD</h2>
+  </div>
+
+  <script src="{% static 'drag_drop/js/jquery-2.1.1.min.js' %}"></script>
+  <script src="{% static 'drag_drop/js/bundle.js' %}"></script>
+  <script src="{% static 'drag_drop/js/index.js' %}"></script>
+{% endblock %}

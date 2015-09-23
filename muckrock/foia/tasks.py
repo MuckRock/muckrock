@@ -3,7 +3,6 @@
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
-from django.core.files.base import ContentFile
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
@@ -35,6 +34,7 @@ from muckrock.settings import (
     AWS_ACCESS_KEY_ID,
     AWS_SECRET_ACCESS_KEY,
     AWS_AUTOIMPORT_BUCKET_NAME,
+    AWS_STORAGE_BUCKET_NAME,
     )
 from muckrock.vendor import MultipartPostHandler
 
@@ -303,9 +303,9 @@ def autoimport():
         arg = m_name.group('arg')
         id_ = m_name.group('id')
         if m_name.group('esty'):
-            est_date = datetime(int(m_name.group('esty')) + 2000,
-                                int(m_name.group('estm')),
-                                int(m_name.group('estd')))
+            est_date = date(int(m_name.group('esty')) + 2000,
+                            int(m_name.group('estm')),
+                            int(m_name.group('estd')))
         else:
             est_date = None
 
@@ -324,10 +324,13 @@ def autoimport():
 
         foia_file = FOIAFile(foia=foia, comm=comm, title=title, date=comm.date,
                              source=comm.from_who[:70], access=access)
+        full_file_name = foia_file.ffile.field.generate_filename(
+                foia_file.ffile.instance,
+                file_name)
+        new_key = key.copy(storage_bucket, full_file_name)
+        new_key.set_acl('public-read')
 
-        con_file = ContentFile(key.get_contents_as_string())
-        foia_file.ffile.save(file_name, con_file)
-        con_file.close()
+        foia_file.ffile.name = full_file_name
         foia_file.save()
         if key.size != foia_file.ffile.size:
             raise SizeError(key.size, foia_file.ffile.size, foia_file)
@@ -354,6 +357,7 @@ def autoimport():
 
     conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
     bucket = conn.get_bucket(AWS_AUTOIMPORT_BUCKET_NAME)
+    storage_bucket = conn.get_bucket(AWS_STORAGE_BUCKET_NAME)
     for key in bucket.list(prefix='scans/', delimiter='/'):
         if key.name == 'scans/':
             continue

@@ -3,6 +3,7 @@ Models for the accounts application
 """
 
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
@@ -14,17 +15,16 @@ from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
+from lot.models import LOT
 from random import choice
-from sesame.utils import get_parameters
 from urllib import urlencode
 
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
-from muckrock.settings import MONTHLY_REQUESTS, STRIPE_SECRET_KEY
 from muckrock.values import TextValue
 
-stripe.api_key = STRIPE_SECRET_KEY
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
@@ -152,7 +152,7 @@ class Profile(models.Model):
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
             self.date_update = datetime.now()
-            self.monthly_requests = MONTHLY_REQUESTS.get(self.acct_type, 0)
+            self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
         return self.monthly_requests
 
@@ -238,7 +238,7 @@ class Profile(models.Model):
         customer.save()
         self.acct_type = 'pro'
         self.date_update = datetime.now()
-        self.monthly_requests = MONTHLY_REQUESTS.get('pro', 0)
+        self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
 
     def cancel_pro_subscription(self):
@@ -384,8 +384,11 @@ class Profile(models.Model):
     def wrap_url(self, link, **extra):
         """Wrap a URL for autologin"""
         if self.use_autologin:
-            params = get_parameters(self.user)
-            extra.update(params)
+            lot = LOT.objects.create(
+                user=self.user,
+                type='slow-login',
+                )
+            extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
 
 class Statistics(models.Model):

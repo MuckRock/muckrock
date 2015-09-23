@@ -9,7 +9,7 @@ from muckrock.sidebar.models import Broadcast
 
 def get_recent_articles():
     """Lists last five recent news articles"""
-    return Article.objects.filter(publish=True).order_by('-pub_date')[:5]
+    return Article.objects.get_published().order_by('-pub_date')[:5]
 
 def get_actionable_requests(user):
     """Gets requests that require action or attention"""

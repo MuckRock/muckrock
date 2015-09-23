@@ -34,8 +34,7 @@ class TaskTests(TestCase):
             'Tasks given no arguments should create successfully')
 
     def test_unicode(self):
-        eq_(str(self.task), 'Task: %d' % self.task.pk,
-            'Unicode string should return the classname and PK of the task')
+        eq_(unicode(self.task), u'Task', 'Unicode string should return the classname of the task')
 
     def test_resolve(self):
         """Tasks should be resolvable, updating their state when that happens."""
@@ -95,6 +94,13 @@ class OrphanTaskTests(TestCase):
 
     def test_blacklist(self):
         """A blacklisted orphan should add its sender's domain to the blacklist"""
+        self.task.blacklist()
+        ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
+
+    def test_blacklist_duplicate(self):
+        """The blacklist method should not crash when a domain is dupliacted."""
+        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
+        task.models.BlacklistDomain.objects.create(domain='muckrock.com')
         self.task.blacklist()
         ok_(task.models.BlacklistDomain.objects.filter(domain='muckrock.com'))
 
@@ -279,3 +285,79 @@ class ResponseTaskTests(TestCase):
         self.task.set_price(1)
         self.task.set_price('1')
         self.task.set_price('foo')
+
+
+class TestTaskManager(TestCase):
+    """Tests for a helpful and handy task object manager."""
+
+    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
+                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
+
+    def setUp(self):
+        self.foia = FOIARequest.objects.get(pk=1)
+        self.comm = FOIACommunication.objects.create(
+                date=datetime.now(),
+                from_who='God',
+                foia=self.foia,
+                full_html=False,
+                opened=False,
+                response=True)
+        self.user = User.objects.get(pk=1)
+        self.agency = Agency.objects.get(pk=1)
+        self.agency.approved = False
+        self.foia.agency = self.agency
+        self.foia.save()
+        self.agency.save()
+
+        # tasks that incorporate FOIAs are:
+        # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
+        # StatusChangeTask, PaymentTask, NewAgencyTask
+        self.tasks = []
+        # ResponseTask
+        self.tasks.append(task.models.ResponseTask.objects.create(communication=self.comm))
+        # SnailMailTask
+        self.tasks.append(task.models.SnailMailTask.objects.create(
+            category='a',
+            communication=self.comm
+        ))
+        # FailedFaxTask
+        self.tasks.append(task.models.FailedFaxTask.objects.create(communication=self.comm))
+        # RejectedEmailTask
+        self.tasks.append(task.models.RejectedEmailTask.objects.create(
+            category='d',
+            foia=self.foia
+        ))
+        # FlaggedTask
+        self.tasks.append(task.models.FlaggedTask.objects.create(
+            user=self.user,
+            text='Halp',
+            foia=self.foia
+        ))
+        # StatusChangeTask
+        self.tasks.append(task.models.StatusChangeTask.objects.create(
+            user=self.user,
+            old_status='ack',
+            foia=self.foia
+        ))
+        # PaymentTask
+        self.tasks.append(task.models.PaymentTask.objects.create(
+            amount=100.00,
+            user=self.user,
+            foia=self.foia
+        ))
+        # NewAgencyTask
+        self.tasks.append(task.models.NewAgencyTask.objects.create(
+            user=self.user,
+            agency=self.agency
+        ))
+
+    def test_tasks_for_foia(self):
+        """
+        The task manager should return all tasks that explictly
+        or implicitly reference the provided FOIA.
+        """
+        returned_tasks = task.models.Task.objects.filter_by_foia(self.foia)
+        logging.debug(returned_tasks)
+        logging.debug(self.tasks)
+        eq_(returned_tasks, self.tasks,
+            'The manager should return all the tasks that incorporate this FOIA.')

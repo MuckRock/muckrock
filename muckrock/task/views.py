@@ -274,3 +274,18 @@ class MultiRequestTaskList(TaskList):
 class FailedFaxTaskList(TaskList):
     title = 'Failed Faxes'
     model = FailedFaxTask
+
+class RequestTaskList(TaskList):
+    """Displays all the tasks for a given request."""
+    title = 'Request Tasks'
+    template_name = 'lists/request_task_list.html'
+
+    def get_queryset(self):
+        foia_request = get_object_or_404(foia.models.FOIARequest, pk=self.kwargs['pk'])
+        tasks = Task.objects.filter_by_foia(foia_request)
+        return tasks
+
+    def get_context_data(self, **kwargs):
+        context = super(RequestTaskList, self).get_context_data(**kwargs)
+        context['foia'] = get_object_or_404(foia.models.FOIARequest, pk=self.kwargs['pk'])
+        return context

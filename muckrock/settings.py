@@ -162,8 +162,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'lot.middleware.LOTMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'sesame.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
 )
@@ -234,6 +234,7 @@ INSTALLED_APPS = (
     'storages',
     'taggit',
     'django_xmlrpc',
+    'lot',
     'muckrock.accounts',
     'muckrock.foia',
     'muckrock.news',
@@ -265,6 +266,7 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': show_toolbar,
     'INTERCEPT_REDIRECTS': False,
+    'JQUERY_URL': '',
 }
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
@@ -303,7 +305,7 @@ CELERYD_TASK_TIME_LIMIT = os.environ.get('CELERYD_TASK_TIME_LIMIT', 5 * 60)
 
 AUTHENTICATION_BACKENDS = (
     'muckrock.accounts.backends.CaseInsensitiveModelBackend',
-    'sesame.backends.ModelBackend',
+    'lot.auth_backend.LOTBackend',
     )
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
@@ -571,6 +573,15 @@ SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
+
+LOT = {
+  'slow-login': {
+      'name': u'Slow login',
+      'duration': 60*60*24*2,
+      'one-time': True,
+  },
+}
+LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
 
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import
