@@ -304,15 +304,15 @@
         {% if user_can_edit %}
         <!-- NOTES -->
         <section class="tab-section notes" id="notes">
+            {% if foia.notes.count > 0 %}
             <header class="notes-controls">
                 <div class="notes filter">
                     <input id="notes-filter" type="search" placeholder="Filter notes" />
                 </div>
             </header>
+            {% endif %}
             {% for note in foia.notes.all %}
                 {% include 'foia/note.html' with note=note %}
-            {% empty %}
-                <h3 class="empty">There are no notes attached to this request.</h3>
             {% endfor %}
             <form class="add-note" method="post">
                 {% csrf_token %}
@@ -323,12 +323,13 @@
                 {{ note_form.note }}
                 <footer>
                     <button class="primary" type="submit" name="action" value="add_note">Save</button>
+                    <p>Your notes are only visible to you{% if request.user.profile.can_embargo %} and other editors of this request{% endif %}.</p>
                 </footer>
             </form>
         </section>
         {% endif %}
 
-        {% if user_can_edit %}
+        {% if user_can_edit and request.user.profile.can_embargo %}
         <!-- ACCESS -->
         <section class="tab-section access" id="sharing">
             {% if foia.embargo %}
