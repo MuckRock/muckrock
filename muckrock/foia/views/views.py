@@ -22,6 +22,7 @@ from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
     RequestFilterForm, \
     FOIAEmbargoForm, \
+    FOIANoteForm, \
     FOIAEstimatedCompletionDateForm, \
     FOIAAccessForm
 from muckrock.foia.models import \
@@ -169,6 +170,7 @@ class Detail(DetailView):
             'permanent_embargo': foia.permanent_embargo,
             'date_embargo': foia.date_embargo
         })
+        context['note_form'] = FOIANoteForm()
         context['access_form'] = FOIAAccessForm()
         context['embargo_needs_date'] = foia.status in END_STATUS
         context['user_actions'] = foia.user_actions(user)
@@ -193,6 +195,7 @@ class Detail(DetailView):
             'tags': self._tags,
             'follow_up': self._follow_up,
             'question': self._question,
+            'add_note': self._add_note,
             'flag': self._flag,
             'appeal': self._appeal,
             'date_estimate': self._update_estimate,
@@ -260,7 +263,19 @@ class Detail(DetailView):
             messages.success(request, 'Your question has been posted.')
             question.notify_new()
             return redirect(question)
+        return redirect(foia)
 
+    def _add_note(self, request, foia):
+        """Adds a note to the request"""
+        note_form = FOIANoteForm(request.POST)
+        if foia.editable_by(request.user) and note_form.is_valid():
+            foia_note = note_form.save(commit=False)
+            foia_note.foia = foia
+            foia_note.author = request.user
+            foia_note.datetime = datetime.now()
+            foia_note.save()
+            logging.info('%s added %s to %s', foia_note.author, foia_note, foia_note.foia)
+            messages.success(request, 'Your note is attached to the request.')
         return redirect(foia)
 
     def _flag(self, request, foia):

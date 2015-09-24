@@ -86,32 +86,6 @@ def _foia_action(request, foia, action):
         context_instance=RequestContext(request)
     )
 
-# User Actions
-
-@login_required
-def note(request, jurisdiction, jidx, slug, idx):
-    """Add a note to a request"""
-    def form_actions(_, foia, form):
-        """Helper class, passed to generic function"""
-        foia_note = form.save(commit=False)
-        foia_note.foia = foia
-        foia_note.date = datetime.now()
-        foia_note.save()
-    foia = _get_foia(jurisdiction, jidx, slug, idx)
-    action = RequestAction(
-        form_actions=form_actions,
-        msg='add notes',
-        tests=[],
-        form_class=lambda r, f: FOIANoteForm,
-        return_url=lambda r, f: f.get_absolute_url() + '#tabs-notes',
-        heading='Add Note',
-        value='Add',
-        must_own=True,
-        template=action_template,
-        extra_context=lambda f: {}
-    )
-    return _foia_action(request, foia, action)
-
 @login_required
 def delete(request, jurisdiction, jidx, slug, idx):
     """Delete a non-submitted FOIA Request"""
