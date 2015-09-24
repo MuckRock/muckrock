@@ -190,7 +190,7 @@ def followup_requests():
     if options.enable_followup and (options.enable_weekend_followup or is_weekday):
         for foia in FOIARequest.objects.get_followup():
             try:
-                foia.followup()
+                foia.followup(automatic=True)
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             except MailgunAPIError as exc:
                 error_log.append('ERROR: %s - %d - %s - %s' %
