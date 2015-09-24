@@ -126,7 +126,9 @@
                 <section class="embargo manager">
                     <header>
                         <dfn>Embargo</dfn>
+                        {% if user.profile.can_embargo %}
                         <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
+                        {% endif %}
                     </header>
                     <div class="embargo state">
                     {% if foia.embargo %}
@@ -139,6 +141,7 @@
                         <p>This request has no embargo.</p>
                     {% endif %}
                     </div>
+                    {% if user.profile.can_embargo %}
                     <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
                         {% csrf_token %}
                         {{ embargo_form.errors }}
@@ -167,6 +170,7 @@
                         {% endif %}
                         <button class="cancel" id="cancel-embargo">Cancel</button>
                     </form>
+                    {% endif %}
                 </section>
                 {% endif %}
                 {% tag_manager foia %}
