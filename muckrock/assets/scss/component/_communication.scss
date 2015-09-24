@@ -97,9 +97,11 @@
             @include display(flex);
             padding: 0;
         }
+        margin-bottom: 0;
     }
     .files {
         list-style-type: none;
+        margin-bottom: 0;
         padding-left: 0;
         & > li {
             display: block;
