@@ -332,14 +332,50 @@ $request-breakpoint: 768px;
         @include flex(0 1 50%);
     }
 
+    .add-note {
+        display: none;
+        &.visible {
+            display: block;
+        }
+        @include border;
+        textarea {
+            display: block;
+            margin-bottom: 0;
+            border: none;
+            border-radius: 0;
+        }
+        h4 {
+            margin-bottom: 0;
+        }
+        header {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(flex-end);
+            margin-bottom: 0;
+            padding: $vertical-rhythm/2;
+            border-bottom: 1px solid $color-grey;
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+            padding: $vertical-rhythm/2;
+            border-top: 1px solid $color-grey;
+        }
+    }
+
     .note {
         @include border;
         border-color: $color-yellow;
-        .note-date {
+        .note-header {
+            @include display(flex);
+            @include justify-content(space-between);
             margin-bottom: 0;
             padding: $vertical-rhythm/2;
             background-color: $color-yellow;
-            text-align: right;
+            p {
+                margin-bottom: 0;
+            }
         }
         .note-body {
             padding: $vertical-rhythm/2;

@@ -295,15 +295,27 @@
             {% endif %}
         </section>
 
-        {% if foia.user == user or user.is_staff %}
+        {% if user_can_edit %}
         <!-- NOTES -->
         <section class="tab-section notes" id="notes">
             <header class="notes-controls">
                 <div class="notes filter">
                     <input id="notes-filter" type="search" placeholder="Filter notes" />
                 </div>
-                <a class="primary button" href="{% url 'foia-note' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}">Add a Note</a>
+                <button class="primary" id="add-note">Add a Note</button>
             </header>
+            <form class="add-note" method="post">
+                {% csrf_token %}
+                <header>
+                    <h4>Add a note</h4>
+                    <p>Markdown syntax supported</p>
+                </header>
+                {{ note_form.note }}
+                <footer>
+                    <button class="primary" type="submit" name="action" value="add_note">Save</button>
+                    <span class="cancel button">Cancel</span>
+                </footer>
+            </form>
             {% for note in foia.notes.all %}
                 {% include 'foia/note.html' with note=note %}
             {% empty %}

@@ -37,6 +37,35 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
 
+
+class UserFactory(factory.django.DjangoModelFactory):
+    """A factory for creating User test objects."""
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: "user_%d" % n)
+
+
+class JurisdictionFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Jurisdiction test objects."""
+    class Meta:
+        model = Jurisdiction
+
+    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+
+
+class FOIARequestFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIARequest test objects."""
+    class Meta:
+        model = FOIARequest
+
+    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
+    user = factory.SubFactory(UserFactory)
+    jurisdiction = factory.SubFactory(JurisdictionFactory)
+
+
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
@@ -834,32 +863,57 @@ class FOIAEmbargoTests(TestCase):
             'The embargo date should be removed.')
 
 
-class UserFactory(factory.django.DjangoModelFactory):
-    """A factory for creating User test objects."""
-    class Meta:
-        model = User
+class TestFOIANotes(TestCase):
+    """Allow editors to attach notes to a request."""
+    def setUp(self):
+        self.factory = RequestFactory()
+        self.foia = FOIARequestFactory()
+        self.creator = self.foia.user
+        self.editor = UserFactory()
+        self.viewer = UserFactory()
+        self.normie = UserFactory()
+        self.foia.add_editor(self.editor)
+        self.foia.add_viewer(self.viewer)
+        self.note_text = u'Lorem ipsum dolor su ament.'
+        self.note_data = {'action': 'add_note', 'note': self.note_text}
 
-    username = factory.Sequence(lambda n: "user_%d" % n)
+    def mockMiddleware(self, request):
+        """Mocks the request with messages and session middleware"""
+        setattr(request, 'session', Mock())
+        setattr(request, '_messages', Mock())
+        return request
 
+    def test_add_note(self):
+        """User with edit permission should be able to create a note."""
+        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
+        request = self.mockMiddleware(request)
+        request.user = self.editor
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.notes.count() > 0)
 
-class JurisdictionFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Jurisdiction test objects."""
-    class Meta:
-        model = Jurisdiction
-
-    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-
-class FOIARequestFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIARequest test objects."""
-    class Meta:
-        model = FOIARequest
-
-    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory(JurisdictionFactory)
-
+    def test_add_note_without_permission(self):
+        """Normies and viewers cannot add notes."""
+        request = self.factory.post(self.foia.get_absolute_url(), self.note_data)
+        request = self.mockMiddleware(request)
+        request.user = self.viewer
+        response = Detail.as_view()(
+            request,
+            jurisdiction=self.foia.jurisdiction.slug,
+            jidx=self.foia.jurisdiction.id,
+            slug=self.foia.slug,
+            idx=self.foia.id
+        )
+        self.foia.refresh_from_db()
+        nose.tools.eq_(response.status_code, 302)
+        nose.tools.assert_true(self.foia.notes.count() == 0)
 
 class TestRequestSharing(TestCase):
     """Allow people to edit and view another user's request."""

@@ -195,6 +195,17 @@ $('.toggle-embed').click(function(){
     });
 });
 
+/* Notes */
+
+$('#add-note').click(function(e){
+    e.preventDefault();
+    var noteForm = $('form.add-note');
+    $(noteForm).addClass('visible');
+    $(noteForm).find('.cancel.button').click(function(){
+        $(noteForm).removeClass('visible');
+    });
+});
+
 /* Sharing */
 
 var foiaId = $('.request.detail').attr('id');
