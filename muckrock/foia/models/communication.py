@@ -266,15 +266,16 @@ class FOIANote(models.Model):
     """A private note on a FOIA request"""
 
     foia = models.ForeignKey(FOIARequest, related_name='notes')
-    date = models.DateTimeField()
+    author = models.ForeignKey('auth.User', related_name='notes', null=True)
+    datetime = models.DateTimeField()
     note = models.TextField()
 
     def __unicode__(self):
         # pylint: disable=no-member
-        return 'Note for %s on %s' % (self.foia.title, self.date)
+        return 'Note by %s on %s' % (self.author.get_full_name(), self.foia.title)
 
     class Meta:
         # pylint: disable=too-few-public-methods
-        ordering = ['foia', 'date']
+        ordering = ['foia', 'datetime']
         verbose_name = 'FOIA Note'
         app_label = 'foia'
