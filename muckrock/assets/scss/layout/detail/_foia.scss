@@ -333,6 +333,10 @@ $request-breakpoint: 768px;
     }
 
     .add-note {
+        display: none;
+        &.visible {
+            display: block;
+        }
         @include border;
         textarea {
             display: block;
