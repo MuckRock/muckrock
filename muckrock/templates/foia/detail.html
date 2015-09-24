@@ -184,7 +184,7 @@
         {% endif %}
 
         <ul class="tabs">
-            <li class="tab active" data-target="#request">Request</li>
+            <li class="tab active" data-target="#comms">Request</li>
             <li class="tab" data-target="#files">Files</li>
             {% if foia.user == user or user.is_staff %}
             <li class="tab" data-target="#notes">Notes</li>
@@ -197,7 +197,7 @@
             {% endif %}
         </ul>
 
-        <section class="tab-section communications visible" id="request">
+        <section class="tab-section communications visible" id="comms">
             <div class="communications-controls">
                 <div class="communications filter">
                     <input id="comms-filter" type="search" placeholder="Filter communications" />

@@ -85,6 +85,7 @@ $('.tab').click(function() {
 var target = window.location.hash;
 var n = target.indexOf('-');
 target = target.substring(0, n != -1 ? n : target.length);
+target += 's';
 $('.tab').each(function(index, element){
     var tabTarget = $(this).data('target');
     if (target == tabTarget) {
@@ -92,9 +93,13 @@ $('.tab').each(function(index, element){
     }
 });
 // deep link to single file
-if (target == '#file') {
+if (target == '#files') {
     var specificFile = window.location.hash;
     $(specificFile + ' .view-file').click();
+} else if (target == '#notes' || target == '#comms' || target == '#tasks') { // deep link to specific element
+    var specificElement = window.location.hash;
+    var elementOffset = $(specificElement).offset();
+    window.scrollTo(elementOffset.top, elementOffset.left);
 }
 
 /* Communications */
