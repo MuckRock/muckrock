@@ -333,10 +333,6 @@ $request-breakpoint: 768px;
     }
 
     .add-note {
-        display: none;
-        &.visible {
-            display: block;
-        }
         @include border;
         textarea {
             display: block;
@@ -366,19 +362,29 @@ $request-breakpoint: 768px;
 
     .note {
         @include border;
-        border-color: $color-yellow;
+        border-color: $color-grey;
         .note-header {
             @include display(flex);
             @include justify-content(space-between);
             margin-bottom: 0;
             padding: $vertical-rhythm/2;
-            background-color: $color-yellow;
+            background-color: $color-grey;
+            color: $color-white;
             p {
                 margin-bottom: 0;
+            }
+            a {
+                color: $color-white;
+            }
+            .note-author {
+                font-weight: $font-weight-bold;
             }
         }
         .note-body {
             padding: $vertical-rhythm/2;
+        }
+        &.collapsed .note-body {
+            display: none;
         }
     }
 }

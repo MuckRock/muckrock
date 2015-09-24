@@ -197,13 +197,12 @@ $('.toggle-embed').click(function(){
 
 /* Notes */
 
-$('#add-note').click(function(e){
-    e.preventDefault();
-    var noteForm = $('form.add-note');
-    $(noteForm).addClass('visible');
-    $(noteForm).find('.cancel.button').click(function(){
-        $(noteForm).removeClass('visible');
-    });
+$('.note-header').click(function(){
+    $(this).parent().toggleClass('collapsed');
+});
+
+$('.note-date').click(function(){
+    return false;
 });
 
 /* Sharing */

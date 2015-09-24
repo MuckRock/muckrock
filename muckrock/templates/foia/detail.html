@@ -302,8 +302,12 @@
                 <div class="notes filter">
                     <input id="notes-filter" type="search" placeholder="Filter notes" />
                 </div>
-                <button class="primary" id="add-note">Add a Note</button>
             </header>
+            {% for note in foia.notes.all %}
+                {% include 'foia/note.html' with note=note %}
+            {% empty %}
+                <h3 class="empty">There are no notes attached to this request.</h3>
+            {% endfor %}
             <form class="add-note" method="post">
                 {% csrf_token %}
                 <header>
@@ -313,14 +317,8 @@
                 {{ note_form.note }}
                 <footer>
                     <button class="primary" type="submit" name="action" value="add_note">Save</button>
-                    <span class="cancel button">Cancel</span>
                 </footer>
             </form>
-            {% for note in foia.notes.all %}
-                {% include 'foia/note.html' with note=note %}
-            {% empty %}
-                <h3 class="empty">There are no notes attached to this request.</h3>
-            {% endfor %}
         </section>
         {% endif %}
 
