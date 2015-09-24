@@ -20,7 +20,6 @@ from muckrock.crowdfund.forms import CrowdfundRequestForm
 from muckrock.foia.forms import \
     FOIADeleteForm, \
     FOIAAdminFixForm, \
-    FOIANoteForm, \
     FOIAEmbargoForm, \
     FOIAFileFormSet
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
