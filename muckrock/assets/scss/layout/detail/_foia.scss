@@ -287,6 +287,9 @@ $request-breakpoint: 768px;
             h3 {
                 margin-bottom: 0;
             }
+            .cancel.button {
+                margin-left: $vertical-rhythm;
+            }
         }
     }
     .files-list {

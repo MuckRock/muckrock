@@ -190,6 +190,12 @@ $('a.view-file').click(function() {
     displayDoc(docId, docTitle, docAnchor);
 });
 
+$('.active-document .cancel.button').click(function(){
+    $('#viewer').empty();
+    $('.active-document').removeClass('visible');
+    $('.files-list .active').removeClass('active');
+});
+
 $('.toggle-embed').click(function(){
     var file = $(this).closest('.file');
     var embed = $(file).find('.file-embed');
