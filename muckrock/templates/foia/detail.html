@@ -247,7 +247,7 @@
                 {{ note_form.note }}
                 <footer>
                     <button class="primary" type="submit" name="action" value="add_note">Save</button>
-                    <p>Your notes are only visible to you{% if request.user.profile.can_embargo %} and other editors of this request{% endif %}.</p>
+                    <p>Your notes are visible to you and other editors of this request.</p>
                 </footer>
             </form>
         </section>
