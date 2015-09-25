@@ -1,0 +1,51 @@
+{% if show_embargo %}
+<section class="embargo manager">
+    <header>
+        <dfn>Embargo</dfn>
+        {% if user_can_edit and user.profile.can_embargo or user_can_edit and foia.embargo %}
+        <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
+        {% endif %}
+    </header>
+    <div class="embargo state">
+    {% if foia.embargo %}
+        {% if foia.permanent_embargo %}
+        <p>This request is permanently embargoed.</p>
+        {% else %}
+        <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.{% endif %}</p>
+        {% endif %}
+    {% else %}
+        <p>This request has no embargo.</p>
+    {% endif %}
+    </div>
+    {% if user_can_edit and user.profile.can_embargo %}
+    <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
+        {% csrf_token %}
+        {{ embargo_form.errors }}
+        {{ embargo_form.non_field_errors }}
+        {% if request.user.profile.can_embargo_permanently %}
+        <div class="permanent">
+            {{ embargo_form.permanent_embargo.label_tag }}
+            {{ embargo_form.permanent_embargo }}
+            <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
+        </div>
+        {% endif %}
+        {% if embargo_needs_date %}
+        <div class="expiration">
+            {{ embargo_form.date_embargo.label_tag }}
+            {{ embargo_form.date_embargo }}
+            <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
+        </div>
+        {% endif %}
+        {% if not foia.embargo %}
+        <button class="primary" type="submit" name="embargo" value="create">Embargo</button>
+        {% else %}
+            {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
+        <button class="primary" type="submit" name="embargo" value="update">Update</button>
+            {% endif %}
+        <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
+        {% endif %}
+        <button class="cancel" id="cancel-embargo">Cancel</button>
+    </form>
+    {% endif %}
+</section>
+{% endif %}
