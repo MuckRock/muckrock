@@ -220,8 +220,10 @@ $('.note-date').click(function(){
 
 var foiaId = $('.request.detail').attr('id');
 foiaId = foiaId.substring(foiaId.indexOf('-') + 1);
-$('#id_users-autocomplete').yourlabsAutocomplete().data = {
-    foiaId: foiaId
+if ($('#id_users-autocomplete').length) {
+    $('#id_users-autocomplete').yourlabsAutocomplete().data = {
+        foiaId: foiaId
+    }
 }
 
 // Generate private link with AJAX
