@@ -253,7 +253,7 @@
         </section>
         {% endif %}
 
-        {% if user_can_edit and request.user.profile.can_embargo %}
+        {% if user_can_edit %}
         <!-- ACCESS -->
         <section class="tab-section access" id="sharing">
             {% if foia.embargo %}

@@ -1,8 +1,8 @@
-{% if show_embargo %}
+{% if embargo.show %}
 <section class="embargo manager">
     <header>
         <dfn>Embargo</dfn>
-        {% if user_can_edit and user.profile.can_embargo or user_can_edit and foia.embargo %}
+        {% if embargo.add or embargo.remove %}
         <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
         {% endif %}
     </header>
@@ -17,7 +17,7 @@
         <p>This request has no embargo.</p>
     {% endif %}
     </div>
-    {% if user_can_edit and user.profile.can_embargo %}
+    {% if embargo.add %}
     <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
         {% csrf_token %}
         {{ embargo_form.errors }}
@@ -44,6 +44,12 @@
             {% endif %}
         <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
         {% endif %}
+        <button class="cancel" id="cancel-embargo">Cancel</button>
+    </form>
+    {% elif embargo.remove %}
+    <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
+        {% csrf_token %}
+        <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
         <button class="cancel" id="cancel-embargo">Cancel</button>
     </form>
     {% endif %}
