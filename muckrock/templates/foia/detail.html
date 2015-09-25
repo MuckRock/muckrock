@@ -97,80 +97,8 @@
             </form>
             {% endif %}
             <section class="states">
-                <section class="status manager" id="request-status">
-                    <header>
-                        <dfn>Status</dfn>
-                        {% if foia.status != 'started' and foia.status != 'submitted' %}
-                        {% if user_can_edit %}
-                        <div class="edit" id="edit-status" data-manager=".status-manager">Edit</div>
-                        {% endif %}
-                        {% endif %}
-                    </header>
-                    <p class="status state {{ foia.color_code }}">{{foia.get_status_display}}</p>
-                    {% if foia.status != 'started' and foia.status != 'submitted' %}
-                    {% if user_can_edit %}
-                    <form method="post" class="status-form" id="status-form">
-                        {% csrf_token %}
-                        <select name="status">
-                        {% for choice in status_choices %}
-                            <option value="{{ choice|first }}" {% if choice|first == foia.status %}selected{% endif %}>{{ choice|last }}</option>
-                        {% endfor %}
-                        </select>
-                        <button type="submit" name="action" value="status" class="primary button">Save</button>
-                        <button class="cancel" id="cancel-status">Cancel</button>
-                    </form>
-                    {% endif %}
-                    {% endif %}
-                </section>
-                <section class="embargo manager">
-                    <header>
-                        <dfn>Embargo</dfn>
-                        {% if user_can_edit and user.profile.can_embargo %}
-                        <div class="edit" id="edit-embargo" data-manager=".embargo-manager">Edit</div>
-                        {% endif %}
-                    </header>
-                    <div class="embargo state">
-                    {% if foia.embargo %}
-                        {% if foia.permanent_embargo %}
-                        <p>This request is permanently embargoed.</p>
-                        {% else %}
-                        <p>This request is embargoed until {% if foia.date_embargo %}{{ foia.date_embargo }}{% else %}30 days after it is finished.{% endif %}</p>
-                        {% endif %}
-                    {% else %}
-                        <p>This request has no embargo.</p>
-                    {% endif %}
-                    </div>
-                    {% if user_can_edit and user.profile.can_embargo %}
-                    <form method="post" action="embargo/" class="embargo-form" id="embargo-form">
-                        {% csrf_token %}
-                        {{ embargo_form.errors }}
-                        {{ embargo_form.non_field_errors }}
-                        {% if request.user.profile.can_embargo_permanently %}
-                        <div class="permanent">
-                            {{ embargo_form.permanent_embargo.label_tag }}
-                            {{ embargo_form.permanent_embargo }}
-                            <p class="help-text">{{ embargo_form.permanent_embargo.help_text }}</p>
-                        </div>
-                        {% endif %}
-                        {% if embargo_needs_date %}
-                        <div class="expiration">
-                            {{ embargo_form.date_embargo.label_tag }}
-                            {{ embargo_form.date_embargo }}
-                            <p class="help-text">{{ embargo_form.date_embargo.help_text }}</p>
-                        </div>
-                        {% endif %}
-                        {% if not foia.embargo %}
-                        <button class="primary" type="submit" name="embargo" value="create">Embargo</button>
-                        {% else %}
-                            {% if embargo_needs_date or request.user.profile.can_embargo_permanently %}
-                        <button class="primary" type="submit" name="embargo" value="update">Update</button>
-                            {% endif %}
-                        <button class="failure" type="submit" name="embargo" value="delete">Remove</button>
-                        {% endif %}
-                        <button class="cancel" id="cancel-embargo">Cancel</button>
-                    </form>
-                    {% endif %}
-                </section>
+                {% include 'foia/component/status.html' %}
+                {% include 'foia/component/embargo.html' %}
                 {% tag_manager foia %}
             </section>
         </section>
@@ -275,7 +203,6 @@
 
         <!-- DOCUMENTS -->
         <section class="tab-section files" id="files">
-            {% if not foia.embargo or user_can_edit %}
             {% if foia.total_pages > 0 %}
             <div class="active-document">
                 <header>
@@ -296,11 +223,10 @@
             {% else %}
             <h3 class="empty">There are no files associated with this request.</h3>
             {% endif %}
-            {% endif %}
         </section>
 
-        {% if user_can_edit %}
         <!-- NOTES -->
+        {% if user_can_edit %}
         <section class="tab-section notes" id="notes">
             {% if foia.notes.count > 0 %}
             <header class="notes-controls">
@@ -327,7 +253,7 @@
         </section>
         {% endif %}
 
-        {% if user_can_edit and request.user.profile.can_embargo %}
+        {% if user_can_edit %}
         <!-- ACCESS -->
         <section class="tab-section access" id="sharing">
             {% if foia.embargo %}

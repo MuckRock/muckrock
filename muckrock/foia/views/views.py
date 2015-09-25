@@ -161,11 +161,18 @@ class Detail(DetailView):
         context = super(Detail, self).get_context_data(**kwargs)
         foia = context['foia']
         user = self.request.user
+        user_can_edit = foia.editable_by(user)
         is_past_due = foia.date_due < datetime.now().date() if foia.date_due else False
         include_draft = user.is_staff or foia.status == 'started'
         context['all_tags'] = Tag.objects.all()
         context['past_due'] = is_past_due
-        context['user_can_edit'] = foia.editable_by(user)
+        context['user_can_edit'] = user_can_edit
+        context['embargo'] = {
+            'show': (user_can_edit and foia.user.profile.can_embargo) or foia.embargo,
+            'edit': user_can_edit and foia.user.profile.can_embargo,
+            'add': user_can_edit and user.profile.can_embargo,
+            'remove': user_can_edit and foia.embargo
+        }
         context['embargo_form'] = FOIAEmbargoForm(initial={
             'permanent_embargo': foia.permanent_embargo,
             'date_embargo': foia.date_embargo
