@@ -180,7 +180,7 @@ class MRFilterableListView(ListView):
 
     def get_paginate_by(self, queryset):
         """Paginates list by the return value"""
-        return self.request.GET.get('per_page', 25)
+        return min(self.request.GET.get('per_page', 25), 100)
 
 
 class MRSearchView(SearchView):
