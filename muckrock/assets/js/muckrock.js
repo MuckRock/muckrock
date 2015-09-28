@@ -66,6 +66,18 @@ $('.embed.hidden-modal').each(function() {
     textarea.val(embed);
 });
 
+// FLAG FORM
+
+$('#show-flag-form').click(function(){
+    var thisButton = $(this);
+    $(thisButton).hide();
+    var flagForm = $(this).next();
+    $(flagForm).addClass('visible').find('.cancel.button').click(function(){
+        $(thisButton).show();
+        $(flagForm).removeClass('visible');
+    });
+});
+
 // SELECT ALL
 $('#toggle-all').click(function(){
     var toggleAll = this;
