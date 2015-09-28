@@ -27,6 +27,7 @@ $sidebar-width: 250px;
     .website-sidebar {
         z-index: 100;
         right: 0;
+        box-shadow: inset 4px 0px 8px rgba(0, 0, 0, 0.25);
     }
     .website-sidebar.visible + .container {
         @include transform(translateX(0));

@@ -1,17 +1,23 @@
 {% if tags or is_authorized %}
-<div class="tag-manager">
+<div class="tag manager">
     {% if is_authorized %}
-    <dfn>Tags <span class="edit" id="edit-tags">Edit</span></dfn>
+    <header>
+        <dfn>Tags</dfn>
+        <span class="edit" id="edit-tags">Edit</span>
+    </header>
     <form method="post" action="{{endpoint}}" class="tag-form" id="tag-form">
         {% csrf_token %}
         {{form.tags}}
-        <button type="submit" name="action" value="tags" class="primary button">Save</button>
         <p><small>Separate tags with commas</small></p>
+        <button type="submit" name="action" value="tags" class="tag-form-button primary">Save</button>
+        <button class="tag-form-button cancel" id="cancel-tags">Cancel</button>
     </form>
     {% else %}
-    <dfn>Tags</dfn>
+    <header>
+        <dfn>Tags</dfn>
+    </header>
     {% endif %}
-    <ul>
+    <ul class="tag-list state">
         {% for tag in tags %}
         <li>
             <a class="tag" href="{% url 'tag-detail' slug=tag.slug %}">{{tag.name}}</a>

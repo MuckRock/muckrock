@@ -2,7 +2,7 @@
 <div class="comm-actions">
     <div class="comm-action-container">
         {% if comm.rawemail.raw_email %}<a href="{% url "foia-raw" idx=comm.pk %}" class="comm-action">Raw Email</a>{% endif %}
-        <span onClick="$('#move-{{comm.pk}}-form').show();" class="comm-action">Move</span>
+        <span onClick="showCommForm('#move-{{comm.pk}}-form');" class="comm-action">Move</span>
         <span onClick="$('#resend-{{comm.pk}}-form').show();" class="comm-action">Resend</span>
         <span onClick="$('#delete-{{comm.pk}}-form').show();" class="comm-action">Delete</span>
     </div>

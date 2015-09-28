@@ -2,6 +2,9 @@
 Miscellanous utilities
 """
 
+import random
+import string
+
 from django.template import Context
 from django.template.loader_tags import BlockNode, ExtendsNode
 
@@ -19,3 +22,7 @@ def get_node(template, context=Context(), name='subject'):
         elif isinstance(node, ExtendsNode):
             return get_node(node.nodelist, context, name)
     raise BlockNotFound("Node '%s' could not be found in template." % name)
+
+def generate_key(size=6, chars=string.ascii_uppercase + string.digits):
+    """Generates a random alphanumeric key"""
+    return ''.join(random.SystemRandom().choice(chars) for _ in range(size))

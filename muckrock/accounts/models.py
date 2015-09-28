@@ -9,16 +9,15 @@ from django.db import models
 from django.template.loader import render_to_string
 
 import dbsettings
-import string
 import stripe
 from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
-from random import choice
 from urllib import urlencode
 
+from muckrock import utils
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
@@ -225,6 +224,10 @@ class Profile(models.Model):
         """Is this user allowed to embargo?"""
         return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
 
+    def can_embargo_permanently(self):
+        """Is this user allowed to permanently embargo?"""
+        return self.acct_type in ['admin'] or self.organization != None
+
     def can_view_emails(self):
         """Is this user allowed to view all emails and private contact information?"""
         return self.acct_type in ['admin', 'pro']
@@ -288,7 +291,7 @@ class Profile(models.Model):
 
     def generate_confirmation_key(self):
         """Generate random key"""
-        key = ''.join(choice(string.ascii_letters) for _ in range(24))
+        key = utils.generate_key(24)
         self.confirmation_key = key
         self.save()
         return key

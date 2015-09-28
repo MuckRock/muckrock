@@ -14,9 +14,9 @@ from django.template.loader import render_to_string
 from datetime import datetime, date, timedelta
 from hashlib import md5
 from itertools import chain
+import logging
 from taggit.managers import TaggableManager
 from unidecode import unidecode
-import logging
 
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
@@ -24,6 +24,7 @@ from muckrock.settings import MAILGUN_SERVER_NAME
 from muckrock.tags.models import Tag, TaggedItemBase
 from muckrock import task
 from muckrock import fields
+from muckrock import utils
 
 logger = logging.getLogger(__name__)
 
@@ -54,12 +55,12 @@ class FOIARequestQuerySet(models.QuerySet):
             return self.filter(Q(user=user) |
                                (~Q(status='started') &
                                 ~Q(embargo=True, date_embargo=None) &
-                                ~Q(embargo=True, date_embargo__gt=date.today())))
+                                ~Q(embargo=True, date_embargo__gte=date.today())))
         else:
             # anonymous user, filter out drafts and embargoes
             return self.exclude(status='started') \
                        .exclude(embargo=True, date_embargo=None) \
-                       .exclude(embargo=True, date_embargo__gt=date.today())
+                       .exclude(embargo=True, date_embargo__gte=date.today())
 
     def get_public(self):
         """Get all publically viewable FOIA requests"""
@@ -107,6 +108,8 @@ STATUS = (
     ('abandoned', 'Withdrawn'),
 )
 
+END_STATUS = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
+
 class Action():
     """A helper class to provide interfaces for request actions"""
     # pylint: disable=too-many-arguments
@@ -142,8 +145,8 @@ class FOIARequest(models.Model):
     date_estimate = models.DateField(blank=True, null=True,
             verbose_name='Estimated Date Completed')
     embargo = models.BooleanField(default=False)
-    date_embargo = models.DateField(blank=True, null=True)
     permanent_embargo = models.BooleanField(default=False)
+    date_embargo = models.DateField(blank=True, null=True)
     price = models.DecimalField(max_digits=14, decimal_places=2, default='0.00')
     requested_docs = models.TextField(blank=True)
     description = models.TextField(blank=True)
@@ -174,6 +177,7 @@ class FOIARequest(models.Model):
         related_name='edit_access',
         blank=True,
     )
+    access_key = models.CharField(blank=True, max_length=255)
 
     objects = FOIARequestQuerySet.as_manager()
     tags = TaggableManager(through=TaggedItemBase, blank=True)
@@ -194,18 +198,21 @@ class FOIARequest(models.Model):
         })
 
     def save(self, *args, **kwargs):
-        """Normalize fields before saving"""
+        """Normalize fields before saving and set the embargo expiration if necessary"""
         self.slug = slugify(self.slug)
         self.title = self.title.strip()
+        if self.embargo:
+            if self.status in END_STATUS:
+                default_date = date.today() + timedelta(30)
+                existing_date = self.date_embargo
+                self.date_embargo = default_date if not existing_date else existing_date
+            else:
+                self.date_embargo = None
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
         """Can this request be updated?"""
         return self.status == 'started'
-
-    def is_fixable(self):
-        """Can this request be ammended by the user?"""
-        return self.status == 'fix'
 
     def is_appealable(self):
         """Can this request be appealed by the user?"""
@@ -230,49 +237,107 @@ class FOIARequest(models.Model):
         """Can this request be deleted?"""
         return self.status == 'started'
 
-    def is_viewable(self, user):
-        """Is this request viewable?"""
-        # pylint: disable=unexpected-keyword-arg
-        return user.is_staff or self.user == user or \
-            self.read_collaborators.filter(pk=user.pk).exists() or \
-            self.edit_collaborators.filter(pk=user.pk).exists() or \
-            (self.status != 'started' and not self.is_embargo())
-
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.is_viewable(AnonymousUser())
+        return self.viewable_by(AnonymousUser())
 
-    def is_embargo(self, save=True):
-        """Is this request currently on an embargo?"""
-        if not self.embargo:
-            return False
+    # Request Sharing and Permissions
 
-        if self.is_permanently_embargoed() or not self.embargo_date() or \
-                date.today() < self.embargo_date():
-            return True
+    ## Creator
 
-        if save:
-            logger.info('Embargo expired for FOI Request %d - %s on %s',
-                        self.pk, self.title, self.embargo_date())
-            self.embargo = False
+    def created_by(self, user):
+        """Did this user create this request?"""
+        return self.user == user
+
+    ## Editors
+
+    def has_editor(self, user):
+        """Checks whether the given user is an editor."""
+        user_is_editor = False
+        if self.edit_collaborators.filter(pk=user.pk).exists():
+            user_is_editor = True
+        return user_is_editor
+
+    def add_editor(self, user):
+        """Grants the user permission to edit this request."""
+        # pylint: disable=no-member
+        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
+            self.edit_collaborators.add(user)
             self.save()
+            logger.info('%s granted edit access to %s', user, self)
+        return
 
-        return False
+    def remove_editor(self, user):
+        """Revokes the user's permission to edit this request."""
+        # pylint: disable=no-member
+        if self.has_editor(user):
+            self.edit_collaborators.remove(user)
+            self.save()
+            logger.info('%s revoked edit access from %s', user, self)
+        return
 
-    def embargo_date(self):
-        """The date this request comes off of embargo"""
-        if self.embargo:
-            return self.date_embargo
-
-    def is_permanently_embargoed(self):
-        """The request is permanently embargoed"""
-        if self.embargo:
-            return self.permanent_embargo
+    def demote_editor(self, user):
+        """Reduces the editor's access to that of a viewer."""
+        self.remove_editor(user)
+        self.add_viewer(user)
+        return
 
     def editable_by(self, user):
-        """Can this user edit this request"""
-        return self.user == user or self.edit_collaborators.filter(pk=user.pk).exists() \
-                or user.is_staff
+        """Can this user edit this request?"""
+        return self.created_by(user) or self.has_editor(user) or user.is_staff
+
+    ## Viewers
+
+    def has_viewer(self, user):
+        """Checks whether the given user is a viewer."""
+        user_is_viewer = False
+        if self.read_collaborators.filter(pk=user.pk).exists():
+            user_is_viewer = True
+        return user_is_viewer
+
+    def add_viewer(self, user):
+        """Grants the user permission to view this request."""
+        # pylint: disable=no-member
+        if not self.has_viewer(user) and not self.has_editor(user) and not self.created_by(user):
+            self.read_collaborators.add(user)
+            self.save()
+            logger.info('%s granted view access to %s', user, self)
+        return
+
+    def remove_viewer(self, user):
+        """Revokes the user's permission to view this request."""
+        # pylint: disable=no-member
+        if self.has_viewer(user):
+            self.read_collaborators.remove(user)
+            logger.info('%s revoked view access from %s', user, self)
+            self.save()
+        return
+
+    def promote_viewer(self, user):
+        """Enhances the viewer's access to that of an editor."""
+        self.remove_viewer(user)
+        self.add_editor(user)
+        return
+
+    def viewable_by(self, user):
+        """Can this user view this request?"""
+        user_has_access = user.is_staff or self.created_by(user) \
+                          or self.has_editor(user) or self.has_viewer(user)
+        request_is_private = self.status == 'started' or self.embargo
+        viewable_by_user = True
+        if request_is_private and not user_has_access:
+            viewable_by_user = False
+        return viewable_by_user
+
+    ## Access key
+
+    def generate_access_key(self):
+        """Generates a random key for accessing the request when it is private."""
+        key = utils.generate_key(24)
+        self.access_key = key
+        self.save()
+        logger.info('New access key generated for %s', self)
+        return key
 
     def has_crowdfund(self):
         """Does this request have crowdfunding enabled?"""
@@ -281,14 +346,6 @@ class FOIARequest(models.Model):
     def public_documents(self):
         """Get a list of public documents attached to this request"""
         return self.files.filter(access='public')
-
-    def percent_complete(self):
-        """Get percent complete for the progress bar"""
-        percents = {'started':   25, 'submitted':  50, 'ack':       65,
-                    'processed': 75, 'fix':        75, 'payment':   75,
-                    'rejected': 100, 'no_docs':   100, 'done':     100,
-                    'partial':   90, 'abandoned': 100, 'appealing': 75}
-        return percents.get(self.status, 0)
 
     def color_code(self):
         """Get the color code for the current status"""
@@ -309,6 +366,10 @@ class FOIARequest(models.Model):
             return self.communications.all()[0].communication
         except IndexError:
             return ''
+
+    def last_response(self):
+        """Return the most recent response"""
+        return self.communications.filter(response=True).order_by('-date').first()
 
     def set_mail_id(self):
         """Set the mail id, which is the unique identifier for the auto mailer system"""
@@ -339,7 +400,6 @@ class FOIARequest(models.Model):
     def get_to_who(self):
         """Who communications are to"""
         # pylint: disable=no-member
-
         if self.agency:
             return self.agency.name
         else:
@@ -347,7 +407,6 @@ class FOIARequest(models.Model):
 
     def get_saved(self):
         """Get the old model that is saved in the db"""
-
         try:
             return FOIARequest.objects.get(pk=self.pk)
         except FOIARequest.DoesNotExist:
@@ -356,22 +415,7 @@ class FOIARequest(models.Model):
     def last_comm(self):
         """Return the last communication"""
         # pylint: disable=no-member
-        return self.communications.reverse()[0]
-
-    def last_comm_date(self):
-        """Return the date of the latest communication or doc or file"""
-        # pylint: disable=no-member
-
-        qsets = [self.communications.all().order_by('-date'),
-                 self.files.exclude(date=None).order_by('-date')]
-
-        dates = []
-        for qset in qsets:
-            if qset:
-                # convert datetimes to dates
-                dates.append(qset[0].date.date() if hasattr(qset[0].date, 'date') else qset[0].date)
-
-        return max(dates) if dates else None
+        return self.communications.last()
 
     def latest_response(self):
         """How many days since the last response"""
@@ -390,7 +434,7 @@ class FOIARequest(models.Model):
         self.save()
 
         for profile in chain(self.followed_by.all(), [self.user.profile]):
-            if self.is_viewable(profile.user):
+            if self.viewable_by(profile.user):
                 profile.notify(self)
 
         self.update_dates()
@@ -446,7 +490,7 @@ class FOIARequest(models.Model):
         for profile in self.followed_by.all():
             profile.notify(self)
 
-    def followup(self):
+    def followup(self, automatic=False):
         """Send a follow up email for this request"""
         # pylint: disable=no-member
         from muckrock.foia.models.communication import FOIACommunication
@@ -460,7 +504,7 @@ class FOIARequest(models.Model):
 
         comm = FOIACommunication.objects.create(
             foia=self, from_who='MuckRock.com', to_who=self.get_to_who(),
-            date=datetime.now(), response=False, full_html=False,
+            date=datetime.now(), response=False, full_html=False, autogenerated=automatic,
             communication=render_to_string('text/foia/followup.txt',
                 {'request': self, 'estimate': estimate}))
 
@@ -535,38 +579,30 @@ class FOIARequest(models.Model):
     def update_dates(self):
         """Set the due date, follow up date and days until due attributes"""
         # pylint: disable=no-member
-
         cal = self.jurisdiction.get_calendar()
-
         # first submit
         if not self.date_submitted:
             self.date_submitted = date.today()
             days = self.jurisdiction.get_days()
             if days:
                 self.date_due = cal.business_days_from(date.today(), days)
-
         # updated from mailgun without setting status or submitted
         if self.status in ['ack', 'processed']:
-
             # unpause the count down
             if self.days_until_due is not None:
                 self.date_due = cal.business_days_from(date.today(), self.days_until_due)
                 self.days_until_due = None
-
             self._update_followup_date()
-
         # if we are no longer waiting on the agency, do not follow up
         if self.status not in ['ack', 'processed'] and self.date_followup:
             self.date_followup = None
-
         # if we need to respond, pause the count down until we do
         if self.status in ['fix', 'payment'] and self.date_due:
-            last_date = self.last_comm_date()
-            if not last_date:
-                last_date = date.today()
-            self.days_until_due = cal.business_days_between(last_date, self.date_due)
+            last_datetime = self.last_comm().date
+            if not last_datetime:
+                last_datetime = datetime.now()
+            self.days_until_due = cal.business_days_between(last_datetime.date(), self.date_due)
             self.date_due = None
-
         self.save()
 
     def _update_followup_date(self):
@@ -604,27 +640,9 @@ class FOIARequest(models.Model):
             tag_set.add(new_tag)
         self.tags.set(*tag_set)
 
-    def admin_actions(self, user):
-        '''Provides action interfaces for admins'''
-        kwargs = {
-            'jurisdiction': self.jurisdiction.slug,
-            'jidx': self.jurisdiction.pk,
-            'idx': self.pk,
-            'slug': self.slug
-        }
-        return [
-            Action(
-                test=user.is_staff,
-                link=reverse('foia-admin-fix', kwargs=kwargs),
-                title='Admin Fix',
-                desc='Open the admin fix form',
-                class_name='default'
-            ),
-        ]
-
     def user_actions(self, user):
         '''Provides action interfaces for users'''
-        is_owner = self.user == user
+        is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
         is_following = user.is_authenticated() and self.followed_by.filter(user=user)
         kwargs = {
@@ -649,19 +667,16 @@ class FOIARequest(models.Model):
             ),
             Action(
                 test=True,
-                title='Report',
+                title='Get Help',
                 action='flag',
                 desc=u'Something broken, buggy, or off?  Let us know and we’ll fix it',
-                class_name='modal'
+                class_name='failure modal'
             ),
         ]
 
     def noncontextual_request_actions(self, user):
         '''Provides context-insensitive action interfaces for requests'''
         can_edit = self.editable_by(user) or user.is_staff
-        can_embargo = not self.is_editable() and can_edit and user.profile.can_embargo()
-        # pylint: disable=line-too-long
-        can_permanently_embargo = can_embargo and self.is_embargo() and not self.is_permanently_embargoed()
         can_pay = can_edit and self.is_payable()
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
@@ -670,20 +685,6 @@ class FOIARequest(models.Model):
             'slug': self.slug
         }
         return [
-            Action(
-                test=can_permanently_embargo,
-                link=reverse('foia-embargo-permanent', kwargs=kwargs),
-                title='Permanently Embargo',
-                desc='Permanently embargo this request',
-                class_name='default'
-            ),
-            Action(
-                test=can_embargo,
-                link=reverse('foia-embargo', kwargs=kwargs),
-                title=('Unembargo' if self.embargo else 'Embargo'),
-                desc=('Make this request public' if self.embargo else 'Make this request private'),
-                class_name='default'
-            ),
             Action(
                 test=can_pay,
                 link=reverse('foia-pay', kwargs=kwargs),
@@ -705,7 +706,20 @@ class FOIARequest(models.Model):
         can_edit = self.editable_by(user) or user.is_staff
         can_follow_up = can_edit and self.status != 'started'
         can_appeal = can_edit and self.is_appealable()
+        kwargs = {
+            'jurisdiction': self.jurisdiction.slug,
+            'jidx': self.jurisdiction.pk,
+            'idx': self.pk,
+            'slug': self.slug
+        }
         return [
+            Action(
+                test=user.is_staff,
+                link=reverse('foia-admin-fix', kwargs=kwargs),
+                title='Admin Fix',
+                desc='Open the admin fix form',
+                class_name='default'
+            ),
             Action(
                 test=can_edit,
                 title='Get Advice',
