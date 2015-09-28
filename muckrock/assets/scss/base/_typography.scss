@@ -55,7 +55,7 @@ $font-size-display-3:   $font-size-9;
 
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
     font-weight: $font-weight-normal;
-    line-height: 1.1875em;
+    line-height: $font-line-height;
     @extend %vertical-rhythm;
 }
 h1, .h1 { font-size: $font-size-7; }

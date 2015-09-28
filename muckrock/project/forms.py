@@ -23,7 +23,7 @@ class ProjectCreateForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['title', 'summary', 'description', 'image', 'contributors', 'tags', 'private']
-        widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('ProjectContributorAutocomplete')}
+        widgets = {'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete')}
         help_texts = {
             'contributors': ('As the project creator, you are'
                             ' automatically listed as a contributor.'),
@@ -42,7 +42,7 @@ class ProjectUpdateForm(forms.ModelForm):
         model = Project
         fields = ['summary', 'description', 'image', 'contributors', 'tags', 'requests', 'articles', 'private']
         widgets = {
-            'contributors': autocomplete_light.MultipleChoiceWidget('ProjectContributorAutocomplete'),
+            'contributors': autocomplete_light.MultipleChoiceWidget('UserAutocomplete'),
             'requests': autocomplete_light.MultipleChoiceWidget('FOIARequestAutocomplete'),
             'articles': autocomplete_light.MultipleChoiceWidget('ArticleAutocomplete'),
         }

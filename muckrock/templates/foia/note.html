@@ -1,0 +1,13 @@
+{% load markdown_deux_tags %}
+
+{% if note %}
+<div class="note" id="note-{{ note.id }}">
+    <header class="note-header">
+        <p class="note-author">{% if note.author %}{{ note.author.get_full_name }}{% else %}{{ note.foia.user.get_full_name }}{% endif %}</p>
+        <a href="{{ request.get_full_path }}#note-{{ note.id }}"><time datetime="{{note.datetime|date:'c'}}" title="{{note.datetime|date:'c'}}" class="note-date">{{note.datetime|date}}</time></a>
+    </header>
+    <main class="note-body">
+        {{ note.note|markdown }}
+    </main>
+</div>
+{% endif %}

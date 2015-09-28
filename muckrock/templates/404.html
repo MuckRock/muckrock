@@ -2,6 +2,8 @@
 {% block title %}MuckRock &bull; Page Not Found{% endblock %}
 
 {% block content %}
-<h1>404</h1>
-<h2>Page not found.</h2>
+<section class="error-404">
+    <p><mark class="redacted">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor</mark> Error <mark class="redacted">invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.At vero eos</mark> 404 <mark class="redacted"> et accusam et justoduo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctusest Lorem ipsum dolor sit amet.Lorem ipsum dolor sit amet,consetetur  </mark> Page not found. <mark class="redacted">sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</mark><p>
+    <p><mark class="redacted">At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, nosea takimata sanctus est Lorem ipsum dolor sit amet.Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam no {% if not user.is_authenticated %}</mark> Need to <a href="{% url 'acct-login' %}?next={{ request.get_full_path }}">sign in</a>? <mark class="redacted">{% endif %}numy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.</mark></p>
+</section>
 {% endblock content %}

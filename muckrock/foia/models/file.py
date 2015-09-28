@@ -77,13 +77,13 @@ class FOIAFile(models.Model):
         if self.comm and self.comm.foia:
             return self.comm.foia
 
-    def is_viewable(self, user):
+    def viewable_by(self, user):
         """Is this document viewable to user"""
-        return self.access == 'public' and self.foia.is_viewable(user)
+        return self.access == 'public' and self.foia.viewable_by(user)
 
     def is_public(self):
         """Is this document viewable to everyone"""
-        return self.is_viewable(AnonymousUser())
+        return self.viewable_by(AnonymousUser())
 
     def is_eml(self):
         """Is this an eml file?"""

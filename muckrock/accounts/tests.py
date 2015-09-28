@@ -289,7 +289,7 @@ class TestAccountFunctional(TestCase):
         """Test managing your subscription"""
 
         # beta
-        self.client.login(username='adam', password='abc')
+        self.client.login(username='bob', password='abc')
         get_allowed(self.client, reverse('acct-manage-subsc'),
                     ['forms/account/subscription.html'])
 

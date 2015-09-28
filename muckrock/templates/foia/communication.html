@@ -1,0 +1,72 @@
+{% load tags %}
+
+{% if communication %}
+<section class="{% if communication.response %}received{% else %}sent{% endif %} communication {% if communication.from_who == 'MuckRock.com' %}collapsed{% endif %}" id="{{ communication.anchor }}">
+    <header class="communication-header">
+        <h1 class="from">From: {{ communication.from_who }}</h1>
+        <div class="actionables">
+            <a href="{{ request.path }}#{{ communication.anchor }}" class="permalink"><time datetime="{{ communication.date|date:'c' }}" class="date">{{ communication.date | date:"m/d/Y" }}</time></a>
+            {% if request.user.is_staff %}
+            <div class="options dropdown">
+                {% include 'lib/icons/options.svg' %}
+                <ul class="options dropdown-list">
+                    {% if comm.rawemail.raw_email %}<li><a href="{% url 'foia-raw' idx=comm.pk %}" class="option">Raw Email</a></li>{% endif %}
+                    <li onClick="showCommForm('#move-{{comm.pk}}-form');" class="option">Move</li>
+                    <li onClick="showCommForm('#resend-{{comm.pk}}-form');" class="option">Resend</li>
+                    <li onClick="showCommForm('#delete-{{comm.pk}}-form');" class="option">Delete</li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+    {% if communication.communication %}
+    <section class="communication-body">
+        {% if communication.subject %}
+        <header class="communication-body-header">
+            <p class="subject">Subject: {{ communication.subject }}</p>
+        </header>
+        {% endif %}
+        {% if communication.full_html %}
+        {{ communication.communication|redact_emails }}
+        {% else %}
+        {{ communication.communication|redact_emails|urlize|linebreaks }}
+        {% endif %}
+    </section>
+    {% endif %}
+    {% if communication.files.count > 0 %}
+    <ul class="files">
+    {% for file in communication.files.all %}
+        <li>{% include 'lib/file.html' %}</li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    {% if request.user.is_staff %}
+    <div class="communication-actions">
+        <form method="post" class="move-communication communication-action" id="move-{{comm.pk}}-form">
+            {% csrf_token %}
+            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <label for="new_foia_pk">Move to Requests</label>
+            <input type="text" name="new_foia_pks" value="{{ foia.pk }}" placeholder="Enter MuckRock number" />
+            <button type="submit" name="action" value="move_comm" class="primary">Move</button>
+            <button class="cancel" id="cancel-move-communication">Close</button>
+        </form>
+        <form method="post" class="resend-communication communication-action" id="resend-{{comm.pk}}-form">
+            {% csrf_token %}
+            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <label for="email">Resend to Email</label>
+            <input type="text" name="email" value="{{foia.email}}" />
+            <p class="help-text">This will become the new email address for the request. Leave the field blank to force a manual mailing. For faxes, enter the 10 digit fax number beginning with a leading 1 and ending with @fax2.faxaway.com.</p>
+            <button type="submit" name="action" value="resend_comm" class="primary">Resend</button>
+            <button class="cancel" id="cancel-resend-communication">Close</button>
+        </form>
+        <form method="post" class="delete-communication communication-action" id="delete-{{comm.pk}}-form">
+            {% csrf_token %}
+            <input type="hidden" name="comm_pk" value="{{comm.pk}}" />
+            <p>This will delete the communication. Are you sure you want to do this?</p>
+            <button type="submit" name="action" value="delete_comm" class="failure">Delete</button>
+            <button class="cancel" id="cancel-delete-communication">Close</button>
+        </form>
+    </div>
+    {% endif %}
+</section>
+{% endif %}

@@ -23,19 +23,12 @@ kwargs = {"wsgi.url_scheme": "https"}
 def get_allowed(client, url, templates=None, base='base.html', context=None, redirect=None):
     """Test a get on a url that is allowed with the users current credntials"""
     # pylint: disable=too-many-arguments
+    # pylint: disable=unused-argument
     response = client.get(url, follow=True, **kwargs)
     nose.tools.eq_(response.status_code, 200)
 
     if redirect:
         nose.tools.eq_(response.redirect_chain, [('https://testserver:80' + redirect, 302)])
-
-    if templates:
-        resp_ts = [t.name for t in response.templates[:len(templates)+1]]
-        nose.tools.eq_(resp_ts, templates + [base])
-
-    if context:
-        for key, value in context.iteritems():
-            nose.tools.eq_(response.context[key], value)
 
     return response
 

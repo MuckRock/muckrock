@@ -1,0 +1,11 @@
+{% autoescape off %}
+Dear {{request.user.get_full_name}},
+
+The embargo on your FOI request "{{request.title}}" has expired and it is now visible to the public. If you need to reset the embargo for any reason, you may do that from the request page.
+
+Direct link to your request:
+http://www.muckrock.com{% url 'foia-detail' jurisdiction=request.jurisdiction.slug jidx=request.jurisdiction.pk slug=request.slug idx=request.pk %}
+
+Sincerely,
+The MuckRock Team
+{% endautoescape %}

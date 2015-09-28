@@ -147,32 +147,58 @@ class RequestFilterForm(MRFilterForm):
         required=False
     )
 
-class FOIAEmbargoForm(forms.ModelForm):
-    """A form to update the embargo status of a FOIA Request"""
-    date_embargo = forms.DateField(
-        label='Embargo date',
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'datepicker'}),
-        help_text='Choose the date the embargo will expire and become public.'
+class FOIAEstimatedCompletionDateForm(forms.ModelForm):
+    """Form to change an estimaged completion date."""
+    date_estimate = forms.DateField(
+        label='Estimated completion date',
+        help_text='The est. completion date is declared by the agency.',
+        widget=forms.DateInput(format='%m/%d/%Y'),
+        input_formats=[
+            '%Y-%m-%d',      # '2006-10-25'
+            '%m/%d/%Y',      # '10/25/2006'
+            '%m/%d/%y',      # '10/25/06'
+            '%b %d %Y',      # 'Oct 25 2006'
+            '%b %d, %Y',     # 'Oct 25, 2006'
+            '%d %b %Y',      # '25 Oct 2006'
+            '%d %b, %Y',     # '25 Oct, 2006'
+            '%B %d %Y',      # 'October 25 2006'
+            '%B %d, %Y',     # 'October 25, 2006'
+            '%d %B %Y',      # '25 October 2006'
+            '%d %B, %Y']     # '25 October, 2006'
     )
 
-    def clean(self):
-        """Checks if date embargo is necessary and if it is within 30 days"""
-        date_embargo = self.cleaned_data.get('date_embargo')
-        finished_status = ['rejected', 'no_docs', 'done', 'partial', 'abandoned']
-        if self.instance.status in finished_status:
-            if not date_embargo:
-                error_msg = 'Embargo date is required for finished requests'
-                self._errors['date_embargo'] = self.error_class([error_msg])
-            elif date_embargo > date.today() + timedelta(30):
-                error_msg = 'Embargo date must be within 30 days of today'
-                self._errors['date_embargo'] = self.error_class([error_msg])
-        return self.cleaned_data
-
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = FOIARequest
-        fields = ['date_embargo']
+        fields = ['date_estimate']
+
+class FOIAEmbargoForm(forms.Form):
+    """Form to configure an embargo on a request"""
+    permanent_embargo = forms.BooleanField(
+        required=False,
+        label='Make permanent',
+        help_text='A permanent embargo will never expire.',
+        widget=forms.CheckboxInput()
+    )
+
+    date_embargo = forms.DateField(
+        required=False,
+        label='Expiration date',
+        help_text='Embargo duration are limited to a maximum of 30 days.',
+        widget=forms.DateInput(attrs={
+            'class': 'datepicker',
+            'placeholder': 'Pick a date'
+        })
+    )
+
+    def clean_date_embargo(self):
+        """Checks if date embargo is within 30 days"""
+        date_embargo = self.cleaned_data['date_embargo']
+        max_duration = date.today() + timedelta(30)
+        if date_embargo and date_embargo > max_duration:
+            error_msg = 'Embargo expiration date must be within 30 days of today'
+            self._errors['date_embargo'] = self.error_class([error_msg])
+        return date_embargo
+
 
 class FOIADeleteForm(forms.Form):
     """Form to confirm deleting a FOIA Request"""
@@ -216,3 +242,15 @@ class FOIAAdminFixForm(forms.ModelForm):
         other_emails = self.cleaned_data['other_emails']
         other_emails = other_emails.strip()
         return other_emails
+
+class FOIAAccessForm(forms.Form):
+    """Form to add editors or viewers to a request."""
+    users = forms.ModelMultipleChoiceField(
+        queryset=User.objects.all(),
+        widget=autocomplete.MultipleChoiceWidget('UserRequestSharingAutocomplete')
+    )
+    access_choices = [
+        ('edit', 'Can Edit'),
+        ('view', 'Can View'),
+    ]
+    access = forms.ChoiceField(choices=access_choices)

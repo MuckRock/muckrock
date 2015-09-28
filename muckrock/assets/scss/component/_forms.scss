@@ -53,6 +53,12 @@
     display: none;
 }
 
+.help-text {
+    font-size: $font-size-2;
+    color: $color-grey;
+    line-height: $font-line-height;
+}
+
 .hidden-stripe-handler {
     display: none;
 }
