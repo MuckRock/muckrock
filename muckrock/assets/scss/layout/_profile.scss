@@ -20,6 +20,13 @@
     }
 }
 
+.profile .image {
+    margin: 0 0 $vertical-rhythm;
+    .header-image {
+        margin-bottom: 0;
+    }
+}
+
 .profile .flag {
     form {
         display: none;
