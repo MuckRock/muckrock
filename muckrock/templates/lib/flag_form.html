@@ -1,0 +1,15 @@
+<section class="flag">
+    <span class="button" id="show-flag-form">Submit a Change</span>
+    <form class="agency" method="post">
+        {% csrf_token %}
+        <header>
+            <label for="{{ form.reason.id_for_label }}">{{ form.reason.label }}</label>
+            <p class="help-text">{{ form.reason.help_text }}</p>
+        </header>
+        {{ form.reason }}
+        <footer>
+            <button type="submit" class="primary button">Submit</button>
+            <span class="cancel button">Cancel</span>
+        </footer>
+    </form>
+</section>

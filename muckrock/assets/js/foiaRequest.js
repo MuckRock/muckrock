@@ -82,25 +82,43 @@ $('.tab').click(function() {
 
 /* Deep link into tab */
 
-var target = window.location.hash;
-var n = target.indexOf('-');
-target = target.substring(0, n != -1 ? n : target.length);
-target += 's';
-$('.tab').each(function(index, element){
-    var tabTarget = $(this).data('target');
-    if (target == tabTarget) {
-        $(this).click();
+function deepLink(e) {
+    var target;
+    if (e) {
+        e.preventDefault();
+        target = '#' + $(e.target).data('doc-anchor');
+    } else {
+        target = window.location.hash;
     }
-});
-// deep link to single file
-if (target == '#files') {
-    var specificFile = window.location.hash;
-    $(specificFile + ' .view-file').click();
-} else if (target == '#notes' || target == '#comms' || target == '#tasks') { // deep link to specific element
-    var specificElement = window.location.hash;
-    var elementOffset = $(specificElement).offset();
-    window.scrollTo(elementOffset.top, elementOffset.left);
+    var n = target.indexOf('-');
+    var tab = target.substring(0, n != -1 ? n : target.length);
+    tab += 's';
+    $('.tab').each(function(index, element){
+        var tabTarget = $(this).data('target');
+        if (tab == tabTarget) {
+            $(this).click();
+        }
+    });
+    // deep link to single file
+    if (tab == '#files') {
+        var specificFile = target;
+        var linkToView = $(specificFile).find('.view-file');
+        if (linkToView) {
+            var id = linkToView.data('doc-id');
+            var title = linkToView.data('doc-title');
+            var anchor = linkToView.data('doc-anchor');
+            console.log(id, title, anchor);
+            displayDoc(id, title, anchor);
+        }
+    } else if (tab == '#notes' || tab == '#comms' || tab == '#tasks') { // deep link to specific element
+        var specificElement = window.location.hash;
+        var elementOffset = $(specificElement).offset();
+        window.scrollTo(elementOffset.top, elementOffset.left);
+    }
 }
+
+deepLink();
+$('a.view-file').click(deepLink);
 
 /* Communications */
 
@@ -181,14 +199,6 @@ function displayDoc(docId, docTitle, docAnchor) {
     $('.active-document').addClass('visible');
     window.scrollTo(0, $('.active-document').offset().top);
 }
-
-$('a.view-file').click(function() {
-    var docId = $(this).data('docId');
-    var docTitle = $(this).data('docTitle');
-    var docAnchor = $(this).data('docAnchor');
-    $('#tab-files').click();
-    displayDoc(docId, docTitle, docAnchor);
-});
 
 $('.active-document .cancel.button').click(function(){
     $('#viewer').empty();
