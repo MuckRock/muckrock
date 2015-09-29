@@ -211,6 +211,6 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
         max_date = django_filters.DateFilter(name='date', lookup_type='lte')
         class Meta:
             model = FOIACommunication
-            fields = ('max_date', 'min_date', 'foia', 'status')
+            fields = ('max_date', 'min_date', 'foia', 'status', 'response')
 
     filter_class = Filter
