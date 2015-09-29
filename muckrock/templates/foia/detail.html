@@ -375,5 +375,20 @@
         defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
         {% endif %}
     });
+    /* CHECKOUT */
+    $('.checkout-button').click(function(e){
+        e.preventDefault();
+        var checkoutData = getCheckoutData($(this));
+        checkout(
+            "{{ stripe_pk }}",
+            "{% static 'apple-touch-icon.png' %}",
+            checkoutData.description,
+            checkoutData.amount,
+            checkoutData.email,
+            checkoutData.label,
+            checkoutData.form
+        );
+        return false;
+    });
 </script>
 {% endblock scripts %}
