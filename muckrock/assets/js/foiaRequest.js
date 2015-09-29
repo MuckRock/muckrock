@@ -267,20 +267,3 @@ $('.text-area.modal-button').click(function(e){
     textAreaModal($(this).next());
     return false;
 });
-
-/* CHECKOUT */
-
-$('.checkout-button').click(function(e){
-    e.preventDefault();
-    var checkoutData = getCheckoutData($(this));
-    checkout(
-        "{{ stripe_pk }}",
-        "{% static 'apple-touch-icon.png' %}",
-        checkoutData.description,
-        checkoutData.amount,
-        checkoutData.email,
-        checkoutData.label,
-        checkoutData.form
-    );
-    return false;
-});
