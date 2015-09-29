@@ -11,5 +11,7 @@ class FOIAConfig(AppConfig):
     name = 'muckrock.foia'
 
     def ready(self):
-        """Registers requests with the activity streams plugin"""
+        """Registers requests and communications with the activity streams plugin"""
         registry.register(self.get_model('FOIARequest'))
+        registry.register(self.get_model('FOIACommunication'))
+        registry.register(self.get_model('FOIANote'))
