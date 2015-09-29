@@ -1,38 +1,41 @@
+# MuckRock
+
 [ ![Codeship Status for MuckRock/muckrock](https://codeship.com/projects/c14392c0-630c-0132-1e4c-4ad47cf4b99f/status?branch=master)](https://codeship.com/projects/52228)
 
-1. Check out the repository from github:
-  1. Create a github account and have us give you access to the muckrock repository
-  2. Check out the repository: `git clone git@github.com:MuckRock/muckrock.git`
-  See more: https://help.github.com/articles/set-up-git#platform-all
-  http://git-scm.com/documentation
+## Install and run
 
-2. Set the secrets
-  1. Create a file `muckrock/local_settings.py` (`settings.py` should already be in this directory), which contains sensitive information that will not be checked into the repository
-  2. We will send you the sensitive information in a secure manner.
-
-3. Set up vagrant
-  1. Install vagrant https://www.vagrantup.com/downloads.html
-  2. cd to the `vm` directory and type: `vagrant up` (this will take a few minutes)
+1. Set up your virtual machine
+  1. Install [Vagrant](https://www.vagrantup.com/downloads.html)
+  2. `cd` into the `vm` directory and run `vagrant up` (this will take a while)
   3. Type `vagrant ssh` to ssh into the virtual machine
 
-4. Sync and populate the database
-  1. From within the virtual machine, `cd muckrock`
+2. Set the secrets
+  1. From inside the `muckrock` directory, `touch local_settings.py` (`settings.py` should already be in this directory).
+  2. The `local_settings.py` file should never be checked in to the repository.
+  3. We will send you the (definitely) sensitive information in a (probably) secure manner.
+
+3. Sync and populate the database inside the virtual machine
+  1. From within the virtual machine, `cd` into the `muckrock` directory
   2. Run `./manage.py syncdb` and create a superuser when asked to do so
   3. Run `./manage.py migrate`
-  4. Run `./manage.py shell < myscript.py`
+  4. Run `fab populate-db` to populate the DB (this is broken I think…)
 
-5. Run the test server
-  1. Run `./manage.py runserver 0.0.0.0:8000`
-  2. Navigate your web browser (from the hostt machine) to http://127.0.0.1:8000
-  3. Run `./manage.py celeryd` to start a celery process to run delayed tasks
-  4. Run `python -m smtpd -n -c DebuggingServer localhost:1025` to start a dummy email server
-
-6. Install the heroku toolbelt
-  1. https://toolbelt.heroku.com/
-  2. Set up a heroku remote branch so you can deploy your code: https://devcenter.heroku.com/articles/git#creating-a-heroku-remote
-
-----
+4. Run the test server inside the virtual machine
+  1. Run `fab mail &` to start a background email server
+  2. Run `fab celery &` to start a background task queue
+  3. Run `fab runserver` to start a server instance
+  4. Navigate your web browser (from the host machine) to `localhost:8000`
 
 You should have a very bare MuckRock site running locally now.
-The code checked out from github is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine.
+The code checked out from GitHub is synced between the virtual machine and your host machine, so you may edit the code using your favorite text editor locally while running the code from within the virtual machine. To run the server again, just follow step 4.
 
+## Test and lint
+
+* Test your code in one of two ways:
+    * Run `fab test` to run all the tests
+    * Run `./manage.py test muckrock.<app_name>` to test a particular application
+* Lint your code by running `fab pylint`
+
+## Push and deploy
+
+The `master` branch represents our product code. `master` should only ever be updated by merges from the `dev` branch, which tracks it. New features should be branched from `dev`, then merged back into `dev` once they are tested and linted. Any feature branch pushed to GitHub will be evaluated by Codeship. If the `staging` branch is pushed, the [staging server](http://muckrock-staging.herokuapp.com) will be updated. If the `master` branch is pushed, the [production server](https://www.muckrock.com) will be updated.

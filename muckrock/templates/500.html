@@ -1,10 +1,19 @@
 {% extends "base.html" %}
+{% load static from staticfiles %}
 {% block title %}MuckRock &bull; Server Malfunction{% endblock title %}
 
 {% block content %}
-<h1>Uh oh, something seems to have gone wrong on our end.</h1>
-<h2>We have top men working on this issue. <small>Top. Men.</small></h2>
-{% if request.sentry.id %}
-	<p class="larger">If you need assistance, you may <a href="mailto:info@muckrock.com">email us</a> and reference this error as <strong>{{ request.sentry.id }}</strong>.</p>
-{% endif %}
+<article class="error-500" style="background-image: url('{% static 'img/500.jpg' %}');">
+    <div class="error-500 text">
+        <div class="error-message">
+            <h1 class="display">Oops.</h1>
+            <h2>Something broke on our end. We’re always improving the site, so it should be fixed soon.</h2>
+        </div>
+        <div class="error-report">
+            <p><strong>Report this error</strong></p>
+            <p>If you want to help us fix this faster, <a href="mailto:info@muckrock.com?subject=Error%20{{ request.sentry.id }}">send us a report</a> and tell us what you were doing before this error appeared.</p>
+            <p>Thank you!</p>
+        </div>
+    </div>
+</article>
 {% endblock %}

@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load compress %}
+{% load humanize %}
+{% load markdown_deux_tags %}
+{% load mathfilters %}
+{% load static from staticfiles %}
+{% load crowdfund_tags %}
+{% load tags %}
+
+{% block title %}MuckRock &bull; {{ foia.title }}{% endblock %}
+{% block type %}request{% endblock %}
+
+{% block open_graph %}
+<meta property="og:title" content="{{ foia.title }}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
+<meta property="og:image" content="{% static 'apple-touch-icon.png' %}" />
+<meta property="og:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta property="og:site_name" content="MuckRock" />
+{% endblock open_graph %}
+
+{% block twitter_card %}
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@muckrock" />
+{% if foia.user.profile.twitter %}
+<meta name="twitter:creator" content="{{ foia.user.profile.twitter }}" />
+{% endif %}
+<meta name="twitter:title" content="{{ foia.title }}" />
+<meta name="twitter:description" content="{{ foia.user.get_full_name }} {% if foia.date_done %}made{% else %}is making{% endif %} this request{% if foia.agency %} to {{ foia.agency.name }} of {% if foia.jurisdiction.name = 'United States of America' %}the {% endif %}{{ foia.jurisdiction.name }}.{% endif %}" />
+<meta name="twitter:image:src" content="{% static 'apple-touch-icon.png' %}" />
+{% endblock twitter_card %}
+
+{% block content %}
+<article class="request detail" id="foia-{{ foia.id }}">
+    <section class="request properties">
+        <header>
+            <section class="identity">
+                <h1>{{ foia.title }}</h1>
+            </section>
+        </header>
+        <section class="basic-information">
+            <summary class="synopsis"><a href="{% url 'acct-profile' foia.user.username %}">{{ foia.user.get_full_name }}</a> filed this request{% if foia.agency %} with the {% if foia.agency.approved %}<a href="{{ foia.agency.get_absolute_url }}">{{ foia.agency.name }}</a>{% else %}{{ foia.agency.name }}{% endif %} of {% if foia.jurisdiction.level == 'f' %}the {% endif %}<a href="{{ foia.jurisdiction.get_absolute_url }}">{{ foia.jurisdiction.name }}</a>{% if foia.jurisdiction.parent and foia.jurisdiction.level == 'l' %}, <a href="{{ foia.jurisdiction.parent.get_absolute_url }}" title="{{ foia.jurisdiction.parent.name }}">{{ foia.jurisdiction.parent.abbrev }}</a>{% endif %}{% endif %}.</summary>
+            {% if foia.parent %}
+            <p>It is a clone of <a href="{{ foia.parent.get_absolute_url }}">this request</a>.</p>
+            {% endif %}
+        </section>
+        <span class="toggle-details" id="toggle-specific-information" data-state="0">Show details</span>
+        <section class="specific-information">
+            {% if user.is_staff %}
+            <table class="numbers">
+                <tr class="muckrock-number">
+                    <td>MuckRock #</td>
+                    <td>{{ foia.id }}</td>
+                </tr>
+                <tr class="tracking-number">
+                    <td>Tracking #</td>
+                    <td>{{ foia.tracking_id }}</td>
+                </tr>
+            </table>
+            {% endif %}
+            <table class="dates">
+                <tr class="submitted">
+                    <td class="label">Submitted</td>
+                    <td class="date">{{ foia.date_submitted }}</td>
+                </tr>
+                {% if foia.date_due and foia.status == "processed" %}
+                <tr class="due">
+                    <td class="label">Due</td>
+                    {% if past_due %}
+                    <td class="date failure">{{ foia.date_due }}</td>
+                    {% else %}
+                    <td class="date">{{ foia.date_due }}</td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+                {% if foia.last_response %}
+                <tr class="last-response">
+                    <td class="label">Last Response</td>
+                    <td class="date">{{ foia.last_response.date.date }}</td>
+                </tr>
+                {% endif %}
+                {% if show_estimated_date %}
+                <tr class="estimated-completion">
+                    <td class="label">Est. Completion</td>
+                    <td class="date">{% if foia.date_estimate %}{{ foia.date_estimate|date }}{% else %}None{% endif %}{% if user_can_edit %}<span class="edit">Edit</span>{% endif %}</td>
+                </tr>
+                {% endif %}
+            </table>
+            {% if user_can_edit %}
+            <form class="change-date" id="change-estimated-completion-date" method="post">
+                {% csrf_token %}
+                <label for="{{ change_estimated_date.date_estimate.id_for_label }}">{{ change_estimated_date.date_estimate.label }}</label>
+                {{ change_estimated_date.date_estimate }}
+                <p class="help-text">{{ change_estimated_date.date_estimate.help_text }}</p>
+                <button class="primary" type="submit" name="action" value="date_estimate">Save</button>
+                <button class="cancel" id="cancel-date-estimate">Cancel</button>
+            </form>
+            {% endif %}
+            <section class="states">
+                {% include 'foia/component/status.html' %}
+                {% include 'foia/component/embargo.html' %}
+                {% tag_manager foia %}
+            </section>
+        </section>
+    </section>
+    <main class="request main">
+
+        <section class="actions">
+            {% include 'foia/foia_actions.html' %}
+        </section>
+
+        {% if foia.has_crowdfund %}
+            {% crowdfund_request foia.crowdfund.pk %}
+        {% endif %}
+
+        <ul class="tabs">
+            <li class="tab active" data-target="#comms">Request</li>
+            <li class="tab" data-target="#files">Files</li>
+            {% if foia.user == user or user.is_staff %}
+            <li class="tab" data-target="#notes">Notes</li>
+            {% endif %}
+            {% if user_can_edit %}
+            <li class="tab" data-target="#sharing">Sharing</li>
+            {% endif %}
+            {% if user.is_staff %}
+            <li class="tab" data-target="#tasks">Tasks</li>
+            {% endif %}
+        </ul>
+
+        <section class="tab-section communications visible" id="comms">
+            <div class="communications-controls">
+                <div class="communications filter">
+                    <input id="comms-filter" type="search" placeholder="Filter communications" />
+                </div>
+                <button id="toggle-communication-collapse" data-state="0">Collapse All</button>
+            </div>
+            <div class="communications-list">
+            {% for comm in foia.communications.all %}
+                {% include 'foia/communication.html' with communication=comm %}
+            {% endfor %}
+            </div>
+
+            {% if user_can_edit %}
+            {% if foia.status == "ack" or foia.status == "processed" %}
+            <div class="auto-follow-up">
+                {% if foia.disable_autofollowups %}
+                <p>Automatic follow ups are disabled.</p>
+                <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Enable automatic follow ups">Enable</a>
+                {% else %}
+                <p>We'll automatically follow-up with the agency{% if foia.date_followup %} in {{ foia.date_followup|timeuntil }}{% endif %}.</p>
+                <a href="{% url 'foia-toggle-followups' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Disable automatic follow ups">Disable</a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if user_can_edit %}
+            <div class="communications-composer">
+                <div class="composer-actions">
+                    <button class="primary" id="follow-up">Follow Up</button>
+                    {% if foia.is_appealable %}
+                    <button class="failure" id="appeal">Appeal</button>
+                    {% endif %}
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'foia-admin-fix' jurisdiction=foia.jurisdiction.slug jidx=foia.jurisdiction.pk idx=foia.id slug=foia.slug %}" title="Make an admin fix" class="button">Admin Fix</a>
+                    {% else %}
+                    <button id="get-advice">Get Advice</button>
+                    {% endif %}
+                </div>
+                <div class="inactive composer-input visible">
+                    <p>You may <span id="inactive-follow-up">follow up</span> {% if not foia.disable_autofollowups %}manually {% endif %}with the agency{% if foia.is_appealable %} or <span id="inactive-appeal">appeal</span> their decision{% endif %}.</p>
+                </div>
+                <form class="follow-up composer-input" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="follow_up" />
+                    <label for="follow-up-composer">Send a follow up to the {{ foia.agency.name }}</label>
+                    <textarea name="text" id="follow-up-composer"></textarea>
+                    <div class="buttons">
+                        <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                        <span class="button cancel">Cancel</span>
+                    </div>
+                </form>
+                {% if foia.is_appealable %}
+                <form class="appeal composer-input" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="appeal" />
+                    {% if foia.agency.appeal_agency %}
+                    <label for="appeal-composer">Send an appeal to the {{ foia.agency.appeal_agency.name }}</label>
+                    {% else %}
+                    <label for="appeal-composer">Send an appeal to the {{ foia.agency.name }}</label>
+                    {% endif %}
+                    <textarea name="text" id="appeal-composer"></textarea>
+                    <div class="buttons">
+                        <button class="primary" type="submit" name="appeal" value="1">Send</button>
+                        <span class="button cancel">Cancel</span>
+                    </div>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </section>
+
+        <!-- DOCUMENTS -->
+        <section class="tab-section files" id="files">
+            {% if foia.total_pages > 0 %}
+            <div class="active-document">
+                <header>
+                    <h3 id="doc-title"></h3>
+                    <div class="file-viewer-actions">
+                        <span class="cancel button">Close</span>
+                    </div>
+                </header>
+                <div class="viewer" id="viewer"></div>
+            </div>
+            {% endif %}
+            {% if foia.files.count > 0 %}
+            <ul class="files-list" id="all-files">
+                {% for file in foia.files.all %}
+                <li>{% include "lib/file.html" %}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <h3 class="empty">There are no files associated with this request.</h3>
+            {% endif %}
+        </section>
+
+        <!-- NOTES -->
+        {% if user_can_edit %}
+        <section class="tab-section notes" id="notes">
+            {% if foia.notes.count > 0 %}
+            <header class="notes-controls">
+                <div class="notes filter">
+                    <input id="notes-filter" type="search" placeholder="Filter notes" />
+                </div>
+            </header>
+            {% endif %}
+            {% for note in foia.notes.all %}
+                {% include 'foia/note.html' with note=note %}
+            {% endfor %}
+            <form class="add-note" method="post">
+                {% csrf_token %}
+                <header>
+                    <h4>Add a note</h4>
+                    <p>Markdown syntax supported</p>
+                </header>
+                {{ note_form.note }}
+                <footer>
+                    <button class="primary" type="submit" name="action" value="add_note">Save</button>
+                    <p>Your notes are visible to you and other editors of this request.</p>
+                </footer>
+            </form>
+        </section>
+        {% endif %}
+
+        {% if user_can_edit %}
+        <!-- ACCESS -->
+        <section class="tab-section access" id="sharing">
+            {% if foia.embargo %}
+            <form class="generate-private-link" method="post">
+                {% csrf_token %}
+                <h3>Private Link</h3>
+                {% if foia.access_key %}
+                <input type="text" value="{{ request.get_host }}{{ request.get_full_path }}?key={{ foia.access_key }}" readonly />
+                {% else %}
+                <input type="text" value="No private link" readonly />
+                {% endif %}
+                <button type="submit" name="action" value="generate_key">Create new link</button>
+                <p class="help-text">Share this private link with anyone you want to be able to see this request. If you regenerate this link, it will break any that you have already given out.</p>
+            </form>
+            {% endif %}
+            <form class="grant-access" method="post">
+                {% csrf_token %}
+                <h3>Grant Access</h3>
+                <div class="user search input">
+                    <label for="{{ access_form.users.id_for_label}}">Search for MuckRock users</label>
+                    {{ access_form.users }}
+                </div>
+                {{ access_form.access }}
+                <button class="primary" type="submit" name="action" value="grant_access">Save</button>
+            </form>
+            <table class="people with-access">
+                <h3>People with access</h3>
+                <tbody>
+                    <tr class="person with-access">
+                        <td class="name"><p>{{ foia.user.get_full_name }}</p></td>
+                        <td class="access nostretch"><p class="creator access-badge">Creator</p></td>
+                        <td class="modify nostretch"></td>
+                    </tr>
+                    {% for user in foia.edit_collaborators.all %}
+                    <tr class="person with-access">
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
+                        </td>
+                        <td class="access nostretch">
+                            <p class="editor access-badge">Editor</p>
+                        </td>
+                        <td class="modify nostretch">
+                            <form class="modify-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="demote">Demote</button>
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% for user in foia.read_collaborators.all %}
+                    <tr class="person with-access">
+                        <td class="name">
+                            <p>{{ user.get_full_name }}</p>
+                        </td>
+                        <td class="access nostretch">
+                            <p class="reader access-badge">Viewer</p>
+                        </td>
+                        <td class="modify nostretch">
+                            <form class="modify-access" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="user" value="{{ user.id }}" />
+                                <button type="submit" name="action" value="promote">Promote</button>
+                                <button class="failure" type="submit" name="action" value="revoke_access">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+
+        {% if user.is_staff %}
+        <!-- TASKS -->
+        <section class="tab-section tasks" id="tasks">
+            <header class="tasks-control">
+                <p>{% if open_tasks|length > 0 %}Showing {{ open_tasks|length }} unresolved task{{ open_tasks|length|pluralize }}. {% endif %}<a href="{% url 'request-task-list' pk=foia.pk %}" class="task-link">See all tasks for this request.</a></p>
+            </header>
+            {% for task in open_tasks %}
+                {% include 'lib/task.html' with task=task %}
+            {% empty %}
+                {% if task_count > 0 %}
+            <h3 class="empty">All the tasks for this request are resolved.</h3>
+                {% else %}
+            <h3 class="empty">There are no tasks for this request.</h3>
+                {% endif %}
+            {% endfor %}
+        </section>
+        {% endif %}
+    </main>
+</article>
+{% endblock content %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js" type="text/javascript"></script>
+<script src="https://s3.amazonaws.com/s3.documentcloud.org/viewer/loader.js" type="text/javascript"></script>
+{% if foia.has_crowdfund %}
+<script src="{% static 'js/autoNumeric.js' %}" type="text/javascript"></script>
+<script type="text/javascript" src="{% static 'js/crowdfund.js' %}"></script>
+{% endif %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript" src="{% static 'js/jquery.quicksearch.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery.ui.datepicker.js' %}" ></script>
+<script type="text/javascript" src="{% static 'js/communication.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/task.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/foiaRequest.js' %}"></script>
+<script type="text/javascript">
+    $('#comms-filter').quicksearch('#comms .communications-list .communication');
+    $('#notes-filter').quicksearch('#notes .note');
+    $('.datepicker').datepicker({
+        maxDate: '+1m',
+        minDate: 0,
+        firstDay: 1,
+        hideIfNoPrevNext: true,
+        numberOfMonths: 1,
+        {% if foia.date_embargo %}
+        defaultDate: '{{ foia.date_embargo|date:"m/d/Y" }}'
+        {% endif %}
+    });
+    /* CHECKOUT */
+    $('.checkout-button').click(function(e){
+        e.preventDefault();
+        var checkoutData = getCheckoutData($(this));
+        checkout(
+            "{{ stripe_pk }}",
+            "{% static 'apple-touch-icon.png' %}",
+            checkoutData.description,
+            checkoutData.amount,
+            checkoutData.email,
+            checkoutData.label,
+            checkoutData.form
+        );
+        return false;
+    });
+</script>
+{% endblock scripts %}

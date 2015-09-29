@@ -1,14 +1,14 @@
 function modal(nextSelector) {
-    var overlay = '<div class="overlay"></div>';
-    $(overlay).insertBefore($('.container')).fadeIn();
-    nextSelector.removeClass('hidden-modal').addClass('modal');
-    $('.overlay').click(function(){
-        $('.overlay').fadeOut().remove();
-        $('.modal').removeClass('modal').addClass('hidden-modal');
+    var overlay = '#modal-overlay';
+    $(overlay).addClass('visible');
+    $(nextSelector).addClass('visible');
+    $(overlay).click(function(){
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
     });
     $('.close-modal').click(function(){
-        $('.overlay').fadeOut().remove();
-        $('.modal').removeClass('modal').addClass('hidden-modal');
+        $(overlay).removeClass('visible');
+        $(nextSelector).removeClass('visible');
     });
 }
 
@@ -66,6 +66,18 @@ $('.embed.hidden-modal').each(function() {
     textarea.val(embed);
 });
 
+// FLAG FORM
+
+$('#show-flag-form').click(function(){
+    var thisButton = $(this);
+    $(thisButton).hide();
+    var flagForm = $(this).next();
+    $(flagForm).addClass('visible').find('.cancel.button').click(function(){
+        $(thisButton).show();
+        $(flagForm).removeClass('visible');
+    });
+});
+
 // SELECT ALL
 $('#toggle-all').click(function(){
     var toggleAll = this;
@@ -79,11 +91,22 @@ $('#toggle-all').click(function(){
     });
 });
 
-// Tag Manager
-
-$('#edit-tags').click(function() {
-    $('#tag-form').show();
-    $(this).hide();
+// Manager Component
+// A manager presents a state and a form that can modify that state.
+$('.edit').click(function(){
+    var editButton = this;
+    var manager = $(editButton).closest('.manager');
+    var form = $(manager).find('form');
+    var display = $(manager).find('.state');
+    $(form).addClass('visible');
+    $(display).hide();
+    $(editButton).hide();
+    $(manager).find('.cancel').click(function(e){
+        e.preventDefault();
+        $(form).removeClass('visible');
+        $(display).show();
+        $(editButton).show();
+    });
 });
 
 // MESSAGES
@@ -101,40 +124,6 @@ $('.message .visibility').click(function() {
         $(this).html('&#9660;');
     }
 });
-
-if ($.cookie('broadcast') == false) {
-    var broadcastPanel= $('.sidebar .broadcast')[0];
-    $(broadcastPanel).hide();
-}
-$('#close-broadcast').click(function(){
-    $(this).parent().hide();
-    $.cookie('broadcast', 0);
-});
-
-/* Key and Swipe Bindings
-$(document).bind('keydown', 'm', toggleSidebar());
-$(document).bind('keydown', 'shift+m', toggleSidebar());
-$(document).bind('keydown', 'left', toggleSidebar());
-$(document).bind('keydown', 'right', toggleSidebarOff());
-$(document).bind('keydown', 'esc', toggleSidebarOff());
-// swipe left to toggle sidebar on
-// swipe right to toggle sidebar off
-
-// Sidebar Interactions
-//
-// if sidebar is open
-//      on clicking or tapping div.container or div.footer-container:
-//          sidebar closes
-//      on clicking or tapping a.menu-button:
-//          sidebar closes
-//          a.menu-button content changes
-// if sidebar is closed
-//      on clicking or tapping a.menu-button:
-//          sidebar opens
-//          a.menu-button content changes
-*/
-
-
 
 // formsets
 $(function() {

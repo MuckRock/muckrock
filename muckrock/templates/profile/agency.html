@@ -72,44 +72,14 @@
         {% else %}
         <a href="{% follow_url agency %}?next={{ agency.get_absolute_url }}" class="follow primary button">Follow</a>
         {% endif %}
-        <span class="modal-button button">Submit a Change</span>
-        <div class="hidden-modal">
-            <form action="" method="post">
-                {% csrf_token %}
-                {% if form.non_field_errors %}
-                <object class="failure panel">
-                {{ form.non_field_errors }}
-                </object>
-                {% endif %}
-                {% for field in form.hidden_fields %}
-                    {{ field }}
-                {% endfor %}
-                {% for field in form.visible_fields %}
-
-                        <h1>{{ field.label }}</h1>
-                        <h2>{{ field.help_text }}</h2>
-                        {{ field }}
-                        {% if field.errors %}<p class="failure"><small>{{ field.errors }}</small></p>{% endif %}
-                {% endfor %}
-                <input type="submit" name="submit" value="Submit" class="primary button" />
-            </form>
-        </div>
+        {% include 'lib/flag_form.html' %}
     </section>
     {% endif %}
-
+    {% if agency.public_notes %}
     <section class="notes">
         {{ agency.public_notes|markdown:"trusted" }}
     </section>
-
-    {% comment %}
-    <section class="interesting-requests">
-    {% for req in agency.interesting_requests %}
-        <h3>{{req.headline}}</h3>
-        {% include 'lib/foia_group.html' with foias=req %}
-    {% endfor %}
-    </section>
-    {% endcomment %}
-
+    {% endif %}
     <h3>Recent Requests <small><a href="{% url 'foia-list' %}?agency={{ agency.pk }}">See All</a></small></h3>
     {% include 'lib/foia_table.html' with requests=foia_requests %}
 </main>

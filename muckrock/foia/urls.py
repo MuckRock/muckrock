@@ -50,21 +50,17 @@ urlpatterns = patterns(
 
     # Detail View
     url(r'^%s/$' % foia_url,
-        views.Detail.as_view(template_name='details/request_detail.html'),
+        views.Detail.as_view(template_name='foia/detail.html'),
         name='foia-detail'),
 
     url(r'^%s/clone/$' % foia_url,
         views.clone_request, name='foia-clone'),
     url(r'^%s/admin_fix/$' % foia_url,
         views.admin_fix, name='foia-admin-fix'),
-    url(r'^%s/add_note/$' % foia_url,
-        views.note, name='foia-note'),
     url(r'^%s/delete/$' % foia_url,
         views.delete, name='foia-delete'),
     url(r'^%s/embargo/$' % foia_url,
         views.embargo, name='foia-embargo'),
-    url(r'^%s/embargo/permanent/$' % foia_url,
-        views.permanent_embargo, name='foia-embargo-permanent'),
     url(r'^%s/pay/$' % foia_url,
         views.pay_request, name='foia-pay'),
     url(r'^%s/crowdfund/$' % foia_url,
