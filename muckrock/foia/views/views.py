@@ -13,6 +13,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
 
+import actstream
 from datetime import datetime
 import json
 import logging
@@ -237,11 +238,16 @@ class Detail(DetailView):
                  (request.user.is_staff and status in [s for s, _ in STATUS])):
             foia.status = status
             foia.save()
-
             StatusChangeTask.objects.create(
                 user=request.user,
                 old_status=old_status,
                 foia=foia,
+            )
+            # generate status change activity
+            actstream.action.send(
+                request.user,
+                verb='changed the status of',
+                action_object=foia
             )
         return redirect(foia)
 
@@ -250,8 +256,15 @@ class Detail(DetailView):
         text = request.POST.get('text', False)
         can_follow_up = foia.editable_by(request.user) or request.user.is_staff
         if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(foia, foia.user.get_full_name(), text)
+            save_foia_comm(foia, request.user.get_full_name(), text)
             messages.success(request, 'Your follow up has been sent.')
+            # generate follow up action
+            actstream.action.send(
+                request.user,
+                verb='followed up',
+                action_object=foia,
+                target=foia.agency
+            )
         return redirect(foia)
 
     def _question(self, request, foia):
@@ -283,6 +296,13 @@ class Detail(DetailView):
             foia_note.save()
             logging.info('%s added %s to %s', foia_note.author, foia_note, foia_note.foia)
             messages.success(request, 'Your note is attached to the request.')
+            # generate note added action
+            actstream.action.send(
+                request.user,
+                verb='added',
+                action_object=foia_note,
+                target=foia
+            )
         return redirect(foia)
 
     def _flag(self, request, foia):
@@ -294,6 +314,12 @@ class Detail(DetailView):
                 text=text,
                 foia=foia)
             messages.success(request, 'Problem succesfully reported')
+            # generate flagged action
+            actstream.action.send(
+                request.user,
+                verb='flagged',
+                action_object=foia
+            )
         return redirect(foia)
 
     def _appeal(self, request, foia):
@@ -302,6 +328,14 @@ class Detail(DetailView):
         if foia.editable_by(request.user) and foia.is_appealable() and text:
             save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
             messages.success(request, 'Appeal successfully sent.')
+            agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
+            # generate appeal action
+            actstream.action.send(
+                request.user,
+                verb='appealed',
+                action_object=foia,
+                target=agency
+            )
         return redirect(foia)
 
     def _update_estimate(self, request, foia):
@@ -341,9 +375,23 @@ class Detail(DetailView):
         if access == 'edit' and users:
             for user in users:
                 foia.add_editor(user)
+                # generate action
+                actstream.action.send(
+                    request.user,
+                    verb='added editor',
+                    action_object=user,
+                    target=foia
+                )
         if access == 'view' and users:
             for user in users:
                 foia.add_viewer(user)
+                # generate action
+                actstream.action.send(
+                    request.user,
+                    verb='added viewer',
+                    action_object=user,
+                    target=foia
+                )
         if len(users) > 1:
             success_msg = '%d people can now %s this request.' % (len(users), access)
         else:
@@ -360,6 +408,13 @@ class Detail(DetailView):
                 foia.remove_editor(user)
             elif foia.has_viewer(user):
                 foia.remove_viewer(user)
+            # generate action
+            actstream.action.send(
+                request.user,
+                verb='removed',
+                action_object=user,
+                target=foia
+            )
             messages.success(request, '%s no longer has access to this request.' % user.first_name)
         return redirect(foia)
 

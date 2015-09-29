@@ -479,22 +479,14 @@ class FOIARequest(models.Model):
         else:
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
+        # generate sent activity
+        actstream.action.send(
+            self,
+            verb='sent',
+            action_object=comm,
+            target=self.agency
+        )
         self.save()
-        # the user submitted the request
-        if appeal:
-            actstream.action.send(
-                self.user,
-                verb='appealed',
-                action_object=self,
-                target=self.agency
-            )
-        else:
-            actstream.action.send(
-                self.user,
-                verb='submitted',
-                action_object=self,
-                target=self.agency
-            )
 
     def followup(self, automatic=False):
         """Send a follow up email for this request"""

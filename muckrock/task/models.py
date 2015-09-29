@@ -277,6 +277,38 @@ class ResponseTask(Task):
         foia.tracking_id = tracking_id
         foia.save()
 
+    def generate_actions(self, foia, comm):
+        """Generate activity stream actions for agency replies"""
+        # generate action
+        actstream.action.send(
+            foia.agency,
+            verb='sent',
+            action_object=comm,
+            target=foia
+        )
+        if status == 'rejected':
+            # generate action
+            actstream.action.send(
+                foia.agency,
+                verb='rejected',
+                action_object=foia
+            )
+        }
+        elif status == 'done':
+            # generate action
+            actstream.action.send(
+                foia.agency,
+                verb='completed',
+                action_object=foia
+            )
+        elif status == 'partial':
+            # generate action
+            actstream.action.send(
+                foia.agency,
+                verb='partially completed',
+                action_object=foia
+            )
+
     def set_status(self, status):
         """Sets status of comm and foia"""
         comm = self.communication
@@ -294,6 +326,7 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
+        self.generate_actions(foia, comm)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""

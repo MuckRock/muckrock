@@ -16,6 +16,7 @@ from django.template.loader import render_to_string, get_template
 from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
+import actstream
 from datetime import datetime
 import json
 import logging
@@ -186,6 +187,13 @@ def _submit_request(request, foia):
     foia.submit()
     request.session['ga'] = 'request_submitted'
     messages.success(request, 'Your request was submitted.')
+    # generate action
+    actstream.action.send(
+        request.user,
+        verb='submitted',
+        action_object=foia,
+        target=foia.agency
+    )
     return redirect(foia)
 
 def clone_request(request, jurisdiction, jidx, slug, idx):
@@ -225,6 +233,20 @@ def create_request(request):
             foia_comm.save()
             foia.save()
             request.session['ga'] = 'request_drafted'
+            # generate action
+            actstream.action.send(
+                request.user,
+                verb='drafted',
+                action_object=foia
+            )
+            if (foia.parent) {
+                # generate action
+                actstream.action.send(
+                    request.user,
+                    verb='cloned',
+                    action_object=foia.parent
+                )
+            }
             return redirect(foia)
         else:
             # form is invalid
