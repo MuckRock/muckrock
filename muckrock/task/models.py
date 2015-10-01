@@ -8,9 +8,9 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
 
+import actstream
 from datetime import datetime
 import email
-
 import logging
 
 from muckrock.foia.models import FOIARequest, STATUS
@@ -277,7 +277,7 @@ class ResponseTask(Task):
         foia.tracking_id = tracking_id
         foia.save()
 
-    def generate_actions(self, foia, comm):
+    def generate_actions(self, foia, comm, status):
         """Generate activity stream actions for agency replies"""
         # generate action
         actstream.action.send(
@@ -293,7 +293,6 @@ class ResponseTask(Task):
                 verb='rejected',
                 action_object=foia
             )
-        }
         elif status == 'done':
             # generate action
             actstream.action.send(
@@ -326,7 +325,7 @@ class ResponseTask(Task):
         foia.update()
         foia.save()
         logging.info('Request #%d status changed to "%s"', foia.id, status)
-        self.generate_actions(foia, comm)
+        self.generate_actions(foia, comm, status)
 
     def set_price(self, price):
         """Sets the price of the communication's request"""

@@ -425,6 +425,15 @@ class FOIARequest(models.Model):
         if responses:
             return (date.today() - responses[0].date.date()).days
 
+    def _notify(self):
+        """Notify request's creator and followers about the update"""
+        # notify creator
+        self.user.profile.notify(self)
+        # notify followers
+        for user in actstream.models.followers(self):
+            if self.viewable_by(user):
+                user.profile.notify(self)
+
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=no-member
@@ -432,6 +441,7 @@ class FOIARequest(models.Model):
         # Do something with anchor
         self.updated = True
         self.save()
+        self._notify()
         self.update_dates()
 
     def submit(self, appeal=False, snail=False):

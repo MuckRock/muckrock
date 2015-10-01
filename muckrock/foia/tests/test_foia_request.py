@@ -21,6 +21,7 @@ import re
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
+from muckrock.factories import UserFactory, FOIARequestFactory
 from muckrock.foia import tasks
 from muckrock.foia.models import FOIARequest, FOIACommunication, END_STATUS
 from muckrock.foia.forms import FOIAEmbargoForm, FOIAAccessForm
@@ -36,35 +37,6 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 # allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-
-
-class UserFactory(factory.django.DjangoModelFactory):
-    """A factory for creating User test objects."""
-    class Meta:
-        model = User
-
-    username = factory.Sequence(lambda n: "user_%d" % n)
-
-
-class JurisdictionFactory(factory.django.DjangoModelFactory):
-    """A factory for creating Jurisdiction test objects."""
-    class Meta:
-        model = Jurisdiction
-
-    name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
-
-
-class FOIARequestFactory(factory.django.DjangoModelFactory):
-    """A factory for creating FOIARequest test objects."""
-    class Meta:
-        model = FOIARequest
-
-    title = factory.Sequence(lambda n: "FOIA Request %d" % n)
-    slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
-    user = factory.SubFactory(UserFactory)
-    jurisdiction = factory.SubFactory(JurisdictionFactory)
-
 
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
@@ -560,6 +532,7 @@ class TestFOIAIntegration(TestCase):
         nose.tools.eq_(len(mail.outbox), 1)
         nose.tools.ok_(mail.outbox[-1].subject.startswith('[MuckRock]'))
         nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
+
         # make sure dates were set correctly
         nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
         nose.tools.ok_(foia.date_due is None)
@@ -608,9 +581,6 @@ class TestFOIAIntegration(TestCase):
         foia.save()
         foia.update(comm.anchor())
 
-        # check that a notification has not been sent to the user since they habe not
-        # cleared the updated flag yet by viewing it
-        nose.tools.eq_(len(mail.outbox), 2)
         # make sure dates were set correctly
         nose.tools.eq_(foia.date_submitted, datetime.date(2010, 2, 3))
         nose.tools.eq_(foia.date_due, old_date_due)

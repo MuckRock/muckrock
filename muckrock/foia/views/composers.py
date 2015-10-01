@@ -239,14 +239,13 @@ def create_request(request):
                 verb='drafted',
                 action_object=foia
             )
-            if (foia.parent) {
+            if (foia.parent):
                 # generate action
                 actstream.action.send(
                     request.user,
                     verb='cloned',
                     action_object=foia.parent
                 )
-            }
             return redirect(foia)
         else:
             # form is invalid
