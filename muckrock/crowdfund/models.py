@@ -5,6 +5,7 @@ Models for the crowdfund application
 from django.contrib.auth.models import User, AnonymousUser
 from django.db import models
 
+import actstream
 from datetime import date
 from decimal import Decimal
 import logging
@@ -52,9 +53,11 @@ class CrowdfundABC(models.Model):
             total_amount += payment.amount
         self.payment_received = total_amount
         self.save()
-        if self.payment_received >= self.payment_required and self.payment_capped:
-            self.close_crowdfund()
+        if self.payment_received >= self.payment_required:
             logging.info('Crowdfund %d reached its goal.', self.id)
+            actstream.action.send(self, verb='succeeded')
+            if self.payment_capped:
+                self.close_crowdfund()
         return
 
     def close_crowdfund(self):
@@ -62,6 +65,7 @@ class CrowdfundABC(models.Model):
         self.closed = True
         self.save()
         task.models.GenericCrowdfundTask.objects.create(crowdfund=self)
+        actstream.action.send(self, verb='ended')
         return
 
     def contributors(self):

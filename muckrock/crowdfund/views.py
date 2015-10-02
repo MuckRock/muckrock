@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, DetailView, CreateView
 
+import actstream
 from datetime import date, timedelta
 import logging
 import stripe
@@ -143,7 +144,12 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             )
             try:
-                crowdfund.make_payment(token, amount, show, user)
+                payment = crowdfund.make_payment(token, amount, show, user)
+                actstream.action.send(
+                    payment,
+                    verb='contributed',
+                    target=crowdfund
+                )
             except stripe_exceptions as payment_error:
                 logging.error(payment_error)
                 self.return_error(request)
@@ -195,6 +201,16 @@ class CrowdfundProjectCreateView(CreateView):
             'project': project.id
         }
 
+    def generate_action(self):
+        """Generates an activity stream action"""
+        crowdfund = self.get_object()
+        actstream.action.send(
+            self.request.user,
+            verb='created',
+            action_object=crowdfund
+        )
+
     def get_success_url(self):
+        self.generate_action()
         project = self.get_project()
         return project.get_absolute_url()

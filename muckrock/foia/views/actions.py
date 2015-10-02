@@ -320,8 +320,13 @@ def crowdfund_request(request, idx, **kwargs):
         # save crowdfund object
         form = CrowdfundRequestForm(request.POST)
         if form.is_valid():
-            form.save()
+            crowdfund = form.save()
             messages.success(request, 'Your crowdfund has started, spread the word!')
+            actstream.action.send(
+                request.user,
+                verb='created',
+                action_object=crowdfund
+            )
             return redirect(foia)
 
     elif request.method == 'GET':
