@@ -165,6 +165,11 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
+            actstream.action.send(
+                answer.user,
+                verb='answered',
+                action_object=answer.question
+            )
             answer.question.notify_update()
             return redirect(answer.question)
     else:
