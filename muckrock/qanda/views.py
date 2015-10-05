@@ -107,7 +107,7 @@ class Detail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(Detail, self).get_context_data(**kwargs)
         user = self.request.user
-        if user.is_authenticated() and context['object'].followed_by.filter(user=user):
+        if user.is_authenticated() and actstream.actions.is_following(user, self.get_object()):
             context['follow_label'] = 'Unfollow'
         else:
             context['follow_label'] = 'Follow'
