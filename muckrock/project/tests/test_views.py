@@ -83,7 +83,7 @@ class TestProjectCreateView(TestCase):
         logging.debug('Projects: %s', Project.objects.all())
         eq_(Project.objects.count(), 1, 'There should now be one project.')
         # An action should also be created with this project as the target
-        project = Project.objects.get(pk=1)
+        project = Project.objects.first()
         eq_(len(project.target_actions.filter(verb='created')), 1,
             'An activity stream action should be generated.')
         logging.debug('Projects: %s', Project.objects.all())
