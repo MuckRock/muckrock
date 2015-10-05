@@ -1,4 +1,5 @@
 {% extends 'details/base_detail.html' %}
+{% load activity_tags %}
 {% load markdown_deux_tags %}
 {% load tags %}
 
@@ -41,7 +42,13 @@
     {% endfor %}
     </div>
     <section class="actions">
-        <a class="primary button" href="{% url 'question-follow' slug=object.slug idx=object.pk %}">Follow</a>
+    {% if request.user != object.user %}
+        {% if request.user|is_following:object %}
+        <a href="{% follow_all_url object %}" class="failure button">Unfollow</a>
+        {% else %}
+        <a href="{% follow_all_url object %}" class="primary button">Follow</a>
+        {% endif %}
+    {% endif %}
         <a class="button" href="{% url 'answer-create' slug=object.slug idx=object.pk %}">Reply</a>
     </section>
 {% endblock main %}
