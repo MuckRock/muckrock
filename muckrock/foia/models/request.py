@@ -14,7 +14,6 @@ from django.template.loader import render_to_string
 import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
-from itertools import chain
 import logging
 from taggit.managers import TaggableManager
 from unidecode import unidecode
@@ -427,6 +426,7 @@ class FOIARequest(models.Model):
 
     def _notify(self):
         """Notify request's creator and followers about the update"""
+        # pylint: disable=no-member
         # notify creator
         self.user.profile.notify(self)
         # notify followers

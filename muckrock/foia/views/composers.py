@@ -239,7 +239,7 @@ def create_request(request):
                 verb='drafted',
                 action_object=foia
             )
-            if (foia.parent):
+            if foia.parent:
                 # generate action
                 actstream.action.send(
                     request.user,

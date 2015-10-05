@@ -1,3 +1,7 @@
+"""
+Factories generate objects during testing
+"""
+
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
