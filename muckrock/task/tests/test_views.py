@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
+import logging
 import nose
 
 from muckrock import task
@@ -285,6 +286,8 @@ class ResponseTaskListViewTests(TestCase):
     def test_post_set_price(self):
         """Setting the price should update the price on the response's request."""
         price = 1
+        foia = self.task.communication.foia
+        logging.info(foia.agency)
         self.client.post(self.url, {
             'status': 'done',
             'price': price,

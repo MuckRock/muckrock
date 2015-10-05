@@ -64,7 +64,7 @@ class OrphanTaskTests(TestCase):
         self.comm = FOIACommunication.objects.create(
                 date=datetime.now(),
                 from_who='Michael Morisy',
-                priv_from_who='Michael Morisy <michael@muckrock.com>',
+                priv_from_who='michael@muckrock.com',
                 full_html=False,
                 opened=False,
                 response=True)
@@ -122,10 +122,13 @@ class OrphanTaskTests(TestCase):
             reason='ib',
             communication=self.comm,
             address='orphan-address')
-        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        updated_task_2 = task.models.OrphanTask.objects.get(pk=new_orphan.pk)
-        eq_(updated_task_1.resolved, True)
-        eq_(updated_task_2.resolved, True)
+        logging.info(task.models.BlacklistDomain.objects.all())
+        logging.info(new_orphan.get_sender_domain())
+        self.task.refresh_from_db()
+        new_orphan.refresh_from_db()
+        logging.info(new_orphan.resolved)
+        eq_(self.task.resolved, True)
+        eq_(new_orphan.resolved, True)
 
 
 class SnailMailTaskTests(TestCase):
@@ -214,7 +217,7 @@ class ResponseTaskTests(TestCase):
                 'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
 
     def setUp(self):
-        self.foia = FOIARequest.objects.get(pk=1)
+        self.foia = FOIARequest.objects.get(pk=2)
         self.comm = FOIACommunication.objects.create(
                 date=datetime.now(),
                 from_who='God',

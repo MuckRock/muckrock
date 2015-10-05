@@ -250,6 +250,7 @@ INSTALLED_APPS = (
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
+    'actstream'
 )
 if DEBUG:
     INSTALLED_APPS += ('django_nose',)

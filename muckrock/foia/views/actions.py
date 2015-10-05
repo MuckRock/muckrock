@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
+import actstream
 from collections import namedtuple
 from datetime import datetime, timedelta
 import logging
@@ -138,6 +139,12 @@ def embargo(request, jurisdiction, jidx, slug, idx):
             foia.embargo = True
             foia.save()
             logger.info('%s embargoed %s', request.user, foia)
+            # generate action
+            actstream.action.send(
+                request.user,
+                verb='embargoed',
+                action_object=foia
+            )
             fine_tune_embargo(request, foia)
         else:
             logger.error('%s was forbidden from embargoing %s', request.user, foia)
@@ -158,6 +165,12 @@ def embargo(request, jurisdiction, jidx, slug, idx):
         foia.embargo = False
         foia.save()
         logger.info('%s unembargoed %s', request.user, foia)
+        # generate action
+        actstream.action.send(
+            request.user,
+            verb='unembargoed',
+            action_object=foia
+        )
         return
 
     foia = _get_foia(jurisdiction, jidx, slug, idx)
@@ -197,6 +210,12 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
             int(amount)/100,
             foia.title
         )
+        # generate action
+        actstream.action.send(
+            request.user,
+            verb='paid fees',
+            target=foia
+        )
         foia.status = 'processed'
         foia.save()
         PaymentTask.objects.create(
@@ -209,18 +228,15 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
 def follow(request, jurisdiction, jidx, slug, idx):
     """Follow or unfollow a request"""
     foia = _get_foia(jurisdiction, jidx, slug, idx)
-    if foia.user != request.user:
-        followers = foia.followed_by
-        if followers.filter(user=request.user): # If following, unfollow
-            followers.remove(request.user.profile)
-            msg = 'You are no longer following %s' % foia.title
-        else: # If not following, follow
-            followers.add(request.user.profile)
-            msg = ('You are now following %s. '
-                   'We will notify you when it is updated.') % foia.title
-        messages.success(request, msg)
+    followers = actstream.models.followers(foia)
+    if foia.user == request.user:
+        messages.error(request, 'You automatically follow requests you own.')
+    elif request.user in followers:
+        actstream.actions.unfollow(request.user, foia)
+        messages.success(request, 'You are no longer following this request.')
     else:
-        messages.error(request, 'You may not follow your own request.')
+        actstream.actions.follow(request.user, foia, actor_only=False)
+        messages.success(request, 'You are now following this request.')
     return redirect(foia)
 
 @login_required
@@ -304,8 +320,13 @@ def crowdfund_request(request, idx, **kwargs):
         # save crowdfund object
         form = CrowdfundRequestForm(request.POST)
         if form.is_valid():
-            form.save()
+            crowdfund = form.save()
             messages.success(request, 'Your crowdfund has started, spread the word!')
+            actstream.action.send(
+                request.user,
+                verb='created',
+                action_object=crowdfund
+            )
             return redirect(foia)
 
     elif request.method == 'GET':

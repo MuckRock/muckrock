@@ -136,7 +136,7 @@
         "pk":8,
         "model":"task.responsetask",
         "fields":{
-            "communication":1
+            "communication":2
         }
     }
 ]

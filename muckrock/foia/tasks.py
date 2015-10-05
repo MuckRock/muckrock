@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
 from django.template import Context
 
+import actstream
 import dbsettings
 import base64
 import json
@@ -191,6 +192,12 @@ def followup_requests():
         for foia in FOIARequest.objects.get_followup():
             try:
                 foia.followup(automatic=True)
+                # generate action
+                actstream.action.send(
+                    foia,
+                    verb='automatically followed up',
+                    target=foia.agency
+                )
                 log.append('%s - %d - %s' % (foia.status, foia.pk, foia.title))
             except MailgunAPIError as exc:
                 error_log.append('ERROR: %s - %d - %s - %s' %
@@ -223,6 +230,10 @@ def embargo_expire():
                                            date_embargo__lt=date.today()):
         foia.embargo = False
         foia.save()
+        actstream.action.send(
+            foia,
+            verb='expired embargo'
+        )
         send_mail('[MuckRock] Embargo expired for FOI Request "%s"' % foia.title,
                   render_to_string('text/foia/embargo_did_expire.txt', {'request': foia}),
                   'info@muckrock.com',

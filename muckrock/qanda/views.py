@@ -11,6 +11,7 @@ from django.template import RequestContext
 from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
 
+import actstream
 from datetime import datetime
 from rest_framework import viewsets, status
 from rest_framework.decorators import detail_route
@@ -106,7 +107,7 @@ class Detail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(Detail, self).get_context_data(**kwargs)
         user = self.request.user
-        if user.is_authenticated() and context['object'].followed_by.filter(user=user):
+        if user.is_authenticated() and actstream.actions.is_following(user, self.get_object()):
             context['follow_label'] = 'Unfollow'
         else:
             context['follow_label'] = 'Follow'
@@ -127,8 +128,12 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
-            question.notify_new()
-            question.followed_by.add(request.user.profile)
+            actstream.action.send(
+                question.user,
+                verb='asked',
+                action_object=question
+            )
+            actstream.actions.follow(request.user, question, actor_only=False)
             return redirect(question)
     else:
         form = QuestionForm()
@@ -139,16 +144,16 @@ def create_question(request):
 @login_required
 def follow(request, slug, idx):
     """Follow or unfollow a question"""
-
     question = get_object_or_404(Question, slug=slug, id=idx)
-
-    if question.followed_by.filter(user=request.user):
-        question.followed_by.remove(request.user.profile)
-        messages.success(request, 'You are no longer following %s' % question.title)
+    followers = actstream.models.followers(question)
+    if question.user == request.user:
+        messages.error(request, 'You automatically follow questions you ask.')
+    elif request.user in followers:
+        actstream.actions.unfollow(request.user, question)
+        messages.success(request, 'You are no longer following this question.')
     else:
-        question.followed_by.add(request.user.profile)
-        msg = 'You are now following %s. We will notify you of any replies.' % question.title
-        messages.success(request, msg)
+        actstream.actions.follow(request.user, question, actor_only=False)
+        messages.success(request, 'You are now following this question.')
     return redirect(question)
 
 @login_required
@@ -165,6 +170,11 @@ def create_answer(request, slug, idx):
             answer.date = datetime.now()
             answer.question = question
             answer.save()
+            actstream.action.send(
+                answer.user,
+                verb='answered',
+                action_object=answer.question
+            )
             answer.question.notify_update()
             return redirect(answer.question)
     else:
@@ -175,21 +185,6 @@ def create_answer(request, slug, idx):
         {'form': form, 'question': question},
         context_instance=RequestContext(request)
     )
-
-@login_required
-def subscribe(request):
-    """Subscribe or unsubscribe to new questions"""
-    profile = request.user.profile
-
-    if profile.follow_questions:
-        profile.follow_questions = False
-        messages.info(request, 'You are now unsubscribed from new question notifications')
-    else:
-        profile.follow_questions = True
-        messages.success(request, 'You are now subscribed to new question notifications')
-    profile.save()
-
-    return redirect('question-index')
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """API views for Question"""

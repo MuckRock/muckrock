@@ -6,6 +6,7 @@ from django.template.defaultfilters import slugify
 from django.template.loader import get_template
 from django.template import RequestContext
 
+import actstream
 from datetime import datetime
 from rest_framework import decorators, status as http_status, viewsets
 from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
@@ -179,10 +180,10 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
                                 status=http_status.HTTP_400_BAD_REQUEST)
 
             if request.method == 'POST':
-                foia.followed_by.add(request.user.profile)
+                actstream.actions.follow(request.user, foia, actor_only=False)
                 return Response({'status': 'Following'}, status=http_status.HTTP_200_OK)
             if request.method == 'DELETE':
-                foia.followed_by.remove(request.user.profile)
+                actstream.actions.unfollow(request.user, foia)
                 return Response({'status': 'Not following'}, status=http_status.HTTP_200_OK)
 
         except FOIARequest.DoesNotExist:

@@ -39,7 +39,6 @@ MuckRock &bull; {{ project.title }}
                         Delete
                     </a>
                 </div>
-
             </div>
             {% endif %}
             {% if project.image %}
@@ -82,7 +81,7 @@ MuckRock &bull; {{ project.title }}
         <section class="project-crowdfunds">
             {% if project.crowdfund.count > 0 %}
                 {% for crowdfund in project.crowdfund.all %}
-            {% crowdfund_project crowdfund.pk %}
+                    {% crowdfund_project crowdfund.pk %}
                 {% endfor %}
             {% endif %}
         </section>
