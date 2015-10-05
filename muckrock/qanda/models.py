@@ -8,13 +8,14 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.loader import render_to_string
 
+import actstream
+from sets import Set
 from taggit.managers import TaggableManager
 
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
-from sets import Set
 
 class Question(models.Model):
     """A question to which the community can respond"""
@@ -37,28 +38,18 @@ class Question(models.Model):
         """The url for this object"""
         return ('question-detail', [], {'slug': self.slug, 'pk': self.pk})
 
-    def notify_new(self):
-        """Email users who want to be notified of new questions"""
-        send_data = []
-        for profile in Profile.objects.filter(follow_questions=True):
-            link = profile.wrap_url(reverse('question-subscribe'))
-            msg = render_to_string('text/qanda/notify.txt', {'question': self, 'link': link})
-            send_data.append(('[MuckRock] New FOIA Question: %s' % self, msg,
-                              'info@muckrock.com', [profile.user.email]))
-        send_mass_mail(send_data, fail_silently=False)
-
     def notify_update(self):
         """Email users who want to be notified of updates to this question"""
         # pylint: disable=no-member
         send_data = []
-        for profile in self.followed_by.all():
-            link = profile.wrap_url(reverse(
+        for user in actstream.models.followers(self):
+            link = user.profile.wrap_url(reverse(
                 'question-follow',
                 kwargs={'slug': self.slug, 'idx': self.pk}
             ))
+            subject = '[MuckRock] New answer to the question: %s' % self
             msg = render_to_string('text/qanda/follow.txt', {'question': self, 'link': link})
-            send_data.append(('[MuckRock] New answer to the question: %s' % self, msg,
-                              'info@muckrock.com', [profile.user.email]))
+            send_data.append((subject, msg, 'info@muckrock.com', [user.email]))
         send_mass_mail(send_data, fail_silently=False)
 
     def get_answer_users(self):

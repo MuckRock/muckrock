@@ -128,8 +128,7 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
-            question.notify_new()
-            question.followed_by.add(request.user.profile)
+            actstream.actions.follow(request.user, question, actor_only=False)
             return redirect(question)
     else:
         form = QuestionForm()
