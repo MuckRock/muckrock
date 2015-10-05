@@ -17,7 +17,7 @@ from muckrock.foia.models import FOIARequest, STATUS
 from muckrock.agency.models import Agency
 from muckrock.jurisdiction.models import Jurisdiction
 
-def generate_status_actions(self, foia, comm, status):
+def generate_status_actions(foia, comm, status):
     """Generate activity stream actions for agency replies"""
     # generate action
     actstream.action.send(
