@@ -11,12 +11,13 @@ from django.template.defaultfilters import slugify
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+import actstream
+from datetime import datetime
+import stripe
+
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import OrganizationForm, OrganizationUpdateForm, AddMembersForm
 from muckrock.settings import STRIPE_PUB_KEY
-
-from datetime import datetime
-import stripe
 
 class List(ListView):
     """List of organizations"""
@@ -86,6 +87,12 @@ def _add_members(request, organization):
         if new_member_count <= (50 - existing_member_count):
             for new_member in new_members:
                 organization.add_member(new_member)
+                actstream.action.send(
+                    request.user,
+                    verb='added',
+                    action_object=new_member,
+                    target=organization
+                )
             msg = 'You granted membership to %s ' % new_member_count
             msg += 'person.' if new_member_count == 1 else 'people.'
             messages.success(request, msg)
@@ -103,6 +110,12 @@ def _remove_members(request, organization):
     for uid in members:
         user = User.objects.get(pk=uid)
         organization.remove_member(user)
+        actstream.action.send(
+            request.user,
+            verb='removed',
+            action_object=user,
+            target=organization
+        )
     msg = 'You revoked membership from %s ' % member_count
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
