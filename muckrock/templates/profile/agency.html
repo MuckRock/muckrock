@@ -66,14 +66,7 @@
 {% block activity %}
 <main class="activity">
     {% if user.is_authenticated %}
-    <section class="actions">
-        {% if request.user|is_following:agency %}
-        <a href="{% follow_url agency %}?next={{ agency.get_absolute_url }}" class="unfollow failure button">Unfollow</a>
-        {% else %}
-        <a href="{% follow_url agency %}?next={{ agency.get_absolute_url }}" class="follow primary button">Follow</a>
-        {% endif %}
-        {% include 'lib/flag_form.html' %}
-    </section>
+    {% include 'lib/flag_form.html' %}
     {% endif %}
     {% if agency.public_notes %}
     <section class="notes">

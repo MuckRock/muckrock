@@ -1,7 +1,6 @@
 {% extends 'details/base_detail.html' %}
 {% load static from staticfiles %}
 
-{% load activity_tags %}
 {% load crowdfund_tags %}
 {% load tags %}
 {% load markdown_deux_tags %}
@@ -40,14 +39,6 @@ MuckRock &bull; {{ project.title }}
                         Delete
                     </a>
                 </div>
-            </div>
-            {% elif request.user.is_authenticated %}
-            <div class="project-follow">
-                {% if request.user|is_following:project %}
-                <a href="{% follow_url project %}?next={{ project.get_absolute_url }}" class="unfollow failure button">Unfollow</a>
-                {% else %}
-                <a href="{% follow_url project %}?next={{ project.get_absolute_url }}" class="follow primary button">Follow</a>
-                {% endif %}
             </div>
             {% endif %}
             {% if project.image %}
@@ -128,12 +119,6 @@ MuckRock &bull; {{ project.title }}
         <section class="project-requests" id="requests">
             <h2>Requests</h2>
             {% include 'lib/foia_table.html' with requests=visible_requests %}
-        </section>
-        {% endif %}
-        {% if project.target_actions.count > 0 %}
-        <section class="activity">
-            <h2>Activity</h2>
-            {% include 'lib/action_group.html' with actions=project.target_actions.all %}
         </section>
         {% endif %}
     </article>
