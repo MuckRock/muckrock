@@ -12,7 +12,6 @@ import actstream
 from sets import Set
 from taggit.managers import TaggableManager
 
-from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
 from muckrock.tags.models import TaggedItemBase
 
