@@ -11,9 +11,9 @@ from django.db.models import Q, Sum
 from django.template.defaultfilters import escape, linebreaks, slugify
 from django.template.loader import render_to_string
 
+import actstream
 from datetime import datetime, date, timedelta
 from hashlib import md5
-from itertools import chain
 import logging
 from taggit.managers import TaggableManager
 from unidecode import unidecode
@@ -424,19 +424,24 @@ class FOIARequest(models.Model):
         if responses:
             return (date.today() - responses[0].date.date()).days
 
+    def _notify(self):
+        """Notify request's creator and followers about the update"""
+        # pylint: disable=no-member
+        # notify creator
+        self.user.profile.notify(self)
+        # notify followers
+        for user in actstream.models.followers(self):
+            if self.viewable_by(user):
+                user.profile.notify(self)
+
     def update(self, anchor=None):
         """Various actions whenever the request has been updated"""
         # pylint: disable=no-member
         # pylint: disable=unused-argument
         # Do something with anchor
-
         self.updated = True
         self.save()
-
-        for profile in chain(self.followed_by.all(), [self.user.profile]):
-            if self.viewable_by(profile.user):
-                profile.notify(self)
-
+        self._notify()
         self.update_dates()
 
     def submit(self, appeal=False, snail=False):
@@ -484,11 +489,14 @@ class FOIARequest(models.Model):
         else:
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
+        # generate sent activity
+        actstream.action.send(
+            self,
+            verb='sent',
+            action_object=comm,
+            target=self.agency
+        )
         self.save()
-
-        # whether it is automailed or not, notify the followers (but not the owner)
-        for profile in self.followed_by.all():
-            profile.notify(self)
 
     def followup(self, automatic=False):
         """Send a follow up email for this request"""
@@ -644,7 +652,8 @@ class FOIARequest(models.Model):
         '''Provides action interfaces for users'''
         is_owner = self.created_by(user)
         can_follow = user.is_authenticated() and not is_owner
-        is_following = user.is_authenticated() and self.followed_by.filter(user=user)
+        followers = actstream.models.followers(self)
+        is_following = user in followers
         kwargs = {
             'jurisdiction': self.jurisdiction.slug,
             'jidx': self.jurisdiction.pk,

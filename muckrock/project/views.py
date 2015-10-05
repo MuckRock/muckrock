@@ -5,12 +5,16 @@ Views for the project application
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse_lazy
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.views.generic import ListView, CreateView, DetailView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
 
+from actstream import action
+from actstream.models import followers
+
 from muckrock.project.models import Project
 from muckrock.project.forms import ProjectCreateForm, ProjectUpdateForm
+
 
 class ProjectListView(ListView):
     """List all projects"""
@@ -25,6 +29,7 @@ class ProjectListView(ListView):
             return Project.objects.get_public()
         else:
             return Project.objects.get_visible(user)
+
 
 class ProjectCreateView(CreateView):
     """Create a project instance"""
@@ -42,17 +47,25 @@ class ProjectCreateView(CreateView):
         queryset = User.objects.filter(pk=self.request.user.pk)
         return {'contributors': queryset}
 
+    def form_valid(self, form):
+        """Saves an activity stream action when creating the object"""
+        project = form.save()
+        action.send(self.request.user, verb='created', target=project)
+        return HttpResponseRedirect(project.get_absolute_url())
+
+
 class ProjectDetailView(DetailView):
     """View a project instance"""
     model = Project
     template_name = 'project/detail.html'
 
     def get_context_data(self, **kwargs):
-        """Filters project requests to only show those that are visible"""
+        """Adds visible requests and followers to project context"""
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
         project = self.get_object()
         user = self.request.user
         context['visible_requests'] = project.requests.get_viewable(user)
+        context['followers'] = followers(project)
         return context
 
     def dispatch(self, *args, **kwargs):
@@ -63,6 +76,7 @@ class ProjectDetailView(DetailView):
         if project.private and not contributor_or_staff:
             raise Http404()
         return super(ProjectDetailView, self).dispatch(*args, **kwargs)
+
 
 class ProjectPermissionsMixin(object):
     """
@@ -87,6 +101,7 @@ class ProjectPermissionsMixin(object):
             raise Http404()
         return super(ProjectPermissionsMixin, self).dispatch(*args, **kwargs)
 
+
 class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
     """Update a project instance"""
     model = Project
@@ -101,6 +116,40 @@ class ProjectUpdateView(ProjectPermissionsMixin, UpdateView):
         viewable_requests = project.requests.get_viewable(user)
         context['viewable_request_ids'] = [request.id for request in viewable_requests]
         return context
+
+    def generate_actions(self, clean_data):
+        """
+        Generates a specific set of actions based on the update form. Should create an
+        action for each request and article that is added or removed from the project.
+        """
+        user = self.request.user
+        project = self.object
+        requests = clean_data['requests']
+        articles = clean_data['articles']
+        existing_requests = project.requests.all()
+        existing_articles = project.articles.all()
+        # generate actions for added objects
+        for request in requests:
+            if request not in existing_requests:
+                action.send(user, verb='added', action_object=request, target=project)
+        for article in articles:
+            if article not in existing_articles:
+                action.send(user, verb='added', action_object=article, target=project)
+        # generate actions for removing objects
+        for existing_request in existing_requests:
+            if existing_request not in requests:
+                action.send(user, verb='removed', action_object=existing_request, target=project)
+        for existing_article in existing_articles:
+            if existing_article not in articles:
+                action.send(user, verb='removed', action_object=existing_article, target=project)
+        # generate a generic action
+        action.send(user, verb='updated', target=project)
+
+    def form_valid(self, form):
+        """Sends an activity stream action when project is updated."""
+        self.generate_actions(form.cleaned_data)
+        return super(ProjectUpdateView, self).form_valid(form)
+
 
 class ProjectDeleteView(ProjectPermissionsMixin, DeleteView):
     """Delete a project instance"""
