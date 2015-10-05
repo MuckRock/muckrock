@@ -201,16 +201,19 @@ class CrowdfundProjectCreateView(CreateView):
             'project': project.id
         }
 
-    def generate_action(self):
-        """Generates an activity stream action"""
+    def get_success_url(self):
+        """Generates actions before returning URL"""
         crowdfund = self.get_object()
+        project = self.get_project()
         actstream.action.send(
             self.request.user,
             verb='created',
             action_object=crowdfund
         )
-
-    def get_success_url(self):
-        self.generate_action()
-        project = self.get_project()
+        actstream.action.send(
+            self.request.user,
+            varb='added',
+            action_object=crowdfund,
+            target=project
+        )
         return project.get_absolute_url()
