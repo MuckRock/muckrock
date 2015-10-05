@@ -128,6 +128,11 @@ def create_question(request):
             question.user = request.user
             question.date = datetime.now()
             question.save()
+            actstream.action.send(
+                question.user,
+                verb='asked',
+                action_object=question
+            )
             actstream.actions.follow(request.user, question, actor_only=False)
             return redirect(question)
     else:
