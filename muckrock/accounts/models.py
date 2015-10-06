@@ -8,13 +8,14 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
+import actstream
+import datetime
 import dbsettings
-import stripe
-from datetime import datetime
 from easy_thumbnails.fields import ThumbnailerImageField
 from itertools import groupby
 from localflavor.us.models import PhoneNumberField, USStateField
 from lot.models import LOT
+import stripe
 from urllib import urlencode
 
 from muckrock import utils
@@ -146,11 +147,11 @@ class Profile(models.Model):
 
     def get_monthly_requests(self):
         """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.now().month
-        not_this_year = self.date_update.year != datetime.now().year
+        not_this_month = self.date_update.month != datetime.datetime.now().month
+        not_this_year = self.date_update.year != datetime.datetime.now().year
         # update requests if they have not yet been updated this month
         if not_this_month or not_this_year:
-            self.date_update = datetime.now()
+            self.date_update = datetime.datetime.now()
             self.monthly_requests = settings.MONTHLY_REQUESTS.get(self.acct_type, 0)
             self.save()
         return self.monthly_requests
@@ -240,7 +241,7 @@ class Profile(models.Model):
         customer.update_subscription(plan='pro')
         customer.save()
         self.acct_type = 'pro'
-        self.date_update = datetime.now()
+        self.date_update = datetime.datetime.now()
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
 
@@ -313,6 +314,36 @@ class Profile(models.Model):
         else:
             self.notifications.add(foia)
             self.save()
+
+    def activity_email(self, stream):
+        """Sends an email that is a stream of activities"""
+        count = stream.count()
+        since = 'yesterday' if self.email_pref == 'daily' else 'last week'
+        subject = '%d updates since %s' % (count, since)
+        msg = render_to_string('email/activity.txt', {
+            'user': self.user,
+            'stream': stream,
+            'count': count,
+            'since': since
+        })
+        email = EmailMessage(
+            subject=subject,
+            body=msg,
+            from_email='info@muckrock.com',
+            to=[self.user.email],
+            bcc=['diagnostics@muckrock.com']
+        )
+        email.send(fail_silently=False)
+
+    def send_timed_update(self):
+        """Send a timed update of site activity"""
+        current_time = datetime.datetime.now()
+        num_days = 1 if self.email_pref == 'daily' else 7
+        period_start = current_time - datetime.timedelta(num_days)
+        user_stream = actstream.models.user_stream(self.user)
+        user_stream = user_stream.filter(timestamp__gte=period_start)
+        if user_stream.count() > 0:
+            self.activity_email(user_stream)
 
     def send_notifications(self):
         """Send deferred notifications"""

@@ -8,12 +8,13 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase
 
-import json
-import nose.tools
-import stripe
-import os
+import actstream
 from datetime import datetime, timedelta
+import json
 from mock import Mock, patch
+import nose.tools
+import os
+import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
@@ -353,6 +354,22 @@ class TestAccountNotifications(TestCase):
     def setUp(self):
         self.user = muckrock.factories.UserFactory()
 
-    def test_profile(self):
-        """Does the user factory contain a profile attribute?"""
-        nose.tools.ok_(self.user.profile)
+    def test_timed_update(self):
+        """A timed update should send an activity email if there are activities"""
+        # create an object for the user to follow
+        foia = muckrock.factories.FOIARequestFactory()
+        actstream.actions.follow(self.user, foia)
+        nose.tools.ok_(actstream.actions.is_following(self.user, foia))
+        # generate an action on the object
+        actstream.action.send(foia, verb='acted')
+        nose.tools.eq_(actstream.models.user_stream(self.user).count(), 1)
+        # an activity email should be generated and sent
+        self.user.profile.activity_email = Mock()
+        self.user.profile.send_timed_update()
+        nose.tools.ok_(self.user.profile.activity_email.called)
+
+    def test_timed_update_no_updates(self):
+        """A timed update should not send an activity email if there are not activities"""
+        self.user.profile.activity_email = Mock()
+        self.user.profile.send_timed_update()
+        nose.tools.ok_(not self.user.profile.activity_email.called)
