@@ -8,15 +8,17 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase
 
-import json
-import nose.tools
-import stripe
-import os
+import actstream
 from datetime import datetime, timedelta
+import json
 from mock import Mock, patch
+import nose.tools
+import os
+import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
+import muckrock.factories
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
@@ -345,3 +347,44 @@ class TestAccountFunctional(TestCase):
         get_allowed(self.client, reverse('acct-logout'),
                     ['front_page.html'])
         get_post_unallowed(self.client, reverse('acct-my-profile'))
+
+
+class TestAccountNotifications(TestCase):
+    """Tests email notifications"""
+    def setUp(self):
+        self.user = muckrock.factories.UserFactory()
+
+    def test_timed_update(self):
+        """A timed update should send an activity email if there are activities"""
+        # create an object for the user to follow
+        foia = muckrock.factories.FOIARequestFactory()
+        actstream.actions.follow(self.user, foia)
+        nose.tools.ok_(actstream.actions.is_following(self.user, foia))
+        # generate an action on the object
+        actstream.action.send(foia, verb='acted')
+        nose.tools.eq_(actstream.models.user_stream(self.user).count(), 1)
+        # an activity email should be generated and sent
+        self.user.profile.activity_email = Mock()
+        self.user.profile.send_timed_update()
+        nose.tools.ok_(self.user.profile.activity_email.called)
+
+    def test_timed_update_no_updates(self):
+        """A timed update should not send an activity email if there are not activities"""
+        self.user.profile.activity_email = Mock()
+        self.user.profile.send_timed_update()
+        nose.tools.ok_(not self.user.profile.activity_email.called)
+
+    @patch.object(mail.EmailMessage, 'send')
+    def test_activity_email(self, mock):
+        """An email with updates should be emailed to a user"""
+        # create an object for the user to follow
+        foia = muckrock.factories.FOIARequestFactory()
+        actstream.actions.follow(self.user, foia)
+        nose.tools.ok_(actstream.actions.is_following(self.user, foia))
+        # generate an action on the object
+        actstream.action.send(foia, verb='acted')
+        nose.tools.eq_(actstream.models.user_stream(self.user).count(), 1)
+        # an activity email should be generated and sent
+        email = self.user.profile.activity_email(actstream.models.user_stream(self.user))
+        nose.tools.ok_(email)
+        nose.tools.ok_(mock.called)
