@@ -17,6 +17,7 @@ from mock import Mock, patch
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
+import muckrock.factories
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
@@ -345,3 +346,13 @@ class TestAccountFunctional(TestCase):
         get_allowed(self.client, reverse('acct-logout'),
                     ['front_page.html'])
         get_post_unallowed(self.client, reverse('acct-my-profile'))
+
+
+class TestAccountNotifications(TestCase):
+    """Tests email notifications"""
+    def setUp(self):
+        self.user = muckrock.factories.UserFactory()
+
+    def test_profile(self):
+        """Does the user factory contain a profile attribute?"""
+        nose.tools.ok_(self.user.profile)
