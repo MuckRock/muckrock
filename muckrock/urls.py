@@ -107,7 +107,6 @@ urlpatterns = patterns(
     url(r'^api_v1/token-auth/', 'rest_framework.authtoken.views.obtain_auth_token'),
     url(r'^api_doc/', include('rest_framework_swagger.urls')),
     url(r'^autocomplete/', include('autocomplete_light.urls')),
-    url(r'^activity/', include('actstream.urls')),
     url(r'^xmlrpc/$', csrf_exempt(handle_xmlrpc), name='xmlrpc'),
     url(r'^blog/(?P<path>.*)$', views.blog, name='blog'),
     url(r'^robots\.txt$', include('robots.urls')),
