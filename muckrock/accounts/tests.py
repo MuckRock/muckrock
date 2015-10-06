@@ -11,7 +11,6 @@ from django.test import TestCase
 import actstream
 from datetime import datetime, timedelta
 import json
-import logging
 from mock import Mock, patch
 import nose.tools
 import os
