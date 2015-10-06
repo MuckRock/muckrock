@@ -233,8 +233,6 @@ def create_request(request):
             foia_comm.save()
             foia.save()
             request.session['ga'] = 'request_drafted'
-            # make user a follower of their own request
-            actstream.actions.follow(request.user, foia, actor_only=False)
             # generate action
             actstream.action.send(
                 request.user,

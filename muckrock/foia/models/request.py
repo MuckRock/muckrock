@@ -425,7 +425,7 @@ class FOIARequest(models.Model):
             return (date.today() - responses[0].date.date()).days
 
     def _notify(self):
-        """Notify request's creator and followers about the update"""
+        """Notify request's followers about the update"""
         # pylint: disable=no-member
         for user in actstream.models.followers(self):
             if self.viewable_by(user):
