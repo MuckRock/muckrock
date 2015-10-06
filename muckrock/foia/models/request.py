@@ -427,9 +427,6 @@ class FOIARequest(models.Model):
     def _notify(self):
         """Notify request's creator and followers about the update"""
         # pylint: disable=no-member
-        # notify creator
-        self.user.profile.notify(self)
-        # notify followers
         for user in actstream.models.followers(self):
             if self.viewable_by(user):
                 user.profile.notify(self)
