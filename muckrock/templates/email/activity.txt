@@ -1,0 +1,9 @@
+Hi {{ user.first_name }},
+
+Since {{ since }}, there have been {{ count }} updates on things you care about:
+
+{% for activity in stream %}
+* {{ action.timestamp|timesince }} ago, {{ action.actor }} {{ action.verb }}{% if action.action_object %} {{ action.action_object }}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {{ action.target }}{% endif %}.
+{% endfor %}
+
+That's all for now!

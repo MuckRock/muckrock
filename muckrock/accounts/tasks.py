@@ -100,9 +100,13 @@ def store_statstics():
 
 def _notices(email_pref):
     """Send out notices"""
-    for profile in Profile.objects.filter(email_pref=email_pref, notifications__isnull=False)\
-                          .distinct():
-        profile.send_notifications()
+    profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
+    for profile in profiles_to_notify:
+        # for now, only send staff the new updates
+        if profile.user.is_staff:
+            profile.send_timed_update()
+        else:
+            profile.send_notifications()
 
 @periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.accounts.tasks.daily_notices')
 def daily_notices():
