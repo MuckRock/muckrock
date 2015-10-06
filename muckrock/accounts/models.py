@@ -334,6 +334,7 @@ class Profile(models.Model):
             bcc=['diagnostics@muckrock.com']
         )
         email.send(fail_silently=False)
+        return email
 
     def send_timed_update(self):
         """Send a timed update of site activity"""
