@@ -98,8 +98,7 @@ class TaskList(MRFilterableListView):
         # clean the list of task_pks
         task_pks = [int(task_pk) for task_pk in task_pks if task_pk is not None]
         if not task_pks:
-            messages.warning(self.request, 'No tasks were selected, so there\'s nothing to do!')
-            return redirect(self.get_redirect_url())
+            raise ValueError('No tasks were selected, so there\'s nothing to do!')
         tasks = [get_object_or_404(self.model, pk=each_pk) for each_pk in task_pks]
         return tasks
 
@@ -112,7 +111,14 @@ class TaskList(MRFilterableListView):
 
     def post(self, request):
         """Handle general cases for updating Task objects"""
-        tasks = self.get_tasks()
+        try:
+            tasks = self.get_tasks()
+        except ValueError as exception:
+            if request.is_ajax():
+                return HttpResponse(400)
+            else:
+                messages.warning(self.request, exception)
+                return redirect(self.get_redirect_url())
         for task in tasks:
             self.task_post_helper(request, task)
         if request.is_ajax():
