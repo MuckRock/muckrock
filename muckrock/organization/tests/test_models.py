@@ -10,6 +10,7 @@ import muckrock.factories
 from muckrock.organization.models import Organization
 
 from datetime import datetime
+import logging
 from mock import Mock, patch
 import nose.tools
 import stripe
@@ -120,10 +121,6 @@ class TestOrgMembership(TestCase):
     def test_has_member(self):
         """Test the has_member method."""
         ok_(self.org.has_member(self.member), 'The org should correctly report its members.')
-
-    def test_owner_is_member(self):
-        """Org should recognize owners as members."""
-        ok_(not self.org.has_member(self.owner), 'The org should recognize its owner as a member.')
 
     def test_add_member(self):
         """Test adding a member to the organization."""
