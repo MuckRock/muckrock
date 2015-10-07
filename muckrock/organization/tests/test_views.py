@@ -23,7 +23,6 @@ def mockMiddleware(request):
 
 class TestOrgCreate(TestCase):
     """Test the expectations of organization creation"""
-
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
