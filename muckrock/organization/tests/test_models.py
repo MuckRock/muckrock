@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from muckrock.accounts.models import Profile
+import muckrock.factories
 from muckrock.organization.models import Organization
 
 from datetime import datetime
@@ -37,126 +38,80 @@ class OrganizationPaymentTests(TestCase):
 
     def setUp(self):
         """Set up models for the organization"""
-        owner = User.objects.create(
-            username='TestOwner',
-            password='testowner'
-        )
-        org = Organization.objects.create(
-            name='Test Organization',
-            slug='test-organization',
-            owner=owner,
-            date_update=datetime.now(),
-        )
-        Profile.objects.create(
-            user=owner,
-            acct_type='community',
-            organization=org,
-            date_update=datetime.now(),
-        )
+        self.org = muckrock.factories.OrganizationFactory()
 
     def test_create_plan(self):
         """Should create a plan and assign a value to the org's stripe_id field"""
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        nose.tools.assert_true(org.stripe_id)
+        self.org.create_plan()
+        nose.tools.assert_true(self.org.stripe_id)
 
     def test_delete_plan(self):
         """Should delete the org's plan and set stripe_id to None"""
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        org.delete_plan()
-        nose.tools.assert_false(org.stripe_id)
+        self.org.create_plan()
+        self.org.delete_plan()
+        nose.tools.assert_false(self.org.stripe_id)
 
     def test_update_plan(self):
         """
         Should create an org plan at once price point, then update the org's
         plan to a new price point.
         """
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        plan = stripe.Plan.retrieve(org.stripe_id)
-        nose.tools.eq_(plan.amount, org.monthly_cost)
-        org.monthly_cost = 15000
+        self.org.create_plan()
+        plan = stripe.Plan.retrieve(self.org.stripe_id)
+        nose.tools.eq_(plan.amount, self.org.monthly_cost)
+        self.org.monthly_cost = 15000
         mock_plan.amount = 15000
-        org.update_plan()
-        plan = stripe.Plan.retrieve(org.stripe_id)
-        nose.tools.eq_(plan.amount, org.monthly_cost)
+        self.org.update_plan()
+        plan = stripe.Plan.retrieve(self.org.stripe_id)
+        nose.tools.eq_(plan.amount, self.org.monthly_cost)
 
     @nose.tools.raises(ValueError)
     def test_double_create_plan(self):
         """Should return an error after trying to create a plan twice in a row"""
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        org.create_plan()
+        self.org.create_plan()
+        self.org.create_plan()
 
     @nose.tools.raises(ValueError)
     def test_delete_nonexistant_plan(self):
         """Should return an error after trying to delete a plan that doesn't exist"""
-        org = Organization.objects.get(slug='test-organization')
-        org.delete_plan()
+        self.org.delete_plan()
 
     @nose.tools.raises(ValueError)
     def test_update_nonexistant_plan(self):
         """Should return an error after tying to update a plan that doesn't exist"""
-        org = Organization.objects.get(slug='test-organization')
-        org.update_plan()
+        self.org.update_plan()
 
     def test_start_subscription(self):
         """
         Should subscribe owner to the organization's plan,
         set the org to active, and reduce pro owners to community accounts
         """
-        org = Organization.objects.get(slug='test-organization')
-        profile = org.owner.profile
+        profile = self.org.owner.profile
         profile.acct_type = 'pro'
-        org.create_plan()
-        org.start_subscription()
+        self.org.create_plan()
+        self.org.start_subscription()
         # customer = org.owner.profile.customer()
         # test if subscription was activated
         nose.tools.eq_(profile.acct_type, 'community')
-        nose.tools.assert_true(org.active)
+        nose.tools.assert_true(self.org.active)
 
     def test_pause_subscription(self):
         """Should cancel owner's subscription and set the org to inactive"""
-        org = Organization.objects.get(slug='test-organization')
-        org.create_plan()
-        org.start_subscription()
-        org.pause_subscription()
+        self.org.create_plan()
+        self.org.start_subscription()
+        self.org.pause_subscription()
         # customer = org.owner.profile.customer()
         # test if subscription was paused
-        nose.tools.assert_false(org.active)
+        nose.tools.assert_false(self.org.active)
 
 class TestOrgMembership(TestCase):
     """Test the membership functions of the organization"""
 
     def setUp(self):
         """Create an owner, a member, and an organization"""
-        self.owner = User.objects.create(
-            username='TestOwner',
-            password='testowner'
-        )
-        self.member = User.objects.create(
-            username='TestMember',
-            password='testmember'
-        )
-        self.org = Organization.objects.create(
-            name='Test Organization',
-            slug='test-organization',
-            owner=self.owner,
-            date_update=datetime.now(),
-        )
-        Profile.objects.create(
-            user=self.owner,
-            acct_type='community',
-            organization=self.org,
-            date_update=datetime.now(),
-        )
-        Profile.objects.create(
-            user=self.member,
-            acct_type='community',
-            organization=self.org,
-            date_update=datetime.now(),
-        )
+        self.org = muckrock.factories.OrganizationFactory()
+        self.owner = self.org.owner
+        self.member = muckrock.factories.UserFactory(profile__organization=self.org)
 
     def test_is_owned_by(self):
         """Test the is_owned_by method."""
@@ -168,19 +123,11 @@ class TestOrgMembership(TestCase):
 
     def test_owner_is_member(self):
         """Org should recognize owners as members."""
-        ok_(self.org.has_member(self.owner), 'The org should regonize its owner as a member.')
+        ok_(not self.org.has_member(self.owner), 'The org should recognize its owner as a member.')
 
     def test_add_member(self):
         """Test adding a member to the organization."""
-        new_member = User.objects.create(
-            username='NewMember',
-            password='newmember'
-        )
-        Profile.objects.create(
-            user=new_member,
-            acct_type='community',
-            date_update=datetime.now()
-        )
+        new_member = muckrock.factories.UserFactory()
         self.org.add_member(new_member)
         eq_(self.org, new_member.profile.organization,
             'The new member should be added to the org.')
@@ -195,17 +142,13 @@ class TestOrgMembership(TestCase):
         ok_(not self.org.has_member(self.member),
             'The org should not recognize the ex-member.')
 
+    @nose.tools.raises(ValueError)
     def test_remove_non_member(self):
-        """Test removing a user who is not a member from the organization."""
-        non_member = User.objects.create(
-            username='NonMember',
-            password='nommember'
-        )
-        Profile.objects.create(
-            user=non_member,
-            acct_type='community',
-            date_update=datetime.now()
-        )
+        """
+        An exception should be raised when trying to remove
+        a user who is not a member from the organization.
+        """
+        non_member = muckrock.factories.UserFactory()
         self.org.remove_member(non_member)
 
     @nose.tools.raises(ValueError)

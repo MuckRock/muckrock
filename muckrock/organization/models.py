@@ -120,16 +120,10 @@ class Organization(models.Model):
     def remove_member(self, user):
         """
         Remove a user (who isn't the owner) from this organization.
-        If the user isn't a member of the organization, do nothing.
-        If the user is the owner, raise an error.
+        If the user is the owner or isn't a member, raise an error.
         """
-        if not self.has_member(user):
-            logger.error(('Cannot remove user %s from the organization %s, as they '
-                'are not a member of the organization.'), user.username, self.name)
-            return
-        if self.is_owned_by(user):
-            error_msg = ('Cannot remove user %s from the organization %s, as they '
-                'are the owner of the organization.') % (user.username, self.name)
+        if self.is_owned_by(user) or not self.has_member(user):
+            error_msg = 'Cannot remove %s from organization %s' % (user.username, self.name)
             logger.error(error_msg)
             raise ValueError(error_msg)
         user.profile.organization = None
