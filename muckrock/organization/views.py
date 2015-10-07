@@ -12,6 +12,7 @@ from django.views.generic import ListView, CreateView, DetailView
 
 import actstream
 from datetime import datetime
+import logging
 import stripe
 
 from muckrock.organization.models import Organization
@@ -45,15 +46,18 @@ class OrganizationCreateView(CreateView):
     def form_valid(self, form):
         """
         When form is valid, save it.
-        Also, make the owner a member of the organization.
+        Then, make the owner a member of the organization.
+        Then, redirect to the newly created organization.
         """
         organization = form.save()
         # make owner a member
-        organization.owner.profile.organization = organization
-        organization.owner.profile.save()
+        owner = organization.owner
+        owner.profile.organization = organization
+        owner.profile.save()
         # redirect to the success url with a nice message
+        logging.info('%s created %s', self.request.user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')
-        return redirect(self.get_success_url())
+        return redirect(organization.get_absolute_url())
 
 
 class OrganizationDetailView(DetailView):
