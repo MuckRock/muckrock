@@ -5,6 +5,7 @@ Test organization urls
 from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
+import muckrock.factories
 from muckrock.organization.models import Organization
 
 from datetime import datetime
@@ -16,8 +17,7 @@ class OrganizationURLTests(TestCase):
 
     def setUp(self):
         """Set up models for the organization"""
-        owner = Mock(spec=User)
-        org = Mock(spec=Organization)
+        self.org = muckrock.factories.OrganizationFactory()
         self.client = Client()
 
     def test_index(self):
@@ -32,10 +32,10 @@ class OrganizationURLTests(TestCase):
 
     def test_detail(self):
         """Detail page should be OK"""
-        response = self.client.get('/organization/test-organization/')
+        response = self.client.get(self.org.get_absolute_url())
         eq_(response.status_code, 200)
 
     def test_delete(self):
         """ordinary users should not be able to access the delete page, hence 404"""
-        response = self.client.get('/organization/test-orgainzation/delete/')
+        response = self.client.get(self.org.get_absolute_url() + '/delete/')
         eq_(response.status_code, 404)
