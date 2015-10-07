@@ -375,7 +375,7 @@ class TestAccountNotifications(TestCase):
         nose.tools.ok_(not self.user.profile.activity_email.called)
 
     @patch.object(mail.EmailMessage, 'send')
-    def test_activity_email(self, mock):
+    def test_activity_email(self, mock_send):
         """An email with updates should be emailed to a user"""
         # create an object for the user to follow
         foia = muckrock.factories.FOIARequestFactory()
@@ -387,4 +387,4 @@ class TestAccountNotifications(TestCase):
         # an activity email should be generated and sent
         email = self.user.profile.activity_email(actstream.models.user_stream(self.user))
         nose.tools.ok_(email)
-        nose.tools.ok_(mock.called)
+        nose.tools.ok_(mock_send.called)
