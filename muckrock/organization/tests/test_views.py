@@ -7,13 +7,26 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase, RequestFactory
 
 import logging
-from mock import Mock
+from mock import Mock, patch
 from nose.tools import ok_, eq_
 
 from muckrock.accounts.models import Profile
 import muckrock.factories
 from muckrock.organization.forms import OrganizationCreateForm
-from muckrock.organization.views import OrganizationCreateView
+from muckrock.organization.views import OrganizationCreateView, activate_organization
+
+# Creates mock items for testing methods that involve Stripe
+mock_customer = Mock()
+MockCustomer = Mock()
+MockCustomer.create.return_value = mock_customer
+MockCustomer.retrieve.return_value = mock_customer
+mock_plan = Mock()
+mock_plan.amount = 45000
+mock_plan.name = 'Test Organization Plan'
+mock_plan.id = 'test-organization-org-plan'
+MockPlan = Mock()
+MockPlan.create.return_value = mock_plan
+MockPlan.retrieve.return_value = mock_plan
 
 def mockMiddleware(request):
     """Mocks the request with messages and session middleware"""
@@ -65,23 +78,65 @@ class TestOrgCreate(TestCase):
         eq_(owner.profile.organization.name, 'Cool Org',
             'The owner should be made a member of the org.')
 
+# Substitutes mock items for Stripe items in each test
+@patch('stripe.Customer', MockCustomer)
+@patch('stripe.Plan', MockPlan)
 class TestOrgActivation(TestCase):
     """Test the expectations of organization activation"""
+    def setUp(self):
+        self.org = muckrock.factories.OrganizationFactory()
+        request_factory = RequestFactory()
+        url = reverse('org-activate', kwargs={'slug': self.org.slug})
+        data = {'token': 'test'}
+        self.request = request_factory.post(url, data)
+        self.request = mockMiddleware(self.request)
 
     def test_activation(self):
         """
         When activating the organization, a Stripe plan should be created and
         the owner should be subscribed to the plan.
         """
-        ok_(False, 'Test unwritten.')
+        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(self.org.is_active())
 
-    def test_staff_or_owner_only(self):
-        """Only MuckRock staff or the organization owner may activate the org."""
-        ok_(False, 'Test unwritten.')
+    def test_staff_activation(self):
+        """Staff should be able to activate the org."""
+        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(self.org.is_active())
+
+    def test_owner_activation(self):
+        """Owner should be able to activate the org."""
+        self.request.user = self.org.owner
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(self.org.is_active())
+
+    def test_member_activation(self):
+        """Members should not be able to activate the org."""
+        member = muckrock.factories.UserFactory(is_staff=False)
+        self.org.add_member(member)
+        self.request.user = member
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(not self.org.is_active())
 
     def test_already_active(self):
         """An already-active org should not be able to be activated."""
-        ok_(False, 'Test unwritten.')
+        # first activate the org
+        self.request.user = self.org.owner
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(self.org.is_active())
+        # then try activating again, make sure the stripe id is the same
+        stripe_id = self.org.stripe_id
+        logging.debug(stripe_id)
+        response = activate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        eq_(self.org.stripe_id, stripe_id)
 
 class TestOrgDeactivation(TestCase):
     """Test the expectations of organization deactivation"""

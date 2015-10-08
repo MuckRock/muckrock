@@ -155,20 +155,27 @@ def _remove_members(request, organization):
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
 
-def activate_organization(request, **kwargs):
+def activate_organization(request, slug):
     """Grants an organization requests and subscribes its owner to a recurring payment plan."""
-    organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    organization = get_object_or_404(Organization, slug=slug)
     # first check if the org is already active
     if organization.is_active():
+        logging.error('Cannot activate %s; it is already active.', organization)
         messages.error(request, 'This organization is already active.')
         return redirect(organization)
     # next check if the user has the authority
     if not organization.is_owned_by(request.user) and not request.user.is_staff:
+        logging.error(
+            'Cannot activate %s; user %s does not have permission.',
+            organization,
+            request.user
+        )
         messages.error(request, 'Only this organization\'s owner may activate it.')
         return redirect(organization)
     # finally, actually activate the organization
     if request.method == 'POST':
         token = request.POST.get('token', None)
+        logging.debug(token)
         if token:
             # update owner card with token
             customer = organization.owner.profile.customer()
@@ -177,6 +184,7 @@ def activate_organization(request, **kwargs):
             try:
                 organization.create_plan()
             except ValueError as exception:
+                logging.error(exception)
                 messages.error(request, exception)
                 return redirect(organization)
             # subscribe owner to plan
