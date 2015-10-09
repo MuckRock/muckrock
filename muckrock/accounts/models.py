@@ -350,8 +350,7 @@ class Profile(models.Model):
         period_start = current_time - datetime.timedelta(num_days)
         user_stream = actstream.models.user_stream(self.user)
         user_stream = user_stream.filter(timestamp__gte=period_start)\
-                                 .exclude(verb='started following')\
-                                 .exclude(verb='stopped following')
+                                 .exclude(verb='started following')
         if user_stream.count() > 0:
             self.activity_email(user_stream)
 
