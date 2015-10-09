@@ -1,16 +1,13 @@
 """
 Tests the models of the organization application
 """
+# pylint: disable=no-member
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 
-from muckrock.accounts.models import Profile
 import muckrock.factories
-from muckrock.organization.models import Organization
 
-from datetime import datetime
-import logging
+
 from mock import Mock, patch
 import nose.tools
 import stripe

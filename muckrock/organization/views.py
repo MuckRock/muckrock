@@ -11,7 +11,6 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, DetailView
 
 import actstream
-from datetime import datetime
 import logging
 import stripe
 
@@ -19,7 +18,6 @@ from muckrock.organization.models import Organization
 from muckrock.organization.forms import OrganizationCreateForm, \
                                         OrganizationUpdateForm, \
                                         AddMembersForm
-from muckrock.settings import STRIPE_PUB_KEY
 
 
 class OrganizationListView(ListView):

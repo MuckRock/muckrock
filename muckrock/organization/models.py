@@ -10,7 +10,7 @@ from django.utils.text import slugify
 
 from muckrock.settings import MONTHLY_REQUESTS
 
-from datetime import date, timedelta
+from datetime import date
 import logging
 import stripe
 

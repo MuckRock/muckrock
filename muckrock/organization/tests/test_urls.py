@@ -1,15 +1,12 @@
 """
 Test organization urls
 """
+# pylint: disable=no-member
 
-from django.contrib.auth.models import User
 from django.test import TestCase, Client
 
 import muckrock.factories
-from muckrock.organization.models import Organization
 
-from datetime import datetime
-from mock import Mock, patch
 from nose.tools import eq_
 
 class OrganizationURLTests(TestCase):
