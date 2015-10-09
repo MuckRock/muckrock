@@ -191,9 +191,9 @@ def activate_organization(request, slug):
             organization.start_subscription()
     return redirect(organization)
 
-def deactivate_organization(request, **kwargs):
+def deactivate_organization(request, slug):
     """Unsubscribes its owner from the recurring payment plan."""
-    organization = get_object_or_404(Organization, slug=kwargs['slug'])
+    organization = get_object_or_404(Organization, slug=slug)
     # first check if org is already deactivated
     if not organization.active:
         messages.error(request, 'This organization is already inactive.')

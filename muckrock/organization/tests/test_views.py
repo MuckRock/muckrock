@@ -145,26 +145,12 @@ class TestOrgDeactivation(TestCase):
     """Test the expectations of organization deactivation"""
     def setUp(self):
         # create an org with a plan, so we can cancel it
-        self.org = muckrock.factories.OrganizationFactory()
-        self.activateOrganization()
+        self.org = muckrock.factories.OrganizationFactory(active=True, stripe_id='test')
+        ok_(self.org.active and self.org.stripe_id)
         request_factory = RequestFactory()
         url = reverse('org-deactivate', kwargs={'slug': self.org.slug})
         self.request = request_factory.post(url)
         self.request = mockMiddleware(self.request)
-
-    def activateOrganization(self):
-        """Helper function to activate an organization"""
-        self.org = muckrock.factories.OrganizationFactory()
-        request_factory = RequestFactory()
-        url = reverse('org-activate', kwargs={'slug': self.org.slug})
-        data = {'token': 'test'}
-        request = request_factory.post(url, data)
-        request = mockMiddleware(request)
-        request.user = self.org.owner
-        response = activate_organization(request, self.org.slug)
-        self.org.refresh_from_db()
-        eq_(response.status_code, 200)
-        ok_(self.org.active)
 
     def test_deactivation(self):
         """
@@ -172,11 +158,40 @@ class TestOrgDeactivation(TestCase):
         the org's plan but the plan should not be deleted.
         """
         self.request.user = self.org.owner
-        response = deactivate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.deactivate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(not self.org.active)
-        ok_(self.org.stripe_id)
+        ok_(not self.org.active and self.org.stripe_id)
 
-    def test_already_inactive(self):
+    def test_staff_dactivation(self):
+        """Staff should be able to deactivate the org."""
+        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        response = muckrock.organization.views.deactivate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(not self.org.active and self.org.stripe_id)
+
+    def test_owner_deactivation(self):
+        """Owners should able to deactivate their org."""
+        self.request.user = self.org.owner
+        response = muckrock.organization.views.deactivate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(not self.org.active and self.org.stripe_id)
+
+    def test_member_deactivation(self):
+        """Members should not be able to deactivate orgs."""
+        member = muckrock.factories.UserFactory()
+        self.org.add_member(member)
+        self.request.user = member
+        response = muckrock.organization.views.deactivate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(self.org.active)
+
+    @patch('muckrock.organization.views.Organization.pause_subscription')
+    def test_already_inactive(self, pause_mock):
         """An already-inactive org should not be able to be deactivated."""
-        ok_(False, 'Test unwritten.')
+        org = muckrock.factories.OrganizationFactory()
+        url = reverse('org-deactivate', kwargs={'slug': org.slug})
+        request = RequestFactory().post(url)
+        request = mockMiddleware(request)
+        request.user = org.owner
+        response = muckrock.organization.views.deactivate_organization(request, org.slug)
+        ok_(not pause_mock.called)
