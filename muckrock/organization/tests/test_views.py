@@ -12,8 +12,7 @@ from nose.tools import ok_, eq_
 
 from muckrock.accounts.models import Profile
 import muckrock.factories
-from muckrock.organization.forms import OrganizationCreateForm
-from muckrock.organization.views import OrganizationCreateView, activate_organization
+import muckrock.organization
 
 # Creates mock items for testing methods that involve Stripe
 mock_customer = Mock()
@@ -40,7 +39,7 @@ class TestOrgCreate(TestCase):
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
-        self.create_view = OrganizationCreateView.as_view()
+        self.create_view = muckrock.organization.views.OrganizationCreateView.as_view()
 
     def test_staff_only(self):
         """Only MuckRock staff may create a new organization."""
@@ -57,7 +56,7 @@ class TestOrgCreate(TestCase):
     def test_owner_is_member(self):
         """The organization owner should be saved as a member."""
         owner = muckrock.factories.UserFactory()
-        form = OrganizationCreateForm({
+        form = muckrock.organization.forms.OrganizationCreateForm({
             'name': 'Cool Org',
             'owner': owner.pk,
             'monthly_cost': 1000,
@@ -70,7 +69,7 @@ class TestOrgCreate(TestCase):
         request = mockMiddleware(request)
         # for the moment, only staff can create an organization
         request.user = muckrock.factories.UserFactory(is_staff=True)
-        response = OrganizationCreateView.as_view()(request)
+        response = muckrock.organization.views.OrganizationCreateView.as_view()(request)
         owner.profile.refresh_from_db()
         eq_(response.status_code, 302,
             'The view should redirect on success.')
@@ -98,21 +97,21 @@ class TestOrgActivation(TestCase):
         the owner should be subscribed to the plan.
         """
         self.request.user = muckrock.factories.UserFactory(is_staff=True)
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         ok_(self.org.active)
 
     def test_staff_activation(self):
         """Staff should be able to activate the org."""
         self.request.user = muckrock.factories.UserFactory(is_staff=True)
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         ok_(self.org.active)
 
     def test_owner_activation(self):
         """Owner should be able to activate the org."""
         self.request.user = self.org.owner
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         ok_(self.org.active)
 
@@ -121,7 +120,7 @@ class TestOrgActivation(TestCase):
         member = muckrock.factories.UserFactory(is_staff=False)
         self.org.add_member(member)
         self.request.user = member
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         ok_(not self.org.active)
 
@@ -129,13 +128,13 @@ class TestOrgActivation(TestCase):
         """An already-active org should not be able to be activated."""
         # first activate the org
         self.request.user = self.org.owner
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         ok_(self.org.active)
         # then try activating again, make sure the stripe id is the same
         stripe_id = self.org.stripe_id
         logging.debug(stripe_id)
-        response = activate_organization(self.request, self.org.slug)
+        response = muckrock.organization.views.activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
         eq_(self.org.stripe_id, stripe_id)
 
