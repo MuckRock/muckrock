@@ -34,6 +34,7 @@ def mockMiddleware(request):
     setattr(request, '_messages', Mock())
     return request
 
+
 class TestOrgCreate(TestCase):
     """Test the expectations of organization creation"""
     def setUp(self):
@@ -78,7 +79,7 @@ class TestOrgCreate(TestCase):
         eq_(owner.profile.organization.name, 'Cool Org',
             'The owner should be made a member of the org.')
 
-# Substitutes mock items for Stripe items in each test
+
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
 class TestOrgActivation(TestCase):
@@ -138,19 +139,44 @@ class TestOrgActivation(TestCase):
         self.org.refresh_from_db()
         eq_(self.org.stripe_id, stripe_id)
 
+
+@patch('stripe.Customer', MockCustomer)
+@patch('stripe.Plan', MockPlan)
 class TestOrgDeactivation(TestCase):
     """Test the expectations of organization deactivation"""
+    def setUp(self):
+        # create an org with a plan, so we can cancel it
+        self.org = muckrock.factories.OrganizationFactory()
+        self.activateOrganization()
+        request_factory = RequestFactory()
+        url = reverse('org-deactivate', kwargs={'slug': self.org.slug})
+        self.request = request_factory.post(url)
+        self.request = mockMiddleware(self.request)
+
+    def activateOrganization(self):
+        """Helper function to activate an organization"""
+        self.org = muckrock.factories.OrganizationFactory()
+        request_factory = RequestFactory()
+        url = reverse('org-activate', kwargs={'slug': self.org.slug})
+        data = {'token': 'test'}
+        request = request_factory.post(url, data)
+        request = mockMiddleware(request)
+        request.user = self.org.owner
+        response = activate_organization(request, self.org.slug)
+        self.org.refresh_from_db()
+        eq_(response.status_code, 200)
+        ok_(self.org.is_active())
 
     def test_deactivation(self):
         """
         When deactivating the organization, the owner should be unsubscribed from
         the org's plan but the plan should not be deleted.
         """
-        ok_(False, 'Test unwritten.')
-
-    def test_staff_or_owner_only(self):
-        """Only MuckRock staff or the organization owner may deactivate the org."""
-        ok_(False, 'Test unwritten.')
+        self.request.user = self.org.owner
+        response = deactivate_organization(self.request, self.org.slug)
+        self.org.refresh_from_db()
+        ok_(not self.org.is_active())
+        ok_(self.org.stripe_id)
 
     def test_already_inactive(self):
         """An already-inactive org should not be able to be deactivated."""
