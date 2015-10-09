@@ -50,10 +50,6 @@ class OrganizationCreateView(CreateView):
         Then, redirect to the newly created organization.
         """
         organization = form.save()
-        # make owner a member
-        owner = organization.owner
-        owner.profile.organization = organization
-        owner.profile.save()
         # redirect to the success url with a nice message
         logging.info('%s created %s', self.request.user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')

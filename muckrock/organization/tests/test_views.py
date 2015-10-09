@@ -53,31 +53,6 @@ class TestOrgCreate(TestCase):
         response = self.create_view(request)
         eq_(response.status_code, 200, 'Staff users should be allowed access.')
 
-    def test_owner_is_member(self):
-        """The organization owner should be saved as a member."""
-        owner = muckrock.factories.UserFactory()
-        form = muckrock.organization.forms.OrganizationCreateForm({
-            'name': 'Cool Org',
-            'owner': owner.pk,
-            'monthly_cost': 1000,
-            'monthly_requests': 100,
-            'max_users': 20
-        })
-        ok_(form.is_valid(),
-            'The form should validate. Form errors: %s' % form.errors.as_json)
-        request = self.request_factory.post(self.url, form.data)
-        request = mockMiddleware(request)
-        # for the moment, only staff can create an organization
-        request.user = muckrock.factories.UserFactory(is_staff=True)
-        response = muckrock.organization.views.OrganizationCreateView.as_view()(request)
-        owner.profile.refresh_from_db()
-        eq_(response.status_code, 302,
-            'The view should redirect on success.')
-        ok_(owner.profile.organization,
-            'The owner should be assigned an organization.')
-        eq_(owner.profile.organization.name, 'Cool Org',
-            'The owner should be made a member of the org.')
-
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
