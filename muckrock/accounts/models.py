@@ -342,7 +342,9 @@ class Profile(models.Model):
         num_days = 1 if self.email_pref == 'daily' else 7
         period_start = current_time - datetime.timedelta(num_days)
         user_stream = actstream.models.user_stream(self.user)
-        user_stream = user_stream.filter(timestamp__gte=period_start)
+        user_stream = user_stream.filter(timestamp__gte=period_start)\
+                                 .exclude(verb='started following')\
+                                 .exclude(verb='stopped following')
         if user_stream.count() > 0:
             self.activity_email(user_stream)
 
