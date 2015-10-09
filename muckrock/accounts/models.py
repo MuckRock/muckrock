@@ -4,7 +4,7 @@ Models for the accounts application
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db import models
 from django.template.loader import render_to_string
 
@@ -320,19 +320,26 @@ class Profile(models.Model):
         count = stream.count()
         since = 'yesterday' if self.email_pref == 'daily' else 'last week'
         subject = '%d updates since %s' % (count, since)
-        msg = render_to_string('email/activity.txt', {
+        text_content = render_to_string('email/activity.txt', {
             'user': self.user,
             'stream': stream,
             'count': count,
             'since': since
         })
-        email = EmailMessage(
+        html_content = render_to_string('email/activity.html', {
+            'user': self.user,
+            'stream': stream,
+            'count': count,
+            'since': since
+        })
+        email = EmailMultiAlternatives(
             subject=subject,
-            body=msg,
-            from_email='info@muckrock.com',
+            body=text_content,
+            from_email='MuckRock <info@muckrock.com>',
             to=[self.user.email],
             bcc=['diagnostics@muckrock.com']
         )
+        email.attach_alternative(html_content, 'text/html')
         email.send(fail_silently=False)
         return email
 
@@ -342,7 +349,9 @@ class Profile(models.Model):
         num_days = 1 if self.email_pref == 'daily' else 7
         period_start = current_time - datetime.timedelta(num_days)
         user_stream = actstream.models.user_stream(self.user)
-        user_stream = user_stream.filter(timestamp__gte=period_start)
+        user_stream = user_stream.filter(timestamp__gte=period_start)\
+                                 .exclude(verb='started following')\
+                                 .exclude(verb='stopped following')
         if user_stream.count() > 0:
             self.activity_email(user_stream)
 
