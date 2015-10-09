@@ -96,7 +96,7 @@ class OrganizationDetailView(DetailView):
         elif action == 'remove_members':
             _remove_members(request, organization)
         elif action == 'change_subscription':
-            if organization.is_active():
+            if organization.active:
                 organization.pause_subscription()
                 msg = 'Your subscription is paused. You may resume it at any time.'
             else:
@@ -159,7 +159,7 @@ def activate_organization(request, slug):
     """Grants an organization requests and subscribes its owner to a recurring payment plan."""
     organization = get_object_or_404(Organization, slug=slug)
     # first check if the org is already active
-    if organization.is_active():
+    if organization.active:
         logging.error('Cannot activate %s; it is already active.', organization)
         messages.error(request, 'This organization is already active.')
         return redirect(organization)
@@ -195,7 +195,7 @@ def deactivate_organization(request, **kwargs):
     """Unsubscribes its owner from the recurring payment plan."""
     organization = get_object_or_404(Organization, slug=kwargs['slug'])
     # first check if org is already deactivated
-    if not organization.is_active():
+    if not organization.active:
         messages.error(request, 'This organization is already inactive.')
         return redirect(organization)
     # next check if the user has the authority

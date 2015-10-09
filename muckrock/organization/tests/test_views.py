@@ -100,21 +100,21 @@ class TestOrgActivation(TestCase):
         self.request.user = muckrock.factories.UserFactory(is_staff=True)
         response = activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(self.org.is_active())
+        ok_(self.org.active)
 
     def test_staff_activation(self):
         """Staff should be able to activate the org."""
         self.request.user = muckrock.factories.UserFactory(is_staff=True)
         response = activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(self.org.is_active())
+        ok_(self.org.active)
 
     def test_owner_activation(self):
         """Owner should be able to activate the org."""
         self.request.user = self.org.owner
         response = activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(self.org.is_active())
+        ok_(self.org.active)
 
     def test_member_activation(self):
         """Members should not be able to activate the org."""
@@ -123,7 +123,7 @@ class TestOrgActivation(TestCase):
         self.request.user = member
         response = activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(not self.org.is_active())
+        ok_(not self.org.active)
 
     def test_already_active(self):
         """An already-active org should not be able to be activated."""
@@ -131,7 +131,7 @@ class TestOrgActivation(TestCase):
         self.request.user = self.org.owner
         response = activate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(self.org.is_active())
+        ok_(self.org.active)
         # then try activating again, make sure the stripe id is the same
         stripe_id = self.org.stripe_id
         logging.debug(stripe_id)
@@ -165,7 +165,7 @@ class TestOrgDeactivation(TestCase):
         response = activate_organization(request, self.org.slug)
         self.org.refresh_from_db()
         eq_(response.status_code, 200)
-        ok_(self.org.is_active())
+        ok_(self.org.active)
 
     def test_deactivation(self):
         """
@@ -175,7 +175,7 @@ class TestOrgDeactivation(TestCase):
         self.request.user = self.org.owner
         response = deactivate_organization(self.request, self.org.slug)
         self.org.refresh_from_db()
-        ok_(not self.org.is_active())
+        ok_(not self.org.active)
         ok_(self.org.stripe_id)
 
     def test_already_inactive(self):

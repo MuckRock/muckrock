@@ -43,10 +43,6 @@ class Organization(models.Model):
         """The url for this object"""
         return ('org-detail', [], {'slug': self.slug})
 
-    def is_active(self):
-        """Is this organization active?"""
-        return self.active
-
     def restore_requests(self):
         """Restore the number of requests credited to the org."""
         if self.active:
