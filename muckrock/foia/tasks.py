@@ -40,7 +40,6 @@ from muckrock.settings import (
     AWS_SECRET_ACCESS_KEY,
     AWS_AUTOIMPORT_BUCKET_NAME,
     AWS_STORAGE_BUCKET_NAME,
-    AWS_CLASSIFIER_BUCKET_NAME,
     )
 from muckrock.task.models import ResponseTask
 from muckrock.vendor import MultipartPostHandler
@@ -210,8 +209,8 @@ def classify_status(task_pk, **kwargs):
     def get_classifier():
         """Load the pickled classifier from S3"""
         conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-        bucket = conn.get_bucket(AWS_CLASSIFIER_BUCKET_NAME)
-        key = bucket.get_key('classifier.pkl')
+        bucket = conn.get_bucket(AWS_STORAGE_BUCKET_NAME)
+        key = bucket.get_key('classifier/classifier.pkl')
         return pickle.loads(key.get_contents_as_string())
 
     def predict_status(vectorizer, selector, classifier, text, pages):
