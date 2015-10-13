@@ -1,5 +1,0 @@
-{{ object.title }}
-{{ object.user.get_full_name }}
-{% for comm in object.communications.all %}
-	{{ comm.communication }}
-{% endfor %}

@@ -210,7 +210,6 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.humanize',
     'django.contrib.staticfiles',
-    'celery_haystack',
     'compressor',
     'debug_toolbar',
     'django_tablib',
@@ -219,7 +218,6 @@ INSTALLED_APPS = (
     'easy_thumbnails',
     'filer',
     'gunicorn',
-    'haystack',
     'dbsettings',
     'localflavor',
     'markdown_deux',
@@ -233,6 +231,7 @@ INSTALLED_APPS = (
     'robots',
     'storages',
     'taggit',
+    'watson',
     'django_xmlrpc',
     'lot',
     'muckrock.accounts',
@@ -325,28 +324,6 @@ TINYMCE_DEFAULT_CONFIG = {
     'theme_advanced_statusbar_location': 'none',
     'convert_urls': False,
 }
-
-haystack_connections = {
-    'solr': {
-        'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
-        'URL': os.environ.get('WEBSOLR_URL', ''),
-        'TIMEOUT': 60 * 5,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-    'whoosh': {
-        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
-        'PATH': os.path.join(SITE_ROOT, 'whoosh/mysite_index'),
-        'STORAGE': 'file',
-        'POST_LIMIT': 128 * 1024 * 1024,
-        'INCLUDE_SPELLING': True,
-        'BATCH_SIZE': 100,
-    },
-}
-HAYSTACK_CONNECTIONS = {}
-HAYSTACK_CONNECTIONS['default'] = haystack_connections[
-    os.environ.get('HAYSTACK_SEARCH_ENGINE', 'whoosh')]
-HAYSTACK_SIGNAL_PROCESSOR = 'muckrock.signals.RelatedCelerySignalProcessor'
 
 SESAME_MAX_AGE = 60 * 60 * 24 * 2
 

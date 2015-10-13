@@ -1,6 +1,0 @@
-{{ object.title }}
-{{ object.user.get_full_name }}
-{{ object.question }}
-{% for answer in object.answers.all %}
-	{{ answer.answer }}
-{% endfor %}

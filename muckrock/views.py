@@ -12,14 +12,14 @@ from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
+import re
+import watson
+
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile
 from muckrock.forms import MRFilterForm
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.news.models import Article
-
-import re
-from haystack.views import SearchView
 
 class MRFilterableListView(ListView):
     """
@@ -182,46 +182,18 @@ class MRFilterableListView(ListView):
         """Paginates list by the return value"""
         return min(self.request.GET.get('per_page', 25), 100)
 
-
-class MRSearchView(SearchView):
-    """Always lower case queries for case insensitive searches"""
-
-    def get_query(self):
-        """Lower case the query"""
-        return super(MRSearchView, self).get_query().lower()
-
-    def extra_context(self):
-        """Adds per_page to context data"""
-        context = super(MRSearchView, self).extra_context()
-        context['per_page'] = int(self.request.GET.get('per_page', 25))
-        return context
-
-    def get_paginate_by(self):
-        """Gets per_page the right way"""
-        return int(self.request.GET.get('per_page', 25))
-
-    def build_page(self):
-        """Circumvents the hard-coded haystack per page value."""
-        # pylint: disable=pointless-statement
-        # disabled pylint because this is not really my code
-        # also, this should only be temporary (see issue #383)
-        try:
-            page_no = int(self.request.GET.get('page', 1))
-        except (TypeError, ValueError):
-            raise Http404("Not a valid number for page.")
-
-        if page_no < 1:
-            raise Http404("Pages should be 1 or greater.")
-
-        start_offset = (page_no - 1) * self.results_per_page
-        self.results[start_offset:start_offset + self.results_per_page]
-
-        paginator = Paginator(self.results, self.get_paginate_by())
-        try:
-            page = paginator.page(page_no)
-        except InvalidPage:
-            raise Http404("No such page!")
-        return (paginator, page)
+def search(request):
+    """Get objects that correspond to the search query"""
+    query = request.GET.get('q', '')
+    context = {
+        'query': query,
+        'results': watson.search(query)
+    }
+    return render_to_response(
+        'search/search.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 def front_page(request):
     """Get all the details needed for the front page"""
