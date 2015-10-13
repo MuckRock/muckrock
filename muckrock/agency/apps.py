@@ -4,7 +4,8 @@ App config for agency
 
 from django.apps import AppConfig
 
-from actstream import registry
+import actstream
+import watson
 
 class AgencyConfig(AppConfig):
     """Configures the agency application to use activity streams"""
@@ -12,4 +13,6 @@ class AgencyConfig(AppConfig):
 
     def ready(self):
         """Registers agencies with the activity streams plugin"""
-        registry.register(self.get_model('Agency'))
+        agency = self.get_model('Agency')
+        actstream.registry.register(agency)
+        watson.register(agency)
