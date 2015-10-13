@@ -110,7 +110,11 @@ class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        return actstream.models.following(self.request.user, FOIARequest)
+        objects = actstream.models.following(self.request.user, FOIARequest)
+        # actstream returns a list of objects, so we have to turn it into a queryset
+        objects = FOIARequest.objects.filter(id__in=[_object.pk for _object in objects])
+        objects = self.sort_list(objects)
+        return self.filter_list(objects)
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
@@ -347,6 +351,7 @@ class Detail(DetailView):
                 messages.error(request, 'Invalid date provided.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
+        return redirect(foia)
 
     def _generate_key(self, request, foia):
         """Generate and return an access key, with support for AJAX."""
