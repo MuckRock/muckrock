@@ -347,6 +347,7 @@ class Detail(DetailView):
                 messages.error(request, 'Invalid date provided.')
         else:
             messages.error(request, 'You cannot do that, stop it.')
+        return redirect(foia)
 
     def _generate_key(self, request, foia):
         """Generate and return an access key, with support for AJAX."""

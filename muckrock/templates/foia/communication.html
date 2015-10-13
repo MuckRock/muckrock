@@ -27,7 +27,7 @@
         </header>
         {% endif %}
         {% if communication.full_html %}
-        {{ communication.communication|redact_emails }}
+        {{ communication.communication|redact_emails|safe }}
         {% else %}
         {{ communication.communication|redact_emails|urlize|linebreaks }}
         {% endif %}
