@@ -110,7 +110,11 @@ class FollowingRequestList(RequestList):
     """List of all FOIA requests the user is following"""
     def get_queryset(self):
         """Limits FOIAs to those followed by the current user"""
-        return actstream.models.following(self.request.user, FOIARequest)
+        objects = actstream.models.following(self.request.user, FOIARequest)
+        # actstream returns a list of objects, so we have to turn it into a queryset
+        objects = FOIARequest.objects.filter(id__in=[object.pk for object in objects])
+        objects = self.sort_list(objects)
+        return self.filter_list(objects)
 
 # pylint: disable=no-self-use
 class Detail(DetailView):
