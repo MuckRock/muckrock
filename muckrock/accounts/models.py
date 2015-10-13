@@ -330,7 +330,8 @@ class Profile(models.Model):
             'user': self.user,
             'stream': stream,
             'count': count,
-            'since': since
+            'since': since,
+            'base_url': 'https://www.muckrock.com'
         })
         email = EmailMultiAlternatives(
             subject=subject,
