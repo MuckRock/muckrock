@@ -10,7 +10,7 @@ from django.http import HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Context, loader
 from django.utils.decorators import method_decorator
-from django.views.generic.list import ListView
+from django.views.generic import TemplateView, ListView
 
 import re
 import watson
@@ -182,18 +182,25 @@ class MRFilterableListView(ListView):
         """Paginates list by the return value"""
         return min(self.request.GET.get('per_page', 25), 100)
 
-def search(request):
+class SearchView(TemplateView):
     """Get objects that correspond to the search query"""
-    query = request.GET.get('q', '')
-    context = {
-        'query': query,
-        'results': watson.search(query)
-    }
-    return render_to_response(
-        'search/search.html',
-        context,
-        context_instance=RequestContext(request)
-    )
+    template_name = 'search.html'
+
+    def get_query(self):
+        """Returns the query"""
+        return self.request.GET.get('q', '')
+
+    def get_search_results(self, query):
+        """Gets the query and perfoms the search."""
+        return watson.search(query)
+
+    def get_context_data(self, **kwargs):
+        """Returns the context"""
+        context = super(SearchView, self).get_context_data(**kwargs)
+        query = self.get_query()
+        context['query'] = query
+        context['results'] = self.get_search_results(query)
+        return context
 
 def front_page(request):
     """Get all the details needed for the front page"""
