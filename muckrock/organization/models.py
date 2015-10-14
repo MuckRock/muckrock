@@ -95,6 +95,22 @@ class Organization(models.Model):
         email.send(fail_silently=False)
         return
 
+    def update_monthly_cost(self, num_users):
+        """Changes the monthly cost to $20 times the number of users, which can be negative."""
+        price_per_user = 2000
+        current_monthly_cost = self.monthly_cost
+        cost_adjustment = price_per_user * num_users
+        self.monthly_cost = current_monthly_cost + cost_adjustment
+        self.save()
+
+    def update_monthly_requests(self, num_users):
+        """Changes the monthly requests to 10 times the number of users, which can be negative."""
+        requests_per_user = 10
+        current_requests = self.monthly_requests
+        request_adjustment = requests_per_user * num_users
+        self.monthly_requests = current_requests + request_adjustment
+        self.save()
+
     def add_member(self, user):
         """
         Adds the passed-in user as a member of the organization.
