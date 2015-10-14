@@ -131,82 +131,49 @@ class Organization(models.Model):
             'text/organization/remove_member.txt')
         return
 
-    def create_plan(self):
-        """
-        Creates an org-specific Stripe plan and saves it to the org.
-        Returns the id associated with the plan.
-        Raises an exception if the org already has a plan.
-        """
-        if self.stripe_id:
-            error_msg = ('This organization already has an associated plan. '
-                         'Delete the existing plan before adding a new one.')
-            raise ValueError(error_msg)
-        plan_name = self.name + ' Plan'
-        plan_id = self.slug + '-org-plan'
-        plan = stripe.Plan.create(
-            amount=self.monthly_cost,
-            interval='month',
-            name=plan_name,
-            currency='usd',
-            id=plan_id)
-        self.stripe_id = plan.id
-        self.save()
-        return self.stripe_id
-
-    def delete_plan(self):
-        """Deletes this organization's specific Stripe plan"""
-        if not self.stripe_id:
-            raise ValueError('This organization has no associated plan to cancel.')
-        try:
-            plan = stripe.Plan.retrieve(self.stripe_id)
-            plan.delete()
-        except stripe.InvalidRequestError:
-            logger.error(('No Plan is associated with Stripe ID %s. '
-                'Removing the Stripe ID from the organization anyway.'), self.stripe_id)
-        self.stripe_id = ''
-        self.save()
-        return
-
-    def update_plan(self):
-        """
-        Deletes and recreates an organization's plan.
-        Plans must be deleted and recreated because Stripe prohibits plans
-        from updating any information except their name.
-        """
-        if not self.stripe_id:
-            raise ValueError(('This organization has no associated plan to update. '
-                              'Try creating a plan instead.'))
-        self.delete_plan()
-        self.create_plan()
-        self.start_subscription()
-        return
-
     def start_subscription(self):
-        """Subscribes the owner to this org's plan"""
+        """Subscribes the owner to the org plan, given a variable quantity"""
         # pylint: disable=no-member
-        profile = self.owner.profile
-        org_plan = stripe.Plan.retrieve(self.stripe_id)
-        customer = profile.customer()
-        customer.update_subscription(plan=org_plan.id)
+        quantity = self.monthly_cost/100
+        customer = self.owner.profile.customer()
+        subscription = customer.subscriptions.create(plan='org', quantity=quantity)
         customer.save()
         # if the owner has a pro account, downgrade them to a community account
-        if profile.acct_type == 'pro':
-            profile.acct_type = 'community'
-            profile.save()
+        if self.owner.profile.acct_type == 'pro':
+            self.owner.profile.acct_type = 'community'
+            self.owner.profile.save()
+        self.stripe_id = subscription.id
         self.active = True
         self.save()
         return
 
-    def pause_subscription(self):
+    def update_subscription(self):
+        """Updates the quantity of the subscription, but only if the subscription is active"""
+        if self.active == True:
+            quantity = self.monthly_cost/100
+            customer = self.owner.profile.customer()
+            subscription = customer.subscriptions.retrieve(self.stripe_id)
+            try:
+                subscription.quantity = quantity
+                subscription = subscription.save()
+            except stripe.InvalidRequestError:
+                logger.error(('No subscription is associated with organization '
+                             'owner %s.'), self.owner.username)
+            self.stripe_id = subscription.id
+            self.save()
+        return
+
+    def cancel_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
         # pylint: disable=no-member
         customer = self.owner.profile.customer()
+        subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
-            customer.cancel_subscription()
-            customer.save()
+            subscription.delete()
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
+        self.stripe_id = None
         self.active = False
         self.save()
         return
