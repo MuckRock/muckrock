@@ -358,7 +358,7 @@ MONTHLY_REQUESTS = {
     'community': 0,
     'pro': 20,
     'proxy': 20,
-    'org': 200,
+    'org': 50,
 }
 
 MARKDOWN_DEUX_STYLES = {
