@@ -7,7 +7,6 @@ from django.test import TestCase
 
 import muckrock.factories
 
-
 from mock import Mock, patch
 import nose.tools
 import stripe
@@ -17,22 +16,20 @@ eq_ = nose.tools.eq_
 
 # Creates mock items for testing methods that involve Stripe
 mock_customer = Mock()
+mock_plan = Mock()
+mock_plan.amount = 100
+mock_plan.name = 'Organization'
+mock_plan.id = 'org'
+mock_subscription = Mock()
+mock_subscription.id = 'test-org-subscription'
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
-mock_plan = Mock()
-mock_plan.amount = 45000
-mock_plan.name = 'Test Organization Plan'
-mock_plan.id = 'test-organization-org-plan'
+MockCustomer.subscriptions.create.return_value = mock_subscription
+MockCustomer.subscriptions.retrieve.return_value = mock_subscription
 MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
-# Substitutes mock items for Stripe items in each test
-@patch('stripe.Customer', MockCustomer)
-@patch('stripe.Plan', MockPlan)
-class OrganizationPaymentTests(TestCase):
-    """Test the methods that create and destroy payments and plans"""
-    # pylint: disable=no-self-use
 
     def setUp(self):
         """Set up models for the organization"""
