@@ -102,6 +102,7 @@ class Organization(models.Model):
         cost_adjustment = price_per_user * num_users
         self.monthly_cost = current_monthly_cost + cost_adjustment
         self.save()
+        return self.monthly_cost
 
     def update_monthly_requests(self, num_users):
         """Changes the monthly requests to 10 times the number of users, which can be negative."""
@@ -110,6 +111,7 @@ class Organization(models.Model):
         request_adjustment = requests_per_user * num_users
         self.monthly_requests = current_requests + request_adjustment
         self.save()
+        return self.monthly_requests
 
     def add_member(self, user):
         """
