@@ -31,77 +31,121 @@ MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
 
+
+class TestRations(TestCase):
+    """Test the dynamic rationing of seats, monthly cost, and monthly requests."""
     def setUp(self):
-        """Set up models for the organization"""
+        """Create a basic organization"""
         self.org = muckrock.factories.OrganizationFactory()
 
-    def test_create_plan(self):
-        """Should create a plan and assign a value to the org's stripe_id field"""
-        self.org.create_plan()
-        nose.tools.assert_true(self.org.stripe_id)
+    def test_no_change(self):
+        """If the seats do not change, then the cost and requests shouldn't change."""
+        num_seats = self.org.max_users
+        old_monthly_cost = self.org.monthly_cost
+        old_monthly_requests = self.org.monthly_requests
+        new_monthly_cost = self.org.update_monthly_cost(num_seats)
+        new_monthly_requets = self.org.update_monthly_requests(num_seats)
+        eq_(old_monthly_cost, new_monthly_cost,
+            'The monthly cost should not change if the number of seats stays the same.')
+        eq_(old_monthly_requests, new_monthly_requets,
+            'The monthly requests should not change if the number of seats stays the same.')
 
-    def test_delete_plan(self):
-        """Should delete the org's plan and set stripe_id to None"""
-        self.org.create_plan()
-        self.org.delete_plan()
-        nose.tools.assert_false(self.org.stripe_id)
+    def test_increase(self):
+        """If the seats increase, then the cost and requests should also increase."""
+        seat_increase = 1
+        cost_increase = 2000 * seat_increase
+        request_increase = 10 * seat_increase
+        num_seats = self.org.max_users + seat_increase
+        old_monthly_cost = self.org.monthly_cost
+        old_monthly_requests = self.org.monthly_requests
+        new_monthly_cost = self.org.update_monthly_cost(num_seats)
+        new_monthly_requets = self.org.update_monthly_requests(num_seats)
+        eq_(new_monthly_cost, old_monthly_cost + cost_increase,
+            'The monthly cost should increase based on the old cost.')
+        eq_(new_monthly_requests, old_monthly_requests + request_increase,
+            'The monhtly requests should increase based on the old requests.')
 
-    def test_update_plan(self):
-        """
-        Should create an org plan at once price point, then update the org's
-        plan to a new price point.
-        """
-        self.org.create_plan()
-        plan = stripe.Plan.retrieve(self.org.stripe_id)
-        nose.tools.eq_(plan.amount, self.org.monthly_cost)
-        self.org.monthly_cost = 15000
-        mock_plan.amount = 15000
-        self.org.update_plan()
-        plan = stripe.Plan.retrieve(self.org.stripe_id)
-        nose.tools.eq_(plan.amount, self.org.monthly_cost)
+    def test_decrease(self):
+        """If the seats decrease, then the cost and requests should also decrease."""
+        seat_decrease = -1
+        cost_decrease = 2000 * seat_decrease
+        request_decrease = 10 * seat_decrease
+        num_seats = self.org.max_users + seat_decrease
+        old_monthly_cost = self.org.monthly_cost
+        old_monthly_requests = self.org.monthly_requests
+        new_monthly_cost = self.org.update_monthly_cost(num_seats)
+        new_monthly_requets = self.org.update_monthly_requests(num_seats)
+        eq_(new_monthly_cost, old_monthly_cost + cost_decrease,
+            'The monthly cost should increase based on the old cost.')
+        eq_(new_monthly_requests, old_monthly_requests + request_decrease,
+            'The monhtly requests should increase based on the old requests.')
 
-    @nose.tools.raises(ValueError)
-    def test_double_create_plan(self):
-        """Should return an error after trying to create a plan twice in a row"""
-        self.org.create_plan()
-        self.org.create_plan()
 
-    @nose.tools.raises(ValueError)
-    def test_delete_nonexistant_plan(self):
-        """Should return an error after trying to delete a plan that doesn't exist"""
-        self.org.delete_plan()
+# Substitutes mock items for Stripe items in each test
+@patch('stripe.Customer', MockCustomer)
+@patch('stripe.Plan', MockPlan)
+class TestSubscriptions(TestCase):
+    """Test the methods for activating, updating, and cancelling an org subscription."""
+    def setUp(self):
+        """Create a basic organization"""
+        self.org = muckrock.factories.OrganizationFactory()
+        ok_(not self.org.active and not self.org.stripe_id,
+            'By default, an org should be inactive and subscription-less')
 
-    @nose.tools.raises(ValueError)
-    def test_update_nonexistant_plan(self):
-        """Should return an error after tying to update a plan that doesn't exist"""
-        self.org.update_plan()
+    def test_activation(self):
+        """Activating the organization should subscribe the owner to an org plan."""
+        # lets add an extra seat, just to make things interesting
+        seat_increase = 1
+        expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
+        expected_request_increase = self.org.monthly_request  + 10 * seat_increase
+        expected_quantity = expected_cost_increase / 100
+        num_seats = self.org.max_users + seat_increase
+        self.org.activate_subscription(num_seats)
+        eq_(self.org.monthly_cost, expected_cost_increase,
+            'The monthly cost should be updated.')
+        eq_(self.org.monthly_requests, expected_request_increase,
+            'The monthly requests should be updated.')
+        eq_(mock_subscription.quantity, expected_quantity,
+            'The subscription quantity should be based on the monthly cost.')
+        eq_(self.org.stripe_id, mock_subscription.id,
+            'The subscription ID should be saved to the organization.')
+        ok_(self.org.active,
+            'The org should be set to an active state.')
 
-    def test_start_subscription(self):
-        """
-        Should subscribe owner to the organization's plan,
-        set the org to active, and reduce pro owners to community accounts
-        """
-        profile = self.org.owner.profile
-        profile.acct_type = 'pro'
-        self.org.create_plan()
-        self.org.start_subscription()
-        # customer = org.owner.profile.customer()
-        # test if subscription was activated
-        nose.tools.eq_(profile.acct_type, 'community')
-        nose.tools.assert_true(self.org.active)
+    def test_updating(self):
+        """Updating the subscription should update the quantity of the subscription."""
+        # change the stripe_id to something else, to make sure it gets updated
+        self.org.stripe_id = 'temp'
+        self.org.save()
+        # let's update this org with 2 more seats
+        seat_increase = 2
+        expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
+        expected_request_increase = self.org.monthly_request  + 10 * seat_increase
+        expected_quantity = expected_cost_increase / 100
+        num_seats = self.org.max_users + seat_increase
+        self.org.update_subscription(num_seats)
+        eq_(self.org.monthly_cost, expected_cost_increase,
+            'The monthly cost should be updated.')
+        eq_(self.org.monthly_requests, expected_request_increase,
+            'The monthly requests should be updated.')
+        eq_(mock_subscription.quantity, expected_quantity,
+            'The subscription quantity should be based on the monthly cost.')
+        eq_(self.org.stripe_id, mock_subscription.id,
+            'The subscription ID should be saved to the organization.')
+        ok_(self.org.active,
+            'The org should be set to an active state.')
 
-    def test_pause_subscription(self):
-        """Should cancel owner's subscription and set the org to inactive"""
-        self.org.create_plan()
-        self.org.start_subscription()
-        self.org.pause_subscription()
-        # customer = org.owner.profile.customer()
-        # test if subscription was paused
-        nose.tools.assert_false(self.org.active)
+    def test_cancelling(self):
+        """Cancelling the subscription should render the org inactive."""
+        self.org.cencel_subscription()
+        ok_(not self.org.active,
+            'The organization should be set to an inactive state.')
+        ok_(not self.org.stripe_id,
+            'The stripe subscription ID should be removed from the org.')
 
-class TestOrgMembership(TestCase):
+
+class TestMembership(TestCase):
     """Test the membership functions of the organization"""
-
     def setUp(self):
         """Create an owner, a member, and an organization"""
         self.org = muckrock.factories.OrganizationFactory()
