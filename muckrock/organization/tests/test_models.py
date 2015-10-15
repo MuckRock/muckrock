@@ -178,6 +178,18 @@ class TestMembership(TestCase):
             'The org should not recognize the ex-member.')
 
     @nose.tools.raises(ValueError)
+    def test_add_member_without_seat(self):
+        """An exception should be raised when trying to add a member without any available seat."""
+        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member3 = muckrock.factories.UserFactory(profile__organization=self.org)
+        eq_(self.org.max_users, 3,
+            'The org should start with three seats.')
+        eq_(self.org.members.count(), 3,
+            'The org should have 3 members.')
+        # adding a new member should throw an error
+        self.org.add_member(muckrock.factories.UserFactory())
+
+    @nose.tools.raises(ValueError)
     def test_remove_non_member(self):
         """
         An exception should be raised when trying to remove
