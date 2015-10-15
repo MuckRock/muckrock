@@ -76,9 +76,9 @@ class TestRations(TestCase):
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
         new_monthly_requets = self.org.update_monthly_requests(num_seats)
         eq_(new_monthly_cost, old_monthly_cost + cost_decrease,
-            'The monthly cost should increase based on the old cost.')
+            'The monthly cost should decrease based on the old cost.')
         eq_(new_monthly_requests, old_monthly_requests + request_decrease,
-            'The monhtly requests should increase based on the old requests.')
+            'The monhtly requests should decrease based on the old requests.')
 
 
 # Substitutes mock items for Stripe items in each test
