@@ -168,18 +168,21 @@ class Organization(models.Model):
 
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
-        if self.active == True:
-            quantity = self.monthly_cost/100
-            customer = self.owner.profile.customer()
-            subscription = customer.subscriptions.retrieve(self.stripe_id)
-            try:
-                subscription.quantity = quantity
-                subscription = subscription.save()
-            except stripe.InvalidRequestError:
-                logger.error(('No subscription is associated with organization '
-                             'owner %s.'), self.owner.username)
-            self.stripe_id = subscription.id
-            self.save()
+        if self.active != True:
+            raise AttributeError('Cannot update an inactive organization.')
+        self.update_monthly_cost(num_seats)
+        self.update_monthly_requests(num_seats)
+        quantity = self.monthly_cost/100
+        customer = self.owner.profile.customer()
+        subscription = customer.subscriptions.retrieve(self.stripe_id)
+        try:
+            subscription.quantity = quantity
+            subscription = subscription.save()
+        except stripe.InvalidRequestError:
+            logger.error(('No subscription is associated with organization '
+                         'owner %s.'), self.owner.username)
+        self.stripe_id = subscription.id
+        self.save()
         return
 
     def cancel_subscription(self):

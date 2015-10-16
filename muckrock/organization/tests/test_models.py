@@ -18,7 +18,9 @@ eq_ = nose.tools.eq_
 # Creates mock items for testing methods that involve Stripe
 mock_subscription = Mock()
 mock_subscription.id = 'test-org-subscription'
+mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
+mock_customer.name = 'allan'
 mock_customer.subscriptions.create.return_value = mock_subscription
 mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
@@ -114,6 +116,7 @@ class TestSubscriptions(TestCase):
         """Updating the subscription should update the quantity of the subscription."""
         # change the stripe_id to something else, to make sure it gets updated
         self.org.stripe_id = 'temp'
+        self.org.active = True
         self.org.save()
         # let's update this org with 2 more seats
         seat_increase = 2
@@ -141,6 +144,11 @@ class TestSubscriptions(TestCase):
         ok_(not self.org.stripe_id,
             'The stripe subscription ID should be removed from the org.')
 
+    @nose.tools.raises(AttributeError)
+    def test_update_inactive(self):
+        """Updating an inactive organization should raise an error."""
+        ok_(not self.org.active)
+        self.org.update_subscription(1)
 
 class TestMembership(TestCase):
     """Test the membership functions of the organization"""
