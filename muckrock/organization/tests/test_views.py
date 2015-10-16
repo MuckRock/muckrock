@@ -14,14 +14,19 @@ import muckrock.factories
 import muckrock.organization
 
 # Creates mock items for testing methods that involve Stripe
+mock_subscription = Mock()
+mock_subscription.id = 'test-org-subscription'
+mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
+mock_customer.subscriptions.create.return_value = mock_subscription
+mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
 mock_plan = Mock()
-mock_plan.amount = 45000
-mock_plan.name = 'Test Organization Plan'
-mock_plan.id = 'test-organization-org-plan'
+mock_plan.amount = 100
+mock_plan.name = 'Organization'
+mock_plan.id = 'org'
 MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
