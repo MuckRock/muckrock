@@ -7,6 +7,7 @@ from django.test import TestCase
 
 import muckrock.factories
 
+import logging
 from mock import Mock, patch
 import nose.tools
 import stripe
@@ -15,18 +16,18 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
 # Creates mock items for testing methods that involve Stripe
+mock_subscription = Mock()
+mock_subscription.id = 'test-org-subscription'
 mock_customer = Mock()
+mock_customer.subscriptions.create.return_value = mock_subscription
+mock_customer.subscriptions.retrieve.return_value = mock_subscription
+MockCustomer = Mock()
+MockCustomer.create.return_value = mock_customer
+MockCustomer.retrieve.return_value = mock_customer
 mock_plan = Mock()
 mock_plan.amount = 100
 mock_plan.name = 'Organization'
 mock_plan.id = 'org'
-mock_subscription = Mock()
-mock_subscription.id = 'test-org-subscription'
-MockCustomer = Mock()
-MockCustomer.create.return_value = mock_customer
-MockCustomer.retrieve.return_value = mock_customer
-MockCustomer.subscriptions.create.return_value = mock_subscription
-MockCustomer.subscriptions.retrieve.return_value = mock_subscription
 MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
@@ -97,16 +98,13 @@ class TestSubscriptions(TestCase):
         # lets add an extra seat, just to make things interesting
         seat_increase = 1
         expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
-        expected_request_increase = self.org.monthly_request  + 10 * seat_increase
+        expected_request_increase = self.org.monthly_requests + 10 * seat_increase
         expected_quantity = expected_cost_increase / 100
-        num_seats = self.org.max_users + seat_increase
-        self.org.activate_subscription(num_seats)
+        self.org.activate_subscription(seat_increase)
         eq_(self.org.monthly_cost, expected_cost_increase,
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
             'The monthly requests should be updated.')
-        eq_(mock_subscription.quantity, expected_quantity,
-            'The subscription quantity should be based on the monthly cost.')
         eq_(self.org.stripe_id, mock_subscription.id,
             'The subscription ID should be saved to the organization.')
         ok_(self.org.active,
@@ -120,10 +118,10 @@ class TestSubscriptions(TestCase):
         # let's update this org with 2 more seats
         seat_increase = 2
         expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
-        expected_request_increase = self.org.monthly_request  + 10 * seat_increase
+        expected_request_increase = self.org.monthly_requests + 10 * seat_increase
         expected_quantity = expected_cost_increase / 100
-        num_seats = self.org.max_users + seat_increase
-        self.org.update_subscription(num_seats)
+        self.org.update_subscription(seat_increase)
+        self.org.refresh_from_db()
         eq_(self.org.monthly_cost, expected_cost_increase,
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
@@ -137,7 +135,7 @@ class TestSubscriptions(TestCase):
 
     def test_cancelling(self):
         """Cancelling the subscription should render the org inactive."""
-        self.org.cencel_subscription()
+        self.org.cancel_subscription()
         ok_(not self.org.active,
             'The organization should be set to an inactive state.')
         ok_(not self.org.stripe_id,

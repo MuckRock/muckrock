@@ -95,20 +95,20 @@ class Organization(models.Model):
         email.send(fail_silently=False)
         return
 
-    def update_monthly_cost(self, num_users):
-        """Changes the monthly cost to $20 times the number of users, which can be negative."""
+    def update_monthly_cost(self, num_seats):
+        """Changes the monthly cost to $20 times the number of seats, which can be negative."""
         price_per_user = 2000
         current_monthly_cost = self.monthly_cost
-        cost_adjustment = price_per_user * num_users
+        cost_adjustment = price_per_user * num_seats
         self.monthly_cost = current_monthly_cost + cost_adjustment
         self.save()
         return self.monthly_cost
 
-    def update_monthly_requests(self, num_users):
-        """Changes the monthly requests to 10 times the number of users, which can be negative."""
+    def update_monthly_requests(self, num_seats):
+        """Changes the monthly requests to 10 times the number of seats, which can be negative."""
         requests_per_user = 10
         current_requests = self.monthly_requests
-        request_adjustment = requests_per_user * num_users
+        request_adjustment = requests_per_user * num_seats
         self.monthly_requests = current_requests + request_adjustment
         self.save()
         return self.monthly_requests
@@ -149,13 +149,14 @@ class Organization(models.Model):
             'text/organization/remove_member.txt')
         return
 
-    def start_subscription(self):
+    def activate_subscription(self, num_seats):
         """Subscribes the owner to the org plan, given a variable quantity"""
         # pylint: disable=no-member
+        self.update_monthly_cost(num_seats)
+        self.update_monthly_requests(num_seats)
         quantity = self.monthly_cost/100
         customer = self.owner.profile.customer()
         subscription = customer.subscriptions.create(plan='org', quantity=quantity)
-        customer.save()
         # if the owner has a pro account, downgrade them to a community account
         if self.owner.profile.acct_type == 'pro':
             self.owner.profile.acct_type = 'community'
@@ -165,7 +166,7 @@ class Organization(models.Model):
         self.save()
         return
 
-    def update_subscription(self):
+    def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
         if self.active == True:
             quantity = self.monthly_cost/100
@@ -191,7 +192,7 @@ class Organization(models.Model):
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
-        self.stripe_id = None
+        self.stripe_id = ''
         self.active = False
         self.save()
         return
