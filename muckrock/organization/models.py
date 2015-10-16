@@ -170,6 +170,7 @@ class Organization(models.Model):
 
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
+        # pylint: disable=no-member
         if self.active != True:
             raise AttributeError('Cannot update an inactive organization.')
         self.update_monthly_cost(num_seats)

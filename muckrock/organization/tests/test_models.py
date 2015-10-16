@@ -7,10 +7,8 @@ from django.test import TestCase
 
 import muckrock.factories
 
-import logging
 from mock import Mock, patch
 import nose.tools
-import stripe
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -101,7 +99,6 @@ class TestSubscriptions(TestCase):
         seat_increase = 1
         expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
         expected_request_increase = self.org.monthly_requests + 10 * seat_increase
-        expected_quantity = expected_cost_increase / 100
         self.org.activate_subscription(seat_increase)
         eq_(self.org.monthly_cost, expected_cost_increase,
             'The monthly cost should be updated.')
@@ -186,8 +183,8 @@ class TestMembership(TestCase):
     @nose.tools.raises(ValueError)
     def test_add_member_without_seat(self):
         """An exception should be raised when trying to add a member without any available seat."""
-        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
-        member3 = muckrock.factories.UserFactory(profile__organization=self.org)
+        muckrock.factories.UserFactory(profile__organization=self.org)
+        muckrock.factories.UserFactory(profile__organization=self.org)
         eq_(self.org.max_users, 3,
             'The org should start with three seats.')
         eq_(self.org.members.count(), 3,
