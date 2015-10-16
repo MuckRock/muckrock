@@ -18,7 +18,6 @@ mock_subscription = Mock()
 mock_subscription.id = 'test-org-subscription'
 mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
-mock_customer.name = 'allan'
 mock_customer.subscriptions.create.return_value = mock_subscription
 mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
@@ -196,6 +195,12 @@ class TestMembership(TestCase):
             'The org should have 3 members.')
         # adding a new member should throw an error
         self.org.add_member(muckrock.factories.UserFactory())
+
+    @nose.tools.raises(ValueError)
+    def test_add_existing_member(self):
+        """An exception should be raised when trying to add an existing member."""
+        existing_member = muckrock.factories.UserFactory(profile__organization=self.org)
+        self.org.add_member(existing_member)
 
     @nose.tools.raises(ValueError)
     def test_remove_non_member(self):

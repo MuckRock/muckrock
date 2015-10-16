@@ -121,11 +121,10 @@ class Organization(models.Model):
         If the user is already a member of the organization, it does nothing.
         """
         if self.members.count() == self.max_users:
-            raise ValueError('No open seats for adding members.')
+            raise ValueError('No open seat for this member.')
         if self.has_member(user):
-            logger.error(('Could not add %s as a member to the organization %s, '
-                          'as they are already a member.'), user.username, self.name)
-            return
+            err_msg = '%s is already a member.' % user.first_name
+            raise ValueError(err_msg)
         user.profile.organization = self
         user.profile.save()
         logger.info('%s was added as a member of the organization %s', user.username, self.name)
