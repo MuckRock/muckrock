@@ -118,6 +118,8 @@ class Organization(models.Model):
         Adds the passed-in user as a member of the organization.
         If the user is already a member of the organization, it does nothing.
         """
+        if self.members.count() == self.max_users:
+            raise ValueError('No open seats for adding members.')
         if self.has_member(user):
             logger.error(('Could not add %s as a member to the organization %s, '
                           'as they are already a member.'), user.username, self.name)

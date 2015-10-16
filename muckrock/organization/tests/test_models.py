@@ -43,7 +43,7 @@ class TestRations(TestCase):
 
     def test_no_change(self):
         """If the seats do not change, then the cost and requests shouldn't change."""
-        num_seats = self.org.max_users
+        num_seats = 0
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
@@ -58,11 +58,11 @@ class TestRations(TestCase):
         seat_increase = 1
         cost_increase = 2000 * seat_increase
         request_increase = 10 * seat_increase
-        num_seats = self.org.max_users + seat_increase
+        num_seats = seat_increase
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
-        new_monthly_requets = self.org.update_monthly_requests(num_seats)
+        new_monthly_requests = self.org.update_monthly_requests(num_seats)
         eq_(new_monthly_cost, old_monthly_cost + cost_increase,
             'The monthly cost should increase based on the old cost.')
         eq_(new_monthly_requests, old_monthly_requests + request_increase,
@@ -73,11 +73,11 @@ class TestRations(TestCase):
         seat_decrease = -1
         cost_decrease = 2000 * seat_decrease
         request_decrease = 10 * seat_decrease
-        num_seats = self.org.max_users + seat_decrease
+        num_seats = seat_decrease
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
-        new_monthly_requets = self.org.update_monthly_requests(num_seats)
+        new_monthly_requests = self.org.update_monthly_requests(num_seats)
         eq_(new_monthly_cost, old_monthly_cost + cost_decrease,
             'The monthly cost should decrease based on the old cost.')
         eq_(new_monthly_requests, old_monthly_requests + request_decrease,
