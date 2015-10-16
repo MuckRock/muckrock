@@ -41,7 +41,7 @@ class TestRations(TestCase):
 
     def test_no_change(self):
         """If the seats do not change, then the cost and requests shouldn't change."""
-        num_seats = 0
+        num_seats = self.org.max_users
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
@@ -56,7 +56,7 @@ class TestRations(TestCase):
         seat_increase = 1
         cost_increase = 2000 * seat_increase
         request_increase = 10 * seat_increase
-        num_seats = seat_increase
+        num_seats = self.org.max_users + seat_increase
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
@@ -71,7 +71,7 @@ class TestRations(TestCase):
         seat_decrease = -1
         cost_decrease = 2000 * seat_decrease
         request_decrease = 10 * seat_decrease
-        num_seats = seat_decrease
+        num_seats = self.org.max_users + seat_decrease
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
         new_monthly_cost = self.org.update_monthly_cost(num_seats)
@@ -99,7 +99,10 @@ class TestSubscriptions(TestCase):
         seat_increase = 1
         expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
         expected_request_increase = self.org.monthly_requests + 10 * seat_increase
-        self.org.activate_subscription(seat_increase)
+        num_seats = self.org.max_users + seat_increase
+        self.org.activate_subscription(num_seats)
+        eq_(self.org.max_users, num_seats,
+            'The maximum number of users should be updated.')
         eq_(self.org.monthly_cost, expected_cost_increase,
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
@@ -120,12 +123,14 @@ class TestSubscriptions(TestCase):
         expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
         expected_request_increase = self.org.monthly_requests + 10 * seat_increase
         expected_quantity = expected_cost_increase / 100
-        self.org.update_subscription(seat_increase)
-        self.org.refresh_from_db()
+        num_seats = self.org.max_users + seat_increase
+        self.org.update_subscription(num_seats)
         eq_(self.org.monthly_cost, expected_cost_increase,
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
             'The monthly requests should be updated.')
+        eq_(self.org.max_users, num_seats,
+            'The maximum number of users should be updated.')
         eq_(mock_subscription.quantity, expected_quantity,
             'The subscription quantity should be based on the monthly cost.')
         eq_(self.org.stripe_id, mock_subscription.id,

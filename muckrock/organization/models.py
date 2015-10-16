@@ -99,7 +99,8 @@ class Organization(models.Model):
         """Changes the monthly cost to $20 times the number of seats, which can be negative."""
         price_per_user = 2000
         current_monthly_cost = self.monthly_cost
-        cost_adjustment = price_per_user * num_seats
+        seat_difference = num_seats - self.max_users
+        cost_adjustment = price_per_user * seat_difference
         self.monthly_cost = current_monthly_cost + cost_adjustment
         self.save()
         return self.monthly_cost
@@ -108,7 +109,8 @@ class Organization(models.Model):
         """Changes the monthly requests to 10 times the number of seats, which can be negative."""
         requests_per_user = 10
         current_requests = self.monthly_requests
-        request_adjustment = requests_per_user * num_seats
+        seat_difference = num_seats - self.max_users
+        request_adjustment = requests_per_user * seat_difference
         self.monthly_requests = current_requests + request_adjustment
         self.save()
         return self.monthly_requests
@@ -163,6 +165,7 @@ class Organization(models.Model):
         if self.owner.profile.acct_type == 'pro':
             self.owner.profile.acct_type = 'community'
             self.owner.profile.save()
+        self.max_users = num_seats
         self.stripe_id = subscription.id
         self.active = True
         self.save()
@@ -184,6 +187,7 @@ class Organization(models.Model):
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
+        self.max_users = num_seats
         self.stripe_id = subscription.id
         self.save()
         return
