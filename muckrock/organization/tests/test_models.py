@@ -111,6 +111,19 @@ class TestSubscriptions(TestCase):
         ok_(self.org.active,
             'The org should be set to an active state.')
 
+    @nose.tools.raises(ValueError)
+    def test_activate_min_seats(self):
+        """Activating with less than the minimum number of seats should raise an error."""
+        min_seats = 3
+        self.org.activate_subscription(min_seats - 1)
+
+    @nose.tools.raises(AttributeError)
+    def test_activate_active_org(self):
+        """Activating and active organization should raise an error."""
+        self.org.active = True
+        self.org.save()
+        self.org.activate_subscription(3)
+
     def test_updating(self):
         """Updating the subscription should update the quantity of the subscription."""
         # change the stripe_id to something else, to make sure it gets updated
@@ -137,8 +150,24 @@ class TestSubscriptions(TestCase):
         ok_(self.org.active,
             'The org should be set to an active state.')
 
+    @nose.tools.raises(ValueError)
+    def test_update_min_seats(self):
+        """Activating with less than the minimum number of seats should raise an error."""
+        min_seats = 3
+        self.org.active = True
+        self.org.save()
+        self.org.update_subscription(min_seats - 1)
+
+    @nose.tools.raises(AttributeError)
+    def test_update_inactive(self):
+        """Updating an inactive organization should raise an error."""
+        ok_(not self.org.active)
+        self.org.update_subscription(3)
+
     def test_cancelling(self):
         """Cancelling the subscription should render the org inactive."""
+        self.org.active = True
+        self.org.save()
         self.org.cancel_subscription()
         ok_(not self.org.active,
             'The organization should be set to an inactive state.')
@@ -146,10 +175,11 @@ class TestSubscriptions(TestCase):
             'The stripe subscription ID should be removed from the org.')
 
     @nose.tools.raises(AttributeError)
-    def test_update_inactive(self):
-        """Updating an inactive organization should raise an error."""
+    def test_cancel_inactive(self):
+        """Cancelling an inactive subscription should throw an error."""
         ok_(not self.org.active)
-        self.org.update_subscription(1)
+        self.org.cancel_subscription()
+
 
 class TestMembership(TestCase):
     """Test the membership functions of the organization"""

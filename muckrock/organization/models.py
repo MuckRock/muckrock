@@ -150,6 +150,10 @@ class Organization(models.Model):
     def activate_subscription(self, num_seats):
         """Subscribes the owner to the org plan, given a variable quantity"""
         # pylint: disable=no-member
+        if self.active:
+            raise AttributeError('Cannot activate an active organization.')
+        if num_seats < 3:
+            raise ValueError('Cannot have an organization with less than three member seats.')
         self.update_monthly_cost(num_seats)
         self.update_monthly_requests(num_seats)
         quantity = self.monthly_cost/100
@@ -168,8 +172,10 @@ class Organization(models.Model):
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
         # pylint: disable=no-member
-        if self.active != True:
-            raise AttributeError('Cannot update an inactive organization.')
+        if not self.active:
+            raise AttributeError('Cannot update an inactive subscription.')
+        if num_seats < 3:
+            raise ValueError('Cannot have an organization with less than three member seats.')
         self.update_monthly_cost(num_seats)
         self.update_monthly_requests(num_seats)
         quantity = self.monthly_cost/100
@@ -189,6 +195,8 @@ class Organization(models.Model):
     def cancel_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
         # pylint: disable=no-member
+        if not self.active:
+            raise AttributeError('Cannot cancel an inactive subscription.')
         customer = self.owner.profile.customer()
         subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
