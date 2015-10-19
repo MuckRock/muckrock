@@ -184,7 +184,7 @@ class TestMembership(TestCase):
         ok_(not self.org.has_member(self.member),
             'The org should not recognize the ex-member.')
 
-    @nose.tools.raises(ValueError)
+    @nose.tools.raises(AttributeError)
     def test_add_member_without_seat(self):
         """An exception should be raised when trying to add a member without any available seat."""
         muckrock.factories.UserFactory(profile__organization=self.org)
@@ -195,12 +195,6 @@ class TestMembership(TestCase):
             'The org should have 3 members.')
         # adding a new member should throw an error
         self.org.add_member(muckrock.factories.UserFactory())
-
-    @nose.tools.raises(ValueError)
-    def test_add_existing_member(self):
-        """An exception should be raised when trying to add an existing member."""
-        existing_member = muckrock.factories.UserFactory(profile__organization=self.org)
-        self.org.add_member(existing_member)
 
     @nose.tools.raises(AttributeError)
     def test_add_member_inactive(self):
@@ -218,17 +212,3 @@ class TestMembership(TestCase):
         ok_(not self.org.active)
         member = muckrock.factories.UserFactory(profile__organization=self.org)
         self.org.remove_member(member)
-
-    @nose.tools.raises(ValueError)
-    def test_remove_non_member(self):
-        """
-        An exception should be raised when trying to remove
-        a user who is not a member from the organization.
-        """
-        non_member = muckrock.factories.UserFactory()
-        self.org.remove_member(non_member)
-
-    @nose.tools.raises(ValueError)
-    def test_remove_owner(self):
-        """An exception should be raised when trying to remove the org's owner as a member"""
-        self.org.remove_member(self.owner)

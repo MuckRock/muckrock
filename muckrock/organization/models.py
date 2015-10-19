@@ -116,44 +116,35 @@ class Organization(models.Model):
         return self.monthly_requests
 
     def add_member(self, user):
-        """
-        Adds the passed-in user as a member of the organization.
-        If the user is already a member of the organization, it does nothing.
-        """
+        """Adds the given user as a member of the organization."""
         if not self.active:
             raise AttributeError('Cannot add members to an inactive organization.')
         if self.members.count() == self.max_users:
-            raise ValueError('No open seat for this member.')
-        if self.has_member(user):
-            err_msg = '%s is already a member.' % user.first_name
-            raise ValueError(err_msg)
-        user.profile.organization = self
-        user.profile.save()
-        logger.info('%s was added as a member of the organization %s', user.username, self.name)
-        self.send_email_notification(
-            user,
-            '[MuckRock] You were added to an organization',
-            'text/organization/add_member.txt')
+            raise AttributeError('No open seat for this member.')
+        if not self.has_member(user):
+            user.profile.organization = self
+            user.profile.save()
+            logger.info('%s was added as a member of the organization %s', user.username, self.name)
+            self.send_email_notification(
+                user,
+                '[MuckRock] You were added to an organization',
+                'text/organization/add_member.txt'
+            )
         return
 
     def remove_member(self, user):
-        """
-        Remove a user (who isn't the owner) from this organization.
-        If the user is the owner or isn't a member, raise an error.
-        """
+        """Removes the given user from this organization if they are a member."""
         if not self.active:
             raise AttributeError('Cannot remove member from an inactive organization.')
-        if self.is_owned_by(user) or not self.has_member(user):
-            error_msg = 'Cannot remove %s from organization %s' % (user.username, self.name)
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-        user.profile.organization = None
-        user.profile.save()
-        logger.info('%s was removed as a member of the %s organization.', user.username, self.name)
-        self.send_email_notification(
-            user,
-            '[MuckRock] You were removed from an organization',
-            'text/organization/remove_member.txt')
+        if self.has_member(user):
+            user.profile.organization = None
+            user.profile.save()
+            logger.info('%s was removed as a member of the %s organization.', user.username, self.name)
+            self.send_email_notification(
+                user,
+                '[MuckRock] You were removed from an organization',
+                'text/organization/remove_member.txt'
+            )
         return
 
     def activate_subscription(self, num_seats):
