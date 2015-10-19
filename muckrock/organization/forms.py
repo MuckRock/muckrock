@@ -8,11 +8,16 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.template.defaultfilters import slugify
 
 from muckrock.organization.models import Organization
+from muckrock.settings import ORG_MIN_SEATS
 
 import autocomplete_light
 
-class OrganizationCreateForm(forms.ModelForm):
-    """A form for creating an Organization"""
+class OwnerCreateForm(forms.ModelForm):
+    """Allows owners to create an organization"""
+    class Meta:
+        model = Organization
+        fields = ['name']
+
     def clean_name(self):
         """Ensures name is unique"""
         name = self.cleaned_data['name']
@@ -23,17 +28,26 @@ class OrganizationCreateForm(forms.ModelForm):
             return name
         raise forms.ValidationError('Organization already exists with this name.')
 
+
+class StaffCreateForm(OrganizationOwnerCreateForm):
+    """Allows staff more control over the creation of an organization"""
     class Meta:
-        # pylint: disable=too-few-public-methods
         model = Organization
         fields = ['name', 'owner', 'monthly_requests', 'monthly_cost', 'max_users']
         widgets = {'owner': autocomplete_light.ChoiceWidget('UserAutocomplete')}
 
-class OrganizationUpdateForm(forms.ModelForm):
-    """A form for tweaking the number of members, number of reqeusts, and monthly cost"""
-    class Meta:
-        model = Organization
-        fields = ['max_users', 'monthly_cost', 'monthly_requests']
+
+class SeatForm(forms.Form):
+    """Allows setting the seats of the organization."""
+    seats = IntegerField()
+
+    def clean_seats(self):
+        """Ensures the number of seats is not below the minimum value."""
+        seats = self.cleaned_data['seats']
+        if seats < ORG_MIN_SEATS:
+            err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
+            raise forms.ValidationError(err_msg)
+
 
 class AddMembersForm(forms.Form):
     """A form that uses autocomplete to suggest users to add to an organization"""
