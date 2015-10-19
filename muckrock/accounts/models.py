@@ -4,7 +4,7 @@ Models for the accounts application
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
@@ -335,11 +335,9 @@ class Profile(models.Model):
             'base_url': 'https://www.muckrock.com'
         })
         email = DailyNotification(
+            self.user,
             subject=subject,
-            body=text_content,
-            from_email='MuckRock <info@muckrock.com>',
-            to=[self.user.email],
-            bcc=['diagnostics@muckrock.com']
+            body=text_content
         )
         email.attach_alternative(html_content, 'text/html')
         email.send(fail_silently=False)
