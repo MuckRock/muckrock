@@ -99,25 +99,32 @@ class Organization(models.Model):
         email.send(fail_silently=False)
         return
 
-    def update_monthly_cost(self, num_seats):
-        """Changes the monthly cost to $20 times the number of seats, which can be negative."""
+    def update_num_seats(self, num_seats):
+        """Updates the max users and adjusts the monthly cost and monthly requests in response."""
+        # since the compute methods use the current max_seat values, update the max_seats last
+        new_cost = self.compute_monthly_cost(num_seats)
+        new_requests = self.compute_monthly_requests(num_seats)
+        self.monthly_cost = new_cost
+        self.monthly_requests = new_requests
+        self.max_users = num_seats
+        self.save()
+        return
+
+    def compute_monthly_cost(self, num_seats):
+        """Computes the monthly cost given the number of seats, which can be negative."""
         price_per_user = ORG_PRICE_PER_SEAT
         current_monthly_cost = self.monthly_cost
         seat_difference = num_seats - self.max_users
         cost_adjustment = price_per_user * seat_difference
-        self.monthly_cost = current_monthly_cost + cost_adjustment
-        self.save()
-        return self.monthly_cost
+        return current_monthly_cost + cost_adjustment
 
-    def update_monthly_requests(self, num_seats):
-        """Changes the monthly requests to 10 times the number of seats, which can be negative."""
+    def compute_monthly_requests(self, num_seats):
+        """Computes the monthly requests given the number of seats, which can be negative."""
         requests_per_user = ORG_REQUESTS_PER_SEAT
         current_requests = self.monthly_requests
         seat_difference = num_seats - self.max_users
         request_adjustment = requests_per_user * seat_difference
-        self.monthly_requests = current_requests + request_adjustment
-        self.save()
-        return self.monthly_requests
+        return current_requests + request_adjustment
 
     def add_member(self, user):
         """Adds the given user as a member of the organization."""
@@ -166,16 +173,18 @@ class Organization(models.Model):
             raise AttributeError('Cannot activate an active organization.')
         if num_seats < ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
-        self.update_monthly_cost(num_seats)
-        self.update_monthly_requests(num_seats)
-        quantity = self.monthly_cost/100
+        quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()
-        subscription = customer.subscriptions.create(plan='org', quantity=quantity)
+        try:
+            subscription = customer.subscriptions.create(plan='org', quantity=quantity)
+        except stripe.Error as exception:
+            logger.error('Payment error: %s', exception)
+            return
         # if the owner has a pro account, downgrade them to a community account
         if self.owner.profile.acct_type == 'pro':
             self.owner.profile.acct_type = 'community'
             self.owner.profile.save()
-        self.max_users = num_seats
+        self.update_num_seats(num_seats)
         self.stripe_id = subscription.id
         self.active = True
         self.save()
@@ -188,18 +197,17 @@ class Organization(models.Model):
             raise AttributeError('Cannot update an inactive subscription.')
         if num_seats < ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
-        self.update_monthly_cost(num_seats)
-        self.update_monthly_requests(num_seats)
-        quantity = self.monthly_cost/100
+        quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()
-        subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
+            subscription = customer.subscriptions.retrieve(self.stripe_id)
             subscription.quantity = quantity
             subscription = subscription.save()
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
-        self.max_users = num_seats
+            return
+        self.update_num_seats(num_seats)
         self.stripe_id = subscription.id
         self.save()
         return

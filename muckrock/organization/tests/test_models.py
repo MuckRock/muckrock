@@ -46,11 +46,10 @@ class TestRations(TestCase):
         num_seats = self.org.max_users
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
-        new_monthly_cost = self.org.update_monthly_cost(num_seats)
-        new_monthly_requets = self.org.update_monthly_requests(num_seats)
-        eq_(old_monthly_cost, new_monthly_cost,
+        self.org.update_num_seats(num_seats)
+        eq_(self.org.monthly_cost, old_monthly_cost,
             'The monthly cost should not change if the number of seats stays the same.')
-        eq_(old_monthly_requests, new_monthly_requets,
+        eq_(self.org.monthly_requests, old_monthly_requests,
             'The monthly requests should not change if the number of seats stays the same.')
 
     def test_increase(self):
@@ -61,11 +60,10 @@ class TestRations(TestCase):
         num_seats = self.org.max_users + seat_increase
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
-        new_monthly_cost = self.org.update_monthly_cost(num_seats)
-        new_monthly_requests = self.org.update_monthly_requests(num_seats)
-        eq_(new_monthly_cost, old_monthly_cost + cost_increase,
+        self.org.update_num_seats(num_seats)
+        eq_(self.org.monthly_cost, old_monthly_cost + cost_increase,
             'The monthly cost should increase based on the old cost.')
-        eq_(new_monthly_requests, old_monthly_requests + request_increase,
+        eq_(self.org.monthly_requests, old_monthly_requests + request_increase,
             'The monhtly requests should increase based on the old requests.')
 
     def test_decrease(self):
@@ -76,11 +74,10 @@ class TestRations(TestCase):
         num_seats = self.org.max_users + seat_decrease
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
-        new_monthly_cost = self.org.update_monthly_cost(num_seats)
-        new_monthly_requests = self.org.update_monthly_requests(num_seats)
-        eq_(new_monthly_cost, old_monthly_cost + cost_decrease,
+        self.org.update_num_seats(num_seats)
+        eq_(self.org.monthly_cost, old_monthly_cost + cost_decrease,
             'The monthly cost should decrease based on the old cost.')
-        eq_(new_monthly_requests, old_monthly_requests + request_decrease,
+        eq_(self.org.monthly_requests, old_monthly_requests + request_decrease,
             'The monhtly requests should decrease based on the old requests.')
 
 
