@@ -12,8 +12,8 @@ from muckrock.settings import ORG_MIN_SEATS
 
 import autocomplete_light
 
-class OwnerCreateForm(forms.ModelForm):
-    """Allows owners to create an organization"""
+class CreateForm(forms.ModelForm):
+    """Allows ordinary users to create an organization"""
     class Meta:
         model = Organization
         fields = ['name']

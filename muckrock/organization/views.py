@@ -15,8 +15,9 @@ import logging
 import stripe
 
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import OrganizationCreateForm, \
-                                        OrganizationUpdateForm, \
+from muckrock.organization.forms import CreateForm, \
+                                        StaffCreateForm, \
+                                        SeatForm,\
                                         AddMembersForm
 
 
@@ -30,28 +31,55 @@ class OrganizationListView(ListView):
 class OrganizationCreateView(CreateView):
     """
     Presents a form for creating an organization.
-    At the moment, only staff may create organizations.
+    Executes different logic depending on whether the current user is staff or not.
     """
-    form_class = OrganizationCreateForm
+
+    form_class = CreateForm
     template_name = 'organization/create.html'
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
     def dispatch(self, *args, **kwargs):
-        """At the moment, only staff are allowed to create an org."""
+        """A user must be logged in to create an organization. They cannot own any other orgs."""
+        already_owns_org = Organization.objects.filter(owner=self.request.user).exists()
+        if already_owns_org and not self.request.user.is_staff:
+            messages.error(self.request, 'You may only own one organization at a time.')
+            return redirect('org-index')
         return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
+
+    def get_form_class(self):
+        """Returns staff-specific form if user is staff."""
+        form_class = self.form_class
+        if self.request.user.is_staff:
+            form_class = StaffCreateForm
+        return form_class
+
+    def get_success_url(self):
+        """
+        Returns the organization activation page if user is not staff.
+        Returns the organization page if user is staff.
+        """
+        if not self.object:
+            raise AttributeError('No organization created! Something went wrong.')
+        success_url = reverse('org-activate', slug=self.object.slug)
+        if self.request.user.is_staff:
+            success_url = self.object.get_absolute_url()
+        return success_url
 
     def form_valid(self, form):
         """
         When form is valid, save it.
-        Then, make the owner a member of the organization.
-        Then, redirect to the newly created organization.
+        If the user is not staff, make the current user the owner and then redirect to the
+        organization's activation page. If the user is staff, redirect to the organization.
         """
-        organization = form.save()
+        organization = form.save(commit=False)
+        if not self.request.user.is_staff:
+            organization.owner = self.request.user
+        organization.save()
+        self.object = organization
         # redirect to the success url with a nice message
         logging.info('%s created %s', self.request.user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')
-        return redirect(organization.get_absolute_url())
+        return redirect(self.get_success_url())
 
 
 class OrganizationDetailView(DetailView):
