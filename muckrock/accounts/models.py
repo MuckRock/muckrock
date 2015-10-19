@@ -8,7 +8,6 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
-import actstream
 import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
