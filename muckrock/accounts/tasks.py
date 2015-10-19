@@ -102,9 +102,9 @@ def _notices(email_pref):
     """Send out notices"""
     profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
     for profile in profiles_to_notify:
-        # for now, only send staff the new updates
-        if profile.user.is_staff:
-            profile.send_timed_update()
+        # for now, only send staff the new updates in a daily format
+        if profile.user.is_staff and email_pref == 'daily':
+            profile.activity_email()
         else:
             profile.send_notifications()
 
