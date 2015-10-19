@@ -1,3 +1,7 @@
 from django.db import models
 
-# Create your models here.
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+
+class DailyNotification(EmailMultiAlternatives):
+    """Sends a daily email notification"""
+    pass

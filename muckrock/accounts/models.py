@@ -21,6 +21,7 @@ from urllib import urlencode
 from muckrock import utils
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.notification.models import DailyNotification
 from muckrock.organization.models import Organization
 from muckrock.values import TextValue
 
@@ -333,7 +334,7 @@ class Profile(models.Model):
             'since': since,
             'base_url': 'https://www.muckrock.com'
         })
-        email = EmailMultiAlternatives(
+        email = DailyNotification(
             subject=subject,
             body=text_content,
             from_email='MuckRock <info@muckrock.com>',
