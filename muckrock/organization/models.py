@@ -8,7 +8,10 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils.text import slugify
 
-from muckrock.settings import MONTHLY_REQUESTS
+from muckrock.settings import MONTHLY_REQUESTS,\
+                              ORG_MIN_SEATS,\
+                              ORG_PRICE_PER_SEAT,\
+                              ORG_REQUESTS_PER_SEAT
 
 from datetime import date
 import logging
@@ -97,7 +100,7 @@ class Organization(models.Model):
 
     def update_monthly_cost(self, num_seats):
         """Changes the monthly cost to $20 times the number of seats, which can be negative."""
-        price_per_user = 2000
+        price_per_user = ORG_PRICE_PER_SEAT
         current_monthly_cost = self.monthly_cost
         seat_difference = num_seats - self.max_users
         cost_adjustment = price_per_user * seat_difference
@@ -107,7 +110,7 @@ class Organization(models.Model):
 
     def update_monthly_requests(self, num_seats):
         """Changes the monthly requests to 10 times the number of seats, which can be negative."""
-        requests_per_user = 10
+        requests_per_user = ORG_REQUESTS_PER_SEAT
         current_requests = self.monthly_requests
         seat_difference = num_seats - self.max_users
         request_adjustment = requests_per_user * seat_difference
@@ -152,7 +155,7 @@ class Organization(models.Model):
         # pylint: disable=no-member
         if self.active:
             raise AttributeError('Cannot activate an active organization.')
-        if num_seats < 3:
+        if num_seats < ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
         self.update_monthly_cost(num_seats)
         self.update_monthly_requests(num_seats)
@@ -174,7 +177,7 @@ class Organization(models.Model):
         # pylint: disable=no-member
         if not self.active:
             raise AttributeError('Cannot update an inactive subscription.')
-        if num_seats < 3:
+        if num_seats < ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
         self.update_monthly_cost(num_seats)
         self.update_monthly_requests(num_seats)

@@ -5,10 +5,13 @@ Tests the models of the organization application
 
 from django.test import TestCase
 
-import muckrock.factories
-
 from mock import Mock, patch
 import nose.tools
+
+import muckrock.factories
+from muckrock.settings import ORG_MIN_SEATS,\
+                              ORG_PRICE_PER_SEAT,\
+                              ORG_REQUESTS_PER_SEAT
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -53,8 +56,8 @@ class TestRations(TestCase):
     def test_increase(self):
         """If the seats increase, then the cost and requests should also increase."""
         seat_increase = 1
-        cost_increase = 2000 * seat_increase
-        request_increase = 10 * seat_increase
+        cost_increase = ORG_PRICE_PER_SEAT * seat_increase
+        request_increase = ORG_REQUESTS_PER_SEAT * seat_increase
         num_seats = self.org.max_users + seat_increase
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
@@ -68,8 +71,8 @@ class TestRations(TestCase):
     def test_decrease(self):
         """If the seats decrease, then the cost and requests should also decrease."""
         seat_decrease = -1
-        cost_decrease = 2000 * seat_decrease
-        request_decrease = 10 * seat_decrease
+        cost_decrease = ORG_PRICE_PER_SEAT * seat_decrease
+        request_decrease = ORG_REQUESTS_PER_SEAT * seat_decrease
         num_seats = self.org.max_users + seat_decrease
         old_monthly_cost = self.org.monthly_cost
         old_monthly_requests = self.org.monthly_requests
@@ -96,8 +99,8 @@ class TestSubscriptions(TestCase):
         """Activating the organization should subscribe the owner to an org plan."""
         # lets add an extra seat, just to make things interesting
         seat_increase = 1
-        expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
-        expected_request_increase = self.org.monthly_requests + 10 * seat_increase
+        expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
+        expected_request_increase = self.org.monthly_requests + ORG_REQUESTS_PER_SEAT * seat_increase
         num_seats = self.org.max_users + seat_increase
         self.org.activate_subscription(num_seats)
         eq_(self.org.max_users, num_seats,
@@ -114,15 +117,14 @@ class TestSubscriptions(TestCase):
     @nose.tools.raises(ValueError)
     def test_activate_min_seats(self):
         """Activating with less than the minimum number of seats should raise an error."""
-        min_seats = 3
-        self.org.activate_subscription(min_seats - 1)
+        self.org.activate_subscription(ORG_MIN_SEATS - 1)
 
     @nose.tools.raises(AttributeError)
     def test_activate_active_org(self):
         """Activating and active organization should raise an error."""
         self.org.active = True
         self.org.save()
-        self.org.activate_subscription(3)
+        self.org.activate_subscription(ORG_MIN_SEATS)
 
     def test_updating(self):
         """Updating the subscription should update the quantity of the subscription."""
@@ -132,8 +134,8 @@ class TestSubscriptions(TestCase):
         self.org.save()
         # let's update this org with 2 more seats
         seat_increase = 2
-        expected_cost_increase = self.org.monthly_cost + 2000 * seat_increase
-        expected_request_increase = self.org.monthly_requests + 10 * seat_increase
+        expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
+        expected_request_increase = self.org.monthly_requests + ORG_REQUESTS_PER_SEAT * seat_increase
         expected_quantity = expected_cost_increase / 100
         num_seats = self.org.max_users + seat_increase
         self.org.update_subscription(num_seats)
@@ -153,16 +155,15 @@ class TestSubscriptions(TestCase):
     @nose.tools.raises(ValueError)
     def test_update_min_seats(self):
         """Activating with less than the minimum number of seats should raise an error."""
-        min_seats = 3
         self.org.active = True
         self.org.save()
-        self.org.update_subscription(min_seats - 1)
+        self.org.update_subscription(ORG_MIN_SEATS - 1)
 
     @nose.tools.raises(AttributeError)
     def test_update_inactive(self):
         """Updating an inactive organization should raise an error."""
         ok_(not self.org.active)
-        self.org.update_subscription(3)
+        self.org.update_subscription(ORG_MIN_SEATS)
 
     def test_cancelling(self):
         """Cancelling the subscription should render the org inactive."""
