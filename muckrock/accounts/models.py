@@ -318,29 +318,9 @@ class Profile(models.Model):
 
     def activity_email(self, stream):
         """Sends an email that is a stream of activities"""
-        count = stream.count()
-        since = 'yesterday' if self.email_pref == 'daily' else 'last week'
-        subject = '%d updates since %s' % (count, since)
-        text_content = render_to_string('email/activity.txt', {
-            'user': self.user,
-            'stream': stream,
-            'count': count,
-            'since': since
-        })
-        html_content = render_to_string('email/activity.html', {
-            'user': self.user,
-            'stream': stream,
-            'count': count,
-            'since': since,
-            'base_url': 'https://www.muckrock.com'
-        })
-        email = DailyNotification(
-            self.user,
-            subject=subject,
-            body=text_content
-        )
-        email.attach_alternative(html_content, 'text/html')
-        email.send(fail_silently=False)
+        email = DailyNotification(self.user)
+        if email.notification_count > 0:
+            email.send(fail_silently=False)
         return email
 
     def send_timed_update(self):
