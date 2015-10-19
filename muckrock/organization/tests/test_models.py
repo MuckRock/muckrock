@@ -155,7 +155,7 @@ class TestMembership(TestCase):
     """Test the membership functions of the organization"""
     def setUp(self):
         """Create an owner, a member, and an organization"""
-        self.org = muckrock.factories.OrganizationFactory()
+        self.org = muckrock.factories.OrganizationFactory(active=True)
         self.owner = self.org.owner
         self.member = muckrock.factories.UserFactory(profile__organization=self.org)
 
@@ -201,6 +201,23 @@ class TestMembership(TestCase):
         """An exception should be raised when trying to add an existing member."""
         existing_member = muckrock.factories.UserFactory(profile__organization=self.org)
         self.org.add_member(existing_member)
+
+    @nose.tools.raises(AttributeError)
+    def test_add_member_inactive(self):
+        """Owners cannot add members when the org is inactive."""
+        self.org.active = False
+        self.org.save()
+        ok_(not self.org.active)
+        self.org.add_member(muckrock.factories.UserFactory())
+
+    @nose.tools.raises(AttributeError)
+    def test_remove_member_inactive(self):
+        """Owners cannot remove members when the org is inactive."""
+        self.org.active = False
+        self.org.save()
+        ok_(not self.org.active)
+        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        self.org.remove_member(member)
 
     @nose.tools.raises(ValueError)
     def test_remove_non_member(self):

@@ -120,6 +120,8 @@ class Organization(models.Model):
         Adds the passed-in user as a member of the organization.
         If the user is already a member of the organization, it does nothing.
         """
+        if not self.active:
+            raise AttributeError('Cannot add members to an inactive organization.')
         if self.members.count() == self.max_users:
             raise ValueError('No open seat for this member.')
         if self.has_member(user):
@@ -139,6 +141,8 @@ class Organization(models.Model):
         Remove a user (who isn't the owner) from this organization.
         If the user is the owner or isn't a member, raise an error.
         """
+        if not self.active:
+            raise AttributeError('Cannot remove member from an inactive organization.')
         if self.is_owned_by(user) or not self.has_member(user):
             error_msg = 'Cannot remove %s from organization %s' % (user.username, self.name)
             logger.error(error_msg)
