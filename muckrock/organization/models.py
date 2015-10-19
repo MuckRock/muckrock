@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
+    # pylint: disable=too-many-instance-attributes
 
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
@@ -127,7 +128,11 @@ class Organization(models.Model):
         if not self.has_member(user):
             user.profile.organization = self
             user.profile.save()
-            logger.info('%s was added as a member of the organization %s', user.username, self.name)
+            logger.info(
+                '%s was added as a member of the organization %s',
+                user.username,
+                self.name
+            )
             self.send_email_notification(
                 user,
                 '[MuckRock] You were added to an organization',
@@ -142,7 +147,11 @@ class Organization(models.Model):
         if self.has_member(user):
             user.profile.organization = None
             user.profile.save()
-            logger.info('%s was removed as a member of the %s organization.', user.username, self.name)
+            logger.info(
+                '%s was removed as a member of the %s organization.',
+                user.username,
+                self.name
+            )
             self.send_email_notification(
                 user,
                 '[MuckRock] You were removed from an organization',

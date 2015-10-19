@@ -97,6 +97,8 @@ class TestSubscriptions(TestCase):
 
     def test_activation(self):
         """Activating the organization should subscribe the owner to an org plan."""
+        # pylint: disable=line-too-long
+        # pylint disabled because 1 character r u kidding me
         # lets add an extra seat, just to make things interesting
         seat_increase = 1
         expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
@@ -128,6 +130,8 @@ class TestSubscriptions(TestCase):
 
     def test_updating(self):
         """Updating the subscription should update the quantity of the subscription."""
+        # pylint: disable=line-too-long
+        # pylint disabled because 1 character r u kidding me
         # change the stripe_id to something else, to make sure it gets updated
         self.org.stripe_id = 'temp'
         self.org.active = True
