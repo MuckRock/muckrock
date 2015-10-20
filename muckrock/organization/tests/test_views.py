@@ -104,6 +104,11 @@ class TestCreateView(TestCase):
         eq_(response.status_code, 302,
             'The user should be redirected to the activation page when creation is successful.')
 
+    def test_staff_post(self):
+        """Staff users should need to provide more information, including an owner."""
+        staff_user = muckrock.factories.UserFactory(is_staff=True)
+        ok_(False, 'Test should be written!')
+
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
