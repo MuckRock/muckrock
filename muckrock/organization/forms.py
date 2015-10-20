@@ -29,7 +29,7 @@ class CreateForm(forms.ModelForm):
         raise forms.ValidationError('Organization already exists with this name.')
 
 
-class StaffCreateForm(OrganizationOwnerCreateForm):
+class StaffCreateForm(CreateForm):
     """Allows staff more control over the creation of an organization"""
     class Meta:
         model = Organization
@@ -39,7 +39,7 @@ class StaffCreateForm(OrganizationOwnerCreateForm):
 
 class SeatForm(forms.Form):
     """Allows setting the seats of the organization."""
-    seats = IntegerField()
+    seats = forms.IntegerField()
 
     def clean_seats(self):
         """Ensures the number of seats is not below the minimum value."""
