@@ -31,15 +31,18 @@ class OrganizationListView(ListView):
 class OrganizationCreateView(CreateView):
     """
     Presents a form for creating an organization.
-    Executes different logic depending on whether the current user is staff or not.
+    It behaves differently if the current user is staff.
     """
-
-    form_class = CreateForm
     template_name = 'organization/create.html'
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        """A user must be logged in to create an organization. They cannot own any other orgs."""
+        """
+        A user must be logged in to create an organization.
+        They cannot own any other orgs.
+        Staff are exempt from the "can only own one" rule because
+        they will likely be creating orgs for other folks.
+        """
         already_owns_org = Organization.objects.filter(owner=self.request.user).exists()
         if already_owns_org and not self.request.user.is_staff:
             messages.error(self.request, 'You may only own one organization at a time.')
@@ -48,36 +51,31 @@ class OrganizationCreateView(CreateView):
 
     def get_form_class(self):
         """Returns staff-specific form if user is staff."""
-        form_class = self.form_class
+        form_class = CreateForm
         if self.request.user.is_staff:
             form_class = StaffCreateForm
         return form_class
 
     def get_success_url(self):
-        """
-        Returns the organization activation page if user is not staff.
-        Returns the organization page if user is staff.
-        """
+        """The success url is the organization activation page."""
         if not self.object:
             raise AttributeError('No organization created! Something went wrong.')
         success_url = reverse('org-activate', slug=self.object.slug)
-        if self.request.user.is_staff:
-            success_url = self.object.get_absolute_url()
         return success_url
 
     def form_valid(self, form):
         """
         When form is valid, save it.
-        If the user is not staff, make the current user the owner and then redirect to the
-        organization's activation page. If the user is staff, redirect to the organization.
+        If the user is not staff, make the current user the owner.
+        Finally, redirect to the organization's activation page.
         """
+        user = self.request.user
         organization = form.save(commit=False)
-        if not self.request.user.is_staff:
-            organization.owner = self.request.user
-        organization.save()
-        self.object = organization
+        if not user.is_staff:
+            organization.owner = user
+        self.object = organization.save()
         # redirect to the success url with a nice message
-        logging.info('%s created %s', self.request.user, organization)
+        logging.info('%s created %s', user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')
         return redirect(self.get_success_url())
 
