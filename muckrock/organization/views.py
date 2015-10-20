@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
 import actstream
 import logging
@@ -78,6 +78,58 @@ class OrganizationCreateView(CreateView):
         logging.info('%s created %s', user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')
         return redirect(self.get_success_url())
+
+
+class OrganizationActivationView(UpdateView):
+    """Organization activation view"""
+    model = Organization
+    template_name = "organization/activate.html"
+    form_class = SeatForm
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """
+        A user must be logged in to activate an organization.
+        The user must be staff or the owner.
+        The organization cannot already be active.
+        """
+        organization = self.get_object()
+        user = self.request.user
+        if user.is_staff or organization.is_owned_by(user):
+            messages.error(self.request, 'You cannot activate an organization you do not own.')
+            return redirect(organization.get_absolute_url())
+        if organization.active:
+            messages.error(self.request, 'You cannot activate an already active organization.')
+            return redirect(organization.get_absolute_url())
+        return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
+
+    def form_valid(self, form):
+        """When the form is valid, activate the organization."""
+        # should expect a token from Stripe
+        token = self.request.POST.get(token)
+        organization = self.get_object()
+        num_seats = form.cleaned_data['seats']
+        an_error = False
+        if token:
+            try:
+                organization.activate_subscription(token, num_seats)
+                messages.success(self.request, 'Your organization subscription is active.')
+            except (AttributeError, ValueError) as exception:
+                messages.error(self.request, exception)
+                an_error = True
+            except stripe.CardError as exception:
+                messages.error(self.request, exception)
+                an_error = True
+            except (stripe.AuthenticationError, stripe.InvalidRequestError, stripe.StripeError):
+                messages.error(self.request, 'Payment error. Your card has not been charged.')
+                an_error = True
+        else:
+            messages.error(self.request, 'No payment information provided!')
+            an_error = True
+        if an_error:
+            return self.form_invalid()
+        else:
+            return redirect(self.get_success_url())
 
 
 class OrganizationDetailView(DetailView):
@@ -174,42 +226,6 @@ def _remove_members(request, organization):
     msg = 'You revoked membership from %s ' % member_count
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
-
-def activate_organization(request, slug):
-    """Grants an organization requests and subscribes its owner to a recurring payment plan."""
-    organization = get_object_or_404(Organization, slug=slug)
-    # first check if the org is already active
-    if organization.active:
-        logging.error('Cannot activate %s; it is already active.', organization)
-        messages.error(request, 'This organization is already active.')
-        return redirect(organization)
-    # next check if the user has the authority
-    if not organization.is_owned_by(request.user) and not request.user.is_staff:
-        logging.error(
-            'Cannot activate %s; user %s does not have permission.',
-            organization,
-            request.user
-        )
-        messages.error(request, 'Only this organization\'s owner may activate it.')
-        return redirect(organization)
-    # finally, actually activate the organization
-    if request.method == 'POST':
-        token = request.POST.get('token', None)
-        logging.debug(token)
-        if token:
-            # update owner card with token
-            customer = organization.owner.profile.customer()
-            customer.card = token
-            # create plan
-            try:
-                organization.create_plan()
-            except ValueError as exception:
-                logging.error(exception)
-                messages.error(request, exception)
-                return redirect(organization)
-            # subscribe owner to plan
-            organization.start_subscription()
-    return redirect(organization)
 
 def deactivate_organization(request, slug):
     """Unsubscribes its owner from the recurring payment plan."""
