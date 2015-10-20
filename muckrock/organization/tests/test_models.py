@@ -101,7 +101,7 @@ class TestSubscriptions(TestCase):
         expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
         expected_request_increase = self.org.monthly_requests + ORG_REQUESTS_PER_SEAT * seat_increase
         num_seats = self.org.max_users + seat_increase
-        self.org.activate_subscription(num_seats)
+        self.org.activate_subscription('test', num_seats)
         eq_(self.org.max_users, num_seats,
             'The maximum number of users should be updated.')
         eq_(self.org.monthly_cost, expected_cost_increase,
@@ -116,14 +116,14 @@ class TestSubscriptions(TestCase):
     @nose.tools.raises(ValueError)
     def test_activate_min_seats(self):
         """Activating with less than the minimum number of seats should raise an error."""
-        self.org.activate_subscription(ORG_MIN_SEATS - 1)
+        self.org.activate_subscription('test', ORG_MIN_SEATS - 1)
 
     @nose.tools.raises(AttributeError)
     def test_activate_active_org(self):
         """Activating and active organization should raise an error."""
         self.org.active = True
         self.org.save()
-        self.org.activate_subscription(ORG_MIN_SEATS)
+        self.org.activate_subscription('test', ORG_MIN_SEATS)
 
     def test_updating(self):
         """Updating the subscription should update the quantity of the subscription."""

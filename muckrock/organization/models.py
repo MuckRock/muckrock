@@ -166,7 +166,7 @@ class Organization(models.Model):
             )
         return
 
-    def activate_subscription(self, num_seats):
+    def activate_subscription(self, token, num_seats):
         """Subscribes the owner to the org plan, given a variable quantity"""
         # pylint: disable=no-member
         if self.active:
@@ -175,11 +175,11 @@ class Organization(models.Model):
             raise ValueError('Cannot have an organization with less than three member seats.')
         quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()
-        try:
-            subscription = customer.subscriptions.create(plan='org', quantity=quantity)
-        except stripe.Error as exception:
-            logger.error('Payment error: %s', exception)
-            return
+        subscription = customer.subscriptions.create(
+            plan='org',
+            source=token,
+            quantity=quantity
+        )
         # if the owner has a pro account, downgrade them to a community account
         if self.owner.profile.acct_type == 'pro':
             self.owner.profile.acct_type = 'community'
