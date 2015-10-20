@@ -60,7 +60,7 @@ class OrganizationCreateView(CreateView):
         """The success url is the organization activation page."""
         if not self.object:
             raise AttributeError('No organization created! Something went wrong.')
-        success_url = reverse('org-activate', slug=self.object.slug)
+        success_url = reverse('org-activate', kwargs={'slug': self.object.slug})
         return success_url
 
     def form_valid(self, form):
@@ -73,7 +73,8 @@ class OrganizationCreateView(CreateView):
         organization = form.save(commit=False)
         if not user.is_staff:
             organization.owner = user
-        self.object = organization.save()
+        organization.save()
+        self.object = organization
         # redirect to the success url with a nice message
         logging.info('%s created %s', user, organization)
         messages.success(self.request, 'The organization has been created. Excellent!')

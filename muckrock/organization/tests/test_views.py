@@ -38,43 +38,71 @@ def mock_middleware(request):
     return request
 
 
-class TestCreateGet(TestCase):
-    """Test the expectations of organization creation"""
+class TestCreateView(TestCase):
+    """Tests the expectations of the organization creation view."""
     def setUp(self):
         self.url = reverse('org-create')
         self.request_factory = RequestFactory()
         self.create_view = muckrock.organization.views.OrganizationCreateView.as_view()
-        self.request = self.request_factory.get(self.url)
-        self.request = mock_middleware(self.request)
 
-    def test_regular_access(self):
+    def test_get_ok(self):
         """Regular users should be able to create a request."""
         regular_user = muckrock.factories.UserFactory()
-        self.request.user = regular_user
-        response = self.create_view(self.request)
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = regular_user
+        response = self.create_view(request)
         eq_(response.status_code, 200,
             'Regular users should be able to create an organization.')
         ok_(isinstance(response.context_data['form'], muckrock.organization.forms.CreateForm),
             'Regular users should be shown the regular creation form.')
 
-    def test_access_denied(self):
+    def test_get_forbidden(self):
         """Users who already own an organization should be denied access."""
         org = muckrock.factories.OrganizationFactory()
-        self.request.user = org.owner
-        response = self.create_view(self.request)
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = org.owner
+        response = self.create_view(request)
         eq_(response.status_code, 302,
             'Existing owners should not be allowed to create another organization.')
 
-    def test_staff_access(self):
+    def test_staff_get(self):
         """Staff should be able to create an org even if they own a different one."""
         staff_user = muckrock.factories.UserFactory(is_staff=True)
         org = muckrock.factories.OrganizationFactory(owner=staff_user)
-        self.request.user = staff_user
-        response = self.create_view(self.request)
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = staff_user
+        response = self.create_view(request)
         eq_(response.status_code, 200,
             'Staff should be allowed to create an organization even if they already own one.')
         ok_(isinstance(response.context_data['form'], muckrock.organization.forms.StaffCreateForm),
             'Staff should be shown a special staff-only creation form.')
+
+    def test_post_ok(self):
+        """
+        Regular users should be able to activate an
+        org by POSTing a name and a Stripe token.
+        The org should be activated and the user
+        should be made the owner.
+        """
+        regular_user = muckrock.factories.UserFactory()
+        org_name = 'Cool Org'
+        data = {'token': 'test', 'name': org_name}
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = regular_user
+        response = self.create_view(request)
+        org = muckrock.organization.models.Organization.objects.get(name=org_name)
+        ok_(org,
+            'The organization should be created.')
+        ok_(not org.active,
+            'The organization should be inactive.')
+        eq_(org.owner, regular_user,
+            'The user should be made the owner of the organization.')
+        eq_(response.status_code, 302,
+            'The user should be redirected to the activation page when creation is successful.')
 
 
 @patch('stripe.Customer', MockCustomer)
