@@ -81,7 +81,7 @@ class OrganizationCreateView(CreateView):
         return redirect(self.get_success_url())
 
 
-class OrganizationActivationView(UpdateView):
+class OrganizationActivateView(UpdateView):
     """Organization activation view"""
     model = Organization
     template_name = "organization/activate.html"
@@ -96,13 +96,19 @@ class OrganizationActivationView(UpdateView):
         """
         organization = self.get_object()
         user = self.request.user
-        if user.is_staff or organization.is_owned_by(user):
+        if not user.is_staff and not organization.is_owned_by(user):
             messages.error(self.request, 'You cannot activate an organization you do not own.')
             return redirect(organization.get_absolute_url())
         if organization.active:
             messages.error(self.request, 'You cannot activate an already active organization.')
             return redirect(organization.get_absolute_url())
-        return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
+        return super(OrganizationActivateView, self).dispatch(*args, **kwargs)
+
+    def get_form(self):
+        """The form isn't a ModelForm so we override the get_form method."""
+        organization = self.get_object()
+        seats = organization.max_users
+        return self.form_class(initial={'seats': seats})
 
     def form_valid(self, form):
         """When the form is valid, activate the organization."""

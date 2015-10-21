@@ -25,7 +25,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^(?P<slug>[\w-]+)/activate/$',
-        views.OrganizationActivationView.as_view(),
+        views.OrganizationActivateView.as_view(),
         name='org-activate'
     ),
     url(

@@ -147,62 +147,47 @@ class TestCreateView(TestCase):
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
-class TestOrgActivation(TestCase):
+class TestActivateView(TestCase):
     """Test the expectations of organization activation"""
     def setUp(self):
         self.org = muckrock.factories.OrganizationFactory()
-        request_factory = RequestFactory()
-        url = reverse('org-activate', kwargs={'slug': self.org.slug})
-        data = {'token': 'test'}
-        self.request = request_factory.post(url, data)
-        self.request = mock_middleware(self.request)
+        self.request_factory = RequestFactory()
+        self.url = reverse('org-activate', kwargs={'slug': self.org.slug})
+        self.view = muckrock.organization.views.OrganizationActivateView.as_view()
 
-    def test_activation(self):
-        """
-        When activating the organization, a Stripe plan should be created and
-        the owner should be subscribed to the plan.
-        """
-        self.request.user = muckrock.factories.UserFactory(is_staff=True)
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        ok_(self.org.active)
+    def test_regular_get(self):
+        """Regular users should be denied access to the activation view."""
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory()
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 302)
 
-    def test_staff_activation(self):
-        """Staff should be able to activate the org."""
-        self.request.user = muckrock.factories.UserFactory(is_staff=True)
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        ok_(self.org.active)
+    def test_owner_get(self):
+        """Organization owners should be allowed access to the activation view."""
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 200)
 
-    def test_owner_activation(self):
-        """Owner should be able to activate the org."""
-        self.request.user = self.org.owner
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        ok_(self.org.active)
+    def test_staff_get(self):
+        """Staff should be allowed access to the activation view."""
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory(is_staff=True)
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 200)
 
-    def test_member_activation(self):
-        """Members should not be able to activate the org."""
-        member = muckrock.factories.UserFactory(is_staff=False)
-        self.org.add_member(member)
-        self.request.user = member
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        ok_(not self.org.active)
-
-    def test_already_active(self):
-        """An already-active org should not be able to be activated."""
-        # first activate the org
-        self.request.user = self.org.owner
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        ok_(self.org.active)
-        # then try activating again, make sure the stripe id is the same
-        stripe_id = self.org.stripe_id
-        logging.debug(stripe_id)
-        muckrock.organization.views.activate_organization(self.request, self.org.slug)
-        self.org.refresh_from_db()
-        eq_(self.org.stripe_id, stripe_id)
+    def test_active_get(self):
+        """An active organization should deny all access to its activation view."""
+        self.org.active = True
+        self.org.save()
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 302)
 
 
 @patch('stripe.Customer', MockCustomer)
