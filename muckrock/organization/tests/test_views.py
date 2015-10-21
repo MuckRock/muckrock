@@ -90,6 +90,8 @@ class TestCreateView(TestCase):
         regular_user = muckrock.factories.UserFactory()
         org_name = 'Cool Org'
         data = {'token': 'test', 'name': org_name}
+        form = muckrock.organization.forms.CreateForm(data)
+        ok_(form.is_valid(), '%s' % form.errors)
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = regular_user
@@ -107,7 +109,40 @@ class TestCreateView(TestCase):
     def test_staff_post(self):
         """Staff users should need to provide more information, including an owner."""
         staff_user = muckrock.factories.UserFactory(is_staff=True)
-        ok_(False, 'Test should be written!')
+        org_owner = muckrock.factories.UserFactory()
+        org_name = 'Cool Org'
+        org_max = 3
+        org_cost = 10000
+        org_requests = 50
+        data = {
+            'token': 'test',
+            'name': org_name,
+            'owner': org_owner.pk,
+            'max_users': org_max,
+            'monthly_cost': org_cost,
+            'monthly_requests': org_requests
+        }
+        form = muckrock.organization.forms.StaffCreateForm(data)
+        ok_(form.is_valid(), '%s' % form.errors)
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = staff_user
+        response = self.create_view(request)
+        eq_(response.status_code, 302,
+            'The user should be redirected to the activation page when creation is successful.')
+        org = muckrock.organization.models.Organization.objects.get(name=org_name)
+        ok_(org,
+            'The organization should be created.')
+        ok_(not org.active,
+            'The organization should be inactive.')
+        eq_(org.owner, org_owner,
+            'The organization should have an owner assigned to it.')
+        eq_(org.max_users, org_max,
+            'The organization should have its max users set.')
+        eq_(org.monthly_cost, org_cost,
+            'The organization should have its monthly cost set.')
+        eq_(org.monthly_requests, org_requests,
+            'The organization should have its monthly requests set.')
 
 
 @patch('stripe.Customer', MockCustomer)
