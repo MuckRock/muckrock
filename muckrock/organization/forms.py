@@ -37,16 +37,19 @@ class StaffCreateForm(CreateForm):
         widgets = {'owner': autocomplete_light.ChoiceWidget('UserAutocomplete')}
 
 
-class SeatForm(forms.Form):
+class SeatForm(forms.ModelForm):
     """Allows setting the seats of the organization."""
-    seats = forms.IntegerField()
+    class Meta:
+        model = Organization
+        fields = ['max_users']
 
-    def clean_seats(self):
-        """Ensures the number of seats is not below the minimum value."""
-        seats = self.cleaned_data['seats']
+    def clean_max_users(self):
+        """Ensures that max_users is not below the minimum value."""
+        seats = self.cleaned_data['max_users']
         if seats < ORG_MIN_SEATS:
             err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
+        return seats
 
 
 class AddMembersForm(forms.Form):

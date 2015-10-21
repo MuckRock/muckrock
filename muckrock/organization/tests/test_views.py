@@ -82,14 +82,12 @@ class TestCreateView(TestCase):
 
     def test_post_ok(self):
         """
-        Regular users should be able to activate an
-        org by POSTing a name and a Stripe token.
-        The org should be activated and the user
-        should be made the owner.
+        Regular users should be able to activate an org.
+        When doing so, they should be made the owner.
         """
         regular_user = muckrock.factories.UserFactory()
         org_name = 'Cool Org'
-        data = {'token': 'test', 'name': org_name}
+        data = {'name': org_name}
         form = muckrock.organization.forms.CreateForm(data)
         ok_(form.is_valid(), '%s' % form.errors)
         request = self.request_factory.post(self.url, data)
@@ -115,7 +113,6 @@ class TestCreateView(TestCase):
         org_cost = 10000
         org_requests = 50
         data = {
-            'token': 'test',
             'name': org_name,
             'owner': org_owner.pk,
             'max_users': org_max,
@@ -189,6 +186,19 @@ class TestActivateView(TestCase):
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 302)
 
+    def test_post_ok(self):
+        """Posting a valid Stripe token and the number of seats should activate the organization."""
+        logging.debug(self.org.max_users)
+        data = {'token': 'test', 'max_users': self.org.max_users}
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        self.org.refresh_from_db()
+        eq_(response.status_code, 302,
+            'The view should redirect to the org page on success.')
+        ok_(self.org.active,
+            'The organization should be activated! That\'s the whole point!')
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)

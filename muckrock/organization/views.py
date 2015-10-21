@@ -104,23 +104,18 @@ class OrganizationActivateView(UpdateView):
             return redirect(organization.get_absolute_url())
         return super(OrganizationActivateView, self).dispatch(*args, **kwargs)
 
-    def get_form(self):
-        """The form isn't a ModelForm so we override the get_form method."""
-        organization = self.get_object()
-        seats = organization.max_users
-        return self.form_class(initial={'seats': seats})
-
     def form_valid(self, form):
         """When the form is valid, activate the organization."""
         # should expect a token from Stripe
-        token = self.request.POST.get(token)
+        token = self.request.POST.get('token')
         organization = self.get_object()
-        num_seats = form.cleaned_data['seats']
+        num_seats = form.cleaned_data['max_users']
         an_error = False
         if token:
             try:
                 organization.activate_subscription(token, num_seats)
                 messages.success(self.request, 'Your organization subscription is active.')
+                logging.info('%s activated %s', self.request.user, organization)
             except (AttributeError, ValueError) as exception:
                 messages.error(self.request, exception)
                 an_error = True
