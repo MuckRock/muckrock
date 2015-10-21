@@ -232,17 +232,17 @@ def _remove_members(request, organization):
 def deactivate_organization(request, slug):
     """Unsubscribes its owner from the recurring payment plan."""
     organization = get_object_or_404(Organization, slug=slug)
-    # first check if org is already deactivated
-    if not organization.active:
-        messages.error(request, 'This organization is already inactive.')
-        return redirect(organization)
-    # next check if the user has the authority
+    # check if the user has the authority
     if not organization.is_owned_by(request.user) and not request.user.is_staff:
         messages.error(request, 'Only this organization\'s owner may deactivate it.')
         return redirect(organization)
+    # check if org is already inactive
+    if not organization.active:
+        messages.error(request, 'This organization is already inactive.')
+        return redirect(organization)
     # finally, actually deactivate the organization
     if request.method == 'POST':
-        organization.pause_subscription()
+        organization.cancel_subscription()
     return redirect(organization)
 
 def delete_organization(request, **kwargs):
