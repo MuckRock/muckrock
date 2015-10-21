@@ -186,7 +186,8 @@ class TestActivateView(TestCase):
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 302)
 
-    def test_post_ok(self):
+    @patch('muckrock.organization.models.Organization.activate_subscription')
+    def test_post_ok(self, mock_activation):
         """Posting a valid Stripe token and the number of seats should activate the organization."""
         logging.debug(self.org.max_users)
         data = {'token': 'test', 'max_users': self.org.max_users}
@@ -197,7 +198,7 @@ class TestActivateView(TestCase):
         self.org.refresh_from_db()
         eq_(response.status_code, 302,
             'The view should redirect to the org page on success.')
-        ok_(self.org.active,
+        ok_(mock_activation.called,
             'The organization should be activated! That\'s the whole point!')
 
 @patch('stripe.Customer', MockCustomer)
