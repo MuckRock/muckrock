@@ -70,7 +70,7 @@ class TestCreateView(TestCase):
     def test_staff_get(self):
         """Staff should be able to create an org even if they own a different one."""
         staff_user = muckrock.factories.UserFactory(is_staff=True)
-        org = muckrock.factories.OrganizationFactory(owner=staff_user)
+        muckrock.factories.OrganizationFactory(owner=staff_user)
         request = self.request_factory.get(self.url)
         request = mock_middleware(request)
         request.user = staff_user
@@ -215,21 +215,21 @@ class TestDeactivateView(TestCase):
     def test_regular_post(self, mock_cancellation):
         """Regular users should be denied the ability to POST."""
         self.request.user = muckrock.factories.UserFactory()
-        response = self.view(self.request, self.org.slug)
+        self.view(self.request, self.org.slug)
         ok_(not mock_cancellation.called)
 
     @patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_owner_post(self, mock_cancellation):
         """Owners should be able to cancel the subscription."""
         self.request.user = self.org.owner
-        response = self.view(self.request, self.org.slug)
+        self.view(self.request, self.org.slug)
         ok_(mock_cancellation.called)
 
     @patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_staff_post(self, mock_cancellation):
         """Staff should be able to cancel the subscription."""
         self.request.user = muckrock.factories.UserFactory(is_staff=True)
-        response = self.view(self.request, self.org.slug)
+        self.view(self.request, self.org.slug)
         ok_(mock_cancellation.called)
 
     @patch('muckrock.organization.models.Organization.cancel_subscription')
@@ -238,5 +238,5 @@ class TestDeactivateView(TestCase):
         self.org.active = False
         self.org.save()
         self.request.user = self.org.owner
-        response = self.view(self.request, self.org.slug)
+        self.view(self.request, self.org.slug)
         ok_(not mock_cancellation.called)

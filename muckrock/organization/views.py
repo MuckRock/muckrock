@@ -69,6 +69,8 @@ class OrganizationCreateView(CreateView):
         If the user is not staff, make the current user the owner.
         Finally, redirect to the organization's activation page.
         """
+        # pylint:disable=attribute-defined-outside-init
+        # pylint disabled because parent object does the same exact thing so its ok
         user = self.request.user
         organization = form.save(commit=False)
         if not user.is_staff:
@@ -129,7 +131,7 @@ class OrganizationActivateView(UpdateView):
             messages.error(self.request, 'No payment information provided!')
             an_error = True
         if an_error:
-            return self.form_invalid()
+            return self.form_invalid(form)
         else:
             return redirect(self.get_success_url())
 
