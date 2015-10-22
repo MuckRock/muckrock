@@ -40,7 +40,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^(?P<slug>[\w-]+)/delete/$',
-        views.delete_organization,
+        views.OrganizationDeleteView.as_view(),
         name='org-delete'
     ),
 )

@@ -337,3 +337,48 @@ class TestUpdateView(TestCase):
         eq_(self.org.monthly_requests, data['monthly_requests'])
         ok_(mock_update.called)
         eq_(response.status_code, 302)
+
+
+class TestDeleteView(TestCase):
+    """
+    Only owner and staff may delete the organization.
+    The organization cannot be deleted.
+    The delete method should be called by the organization upon POST.
+    """
+    def setUp(self):
+        self.org = muckrock.factories.OrganizationFactory()
+        self.request_factory = RequestFactory()
+        self.url = reverse('org-delete', kwargs={'slug': self.org.slug})
+        self.request = self.request_factory.post(self.url)
+        self.request = mock_middleware(self.request)
+        self.view = muckrock.organization.views.OrganizationDeleteView.as_view()
+
+    @patch('muckrock.organization.models.Organization.delete')
+    def test_regular_post(self, mock_delete):
+        """Regular users cannot delete organizations."""
+        self.request.user = muckrock.factories.UserFactory()
+        self.view(self.request, slug=self.org.slug)
+        ok_(not mock_delete.called)
+
+    @patch('muckrock.organization.models.Organization.delete')
+    def test_staff_post(self, mock_delete):
+        """Staff users can delete organizations."""
+        self.request.user = muckrock.factories.UserFactory(is_staff=True)
+        self.view(self.request, slug=self.org.slug)
+        ok_(mock_delete.called)
+
+    @patch('muckrock.organization.models.Organization.delete')
+    def test_owner_post(self, mock_delete):
+        """Owners can delete their organizations."""
+        self.request.user = self.org.owner
+        self.view(self.request, slug=self.org.slug)
+        ok_(mock_delete.called)
+
+    @patch('muckrock.organization.models.Organization.delete')
+    def test_active_post(self, mock_delete):
+        """Active organizations cannot be deleted."""
+        self.org.active = True
+        self.org.save()
+        self.request.user = self.org.owner
+        self.view(self.request, slug=self.org.slug)
+        ok_(not mock_delete.called)

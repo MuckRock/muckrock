@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView, CreateView, UpdateView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 import actstream
 import logging
@@ -182,6 +182,50 @@ class OrganizationUpdateView(UpdateView):
         organization.update_subscription(max_users)
         return redirect(self.get_success_url())
 
+def deactivate_organization(request, slug):
+    """Unsubscribes its owner from the recurring payment plan."""
+    organization = get_object_or_404(Organization, slug=slug)
+    # check if the user has the authority
+    if not organization.is_owned_by(request.user) and not request.user.is_staff:
+        messages.error(request, 'Only this organization\'s owner may deactivate it.')
+        return redirect(organization)
+    # check if org is already inactive
+    if not organization.active:
+        messages.error(request, 'This organization is already inactive.')
+        return redirect(organization)
+    # finally, actually deactivate the organization
+    if request.method == 'POST':
+        organization.cancel_subscription()
+    return redirect(organization)
+
+
+class OrganizationDeleteView(DeleteView):
+    """
+    Only staff or the org owner may delete the organization.
+    The org may only be deleted when inactive.
+    """
+    model = Organization
+    template_name = "organization/delete.html"
+    success_url = '/organization/'
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """
+        A user must be logged in to delete an organization.
+        The user must be staff or the owner.
+        The organization cannot be active.
+        """
+        organization = self.get_object()
+        user = self.request.user
+        if not user.is_staff and not organization.is_owned_by(user):
+            messages.error(self.request, 'You cannot delete an organization you do not own.')
+            return redirect(organization.get_absolute_url())
+        if organization.active:
+            messages.error(self.request, 'You cannot delete an active organization.')
+            return redirect(organization.get_absolute_url())
+        return super(OrganizationDeleteView, self).dispatch(*args, **kwargs)
+
+
 class OrganizationDetailView(DetailView):
     """Organization detail view"""
     model = Organization
@@ -277,41 +321,3 @@ def _remove_members(request, organization):
     msg = 'You revoked membership from %s ' % member_count
     msg += 'person.' if member_count == 1 else 'people.'
     messages.success(request, msg)
-
-def deactivate_organization(request, slug):
-    """Unsubscribes its owner from the recurring payment plan."""
-    organization = get_object_or_404(Organization, slug=slug)
-    # check if the user has the authority
-    if not organization.is_owned_by(request.user) and not request.user.is_staff:
-        messages.error(request, 'Only this organization\'s owner may deactivate it.')
-        return redirect(organization)
-    # check if org is already inactive
-    if not organization.active:
-        messages.error(request, 'This organization is already inactive.')
-        return redirect(organization)
-    # finally, actually deactivate the organization
-    if request.method == 'POST':
-        organization.cancel_subscription()
-    return redirect(organization)
-
-def delete_organization(request, **kwargs):
-    """Deletes an organization by removing its users and cancelling its plan"""
-    organization = get_object_or_404(Organization, slug=kwargs['slug'])
-    if organization.is_owned_by(request.user) or request.user.is_staff:
-        members = organization.members.all()
-        for member in members:
-            member.organization = None
-            member.save()
-        organization.pause_subscription()
-        try:
-            organization.delete_plan()
-        except ValueError as exception:
-            messages.error(request, exception)
-            return redirect(organization)
-        organization.delete()
-        messages.success(request, 'Your organization was deleted.')
-    elif request.user.profile.is_member_of(organization):
-        messages.error(request, 'Only the owner may delete this organization.')
-    else:
-        messages.error(request, 'You do not have permission to access this organization.')
-    return redirect('org-index')
