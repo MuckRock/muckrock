@@ -13,24 +13,6 @@ from nose.tools import ok_, eq_
 import muckrock.factories
 import muckrock.organization
 
-# Creates mock items for testing methods that involve Stripe
-mock_subscription = Mock()
-mock_subscription.id = 'test-org-subscription'
-mock_subscription.save.return_value = mock_subscription
-mock_customer = Mock()
-mock_customer.subscriptions.create.return_value = mock_subscription
-mock_customer.subscriptions.retrieve.return_value = mock_subscription
-MockCustomer = Mock()
-MockCustomer.create.return_value = mock_customer
-MockCustomer.retrieve.return_value = mock_customer
-mock_plan = Mock()
-mock_plan.amount = 100
-mock_plan.name = 'Organization'
-mock_plan.id = 'org'
-MockPlan = Mock()
-MockPlan.create.return_value = mock_plan
-MockPlan.retrieve.return_value = mock_plan
-
 def mock_middleware(request):
     """Mocks the request with messages and session middleware"""
     setattr(request, 'session', Mock())
@@ -382,3 +364,42 @@ class TestDeleteView(TestCase):
         self.request.user = self.org.owner
         self.view(self.request, slug=self.org.slug)
         ok_(not mock_delete.called)
+
+
+class TestDetailView(TestCase):
+    """From the organization detail view, owners can add and remove users."""
+    def setUp(self):
+        self.org = muckrock.factories.OrganizationFactory(active=True)
+        self.request_factory = RequestFactory()
+        self.url = reverse('org-detail', kwargs={'slug': self.org.slug})
+        self.view = muckrock.organization.views.OrganizationDetailView.as_view()
+
+    def test_user_add_member(self):
+        """Regular users should not be able to add members to an organization."""
+        ok_(False, 'Test unwritten.')
+
+    def test_owner_add_member(self):
+        """Owners should be able to add members to an organization."""
+        ok_(False, 'Test unwritten.')
+
+    def test_staff_add_member(self):
+        """Staff should be able to add members to an organization."""
+        ok_(False, 'Test unwritten.')
+
+    def test_active(self):
+        """Members may only be added and removed from active organizations."""
+        self.org.active = False
+        self.org.save()
+        ok_(False, 'Test unwritten.')
+
+    def test_existing_member(self):
+        """A member cannot be added if they are a member of a different organization."""
+        ok_(False, 'Test unwritten.')
+
+    def test_existing_owner(self):
+        """A member cannot be added if they are an owner of a different organization."""
+        ok_(False, 'Test unwritten.')
+
+    def test_no_seats(self):
+        """A member cannot be added if there are no open seats for them."""
+        ok_(False, 'Test unwritten.')
