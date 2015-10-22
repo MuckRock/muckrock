@@ -2,11 +2,10 @@
 Views for the organization application
 """
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DetailView
 
@@ -179,7 +178,7 @@ class OrganizationUpdateView(UpdateView):
         max_users = form.cleaned_data['max_users']
         if user.is_staff:
             # if staff we want the changes made to the org to be saved before updating
-            organizaiton = form.save()
+            organization = form.save()
         organization.update_subscription(max_users)
         return redirect(self.get_success_url())
 
@@ -316,29 +315,3 @@ def delete_organization(request, **kwargs):
     else:
         messages.error(request, 'You do not have permission to access this organization.')
     return redirect('org-index')
-
-@user_passes_test(lambda u: u.is_staff)
-def update_organization(request, **kwargs):
-    """Updates the monthly requests, monthly cost, and max users for an org"""
-    organization = get_object_or_404(Organization, slug=kwargs['slug'])
-    old_cost = organization.monthly_cost
-    if request.method == 'POST':
-        form = OrganizationUpdateForm(request.POST, instance=organization)
-        if form.is_valid():
-            organization = form.save()
-            if old_cost != organization.monthly_cost:
-                try:
-                    organization.update_plan()
-                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
-                    messages.error(request, exception)
-                    return redirect(organization)
-            messages.success(request, 'The organization was updated.')
-            return redirect(organization)
-    else:
-        form = OrganizationUpdateForm(instance=organization)
-    return render_to_response(
-        'forms/base_form.html',
-        {'form': form},
-        context_instance=RequestContext(request)
-    )
-
