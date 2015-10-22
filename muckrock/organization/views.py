@@ -172,6 +172,17 @@ class OrganizationUpdateView(UpdateView):
             form_class = StaffUpdateForm
         return form_class
 
+    def form_valid(self, form):
+        """Should handle a valid form differently depending on whether the user is staff."""
+        organization = self.get_object()
+        user = self.request.user
+        max_users = form.cleaned_data['max_users']
+        if user.is_staff:
+            # if staff we want the changes made to the org to be saved before updating
+            organizaiton = form.save()
+        organization.update_subscription(max_users)
+        return redirect(self.get_success_url())
+
 class OrganizationDetailView(DetailView):
     """Organization detail view"""
     model = Organization

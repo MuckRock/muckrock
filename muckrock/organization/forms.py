@@ -42,7 +42,7 @@ class StaffCreateForm(CreateForm):
         if max_users < ORG_MIN_SEATS:
             err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
-        return max_user
+        return max_users
 
 
 class UpdateForm(forms.ModelForm):
@@ -57,7 +57,7 @@ class UpdateForm(forms.ModelForm):
         if max_users < ORG_MIN_SEATS:
             err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
-        return max_user
+        return max_users
 
 
 class StaffUpdateForm(UpdateForm):

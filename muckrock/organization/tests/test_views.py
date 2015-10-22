@@ -295,3 +295,45 @@ class TestUpdateView(TestCase):
         request.user = self.org.owner
         response = self.view(request, slug=self.org.slug)
         eq_(response.status_code, 302)
+
+    @patch('muckrock.organization.models.Organization.update_subscription')
+    def test_owner_post(self, mock_update):
+        """The org should update its subscription when valid data is posted."""
+        starting_max_users = self.org.max_users
+        data = {'max_users': starting_max_users + 1}
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        self.org.refresh_from_db()
+        eq_(self.org.max_users, starting_max_users,
+            'The update view shouldn\'t modify the org itself.')
+        ok_(mock_update.called)
+        eq_(response.status_code, 302)
+
+    @patch('muckrock.organization.models.Organization.update_subscription')
+    def test_staff_post(self, mock_update):
+        """
+        When a staff member posts data, the org should update its own fields
+        before calling the update subscription method.
+        """
+        starting_data = {
+            'max_users': self.org.max_users,
+            'monthly_cost': self.org.monthly_cost,
+            'monthly_requests': self.org.monthly_requests
+        }
+        data = {
+            'max_users': starting_data['max_users'] + 2,
+            'monthly_cost': starting_data['monthly_cost'] + 10000,
+            'monthly_requests': starting_data['monthly_requests'] + 40
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory(is_staff=True)
+        response = self.view(request, slug=self.org.slug)
+        self.org.refresh_from_db()
+        eq_(self.org.max_users, data['max_users'])
+        eq_(self.org.monthly_cost, data['monthly_cost'])
+        eq_(self.org.monthly_requests, data['monthly_requests'])
+        ok_(mock_update.called)
+        eq_(response.status_code, 302)
