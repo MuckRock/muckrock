@@ -17,7 +17,8 @@ import stripe
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import CreateForm, \
                                         StaffCreateForm, \
-                                        SeatForm,\
+                                        UpdateForm, \
+                                        StaffUpdateForm, \
                                         AddMembersForm
 
 
@@ -87,7 +88,7 @@ class OrganizationActivateView(UpdateView):
     """Organization activation view"""
     model = Organization
     template_name = "organization/activate.html"
-    form_class = SeatForm
+    form_class = UpdateForm
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -111,6 +112,9 @@ class OrganizationActivateView(UpdateView):
         # should expect a token from Stripe
         token = self.request.POST.get('token')
         organization = self.get_object()
+        # Do not save the form! The activate_subscription method needs to compare the
+        # new number of seats to the existing number of seats. If the UpdateForm is saved,
+        # it will automatically save the new number of seats to the model since it is a ModelForm.
         num_seats = form.cleaned_data['max_users']
         an_error = False
         if token:
@@ -135,6 +139,38 @@ class OrganizationActivateView(UpdateView):
         else:
             return redirect(self.get_success_url())
 
+
+class OrganizationUpdateView(UpdateView):
+    """
+    Presents a form for updating the organization.
+    Behaves differently depending on whether the user is staff or the organization's owner.
+    """
+    model = Organization
+    template_name = "organization/update.html"
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        """
+        A user must be logged in to update an organization.
+        The user must be staff or the owner.
+        The organization cannot be inactive.
+        """
+        organization = self.get_object()
+        user = self.request.user
+        if not user.is_staff and not organization.is_owned_by(user):
+            messages.error(self.request, 'You cannot update an organization you do not own.')
+            return redirect(organization.get_absolute_url())
+        if not organization.active:
+            messages.error(self.request, 'You cannot update an inactive organization.')
+            return redirect(organization.get_absolute_url())
+        return super(OrganizationUpdateView, self).dispatch(*args, **kwargs)
+
+    def get_form_class(self):
+        """Returns a basic form for owners and a comprehensive form for staff."""
+        form_class = UpdateForm
+        if self.request.user.is_staff:
+            form_class = StaffUpdateForm
+        return form_class
 
 class OrganizationDetailView(DetailView):
     """Organization detail view"""
@@ -186,6 +222,7 @@ class OrganizationDetailView(DetailView):
         else:
             messages.error(request, 'This action is not available.')
         return redirect(organization)
+
 
 def _add_members(request, organization):
     """A helper function to add a list of members to an organization"""

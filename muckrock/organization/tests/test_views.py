@@ -240,3 +240,58 @@ class TestDeactivateView(TestCase):
         self.request.user = self.org.owner
         self.view(self.request, self.org.slug)
         ok_(not mock_cancellation.called)
+
+
+class TestUpdateView(TestCase):
+    """
+    Only owners and staff should be able to update the organization.
+    Only an active organization may be updated.
+    Updating should provide owners with a form to change the number of member seats they pay for.
+    It should provide staff with a form for updating the underlying basics of the organization,
+    then handle updating those fundamentals before updating the subscription.
+    """
+    def setUp(self):
+        self.org = muckrock.factories.OrganizationFactory(active=True, stripe_id='test')
+        self.request_factory = RequestFactory()
+        self.url = reverse('org-update', kwargs={'slug': self.org.slug})
+        self.view = muckrock.organization.views.OrganizationUpdateView.as_view()
+
+    def test_regular_get(self):
+        """Regular users should not have access to the update view."""
+        regular_user = muckrock.factories.UserFactory()
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = regular_user
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 302)
+
+    def test_owner_get(self):
+        """Organization owners should have access to the update view."""
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 200)
+        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.UpdateForm),
+            'Owners should be shown an organization update form.')
+
+    def test_staff_get(self):
+        """Staff users should have access to the update view."""
+        staff_user = muckrock.factories.UserFactory(is_staff=True)
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = staff_user
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 200)
+        ok_(isinstance(response.context_data['form'], muckrock.organization.forms.StaffUpdateForm),
+            'Staff should be shown a special staff-only organization update form.')
+
+    def test_inactive_get(self):
+        """Inactive organizations cannot be updated."""
+        self.org.active = False
+        self.org.save()
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        response = self.view(request, slug=self.org.slug)
+        eq_(response.status_code, 302)

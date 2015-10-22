@@ -36,20 +36,35 @@ class StaffCreateForm(CreateForm):
         fields = ['name', 'owner', 'monthly_requests', 'monthly_cost', 'max_users']
         widgets = {'owner': autocomplete_light.ChoiceWidget('UserAutocomplete')}
 
+    def clean_max_users(self):
+        """Ensures that max_users is not below the minimum value."""
+        max_users = self.cleaned_data['max_users']
+        if max_users < ORG_MIN_SEATS:
+            err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
+            raise forms.ValidationError(err_msg)
+        return max_user
 
-class SeatForm(forms.ModelForm):
-    """Allows setting the seats of the organization."""
+
+class UpdateForm(forms.ModelForm):
+    """Allows owner to update the number of seats in their organization."""
     class Meta:
         model = Organization
         fields = ['max_users']
 
     def clean_max_users(self):
         """Ensures that max_users is not below the minimum value."""
-        seats = self.cleaned_data['max_users']
-        if seats < ORG_MIN_SEATS:
+        max_users = self.cleaned_data['max_users']
+        if max_users < ORG_MIN_SEATS:
             err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
             raise forms.ValidationError(err_msg)
-        return seats
+        return max_user
+
+
+class StaffUpdateForm(UpdateForm):
+    """Allows staff more control over the updating of an organization"""
+    class Meta:
+        model = Organization
+        fields = ['monthly_requests', 'monthly_cost', 'max_users']
 
 
 class AddMembersForm(forms.Form):

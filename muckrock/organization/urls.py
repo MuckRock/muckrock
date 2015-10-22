@@ -29,14 +29,14 @@ urlpatterns = patterns(
         name='org-activate'
     ),
     url(
+        r'^(?P<slug>[\w-]+)/update/$',
+        views.OrganizationUpdateView.as_view(),
+        name='org-update'
+    ),
+    url(
         r'^(?P<slug>[\w-]+)/deactivate/$',
         views.deactivate_organization,
         name='org-deactivate'
-    ),
-    url(
-        r'^(?P<slug>[\w-]+)/update/$',
-        views.update_organization,
-        name='org-update'
     ),
     url(
         r'^(?P<slug>[\w-]+)/delete/$',
