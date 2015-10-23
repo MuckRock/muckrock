@@ -9,7 +9,7 @@ from django.template.loader import render_to_string, get_template
 from django.template import Context
 
 import actstream
-import cPickle as pickle
+import dill as pickle
 import dbsettings
 import base64
 import json
@@ -207,20 +207,18 @@ def classify_status(task_pk, **kwargs):
         return resp.content.decode('utf-8')
 
     def get_classifier():
-        """Load the pickled classifier from S3"""
-        conn = S3Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-        bucket = conn.get_bucket(AWS_STORAGE_BUCKET_NAME)
-        key = bucket.get_key('classifier/classifier.pkl')
-        return pickle.loads(key.get_contents_as_string())
+        """Load the pickled classifier"""
+        with open('muckrock/foia/classifier.pkl', 'rb') as pkl_fp:
+            return pickle.load(pkl_fp)
 
     def predict_status(vectorizer, selector, classifier, text, pages):
         """Run the prediction"""
         # pylint: disable=no-member
-        input_vect = vectorizer.transform(text)
+        input_vect = vectorizer.transform([text])
         pages_vect = np.array([pages], dtype=np.float).transpose()
         input_vect = hstack([input_vect, pages_vect])
         input_vect = selector.transform(input_vect)
-        probs = classifier.predict_proba(input_vect)
+        probs = classifier.predict_proba(input_vect)[0]
         max_prob = max(probs)
         status = classifier.classes_[list(probs).index(max_prob)]
         return status, max_prob
@@ -249,7 +247,7 @@ def classify_status(task_pk, **kwargs):
         vectorizer, selector, classifier, full_text, total_pages)
 
     resp_task.predicted_status = status
-    resp_task.status_probability = prob
+    resp_task.status_probability = int(100 * prob)
     resp_task.save()
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
