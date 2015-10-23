@@ -18,9 +18,7 @@ class TestFOIAClassify(TestCase):
         comm = FOIACommunicationFactory(
                 communication="Here are your responsive documents")
         task = ResponseTask.objects.create(communication=comm)
-        classify_status.apply(args=(task.pk,))
+        classify_status.apply(args=(task.pk,), throw=True)
         task = ResponseTask.objects.get(pk=task.pk)
-        print task.predicted_status
-        print task.status_probability
         nose.tools.ok_(task.predicted_status)
         nose.tools.ok_(task.status_probability)
