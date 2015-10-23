@@ -290,6 +290,11 @@ class ResponseTask(Task):
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
 
+    # for predicting statuses
+    predicted_status = models.CharField(
+            max_length=10, choices=STATUS, blank=True, null=True)
+    status_probability = models.IntegerField(blank=True, null=True)
+
     def __unicode__(self):
         return u'Response Task'
 

@@ -9,18 +9,22 @@ from django.template.loader import render_to_string, get_template
 from django.template import Context
 
 import actstream
+import dill as pickle
 import dbsettings
 import base64
 import json
 import logging
+import numpy as np
 import os.path
 import re
+import requests
 import sys
 import urllib2
 from boto.s3.connection import S3Connection
 from datetime import date, datetime
 from decimal import Decimal
 from django_mailgun import MailgunAPIError
+from scipy.sparse import hstack
 
 from muckrock.foia.models import (
     FOIAFile,
@@ -37,6 +41,7 @@ from muckrock.settings import (
     AWS_AUTOIMPORT_BUCKET_NAME,
     AWS_STORAGE_BUCKET_NAME,
     )
+from muckrock.task.models import ResponseTask
 from muckrock.vendor import MultipartPostHandler
 
 foia_url = r'(?P<jurisdiction>[\w\d_-]+)-(?P<jidx>\d+)/(?P<slug>[\w\d_-]+)-(?P<idx>\d+)'
@@ -180,6 +185,70 @@ def submit_multi_request(req_pk, **kwargs):
             new_foia.submit()
     req.delete()
 
+@task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.classify_status')
+def classify_status(task_pk, **kwargs):
+    """Use a machine learning classifier to predict the communications status"""
+    # pylint: disable=too-many-locals
+
+    def get_text_ocr(doc_id):
+        """Get the text OCR from document cloud"""
+        doc_cloud_url = 'http://www.documentcloud.org/api/documents/%s.json'
+        resp = requests.get(doc_cloud_url % doc_id)
+        try:
+            doc_cloud_json = resp.json()
+        except ValueError:
+            logger.error('Doc Cloud error: %s', resp.content)
+            return ''
+        if 'error' in doc_cloud_json:
+            logger.error('Doc Cloud error: %s', doc_cloud_json['error'])
+            return ''
+        text_url = doc_cloud_json['document']['resources']['text']
+        resp = requests.get(text_url)
+        return resp.content.decode('utf-8')
+
+    def get_classifier():
+        """Load the pickled classifier"""
+        with open('muckrock/foia/classifier.pkl', 'rb') as pkl_fp:
+            return pickle.load(pkl_fp)
+
+    def predict_status(vectorizer, selector, classifier, text, pages):
+        """Run the prediction"""
+        # pylint: disable=no-member
+        input_vect = vectorizer.transform([text])
+        pages_vect = np.array([pages], dtype=np.float).transpose()
+        input_vect = hstack([input_vect, pages_vect])
+        input_vect = selector.transform(input_vect)
+        probs = classifier.predict_proba(input_vect)[0]
+        max_prob = max(probs)
+        status = classifier.classes_[list(probs).index(max_prob)]
+        return status, max_prob
+
+    try:
+        resp_task = ResponseTask.objects.get(pk=task_pk)
+    except ResponseTask.DoesNotExist, exc:
+        classify_status.retry(
+                countdown=60*30, args=[task_pk], kwargs=kwargs, exc=exc)
+
+    file_text = []
+    total_pages = 0
+    for file_ in resp_task.communication.files.all():
+        total_pages += file_.pages
+        if file_.is_doccloud() and file_.doc_id:
+            file_text.append(get_text_ocr(file_.doc_id))
+        elif file_.is_doccloud() and not file_.doc_id:
+            # wait longer for document cloud
+            classify_status.retry(
+                    countdown=60*30, args=[task_pk], kwargs=kwargs, exc=exc)
+
+    full_text = resp_task.communication.communication + (' '.join(file_text))
+    vectorizer, selector, classifier = get_classifier()
+
+    status, prob = predict_status(
+        vectorizer, selector, classifier, full_text, total_pages)
+
+    resp_task.predicted_status = status
+    resp_task.status_probability = int(100 * prob)
+    resp_task.save()
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
 def followup_requests():
