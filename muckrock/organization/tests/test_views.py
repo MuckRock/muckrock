@@ -467,7 +467,7 @@ class TestDetailView(TestCase):
         user1 = muckrock.factories.UserFactory()
         user2 = muckrock.factories.UserFactory()
         user3 = muckrock.factories.UserFactory()
-        other_org = muckrock.factories.OrganizationFactory(owner=user1)
+        muckrock.factories.OrganizationFactory(owner=user1)
         data = {
             'action': 'add_members',
             'members': [user1.pk, user2.pk, user3.pk]

@@ -253,10 +253,10 @@ class OrganizationDetailView(DetailView):
         return context
 
     def post(self, request, **kwargs):
-        # pylint: disable=no-self-use
         """Handle form submission for adding and removing users"""
+        # pylint: disable=attribute-defined-outside-init
+        # disable setting self.object because its actually ok and Django does this also
         self.object = self.get_object()
-        organization = self.object
         action = request.POST.get('action', '')
         if action == 'add_members':
             self.add_members(request)
@@ -280,10 +280,7 @@ class OrganizationDetailView(DetailView):
             existing_member_count = organization.members.count()
             if new_member_count + existing_member_count > organization.max_users:
                 difference = (new_member_count + existing_member_count) - organization.max_users
-                messages.error(
-                    request,
-                    'You will need to upgrade your account if you want to add this many members.'
-                )
+                messages.error(request, 'You will need to purchase %d seats.' % difference)
                 return
             if not organization.active:
                 messages.error(request, 'You may not add members to an inactive organization.')
@@ -315,7 +312,6 @@ class OrganizationDetailView(DetailView):
         """Removes a list of members from an organization"""
         organization = self.get_object()
         members = request.POST.getlist('members')
-        member_count = len(members)
         members_removed = 0
         if not organization.is_owned_by(request.user) and not request.user.is_staff:
             # let members remove themselves from the organization, but nobody else
