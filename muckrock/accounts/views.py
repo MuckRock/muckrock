@@ -185,7 +185,6 @@ def subscribe(request):
             logger.info(logger_msg)
         else:
             messages.error(request, user_msg)
-            logger.error(logger_msg, exc_info=sys.exc_info())
 
         return redirect('acct-my-profile')
 
