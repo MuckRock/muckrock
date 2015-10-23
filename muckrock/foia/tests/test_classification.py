@@ -6,7 +6,7 @@ from django.test import TestCase
 
 import nose.tools
 
-from muckrock.factories import FOIARequestFactory, FOIACommunicationFactory
+from muckrock.factories import FOIACommunicationFactory
 from muckrock.foia.tasks import classify_status
 from muckrock.task.models import ResponseTask
 
@@ -15,6 +15,7 @@ class TestFOIAClassify(TestCase):
 
     def test_classifier(self):
         """Classifier should populate the fields on the response task"""
+        # pylint: disable=no-self-use
         comm = FOIACommunicationFactory(
                 communication="Here are your responsive documents")
         task = ResponseTask.objects.create(communication=comm)
