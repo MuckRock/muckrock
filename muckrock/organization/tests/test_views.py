@@ -39,7 +39,7 @@ class TestCreateView(TestCase):
         ok_(isinstance(response.context_data['form'], muckrock.organization.forms.CreateForm),
             'Regular users should be shown the regular creation form.')
 
-    def test_get_forbidden(self):
+    def test_owner_get_forbidden(self):
         """Users who already own an organization should be denied access."""
         org = muckrock.factories.OrganizationFactory()
         request = self.request_factory.get(self.url)
@@ -48,6 +48,16 @@ class TestCreateView(TestCase):
         response = self.create_view(request)
         eq_(response.status_code, 302,
             'Existing owners should not be allowed to create another organization.')
+
+    def test_member_get_forbidden(self):
+        """Users who are already members of a different organization should be denied access."""
+        org = muckrock.factories.OrganizationFactory()
+        member = muckrock.factories.UserFactory(profile__organization=org)
+        request = self.request_factory.get(self.url)
+        request = mock_middleware(request)
+        request.user = member
+        response = self.create_view(request)
+        eq_(response.status_code, 302)
 
     def test_staff_get(self):
         """Staff should be able to create an org even if they own a different one."""

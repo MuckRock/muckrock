@@ -44,7 +44,8 @@ class OrganizationCreateView(CreateView):
         they will likely be creating orgs for other folks.
         """
         already_owns_org = Organization.objects.filter(owner=self.request.user).exists()
-        if already_owns_org and not self.request.user.is_staff:
+        already_member = self.request.user.profile.organization is not None
+        if (already_member or already_owns_org) and not self.request.user.is_staff:
             messages.error(self.request, 'You may only own one organization at a time.')
             return redirect('org-index')
         return super(OrganizationCreateView, self).dispatch(*args, **kwargs)
