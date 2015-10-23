@@ -55,6 +55,15 @@ class muckrock {
 	} ->
 	package { 'zlib1g-dev':
 		ensure => installed,
+	} ->
+	package { 'liblapack-dev':
+		ensure => installed,
+	} ->
+	package { 'libblas-dev':
+		ensure => installed,
+	} ->
+	package { 'gfortran':
+		ensure => installed,
 	}
 
 	# python
