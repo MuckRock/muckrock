@@ -249,11 +249,3 @@ class TestMembership(TestCase):
         ok_(not self.org.active)
         self.org.add_member(muckrock.factories.UserFactory())
 
-    @nose.tools.raises(AttributeError)
-    def test_remove_member_inactive(self):
-        """Owners cannot remove members when the org is inactive."""
-        self.org.active = False
-        self.org.save()
-        ok_(not self.org.active)
-        member = muckrock.factories.UserFactory(profile__organization=self.org)
-        self.org.remove_member(member)

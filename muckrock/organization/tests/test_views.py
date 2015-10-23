@@ -381,7 +381,7 @@ class TestDetailView(TestCase):
         user3 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -398,7 +398,7 @@ class TestDetailView(TestCase):
         user3 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -415,7 +415,7 @@ class TestDetailView(TestCase):
         user3 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -434,7 +434,7 @@ class TestDetailView(TestCase):
         user3 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -452,7 +452,7 @@ class TestDetailView(TestCase):
         user3 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -470,7 +470,7 @@ class TestDetailView(TestCase):
         other_org = muckrock.factories.OrganizationFactory(owner=user1)
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk]
+            'members': [user1.pk, user2.pk, user3.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -488,7 +488,7 @@ class TestDetailView(TestCase):
         user4 = muckrock.factories.UserFactory()
         data = {
             'action': 'add_members',
-            'add_members': [user1.pk, user2.pk, user3.pk, user4.pk]
+            'members': [user1.pk, user2.pk, user3.pk, user4.pk]
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
@@ -499,3 +499,61 @@ class TestDetailView(TestCase):
             not self.org.has_member(user2) and \
             not self.org.has_member(user3) and \
             not self.org.has_member(user4))
+
+    def test_staff_remove(self):
+        """A staff user should be able to remove members."""
+        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        data = {
+            'action': 'remove_members',
+            'members': [member1.pk, member2.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory(is_staff=True)
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(member1) and \
+            not self.org.has_member(member2))
+
+    def test_owner_remove(self):
+        """The owner should be able to remove members."""
+        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        data = {
+            'action': 'remove_members',
+            'members': [member1.pk, member2.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(member1) and \
+            not self.org.has_member(member2))
+
+    def test_user_remove(self):
+        """Regular user should not be able to remove members."""
+        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        data = {
+            'action': 'remove_members',
+            'members': [member1.pk, member2.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory()
+        self.view(request, slug=self.org.slug)
+        ok_(self.org.has_member(member1) and \
+            self.org.has_member(member2))
+
+    def test_remove_self(self):
+        """However, a member may remove themself from an org."""
+        member = muckrock.factories.UserFactory(profile__organization=self.org)
+        data = {
+            'action': 'remove_members',
+            'members': [member.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = member
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(member))

@@ -128,6 +128,7 @@ class Organization(models.Model):
 
     def add_member(self, user):
         """Adds the given user as a member of the organization."""
+        added = False
         if not self.active:
             raise AttributeError('Cannot add members to an inactive organization.')
         if self.members.count() == self.max_users:
@@ -139,36 +140,27 @@ class Organization(models.Model):
         if not self.has_member(user):
             user.profile.organization = self
             user.profile.save()
-            logger.info(
-                '%s was added as a member of the organization %s',
-                user.username,
-                self.name
-            )
             self.send_email_notification(
                 user,
                 '[MuckRock] You were added to an organization',
                 'text/organization/add_member.txt'
             )
-        return
+            added = True
+        return added
 
     def remove_member(self, user):
         """Removes the given user from this organization if they are a member."""
-        if not self.active:
-            raise AttributeError('Cannot remove member from an inactive organization.')
+        removed = False
         if self.has_member(user):
             user.profile.organization = None
             user.profile.save()
-            logger.info(
-                '%s was removed as a member of the %s organization.',
-                user.username,
-                self.name
-            )
             self.send_email_notification(
                 user,
                 '[MuckRock] You were removed from an organization',
                 'text/organization/remove_member.txt'
             )
-        return
+            removed = True
+        return removed
 
     def activate_subscription(self, token, num_seats):
         """Subscribes the owner to the org plan, given a variable quantity"""

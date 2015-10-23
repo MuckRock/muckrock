@@ -257,15 +257,11 @@ class OrganizationDetailView(DetailView):
         """Handle form submission for adding and removing users"""
         self.object = self.get_object()
         organization = self.object
-        if not organization.is_owned_by(request.user) and not request.user.is_staff:
-            messages.error(request, 'You cannot modify this organization.')
-            context = self.get_context_data()
-            return self.render_to_response(context)
         action = request.POST.get('action', '')
         if action == 'add_members':
             self.add_members(request)
         elif action == 'remove_members':
-            _remove_members(request, organization)
+            self.remove_members(request)
         else:
             messages.error(request, 'This action is not available.')
         context = self.get_context_data()
@@ -274,9 +270,12 @@ class OrganizationDetailView(DetailView):
     def add_members(self, request):
         """Grants organization membership to a list of users"""
         organization = self.get_object()
+        if not organization.is_owned_by(request.user) and not request.user.is_staff:
+            messages.error(request, 'You cannot add members this organization.')
+            return
         form = AddMembersForm(request.POST)
         if form.is_valid():
-            new_members = form.cleaned_data['add_members']
+            new_members = form.cleaned_data['members']
             new_member_count = len(new_members)
             existing_member_count = organization.members.count()
             if new_member_count + existing_member_count > organization.max_users:
@@ -286,33 +285,65 @@ class OrganizationDetailView(DetailView):
                     'You will need to upgrade your account if you want to add this many members.'
                 )
                 return
+            if not organization.active:
+                messages.error(request, 'You may not add members to an inactive organization.')
+                return
             members_added = 0
             for member in new_members:
                 try:
-                    organization.add_member(member)
-                    members_added += 1
+                    if organization.add_member(member):
+                        actstream.action.send(
+                            request.user,
+                            verb='added',
+                            action_object=member,
+                            target=organization
+                        )
+                        logging.info('%s %s %s to %s.',
+                            request.user,
+                            'added',
+                            member,
+                            organization
+                        )
+                        members_added += 1
                 except AttributeError as exception:
                     messages.error(request, exception)
             if members_added > 0:
                 messages.success(request, 'You added %d members.' % members_added)
         return
 
-
-
-
-def _remove_members(request, organization):
-    """A helper function to remove a list of members from an organization"""
-    members = request.POST.getlist('members')
-    member_count = len(members)
-    for uid in members:
-        user = User.objects.get(pk=uid)
-        organization.remove_member(user)
-        actstream.action.send(
-            request.user,
-            verb='removed',
-            action_object=user,
-            target=organization
-        )
-    msg = 'You revoked membership from %s ' % member_count
-    msg += 'person.' if member_count == 1 else 'people.'
-    messages.success(request, msg)
+    def remove_members(self, request):
+        """Removes a list of members from an organization"""
+        organization = self.get_object()
+        members = request.POST.getlist('members')
+        member_count = len(members)
+        members_removed = 0
+        if not organization.is_owned_by(request.user) and not request.user.is_staff:
+            # let members remove themselves from the organization, but nobody else
+            logging.debug(members)
+            logging.debug(request.user.pk)
+            members = [user_pk for user_pk in members if user_pk == unicode(request.user.pk)]
+            logging.debug(members)
+            if len(members) > 1:
+                messages.error(request, 'You cannot remove other members this organization.')
+        for user_pk in members:
+            user = User.objects.get(pk=user_pk)
+            logging.debug('remove %s', user)
+            if organization.remove_member(user):
+                actstream.action.send(
+                    request.user,
+                    verb='removed',
+                    action_object=user,
+                    target=organization
+                )
+                logging.info('%s %s %s from %s.',
+                    request.user,
+                    'removed',
+                    user,
+                    organization
+                )
+                members_removed += 1
+        if members_removed > 0:
+            msg = 'You revoked membership from %s ' % members_removed
+            msg += 'person.' if members_removed == 1 else 'people.'
+            messages.success(request, msg)
+        return
