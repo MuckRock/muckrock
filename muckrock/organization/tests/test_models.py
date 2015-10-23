@@ -229,6 +229,19 @@ class TestMembership(TestCase):
         self.org.add_member(muckrock.factories.UserFactory())
 
     @nose.tools.raises(AttributeError)
+    def test_add_other_org_member(self):
+        """Cannot add a member of a different organization."""
+        other_org = muckrock.factories.OrganizationFactory()
+        member = muckrock.factories.UserFactory(profile__organization=other_org)
+        self.org.add_member(member)
+
+    @nose.tools.raises(AttributeError)
+    def test_add_owner(self):
+        """Cannot add an owner of a different organization."""
+        other_org = muckrock.factories.OrganizationFactory()
+        self.org.add_member(other_org.owner)
+
+    @nose.tools.raises(AttributeError)
     def test_add_member_inactive(self):
         """Owners cannot add members when the org is inactive."""
         self.org.active = False

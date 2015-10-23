@@ -376,30 +376,126 @@ class TestDetailView(TestCase):
 
     def test_user_add_member(self):
         """Regular users should not be able to add members to an organization."""
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory()
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(user1) and \
+            not self.org.has_member(user2) and \
+            not self.org.has_member(user3))
 
     def test_owner_add_member(self):
         """Owners should be able to add members to an organization."""
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        ok_(self.org.has_member(user1) and \
+            self.org.has_member(user2) and \
+            self.org.has_member(user3))
 
     def test_staff_add_member(self):
         """Staff should be able to add members to an organization."""
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = muckrock.factories.UserFactory(is_staff=True)
+        self.view(request, slug=self.org.slug)
+        ok_(self.org.has_member(user1) and \
+            self.org.has_member(user2) and \
+            self.org.has_member(user3))
 
     def test_active(self):
         """Members may only be added and removed from active organizations."""
         self.org.active = False
         self.org.save()
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(user1) and \
+            not self.org.has_member(user2) and \
+            not self.org.has_member(user3))
 
     def test_existing_member(self):
         """A member cannot be added if they are a member of a different organization."""
-        ok_(False, 'Test unwritten.')
+        other_org = muckrock.factories.OrganizationFactory()
+        user1 = muckrock.factories.UserFactory(profile__organization=other_org)
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(user1) and \
+            self.org.has_member(user2) and \
+            self.org.has_member(user3))
 
     def test_existing_owner(self):
         """A member cannot be added if they are an owner of a different organization."""
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        other_org = muckrock.factories.OrganizationFactory(owner=user1)
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        ok_(not self.org.has_member(user1) and \
+            self.org.has_member(user2) and \
+            self.org.has_member(user3))
 
     def test_no_seats(self):
         """A member cannot be added if there are no open seats for them."""
-        ok_(False, 'Test unwritten.')
+        user1 = muckrock.factories.UserFactory()
+        user2 = muckrock.factories.UserFactory()
+        user3 = muckrock.factories.UserFactory()
+        user4 = muckrock.factories.UserFactory()
+        data = {
+            'action': 'add_members',
+            'add_members': [user1.pk, user2.pk, user3.pk, user4.pk]
+        }
+        request = self.request_factory.post(self.url, data)
+        request = mock_middleware(request)
+        request.user = self.org.owner
+        self.view(request, slug=self.org.slug)
+        eq_(self.org.max_users, 3)
+        ok_(not self.org.has_member(user1) and \
+            not self.org.has_member(user2) and \
+            not self.org.has_member(user3) and \
+            not self.org.has_member(user4))

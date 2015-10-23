@@ -255,55 +255,50 @@ class OrganizationDetailView(DetailView):
     def post(self, request, **kwargs):
         # pylint: disable=no-self-use
         """Handle form submission for adding and removing users"""
-        organization = get_object_or_404(Organization, slug=kwargs['slug'])
+        self.object = self.get_object()
+        organization = self.object
+        if not organization.is_owned_by(request.user) and not request.user.is_staff:
+            messages.error(request, 'You cannot modify this organization.')
+            context = self.get_context_data()
+            return self.render_to_response(context)
         action = request.POST.get('action', '')
         if action == 'add_members':
-            _add_members(request, organization)
+            self.add_members(request)
         elif action == 'remove_members':
             _remove_members(request, organization)
-        elif action == 'change_subscription':
-            if organization.active:
-                organization.pause_subscription()
-                msg = 'Your subscription is paused. You may resume it at any time.'
-            else:
-                try:
-                    organization.start_subscription()
-                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
-                    messages.error(request, exception)
-                    return redirect(organization)
-                msg = 'Your subscription is reactivated.'
-            messages.success(request, msg)
         else:
             messages.error(request, 'This action is not available.')
-        return redirect(organization)
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
-
-def _add_members(request, organization):
-    """A helper function to add a list of members to an organization"""
-    form = AddMembersForm(request.POST)
-    if form.is_valid():
-        new_members = form.cleaned_data['add_members']
-        new_member_count = len(new_members)
-        existing_member_count = organization.members.count()
-        # limit org membership to 50 users
-        if new_member_count <= (50 - existing_member_count):
-            for new_member in new_members:
-                organization.add_member(new_member)
-                actstream.action.send(
-                    request.user,
-                    verb='added',
-                    action_object=new_member,
-                    target=organization
+    def add_members(self, request):
+        """Grants organization membership to a list of users"""
+        organization = self.get_object()
+        form = AddMembersForm(request.POST)
+        if form.is_valid():
+            new_members = form.cleaned_data['add_members']
+            new_member_count = len(new_members)
+            existing_member_count = organization.members.count()
+            if new_member_count + existing_member_count > organization.max_users:
+                difference = (new_member_count + existing_member_count) - organization.max_users
+                messages.error(
+                    request,
+                    'You will need to upgrade your account if you want to add this many members.'
                 )
-            msg = 'You granted membership to %s ' % new_member_count
-            msg += 'person.' if new_member_count == 1 else 'people.'
-            messages.success(request, msg)
-        else:
-            error_msg = ('You currently have %s members in your organization '
-                         'but you are limited to 50. If you want to exceed this '
-                         'limit, please contact us at info@muckrock.com' % existing_member_count)
-            messages.error(request, error_msg)
-    return
+                return
+            members_added = 0
+            for member in new_members:
+                try:
+                    organization.add_member(member)
+                    members_added += 1
+                except AttributeError as exception:
+                    messages.error(request, exception)
+            if members_added > 0:
+                messages.success(request, 'You added %d members.' % members_added)
+        return
+
+
+
 
 def _remove_members(request, organization):
     """A helper function to remove a list of members from an organization"""

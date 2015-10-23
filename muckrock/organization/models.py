@@ -132,6 +132,10 @@ class Organization(models.Model):
             raise AttributeError('Cannot add members to an inactive organization.')
         if self.members.count() == self.max_users:
             raise AttributeError('No open seat for this member.')
+        if user.profile.organization:
+            raise AttributeError('Cannot add a member of a different organization.')
+        if Organization.objects.filter(owner=user).exists():
+            raise AttributeError('Cannot add owner of a different organization.')
         if not self.has_member(user):
             user.profile.organization = self
             user.profile.save()
