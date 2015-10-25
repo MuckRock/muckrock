@@ -197,10 +197,11 @@ def classify_status(task_pk, **kwargs):
         try:
             doc_cloud_json = resp.json()
         except ValueError:
-            logger.error('Doc Cloud error: %s', resp.content)
+            logger.warn('Doc Cloud error for %s: %s', doc_id, resp.content)
             return ''
         if 'error' in doc_cloud_json:
-            logger.error('Doc Cloud error: %s', doc_cloud_json['error'])
+            logger.warn('Doc Cloud error for %s: %s',
+                    doc_id, doc_cloud_json['error'])
             return ''
         text_url = doc_cloud_json['document']['resources']['text']
         resp = requests.get(text_url)

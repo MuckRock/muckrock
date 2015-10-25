@@ -67,8 +67,17 @@ def get_404(client, url):
 
 class TestFunctional(TestCase):
     """Functional tests for top level"""
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_agencies.json',
-                'test_users.json', 'test_foiarequests.json', 'test_news.json']
+    fixtures = [
+            'holidays.json',
+            'jurisdictions.json',
+            'agency_types.json',
+            'test_agencies.json',
+            'test_users.json',
+            'test_profiles.json',
+            'test_foiarequests.json',
+            'test_foiacommunications.json',
+            'test_news.json',
+            ]
 
     # tests for base level views
     def test_views(self):
@@ -77,6 +86,16 @@ class TestFunctional(TestCase):
         get_allowed(self.client, reverse('index'))
         get_allowed(self.client, '/sitemap.xml')
         get_allowed(self.client, '/search/')
+
+    def test_api_views(self):
+        """Test APY views"""
+        self.client.login(username='super', password='abc')
+        api_objs = ['jurisdiction', 'agency', 'foia', 'question', 'statistics',
+                'communication', 'user', 'news', 'task', 'orphantask',
+                'snailmailtask', 'rejectedemailtask', 'staleagencytask',
+                'flaggedtask', 'newagencytask', 'responsetask']
+        for obj in api_objs:
+            get_allowed(self.client, reverse('api-%s-list' % obj))
 
 
 class TestUnit(TestCase):
