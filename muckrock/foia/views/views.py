@@ -101,7 +101,8 @@ class MyRequestList(RequestList):
 
     def get_queryset(self):
         """Gets multirequests as well, limits to just those by the current user"""
-        single_req = FOIARequest.objects.filter(user=self.request.user)
+        single_req = (FOIARequest.objects.filter(user=self.request.user)
+                                         .select_related('jurisdiction'))
         multi_req = FOIAMultiRequest.objects.filter(user=self.request.user)
         single_req = self.sort_list(self.filter_list(single_req))
         return list(single_req) + list(multi_req)
@@ -116,6 +117,7 @@ class FollowingRequestList(RequestList):
         objects = FOIARequest.objects.filter(
                 id__in=[_object.pk for _object in objects if _object])
         objects = self.sort_list(objects)
+        objects = objects.select_related('jurisdiction')
         return self.filter_list(objects)
 
 # pylint: disable=no-self-use
