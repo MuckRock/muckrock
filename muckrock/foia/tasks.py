@@ -480,7 +480,7 @@ def autoimport():
 
                 foia.status = status or foia.status
                 if foia.status in ['done', 'rejected', 'no_docs']:
-                    foia.date_done = file_date
+                    foia.date_done = file_date.date()
                 if code == 'FEE' and arg:
                     foia.price = Decimal(arg)
                 if id_:
