@@ -209,7 +209,7 @@ def create_request(request):
     initial_data = {}
     clone = False
     parent = None
-    if request.GET.get('clone', False):
+    try:
         foia_pk = request.GET['clone']
         foia = get_object_or_404(FOIARequest, pk=foia_pk)
         initial_data = {
@@ -226,6 +226,10 @@ def create_request(request):
         initial_data['jurisdiction'] = level
         clone = True
         parent = foia
+    except (KeyError, ValueError):
+        # KeyError if no clone was passed in
+        # Value error if invalid clone is passed in
+        pass
     if request.method == 'POST':
         foia_request = _process_request_form(request)
         if foia_request:
