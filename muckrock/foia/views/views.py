@@ -66,6 +66,7 @@ class RequestList(MRFilterableListView):
     def get_queryset(self):
         """Limits requests to those visible by current user"""
         objects = super(RequestList, self).get_queryset()
+        objects = objects.select_related('jurisdiction')
         return objects.get_viewable(self.request.user)
 
 @class_view_decorator(login_required)
