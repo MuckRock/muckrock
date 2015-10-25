@@ -215,7 +215,7 @@ def buy_requests(request):
         except (stripe.CardError, ValueError) as exc:
             msg = 'Payment error: %s Your card has not been charged.' % exc
             messages.error(request, msg)
-            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return redirect(url_redirect)
         user_profile.num_requests += 4
         user_profile.save()
