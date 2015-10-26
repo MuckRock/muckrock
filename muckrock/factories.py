@@ -9,7 +9,7 @@ import datetime
 import factory
 
 from muckrock.accounts.models import Profile
-from muckrock.foia.models import FOIARequest
+from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 
@@ -60,3 +60,13 @@ class FOIARequestFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.title))
     user = factory.SubFactory(UserFactory)
     jurisdiction = factory.SubFactory(JurisdictionFactory)
+
+
+class FOIACommunicationFactory(factory.django.DjangoModelFactory):
+    """A factory for creating FOIARequest test objects."""
+    class Meta:
+        model = FOIACommunication
+
+    foia = factory.SubFactory(FOIARequestFactory)
+    from_who = factory.Sequence(lambda n: "From: %d" % n)
+    date = factory.LazyAttribute(lambda obj: datetime.datetime.now())

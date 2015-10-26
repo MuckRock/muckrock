@@ -117,7 +117,7 @@ def get_jurisdiction(full_name):
         parent = Jurisdiction.objects.get(abbrev=parent_abbrev)
         return Jurisdiction.objects.get(name=name, parent=parent).pk
     else:
-        return Jurisdiction.objects.get(name=full_name).pk
+        return Jurisdiction.objects.exclude(level='l').get(name=full_name).pk
 
 class EmailValidator(object):
     """Class to validate emails"""

@@ -1,6 +1,7 @@
 .communication {
     @include border;
     position: relative;
+    word-wrap: break-word;
     header, section, footer {
         padding: $vertical-rhythm/2;
     }

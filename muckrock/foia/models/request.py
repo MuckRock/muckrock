@@ -425,8 +425,11 @@ class FOIARequest(models.Model):
             return (date.today() - responses[0].date.date()).days
 
     def _notify(self):
-        """Notify request's followers about the update"""
+        """Notify request's creator and followers about the update"""
         # pylint: disable=no-member
+        # notify creator
+        self.user.profile.notify(self)
+        # notify followers
         for user in actstream.models.followers(self):
             if self.viewable_by(user):
                 user.profile.notify(self)
@@ -628,7 +631,9 @@ class FOIARequest(models.Model):
         """How many days do we wait until we follow up?"""
         # pylint: disable=no-member
         if self.date_estimate and date.today() < self.date_estimate:
-            return 183
+            # return the days until the estimated date
+            date_difference = self.date_estimate - date.today()
+            return date_difference.days
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:

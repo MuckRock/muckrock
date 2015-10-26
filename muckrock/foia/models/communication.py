@@ -72,7 +72,15 @@ class FOIACommunication(models.Model):
     reindex_related = ('foia',)
 
     def __unicode__(self):
-        return '%s: %s...' % (self.date.strftime('%m/%d/%y'), self.communication[:80])
+        if self.delivered:
+            if self.delivered == 'email':
+                return u'an email'
+            elif self.delivered == 'mail':
+                return u'a letter'
+            else:
+                return u'a fax'
+        else:
+            return u'a message'
 
     def get_absolute_url(self):
         """The url for this object"""
