@@ -26,10 +26,14 @@ def staging():
     env.run('git push origin staging', capture=False)
 
 @task
-def test():
-    """Run the tests"""
+def test(test_path='', reuse=0):
+    """Run all tests, or a specific subset of tests"""
+    cmd = 'REUSE_DB=%(reuse)s ./manage.py test %(test_path)s --nologcapture' % {
+        'reuse': reuse,
+        'test_path': test_path
+    }
     with env.cd(env.base_path):
-        env.run('./manage.py test')
+        env.run(cmd)
 
 @task
 def coverage():
