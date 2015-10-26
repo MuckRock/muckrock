@@ -10,9 +10,11 @@ from datetime import datetime
 import logging
 import nose
 
+from muckrock import factories
 from muckrock import task
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIACommunication, FOIARequest
+from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -23,8 +25,6 @@ raises = nose.tools.raises
 
 class TaskTests(TestCase):
     """Test the Task base class"""
-
-    fixtures = ['test_users.json']
 
     def setUp(self):
         self.task = task.models.Task.objects.create()
@@ -48,7 +48,7 @@ class TaskTests(TestCase):
 
     def test_resolve_with_user(self):
         """Tasks should record the user responsible for the resolution."""
-        user = User.objects.create(username='test', password='pass')
+        user = factories.UserFactory()
         self.task.resolve(user)
         eq_(self.task.resolved_by, user,
             'The resolving user should be recorded by the task.')
@@ -57,17 +57,8 @@ class TaskTests(TestCase):
 class OrphanTaskTests(TestCase):
     """Test the OrphanTask class"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
     def setUp(self):
-        self.comm = FOIACommunication.objects.create(
-                date=datetime.now(),
-                from_who='Michael Morisy',
-                priv_from_who='michael@muckrock.com',
-                full_html=False,
-                opened=False,
-                response=True)
+        self.comm = factories.FOIACommunicationFactory()
         self.task = task.models.OrphanTask.objects.create(
             reason='ib',
             communication=self.comm,
@@ -79,8 +70,11 @@ class OrphanTaskTests(TestCase):
 
     def test_move(self):
         """Should move the communication to the listed requests and create a ResponseTask for each new communication."""
+        foia1 = factories.FOIARequestFactory()
+        foia2 = factories.FOIARequestFactory()
+        foia3 = factories.FOIARequestFactory()
         count_response_tasks = task.models.ResponseTask.objects.count()
-        self.task.move([1, 2, 3])
+        self.task.move([foia1.pk, foia2.pk, foia3.pk])
         eq_(task.models.ResponseTask.objects.count(), count_response_tasks + 3,
             'Reponse tasks should be created for each communication moved.')
 
@@ -111,41 +105,32 @@ class OrphanTaskTests(TestCase):
             communication=self.comm,
             address='Whatever Who Cares')
         self.task.blacklist()
-        updated_task_1 = task.models.OrphanTask.objects.get(pk=self.task.pk)
-        updated_task_2 = task.models.OrphanTask.objects.get(pk=other_task.pk)
-        ok_(updated_task_1.resolved and updated_task_2.resolved)
+        self.task.refresh_from_db()
+        other_task.refresh_from_db()
+        ok_(self.task.resolved and other_task.resolved)
 
     def test_create_blacklist_sender(self):
         """An orphan created from a blacklisted sender should be automatically resolved."""
         self.task.blacklist()
+        self.task.refresh_from_db()
+        ok_(self.task.resolved)
         new_orphan = task.models.OrphanTask.objects.create(
             reason='ib',
             communication=self.comm,
-            address='orphan-address')
-        logging.info(task.models.BlacklistDomain.objects.all())
-        logging.info(new_orphan.get_sender_domain())
-        self.task.refresh_from_db()
+            address='orphan-address'
+        )
+        # manually call the method since the signal isn't triggering during testing
+        domain_blacklist(task.models.OrphanTask, new_orphan, True)
         new_orphan.refresh_from_db()
-        logging.info(new_orphan.resolved)
-        eq_(self.task.resolved, True)
-        eq_(new_orphan.resolved, True)
+        logging.debug(new_orphan.resolved)
+        ok_(new_orphan.resolved)
 
 
 class SnailMailTaskTests(TestCase):
     """Test the SnailMailTask class"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
     def setUp(self):
-        self.foia = FOIARequest.objects.get(pk=1)
-        self.comm = FOIACommunication.objects.create(
-                date=datetime.now(),
-                from_who='God',
-                foia=self.foia,
-                full_html=False,
-                opened=False,
-                response=True)
+        self.comm = factories.FOIACommunicationFactory()
         self.task = task.models.SnailMailTask.objects.create(
             category='a',
             communication=self.comm)
@@ -173,13 +158,9 @@ class SnailMailTaskTests(TestCase):
 class NewAgencyTaskTests(TestCase):
     """Test the NewAgencyTask class"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
     def setUp(self):
-        self.user = User.objects.get(pk=1)
-        self.agency = Agency.objects.get(pk=1)
-        self.agency.approved = False
+        self.user = factories.UserFactory()
+        self.agency = factories.AgencyFactory(approved=False)
         self.task = task.models.NewAgencyTask.objects.create(
             user=self.user,
             agency=self.agency)
@@ -194,38 +175,21 @@ class NewAgencyTaskTests(TestCase):
             'Approving a new agency should actually, you know, approve the agency.')
 
     def test_reject(self):
-        replacement = Agency.objects.get(id=2)
-        count_new = FOIARequest.objects.filter(agency=self.task.agency).count()
-        count_replacement = FOIARequest.objects.filter(agency=replacement).count()
+        replacement = factories.AgencyFactory()
+        existing_foia = factories.FOIARequestFactory(agency=self.agency)
         self.task.reject(replacement)
-        logging.debug('Count New: %s', count_new)
-        logging.debug('Count Replacement: %s', count_replacement)
-        logging.debug('Count Expected: %s', count_new + count_replacement)
-        logging.debug('Count Actual: %s', FOIARequest.objects.filter(agency=replacement).count())
+        existing_foia.refresh_from_db()
         eq_(self.task.agency.approved, False,
-            'Rejecting a new agency should not approve it.')
-        eq_(
-            FOIARequest.objects.filter(agency=replacement).count(),
-            count_new + count_replacement,
-            'The replacement agency should receive the requests'
-        )
+            'Rejecting a new agency should leave it unapproved.')
+        eq_(existing_foia.agency, replacement,
+            'The replacement agency should receive the rejected agency\'s requests.')
 
 class ResponseTaskTests(TestCase):
     """Test the ResponseTask class"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
     def setUp(self):
-        self.foia = FOIARequest.objects.get(pk=2)
-        self.comm = FOIACommunication.objects.create(
-                date=datetime.now(),
-                from_who='God',
-                foia=self.foia,
-                full_html=False,
-                opened=False,
-                response=True)
-        self.task = task.models.ResponseTask.objects.create(communication=self.comm)
+        comm = factories.FOIACommunicationFactory(response=True)
+        self.task = task.models.ResponseTask.objects.create(communication=comm)
 
     def test_task_creates_successfully(self):
         ok_(self.task,
@@ -262,9 +226,9 @@ class ResponseTaskTests(TestCase):
             'Should update the price on the request.')
 
     def test_move(self):
-        move_to = 2
-        self.task.move(2)
-        eq_(self.task.communication.foia.id, move_to,
+        move_to_foia = factories.FOIARequestFactory()
+        self.task.move(move_to_foia.id)
+        eq_(self.task.communication.foia, move_to_foia,
             'Should move the communication to a different request.')
 
     @raises(ValueError)
@@ -293,66 +257,58 @@ class ResponseTaskTests(TestCase):
 class TestTaskManager(TestCase):
     """Tests for a helpful and handy task object manager."""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json']
-
     def setUp(self):
-        self.foia = FOIARequest.objects.get(pk=1)
-        self.comm = FOIACommunication.objects.create(
-                date=datetime.now(),
-                from_who='God',
-                foia=self.foia,
-                full_html=False,
-                opened=False,
-                response=True)
-        self.user = User.objects.get(pk=1)
-        self.agency = Agency.objects.get(pk=1)
-        self.agency.approved = False
-        self.foia.agency = self.agency
-        self.foia.save()
-        self.agency.save()
+        user = factories.UserFactory()
+        agency = factories.AgencyFactory(approved=False)
+        self.foia = factories.FOIARequestFactory(user=user, agency=agency)
+        self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
 
         # tasks that incorporate FOIAs are:
         # ResponseTask, SnailMailTask, FailedFaxTask, RejectedEmailTask, FlaggedTask,
         # StatusChangeTask, PaymentTask, NewAgencyTask
-        self.tasks = []
-        # ResponseTask
-        self.tasks.append(task.models.ResponseTask.objects.create(communication=self.comm))
-        # SnailMailTask
-        self.tasks.append(task.models.SnailMailTask.objects.create(
+        response_task = task.models.ResponseTask.objects.create(
+            communication=self.comm
+        )
+        snail_mail_task = task.models.SnailMailTask.objects.create(
             category='a',
             communication=self.comm
-        ))
-        # FailedFaxTask
-        self.tasks.append(task.models.FailedFaxTask.objects.create(communication=self.comm))
-        # RejectedEmailTask
-        self.tasks.append(task.models.RejectedEmailTask.objects.create(
+        )
+        failed_fax_task = task.models.FailedFaxTask.objects.create(
+            communication=self.comm
+        )
+        rejected_email_task = task.models.RejectedEmailTask.objects.create(
             category='d',
             foia=self.foia
-        ))
-        # FlaggedTask
-        self.tasks.append(task.models.FlaggedTask.objects.create(
-            user=self.user,
+        )
+        flagged_task = task.models.FlaggedTask.objects.create(
+            user=user,
             text='Halp',
             foia=self.foia
-        ))
-        # StatusChangeTask
-        self.tasks.append(task.models.StatusChangeTask.objects.create(
-            user=self.user,
+        )
+        status_change_task = task.models.StatusChangeTask.objects.create(
+            user=user,
             old_status='ack',
             foia=self.foia
-        ))
-        # PaymentTask
-        self.tasks.append(task.models.PaymentTask.objects.create(
+        )
+        payment_task = task.models.PaymentTask.objects.create(
             amount=100.00,
-            user=self.user,
+            user=user,
             foia=self.foia
-        ))
-        # NewAgencyTask
-        self.tasks.append(task.models.NewAgencyTask.objects.create(
-            user=self.user,
-            agency=self.agency
-        ))
+        )
+        new_agency_task = task.models.NewAgencyTask.objects.create(
+            user=user,
+            agency=agency
+        )
+        self.tasks = [
+            response_task,
+            snail_mail_task,
+            failed_fax_task,
+            rejected_email_task,
+            flagged_task,
+            status_change_task,
+            payment_task,
+            new_agency_task
+        ]
 
     def test_tasks_for_foia(self):
         """

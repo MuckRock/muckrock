@@ -9,6 +9,7 @@ import datetime
 import factory
 
 from muckrock.accounts.models import Profile
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 
@@ -41,6 +42,16 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     level = 'f'
 
+
+class AgencyFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Agency test objects."""
+    class Meta:
+        model = Agency
+
+    name = factory.Sequence(lambda n: "Agency %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+    jurisdiction = factory.SubFactory(JurisdictionFactory)
+    approved = True
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""
