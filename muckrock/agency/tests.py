@@ -60,6 +60,29 @@ class TestAgencyUnit(TestCase):
         eq_(self.agency1.get_other_emails(), ['other_a@agency1.gov', 'other_b@agency1.gov'])
 
 
+class TestAgencyManager(TestCase):
+    """Tests for the Agency object manager"""
+    def setUp(self):
+        self.agency1 = factories.AgencyFactory()
+        self.agency2 = factories.AgencyFactory(jurisdiction=self.agency1.jurisdiction)
+        self.agency3 = factories.AgencyFactory(jurisdiction=self.agency1.jurisdiction,
+                                               approved=False)
+
+    def test_get_approved(self):
+        """Manager should return all approved agencies"""
+        agencies = agency.models.Agency.objects.get_approved()
+        ok_(self.agency1 in agencies)
+        ok_(self.agency2 in agencies)
+        ok_(self.agency3 not in agencies)
+
+    def test_get_siblings(self):
+        """Manager should return all siblings to a given agency"""
+        agencies = agency.models.Agency.objects.get_siblings(self.agency1)
+        ok_(self.agency1 not in agencies, 'The given agency shouldn\'t be its own sibling.')
+        ok_(self.agency2 in agencies)
+        ok_(self.agency3 not in agencies, 'Unapproved agencies shouldn\'t be siblings.')
+
+
 class TestAgencyViews(TestCase):
     """Tests for Agency views"""
     def setUp(self):
