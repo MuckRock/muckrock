@@ -39,6 +39,7 @@ class JurisdictionFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Jurisdiction %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+    level = 'f'
 
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
@@ -59,4 +60,5 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
 
     foia = factory.SubFactory(FOIARequestFactory)
     from_who = factory.Sequence(lambda n: "From: %d" % n)
+    priv_from_who = 'Test Sender <test@muckrock.com>'
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
