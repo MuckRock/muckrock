@@ -15,6 +15,8 @@ from muckrock.utils import mock_middleware
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 
+# pylint: disable=no-member
+
 class TestAgencyUnit(TestCase):
     """Unit tests for Agencies"""
 
@@ -111,7 +113,7 @@ class TestAgencyViews(TestCase):
         self.agency.approved = False
         self.agency.save()
         jurisdiction = self.agency.jurisdiction
-        response = self.view(
+        self.view(
             self.request,
             jurisdiction.slug,
             jurisdiction.pk,
@@ -129,6 +131,7 @@ class TestAgencyForm(TestCase):
 
     def test_validate_empty_form(self):
         """The form should have a name, at least"""
+        # pylint: disable=no-self-use
         ok_(not agency.forms.AgencyForm().is_valid(),
             'Empty AgencyForm should not validate.')
 

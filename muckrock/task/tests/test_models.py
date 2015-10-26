@@ -2,7 +2,6 @@
 Tests for Tasks models
 """
 
-from django.contrib.auth.models import User
 from django.http import Http404
 from django.test import TestCase
 
@@ -12,8 +11,6 @@ import nose
 
 from muckrock import factories
 from muckrock import task
-from muckrock.agency.models import Agency
-from muckrock.foia.models import FOIACommunication, FOIARequest
 from muckrock.task.signals import domain_blacklist
 
 ok_ = nose.tools.ok_
@@ -22,6 +19,7 @@ raises = nose.tools.raises
 
 # pylint: disable=missing-docstring
 # pylint: disable=line-too-long
+# pylint: disable=no-member
 
 class TaskTests(TestCase):
     """Test the Task base class"""
