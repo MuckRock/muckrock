@@ -102,16 +102,7 @@ def _notices(email_pref):
     """Send out notices"""
     profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
     for profile in profiles_to_notify:
-        # for now, only send staff the new updates in a daily format
-        if profile.user.is_staff and email_pref == 'daily':
-            profile.activity_email()
-        else:
             profile.send_notifications()
-
-@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.accounts.tasks.daily_notices')
-def daily_notices():
-    """Send out daily notices"""
-    _notices('daily')
 
 @periodic_task(run_every=crontab(day_of_week='mon', hour=10, minute=0),
                name='muckrock.accounts.tasks.weekly')
