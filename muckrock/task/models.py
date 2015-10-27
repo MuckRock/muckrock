@@ -19,6 +19,8 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 def generate_status_actions(foia, comm, status):
     """Generate activity stream actions for agency replies"""
+    if not foia.agency:
+        return
     # generate action
     actstream.action.send(
         foia.agency,
@@ -47,6 +49,7 @@ def generate_status_actions(foia, comm, status):
             verb='partially completed',
             action_object=foia
         )
+    return
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
