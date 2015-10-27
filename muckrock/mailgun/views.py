@@ -112,7 +112,7 @@ def handle_request(request, mail_id):
             if type_ == 'file':
                 _upload_file(foia, comm, file_, from_)
 
-        ResponseTask.objects.create(communication=comm)
+        task = ResponseTask.objects.create(communication=comm)
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
 
         foia.email = from_email
