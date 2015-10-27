@@ -37,7 +37,7 @@ django-lot==0.0.6
 django-markdown-deux==1.0.4
 django-mathfilters==0.3.0
 django-mptt==0.7.4
-django-nose==1.4.1
+django-nose==1.4.2
 django-polymorphic==0.7.1
 django-pylibmc-sasl==0.2.4
 django-rest-swagger==0.3.2
