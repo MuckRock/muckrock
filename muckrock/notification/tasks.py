@@ -16,6 +16,6 @@ def daily_notification():
         # for now, only send staff the new updates
         if profile.user.is_staff:
             email = DailyNotification(profile.user)
-            email.send(fail_silently=False)
+            email.send()
         else:
             profile.send_notifications()

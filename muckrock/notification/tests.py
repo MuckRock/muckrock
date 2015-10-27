@@ -29,7 +29,8 @@ class TestDailyNotification(TestCase):
     @raises(TypeError)
     def test_requires_user(self):
         """The email should raise an error when instantiated without a user."""
-        DailyNotification()
+        # pylint:disable=no-self-use
+        DailyNotification(None)
 
     def test_send_no_notifications(self):
         """The email shouldn't send if there's no notifications."""
@@ -56,7 +57,7 @@ class TestDailyNotification(TestCase):
         # lets also create an agency to act upon our FOIA
         agency = factories.AgencyFactory()
         actstream.action.send(agency, verb='rejected', action_object=foia)
-        email = DailyNotification(self.user)
+        DailyNotification(self.user)
 
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""

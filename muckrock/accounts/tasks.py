@@ -102,7 +102,7 @@ def _notices(email_pref):
     """Send out notices"""
     profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
     for profile in profiles_to_notify:
-            profile.send_notifications()
+        profile.send_notifications()
 
 @periodic_task(run_every=crontab(day_of_week='mon', hour=10, minute=0),
                name='muckrock.accounts.tasks.weekly')

@@ -6,8 +6,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 
-from actstream.managers import ActionManager, stream, check
-import logging
+from actstream.managers import ActionManager, stream
 
 from muckrock.foia.models import FOIARequest
 

@@ -20,7 +20,6 @@ from urllib import urlencode
 from muckrock import utils
 from muckrock.foia.models import FOIARequest
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.notification.models import DailyNotification
 from muckrock.organization.models import Organization
 from muckrock.values import TextValue
 
@@ -314,13 +313,6 @@ class Profile(models.Model):
         else:
             self.notifications.add(foia)
             self.save()
-
-    def activity_email(self):
-        """Sends an email that is a stream of activities"""
-        email = DailyNotification(self.user)
-        if email.notification_count > 0:
-            email.send(fail_silently=False)
-        return email
 
     def send_notifications(self):
         """Send deferred notifications"""

@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase
 
-import actstream
 from datetime import datetime, timedelta
 import json
 from mock import Mock, patch
@@ -18,7 +17,6 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
-import muckrock.factories
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
