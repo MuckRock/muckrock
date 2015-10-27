@@ -569,6 +569,10 @@ FILER_STORAGES = {
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
+ACTSTREAM_SETTINGS = {
+    'MANAGER': 'muckrock.managers.MRActionManager'
+}
+
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
