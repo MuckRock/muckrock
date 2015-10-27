@@ -5,6 +5,7 @@ from django.template.loader import render_to_string
 
 import actstream
 import datetime
+import logging
 
 class DailyNotification(EmailMultiAlternatives):
     """Sends a daily email notification"""
@@ -54,6 +55,8 @@ class DailyNotification(EmailMultiAlternatives):
 
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
+        foia_stream = actstream.models.Action.objects.requests_for_user(self.user)
+        logging.info(foia_stream)
         current_time = datetime.datetime.now()
         period_start = current_time - datetime.timedelta(1)
         user_stream = actstream.models.user_stream(self.user)

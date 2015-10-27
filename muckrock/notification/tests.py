@@ -47,6 +47,17 @@ class TestDailyNotification(TestCase):
         logging.debug(email.notification_count)
         eq_(email.send(), 1)
 
+    def test_notification_composition(self):
+        """The email should be composed of updates to requests I own and things I follow."""
+        # lets create a FOIA to belong to our user
+        foia = factories.FOIARequestFactory(user=self.user)
+        # lets have this FOIA do some things
+        actstream.action.send(foia, verb='created')
+        # lets also create an agency to act upon our FOIA
+        agency = factories.AgencyFactory()
+        actstream.action.send(agency, verb='rejected', action_object=foia)
+        email = DailyNotification(self.user)
+
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
