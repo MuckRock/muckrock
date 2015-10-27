@@ -24,6 +24,12 @@ class DailyNotification(EmailMultiAlternatives):
         self.bcc = ['diagnostics@muckrock.com']
         self.compose()
 
+    def send(self, *args):
+        """Don't send the email if there's no notifications."""
+        if self.notification_count == 0:
+            return 0
+        return super(DailyNotification, self).send(*args)
+
     def compose(self):
         """Compose the email"""
         activity = self.get_activity()
