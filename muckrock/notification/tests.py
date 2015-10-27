@@ -58,7 +58,9 @@ class TestDailyTask(TestCase):
         actstream.action.send(other_user, verb='acted')
 
     @mock.patch('muckrock.notification.messages.DailyNotification.send')
-    def test_daily_notification_task(self, mock_send):
+    @mock.patch('muckrock.accounts.models.Profile.send_notifications')
+    def test_daily_notification_task(self, mock_send, mock_profile_send):
         """Make sure the send method is called for the staff user."""
         daily_notification()
         mock_send.assert_called_once_with(self.staff_user)
+        mock_profile_send.assert_called_once()
