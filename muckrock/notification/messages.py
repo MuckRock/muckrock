@@ -10,8 +10,34 @@ import actstream
 import datetime
 import logging
 
+def get_foia_activity(user, period):
+    """Returns a sorted collection of FOIA activity."""
+    foia_stream = actstream.models.Action.objects.requests_for_user(user)
+    foia_stream = foia_stream.filter(timestamp__gte=period)
+    # we sort the items in the foia stream to figure out their priority
+    finished_verbs = ['completed', 'rejected', 'partially completed']
+    attention_verbs = ['requires fix', 'requires payment']
+    foia_actions = {
+        'count': foia_stream.count(),
+        'finished': [],
+        'attention': [],
+        'other': []
+    }
+    for foia_action in foia_stream:
+        if foia_action.verb in finished_verbs:
+            foia_actions['finished'].append(foia_action)
+        elif foia_action.verb in attention_verbs:
+            foia_actions['attention'].append(foia_action)
+        else:
+            foia_actions['other'].append(foia_action)
+    return foia_actions
+
+
 class DailyNotification(EmailMultiAlternatives):
     """Sends a daily email notification"""
+
+    text_template = 'notification/daily.txt'
+    html_template = 'notification/daily.html'
 
     notification_count = 0
     since = 'yesterday'
@@ -37,20 +63,26 @@ class DailyNotification(EmailMultiAlternatives):
     def compose(self):
         """Compose the email"""
         activity = self.get_activity()
-        self.notification_count = len(activity)
-        text_content = render_to_string('email/activity.txt', {
+        self.notification_count = activity['following'].count() + activity['requests']['count']
+        show_requests = activity['requests']['count'] > 0
+        show_following = activity['following'].count() > 0
+        show_headings = show_requests and show_following
+        context = {
             'user': self.user,
-            'stream': activity,
-            'count': self.notification_count,
-            'since': self.since
-        })
-        html_content = render_to_string('email/activity.html', {
-            'user': self.user,
-            'stream': activity,
+            'show_headings': show_headings,
+            'show_requests': show_requests,
+            'show_following': show_following,
+            'attention_foia': activity['requests']['attention'],
+            'finished_foia': activity['requests']['finished'],
+            'other_foia': activity['requests']['other'],
+            'following': activity['following'],
             'count': self.notification_count,
             'since': self.since,
             'base_url': 'https://www.muckrock.com'
-        })
+        }
+        logging.info(context)
+        text_content = render_to_string(self.text_template, context)
+        html_content = render_to_string(self.html_template, context)
         self.subject = self.get_subject()
         self.body = text_content
         self.attach_alternative(html_content, 'text/html')
@@ -58,14 +90,14 @@ class DailyNotification(EmailMultiAlternatives):
 
     def get_activity(self):
         """Returns a list of activities to be sent in the email"""
-        foia_stream = actstream.models.Action.objects.requests_for_user(self.user)
-        logging.info(foia_stream)
-        current_time = datetime.datetime.now()
-        period_start = current_time - datetime.timedelta(1)
+        period = datetime.datetime.now() - datetime.timedelta(1)
+        foia_activity = get_foia_activity(self.user, period)
         user_stream = actstream.models.user_stream(self.user)
-        user_stream = user_stream.filter(timestamp__gte=period_start)\
-                                 .exclude(verb='started following')
-        return list(user_stream)
+        user_stream = user_stream.filter(timestamp__gte=period).exclude(verb__icontains='following')
+        return {
+            'requests': foia_activity,
+            'following': user_stream
+        }
 
     def get_subject(self):
         """Summarizes the activities in the notificiation"""

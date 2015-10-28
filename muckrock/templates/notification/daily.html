@@ -1,15 +1,41 @@
 {% load activity_tags %}
 
-<p>Hi {{ user.first_name }},</p>
-
-<p>Since {{ since }}, there have been {{ count }} updates on things you care about:</p>
-
-<ul>
-{% for action in stream %}
-    <li>
-        {% if action.actor.get_absolute_url %}<a href="{{ base_url }}{{ action.actor.get_absolute_url }}">{{ action.actor }}</a>{% else %}<a href="{{ base_url }}{{ action.actor_url }}">{{ action.actor }}</a>{% endif %} {{ action.verb }}{% if action.action_object %} {% if action.action_object.get_absolute_url %}<a href="{{ base_url }}{{ action.action_object.get_absolute_url }}">{{ action.action_object }}</a>{% else %}<a href="{{ base_url }}{{ action.action_object_url }}">{{ action.action_object }}</a>{% endif %}{% endif %}{% if action.action_object and action.target %} to{% endif %}{% if action.target %} {% if action.target.get_absolute_url %}<a href="{{ base_url }}{{ action.target.get_absolute_url }}">{{ action.target }}</a>{% else %}<a href="{{ base_url }}{{ action.target_url }}">{{ action.target }}</a>{% endif %}{% endif %}
-    </li>
-{% endfor %}
-</ul>
-
-<p>That's all for now!</p>
+{% if show_requests %}
+    {% if show_headings %}
+    <h1>Your requests<h1>
+    {% endif %}
+    {% if attention_foia %}
+    <h2>Requests requiring attention</h2>
+    <ul>
+        {% for action in attention_foia %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if finished_foia %}
+    <h2>Finished requests</h2>
+    <ul>
+        {% for action in finished_foia %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% if other_foia %}
+    <h2>Updated requests</h2>
+    <ul>
+        {% for action in other_foia %}
+        <li>{% display_action action %}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{% endif %}
+{% if following %}
+    {% if show_headings %}
+    <h1>Site Activity</h1>
+    {% endif %}
+    <ul>
+    {% for action in following %}
+        <li>{% display_action action %}</li>
+    {% endfor %}
+    </ul>
+{% endif %}

@@ -57,7 +57,14 @@ class TestDailyNotification(TestCase):
         # lets also create an agency to act upon our FOIA
         agency = factories.AgencyFactory()
         actstream.action.send(agency, verb='rejected', action_object=foia)
-        DailyNotification(self.user)
+        # lets also have the user follow somebody
+        other_user = factories.UserFactory()
+        actstream.actions.follow(self.user, other_user, actor_only=False)
+        # lets generate some actions on behalf of this other user
+        actstream.action.send(other_user, verb='acted')
+        actstream.action.send(agency, verb='sent an email', target=other_user)
+        email = DailyNotification(self.user)
+        logging.info(email.message())
 
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
