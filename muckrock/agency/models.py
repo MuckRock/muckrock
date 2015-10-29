@@ -33,6 +33,13 @@ class AgencyQuerySet(models.QuerySet):
         """Get all approved agencies"""
         return self.filter(approved=True)
 
+    def get_siblings(self, agency):
+        """Get all approved agencies in the same jurisdiction as the given agency."""
+        return self.filter(jurisdiction=agency.jurisdiction)\
+                   .exclude(id=agency.id)\
+                   .exclude(approved=False)\
+                   .order_by('name')
+
 
 class Agency(models.Model, RequestHelper):
     """An agency for a particular jurisdiction that has at least one agency type"""

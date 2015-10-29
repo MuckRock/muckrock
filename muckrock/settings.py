@@ -247,6 +247,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.notification',
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
@@ -568,6 +569,10 @@ FILER_STORAGES = {
 }
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+
+ACTSTREAM_SETTINGS = {
+    'MANAGER': 'muckrock.managers.MRActionManager'
+}
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',
