@@ -99,5 +99,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if 'no_editor' in self.request.QUERY_PARAMS:
-            return self.model.objects.filter(editors=None)
-        return self.model.objects.all()
+            queryset = self.model.objects.filter(editors=None)
+        else:
+            queryset = self.model.objects.all()
+        return queryset.prefetch_related('authors', 'editors', 'foias')

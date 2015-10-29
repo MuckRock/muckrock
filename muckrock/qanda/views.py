@@ -5,7 +5,7 @@ Views for the QandA application
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
@@ -191,7 +191,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
     # pylint: disable=too-many-ancestors
-    queryset = Question.objects.all()
+    queryset = (Question.objects.select_related('user')
+            .prefetch_related('tags',
+                Prefetch('answers',
+                    queryset=Answer.objects.select_related('user'))))
     serializer_class = QuestionSerializer
     permission_classes = (QuestionPermissions,)
     filter_fields = ('title', 'foia',)

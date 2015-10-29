@@ -33,7 +33,6 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     """
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    queryset = FOIARequest.objects.all()
     serializer_class = FOIARequestSerializer
     permission_classes = (FOIAPermissions,)
 
@@ -53,7 +52,9 @@ class FOIARequestViewSet(viewsets.ModelViewSet):
     filter_class = Filter
 
     def get_queryset(self):
-        return FOIARequest.objects.get_viewable(self.request.user)
+        return (FOIARequest.objects.get_viewable(self.request.user)
+                .select_related('user')
+                .prefetch_related('communications__files', 'notes', 'tags'))
 
     def create(self, request):
         """Submit new request"""
@@ -200,7 +201,7 @@ class FOIACommunicationViewSet(viewsets.ModelViewSet):
     """API views for FOIARequest"""
     # pylint: disable=too-many-public-methods
     # pylint: disable=C0103
-    queryset = FOIACommunication.objects.all()
+    queryset = FOIACommunication.objects.prefetch_related('files')
     serializer_class = FOIACommunicationSerializer
     permission_classes = (DjangoModelPermissions,)
 

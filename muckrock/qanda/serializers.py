@@ -4,6 +4,7 @@ Serilizers for the Q&A application API
 
 from rest_framework import serializers, permissions
 
+from muckrock.foia.models import FOIARequest
 from muckrock.qanda.models import Question, Answer
 
 # pylint: disable=too-few-public-methods
@@ -34,6 +35,9 @@ class QuestionSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
     answers = AnswerSerializer(many=True, read_only=True)
     tags = serializers.StringRelatedField(many=True)
+    foia = serializers.PrimaryKeyRelatedField(
+            queryset=FOIARequest.objects.all(),
+            style={'base_template': 'input.html'})
 
     class Meta:
         model = Question
