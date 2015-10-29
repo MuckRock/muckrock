@@ -106,24 +106,15 @@ class CrowdfundABC(models.Model):
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
         # Try processing the payment using Stripe.
-        # If the payment fails, raise an error.
-        stripe_exceptions = (
-            stripe.InvalidRequestError,
-            stripe.CardError,
-            stripe.APIConnectionError,
-            stripe.AuthenticationError
+        # If the payment fails, do not catch the error.
+        # Stripe represents currency as integers
+        stripe_amount = int(float(amount) * 100)
+        stripe.Charge.create(
+            amount=stripe_amount,
+            source=token,
+            currency='usd',
+            description='Crowdfund contribution: %s' % self,
         )
-        try:
-            # Stripe represents currency as integers
-            stripe_amount = int(float(amount) * 100)
-            stripe.Charge.create(
-                amount=stripe_amount,
-                source=token,
-                currency='usd',
-                description='Crowdfund contribution: %s' % self,
-            )
-        except stripe_exceptions as payment_error:
-            raise payment_error
         payment_object = self.get_crowdfund_payment_object()
         payment = payment_object.objects.create(
             amount=amount,
