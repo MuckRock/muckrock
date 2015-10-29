@@ -49,6 +49,10 @@ def generate_status_actions(foia, comm, status):
             verb='partially completed',
             action_object=foia
         )
+    elif status == 'fix':
+        actstream.action.send(foia, verb='requires fix')
+    elif status == 'payment':
+        actstream.action.send(foia, verb='requires payment')
     return
 
 class TaskQuerySet(models.QuerySet):
