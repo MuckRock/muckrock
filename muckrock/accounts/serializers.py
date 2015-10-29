@@ -7,11 +7,15 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from muckrock.accounts.models import Profile, Statistics
+from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=too-few-public-methods
 
 class ProfileSerializer(serializers.ModelSerializer):
     """Serializer for Profile model"""
+    location = serializers.PrimaryKeyRelatedField(
+            queryset=Jurisdiction.objects.all(),
+            style={'base_template': 'input.html'})
 
     class Meta:
         model = Profile
