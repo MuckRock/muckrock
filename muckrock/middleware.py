@@ -5,18 +5,20 @@ Middleware for MuckRock
 from django.conf import settings
 from django.http import HttpResponseRedirect
 
-from urllib import urlencode
 import hotshot, hotshot.stats
-import logging
 import os
 import re
 import StringIO
 import sys
 import tempfile
 
-from muckrock import settings
+class RemoveTokenMiddleware(object):
+    """Remove login token from URL"""
 
-logger = logging.getLogger(__name__)
+    def process_request(self, request):
+        """Remove login token from URL"""
+        if settings.LOT_MIDDLEWARE_PARAM_NAME in request.GET:
+            return HttpResponseRedirect(request.path)
 
 # Orignal version taken from http://www.djangosnippets.org/snippets/186/
 # Original author: udfalkso
