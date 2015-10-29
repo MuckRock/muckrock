@@ -10,12 +10,9 @@ from decimal import Decimal
 from mock import patch, Mock
 from nose.tools import eq_, ok_
 
+from muckrock.factories import FOIARequestFactory, ProjectFactory
 from muckrock.crowdfund import models
-from muckrock.foia.models import FOIARequest
-from muckrock.project.models import Project
 from muckrock.task.models import GenericCrowdfundTask
-
-# TODO Fully test Stripe integration
 
 def create_project_crowdfund():
     """Helper function to create a project crowdfund"""
@@ -23,9 +20,8 @@ def create_project_crowdfund():
         name='Cool project please help',
         payment_required=Decimal(50),
         date_due=(date.today() + timedelta(30)),
-        project=Project.objects.create(title='Test Project')
+        project=ProjectFactory()
     )
-    crowdfund.save()
     return crowdfund
 
 
@@ -39,8 +35,8 @@ class TestCrowdfundAbstract(TestCase):
         """Closing a crowdfund should raise a flag and create a task."""
         crowdfund_task_count = GenericCrowdfundTask.objects.count()
         self.crowdfund.close_crowdfund()
-        updated_crowdfund = models.CrowdfundProject.objects.get(pk=self.crowdfund.pk)
-        ok_(updated_crowdfund.closed, 'The closed flag should be raised.')
+        self.crowdfund.refresh_from_db()
+        ok_(self.crowdfund.closed, 'The closed flag should be raised.')
         eq_(GenericCrowdfundTask.objects.count(), crowdfund_task_count + 1,
             'A new crowdfund task should be created.')
 
@@ -48,13 +44,9 @@ class TestCrowdfundAbstract(TestCase):
 class TestCrowdfundRequest(TestCase):
     """Test crowdfund a request"""
 
-    fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
-                'test_agencies.json', 'test_profiles.json', 'test_foiarequests.json',
-                'test_foiacommunications.json']
-
     def setUp(self):
         self.crowdfund = models.CrowdfundRequest()
-        self.foia = FOIARequest.objects.get(pk=1)
+        self.foia = FOIARequestFactory()
         self.crowdfund.foia = self.foia
 
     def test_unicode(self):
@@ -63,6 +55,10 @@ class TestCrowdfundRequest(TestCase):
         self.crowdfund.foia.title = u'Test¢Unicode'
         self.crowdfund.foia.save()
         eq_('%s' % self.crowdfund, 'Crowdfunding for %s' % self.foia)
+
+    def test_get_crowdfund_object(self):
+        """The crowdfund should have a request being crowdfunded."""
+        eq_(self.crowdfund.get_crowdfund_object(), self.foia)
 
 
 class TestCrowdfundProject(TestCase):
@@ -74,13 +70,11 @@ class TestCrowdfundProject(TestCase):
 
     def test_unicode(self):
         """The crowdfund should express itself concisely."""
-        eq_('%s' % self.crowdfund, 'Crowdfunding for Test Project')
+        eq_('%s' % self.crowdfund, 'Crowdfunding for %s' % self.project)
 
     def test_unicode_characters(self):
         """The unicode method should support unicode characters"""
-        project_title = u'Test¢s Request'
-        self.project = Project.objects.create(title=project_title)
-        self.crowdfund.project = self.project
+        self.crowdfund.project = ProjectFactory(title=u'Test¢s Project')
         ok_('%s' % self.crowdfund)
 
     def test_get_crowdfund_object(self):
