@@ -26,7 +26,7 @@ class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     owner = models.ForeignKey(User)
-    date_update = models.DateField(null=True)
+    date_update = models.DateField(auto_now_add=True, null=True)
     num_requests = models.IntegerField(default=0)
     max_users = models.IntegerField(default=3)
     monthly_cost = models.IntegerField(default=10000)
