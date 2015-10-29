@@ -19,6 +19,8 @@ from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.settings import STRIPE_SECRET_KEY
 
+# TODO Fully test Stripe integration
+
 def get_stripe_token():
     """
     Helper function for creating a dummy Stripe token.

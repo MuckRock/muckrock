@@ -26,6 +26,8 @@ from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 # pylint: disable=too-many-public-methods
 # pylint: disable=E1103
 
+# TODO Fully test Stripe integration
+
 mock_customer = Mock()
 mock_customer.id = 'cus_2jPQblsYu5doOE'
 mock_customer.active_card.last4 = '1234'

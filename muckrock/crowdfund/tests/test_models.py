@@ -15,6 +15,8 @@ from muckrock.foia.models import FOIARequest
 from muckrock.project.models import Project
 from muckrock.task.models import GenericCrowdfundTask
 
+# TODO Fully test Stripe integration
+
 def create_project_crowdfund():
     """Helper function to create a project crowdfund"""
     crowdfund = models.CrowdfundProject.objects.create(

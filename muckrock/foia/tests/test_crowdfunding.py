@@ -2,33 +2,25 @@
 Tests using nose for the FOIA application
 """
 
-from django.contrib import messages
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse, resolve
 from django.core import mail
 from django.test import TestCase, Client
 import nose.tools
 
 import datetime
-import re
-from datetime import date as real_date
-from operator import attrgetter
 
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.crowdfund.forms import CrowdfundRequestForm
-from muckrock.foia.models import FOIARequest, FOIACommunication
-from muckrock.agency.models import Agency
-from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed, get_404
+from muckrock.foia.models import FOIARequest
 
-# MockDate breaks pylint-django
-# pylint: skip-file
-
-# allow methods that could be functions and too many public methods in tests
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=E1103
+# pylint: disable=no-member
+# pylint: disable=missing-docstring
+# pylint: disable=invalid-name
 
+# TODO Fully test Stripe integration
 
 class TestFOIACrowdfunding(TestCase):
     """Tests for FOIA Crowdfunding"""
