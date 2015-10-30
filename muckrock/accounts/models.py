@@ -224,8 +224,10 @@ class Profile(models.Model):
     def customer(self):
         """Get stripe customer or create one if it doesn't exist"""
         try:
+            if not self.stripe_id:
+                raise AttributeError('No Stripe ID')
             customer = stripe.Customer.retrieve(self.stripe_id)
-        except stripe.InvalidRequestError:
+        except (AttributeError, stripe.InvalidRequestError):
             customer = stripe.Customer.create(
                 description=self.user.username,
                 email=self.user.email
