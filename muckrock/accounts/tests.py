@@ -21,13 +21,32 @@ from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
 # allow long names, methods that could be functions and too many public methods in tests
-# pylint: disable=C0103
+# pylint: disable=invalid-name
 # pylint: disable=no-self-use
 # pylint: disable=too-many-public-methods
-# pylint: disable=E1103
+# pylint: disable=no-member
 
 # TODO Fully test Stripe integration
 
+# Creates mock items for testing methods that involve Stripe
+mock_subscription = Mock()
+mock_subscription.id = 'test-org-subscription'
+mock_subscription.save.return_value = mock_subscription
+mock_customer = Mock()
+mock_customer.subscriptions.create.return_value = mock_subscription
+mock_customer.subscriptions.retrieve.return_value = mock_subscription
+MockCustomer = Mock()
+MockCustomer.create.return_value = mock_customer
+MockCustomer.retrieve.return_value = mock_customer
+mock_plan = Mock()
+mock_plan.amount = 100
+mock_plan.name = 'Organization'
+mock_plan.id = 'org'
+MockPlan = Mock()
+MockPlan.create.return_value = mock_plan
+MockPlan.retrieve.return_value = mock_plan
+
+"""
 mock_customer = Mock()
 mock_customer.id = 'cus_2jPQblsYu5doOE'
 mock_customer.active_card.last4 = '1234'
@@ -35,6 +54,7 @@ mock_customer.active_card.type = 'Visa'
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
+"""
 
 class TestAccountFormsUnit(TestCase):
     """Unit tests for account forms"""
