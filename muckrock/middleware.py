@@ -2,7 +2,6 @@
 Middleware for MuckRock
 """
 
-from django.conf import settings
 from django.http import HttpResponseRedirect
 
 import hotshot, hotshot.stats
@@ -11,6 +10,8 @@ import re
 import StringIO
 import sys
 import tempfile
+
+from muckrock import settings
 
 class RemoveTokenMiddleware(object):
     """Remove login token from URL"""
