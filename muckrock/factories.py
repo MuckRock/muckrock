@@ -20,7 +20,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
-    user = factory.SubFactory('app.factories.UserFactory', profile=None)
+    user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
     acct_type = 'community'
     date_update = datetime.datetime.now()
 
