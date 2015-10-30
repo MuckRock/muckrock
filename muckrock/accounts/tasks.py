@@ -6,7 +6,7 @@ Tasks for the account application
 from celery.schedules import crontab
 from celery.task import periodic_task
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, F
 
 import logging
 from datetime import date, timedelta
@@ -53,7 +53,7 @@ def store_statstics():
         total_requests_no_docs=FOIARequest.objects.filter(status='no_docs').count(),
         total_requests_partial=FOIARequest.objects.filter(status='partial').count(),
         total_requests_abandoned=FOIARequest.objects.filter(status='abandoned').count(),
-        requests_processing_days=(FOIAReuqest.objects
+        requests_processing_days=(FOIARequest.objects
             .filter(status='submitted')
             .exclude(date_processing=None)
             .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
