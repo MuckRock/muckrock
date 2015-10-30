@@ -8,9 +8,10 @@ from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import json
-from mock import Mock, patch
+import logging
+from mock import MagicMock, Mock, patch
 import nose.tools
 import os
 import stripe
@@ -20,6 +21,11 @@ from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.factories import UserFactory, ProfileFactory
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
+from muckrock.utils import get_stripe_token
+
+ok_ = nose.tools.ok_
+eq_ = nose.tools.eq_
+raises = nose.tools.raises
 
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=invalid-name
@@ -30,10 +36,13 @@ from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 # TODO Fully test Stripe integration
 
 # Creates mock items for testing methods that involve Stripe
+mock_charge = Mock()
+mock_charge.create = Mock()
 mock_subscription = Mock()
 mock_subscription.id = 'test-pro-subscription'
 mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
+mock_customer.id = 'test-customer'
 mock_customer.subscriptions.create.return_value = mock_subscription
 mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
@@ -101,13 +110,11 @@ class TestAccountFormsUnit(TestCase):
         nose.tools.assert_false(form.is_valid())
 
 
-@patch('stripe.Customer', MockCustomer)
-@patch('stripe.Charge', Mock())
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
     fixtures = ['test_users.json', 'test_profiles.json', 'test_stripeccs.json']
     def setUp(self):
-        self.profile = ProfileFactory(monthly_requests=25)
+        self.profile = ProfileFactory(monthly_requests=25, acct_type='pro')
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
@@ -120,30 +127,28 @@ class TestProfileUnit(TestCase):
 
     def test_get_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
-        profile = Profile.objects.get(pk=2)
-        profile.date_update = datetime.now() - timedelta(32)
-        nose.tools.eq_(profile.get_monthly_requests(), MONTHLY_REQUESTS[profile.acct_type])
-        nose.tools.ok_(datetime.now() - profile.date_update < timedelta(minutes=5))
+        self.profile.date_update = datetime.now() - timedelta(32)
+        monthly_requests = MONTHLY_REQUESTS[self.profile.acct_type]
+        nose.tools.eq_(self.profile.get_monthly_requests(), monthly_requests)
+        nose.tools.eq_(self.profile.date_update.date(), date.today())
 
     def test_make_request_refresh(self):
         """Make request resets count if it has been more than a month"""
-        profile = Profile.objects.get(pk=3)
-        profile.date_update = datetime.now() - timedelta(32)
-        nose.tools.assert_true(profile.make_request())
+        self.profile.date_update = datetime.now() - timedelta(32)
+        nose.tools.assert_true(self.profile.make_request())
 
     def test_make_request_pass_monthly(self):
         """Make request call decrements number of monthly requests"""
-        profile = Profile.objects.get(pk=1)
-        profile.date_update = datetime.now()
-        profile.make_request()
-        nose.tools.eq_(profile.monthly_requests, 24)
+        num_requests = self.profile.monthly_requests
+        self.profile.make_request()
+        nose.tools.eq_(self.profile.monthly_requests, num_requests - 1)
 
     def test_make_request_pass(self):
         """Make request call decrements number of requests if out of monthly requests"""
-        profile = Profile.objects.get(pk=2)
-        profile.date_update = datetime.now()
+        num_requests = 10
+        profile = ProfileFactory(num_requests=num_requests)
         profile.make_request()
-        nose.tools.eq_(profile.num_requests, 9)
+        nose.tools.eq_(profile.num_requests, num_requests - 1)
 
     def test_make_request_fail(self):
         """If out of requests, make request returns false"""
@@ -151,28 +156,52 @@ class TestProfileUnit(TestCase):
         profile.date_update = datetime.now()
         nose.tools.assert_false(profile.make_request())
 
+    @patch('stripe.Customer', MockCustomer)
     def test_customer(self):
-        """Test customer"""
+        """Test accessing the profile's Stripe customer"""
+        ok_(not self.profile.stripe_id)
+        customer = self.profile.customer()
+        ok_(MockCustomer.create.called,
+            'If no customer exists, it should be created.')
+        eq_(customer, mock_customer)
+        eq_(self.profile.stripe_id, mock_customer.id,
+            'The customer id should be saved so the customer can be retrieved.')
+        customer = self.profile.customer()
+        ok_(MockCustomer.retrieve.called,
+            'After the customer exists, it should be retrieved for subsequent calls.')
 
-        # customer exists
-        profile = Profile.objects.get(pk=1)
-        customer = profile.customer()
-        nose.tools.eq_(customer, mock_customer)
+    @patch('stripe.Charge', mock_charge)
+    def test_pay(self):
+        """Test making a payment"""
+        self.profile.pay('token', 100, 'test charge')
+        ok_(mock_charge.create.called)
 
-        # customer doesn't exist
-        with patch('stripe.Customer') as NewMockCustomer:
-            new_mock_customer = Mock()
-            new_mock_customer.id = 'cus_PKt7LZD6fbFdpC'
-            NewMockCustomer.retrieve.side_effect = stripe.InvalidRequestError('Message', 'Param')
-            NewMockCustomer.create.return_value = new_mock_customer
+    def test_start_pro_subscription(self):
+        """Test starting a pro subscription"""
+        ok_(False, 'Test unwritten.')
 
-            profile = Profile.objects.get(pk=1)
-            customer = profile.customer()
-            nose.tools.eq_(customer, new_mock_customer)
+    def test_cancel_pro_subscription(self):
+        """Test ending a pro subscription"""
+        ok_(False, 'Test unwritten.')
+
+
+class TestStripeIntegration(TestCase):
+    """Tests stripe integration and error handling"""
+    def setUp(self):
+        self.profile = ProfileFactory()
 
     def test_pay(self):
-        """Test pay"""
-        # rewrite this for stripe
+        """Test making a payment"""
+        token = get_stripe_token()
+        self.profile.pay(token, 100, 'Test charge (muckrock.accounts.tests)')
+
+    def test_customer(self):
+        """Test accessing the profile's Stripe customer"""
+        ok_(not self.profile.stripe_id)
+        customer = self.profile.customer()
+        ok_(self.profile.stripe_id,
+            'The customer id should be saved so the customer can be retrieved later.')
+
 
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Charge', Mock())
