@@ -31,6 +31,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: "user_%d" % n)
+    email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
 
 
