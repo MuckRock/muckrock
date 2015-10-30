@@ -17,7 +17,7 @@ from django.template import RequestContext, Context
 from django.utils.encoding import smart_text
 
 import actstream
-from datetime import datetime
+from datetime import datetime, date
 import json
 import logging
 import stripe
@@ -432,6 +432,7 @@ def draft_multirequest(request, slug, idx):
                     profile.monthly_requests -= request_count['monthly_requests']
                     profile.save()
                     foia.status = 'submitted'
+                    foia.date_processing = date.today()
                     foia.save()
                     messages.success(request, 'Your multi-request was submitted.')
                     MultiRequestTask.objects.create(multirequest=foia)
