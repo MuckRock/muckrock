@@ -17,6 +17,7 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
+from muckrock.factories import UserFactory, ProfileFactory
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
@@ -30,7 +31,7 @@ from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
 
 # Creates mock items for testing methods that involve Stripe
 mock_subscription = Mock()
-mock_subscription.id = 'test-org-subscription'
+mock_subscription.id = 'test-pro-subscription'
 mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
 mock_customer.subscriptions.create.return_value = mock_subscription
@@ -38,13 +39,6 @@ mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
-mock_plan = Mock()
-mock_plan.amount = 100
-mock_plan.name = 'Organization'
-mock_plan.id = 'org'
-MockPlan = Mock()
-MockPlan.create.return_value = mock_plan
-MockPlan.retrieve.return_value = mock_plan
 
 """
 mock_customer = Mock()
@@ -58,44 +52,51 @@ MockCustomer.retrieve.return_value = mock_customer
 
 class TestAccountFormsUnit(TestCase):
     """Unit tests for account forms"""
-    fixtures = ['test_users.json', 'test_profiles.json']
-
     def setUp(self):
         """Set up tests"""
-        self.profile = Profile.objects.get(pk=1)
+        self.profile = ProfileFactory()
+        self.form = UserChangeForm(instance=self.profile)
 
     def test_user_change_form_email_normal(self):
         """Changing email normally should succeed"""
-        # pylint: disable=attribute-defined-outside-init
-        form = UserChangeForm(instance=self.profile)
-        form.cleaned_data = {}
-        form.cleaned_data['email'] = 'new@example.com'
-        nose.tools.eq_(form.clean_email(), 'new@example.com')
+        new_email = 'new@example.com'
+        self.form.cleaned_data = {'email': new_email}
+        nose.tools.eq_(self.form.clean_email(), new_email)
 
     def test_user_change_form_email_same(self):
         """Keeping email the same should succeed"""
-        form = UserChangeForm(instance=self.profile)
-        form.cleaned_data = {}
-        form.cleaned_data['email'] = 'adam@example.com'
-        nose.tools.eq_(form.clean_email(), 'adam@example.com')
+        existing_email = self.profile.user.email
+        self.form.cleaned_data = {'email': existing_email}
+        nose.tools.eq_(self.form.clean_email(), existing_email)
 
     def test_user_change_form_email_conflict(self):
         """Trying to use an already taken email should fail"""
-        form = UserChangeForm(instance=self.profile)
-        form.cleaned_data = {}
-        form.cleaned_data['email'] = 'bob@example.com'
-        nose.tools.assert_raises(ValidationError, form.clean_email) # conflicting email
+        other_user = UserFactory()
+        self.form.cleaned_data = {'email': other_user.email}
+        nose.tools.assert_raises(ValidationError, self.form.clean_email)
 
     def test_user_creation_form(self):
         """Create a new user - name/email should be unique (case insensitive)"""
-
-        data = {'username': 'ADAM', 'email': 'notadam@example.com', 'first_name': 'adam',
-                'last_name': 'smith', 'password1': '123', 'password2': '123'}
+        existing_username = self.profile.user.username
+        existing_email = self.profile.user.email
+        data = {
+            'username': existing_username,
+            'email': 'different@example.com',
+            'first_name': 'Adam',
+            'last_name': 'Smith',
+            'password1': 'password',
+            'password2': 'password'
+        }
         form = RegisterForm(data)
         nose.tools.assert_false(form.is_valid())
-
-        data = {'username': 'not_adam', 'email': 'ADAM@EXAMPLE.COM', 'first_name': 'adam',
-                'last_name': 'smith', 'password1': '123', 'password2': '123'}
+        data = {
+            'username': 'different',
+            'email': existing_email,
+            'first_name': 'Adam',
+            'last_name': 'Smith',
+            'password1': 'password',
+            'password2': 'password'
+        }
         form = RegisterForm(data)
         nose.tools.assert_false(form.is_valid())
 
@@ -105,17 +106,17 @@ class TestAccountFormsUnit(TestCase):
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
     fixtures = ['test_users.json', 'test_profiles.json', 'test_stripeccs.json']
+    def setUp(self):
+        self.profile = ProfileFactory(monthly_requests=25)
 
     def test_unicode(self):
         """Test profile model's __unicode__ method"""
-        profile = Profile.objects.get(pk=1)
-        nose.tools.eq_(unicode(profile), "Adam's Profile")
+        expected = "%s's Profile" % unicode(self.profile.user).capitalize()
+        nose.tools.eq_(unicode(self.profile), expected)
 
     def test_get_monthly_requests(self):
-        """Normal get number reuqests just returns the current value"""
-        profile = Profile.objects.get(pk=1)
-        profile.date_update = datetime.now()
-        nose.tools.eq_(profile.get_monthly_requests(), 25)
+        """Normal get number requests just returns the current value"""
+        nose.tools.eq_(self.profile.get_monthly_requests(), self.profile.monthly_requests)
 
     def test_get_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
