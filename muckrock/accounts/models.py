@@ -265,19 +265,6 @@ class Profile(models.Model):
         except stripe.CardError as exception:
             raise ValueError(exception)
 
-    def api_pay(self, amount, desc):
-        """Create a stripe charge for the user through the API"""
-        # pylint: disable=no-member
-        customer = self.customer()
-        desc = '%s: %s' % (self.user.username, desc)
-        # always use card on file
-        stripe.Charge.create(
-            amount=amount,
-            currency='usd',
-            customer=customer.id,
-            description=desc
-        )
-
     def generate_confirmation_key(self):
         """Generate random key"""
         key = utils.generate_key(24)
