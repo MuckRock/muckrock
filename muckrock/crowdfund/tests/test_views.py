@@ -17,9 +17,7 @@ from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
 from muckrock.crowdfund.views import CrowdfundDetailView, CrowdfundRequestDetail, CrowdfundProjectDetail
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
-from muckrock.utils import get_stripe_token, mock_middleware
-
-# TODO Fully test Stripe integration
+from muckrock.utils import mock_middleware
 
 class TestCrowdfundDetailView(TestCase):
     """Tests the helper method in the DetailView subclass"""
