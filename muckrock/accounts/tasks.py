@@ -15,9 +15,20 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 GenericTask, PaymentTask, GenericCrowdfundTask, FailedFaxTask
+from muckrock.task.models import (
+        Task,
+        OrphanTask,
+        SnailMailTask,
+        RejectedEmailTask,
+        StaleAgencyTask,
+        FlaggedTask,
+        NewAgencyTask,
+        ResponseTask,
+        GenericTask,
+        PaymentTask,
+        GenericCrowdfundTask,
+        FailedFaxTask,
+        )
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +53,10 @@ def store_statstics():
         total_requests_no_docs=FOIARequest.objects.filter(status='no_docs').count(),
         total_requests_partial=FOIARequest.objects.filter(status='partial').count(),
         total_requests_abandoned=FOIARequest.objects.filter(status='abandoned').count(),
+        requests_processing_days=(FOIAReuqest.objects
+            .filter(status='submitted')
+            .exclude(date_processing=None)
+            .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
         total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),
