@@ -34,7 +34,7 @@ def detail(request, jurisdiction, jidx, slug, idx):
     jmodel = get_object_or_404(Jurisdiction, slug=jurisdiction, pk=jidx)
     agency = get_object_or_404(Agency, jurisdiction=jmodel, slug=slug, pk=idx)
 
-    if not agency.approved:
+    if agency.status != 'approved':
         raise Http404()
 
     foia_requests = FOIARequest.objects.get_viewable(request.user)\

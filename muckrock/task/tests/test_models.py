@@ -158,7 +158,7 @@ class NewAgencyTaskTests(TestCase):
 
     def setUp(self):
         self.user = factories.UserFactory()
-        self.agency = factories.AgencyFactory(approved=False)
+        self.agency = factories.AgencyFactory(status='pending')
         self.task = task.models.NewAgencyTask.objects.create(
             user=self.user,
             agency=self.agency)
@@ -169,7 +169,7 @@ class NewAgencyTaskTests(TestCase):
 
     def test_approve(self):
         self.task.approve()
-        eq_(self.task.agency.approved, True,
+        eq_(self.task.agency.status, 'approved',
             'Approving a new agency should actually, you know, approve the agency.')
 
     def test_reject(self):
@@ -177,7 +177,7 @@ class NewAgencyTaskTests(TestCase):
         existing_foia = factories.FOIARequestFactory(agency=self.agency)
         self.task.reject(replacement)
         existing_foia.refresh_from_db()
-        eq_(self.task.agency.approved, False,
+        eq_(self.task.agency.status, 'rejected',
             'Rejecting a new agency should leave it unapproved.')
         eq_(existing_foia.agency, replacement,
             'The replacement agency should receive the rejected agency\'s requests.')
@@ -257,7 +257,7 @@ class TestTaskManager(TestCase):
 
     def setUp(self):
         user = factories.UserFactory()
-        agency = factories.AgencyFactory(approved=False)
+        agency = factories.AgencyFactory(status='pending')
         self.foia = factories.FOIARequestFactory(user=user, agency=agency)
         self.comm = factories.FOIACommunicationFactory(foia=self.foia, response=True)
 

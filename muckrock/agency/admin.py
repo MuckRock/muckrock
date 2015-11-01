@@ -35,17 +35,21 @@ class AgencyTypeAdmin(VersionAdmin):
 
 class AgencyAdminForm(forms.ModelForm):
     """Agency admin form to order users"""
-    user = autocomplete_light.ModelChoiceField('UserAutocomplete',
-                                               queryset=User.objects.all(),
-                                               required=False)
-    jurisdiction = autocomplete_light.ModelChoiceField('JurisdictionAdminAutocomplete',
-                                                       queryset=Jurisdiction.objects.all())
-    appeal_agency = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
-                                                        queryset=Agency.objects.all(),
-                                                        required=False)
-    parent = autocomplete_light.ModelChoiceField('AgencyAdminAutocomplete',
-                                                 queryset=Agency.objects.all(),
-                                                 required=False)
+    user = autocomplete_light.ModelChoiceField(
+            'UserAutocomplete',
+            queryset=User.objects.all(),
+            required=False)
+    jurisdiction = autocomplete_light.ModelChoiceField(
+            'JurisdictionAdminAutocomplete',
+            queryset=Jurisdiction.objects.all())
+    appeal_agency = autocomplete_light.ModelChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.all(),
+            required=False)
+    parent = autocomplete_light.ModelChoiceField(
+            'AgencyAdminAutocomplete',
+            queryset=Agency.objects.all(),
+            required=False)
 
     class Meta:
         # pylint: disable=too-few-public-methods
@@ -58,7 +62,7 @@ class AgencyAdmin(VersionAdmin):
     change_list_template = 'admin/agency/agency/change_list.html'
     prepopulated_fields = {'slug': ('name',)}
     list_display = ('name', 'jurisdiction')
-    list_filter = ['approved', 'types']
+    list_filter = ['status', 'types']
     search_fields = ['name']
     filter_horizontal = ('types',)
     form = AgencyAdminForm
@@ -145,7 +149,7 @@ class AgencyCsvModel(CsvModel):
     url = CharField()
     phone = CharField()
     fax = CharField()
-    approved = BooleanField()
+    status = CharField()
 
     class Meta:
         # pylint: disable=too-few-public-methods

@@ -66,9 +66,11 @@ class TestAgencyManager(TestCase):
     """Tests for the Agency object manager"""
     def setUp(self):
         self.agency1 = factories.AgencyFactory()
-        self.agency2 = factories.AgencyFactory(jurisdiction=self.agency1.jurisdiction)
-        self.agency3 = factories.AgencyFactory(jurisdiction=self.agency1.jurisdiction,
-                                               approved=False)
+        self.agency2 = factories.AgencyFactory(
+                jurisdiction=self.agency1.jurisdiction)
+        self.agency3 = factories.AgencyFactory(
+                jurisdiction=self.agency1.jurisdiction,
+                status='pending')
 
     def test_get_approved(self):
         """Manager should return all approved agencies"""
@@ -110,7 +112,7 @@ class TestAgencyViews(TestCase):
     @nose.tools.raises(Http404)
     def test_unapproved_not_found(self):
         """An unapproved agency should return a 404 response."""
-        self.agency.approved = False
+        self.agency.status = 'pending'
         self.agency.save()
         jurisdiction = self.agency.jurisdiction
         self.view(

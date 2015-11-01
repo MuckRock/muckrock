@@ -270,7 +270,7 @@ class NewAgencyTask(Task):
 
     def approve(self):
         """Approves agency, resends pending requests, and resolves"""
-        self.agency.approved = True
+        self.agency.status = 'approved'
         self.agency.save()
         # resend the first comm of each foia associated to this agency
         for foia in self.pending_requests():
@@ -281,6 +281,8 @@ class NewAgencyTask(Task):
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency and resolves"""
+        self.agency.status = 'rejected'
+        self.agency.save()
         for foia in self.pending_requests():
             # first switch foia to use replacement agency
             foia.agency = replacement_agency

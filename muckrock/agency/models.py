@@ -31,13 +31,13 @@ class AgencyQuerySet(models.QuerySet):
 
     def get_approved(self):
         """Get all approved agencies"""
-        return self.filter(approved=True)
+        return self.filter(status='approved')
 
     def get_siblings(self, agency):
         """Get all approved agencies in the same jurisdiction as the given agency."""
         return self.filter(jurisdiction=agency.jurisdiction)\
                    .exclude(id=agency.id)\
-                   .exclude(approved=False)\
+                   .filter(status='approved')\
                    .order_by('name')
 
 
@@ -49,6 +49,11 @@ class Agency(models.Model, RequestHelper):
     jurisdiction = models.ForeignKey(Jurisdiction, related_name='agencies')
     types = models.ManyToManyField(AgencyType, blank=True)
     approved = models.BooleanField(default=False)
+    status = models.CharField(choices=(
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ), max_length=8, default='pending')
     user = models.ForeignKey(User, null=True, blank=True)
     appeal_agency = models.ForeignKey('self', null=True, blank=True)
     can_email_appeals = models.BooleanField(default=False)
@@ -131,7 +136,7 @@ class Agency(models.Model, RequestHelper):
 
     def link_display(self):
         """Returns link if approved"""
-        if self.approved:
+        if self.status == 'approved':
             return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
         else:
             return self.name
