@@ -51,7 +51,8 @@ class AgencyFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Agency %d" % n)
     slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
     jurisdiction = factory.SubFactory(JurisdictionFactory)
-    approved = True
+    status = 'approved'
+
 
 class FOIARequestFactory(factory.django.DjangoModelFactory):
     """A factory for creating FOIARequest test objects."""

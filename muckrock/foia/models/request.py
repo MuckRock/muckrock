@@ -465,7 +465,7 @@ class FOIARequest(models.Model):
 
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
-        approved_agency = self.agency and self.agency.approved
+        approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
 
