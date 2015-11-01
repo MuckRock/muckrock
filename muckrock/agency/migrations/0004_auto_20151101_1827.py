@@ -6,8 +6,8 @@ from django.db import models, migrations
 def set_agency_status(apps, schema_editor):
     """Set the status field based on the approved field
     and if an open NewAgencyTask exists or not"""
-    Agency = apps.get('agency', 'Agency')
-    NewAgencyTask = apps.get('task', 'NewAgencyTask')
+    Agency = apps.get_model('agency', 'Agency')
+    NewAgencyTask = apps.get_model('task', 'NewAgencyTask')
     # if it is approved, its status is approved
     for agency in Agency.objects.filter(approved=True):
         agency.status = 'approved'
