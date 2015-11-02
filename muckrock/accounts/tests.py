@@ -10,11 +10,9 @@ from django.test import TestCase
 
 from datetime import datetime, date, timedelta
 import json
-import logging
-from mock import MagicMock, Mock, patch
+from mock import Mock, patch
 import nose.tools
 import os
-import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
@@ -197,7 +195,7 @@ class TestStripeIntegration(TestCase):
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
         ok_(not self.profile.stripe_id)
-        customer = self.profile.customer()
+        self.profile.customer()
         ok_(self.profile.stripe_id,
             'The customer id should be saved so the customer can be retrieved later.')
 

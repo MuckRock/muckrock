@@ -96,7 +96,7 @@ class TestFOIACrowdfunding(TestCase):
 
     def test_crowdfund_view_crowdfund_already_exists(self):
         date_due = datetime.datetime.now() + datetime.timedelta(30)
-        crowdfund = CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
+        CrowdfundRequest.objects.create(foia=self.foia, date_due=date_due)
         self.client.login(username='adam', password='abc')
         response = self.client.get(self.url)
         nose.tools.eq_(response.status_code, 302,

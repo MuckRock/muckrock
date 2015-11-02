@@ -26,7 +26,6 @@ from muckrock.foia.forms import \
 from muckrock.foia.models import FOIARequest, FOIAFile, END_STATUS
 from muckrock.foia.views.comms import save_foia_comm
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.settings import STRIPE_SECRET_KEY
 from muckrock.task.models import PaymentTask
 
 logger = logging.getLogger(__name__)

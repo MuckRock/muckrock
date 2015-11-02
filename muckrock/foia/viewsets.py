@@ -19,7 +19,6 @@ from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.foia.serializers import FOIARequestSerializer, FOIACommunicationSerializer, \
                                       FOIAPermissions, IsOwner
 from muckrock.jurisdiction.models import Jurisdiction
-from muckrock.task.models import PaymentTask
 
 # pylint: disable=too-many-ancestors
 # pylint: disable=bad-continuation

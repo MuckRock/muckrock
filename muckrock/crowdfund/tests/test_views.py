@@ -11,11 +11,12 @@ from decimal import Decimal
 import logging
 from mock import Mock, patch
 from nose.tools import ok_, eq_
-import stripe
 
 from muckrock.crowdfund.forms import CrowdfundRequestPaymentForm
 from muckrock.crowdfund.models import CrowdfundRequest, CrowdfundRequestPayment, CrowdfundProject
-from muckrock.crowdfund.views import CrowdfundDetailView, CrowdfundRequestDetail, CrowdfundProjectDetail
+from muckrock.crowdfund.views import CrowdfundDetailView,\
+                                     CrowdfundRequestDetail,\
+                                     CrowdfundProjectDetail
 from muckrock.factories import UserFactory, FOIARequestFactory, ProjectFactory
 from muckrock.utils import mock_middleware
 
@@ -53,6 +54,7 @@ class TestCrowdfundDetailView(TestCase):
 class TestCrowdfundRequestView(TestCase):
     """Tests the Detail view for CrowdfundRequest objects"""
     def setUp(self):
+        # pylint:disable=no-member
         foia = FOIARequestFactory(status='payment', price=10.00)
         due = datetime.today() + timedelta(30)
         self.crowdfund = CrowdfundRequest.objects.create(
