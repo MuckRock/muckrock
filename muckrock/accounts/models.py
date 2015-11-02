@@ -256,16 +256,12 @@ class Profile(models.Model):
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
-        # pylint: disable=no-member
-        try:
-            stripe.Charge.create(
-                amount=amount,
-                currency='usd',
-                card=token,
-                description='%s: %s' % (self.user.username, desc)
-            )
-        except stripe.CardError as exception:
-            raise ValueError(exception)
+        stripe.Charge.create(
+            amount=amount,
+            currency='usd',
+            card=token,
+            description='%s: %s' % (self.user.username, desc)
+        )
 
     def generate_confirmation_key(self):
         """Generate random key"""
