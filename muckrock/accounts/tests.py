@@ -330,7 +330,6 @@ class TestAccountFunctional(TestCase):
 
     def test_change_pw_view(self):
         """Test the change pw view"""
-
         self._test_post_view_helper(
             'acct-change-pw',
             ['forms/account/pw_change.html', 'forms/base_form.html'],
@@ -342,62 +341,9 @@ class TestAccountFunctional(TestCase):
         nose.tools.assert_false(self.client.login(username='adam', password='abc'))
         nose.tools.assert_true(self.client.login(username='adam', password='123'))
 
-    def test_manage_subsc_view(self):
-        """Test managing your subscription"""
-
-        # beta
-        self.client.login(username='bob', password='abc')
-        get_allowed(self.client, reverse('acct-manage-subsc'),
-                    ['forms/account/subscription.html'])
-
-        # admin
-        self.client.login(username='admin', password='abc')
-        get_allowed(self.client, reverse('acct-manage-subsc'),
-                    ['profile/account.html', 'base_profile.html'])
-
-        # update this for stripe for community and pro
-
-
-    def test_buy_requests_view(self):
-        """Test buying requests"""
-        # write this
-
-    def test_stripe_webhooks(self):
-        """Test webhooks received from stripe"""
-        kwargs = {"wsgi.url_scheme": "https"}
-
-        response = self.client.post(reverse('acct-webhook'), {}, **kwargs)
-        nose.tools.eq_(response.status_code, 404)
-
-        response = self.client.post(reverse('acct-webhook'),
-                                    {'json': json.dumps({'event': 'fake_event'})}, **kwargs)
-        nose.tools.eq_(response.status_code, 404)
-
-        response = self.client.post(reverse('acct-webhook'),
-                                    {'json': json.dumps({'event': 'ping'})}, **kwargs)
-        nose.tools.eq_(response.status_code, 200)
-        webhook_json = open(os.path.join(
-            SITE_ROOT,
-            'accounts/fixtures/webhook_recurring_payment_failed.json'
-        )).read()
-        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
-        nose.tools.eq_(response.status_code, 200)
-        nose.tools.eq_(len(mail.outbox), 1)
-        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
-        webhook_json = open(os.path.join(
-            SITE_ROOT,
-            'accounts/fixtures/webhook_subscription_final_payment_attempt_failed.json'
-        )).read()
-        response = self.client.post(reverse('acct-webhook'), {'json': webhook_json}, **kwargs)
-        nose.tools.eq_(response.status_code, 200)
-        nose.tools.eq_(len(mail.outbox), 2)
-        nose.tools.eq_(mail.outbox[-1].to, ['adam@example.com'])
-
     def test_logout_view(self):
         """Test the logout view"""
-
         self.client.login(username='adam', password='abc')
-
         # logout & check
         get_allowed(self.client, reverse('acct-logout'),
                     ['front_page.html'])
