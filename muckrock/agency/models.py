@@ -5,6 +5,7 @@ Models for the Agency application
 from django.contrib.auth.models import User
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.utils.safestring import mark_safe
 
 from datetime import date
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -137,7 +138,7 @@ class Agency(models.Model, RequestHelper):
     def link_display(self):
         """Returns link if approved"""
         if self.status == 'approved':
-            return '<a href="%s">%s</a>' % (self.get_absolute_url(), self.name)
+            return mark_safe('<a href="%s">%s</a>' % (self.get_absolute_url(), self.name))
         else:
             return self.name
 
