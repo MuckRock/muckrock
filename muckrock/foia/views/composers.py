@@ -73,7 +73,7 @@ def _make_new_agency(request, agency, jurisdiction):
         slug=(slugify(agency[:255]) or 'untitled'),
         jurisdiction=jurisdiction,
         user=user,
-        stats='pending',
+        status='pending',
     )
     NewAgencyTask.objects.create(
             user=user,
