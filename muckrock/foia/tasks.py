@@ -439,6 +439,10 @@ def autoimport():
         for key in bucket.list(prefix=prefix.name, delimiter='/'):
             if key.name == prefix.name:
                 continue
+            if key.name.endswith('/'):
+                log.append('ERROR: nested directories not allowed: %s in %s' %
+                        (key.name, prefix.name))
+                continue
             try:
                 import_key(key, comm, log)
             except SizeError as exc:
