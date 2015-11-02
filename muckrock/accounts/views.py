@@ -277,60 +277,6 @@ def profile(request, user_name=None):
     )
 
 @csrf_exempt
-def stripe_webhook(request):
-    """Handle webhooks from stripe"""
-    if 'json' not in request.POST:
-        raise Http404
-
-    message = json.loads(request.POST.get('json'))
-    event = message.get('event')
-    del message['event']
-
-    events = [
-        'recurring_payment_failed',
-        'invoice_ready',
-        'recurring_payment_succeeded',
-        'subscription_trial_ending',
-        'subscription_final_payment_attempt_failed',
-        'ping'
-    ]
-
-    if event not in events:
-        raise Http404
-
-    for key, value in message.iteritems():
-        if isinstance(value, dict) and 'object' in value:
-            message[key] = stripe.convert_to_stripe_object(value, STRIPE_SECRET_KEY)
-
-    if event == 'recurring_payment_failed':
-        user_profile = Profile.objects.get(stripe_id=message['customer'])
-        user = user_profile.user
-        attempt = message['attempt']
-        logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        send_mail('Payment Failed',
-                  render_to_string('text/user/pay_fail.txt',
-                                   {'user': user, 'attempt': attempt}),
-                  'info@muckrock.com', [user.email], fail_silently=False)
-    elif event == 'subscription_final_payment_attempt_failed':
-        user_profile = Profile.objects.get(stripe_id=message['customer'])
-        user = user_profile.user
-        user_profile.acct_type = 'community'
-        user_profile.save()
-        logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        send_mail(
-            'Payment Failed',
-            render_to_string(
-                'text/user/pay_fail.txt',
-                {'user': user, 'attempt': 'final'}
-            ),
-            'info@muckrock.com',
-            [user.email],
-            fail_silently=False
-        )
-
-    return HttpResponse()
-
-@csrf_exempt
 def stripe_webhook_v2(request):
     """Handle webhooks from stripe"""
     # pylint: disable=too-many-branches
