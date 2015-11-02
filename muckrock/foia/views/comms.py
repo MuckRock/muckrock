@@ -74,8 +74,12 @@ def resend_comm(request, next_):
         messages.error(request, 'The communication does not exist.')
     except ValidationError:
         messages.error(request, 'The provided email was invalid')
-    except ValueError:
-        messages.error(request, 'The communication is an orphan and cannot be resent.')
+    except ValueError as exc:
+        if exc.args[1] == 'no_foia':
+            messages.error(request, 'The communication is an orphan and cannot be resent.')
+        elif exc.args[1] == 'no_agency':
+            messages.error(request, 'The communication\'s associated agency is '
+                    'not approved, refusing to resend.')
     return redirect(next_)
 
 @user_passes_test(lambda u: u.is_staff)

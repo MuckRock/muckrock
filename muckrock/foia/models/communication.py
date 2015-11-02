@@ -177,7 +177,10 @@ class FOIACommunication(models.Model):
         foia = self.foia
         if not foia:
             logging.error('Tried resending an orphaned communication.')
-            raise ValueError('This communication has no FOIA to submit.')
+            raise ValueError('This communication has no FOIA to submit.', 'no_foia')
+        if not foia.agency or not foia.agency.status == 'approved':
+            logging.error('Tried resending a communication with an unapproved agency')
+            raise ValueError('This communication has no approved agency.', 'no_agency')
         snail = False
         self.date = datetime.datetime.now()
         self.save()
