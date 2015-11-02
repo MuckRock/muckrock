@@ -33,8 +33,6 @@ raises = nose.tools.raises
 # pylint: disable=too-many-public-methods
 # pylint: disable=no-member
 
-# TODO Fully test Stripe integration
-
 # Creates mock items for testing methods that involve Stripe
 mock_charge = Mock()
 mock_charge.create = Mock()
@@ -43,21 +41,12 @@ mock_subscription.id = 'test-pro-subscription'
 mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
 mock_customer.id = 'test-customer'
-mock_customer.subscriptions.create.return_value = mock_subscription
-mock_customer.subscriptions.retrieve.return_value = mock_subscription
+mock_customer.update_subscription.return_value = mock_subscription
+mock_customer.cancel_subscription.return_value = mock_subscription
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
 
-"""
-mock_customer = Mock()
-mock_customer.id = 'cus_2jPQblsYu5doOE'
-mock_customer.active_card.last4 = '1234'
-mock_customer.active_card.type = 'Visa'
-MockCustomer = Mock()
-MockCustomer.create.return_value = mock_customer
-MockCustomer.retrieve.return_value = mock_customer
-"""
 
 class TestAccountFormsUnit(TestCase):
     """Unit tests for account forms"""
@@ -176,13 +165,23 @@ class TestProfileUnit(TestCase):
         self.profile.pay('token', 100, 'test charge')
         ok_(mock_charge.create.called)
 
+    @patch('stripe.Customer', MockCustomer)
     def test_start_pro_subscription(self):
         """Test starting a pro subscription"""
-        ok_(False, 'Test unwritten.')
+        self.profile.start_pro_subscription()
+        self.profile.refresh_from_db()
+        ok_(mock_customer.update_subscription.called)
+        eq_(self.profile.acct_type, 'pro')
+        eq_(self.profile.date_update.today(), date.today())
+        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('pro'))
 
+    @patch('stripe.Customer', MockCustomer)
     def test_cancel_pro_subscription(self):
         """Test ending a pro subscription"""
-        ok_(False, 'Test unwritten.')
+        self.profile.cancel_pro_subscription()
+        self.profile.refresh_from_db()
+        ok_(mock_customer.cancel_subscription.called)
+        eq_(self.profile.acct_type, 'community')
 
 
 class TestStripeIntegration(TestCase):
@@ -201,6 +200,14 @@ class TestStripeIntegration(TestCase):
         customer = self.profile.customer()
         ok_(self.profile.stripe_id,
             'The customer id should be saved so the customer can be retrieved later.')
+
+    def test_subscription(self):
+        """Test starting a subscription"""
+        customer = self.profile.customer()
+        customer.card = get_stripe_token()
+        customer.save()
+        self.profile.start_pro_subscription()
+        self.profile.cancel_pro_subscription()
 
 
 @patch('stripe.Customer', MockCustomer)
