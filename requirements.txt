@@ -87,7 +87,7 @@ scikit-learn==0.16.1
 scipy==0.14.0
 six==1.7.3
 sqlparse==0.1.15
-stripe==1.7.9
+stripe==1.27.1
 tablib==0.10.0
 waitress==0.8.8
 webassets==0.7.1
