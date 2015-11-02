@@ -216,7 +216,7 @@ class TestCommunicationResend(test.TestCase):
 
     def setUp(self):
         self.creation_date = datetime.datetime.now() - datetime.timedelta(1)
-        self.comm = FOIACommunication.objects.get(id=1)
+        self.comm = FOIACommunication.objects.get(id=2)
         self.comm.date = self.creation_date
         self.comm.save()
 
@@ -234,7 +234,7 @@ class TestCommunicationResend(test.TestCase):
         self.comm.resend(new_email)
         eq_(self.comm.foia.email, new_email,
             'Resubmitting with a new email should update the email of the FOIA request.')
-        eq_(self.comm.foia.status, 'submitted',
+        eq_(self.comm.foia.status, 'ack',
             'Resubmitting with an email should resubmit its associated FOIARequest.')
 
     @raises(ValidationError)
@@ -244,7 +244,14 @@ class TestCommunicationResend(test.TestCase):
 
     @raises(ValueError)
     def test_resend_orphan_comm(self):
-        """Should throw and error if the communication being resent is an orphan"""
+        """Should throw an error if the communication being resent is an orphan"""
         self.comm.foia = None
         self.comm.save()
+        self.comm.resend('hello@world.com')
+
+    @raises(ValueError)
+    def test_resend_unapproved_comm(self):
+        """Should throw an error if the communication being resent has an unapproved agency"""
+        self.comm.foia.agency.status = 'rejected'
+        self.comm.foia.agency.save()
         self.comm.resend('hello@world.com')
