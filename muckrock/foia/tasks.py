@@ -239,7 +239,7 @@ def classify_status(task_pk, **kwargs):
         elif file_.is_doccloud() and not file_.doc_id:
             # wait longer for document cloud
             classify_status.retry(
-                    countdown=60*30, args=[task_pk], kwargs=kwargs, exc=exc)
+                    countdown=60*30, args=[task_pk], kwargs=kwargs)
 
     full_text = resp_task.communication.communication + (' '.join(file_text))
     vectorizer, selector, classifier = get_classifier()
