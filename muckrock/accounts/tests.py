@@ -9,16 +9,14 @@ from django.forms import ValidationError
 from django.test import TestCase
 
 from datetime import datetime, date, timedelta
-import json
 from mock import Mock, patch
 import nose.tools
-import os
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.factories import UserFactory, ProfileFactory
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
-from muckrock.settings import MONTHLY_REQUESTS, SITE_ROOT
+from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
 
 ok_ = nose.tools.ok_
