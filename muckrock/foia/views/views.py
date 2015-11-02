@@ -17,7 +17,6 @@ import actstream
 from datetime import datetime
 import json
 import logging
-import stripe
 
 from muckrock.foia.codes import CODES
 from muckrock.foia.forms import \
@@ -33,7 +32,7 @@ from muckrock.foia.models import \
 from muckrock.foia.views.composers import get_foia
 from muckrock.foia.views.comms import move_comm, delete_comm, save_foia_comm, resend_comm
 from muckrock.qanda.models import Question
-from muckrock.settings import STRIPE_PUB_KEY, STRIPE_SECRET_KEY
+from muckrock.settings import STRIPE_PUB_KEY
 from muckrock.tags.models import Tag
 from muckrock.task.models import Task, FlaggedTask, StatusChangeTask
 from muckrock.views import class_view_decorator, MRFilterableListView
@@ -41,7 +40,6 @@ from muckrock.views import class_view_decorator, MRFilterableListView
 # pylint: disable=too-many-ancestors
 
 logger = logging.getLogger(__name__)
-stripe.api_key = STRIPE_SECRET_KEY
 STATUS_NODRAFT = [st for st in STATUS if st != ('started', 'Draft')]
 
 class RequestList(MRFilterableListView):

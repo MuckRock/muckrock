@@ -13,7 +13,6 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.response import Response
 import django_filters
 import logging
-import stripe
 
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication

@@ -20,8 +20,6 @@ from muckrock.foia.models import FOIARequest
 # pylint: disable=missing-docstring
 # pylint: disable=invalid-name
 
-# TODO Fully test Stripe integration
-
 class TestFOIACrowdfunding(TestCase):
     """Tests for FOIA Crowdfunding"""
 

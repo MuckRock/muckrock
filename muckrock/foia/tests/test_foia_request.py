@@ -32,8 +32,6 @@ from muckrock.tests import get_allowed, post_allowed, get_post_unallowed, get_40
 # pylint: disable=invalid-name
 # pylint: disable=bad-mcs-method-argument
 
-# TODO Fully test Stripe integration
-
 class TestFOIARequestUnit(TestCase):
     """Unit tests for FOIARequests"""
     fixtures = ['holidays.json', 'jurisdictions.json', 'agency_types.json', 'test_users.json',
