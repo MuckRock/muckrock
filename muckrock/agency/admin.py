@@ -12,7 +12,7 @@ from django.template.defaultfilters import slugify
 from django.template import RequestContext
 
 from adaptor.model import CsvModel
-from adaptor.fields import BooleanField, CharField, DjangoModelField
+from adaptor.fields import CharField, DjangoModelField
 from reversion import VersionAdmin
 import autocomplete_light
 import logging
