@@ -14,6 +14,8 @@ import stripe
 from muckrock.foia.models import FOIARequest
 from muckrock import task
 
+stripe.api_version = '2015-10-16'
+
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
