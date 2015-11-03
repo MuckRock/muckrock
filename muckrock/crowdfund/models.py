@@ -115,7 +115,7 @@ class CrowdfundABC(models.Model):
             amount=stripe_amount,
             source=token,
             currency='usd',
-            description='Crowdfund contribution: %s' % self,
+            description='Crowdfund contribution: %s' % self
         )
         payment_object = self.get_crowdfund_payment_object()
         payment = payment_object.objects.create(
@@ -125,7 +125,6 @@ class CrowdfundABC(models.Model):
             show=show,
             charge_id=charge.id
         )
-        payment.save()
         logging.info(payment)
         self.update_payment_received()
         return payment
