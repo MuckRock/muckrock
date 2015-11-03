@@ -22,6 +22,7 @@ mock_subscription = Mock()
 mock_subscription.id = 'test-org-subscription'
 mock_subscription.save.return_value = mock_subscription
 mock_customer = Mock()
+mock_customer.save.return_value = mock_customer
 mock_customer.subscriptions.create.return_value = mock_subscription
 mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
@@ -34,6 +35,8 @@ mock_plan.id = 'org'
 MockPlan = Mock()
 MockPlan.create.return_value = mock_plan
 MockPlan.retrieve.return_value = mock_plan
+mock_get_customer = Mock()
+mock_get_customer.return_value = mock_customer
 
 
 class TestRations(TestCase):
@@ -83,6 +86,7 @@ class TestRations(TestCase):
 
 
 # Substitutes mock items for Stripe items in each test
+@patch('muckrock.accounts.models.Profile.customer', mock_get_customer)
 @patch('stripe.Customer', MockCustomer)
 @patch('stripe.Plan', MockPlan)
 class TestSubscriptions(TestCase):
@@ -113,6 +117,17 @@ class TestSubscriptions(TestCase):
             'The subscription ID should be saved to the organization.')
         ok_(self.org.active,
             'The org should be set to an active state.')
+        eq_(self.org.owner.profile.subscription_id, mock_subscription.id,
+            'The subscription ID should also be saved to the user.')
+
+    def test_activate_as_pro(self):
+        """A pro user should have their pro subscription cancelled in favor of an organization."""
+        pro = muckrock.factories.ProfileFactory(acct_type='pro', subscription_id='test-pro')
+        self.org.owner = pro.user
+        self.org.activate_subscription('test', self.org.max_users)
+        pro.refresh_from_db()
+        eq_(pro.acct_type, 'community', 'The pro account should be downgraded.')
+        eq_(pro.subscription_id, mock_subscription.id, 'The subscription should be changed.')
 
     @nose.tools.raises(ValueError)
     def test_activate_min_seats(self):
@@ -134,6 +149,8 @@ class TestSubscriptions(TestCase):
         self.org.stripe_id = 'temp'
         self.org.active = True
         self.org.save()
+        self.org.owner.profile.subscription_id = 'temp'
+        self.org.owner.profile.save()
         # let's update this org with 2 more seats
         seat_increase = 2
         expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
@@ -151,6 +168,8 @@ class TestSubscriptions(TestCase):
             'The subscription quantity should be based on the monthly cost.')
         eq_(self.org.stripe_id, mock_subscription.id,
             'The subscription ID should be saved to the organization.')
+        eq_(self.org.owner.profile.subscription_id, mock_subscription.id,
+            'The subscription ID should also be saved to the user.')
         ok_(self.org.active,
             'The org should be set to an active state.')
 
@@ -170,12 +189,17 @@ class TestSubscriptions(TestCase):
     def test_cancelling(self):
         """Cancelling the subscription should render the org inactive."""
         self.org.active = True
+        self.org.stripe_id = 'temp'
         self.org.save()
+        self.org.owner.profile.subscription_id = 'temp'
+        self.org.owner.profile.save()
         self.org.cancel_subscription()
         ok_(not self.org.active,
             'The organization should be set to an inactive state.')
         ok_(not self.org.stripe_id,
             'The stripe subscription ID should be removed from the org.')
+        ok_(not self.org.owner.profile.subscription_id,
+            'The Stripe subscription ID should be removed form the owner.')
 
     @nose.tools.raises(AttributeError)
     def test_cancel_inactive(self):
@@ -197,7 +221,7 @@ class TestStripe(TestCase):
     def test_methods(self):
         """Test the subscription methods."""
         self.org.activate_subscription(self.token, self.org.max_users)
-        self.org.update_subscription(max_users + 1)
+        self.org.update_subscription(self.org.max_users + 1)
         self.org.cancel_subscription()
 
     def get_stripe_token(self):

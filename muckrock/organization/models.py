@@ -18,6 +18,7 @@ import logging
 import stripe
 
 logger = logging.getLogger(__name__)
+stripe.api_version = '2015-10-16'
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
@@ -169,6 +170,7 @@ class Organization(models.Model):
             raise AttributeError('Cannot activate an active organization.')
         if num_seats < ORG_MIN_SEATS:
             raise ValueError('Cannot have an organization with less than three member seats.')
+
         quantity = self.compute_monthly_cost(num_seats)/100
         customer = self.owner.profile.customer()
         subscription = customer.subscriptions.create(
@@ -176,15 +178,16 @@ class Organization(models.Model):
             source=token,
             quantity=quantity
         )
-        # if the owner has a pro account, downgrade them to a community account
-        if self.owner.profile.acct_type == 'pro':
-            self.owner.profile.acct_type = 'community'
-            self.owner.profile.save()
         self.update_num_seats(num_seats)
         self.stripe_id = subscription.id
         self.active = True
         self.save()
-        return
+        # if the owner has a pro account, cancel it
+        if self.owner.profile.acct_type == 'pro':
+            self.owner.profile.cancel_pro_subscription()
+        self.owner.profile.subscription_id = subscription.id
+        self.owner.profile.save()
+        return subscription
 
     def update_subscription(self, num_seats):
         """Updates the quantity of the subscription, but only if the subscription is active"""
@@ -199,14 +202,16 @@ class Organization(models.Model):
             subscription = customer.subscriptions.retrieve(self.stripe_id)
             subscription.quantity = quantity
             subscription = subscription.save()
+            self.stripe_id = subscription.id
+            self.owner.profile.subscription_id = subscription.id
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
             return
         self.update_num_seats(num_seats)
-        self.stripe_id = subscription.id
         self.save()
-        return
+        self.owner.profile.save()
+        return subscription
 
     def cancel_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
@@ -216,11 +221,13 @@ class Organization(models.Model):
         customer = self.owner.profile.customer()
         subscription = customer.subscriptions.retrieve(self.stripe_id)
         try:
-            subscription.delete()
+            subscription = subscription.delete()
+            self.stripe_id = ''
+            self.owner.profile.subscription_id = ''
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
-        self.stripe_id = ''
         self.active = False
         self.save()
-        return
+        self.owner.profile.save()
+        return subscription

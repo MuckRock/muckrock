@@ -15,7 +15,7 @@ import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
-from muckrock.factories import UserFactory, ProfileFactory
+from muckrock.factories import UserFactory, ProfileFactory, OrganizationFactory
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
@@ -99,7 +99,8 @@ class TestAccountFormsUnit(TestCase):
         form = RegisterForm(data)
         nose.tools.assert_false(form.is_valid())
 
-
+@patch('stripe.Customer', MockCustomer)
+@patch('stripe.Charge', mock_charge)
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
     def setUp(self):
@@ -145,7 +146,6 @@ class TestProfileUnit(TestCase):
         profile.date_update = datetime.now()
         nose.tools.assert_false(profile.make_request())
 
-    @patch('stripe.Customer', MockCustomer)
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
         ok_(not self.profile.customer_id)
@@ -159,13 +159,11 @@ class TestProfileUnit(TestCase):
         ok_(MockCustomer.retrieve.called,
             'After the customer exists, it should be retrieved for subsequent calls.')
 
-    @patch('stripe.Charge', mock_charge)
     def test_pay(self):
         """Test making a payment"""
         self.profile.pay('token', 100, 'test charge')
         ok_(mock_charge.create.called)
 
-    @patch('stripe.Customer', MockCustomer)
     def test_start_pro_subscription(self):
         """Test starting a pro subscription"""
         self.profile.start_pro_subscription()
@@ -176,7 +174,12 @@ class TestProfileUnit(TestCase):
         eq_(self.profile.date_update.today(), date.today())
         eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('pro'))
 
-    @patch('stripe.Customer', MockCustomer)
+    @raises(AttributeError)
+    def test_start_pro_as_owner(self):
+        """Organization owners shouldn't be able to start a pro subscription."""
+        self.profile.subscription_id = 'test-org'
+        self.profile.start_pro_subscription()
+
     def test_cancel_pro_subscription(self):
         """Test ending a pro subscription"""
         self.profile.start_pro_subscription()
