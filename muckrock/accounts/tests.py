@@ -11,11 +11,9 @@ from django.test import TestCase
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 import nose.tools
-import stripe
 
-from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
-from muckrock.factories import UserFactory, ProfileFactory, OrganizationFactory
+from muckrock.factories import UserFactory, ProfileFactory
 from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
