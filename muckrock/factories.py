@@ -12,6 +12,7 @@ from muckrock.accounts.models import Profile
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
+from muckrock.project.models import Project
 
 
 class ProfileFactory(factory.django.DjangoModelFactory):
@@ -19,7 +20,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Profile
 
-    user = factory.SubFactory('app.factories.UserFactory', profile=None)
+    user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
     acct_type = 'community'
     date_update = datetime.datetime.now()
 
@@ -30,6 +31,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: "user_%d" % n)
+    email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
 
 
@@ -74,3 +76,11 @@ class FOIACommunicationFactory(factory.django.DjangoModelFactory):
     from_who = factory.Sequence(lambda n: "From: %d" % n)
     priv_from_who = 'Test Sender <test@muckrock.com>'
     date = factory.LazyAttribute(lambda obj: datetime.datetime.now())
+
+
+class ProjectFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Project test objects."""
+    class Meta:
+        model = Project
+
+    title = factory.Sequence(lambda n: "Project %d" % n)

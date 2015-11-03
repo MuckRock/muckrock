@@ -39,7 +39,6 @@ urlpatterns = patterns(
     url(r'^update/$', views.update, name='acct-update'),
     url(r'^verify_email/$', views.verify_email, name='acct-verify-email'),
     url(r'^buy_requests/$', views.buy_requests, name='acct-buy-requests'),
-    url(r'^stripe_webhook/$', views.stripe_webhook, name='acct-webhook'),
     url(r'^stripe_webhook_v2/$', views.stripe_webhook_v2, name='acct-webhook-v2'),
     url(
         r'^change_pw/$',
