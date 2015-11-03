@@ -309,7 +309,7 @@ def stripe_webhook_v2(request):
             email = username
     elif customer:
         try:
-            user = Profile.objects.get(stripe_id=customer).user
+            user = Profile.objects.get(customer_id=customer).user
         except Profile.DoesNotExist:
             # db is not synced yet, return 404 and let stripe retry - we should be synced by then
             raise Http404

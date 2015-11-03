@@ -11,6 +11,7 @@ from django.test import TestCase
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 import nose.tools
+import stripe
 
 from muckrock.accounts.models import Profile
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
@@ -35,10 +36,14 @@ mock_charge.create = Mock()
 mock_subscription = Mock()
 mock_subscription.id = 'test-pro-subscription'
 mock_subscription.save.return_value = mock_subscription
+mock_subscription.delete.return_value = mock_subscription
 mock_customer = Mock()
 mock_customer.id = 'test-customer'
+mock_customer.save.return_value = mock_customer
 mock_customer.update_subscription.return_value = mock_subscription
 mock_customer.cancel_subscription.return_value = mock_subscription
+mock_customer.subscriptions.create.return_value = mock_subscription
+mock_customer.subscriptions.retrieve.return_value = mock_subscription
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
@@ -97,7 +102,6 @@ class TestAccountFormsUnit(TestCase):
 
 class TestProfileUnit(TestCase):
     """Unit tests for profile model"""
-    fixtures = ['test_users.json', 'test_profiles.json', 'test_stripeccs.json']
     def setUp(self):
         self.profile = ProfileFactory(monthly_requests=25, acct_type='pro')
 
@@ -137,19 +141,19 @@ class TestProfileUnit(TestCase):
 
     def test_make_request_fail(self):
         """If out of requests, make request returns false"""
-        profile = Profile.objects.get(pk=3)
+        profile = ProfileFactory(num_requests=0)
         profile.date_update = datetime.now()
         nose.tools.assert_false(profile.make_request())
 
     @patch('stripe.Customer', MockCustomer)
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
-        ok_(not self.profile.stripe_id)
+        ok_(not self.profile.customer_id)
         customer = self.profile.customer()
         ok_(MockCustomer.create.called,
             'If no customer exists, it should be created.')
         eq_(customer, mock_customer)
-        eq_(self.profile.stripe_id, mock_customer.id,
+        eq_(self.profile.customer_id, mock_customer.id,
             'The customer id should be saved so the customer can be retrieved.')
         customer = self.profile.customer()
         ok_(MockCustomer.retrieve.called,
@@ -166,18 +170,22 @@ class TestProfileUnit(TestCase):
         """Test starting a pro subscription"""
         self.profile.start_pro_subscription()
         self.profile.refresh_from_db()
-        ok_(mock_customer.update_subscription.called)
+        ok_(mock_customer.subscriptions.create.called)
         eq_(self.profile.acct_type, 'pro')
+        eq_(self.profile.subscription_id, mock_subscription.id)
         eq_(self.profile.date_update.today(), date.today())
         eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('pro'))
 
     @patch('stripe.Customer', MockCustomer)
     def test_cancel_pro_subscription(self):
         """Test ending a pro subscription"""
+        self.profile.start_pro_subscription()
         self.profile.cancel_pro_subscription()
         self.profile.refresh_from_db()
-        ok_(mock_customer.cancel_subscription.called)
+        ok_(mock_subscription.delete.called)
         eq_(self.profile.acct_type, 'community')
+        ok_(not self.profile.subscription_id)
+        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('community'))
 
 
 class TestStripeIntegration(TestCase):
@@ -192,15 +200,15 @@ class TestStripeIntegration(TestCase):
 
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
-        ok_(not self.profile.stripe_id)
+        ok_(not self.profile.customer_id)
         self.profile.customer()
-        ok_(self.profile.stripe_id,
+        ok_(self.profile.customer_id,
             'The customer id should be saved so the customer can be retrieved later.')
 
     def test_subscription(self):
         """Test starting a subscription"""
         customer = self.profile.customer()
-        customer.card = get_stripe_token()
+        customer.sources.create(source=get_stripe_token())
         customer.save()
         self.profile.start_pro_subscription()
         self.profile.cancel_pro_subscription()

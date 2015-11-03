@@ -24,6 +24,7 @@ from muckrock.organization.models import Organization
 from muckrock.values import TextValue
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_version = '2015-10-16'
 
 class EmailOptions(dbsettings.Group):
     """DB settings for sending email"""
@@ -128,8 +129,9 @@ class Profile(models.Model):
     # for limiting # of requests / month
     monthly_requests = models.IntegerField(default=0)
     date_update = models.DateField()
-    # for stripe
-    stripe_id = models.CharField(max_length=255, blank=True)
+    # for Stripe
+    customer_id = models.CharField(max_length=255, blank=True)
+    subscription_id = models.CharField(max_length=255, blank=True)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -222,44 +224,58 @@ class Profile(models.Model):
         return self.acct_type in ['admin', 'pro']
 
     def customer(self):
-        """Get stripe customer or create one if it doesn't exist"""
+        """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
         try:
-            if not self.stripe_id:
+            if not self.customer_id:
                 raise AttributeError('No Stripe ID')
-            customer = stripe.Customer.retrieve(self.stripe_id)
+            customer = stripe.Customer.retrieve(self.customer_id)
         except (AttributeError, stripe.InvalidRequestError):
             customer = stripe.Customer.create(
                 description=self.user.username,
                 email=self.user.email
             )
-            self.stripe_id = customer.id
+            self.customer_id = customer.id
             self.save()
         return customer
 
-    def start_pro_subscription(self):
-        """Subscribe this profile to a pro plan"""
+    def start_pro_subscription(self, token=None):
+        """Subscribe this profile to a professional plan. Return the subscription."""
+        # create the stripe subscription
         customer = self.customer()
-        customer.update_subscription(plan='pro')
+        if self.subscription_id:
+            raise AttributeError('Only allowed one active subscription at a time.')
+        if not token and not customer.default_source:
+            raise AttributeError('No payment method provided for this subscription.')
+        subscription = customer.subscriptions.create(plan='pro', source=token)
         customer.save()
+        # modify the profile object (should this be part of a webhook callback?)
+        self.subscription_id = subscription.id
         self.acct_type = 'pro'
         self.date_update = datetime.datetime.now()
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('pro', 0)
         self.save()
+        return subscription
 
     def cancel_pro_subscription(self):
-        """Unsubscribe this profile form a pro plan"""
+        """Unsubscribe this profile from a professional plan. Return the cancelled subscription."""
+        if not self.subscription_id:
+            raise AttributeError('There is no subscription to cancel.')
         customer = self.customer()
-        customer.cancel_subscription()
-        customer.save()
+        subscription = customer.subscriptions.retrieve(self.subscription_id)
+        subscription = subscription.delete()
+        customer = customer.save()
+        self.subscription_id = ''
         self.acct_type = 'community'
+        self.monthly_requests = settings.MONTHLY_REQUESTS.get('community', 0)
         self.save()
+        return subscription
 
     def pay(self, token, amount, desc):
         """Create a stripe charge for the user"""
         stripe.Charge.create(
             amount=amount,
             currency='usd',
-            card=token,
+            source=token,
             description='%s: %s' % (self.user.username, desc)
         )
 
