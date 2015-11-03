@@ -6,10 +6,14 @@ from django.contrib.auth.models import User
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 
-from muckrock.settings import MONTHLY_REQUESTS
+from muckrock.settings import MONTHLY_REQUESTS,\
+                              ORG_MIN_SEATS,\
+                              ORG_PRICE_PER_SEAT,\
+                              ORG_REQUESTS_PER_SEAT
 
-from datetime import datetime
+from datetime import date
 import logging
 import stripe
 
@@ -17,17 +21,23 @@ logger = logging.getLogger(__name__)
 
 class Organization(models.Model):
     """Orginization to allow pooled requests and collaboration"""
+    # pylint: disable=too-many-instance-attributes
 
     name = models.CharField(max_length=255, unique=True)
     slug = models.SlugField(max_length=255, unique=True)
     owner = models.ForeignKey(User)
-    date_update = models.DateField()
+    date_update = models.DateField(auto_now_add=True, null=True)
     num_requests = models.IntegerField(default=0)
-    max_users = models.IntegerField(default=50)
-    monthly_cost = models.IntegerField(default=45000)
+    max_users = models.IntegerField(default=3)
+    monthly_cost = models.IntegerField(default=10000)
     monthly_requests = models.IntegerField(default=MONTHLY_REQUESTS.get('org', 0))
     stripe_id = models.CharField(max_length=255, blank=True)
     active = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        """Autogenerates the slug based on the org name"""
+        self.slug = slugify(self.name)
+        super(Organization, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -37,137 +47,180 @@ class Organization(models.Model):
         """The url for this object"""
         return ('org-detail', [], {'slug': self.slug})
 
-    def get_requests(self):
-        """Get the number of requests left for this month"""
-        not_this_month = self.date_update.month != datetime.now().month
-        not_this_year = self.date_update.year != datetime.now().year
-        if not_this_month or not_this_year and self.active:
-            # update requests if they have not yet been updated this month
-            self.date_update = datetime.now()
+    def restore_requests(self):
+        """Restore the number of requests credited to the org."""
+        if self.active:
+            self.date_update = date.today()
             self.num_requests = self.monthly_requests
             self.save()
+        return
+
+    def get_requests(self):
+        """
+        Get the number of requests left for this month.
+        Before doing so, restore the org's requests if they have not
+        been restored for this month, or ever.
+        """
+        if self.date_update:
+            not_this_month = self.date_update.month != date.today().month
+            not_this_year = self.date_update.year != date.today().year
+            if not_this_month or not_this_year:
+                self.restore_requests()
+        else:
+            self.restore_requests()
         return self.num_requests
 
     def is_owned_by(self, user):
-        """Answers whether the passed user owns the org"""
+        """Returns true IFF the passed-in user is the owner of the org"""
         return self.owner == user
 
-    def is_active(self):
-        """Is this organization active?"""
-        return self.active
+    def has_member(self, user):
+        """Returns true IFF the passed-in user is a member of the org"""
+        if user.profile in self.members.all():
+            return True
+        else:
+            return False
+
+    def send_email_notification(self, user, subject, template):
+        """Notifies a user via email about a change to their organization membership."""
+        msg = render_to_string(template, {
+            'member_name': user.first_name,
+            'organization_name': self.name,
+            'organization_owner': self.owner.get_full_name(),
+            'organization_link': self.get_absolute_url()
+        })
+        email = EmailMessage(
+            subject=subject,
+            body=msg,
+            from_email='info@muckrock.com',
+            to=[user.email],
+            bcc=['diagnostics@muckrock.com']
+        )
+        email.send(fail_silently=False)
+        return
+
+    def update_num_seats(self, num_seats):
+        """Updates the max users and adjusts the monthly cost and monthly requests in response."""
+        # since the compute methods use the current max_seat values, update the max_seats last
+        new_cost = self.compute_monthly_cost(num_seats)
+        new_requests = self.compute_monthly_requests(num_seats)
+        self.monthly_cost = new_cost
+        self.monthly_requests = new_requests
+        self.max_users = num_seats
+        self.save()
+        return
+
+    def compute_monthly_cost(self, num_seats):
+        """Computes the monthly cost given the number of seats, which can be negative."""
+        price_per_user = ORG_PRICE_PER_SEAT
+        current_monthly_cost = self.monthly_cost
+        seat_difference = num_seats - self.max_users
+        cost_adjustment = price_per_user * seat_difference
+        return current_monthly_cost + cost_adjustment
+
+    def compute_monthly_requests(self, num_seats):
+        """Computes the monthly requests given the number of seats, which can be negative."""
+        requests_per_user = ORG_REQUESTS_PER_SEAT
+        current_requests = self.monthly_requests
+        seat_difference = num_seats - self.max_users
+        request_adjustment = requests_per_user * seat_difference
+        return current_requests + request_adjustment
 
     def add_member(self, user):
-        """Add a user to this organization"""
-        profile = user.profile
-        if not profile.is_member_of(self): # doesn't update if already a member
-            profile.organization = self
-            profile.save()
-            # send an email notifying the user
-            msg = render_to_string('text/organization/add_member.txt', {
-                'member_name': user.first_name,
-                'organization_name': self.name,
-                'organization_owner': self.owner.get_full_name(),
-                'organization_link': self.get_absolute_url()
-            })
-            email = EmailMessage(
-                subject='[MuckRock] You were added to an organization',
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[user.email],
-                bcc=['diagnostics@muckrock.com']
+        """Adds the given user as a member of the organization."""
+        added = False
+        if not self.active:
+            raise AttributeError('Cannot add members to an inactive organization.')
+        if self.members.count() == self.max_users:
+            raise AttributeError('No open seat for new members.')
+        if user.profile.organization:
+            raise AttributeError('%s is already a member of a different organization.' % user)
+        if Organization.objects.filter(owner=user).exists():
+            raise AttributeError('%s is already an owner of a different organization.' % user)
+        if not self.has_member(user):
+            user.profile.organization = self
+            user.profile.save()
+            self.send_email_notification(
+                user,
+                '[MuckRock] You were added to an organization',
+                'text/organization/add_member.txt'
             )
-            email.send(fail_silently=False)
-            logger.info('%s was added as a member of the %s organization', user.username, self.name)
-        return
+            added = True
+        return added
 
     def remove_member(self, user):
-        """Remove a user (who isn't the owner) from this organization"""
-        if not self.is_owned_by(user):
-            profile = user.profile
-            profile.organization = None
-            profile.save()
-            # send an email notifying the user
-            msg = render_to_string('text/organization/remove_member.txt', {
-                'member_name': user.first_name,
-                'organization_name': self.name,
-                'organization_owner': self.owner.get_full_name(),
-            })
-            email = EmailMessage(
-                subject='[MuckRock] You were removed from an organization',
-                body=msg,
-                from_email='info@muckrock.com',
-                to=[user.email],
-                bcc=['diagnostics@muckrock.com']
+        """Removes the given user from this organization if they are a member."""
+        removed = False
+        if self.has_member(user):
+            user.profile.organization = None
+            user.profile.save()
+            self.send_email_notification(
+                user,
+                '[MuckRock] You were removed from an organization',
+                'text/organization/remove_member.txt'
             )
-            email.send(fail_silently=False)
-            logger.info('%s was removed as a member of the %s organization',
-                user.username, self.name)
-        return
+            removed = True
+        return removed
 
-    def create_plan(self):
-        """Creates an organization-specific Stripe plan"""
-        if not self.stripe_id:
-            plan_name = self.name + ' Plan'
-            plan_id = self.slug + '-org-plan'
-            plan = stripe.Plan.create(
-                amount=self.monthly_cost,
-                interval='month',
-                name=plan_name,
-                currency='usd',
-                id=plan_id)
-            self.stripe_id = plan.id
-            self.save()
-        else:
-            raise ValueError('This organization already has an associated plan.')
-        return
-
-    def delete_plan(self):
-        """Deletes this organization's specific Stripe plan"""
-        if self.stripe_id:
-            plan = stripe.Plan.retrieve(self.stripe_id)
-            plan.delete()
-            self.stripe_id = ''
-            self.save()
-        else:
-            raise ValueError('This organization has no associated plan to cancel.')
-        return
-
-    def update_plan(self):
-        """
-        Deletes and recreates an organization's plan.
-        Plans must be deleted and recreated because Stripe prohibits plans
-        from updating any information except their name.
-        """
-        if self.stripe_id:
-            self.delete_plan()
-            self.create_plan()
-            self.start_subscription()
-        else:
-            raise ValueError('This organization has no associated plan to update.')
-        return
-
-    def start_subscription(self):
-        """Subscribes the owner to this org's plan"""
+    def activate_subscription(self, token, num_seats):
+        """Subscribes the owner to the org plan, given a variable quantity"""
         # pylint: disable=no-member
-        profile = self.owner.profile
-        org_plan = stripe.Plan.retrieve(self.stripe_id)
-        customer = profile.customer()
-        customer.update_subscription(plan=org_plan.id)
-        customer.save()
-        # if the owner has a pro account, downgrade him to a community account
-        if profile.acct_type == 'pro':
-            profile.acct_type = 'community'
-            profile.save()
+        if self.active:
+            raise AttributeError('Cannot activate an active organization.')
+        if num_seats < ORG_MIN_SEATS:
+            raise ValueError('Cannot have an organization with less than three member seats.')
+        quantity = self.compute_monthly_cost(num_seats)/100
+        customer = self.owner.profile.customer()
+        subscription = customer.subscriptions.create(
+            plan='org',
+            source=token,
+            quantity=quantity
+        )
+        # if the owner has a pro account, downgrade them to a community account
+        if self.owner.profile.acct_type == 'pro':
+            self.owner.profile.acct_type = 'community'
+            self.owner.profile.save()
+        self.update_num_seats(num_seats)
+        self.stripe_id = subscription.id
         self.active = True
         self.save()
         return
 
-    def pause_subscription(self):
+    def update_subscription(self, num_seats):
+        """Updates the quantity of the subscription, but only if the subscription is active"""
+        # pylint: disable=no-member
+        if not self.active:
+            raise AttributeError('Cannot update an inactive subscription.')
+        if num_seats < ORG_MIN_SEATS:
+            raise ValueError('Cannot have an organization with less than three member seats.')
+        quantity = self.compute_monthly_cost(num_seats)/100
+        customer = self.owner.profile.customer()
+        try:
+            subscription = customer.subscriptions.retrieve(self.stripe_id)
+            subscription.quantity = quantity
+            subscription = subscription.save()
+        except stripe.InvalidRequestError:
+            logger.error(('No subscription is associated with organization '
+                         'owner %s.'), self.owner.username)
+            return
+        self.update_num_seats(num_seats)
+        self.stripe_id = subscription.id
+        self.save()
+        return
+
+    def cancel_subscription(self):
         """Cancels the owner's subscription to this org's plan"""
         # pylint: disable=no-member
+        if not self.active:
+            raise AttributeError('Cannot cancel an inactive subscription.')
         customer = self.owner.profile.customer()
-        customer.cancel_subscription()
-        customer.save()
+        subscription = customer.subscriptions.retrieve(self.stripe_id)
+        try:
+            subscription.delete()
+        except stripe.InvalidRequestError:
+            logger.error(('No subscription is associated with organization '
+                         'owner %s.'), self.owner.username)
+        self.stripe_id = ''
         self.active = False
         self.save()
         return

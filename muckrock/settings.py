@@ -360,7 +360,7 @@ MONTHLY_REQUESTS = {
     'community': 0,
     'pro': 20,
     'proxy': 20,
-    'org': 200,
+    'org': 50,
 }
 
 MARKDOWN_DEUX_STYLES = {
@@ -588,6 +588,12 @@ LOT = {
   },
 }
 LOT_MIDDLEWARE_PARAM_NAME = 'uuid-login'
+
+# Organization Settings
+
+ORG_MIN_SEATS = 3
+ORG_PRICE_PER_SEAT = 2000
+ORG_REQUESTS_PER_SEAT = 10
 
 # pylint: disable=wildcard-import
 # pylint: disable=unused-wildcard-import

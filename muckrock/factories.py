@@ -13,7 +13,7 @@ from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication
 from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.project.models import Project
-
+from muckrock.organization.models import Organization
 
 class ProfileFactory(factory.django.DjangoModelFactory):
     """A factory for creating Profile test objects."""
@@ -33,6 +33,16 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.Sequence(lambda n: "user_%d" % n)
     email = factory.Faker('email')
     profile = factory.RelatedFactory(ProfileFactory, 'user')
+
+
+class OrganizationFactory(factory.django.DjangoModelFactory):
+    """A factory for creating Organization test objects."""
+    class Meta:
+        model = Organization
+
+    name = factory.Sequence(lambda n: "Organization %d" % n)
+    slug = factory.LazyAttribute(lambda obj: slugify(obj.name))
+    owner = factory.SubFactory(UserFactory)
 
 
 class JurisdictionFactory(factory.django.DjangoModelFactory):
