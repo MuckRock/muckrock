@@ -107,9 +107,9 @@ class CrowdfundABC(models.Model):
             amount = self.amount_remaining()
         # Try processing the payment using Stripe.
         # If the payment fails, do not catch the error.
-        # Stripe represents currency as integers
+        # Stripe represents currency as smallest-unit integers.
         stripe_amount = int(float(amount) * 100)
-        stripe.Charge.create(
+        charge = stripe.Charge.create(
             amount=stripe_amount,
             source=token,
             currency='usd',
@@ -120,7 +120,8 @@ class CrowdfundABC(models.Model):
             amount=amount,
             crowdfund=self,
             user=user,
-            show=show
+            show=show,
+            charge_id=charge.id
         )
         payment.save()
         logging.info(payment)
@@ -135,6 +136,7 @@ class CrowdfundPaymentABC(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=False)
+    charge_id = models.CharField(max_length=255, blank=True)
 
     class Meta:
         abstract = True
