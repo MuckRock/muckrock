@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail, EmailMessage
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -27,6 +27,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.crowdfund.models import CrowdfundRequest
 from muckrock.foia.models import FOIARequest, FOIAMultiRequest
+import muckrock.notification
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -279,145 +280,38 @@ def profile(request, user_name=None):
 @csrf_exempt
 def stripe_webhook(request):
     """Handle webhooks from stripe"""
-    # pylint: disable=too-many-branches
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-statements
-
     if request.method != "POST":
-        return HttpResponse("Invalid Request.", status=400)
-
-    event_json = json.loads(request.body)
-    event_data = event_json['data']['object']
-
-    logger.info(
-        'Received stripe webhook of type %s\nIP: %s\nID:%s\nData: %s',
-        event_json['type'],
-        request.META['REMOTE_ADDR'],
-        event_json['id'],
-        event_json
-    )
-
-    description = event_data.get('description')
-    customer = event_data.get('customer')
-    email = None
-    if description and ':' in description:
-        username = description[:description.index(':')]
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = None
-            email = username
-    elif customer:
-        try:
-            user = Profile.objects.get(customer_id=customer).user
-        except Profile.DoesNotExist:
-            # db is not synced yet, return 404 and let stripe retry - we should be synced by then
-            raise Http404
-    elif event_json['type'] in ['charge.succeeded', 'invoice.payment_failed']:
-        logger.warning('Cannot figure out customer from stripe webhook, no receipt sent: %s',
-                       event_json)
-        return HttpResponse()
-
-    if event_json['type'] == 'charge.succeeded':
-        amount = event_data['amount'] / 100.0
-        base_amount = amount / 1.05
-        fee_amount = amount - base_amount
-
-        if event_data.get('description') and \
-                event_data['description'].endswith('Charge for 4 requests'):
-            type_ = 'community'
-            url = '/foia/new/'
-            subject = 'Payment received for additional requests'
-        elif event_data.get('description') and \
-                'Charge for request' in event_data['description']:
-            type_ = 'doc'
-            url = FOIARequest.objects.get(id=event_data['description'].split()[-1])\
-                                     .get_absolute_url()
-            subject = 'Payment received for request fee'
-        elif event_data.get('description') and \
-                'Charge for multi request' in event_data['description']:
-            type_ = 'doc'
-            url = FOIAMultiRequest.objects.get(id=event_data['description'].split()[-1])\
-                                          .get_absolute_url()
-            subject = 'Payment received for multi request fee'
-        elif event_data.get('description') and \
-                'Contribute to Crowdfunding' in event_data['description']:
-            type_ = 'crowdfunding'
-            url = CrowdfundRequest.objects.get(id=event_data['description'].split()[-1])\
-                                          .foia.get_absolute_url()
-            subject = 'Payment received for crowdfunding a request'
-        else:
-            type_ = 'pro'
-            url = '/foia/new/'
-            subject = 'Payment received for professional account'
-
-        card = event_data.get('card')
-        if card:
-            last4 = card.get('last4')
-        else:
-            last4 = ''
-
-        if user:
-            msg = EmailMessage(
-                subject=subject,
-                body=render_to_string('notification/receipt/receipt.txt', {
-                    'user': user,
-                    'id': event_data['id'],
-                    'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': last4,
-                    'amount': amount,
-                    'base_amount': base_amount,
-                    'fee_amount': fee_amount,
-                    'url': url,
-                    'type': type_}),
-                from_email='info@muckrock.com',
-                to=[user.email], bcc=['diagnostics@muckrock.com']
-            )
-        else:
-            msg = EmailMessage(
-                subject=subject,
-                body=render_to_string('notification/receipt/crowdfund.txt', {
-                    'id': event_data['id'],
-                    'date': datetime.fromtimestamp(event_data['created']),
-                    'last4': last4,
-                    'amount': amount,
-                    'base_amount': base_amount,
-                    'fee_amount': fee_amount,
-                    'url': url,
-                    'type': type_}),
-                from_email='info@muckrock.com',
-                to=[email], bcc=['diagnostics@muckrock.com']
-            )
-        msg.send(fail_silently=False)
-
-    elif event_json['type'] == 'invoice.payment_failed':
-        attempt = event_data['attempt_count']
-        user_profile = user.profile
-        if attempt == 4:
-            user_profile.acct_type = 'community'
-            user_profile.save()
-            logger.info('%s subscription has been cancelled due to failed payment', user.username)
-            msg = EmailMessage(
-                subject='Payment Failed',
-                body=render_to_string('notification/failed_payment.txt', {
-                    'user': user,
-                    'attempt': 'final'}),
-                from_email='info@muckrock.com',
-                to=[user.email], bcc=['diagnostics@muckrock.com']
-            )
-            msg.send(fail_silently=False)
-        else:
-            logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-            msg = EmailMessage(
-                subject='Payment Failed',
-                body=render_to_string('notification/failed_payment.txt', {
-                    'user': user,
-                    'attempt': attempt}),
-                from_email='info@muckrock.com',
-                to=[user.email], bcc=['diagnostics@muckrock.com']
-            )
-            msg.send(fail_silently=False)
-
+        return HttpResponseNotAllowed(['POST'])
+    try:
+        event_json = json.loads(request.body)
+        event_data = event_json['data']['object']
+    except (TypeError, ValueError, SyntaxError) as exception:
+        logging.error('Error parsing JSON: %s', exception)
+        return HttpResponseBadRequest()
+    except KeyError as exception:
+        logging.error('Unexpected dictionary structure: %s', exception)
+        return HttpResponseBadRequest()
+    # If we've made it this far, then the webhook message was successfully sent!
+    # Now it's up to us to act on it.'
+    event_id = event_json['id']
+    event_type = event_json['type']
+    success_msg = (
+        'Received Stripe webhook\n'
+        '\tfrom:\t%(address)s\n'
+        '\tid:\t%(id)s\n'
+        '\ttype:\t%(type)s\n'
+        '\tdata:\t%(data)s\n'
+    ) % {
+        'address': request.META['REMOTE_ADDR'],
+        'id': event_id,
+        'type': event_type,
+        'data': event_json
+    }
+    logger.info(success_msg)
+    if event_type == 'charge.succeeded':
+        muckrock.notification.tasks.send_receipt.delay(event_data)
+    elif event_type == 'invoice.payment_failed':
+        muckrock.notification.tasks.failed_payment.delay(event_data)
     return HttpResponse()
 
 
