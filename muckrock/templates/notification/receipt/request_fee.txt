@@ -1,5 +1,3 @@
-
-
 Hi {{user.first_name}},
 
 Thank you for using MuckRock. This e-mail confirms your payment of a request fee through MuckRock.com. No further action is required, and you can check the current status of your request here:
