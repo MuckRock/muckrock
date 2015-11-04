@@ -6,10 +6,15 @@ from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from datetime import datetime
+
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
+    subject = u'Your Receipt'
+    text_template = 'notification/receipt/receipt.txt'
+
     def __init__(self, user, charge, **kwargs):
-        super(FailedPaymentNotification, self).__init__(**kwargs)
+        super(GenericReceipt, self).__init__(**kwargs)
         if isinstance(user, User):
             self.user = user
             self.to = [user.email]
@@ -30,11 +35,11 @@ class GenericReceipt(EmailMultiAlternatives):
 
     def get_subject(self):
         """Returns a receipt-appropriate subject"""
-        return u'Your Receipt'
+        return self.subject
 
     def get_text_template(self):
         """Returns a plain text email template reference"""
-        return 'notification/receipt/receipt.txt'
+        return self.text_template
 
     def get_context_data(self, charge):
         """Returns a dictionary of context for the template, given the charge object"""
@@ -51,56 +56,40 @@ class GenericReceipt(EmailMultiAlternatives):
 
 class RequestPurchaseReceipt(GenericReceipt):
     """A receipt for request purchases"""
-    def get_subject(self):
-        return u'Payment received for additional requests'
+    subject = u'Payment received for additional requests'
+    text_template = 'notification/receipt/request_purchase.txt'
 
-    def get_text_template(self):
-        return 'notification/receipt/request_purchase.txt'
-
-class RequestFeeReceipt(GenericReciept):
+class RequestFeeReceipt(GenericReceipt):
     """A receipt for payment of request fees"""
-    def get_subject(self):
-        return u'Payment received for request fee'
-
-    def get_text_template(self):
-        return 'notification/receipt/request_fees.txt'
+    subject = u'Payment received for request fee'
+    text_template = 'notification/receipt/request_fees.txt'
 
     def get_context_data(self, charge):
         """Returns the context for the template"""
         context = super(RequestFeeReceipt, self).get_context_data(charge)
         amount = context['amount']
-        context['base_amount'] = amount / 1.05
-        context['fee_amount'] = amount - base_amount
+        base_amount = amount / 1.05
+        fee_amount = amount - base_amount
+        context['base_amount'] = base_amount
+        context['fee_amount'] = fee_amount
         return context
 
 class MultiRequestReceipt(GenericReceipt):
     """A receipt for the purchase of a multirequest"""
-    def get_subject(self):
-        return u'Payment received for multi request fee'
-
-    def get_text_tempalte(self):
-        return 'notification/receipt/multirequest.txt'
+    subject = u'Payment received for multi request fee'
+    text_template = 'notification/receipt/multirequest.txt'
 
 class CrowdfundPaymentReceipt(GenericReceipt):
     """A receipt for the payment to a crowdfund"""
-    def get_subject(self):
-        return u'Payment received for crowdfunding a request'
-
-    def get_text_template(self):
-        return 'notification/receipt/crowdfund.txt'
+    subject = u'Payment received for crowdfunding a request'
+    text_template = 'notification/receipt/crowdfund.txt'
 
 class ProSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring pro subscription charge"""
-    def get_subject(self):
-        return u'Payment received for professional account'
-
-    def get_text_template(self):
-        return 'notification/receipt/pro.txt'
+    subject = u'Payment received for professional account'
+    text_template = 'notification/receipt/pro.txt'
 
 class OrgSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring org subscription charge"""
-    def get_subject(self):
-        return u'Payment received dor organization account'
-
-    def get_text_template(self):
-        return 'notification/receipt/org.txt'
+    subject = u'Payment received dor organization account'
+    text_template = 'notification/receipt/org.txt'
