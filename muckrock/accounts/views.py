@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.mail import send_mail, EmailMessage
-from django.http import HttpResponse, Http404, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.core.mail import send_mail
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -25,8 +25,7 @@ import sys
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
-from muckrock.crowdfund.models import CrowdfundRequest
-from muckrock.foia.models import FOIARequest, FOIAMultiRequest
+from muckrock.foia.models import FOIARequest
 import muckrock.notification
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 

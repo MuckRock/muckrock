@@ -7,7 +7,6 @@ from django.test import TestCase
 
 from mock import Mock, patch
 import nose.tools
-import stripe
 
 import muckrock.factories
 from muckrock.utils import get_stripe_token
