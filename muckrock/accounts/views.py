@@ -277,7 +277,7 @@ def profile(request, user_name=None):
     )
 
 @csrf_exempt
-def stripe_webhook_v2(request):
+def stripe_webhook(request):
     """Handle webhooks from stripe"""
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
