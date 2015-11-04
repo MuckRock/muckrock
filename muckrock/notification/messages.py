@@ -104,3 +104,22 @@ class DailyNotification(EmailMultiAlternatives):
         noun = 'update' if self.notification_count == 1 else 'updates'
         subject = '%d %s %s' % (self.notification_count, noun, self.since)
         return subject
+
+
+class FailedPaymentNotification(EmailMultiAlternatives):
+    """Sends a failed payment notification"""
+    def __init__(self, user, attempt, **kwargs):
+        """Initialize the notification"""
+        super(FailedPaymentNotification, self).__init__(**kwargs)
+        if isinstance(user, User):
+            self.user = user
+            self.to = [user.email]
+        else:
+            raise TypeError('Notification requires a User to recieve it.')
+        self.from_email = 'MuckRock <info@muckrock.com>'
+        self.bcc = ['diagnostics@muckrock.com']
+        self.subject = 'Payment Failed'
+        self.body = render_to_string(
+            'notification/failed_payment.txt',
+            {'user': self.user, 'attempt': attempt}
+        )
