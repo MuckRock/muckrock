@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 
 from datetime import datetime
 
+from muckrock.foia.models import FOIARequest
+
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
     subject = u'Your Receipt'
@@ -72,6 +74,14 @@ class RequestFeeReceipt(GenericReceipt):
         fee_amount = amount - base_amount
         context['base_amount'] = base_amount
         context['fee_amount'] = fee_amount
+        try:
+            foia_pk = charge['metadata']['foia']
+            foia = FOIARequest.objects.get(pk=foia_pk)
+            context['url'] = foia.get_absolute_url()
+        except KeyError:
+            logger.error('No FOIA identified in Charge metadata.')
+        except FOIARequest.DoesNotExist:
+            logger.error('Could not find FOIARequest identified by Charge metadata.')
         return context
 
 

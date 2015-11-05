@@ -135,7 +135,9 @@ class TestSendReceiptTask(TestCase):
     @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
     def testRequestFeeReceipt(self, mock_send):
         """A receipt should be sent after request fee is paid."""
+        foia = factories.FOIARequestFactory()
         self.charge['metadata']['action'] = 'request-fee'
+        self.charge['metadata']['foia'] = foia.pk
         tasks.send_receipt(self.charge)
         mock_send.assert_called_once_with(self.user)
 
