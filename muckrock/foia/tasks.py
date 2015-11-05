@@ -272,7 +272,7 @@ def classify_status(task_pk, **kwargs):
     resp_task.status_probability = int(100 * prob)
 
     resolve_if_possible(resp_task)
-    
+
     resp_task.save()
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
@@ -282,7 +282,7 @@ def followup_requests():
     error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
-    if (foia_options.enable_followup and 
+    if (foia_options.enable_followup and
             (foia_options.enable_weekend_followup or is_weekday)):
         for foia in FOIARequest.objects.get_followup():
             try:
