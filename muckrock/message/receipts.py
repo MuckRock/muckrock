@@ -85,7 +85,7 @@ class MultiRequestReceipt(GenericReceipt):
     """A receipt for the purchase of a multirequest"""
     subject = u'Payment received for multi request fee'
     item = u'Multi-request fee'
-    text_template = 'message/receipt/multirequest.txt'
+    text_template = 'message/receipt/request_multi.txt'
 
 
 class CrowdfundPaymentReceipt(GenericReceipt):
