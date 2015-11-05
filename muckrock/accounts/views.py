@@ -14,7 +14,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime
+from datetime import datetime, date
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
@@ -54,7 +54,7 @@ def register(request):
                 user=new_user,
                 acct_type='community',
                 monthly_requests=0,
-                date_update=datetime.now()
+                date_update=date.today()
             )
             send_mail(
                 'Welcome to MuckRock',
