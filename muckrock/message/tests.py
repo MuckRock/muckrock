@@ -128,7 +128,7 @@ class TestSendReceiptTask(TestCase):
     @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
     def testRequestPurchaseReceipt(self, mock_send):
         """A receipt should be sent after request bundle is purchased."""
-        self.charge['metadata']['action'] = 'request-payment'
+        self.charge['metadata']['action'] = 'request-purchase'
         tasks.send_receipt(self.charge)
         mock_send.assert_called_once_with(self.user)
 
