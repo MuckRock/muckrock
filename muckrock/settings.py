@@ -313,7 +313,7 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
 
-DBSETTINGS_USE_SITES = False
+DBSETTINGS_USE_SITES = True
 
 if DEBUG:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
