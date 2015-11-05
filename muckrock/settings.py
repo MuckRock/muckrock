@@ -248,7 +248,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
-    'muckrock.notification',
+    'muckrock.message',
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',

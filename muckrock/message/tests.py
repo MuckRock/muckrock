@@ -1,5 +1,5 @@
 """
-Tests the notification application.
+Tests the messages application.
 """
 
 from django.test import TestCase
@@ -10,8 +10,8 @@ import mock
 import nose.tools
 
 from muckrock import factories
-from muckrock.notification.tasks import daily_notification
-from muckrock.notification.messages import DailyNotification
+from muckrock.message.tasks import daily_notification
+from muckrock.message.notifications import DailyNotification
 
 ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
@@ -76,7 +76,7 @@ class TestDailyTask(TestCase):
         actstream.actions.follow(self.staff_user, other_user)
         actstream.action.send(other_user, verb='acted')
 
-    @mock.patch('muckrock.notification.messages.DailyNotification.send')
+    @mock.patch('muckrock.message.notifications.DailyNotification.send')
     @mock.patch('muckrock.accounts.models.Profile.send_notifications')
     def test_daily_notification_task(self, mock_send, mock_profile_send):
         """Make sure the send method is called for the staff user."""

@@ -1,5 +1,5 @@
 """
-Tasks for the notifications application.
+Tasks for the messages application.
 """
 
 from django.contrib.auth.models import User
@@ -10,25 +10,24 @@ from celery.task import periodic_task, task
 import logging
 
 from muckrock.accounts.models import Profile
-from muckrock.notification.messages import DailyNotification, FailedPaymentNotification
-from muckrock.notification import receipts
+from muckrock.message import notifications, receipts
 
 logger = logging.getLogger(__name__)
 
 @periodic_task(run_every=crontab(hour=10, minute=0),
-               name='muckrock.notification.tasks.daily_notification')
+               name='muckrock.message.tasks.daily_notification')
 def daily_notification():
     """Send out daily notifications"""
     profiles_to_notify = Profile.objects.filter(email_pref='daily').distinct()
     for profile in profiles_to_notify:
         # for now, only send staff the new updates
         if profile.user.is_staff:
-            email = DailyNotification(profile.user)
+            email = notifications.DailyNotification(profile.user)
             email.send()
         else:
             profile.send_notifications()
 
-@task(name='muckrock.notification.tasks.send_receipt')
+@task(name='muckrock.message.tasks.send_receipt')
 def send_receipt(event_data):
     """Send out a receipt for a charge"""
     # we should expect charges to have metadata assigned
@@ -60,7 +59,7 @@ def send_receipt(event_data):
     receipt = receipt_class(user, event_data)
     receipt.send(fail_silently=False)
 
-@task(name='muckrock.notification.tasks.failed_payment')
+@task(name='muckrock.message.tasks.failed_payment')
 def failed_payment(event_data):
     """Notify a customer about a failed subscription invoice."""
     attempt = event_data['attempt_count']
@@ -71,7 +70,7 @@ def failed_payment(event_data):
         # on last attempt, cancel the user's subscription
         user.profile.cancel_pro_subscription()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        notification = FailedPaymentNotification(user, 'final')
+        notification = notifications.FailedPaymentNotification(user, 'final')
         notification.send(fail_silently=False)
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)

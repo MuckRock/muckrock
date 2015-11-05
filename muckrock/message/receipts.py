@@ -1,5 +1,5 @@
 """
-Receipt objects for the notification app
+Receipt objects for the messages app
 """
 
 from django.contrib.auth.models import User
