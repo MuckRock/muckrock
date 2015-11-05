@@ -28,14 +28,14 @@ def daily_notification():
             profile.send_notifications()
 
 @task(name='muckrock.message.tasks.send_receipt')
-def send_receipt(event_data):
+def send_receipt(charge_data):
     """Send out a receipt for a charge"""
     # we should expect charges to have metadata assigned
     try:
-        user_email = event_data['metadata']['email']
-        user_action = event_data['metadata']['action']
+        user_email = charge_data['metadata']['email']
+        user_action = charge_data['metadata']['action']
     except KeyError:
-        logger.warning('Malformed event metadata, so no receipt sent: %s', event_data)
+        logger.warning('Malformed charge metadata, no receipt sent: %s', charge_data)
         return
     # try getting the user based on the provided email
     # we know from Checkout purchases that logged in users have their email autofilled
@@ -56,7 +56,7 @@ def send_receipt(event_data):
         receipt_class = receipt_classes[user_action]
     except KeyError:
         receipt_class = receipts.GenericReceipt
-    receipt = receipt_class(user, event_data)
+    receipt = receipt_class(user, charge_data)
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.failed_payment')
