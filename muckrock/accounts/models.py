@@ -37,6 +37,7 @@ ACCT_TYPES = [
     ('community', 'Community'),
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
+    ('robot', 'Robot'),
 ]
 
 class Profile(models.Model):
