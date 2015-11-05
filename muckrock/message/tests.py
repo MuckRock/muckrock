@@ -96,14 +96,80 @@ class TestFailedPaymentTask(TestCase):
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     def test_send_failed_payment_notification(self, mock_send):
         """Make sure the send method is called for a failed payment notification"""
-        tasks.failed_payment(self.data)
+        tasks.failed_payment(self.invoice)
         mock_send.assert_called_once_with(self.profile.user)
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
     def test_last_attempt(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's pro subscription"""
-        self.data['attempt_count'] = 4
-        tasks.failed_payment(self.data)
+        self.invoice['attempt_count'] = 4
+        tasks.failed_payment(self.invoice)
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
+
+
+class TestSendReceiptTask(TestCase):
+    """Tests the send receipt task."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+        self.charge = {
+            'metadata': {
+                'email': self.user.email
+            },
+            'id': 'test-charge',
+            'amount': 100,
+            'created': 1446680016,
+            'source': {
+                'last4': '1234',
+            }
+        }
+
+    @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
+    def testRequestPurchaseReceipt(self, mock_send):
+        """A receipt should be sent after request bundle is purchased."""
+        self.charge['metadata']['action'] = 'request-payment'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
+    def testRequestFeeReceipt(self, mock_send):
+        """A receipt should be sent after request fee is paid."""
+        self.charge['metadata']['action'] = 'request-fee'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.MultiRequestReceipt.send')
+    def testMultiRequestReceipt(self, mock_send):
+        """A receipt should be sent after a multi-request is purchased."""
+        self.charge['metadata']['action'] = 'request-multi'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.CrowdfundPaymentReceipt.send')
+    def testCrowdfundPaymentReceipt(self, mock_send):
+        """A receipt should be sent after a crowdfund payment is made."""
+        self.charge['metadata']['action'] = 'crowdfund-payment'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
+    def testProSubscriptionReceipt(self, mock_send):
+        """A receipt should be sent after a pro subscription payment is made."""
+        self.charge['metadata']['action'] = 'pro-subscription'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
+    def testOrgSubscriptionReceipt(self, mock_send):
+        """A receipt should be sent after an org subscription payment is made."""
+        self.charge['metadata']['action'] = 'org-subscription'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
+
+    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
+    def testOtherReceipt(self, mock_send):
+        """A generic receipt should be sent for any other charges."""
+        self.charge['metadata']['action'] = 'unknown-charge'
+        tasks.send_receipt(self.charge)
+        mock_send.assert_called_once_with(self.user)
