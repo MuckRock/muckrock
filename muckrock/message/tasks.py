@@ -65,14 +65,15 @@ def failed_payment(event_data):
     attempt = event_data['attempt_count']
     # invoices should always have a customer, so we can infer the user from that
     customer = event_data['customer']
-    user = get_object_or_404(User, customer_id=customer)
+    profile = get_object_or_404(Profile, customer_id=customer)
+    user = profile.user
     if attempt == 4:
         # on last attempt, cancel the user's subscription
-        user.profile.cancel_pro_subscription()
+        profile.cancel_pro_subscription()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
         notification = notifications.FailedPaymentNotification(user, 'final')
         notification.send(fail_silently=False)
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        notification = FailedPaymentNotification(user, attempt)
+        notification = notifications.FailedPaymentNotification(user, attempt)
         notification.send(fail_silently=False)
