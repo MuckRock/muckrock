@@ -3,6 +3,7 @@
 from celery.signals import task_failure
 from celery.schedules import crontab
 from celery.task import periodic_task, task
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.defaultfilters import slugify
 from django.template.loader import render_to_string, get_template
@@ -50,10 +51,19 @@ logger = logging.getLogger(__name__)
 
 class FOIAOptions(dbsettings.Group):
     """DB settings for the FOIA app"""
-    enable_followup = dbsettings.BooleanValue('whether to send automated followups or not')
-    enable_weekend_followup = dbsettings.BooleanValue('whether to send automated followups '
-                                                      'or not on the weekends')
-options = FOIAOptions()
+    enable_followup = dbsettings.BooleanValue(
+            'whether to send automated followups or not')
+    enable_weekend_followup = dbsettings.BooleanValue(
+            'whether to send automated followups or not on the weekends')
+foia_options = FOIAOptions()
+
+class MLOptions(dbsettings.Group):
+    """DB settings for the machine learning"""
+    enable = dbsettings.BooleanValue(
+            'automatically resolve response tasks by machine learning')
+    confidence_min = dbsettings.PositiveIntegerValue(
+            'minimum percent confidence level to automatically resolve')
+ml_options = MLOptions()
 
 @task(ignore_result=True, max_retries=3, name='muckrock.foia.tasks.upload_document_cloud')
 def upload_document_cloud(doc_pk, change, **kwargs):
@@ -224,6 +234,17 @@ def classify_status(task_pk, **kwargs):
         status = classifier.classes_[list(probs).index(max_prob)]
         return status, max_prob
 
+    def resolve_if_possible(resp_task):
+        """Resolve this response task if possible based off of ML setttings"""
+        if (ml_options.enable and
+                resp_task.status_probability >= ml_options.confidence_min):
+            try:
+                ml_robot = User.objects.get(username='mlrobot')
+                resp_task.set_status(resp_task.predicted_status)
+                resp_task.resolve(ml_robot)
+            except User.DoesNotExist:
+                logger.error('mlrobot account does not exist')
+
     try:
         resp_task = ResponseTask.objects.get(pk=task_pk)
     except ResponseTask.DoesNotExist, exc:
@@ -249,6 +270,9 @@ def classify_status(task_pk, **kwargs):
 
     resp_task.predicted_status = status
     resp_task.status_probability = int(100 * prob)
+
+    resolve_if_possible(resp_task)
+
     resp_task.save()
 
 @periodic_task(run_every=crontab(hour=5, minute=0), name='muckrock.foia.tasks.followup_requests')
@@ -258,7 +282,8 @@ def followup_requests():
     error_log = []
     # weekday returns 5 for sat and 6 for sun
     is_weekday = datetime.today().weekday() < 5
-    if options.enable_followup and (options.enable_weekend_followup or is_weekday):
+    if (foia_options.enable_followup and
+            (foia_options.enable_weekend_followup or is_weekday)):
         for foia in FOIARequest.objects.get_followup():
             try:
                 foia.followup(automatic=True)

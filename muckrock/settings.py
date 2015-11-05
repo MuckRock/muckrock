@@ -361,6 +361,7 @@ MONTHLY_REQUESTS = {
     'pro': 20,
     'proxy': 20,
     'org': 200,
+    'robot': 0,
 }
 
 MARKDOWN_DEUX_STYLES = {
