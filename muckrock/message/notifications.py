@@ -36,8 +36,8 @@ def get_foia_activity(user, period):
 class DailyNotification(EmailMultiAlternatives):
     """Sends a daily email notification"""
 
-    text_template = 'notification/daily.txt'
-    html_template = 'notification/daily.html'
+    text_template = 'message/notification/daily.txt'
+    html_template = 'message/notification/daily.html'
 
     notification_count = 0
     since = 'yesterday'
@@ -108,6 +108,8 @@ class DailyNotification(EmailMultiAlternatives):
 
 class FailedPaymentNotification(EmailMultiAlternatives):
     """Sends a failed payment notification"""
+    text_template = 'message/notification/failed_payment.txt'
+
     def __init__(self, user, attempt, **kwargs):
         """Initialize the notification"""
         super(FailedPaymentNotification, self).__init__(**kwargs)
@@ -120,6 +122,6 @@ class FailedPaymentNotification(EmailMultiAlternatives):
         self.bcc = ['diagnostics@muckrock.com']
         self.subject = 'Payment Failed'
         self.body = render_to_string(
-            'notification/failed_payment.txt',
+            self.text_template,
             {'user': self.user, 'attempt': attempt}
         )
