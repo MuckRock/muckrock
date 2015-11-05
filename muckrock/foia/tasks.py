@@ -237,7 +237,7 @@ def classify_status(task_pk, **kwargs):
     def resolve_if_possible(resp_task):
         """Resolve this response task if possible based off of ML setttings"""
         if (ml_options.enable and
-                resp_task.status_probability > ml_options.confidence_min):
+                resp_task.status_probability >= ml_options.confidence_min):
             try:
                 ml_robot = User.objects.get(username='mlrobot')
                 resp_task.set_status(resp_task.predicted_status)
