@@ -11,6 +11,7 @@ from datetime import datetime
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
     subject = u'Your Receipt'
+    item = u''
     text_template = 'message/receipt/receipt.txt'
 
     def __init__(self, user, charge, **kwargs):
@@ -44,6 +45,7 @@ class GenericReceipt(EmailMultiAlternatives):
             'user': self.user,
             'id': charge['id'],
             'date': datetime.fromtimestamp(charge['created']),
+            'item': self.item,
             'last4': card['last4'],
             'amount': amount
         }
@@ -52,11 +54,14 @@ class GenericReceipt(EmailMultiAlternatives):
 class RequestPurchaseReceipt(GenericReceipt):
     """A receipt for request purchases"""
     subject = u'Payment received for additional requests'
+    item = u'4 requests'
     text_template = 'message/receipt/request_purchase.txt'
+
 
 class RequestFeeReceipt(GenericReceipt):
     """A receipt for payment of request fees"""
     subject = u'Payment received for request fee'
+    item = u'Request fee'
     text_template = 'message/receipt/request_fees.txt'
 
     def get_context_data(self, charge):
@@ -69,22 +74,30 @@ class RequestFeeReceipt(GenericReceipt):
         context['fee_amount'] = fee_amount
         return context
 
+
 class MultiRequestReceipt(GenericReceipt):
     """A receipt for the purchase of a multirequest"""
     subject = u'Payment received for multi request fee'
+    item = u'Multi-request fee'
     text_template = 'message/receipt/multirequest.txt'
+
 
 class CrowdfundPaymentReceipt(GenericReceipt):
     """A receipt for the payment to a crowdfund"""
     subject = u'Payment received for crowdfunding a request'
+    item = u'Crowdfund payment'
     text_template = 'message/receipt/crowdfund.txt'
+
 
 class ProSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring pro subscription charge"""
     subject = u'Payment received for professional account'
+    item = u'Professional subscription'
     text_template = 'message/receipt/pro.txt'
+
 
 class OrgSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring org subscription charge"""
     subject = u'Payment received dor organization account'
+    item = u'Organization subscription'
     text_template = 'message/receipt/org.txt'
