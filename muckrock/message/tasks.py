@@ -60,11 +60,11 @@ def send_receipt(event_data):
     receipt.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.failed_payment')
-def failed_payment(event_data):
+def failed_payment(invoice_data):
     """Notify a customer about a failed subscription invoice."""
-    attempt = event_data['attempt_count']
+    attempt = invoice_data['attempt_count']
     # invoices should always have a customer, so we can infer the user from that
-    customer = event_data['customer']
+    customer = invoice_data['customer']
     profile = get_object_or_404(Profile, customer_id=customer)
     user = profile.user
     if attempt == 4:

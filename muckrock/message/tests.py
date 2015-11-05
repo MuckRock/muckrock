@@ -87,7 +87,7 @@ class TestFailedPaymentTask(TestCase):
     """Tests the failed payment task."""
     def setUp(self):
         customer_id = 'test-customer'
-        self.data = {
+        self.invoice = {
             'attempt_count': 1,
             'customer': customer_id
         }
