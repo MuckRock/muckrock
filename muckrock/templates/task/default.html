@@ -4,8 +4,8 @@
         <input type="checkbox" form="batched" name="tasks" value="{{task.pk}}" class="toggle checkbox">
         {% if task.resolved %}
         <div class="task-resolved">
-            <p>Resolved {{task}}</p>
-            <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.pk}}">{{task.date_done|date:'m/d/Y G:i'}}</a></time>
+            <p class="task-type">Resolved {{task}}</p>
+            <time class="task-date-done" datetime="{{task.date_done|date:'Y-m-d G:i::s'}}"><a class="permalink" href="{% url 'task-list' %}?id={{task.pk}}">Resolved {{task.date_done|date:'m/d/Y G:i'}}</a></time>
         </div>
         {% else %}
         <div class="task-metadata">
@@ -19,6 +19,12 @@
         {% endif %}
     </header>
     {% endblock task-header %}
+
+    {% block resolved-task-data %}
+    {% if task.resolved %}
+        <p class="task-data">Resolved by <a href="{{ task.resolved_by.profile.get_absolute_url }}">{{ task.resolved_by.get_full_name }}</a>.</p>
+    {% endif %}
+    {% endblock %}
 
     {% block task-data %}
     {% endblock %}

@@ -4,11 +4,10 @@ Models for the accounts application
 
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
-import actstream
 import datetime
 import dbsettings
 from easy_thumbnails.fields import ThumbnailerImageField
@@ -38,6 +37,7 @@ ACCT_TYPES = [
     ('community', 'Community'),
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
+    ('robot', 'Robot'),
 ]
 
 class Profile(models.Model):
@@ -315,45 +315,6 @@ class Profile(models.Model):
             self.notifications.add(foia)
             self.save()
 
-    def activity_email(self, stream):
-        """Sends an email that is a stream of activities"""
-        count = stream.count()
-        since = 'yesterday' if self.email_pref == 'daily' else 'last week'
-        subject = '%d updates since %s' % (count, since)
-        text_content = render_to_string('email/activity.txt', {
-            'user': self.user,
-            'stream': stream,
-            'count': count,
-            'since': since
-        })
-        html_content = render_to_string('email/activity.html', {
-            'user': self.user,
-            'stream': stream,
-            'count': count,
-            'since': since
-        })
-        email = EmailMultiAlternatives(
-            subject=subject,
-            body=text_content,
-            from_email='MuckRock <info@muckrock.com>',
-            to=[self.user.email],
-            bcc=['diagnostics@muckrock.com']
-        )
-        email.attach_alternative(html_content, 'text/html')
-        email.send(fail_silently=False)
-        return email
-
-    def send_timed_update(self):
-        """Send a timed update of site activity"""
-        current_time = datetime.datetime.now()
-        num_days = 1 if self.email_pref == 'daily' else 7
-        period_start = current_time - datetime.timedelta(num_days)
-        user_stream = actstream.models.user_stream(self.user)
-        user_stream = user_stream.filter(timestamp__gte=period_start)\
-                                 .exclude(verb='started following')
-        if user_stream.count() > 0:
-            self.activity_email(user_stream)
-
     def send_notifications(self):
         """Send deferred notifications"""
         # pylint: disable=no-member
@@ -434,6 +395,7 @@ class Profile(models.Model):
             extra.update({settings.LOT_MIDDLEWARE_PARAM_NAME: lot.uuid})
         return link + '?' + urlencode(extra)
 
+
 class Statistics(models.Model):
     """Nightly statistics"""
     # pylint: disable=invalid-name
@@ -451,6 +413,7 @@ class Statistics(models.Model):
     total_requests_no_docs = models.IntegerField(null=True, blank=True)
     total_requests_partial = models.IntegerField(null=True, blank=True)
     total_requests_abandoned = models.IntegerField(null=True, blank=True)
+    requests_processing_days = models.IntegerField(null=True, blank=True)
 
     orphaned_communications = models.IntegerField(null=True, blank=True)
 
@@ -495,6 +458,7 @@ class Statistics(models.Model):
     total_unresolved_payment_tasks = models.IntegerField(null=True, blank=True)
     total_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
     total_unresolved_crowdfundpayment_tasks = models.IntegerField(null=True, blank=True)
+    daily_robot_response_tasks = models.IntegerField(null=True, blank=True)
 
     # notes
     public_notes = models.TextField(default='', blank=True)

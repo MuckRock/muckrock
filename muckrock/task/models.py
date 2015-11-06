@@ -19,6 +19,8 @@ from muckrock.jurisdiction.models import Jurisdiction
 
 def generate_status_actions(foia, comm, status):
     """Generate activity stream actions for agency replies"""
+    if not foia.agency:
+        return
     # generate action
     actstream.action.send(
         foia.agency,
@@ -47,6 +49,11 @@ def generate_status_actions(foia, comm, status):
             verb='partially completed',
             action_object=foia
         )
+    elif status == 'fix':
+        actstream.action.send(foia, verb='requires fix')
+    elif status == 'payment':
+        actstream.action.send(foia, verb='requires payment')
+    return
 
 class TaskQuerySet(models.QuerySet):
     """Object manager for all tasks"""
@@ -263,7 +270,7 @@ class NewAgencyTask(Task):
 
     def approve(self):
         """Approves agency, resends pending requests, and resolves"""
-        self.agency.approved = True
+        self.agency.status = 'approved'
         self.agency.save()
         # resend the first comm of each foia associated to this agency
         for foia in self.pending_requests():
@@ -274,6 +281,8 @@ class NewAgencyTask(Task):
 
     def reject(self, replacement_agency):
         """Resends pending requests to replacement agency and resolves"""
+        self.agency.status = 'rejected'
+        self.agency.save()
         for foia in self.pending_requests():
             # first switch foia to use replacement agency
             foia.agency = replacement_agency
@@ -289,6 +298,11 @@ class ResponseTask(Task):
     # pylint: disable=no-member
     communication = models.ForeignKey('foia.FOIACommunication')
     created_from_orphan = models.BooleanField(default=False)
+
+    # for predicting statuses
+    predicted_status = models.CharField(
+            max_length=10, choices=STATUS, blank=True, null=True)
+    status_probability = models.IntegerField(blank=True, null=True)
 
     def __unicode__(self):
         return u'Response Task'

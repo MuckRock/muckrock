@@ -4,7 +4,9 @@ Serilizers for the FOIA application API
 
 from rest_framework import serializers, permissions
 
+from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, FOIANote
+from muckrock.jurisdiction.models import Jurisdiction
 
 # pylint: disable=too-few-public-methods
 
@@ -53,6 +55,12 @@ class FOIAFileSerializer(serializers.ModelSerializer):
 class FOIACommunicationSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Communication model"""
     files = FOIAFileSerializer(many=True)
+    foia = serializers.PrimaryKeyRelatedField(
+            queryset=FOIARequest.objects.all(),
+            style={'base_template': 'input.html'})
+    likely_foia = serializers.PrimaryKeyRelatedField(
+            queryset=FOIARequest.objects.all(),
+            style={'base_template': 'input.html'})
     class Meta:
         model = FOIACommunication
 
@@ -67,6 +75,12 @@ class FOIANoteSerializer(serializers.ModelSerializer):
 class FOIARequestSerializer(serializers.ModelSerializer):
     """Serializer for FOIA Request model"""
     username = serializers.StringRelatedField(source='user')
+    jurisdiction = serializers.PrimaryKeyRelatedField(
+            queryset=Jurisdiction.objects.all(),
+            style={'base_template': 'input.html'})
+    agency = serializers.PrimaryKeyRelatedField(
+            queryset=Agency.objects.all(),
+            style={'base_template': 'input.html'})
     tags = serializers.StringRelatedField(many=True)
     communications = FOIACommunicationSerializer(many=True)
     notes = FOIANoteSerializer(many=True)

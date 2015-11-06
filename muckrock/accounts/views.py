@@ -14,7 +14,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
-from datetime import datetime
+from datetime import datetime, date
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions, DjangoModelPermissionsOrAnonReadOnly
 import json
@@ -54,7 +54,7 @@ def register(request):
                 user=new_user,
                 acct_type='community',
                 monthly_requests=0,
-                date_update=datetime.now()
+                date_update=date.today()
             )
             send_mail(
                 'Welcome to MuckRock',
@@ -185,7 +185,6 @@ def subscribe(request):
             logger.info(logger_msg)
         else:
             messages.error(request, user_msg)
-            logger.error(logger_msg, exc_info=sys.exc_info())
 
         return redirect('acct-my-profile')
 
@@ -216,7 +215,7 @@ def buy_requests(request):
         except (stripe.CardError, ValueError) as exc:
             msg = 'Payment error: %s Your card has not been charged.' % exc
             messages.error(request, msg)
-            logger.error('Payment error: %s', exc, exc_info=sys.exc_info())
+            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
             return redirect(url_redirect)
         user_profile.num_requests += 4
         user_profile.save()
@@ -480,7 +479,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """API views for User"""
     # pylint: disable=too-many-ancestors
     # pylint: disable=too-many-public-methods
-    queryset = User.objects.all()
+    queryset = User.objects.prefetch_related('profile', 'groups')
     serializer_class = UserSerializer
     permission_classes = (DjangoModelPermissions,)
     filter_fields = ('username', 'first_name', 'last_name', 'email', 'is_staff')

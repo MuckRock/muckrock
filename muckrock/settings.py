@@ -163,6 +163,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'lot.middleware.LOTMiddleware',
+    'muckrock.middleware.RemoveTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'reversion.middleware.RevisionMiddleware',
@@ -247,6 +248,7 @@ INSTALLED_APPS = (
     'muckrock.crowdfund',
     'muckrock.sidebar',
     'muckrock.task',
+    'muckrock.notification',
     'muckrock.organization',
     'muckrock.project',
     'muckrock.mailgun',
@@ -311,7 +313,7 @@ ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
 }
 
-DBSETTINGS_USE_SITES = False
+DBSETTINGS_USE_SITES = True
 
 if DEBUG:
     TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
@@ -359,6 +361,7 @@ MONTHLY_REQUESTS = {
     'pro': 20,
     'proxy': 20,
     'org': 200,
+    'robot': 0,
 }
 
 MARKDOWN_DEUX_STYLES = {
@@ -568,6 +571,10 @@ FILER_STORAGES = {
 }
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
+
+ACTSTREAM_SETTINGS = {
+    'MANAGER': 'muckrock.managers.MRActionManager'
+}
 
 SOUTH_MIGRATION_MODULES = {
     'taggit': 'taggit.south_migrations',

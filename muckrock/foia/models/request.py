@@ -144,6 +144,7 @@ class FOIARequest(models.Model):
     date_followup = models.DateField(blank=True, null=True)
     date_estimate = models.DateField(blank=True, null=True,
             verbose_name='Estimated Date Completed')
+    date_processing = models.DateField(blank=True, null=True)
     embargo = models.BooleanField(default=False)
     permanent_embargo = models.BooleanField(default=False)
     date_embargo = models.DateField(blank=True, null=True)
@@ -464,7 +465,7 @@ class FOIARequest(models.Model):
 
         # if agency isnt approved, do not email or snail mail
         # it will be handled after agency is approved
-        approved_agency = self.agency and self.agency.approved
+        approved_agency = self.agency and self.agency.status == 'approved'
         can_email = self.email and not appeal
         comm = self.last_comm()
 
@@ -481,6 +482,7 @@ class FOIARequest(models.Model):
         elif approved_agency:
             # snail mail it
             self.status = 'submitted'
+            self.date_processing = date.today()
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
@@ -489,6 +491,7 @@ class FOIARequest(models.Model):
         else:
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
+            self.date_processing = date.today()
         # generate sent activity
         actstream.action.send(
             self,
@@ -525,6 +528,7 @@ class FOIARequest(models.Model):
             self._send_email()
         else:
             self.status = 'submitted'
+            self.date_processing = date.today()
             self.save()
             comm.delivered = 'mail'
             comm.save()
@@ -631,7 +635,9 @@ class FOIARequest(models.Model):
         """How many days do we wait until we follow up?"""
         # pylint: disable=no-member
         if self.date_estimate and date.today() < self.date_estimate:
-            return 183
+            # return the days until the estimated date
+            date_difference = self.date_estimate - date.today()
+            return date_difference.days
         if self.jurisdiction and self.jurisdiction.level == 'f':
             return 30
         else:
