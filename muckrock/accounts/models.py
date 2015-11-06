@@ -272,6 +272,7 @@ class Profile(models.Model):
 
     def pay(self, token, amount, metadata):
         """Create a stripe charge for the user"""
+        # pylint: disable=no-self-use
         if not metadata.get('email') or not metadata.get('action'):
             raise ValueError('The charge metadata is malformed.')
         stripe.Charge.create(

@@ -104,6 +104,7 @@ class CrowdfundABC(models.Model):
 
     def make_payment(self, token, email, amount, show=False, user=None):
         """Creates a payment for the crowdfund"""
+        # pylint: disable=too-many-arguments
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
