@@ -16,6 +16,24 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
+mock_charge = mock.Mock()
+mock_charge.id = 'test-charge'
+mock_charge.invoice = False
+mock_charge.amount = 100
+mock_charge.created = 1446680016
+mock_charge.source = {'last4': '1234'}
+MockCharge = mock.Mock()
+MockCharge.retrieve.return_value = mock_charge
+
+mock_invoice = mock.Mock()
+mock_invoice.id = 'test-invoice'
+mock_invoice.plan.id = 'pro'
+mock_invoice.attempt_count = 1
+mock_invoice.customer = 'test-customer'
+mock_invoice.charge = mock_charge
+MockInvoice = mock.Mock()
+MockInvoice.retrieve.return_value = mock_invoice
+
 class TestDailyNotification(TestCase):
     """Tests the daily email notification object. It extends Django's built-in email classes."""
     def setUp(self):
@@ -83,95 +101,122 @@ class TestDailyTask(TestCase):
         mock_send.assert_called_once_with(self.staff_user)
         mock_profile_send.assert_called_once()
 
+
+@mock.patch('stripe.Charge', MockCharge)
+class TestSendChargeReceiptTask(TestCase):
+    """Tests the send charge receipt task."""
+    # pylint: disable=no-self-use
+
+    def setUp(self):
+        self.user = factories.UserFactory()
+        mock_charge.invoice = None
+        mock_charge.metadata = {
+            'email': self.user.email
+        }
+
+    @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
+    def test_request_purchase_receipt(self, mock_send):
+        """A receipt should be sent after request bundle is purchased."""
+        mock_charge.metadata['action'] = 'request-purchase'
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_called_once_with(self.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
+    def test_request_fee_receipt(self, mock_send):
+        """A receipt should be sent after request fee is paid."""
+        # pylint: disable=no-member
+        foia = factories.FOIARequestFactory()
+        mock_charge.metadata['action'] = 'request-fee'
+        mock_charge.metadata['foia'] = foia.pk
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_called_once_with(self.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.MultiRequestReceipt.send')
+    def test_multirequest_receipt(self, mock_send):
+        """A receipt should be sent after a multi-request is purchased."""
+        mock_charge.metadata['action'] = 'request-multi'
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_called_once_with(self.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.CrowdfundPaymentReceipt.send')
+    def test_crowdfund_payment_receipt(self, mock_send):
+        """A receipt should be sent after a crowdfund payment is made."""
+        mock_charge.metadata['action'] = 'crowdfund-payment'
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_called_once_with(self.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
+    def test_other_receipt(self, mock_send):
+        """A generic receipt should be sent for any other charges."""
+        mock_charge.metadata['action'] = 'unknown-charge'
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_called_once_with(self.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
+    def test_invoice_charge(self, mock_send):
+        """A charge with an attachced invoice should not generate an email."""
+        mock_charge.invoice = mock_invoice.id
+        mock_charge.metadata['action'] = 'unknown-charge'
+        tasks.send_charge_receipt(mock_charge.id)
+        mock_send.assert_not_called()
+
+
+@mock.patch('stripe.Invoice', MockInvoice)
+@mock.patch('stripe.Charge', MockCharge)
+class TestSendInvoiceReceiptTask(TestCase):
+    """Invoice receipts are send when an invoice payment succeeds."""
+    # pylint: disable=no-self-use
+
+    @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
+    def test_pro_invoice_receipt(self, mock_send):
+        """A receipt should be sent after a pro subscription payment is made."""
+        customer_id = 'test-pro'
+        profile = factories.ProfileFactory(customer_id=customer_id)
+        mock_invoice.customer = customer_id
+        tasks.send_invoice_receipt(mock_invoice)
+        mock_send.assert_called_once_with(profile.user, mock_charge)
+
+    @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
+    def test_org_invoice_receipt(self, mock_send):
+        """A receipt should be sent after an org subscription payment is made."""
+        customer_id = 'test-org'
+        owner = factories.UserFactory(profile__customer_id=customer_id)
+        factories.OrganizationFactory(owner=owner)
+        mock_invoice.customer = customer_id
+        tasks.send_invoice_receipt(mock_invoice.id)
+        mock_send.assert_called_once_with(owner, mock_charge)
+
+
+@mock.patch('stripe.Invoice', MockInvoice)
 class TestFailedPaymentTask(TestCase):
     """Tests the failed payment task."""
     def setUp(self):
-        customer_id = 'test-customer'
-        self.invoice = {
-            'attempt_count': 1,
-            'customer': customer_id
-        }
-        self.profile = factories.ProfileFactory(customer_id=customer_id)
+        mock_invoice.plan.id = 'pro'
+        mock_invoice.attempt_count = 1
+        self.profile = factories.ProfileFactory(customer_id=mock_invoice.customer)
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
-    def test_send_failed_payment_notification(self, mock_send):
+    def test_failed_invoice_charge(self, mock_send):
         """Make sure the send method is called for a failed payment notification"""
-        tasks.failed_payment(self.invoice)
+        tasks.failed_payment(mock_invoice.id)
         mock_send.assert_called_once_with(self.profile.user)
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
-    def test_last_attempt(self, mock_send, mock_cancel):
+    def test_last_attempt_pro(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's pro subscription"""
-        self.invoice['attempt_count'] = 4
-        tasks.failed_payment(self.invoice)
+        mock_invoice.attempt_count = 4
+        tasks.failed_payment(mock_invoice.id)
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
 
-
-class TestSendReceiptTask(TestCase):
-    """Tests the send receipt task."""
-    def setUp(self):
-        self.user = factories.UserFactory()
-        self.charge = {
-            'metadata': {
-                'email': self.user.email
-            },
-            'id': 'test-charge',
-            'amount': 100,
-            'created': 1446680016,
-            'source': {
-                'last4': '1234',
-            }
-        }
-
-    @mock.patch('muckrock.message.receipts.RequestPurchaseReceipt.send')
-    def testRequestPurchaseReceipt(self, mock_send):
-        """A receipt should be sent after request bundle is purchased."""
-        self.charge['metadata']['action'] = 'request-purchase'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.RequestFeeReceipt.send')
-    def testRequestFeeReceipt(self, mock_send):
-        """A receipt should be sent after request fee is paid."""
-        foia = factories.FOIARequestFactory()
-        self.charge['metadata']['action'] = 'request-fee'
-        self.charge['metadata']['foia'] = foia.pk
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.MultiRequestReceipt.send')
-    def testMultiRequestReceipt(self, mock_send):
-        """A receipt should be sent after a multi-request is purchased."""
-        self.charge['metadata']['action'] = 'request-multi'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.CrowdfundPaymentReceipt.send')
-    def testCrowdfundPaymentReceipt(self, mock_send):
-        """A receipt should be sent after a crowdfund payment is made."""
-        self.charge['metadata']['action'] = 'crowdfund-payment'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.ProSubscriptionReceipt.send')
-    def testProSubscriptionReceipt(self, mock_send):
-        """A receipt should be sent after a pro subscription payment is made."""
-        self.charge['metadata']['action'] = 'pro-subscription'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.OrgSubscriptionReceipt.send')
-    def testOrgSubscriptionReceipt(self, mock_send):
-        """A receipt should be sent after an org subscription payment is made."""
-        self.charge['metadata']['action'] = 'org-subscription'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
-
-    @mock.patch('muckrock.message.receipts.GenericReceipt.send')
-    def testOtherReceipt(self, mock_send):
-        """A generic receipt should be sent for any other charges."""
-        self.charge['metadata']['action'] = 'unknown-charge'
-        tasks.send_receipt(self.charge)
-        mock_send.assert_called_once_with(self.user)
+    @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
+    @mock.patch('muckrock.organization.models.Organization.cancel_subscription')
+    def test_last_attempt_org(self, mock_send, mock_cancel):
+        """After the last attempt at payment, cancel the user's org subscription"""
+        factories.OrganizationFactory(owner=self.profile.user)
+        mock_invoice.attempt_count = 4
+        mock_invoice.plan.id = 'org'
+        tasks.failed_payment(mock_invoice.id)
+        mock_send.assert_called_once_with(self.profile.user)
+        mock_cancel.assert_called_once()
