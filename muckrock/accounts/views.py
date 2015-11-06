@@ -211,7 +211,12 @@ def buy_requests(request):
         user_profile = request.user.profile
         try:
             stripe_token = request.POST['stripe_token']
-            user_profile.pay(stripe_token, 2000, 'Charge for 4 requests')
+            stripe_email = request.POST['stripe_email']
+            metadata = {
+                'email': stripe_email,
+                'action': 'request-purchase',
+            }
+            user_profile.pay(stripe_token, 2000, metadata)
         except (stripe.CardError, ValueError) as exc:
             msg = 'Payment error: %s Your card has not been charged.' % exc
             messages.error(request, msg)

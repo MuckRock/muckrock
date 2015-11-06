@@ -102,7 +102,7 @@ class CrowdfundABC(models.Model):
         # pylint:disable=no-self-use
         raise NotImplementedError
 
-    def make_payment(self, token, amount, show=False, user=None):
+    def make_payment(self, token, email, amount, show=False, user=None):
         """Creates a payment for the crowdfund"""
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
@@ -115,7 +115,10 @@ class CrowdfundABC(models.Model):
             amount=stripe_amount,
             source=token,
             currency='usd',
-            description='Crowdfund contribution: %s' % self
+            metadata={
+                'email': email,
+                'action': 'crowdfund-payment'
+            }
         )
         payment_object = self.get_crowdfund_payment_object()
         payment = payment_object.objects.create(

@@ -94,14 +94,14 @@ class TestCrowdfundPayment(TestCase):
     def test_make_payment(self):
         """Should make and return a payment object"""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, amount)
+        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
         ok_(isinstance(payment, models.CrowdfundProjectPayment),
             'Making a payment should create and return a payment object')
 
     def test_unlimit_amount(self):
         """The amount paid should be able to exceed the amount required."""
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, amount)
+        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
         eq_(payment.amount, amount,
             'The payment should be made in full despite exceeding the amount required.')
 
@@ -110,7 +110,7 @@ class TestCrowdfundPayment(TestCase):
         self.crowdfund.payment_capped = True
         self.crowdfund.save()
         amount = Decimal(100)
-        payment = self.crowdfund.make_payment(self.token, amount)
+        payment = self.crowdfund.make_payment(self.token, 'test@email.com', amount)
         eq_(payment.amount, self.crowdfund.payment_required,
             'The amount should be capped at the crowdfund\'s required payment.')
         ok_(self.crowdfund.closed,
@@ -126,10 +126,10 @@ class TestStripeIntegration(TestCase):
     def test_make_valid_payment(self):
         """Charge should go through when card is valid"""
         token = get_stripe_token()
-        self.crowdfund.make_payment(token, self.amount)
+        self.crowdfund.make_payment(token, 'test@email.com', self.amount)
 
     @raises(stripe.CardError)
     def test_make_invalid_payment(self):
         """Charge should not go through when card is declined"""
         token = get_stripe_token('4000000000000002')
-        self.crowdfund.make_payment(token, self.amount)
+        self.crowdfund.make_payment(token, 'test@email.com', self.amount)

@@ -191,11 +191,12 @@ def pay_request(request, jurisdiction, jidx, slug, idx):
     amount = request.POST.get('amount', False)
     if token and email and amount:
         try:
-            request.user.profile.pay(
-                token,
-                amount,
-                'Charge for request: %s %s' % (foia.title, foia.pk)
-            )
+            metadata = {
+                'email': email,
+                'action': 'request-fee',
+                'foia': foia.pk
+            }
+            request.user.profile.pay(token, amount, metadata)
         except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
             messages.error(request, 'Payment error: %s' % exception)
             logger.error('Payment error: %s', exception, exc_info=sys.exc_info())

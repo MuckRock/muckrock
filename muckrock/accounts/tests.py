@@ -159,7 +159,11 @@ class TestProfileUnit(TestCase):
 
     def test_pay(self):
         """Test making a payment"""
-        self.profile.pay('token', 100, 'test charge')
+        metadata = {
+            'email': self.profile.user.email,
+            'action': test-charge
+        }
+        self.profile.pay('token', 100, metadata)
         ok_(mock_charge.create.called)
 
     def test_start_pro_subscription(self):
@@ -197,7 +201,11 @@ class TestStripeIntegration(TestCase):
     def test_pay(self):
         """Test making a payment"""
         token = get_stripe_token()
-        self.profile.pay(token, 100, 'Test charge (muckrock.accounts.tests)')
+        metadata = {
+            'email': self.profile.user.email,
+            'action': 'test-charge'
+        }
+        self.profile.pay(token, 100, metadata)
 
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
