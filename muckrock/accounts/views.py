@@ -283,7 +283,7 @@ def stripe_webhook(request):
         return HttpResponseNotAllowed(['POST'])
     try:
         event_json = json.loads(request.body)
-        event_data = event_json['data']['object']
+        event_object_id = event_json['data']['object']['id']
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error('Error parsing JSON: %s', exception)
         return HttpResponseBadRequest()
@@ -308,9 +308,11 @@ def stripe_webhook(request):
     }
     logger.info(success_msg)
     if event_type == 'charge.succeeded':
-        muckrock.message.tasks.send_receipt.delay(event_data)
+        muckrock.message.tasks.send_charge_receipt.delay(event_object_id)
+    elif event_type == 'invoice.payment_succeeded':
+        muckrock.message.tasks.send_invoice_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_failed':
-        muckrock.message.tasks.failed_payment.delay(event_data)
+        muckrock.message.tasks.failed_payment.delay(event_object_id)
     return HttpResponse()
 
 

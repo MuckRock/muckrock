@@ -110,7 +110,7 @@ class FailedPaymentNotification(EmailMultiAlternatives):
     """Sends a failed payment notification"""
     text_template = 'message/notification/failed_payment.txt'
 
-    def __init__(self, user, attempt, **kwargs):
+    def __init__(self, user, attempt, subscription, **kwargs):
         """Initialize the notification"""
         super(FailedPaymentNotification, self).__init__(**kwargs)
         if isinstance(user, User):
@@ -123,5 +123,5 @@ class FailedPaymentNotification(EmailMultiAlternatives):
         self.subject = 'Payment Failed'
         self.body = render_to_string(
             self.text_template,
-            {'user': self.user, 'attempt': attempt}
+            {'user': self.user, 'attempt': attempt, 'type': subscription}
         )

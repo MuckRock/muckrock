@@ -7,10 +7,13 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from datetime import datetime
+import logging
 
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS
+
+logger = logging.getLogger(__name__)
 
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
@@ -26,7 +29,7 @@ class GenericReceipt(EmailMultiAlternatives):
         else:
             self.user = None
             try:
-                user_email = charge['metadata']['email']
+                user_email = charge.metadata['email']
                 self.to = [user_email]
             except KeyError:
                 self.to = []
@@ -39,12 +42,12 @@ class GenericReceipt(EmailMultiAlternatives):
 
     def get_context_data(self, charge):
         """Returns a dictionary of context for the template, given the charge object"""
-        amount = charge['amount'] / 100.0 # Stripe uses smallest-unit formatting
-        card = charge['source']
+        amount = charge.amount / 100.0 # Stripe uses smallest-unit formatting
+        card = charge.source
         return {
             'user': self.user,
-            'id': charge['id'],
-            'date': datetime.fromtimestamp(charge['created']),
+            'id': charge.id,
+            'date': datetime.fromtimestamp(charge.created),
             'item': self.item,
             'last4': card['last4'],
             'amount': amount
@@ -73,7 +76,7 @@ class RequestFeeReceipt(GenericReceipt):
         context['base_amount'] = base_amount
         context['fee_amount'] = fee_amount
         try:
-            foia_pk = charge['metadata']['foia']
+            foia_pk = charge.metadata['foia']
             foia = FOIARequest.objects.get(pk=foia_pk)
             context['url'] = foia.get_absolute_url()
         except KeyError:
