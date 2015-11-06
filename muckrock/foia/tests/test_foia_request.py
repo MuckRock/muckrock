@@ -199,22 +199,24 @@ class TestFOIARequestUnit(TestCase):
 
         nose.tools.eq_(foia._followup_days(), 15)
 
-        foia.date_estimate = datetime.date(2100, 1, 1)
+        num_days = 365
+        foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
         foia.followup(automatic=True)
         nose.tools.assert_in('I am still', mail.outbox[-1].body)
-        nose.tools.eq_(foia._followup_days(), 183)
+        nose.tools.eq_(foia._followup_days(), num_days)
 
-        foia.date_estimate = datetime.date(2000, 1, 1)
+        foia.date_estimate = datetime.date.today()
         foia.followup()
         nose.tools.assert_in('check on the status', mail.outbox[-1].body)
         nose.tools.eq_(foia._followup_days(), 15)
 
     def test_foia_followup_estimated(self):
-        """If request has an estimated date, returns correct number of days"""
+        """If request has an estimated date, returns number of days until the estimated date"""
         # pylint: disable=protected-access
+        num_days = 365
         foia = FOIARequest.objects.get(pk=15)
-        foia.date_estimate = datetime.date.today() + datetime.timedelta(2)
-        nose.tools.eq_(foia._followup_days(), 183)
+        foia.date_estimate = datetime.date.today() + datetime.timedelta(num_days)
+        nose.tools.eq_(foia._followup_days(), num_days)
 
      # manager
     def test_manager_get_submitted(self):

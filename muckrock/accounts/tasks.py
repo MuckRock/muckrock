@@ -6,7 +6,7 @@ Tasks for the account application
 from celery.schedules import crontab
 from celery.task import periodic_task
 from django.contrib.auth.models import User
-from django.db.models import Sum
+from django.db.models import Sum, F
 
 import logging
 from datetime import date, timedelta
@@ -15,9 +15,20 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.agency.models import Agency
 from muckrock.foia.models import FOIARequest, FOIAFile, FOIACommunication
 from muckrock.news.models import Article
-from muckrock.task.models import Task, OrphanTask, SnailMailTask, RejectedEmailTask, \
-                                 StaleAgencyTask, FlaggedTask, NewAgencyTask, ResponseTask, \
-                                 GenericTask, PaymentTask, GenericCrowdfundTask, FailedFaxTask
+from muckrock.task.models import (
+        Task,
+        OrphanTask,
+        SnailMailTask,
+        RejectedEmailTask,
+        StaleAgencyTask,
+        FlaggedTask,
+        NewAgencyTask,
+        ResponseTask,
+        GenericTask,
+        PaymentTask,
+        GenericCrowdfundTask,
+        FailedFaxTask,
+        )
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +53,10 @@ def store_statstics():
         total_requests_no_docs=FOIARequest.objects.filter(status='no_docs').count(),
         total_requests_partial=FOIARequest.objects.filter(status='partial').count(),
         total_requests_abandoned=FOIARequest.objects.filter(status='abandoned').count(),
+        requests_processing_days=(FOIARequest.objects
+            .filter(status='submitted')
+            .exclude(date_processing=None)
+            .aggregate(days=Sum(date.today() - F('date_processing')))['days']),
         total_pages=FOIAFile.objects.aggregate(Sum('pages'))['pages__sum'],
         total_users=User.objects.count(),
         total_agencies=Agency.objects.count(),
@@ -91,6 +106,10 @@ def store_statstics():
         total_crowdfundpayment_tasks=GenericCrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
             GenericCrowdfundTask.objects.filter(resolved=False).count(),
+        daily_robot_response_tasks=ResponseTask.objects.filter(
+               date_done=yesterday,
+               resolved_by__profile__acct_type='robot',
+               ).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,
@@ -102,16 +121,7 @@ def _notices(email_pref):
     """Send out notices"""
     profiles_to_notify = Profile.objects.filter(email_pref=email_pref).distinct()
     for profile in profiles_to_notify:
-        # for now, only send staff the new updates
-        if profile.user.is_staff:
-            profile.send_timed_update()
-        else:
-            profile.send_notifications()
-
-@periodic_task(run_every=crontab(hour=10, minute=0), name='muckrock.accounts.tasks.daily_notices')
-def daily_notices():
-    """Send out daily notices"""
-    _notices('daily')
+        profile.send_notifications()
 
 @periodic_task(run_every=crontab(day_of_week='mon', hour=10, minute=0),
                name='muckrock.accounts.tasks.weekly')

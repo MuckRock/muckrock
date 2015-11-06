@@ -11,6 +11,12 @@ from muckrock.agency.models import Agency
 class AgencySerializer(serializers.ModelSerializer):
     """Serializer for Agency model"""
     types = serializers.StringRelatedField(many=True)
+    appeal_agency = serializers.PrimaryKeyRelatedField(
+            queryset=Agency.objects.all(),
+            style={'base_template': 'input.html'})
+    parent = serializers.PrimaryKeyRelatedField(
+            queryset=Agency.objects.all(),
+            style={'base_template': 'input.html'})
 
     def __init__(self, *args, **kwargs):
         # pylint: disable=no-member
