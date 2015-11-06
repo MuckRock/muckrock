@@ -288,6 +288,8 @@ def stripe_webhook(request):
         return HttpResponseNotAllowed(['POST'])
     try:
         event_json = json.loads(request.body)
+        event_id = event_json['id']
+        event_type = event_json['type']
         event_object_id = event_json['data']['object']['id']
     except (TypeError, ValueError, SyntaxError) as exception:
         logging.error('Error parsing JSON: %s', exception)
@@ -297,8 +299,6 @@ def stripe_webhook(request):
         return HttpResponseBadRequest()
     # If we've made it this far, then the webhook message was successfully sent!
     # Now it's up to us to act on it.'
-    event_id = event_json['id']
-    event_type = event_json['type']
     success_msg = (
         'Received Stripe webhook\n'
         '\tfrom:\t%(address)s\n'
