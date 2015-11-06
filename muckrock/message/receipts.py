@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 from datetime import datetime
 
 from muckrock.foia.models import FOIARequest
+from muckrock.organization.models import Organization
+from muckrock.settings import MONTHLY_REQUESTS
 
 class GenericReceipt(EmailMultiAlternatives):
     """A basic receipt"""
@@ -99,11 +101,23 @@ class ProSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring pro subscription charge"""
     subject = u'Payment received for professional account'
     item = u'Professional subscription'
-    text_template = 'message/receipt/pro.txt'
+    text_template = 'message/receipt/pro_subscription.txt'
+
+    def get_context_data(self, charge):
+        """Add monthly requests to context"""
+        context = super(ProSubscriptionReceipt, self).get_context_data(charge)
+        context['monthly_requests'] = MONTHLY_REQUESTS['pro']
+        return context
 
 
 class OrgSubscriptionReceipt(GenericReceipt):
     """A receipt for a recurring org subscription charge"""
     subject = u'Payment received dor organization account'
     item = u'Organization subscription'
-    text_template = 'message/receipt/org.txt'
+    text_template = 'message/receipt/org_subscription.txt'
+
+    def get_context_data(self, charge):
+        """Add the organization to the context"""
+        context = super(OrgSubscriptionReceipt, self).get_context_data(charge)
+        context['org'] = Organization.objects.get(owner=self.user)
+        return context
