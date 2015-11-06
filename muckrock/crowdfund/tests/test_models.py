@@ -8,7 +8,7 @@ from django.test import TestCase
 from datetime import date, timedelta
 from decimal import Decimal
 from mock import patch, Mock
-from nose.tools import eq_, ok_, raises
+from nose.tools import eq_, ok_, raises, nottest
 import stripe
 
 from muckrock.factories import FOIARequestFactory, ProjectFactory
@@ -123,11 +123,13 @@ class TestStripeIntegration(TestCase):
         self.crowdfund = create_project_crowdfund()
         self.amount = Decimal(1)
 
+    @nottest
     def test_make_valid_payment(self):
         """Charge should go through when card is valid"""
         token = get_stripe_token()
         self.crowdfund.make_payment(token, 'test@email.com', self.amount)
 
+    @nottest
     @raises(stripe.CardError)
     def test_make_invalid_payment(self):
         """Charge should not go through when card is declined"""

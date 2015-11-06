@@ -200,6 +200,7 @@ class TestStripeIntegration(TestCase):
     def setUp(self):
         self.profile = ProfileFactory()
 
+    @nose.tools.nottest
     def test_pay(self):
         """Test making a payment"""
         token = get_stripe_token()
@@ -209,6 +210,7 @@ class TestStripeIntegration(TestCase):
         }
         self.profile.pay(token, 100, metadata)
 
+    @nose.tools.nottest
     def test_customer(self):
         """Test accessing the profile's Stripe customer"""
         ok_(not self.profile.customer_id)
@@ -216,6 +218,7 @@ class TestStripeIntegration(TestCase):
         ok_(self.profile.customer_id,
             'The customer id should be saved so the customer can be retrieved later.')
 
+    @nose.tools.nottest
     def test_subscription(self):
         """Test starting a subscription"""
         customer = self.profile.customer()
