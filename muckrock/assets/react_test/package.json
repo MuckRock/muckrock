@@ -2,9 +2,12 @@
   "name": "react_test",
   "version": "1.0.0",
   "description": "react test",
-  "main": "gulpfile.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "browserify": {
+    "transform": [
+      [
+        "reactify"
+      ]
+    ]
   },
   "author": "",
   "license": "ISC",
@@ -19,5 +22,10 @@
     "reactify": "^1.1.1",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0"
+  },
+  "dependencies": {
+    "flux": "^2.1.1",
+    "react": "^0.14.2",
+    "react-dom": "^0.14.2"
   }
 }

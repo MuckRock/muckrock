@@ -5,23 +5,12 @@ Already have node.js and npm installed
 
 ## Steps
 
-1. Install gulp.js globally
+1. Install watchify globally
 ```
-npm install --global gulp
-```
-
-2. cd muckrock/assets/react_test
-
-3. Install the node packages needed for react, gulp and browserify
-```
-npm install
+npm install -g watchify
 ```
 
-4. Start the gulp watcher with the following command
+2. Run watchify
 ```
-gulp
+watchify -v -o dist/build.js src/js/App.js
 ```
-
-## To do
-1. Need gulp command for making production build. Currently only making dev build.
-
