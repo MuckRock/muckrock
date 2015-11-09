@@ -3,6 +3,9 @@ Forms for Task app
 """
 
 from django import forms
+from django.contrib.auth.models import User
+
+import autocomplete_light
 
 from muckrock.forms import MRFilterForm
 from muckrock import foia
@@ -10,8 +13,15 @@ from muckrock import foia
 
 class TaskFilterForm(MRFilterForm):
     """Extends MRFilterForm with a 'show resolved' filter"""
-    show_resolved = forms.BooleanField(
-        label='Show Resolved'
+    show_resolved = forms.BooleanField(label='Show resolved', required=False)
+    resolved_by = forms.ModelChoiceField(
+        label='Resolved by',
+        required=False,
+        queryset=User.objects.all(),
+        widget=autocomplete_light.ChoiceWidget(
+            'UserAutocomplete',
+            attrs={'placeholder': 'Resolved by'}
+        )
     )
 
 

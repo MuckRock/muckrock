@@ -55,6 +55,7 @@ class TaskList(MRFilterableListView):
         queryset = super(TaskList, self).get_queryset()
         filter_ids = self.request.GET.getlist('id')
         show_resolved = self.request.GET.get('show_resolved')
+        resolved_by = self.request.GET.get('resolved_by')
         # first we have to check the integrity of the id values
         for filter_id in filter_ids:
             try:
@@ -66,6 +67,8 @@ class TaskList(MRFilterableListView):
             show_resolved = True
         if not show_resolved:
             queryset = queryset.exclude(resolved=True)
+        if resolved_by:
+            queryset = queryset.filter(resolved_by__pk=resolved_by)
         # order queryset
         queryset = queryset.order_by('date_done', 'date_created')
         return queryset
@@ -73,10 +76,14 @@ class TaskList(MRFilterableListView):
     def get_context_data(self, **kwargs):
         """Adds counters for each of the sections (except all) and uses TaskFilterForm"""
         context = super(TaskList, self).get_context_data(**kwargs)
-        if self.request.GET.get('show_resolved'):
-            context['filter_form'] = TaskFilterForm(initial={'show_resolved': True})
-        else:
-            context['filter_form'] = TaskFilterForm()
+        filter_initial = {}
+        show_resolved = self.request.GET.get('show_resolved')
+        if show_resolved:
+            filter_initial['show_resolved'] = True
+        resolved_by = self.request.GET.get('resolved_by')
+        if resolved_by:
+            filter_initial['resolved_by'] = resolved_by
+        context['filter_form'] = TaskFilterForm(initial=filter_initial)
         context['counters'] = count_tasks()
         context['bulk_actions'] = self.bulk_actions
         return context
