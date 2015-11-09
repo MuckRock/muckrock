@@ -32,6 +32,7 @@ class ResponseTaskForm(forms.Form):
     price = forms.DecimalField(required=False)
     date_estimate = forms.DateField(
         label='Estimated completion date',
+        required=False,
         widget=forms.DateInput(format='%m/%d/%Y'),
         input_formats=[
             '%Y-%m-%d',      # '2006-10-25'
