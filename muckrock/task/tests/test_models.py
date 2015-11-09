@@ -217,6 +217,12 @@ class ResponseTaskTests(TestCase):
         eq_(self.task.communication.foia.tracking_id, new_tracking,
             'Should update the tracking number on the request.')
 
+    def test_set_date_estimate(self):
+        new_date = datetime.now()
+        self.task.set_date_estimate(new_date)
+        eq_(self.task.communication.foia.date_estimate, new_date,
+            'Should update the estimated completion date on the request.')
+
     def test_set_price(self):
         price = 1.23
         self.task.set_price(price)

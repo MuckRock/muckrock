@@ -224,6 +224,7 @@ class ResponseTaskList(TaskList):
         status = cleaned_data['status']
         move = cleaned_data['move']
         tracking_number = cleaned_data['tracking_number']
+        date_estimate = cleaned_data['date_estimate']
         price = cleaned_data['price']
         # move is executed first, so that the status and tracking
         # operations are applied to the correct FOIA request
@@ -245,6 +246,12 @@ class ResponseTaskList(TaskList):
             except ValueError:
                 messages.error(request,
                     'You tried to set an invalid tracking id. Just use a string of characters.')
+                error_happened = True
+        if date_estimate:
+            try:
+                task.set_date_estimate(date_estimate)
+            except ValueError:
+                messages.error(request, 'You tried to set the request to an invalid date.')
                 error_happened = True
         if price:
             try:
