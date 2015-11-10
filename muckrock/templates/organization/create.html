@@ -1,8 +1,25 @@
-{% extends 'forms/base_form.html' %}
+{% extends 'base.html' %}
 {% load static from staticfiles %}
-{% block title %}MuckRock &bull; Create an Organization{% endblock %}
-{% block form-type %}organization{% endblock %}
-{% block form-title %}Create an Organization{% endblock %}
+
+{% block content %}
+<section class="create organization">
+    <header>
+        <h1>Create an organization</h1>
+    </header>
+    {% include 'lib/form.html' with button_text="Create" %}
+    <aside class="description">
+        <p>Organization members can:</p>
+        <ul>
+            <li>Embargo permanently</li>
+            <li>Share a pool of requests</li>
+            <li>Save money on each request filed</li>
+        </ul>
+    </aside>
+    <footer>
+        <p>Once you create your organization, you will be asked to activate it.</p>
+    </footer>
+</section>
+{% endblock content %}
 
 {% block scripts %}
 {% include 'autocomplete_light/static.html' %}
