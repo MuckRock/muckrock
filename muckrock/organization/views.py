@@ -19,6 +19,7 @@ from muckrock.organization.forms import CreateForm, \
                                         UpdateForm, \
                                         StaffUpdateForm, \
                                         AddMembersForm
+from muckrock.settings import STRIPE_PUB_KEY
 
 
 class OrganizationListView(ListView):
@@ -106,6 +107,18 @@ class OrganizationActivateView(UpdateView):
             messages.error(self.request, 'You cannot activate an already active organization.')
             return redirect(organization.get_absolute_url())
         return super(OrganizationActivateView, self).dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        """Adds Stripe pk and user's email to activation form."""
+        context = super(OrganizationActivateView, self).get_context_data(**kwargs)
+        organization = self.get_object()
+        context['org'] = organization
+        context['base_users'] = organization.max_users
+        context['base_requests'] = organization.monthly_requests
+        context['base_price'] = organization.monthly_cost/100.00
+        context['user_email'] = self.request.user.email
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        return context
 
     def form_valid(self, form):
         """When the form is valid, activate the organization."""

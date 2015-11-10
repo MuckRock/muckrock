@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block content %}
+<section class="create organization">
+    <header>
+        <h1>Build your organization's plan</h1>
+    </header>
+    <form method="post">
+        <label for="{{ form.max_users.id_for_label }}">Member Seats</label>
+        {{ form.max_users }}
+        <button
+            data-amount="0"
+            data-description="Organization Account"
+            data-email="{{ request.user.email }}"
+            data-label="Activate"
+            data-form="#subscribe"
+            class="checkout-button primary">
+            Activate
+        </button>
+    </form>
+    <aside class="description">
+        <p>Base plan includes 3 seats, 50 requests/month, $100/month</p>
+        <p>Each additional seat adds 10 requests and $20 to your plan.</p>
+        <h2>Your plan</h2>
+        <ul>
+            <li id="your-plan-users"><span class="value">{{ base_users}}</span> member seats</p>
+            <li id="your-plan-requests"><span class="value">{{ base_requests }}</span> requests per month</li>
+            <li id="your-plan-price">$<span class="price">{{ base_price|floatformat:2 }}</span> per month</li>
+        </ul>
+    </aside>
+    <footer>
+        <p>Once you activate your organization, you can add members to it.</p>
+        <p><a href="{{ org.get_absolute_url }}">Skip this step</a></p>
+    </footer>
+</section>
+{% endblock content %}
