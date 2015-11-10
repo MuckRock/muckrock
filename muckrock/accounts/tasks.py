@@ -106,6 +106,10 @@ def store_statstics():
         total_crowdfundpayment_tasks=GenericCrowdfundTask.objects.count(),
         total_unresolved_crowdfundpayment_tasks=
             GenericCrowdfundTask.objects.filter(resolved=False).count(),
+        daily_robot_response_tasks=ResponseTask.objects.filter(
+               date_done=yesterday,
+               resolved_by__profile__acct_type='robot',
+               ).count(),
         )
     # stats needs to be saved before many to many relationships can be set
     stats.users_today = User.objects.filter(last_login__year=yesterday.year,

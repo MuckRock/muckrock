@@ -351,6 +351,14 @@ class ResponseTask(Task):
         foia.price = price
         foia.save()
 
+    def set_date_estimate(self, date_estimate):
+        """Sets the estimated completion date of the communication's request."""
+        foia = self.communication.foia
+        foia.date_estimate = date_estimate
+        foia.update()
+        foia.save()
+        logging.info('Estimated completion date set to %s', date_estimate)
+
 
 class FailedFaxTask(Task):
     """A fax for this communication failed"""
