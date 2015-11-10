@@ -50,6 +50,7 @@ class UpdateForm(forms.ModelForm):
     class Meta:
         model = Organization
         fields = ['max_users']
+        widgets = {'max_users': forms.NumberInput(attrs={'min': ORG_MIN_SEATS})}
 
     def clean_max_users(self):
         """Ensures that max_users is not below the minimum value."""
