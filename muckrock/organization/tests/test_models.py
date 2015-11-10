@@ -7,7 +7,6 @@ from django.test import TestCase
 
 from mock import Mock, patch
 import nose.tools
-import stripe
 
 import muckrock.factories
 from muckrock.utils import get_stripe_token
@@ -210,7 +209,7 @@ class TestSubscriptions(TestCase):
 
 
 # actually tests Stripe code
-class TestStripe(TestCase):
+class TestStripeIntegration(TestCase):
     """
     Test Stripe integration for activate, update, and cancel methods.
     Mainly checking for errors on calls to SDK methods.
@@ -219,6 +218,7 @@ class TestStripe(TestCase):
         self.org = muckrock.factories.OrganizationFactory()
         self.token = get_stripe_token()
 
+    @nose.tools.nottest
     def test_methods(self):
         """Test the subscription methods."""
         self.org.activate_subscription(self.token, self.org.max_users)

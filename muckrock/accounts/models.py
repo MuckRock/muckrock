@@ -271,13 +271,16 @@ class Profile(models.Model):
         self.save()
         return subscription
 
-    def pay(self, token, amount, desc):
+    def pay(self, token, amount, metadata):
         """Create a stripe charge for the user"""
+        # pylint: disable=no-self-use
+        if not metadata.get('email') or not metadata.get('action'):
+            raise ValueError('The charge metadata is malformed.')
         stripe.Charge.create(
             amount=amount,
             currency='usd',
             source=token,
-            description='%s: %s' % (self.user.username, desc)
+            metadata=metadata
         )
 
     def generate_confirmation_key(self):
