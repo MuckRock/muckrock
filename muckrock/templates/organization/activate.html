@@ -2,19 +2,20 @@
 {% load static from staticfiles %}
 
 {% block content %}
-<section class="create organization">
+<section class="activate organization">
     <header>
         <h1>Build your organization's plan</h1>
     </header>
-    <form method="post">
+    <form method="post" id="activate-organization">
+        {% csrf_token %}
         <label for="{{ form.max_users.id_for_label }}">Member Seats</label>
         {{ form.max_users }}
         <button
             data-amount="0"
             data-description="Organization Account"
-            data-email="{{ request.user.email }}"
+            data-email="{{ user_email }}"
             data-label="Activate"
-            data-form="#subscribe"
+            data-form="#activate-organization"
             class="checkout-button primary">
             Activate
         </button>
@@ -23,10 +24,10 @@
         <p>Base plan includes 3 seats, 50 requests/month, $100/month</p>
         <p>Each additional seat adds 10 requests and $20 to your plan.</p>
         <h2>Your plan</h2>
-        <ul>
+        <ul class="custom-plan" data-users="{{ base_users}}" data-requests="{{ base_requests }}" data-price="{{ base_price|floatformat:2 }}">
             <li id="your-plan-users"><span class="value">{{ base_users}}</span> member seats</p>
             <li id="your-plan-requests"><span class="value">{{ base_requests }}</span> requests per month</li>
-            <li id="your-plan-price">$<span class="price">{{ base_price|floatformat:2 }}</span> per month</li>
+            <li id="your-plan-price">$<span class="value">{{ base_price|floatformat:2 }}</span> per month</li>
         </ul>
     </aside>
     <footer>
@@ -35,3 +36,59 @@
     </footer>
 </section>
 {% endblock content %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.label,
+                checkoutData.form
+            );
+        });
+    });
+
+    $('#{{form.max_users.id_for_label}}').change(function(){
+        var input = this;
+        var num_seats = $(input).val();
+        updatePlan(num_seats);
+    });
+
+    function updatePlan(new_users){
+        function updatePlanRequests(plan, user_delta){
+            var requests = $(plan).data('requests');
+            var new_requests = requests + (user_delta * 10);
+            $(plan).data('requests', new_requests);
+            $(plan).find('#your-plan-requests .value').text(new_requests);
+
+        }
+        function updatePlanUsers(plan, user_delta){
+            var users = $(plan).data('users');
+            var new_users = users + (user_delta * 1);
+            $(plan).data('users', new_users);
+            $(plan).find('#your-plan-users .value').text(new_users);
+        }
+        function updatePlanPrice(plan, user_delta){
+            var price = parseFloat($(plan).data('price'));
+            var new_price = (price + (user_delta * 20.00)).toFixed(2);
+            $(plan).data('price', new_price);
+            $(plan).find('#your-plan-price .value').text(new_price);
+        }
+        var plan = $('.custom-plan');
+        var users = $(plan).data('users');
+        var user_delta = new_users - users;
+        updatePlanUsers(plan, user_delta);
+        updatePlanRequests(plan, user_delta);
+        updatePlanPrice(plan, user_delta);
+    }
+
+</script>
+{% endblock scripts %}
