@@ -123,7 +123,7 @@ class OrganizationActivateView(UpdateView):
     def form_valid(self, form):
         """When the form is valid, activate the organization."""
         # should expect a token from Stripe
-        token = self.request.POST.get('token')
+        token = self.request.POST.get('stripe_token')
         organization = self.get_object()
         # Do not save the form! The activate_subscription method needs to compare the
         # new number of seats to the existing number of seats. If the UpdateForm is saved,
@@ -184,6 +184,16 @@ class OrganizationUpdateView(UpdateView):
         if self.request.user.is_staff:
             form_class = StaffUpdateForm
         return form_class
+
+    def get_context_data(self, **kwargs):
+        """Adds Stripe pk and user's email to activation form."""
+        context = super(OrganizationUpdateView, self).get_context_data(**kwargs)
+        organization = self.get_object()
+        context['org'] = organization
+        context['base_users'] = organization.max_users
+        context['base_requests'] = organization.monthly_requests
+        context['base_price'] = organization.monthly_cost/100.00
+        return context
 
     def form_valid(self, form):
         """Should handle a valid form differently depending on whether the user is staff."""
