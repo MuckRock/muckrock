@@ -1,0 +1,17 @@
+.create.organization {
+    @include display(flex);
+    @include flex-wrap(wrap);
+    header {
+        @include flex(0 1 100%);
+    }
+    aside {
+        @include flex(1 1 auto);
+    }
+    form {
+        @include flex(2 1 auto);
+        input {
+            display: block;
+            width: 100%;
+        }
+    }
+}
