@@ -182,7 +182,7 @@ class MRFilterableListView(ListView):
         """Paginates list by the return value"""
         try:
             per_page = int(self.request.GET.get('per_page'))
-            return min(per_page, 100)
+            return max(min(per_page, 100), 5)
         except (ValueError, TypeError):
             return 25
 
