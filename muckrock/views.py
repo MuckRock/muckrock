@@ -202,7 +202,11 @@ class MRSearchView(SearchView):
 
     def get_paginate_by(self):
         """Gets per_page the right way"""
-        return int(self.request.GET.get('per_page', 25))
+        try:
+            per_page = int(self.request.GET.get('per_page'))
+            return max(min(per_page, 100), 5)
+        except (ValueError, TypeError):
+            return 25
 
     def build_page(self):
         """Circumvents the hard-coded haystack per page value."""
