@@ -255,12 +255,14 @@ def create_request(request):
             # form is invalid
             # autocomplete blows up if you pass it a bad value in state
             # or local - not sure how this is happening, but am removing
-            # blank values for these keys
+            # non numeric values for these keys
             # this seems to technically be a bug in autocompletes rendering
             # should probably fix it there and submit a patch
             post = request.POST.copy()
             for chk_val in ['local', 'state']:
-                if chk_val in post and not post[chk_val]:
+                try:
+                    chk_val in post and int(post[chk_val])
+                except (ValueError, TypeError):
                     del post[chk_val]
             form = RequestForm(post, request=request)
     else:
