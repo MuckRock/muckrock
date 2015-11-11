@@ -3,6 +3,9 @@ Forms for Task app
 """
 
 from django import forms
+from django.contrib.auth.models import User
+
+import autocomplete_light
 
 from muckrock.forms import MRFilterForm
 from muckrock import foia
@@ -10,8 +13,15 @@ from muckrock import foia
 
 class TaskFilterForm(MRFilterForm):
     """Extends MRFilterForm with a 'show resolved' filter"""
-    show_resolved = forms.BooleanField(
-        label='Show Resolved'
+    show_resolved = forms.BooleanField(label='Show resolved', required=False)
+    resolved_by = forms.ModelChoiceField(
+        label='Resolved by',
+        required=False,
+        queryset=User.objects.all(),
+        widget=autocomplete_light.ChoiceWidget(
+            'UserAutocomplete',
+            attrs={'placeholder': 'Resolved by'}
+        )
     )
 
 
@@ -20,6 +30,23 @@ class ResponseTaskForm(forms.Form):
     move = forms.CharField(required=False)
     tracking_number = forms.CharField(required=False)
     price = forms.DecimalField(required=False)
+    date_estimate = forms.DateField(
+        label='Estimated completion date',
+        required=False,
+        widget=forms.DateInput(format='%m/%d/%Y'),
+        input_formats=[
+            '%Y-%m-%d',      # '2006-10-25'
+            '%m/%d/%Y',      # '10/25/2006'
+            '%m/%d/%y',      # '10/25/06'
+            '%b %d %Y',      # 'Oct 25 2006'
+            '%b %d, %Y',     # 'Oct 25, 2006'
+            '%d %b %Y',      # '25 Oct 2006'
+            '%d %b, %Y',     # '25 Oct, 2006'
+            '%B %d %Y',      # 'October 25 2006'
+            '%B %d, %Y',     # 'October 25, 2006'
+            '%d %B %Y',      # '25 October 2006'
+            '%d %B, %Y']     # '25 October, 2006'
+    )
     status = forms.ChoiceField(choices=foia.models.STATUS)
 
     def clean_move(self):

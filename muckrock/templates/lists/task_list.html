@@ -68,7 +68,8 @@
 
 {% block list-filters %}
 {{ filter_form.show_resolved }}
-<label for="id_show_resolved">{{ filter_form.show_resolved.label }}</label>
+<label for="{{ filter_form.show_resolved.id_for_label }}">{{ filter_form.show_resolved.label }}</label>
+{{ filter_form.resolved_by }}
 {% endblock %}
 
 {% block list-content %}
