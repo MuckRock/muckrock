@@ -51,5 +51,37 @@
         </div>
         {% endif %}
     </aside>
+    <main>
+        <ul class="tabs">
+            <li class="tab" data-section="members">Members</li>
+            <li class="tab" data-section="requests">Requests</li>
+        </ul>
+        <div class="tab-sections">
+            <section class="tab-section members">
+                <h1>Members</h1>
+            </section>
+            <section class="tab-section requests">
+                <h1>Requests</h1>
+            </section>
+        </div>
+    </main>
 </div>
 {% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    function activate(element) {
+        console.log(element);
+        $(element).addClass('active');
+        $(element).siblings().removeClass('active');
+    }
+    $('.tab').click(function(){
+        var sectionName = $(this).data('section');
+        var selector = '.' + sectionName;
+        var section = $('.tab-sections').find(selector);
+        activate(this);
+        activate(section);
+    });
+    $('.tabs').children().first().click();
+</script>
+{% endblock scripts %}
