@@ -182,9 +182,15 @@ class Organization(models.Model):
         self.stripe_id = subscription.id
         self.active = True
         self.save()
-        # if the owner has a pro account, cancel it
+
+        # If the owner has a pro account, cancel it.
+        # Assume the pro user has an active subscription.
+        # On the off chance that they don't, just silence the error.
         if self.owner.profile.acct_type == 'pro':
-            self.owner.profile.cancel_pro_subscription()
+            try:
+                self.owner.profile.cancel_pro_subscription()
+            except AttributeError:
+                pass
         self.owner.profile.subscription_id = subscription.id
         self.owner.profile.save()
         return subscription

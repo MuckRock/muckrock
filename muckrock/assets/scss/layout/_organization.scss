@@ -39,22 +39,31 @@ $request-breakpoint: 768px;
 }
 
 .organization.detail .tabs {
+    $border-color: $color-blue-dark;
     list-style: none;
     padding-left: 0;
-    border-bottom: 1px solid $color-grey;
+    border-bottom: 1px solid $border-color;
+    font-weight: $font-weight-bold;
     .tab {
         display: inline-block;
         margin-bottom: -1px;
-        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        padding: $vertical-rhythm/2 $vertical-rhythm;
         border: 1px solid transparent;
+        border-bottom-color: $border-color;
         @include border-top-radius($base-border-radius/2);
         cursor: pointer;
         color: $color-blue;
+        &:hover {
+            background: $color-blue-light;
+        }
     }
     .active {
-        border-color: $color-grey;
+        border-color: $border-color;
         border-bottom-color: $color-white;
-        color: $color-black;
+        color: $color-blue-dark;
+        &:hover {
+            background: transparent;
+        }
     }
 }
 
