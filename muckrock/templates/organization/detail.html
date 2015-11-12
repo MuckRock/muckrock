@@ -1,125 +1,55 @@
-{% extends 'details/base_detail.html' %}
-{% load mathfilters %}
-{% block title %}MuckRock &bull; {{ organization }}{% endblock title %}
-{% block type %}organization{% endblock type %}
+{% extends 'base.html' %}
 
-{% block header %}
-<h1>{{ organization }}</h1>
-<summary>Owned by <a href="{% url 'acct-profile' organization.owner.username %}" title="{{ organization.owner.get_full_name }}'s profile page">{{ organization.owner.get_full_name }}</a></summary>
-{% endblock %}
-
-{% block aside %}
-{% if is_staff or is_owner or is_member %}
-<dl>
-    <dt>Subscription Status</dt>
-    <dd>{% if organization.is_active %}<span class="success">Active{% else %}<span class="failure">Inactive{% endif %}</span></dd>
-    <dt>Requests Remaining</dt>
-    <dd>{{ organization.get_requests }}</dd>
-</dl>
-{% endif %}
-{% endblock %}
-
-{% block main %}
-{% if is_staff or is_owner %}
-<form method="post" class="add-members" id="add-members-form">
-    {% for field in form %}
-        {{ field }}
-    {% endfor %}
-    <button name="action" value="add_members" class="disabled" disabled>Grant Membership</button>
-    {% csrf_token %}
-</form>
-    {% if members|length > 1 %}
-<table class="members">
-    <thead>
-        <th><input type="checkbox" id="toggle-all"></th>
-        <th><label for="toggle-all">{{ members | length | sub:'1' }} member{{ members | length | sub:'1' | pluralize }}</label></th>
-    </thead>
-        {% for member in members %}
-        {% if member != organization.owner %}
-    <tr>
-        <td><input type="checkbox" name="members" form="management-form" value="{{ member.pk }}"></td>
-        <td><a href="{% url 'acct-profile' member.username %}" title="{{ member.get_full_name }}'s profile page">{{ member.get_full_name }}</a></td>
-    </tr>
+{% block content %}
+<div class="organization detail">
+    <aside class="sidebar">
+        <div class="details">
+            <h1>{{organization.name}}</h1>
+            <p>{{members|length}} member{{members|pluralize}}</p>
+            <p>{{requests|length}} request{{requests|pluralize}}</p>
+        </div>
+        <div class="status">
+            {% if organization.active %}
+            <p class="active badge">Active</p>
+            <div class="available seats">
+                <dfn>Available Seats</dfn>
+                <div class="counter">
+                    <div class="progress"></div>
+                    <p>{{members|length}}/{{organization.max_users}}</p>
+                </div>
+            </div>
+            <div class="available requests">
+                <dfn>Available Requests</dfn>
+                <div class="counter">
+                    <div class="progress"></div>
+                    <p>{{organization.num_requests}}/{{organization.monthly_requests}}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="inactive badge">Inactive</p>
+            {% if is_owner %}<p>Activate your organization to add members and receive a monthly allotment of requests.</p>{% endif %}
+            {% endif %}
+        </div>
+        {% if is_owner or is_staff %}
+        <div class="actions">
+            {% if organization.active %}
+            <a class="button" href="{% url 'org-update' slug=organization.slug %}">Update</a>
+            <form method="post" class="actions" action="{% url 'org-deactivate' slug=organization.slug %}">
+                {% csrf_token %}
+                <button>Deactivate</button>
+            </form>
+            {% else %}
+            <a class="primary button" href="{% url 'org-activate' slug=organization.slug %}">Activate</a>
+            <a class="failure button" href="{% url 'org-delete' slug=organization.slug %}">Delete</a>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="owner">
+            <dfn>Owner</dfn>
+            <p>{{ org.owner.get_full_name }}</p>
+            <p>{{ org.owner.email }}</p>
+        </div>
         {% endif %}
-        {% endfor %}
-</table>
-    {% else %}
-<h2>This organization has no members.</h2>
-    {% endif %}
-<form method="post" class="controls" id="management-form">
-    {% if members|length > 1 %}
-    <div class="user-controls">
-        <button name="action" value="remove_members" class="disabled" disabled>Revoke Membership</button>
-    </div>
-    {% endif %}
-    <div class="org-controls">
-        <button name="action" value="change_subscription">{% if organization.is_active %}Pause Subscription{% else %}Start Subscription{% endif %}</button>
-    {% if is_staff %}
-        <a href="{% url 'org-update' organization.slug %}" class="button">Update Organization</a>
-        <a href="{% url 'org-delete' organization.slug %}" class="failure button">Delete Organization</a>
-    {% endif %}
-    </div>
-    {% csrf_token %}
-</form>
-{% else %}
-    {% if members|length > 1 %}
-<table class="members">
-    <thead>
-        <th width="100%">{{ members | length | sub:'1' }} member{{ members | length | sub:'1' | pluralize }}</th>
-    </thead>
-    {% for member in members %}
-    {% if member != organization.owner %}
-    <tr>
-        <td>{{ member.username }}</td>
-    </tr>
-    {% endif %}
-    {% endfor %}
-</table>
-    {% else %}
-<h2>This organization has no members.</h2>
-    {% endif %}
-{% endif %}
-{% endblock %}
-
-{% block scripts %}
-{% include 'autocomplete_light/static.html' %}
-<script type="text/javascript">
-    $(document).ready(function(){
-        $('#toggle-all').click(function(){
-            $('input[name="members"]').trigger('click');
-        });
-        // (de)activates the "Grant membership" button if (no) members to add
-        $('#id_add_members-deck').bind('DOMSubtreeModified', function(){
-            var button = $('button[value="add_members"]');
-            if ($(this).children().length > 0) {
-                button.attr('disabled', false)
-                      .addClass('primary')
-                      .removeClass('disabled');
-            } else {
-                button.attr('disabled', true)
-                      .addClass('disabled')
-                      .removeClass('primary');
-            }
-        });
-        // (de)activates the "Revoke membership" button if (no) members to remove
-        $('input[name="members"]').on('click', function(){
-            var button = $('button[value="remove_members"]');
-            if ($('input[name="members"]:checked').length > 0) {
-                button.attr('disabled', false)
-                      .addClass('failure')
-                      .removeClass('disabled');
-            } else {
-                button.attr('disabled', true)
-                      .addClass('disabled')
-                      .removeClass('failure');
-            }
-        });
-        $('#id_add_members-wrapper').click(function(){
-            $('#id_add_members-autocomplete').focus();
-        });
-        $('#id_add_members-autocomplete').yourlabsAutocomplete().data = {
-            orgId: {{ organization.pk }}
-        }
-    });
-</script>
-{% endblock scripts %}
+    </aside>
+</div>
+{% endblock content %}

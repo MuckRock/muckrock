@@ -13,6 +13,7 @@ import actstream
 import logging
 import stripe
 
+from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import CreateForm, \
                                         StaffCreateForm, \
@@ -259,18 +260,17 @@ class OrganizationDetailView(DetailView):
         """Add extra context data"""
         context = super(OrganizationDetailView, self).get_context_data(**kwargs)
         organization = context['organization']
+        context['is_staff'] = False
+        context['is_owner'] = False
+        context['is_member'] = False
         user = self.request.user
-        member_accounts = [profile.user for profile in organization.members.all()]
         if user.is_authenticated():
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        else:
-            context['is_staff'] = False
-            context['is_owner'] = False
-            context['is_member'] = False
-        context['members'] = member_accounts
-        context['form'] = AddMembersForm()
+        context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)
+        context['members'] = organization.members
+        context['add_members_form'] = AddMembersForm()
         context['sidebar_admin_url'] = reverse(
             'admin:organization_organization_change',
             args=(organization.pk,))
