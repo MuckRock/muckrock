@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
 
 {% block content %}
 <div class="organization detail">
@@ -8,6 +9,7 @@
             <p>{{members|length}} member{{members|pluralize}}</p>
             <p>{{requests|length}} request{{requests|pluralize}}</p>
         </div>
+        {% if is_member or is_owner or is_staff %}
         <div class="status">
             {% if organization.active %}
             <p class="active badge">Active</p>
@@ -15,14 +17,14 @@
                 <dfn>Available Seats</dfn>
                 <div class="counter">
                     <div class="progress"></div>
-                    <p>{{members|length}}/{{organization.max_users}}</p>
+                    <p>{{available.seats}}/{{organization.max_users}}</p>
                 </div>
             </div>
             <div class="available requests">
                 <dfn>Available Requests</dfn>
                 <div class="counter">
                     <div class="progress"></div>
-                    <p>{{organization.num_requests}}/{{organization.monthly_requests}}</p>
+                    <p>{{available.requests}}/{{organization.monthly_requests}}</p>
                 </div>
             </div>
             {% else %}
@@ -30,6 +32,7 @@
             {% if is_owner %}<p>Activate your organization to add members and receive a monthly allotment of requests.</p>{% endif %}
             {% endif %}
         </div>
+        {% endif %}
         {% if is_owner or is_staff %}
         <div class="actions">
             {% if organization.active %}
@@ -43,7 +46,7 @@
             <a class="failure button" href="{% url 'org-delete' slug=organization.slug %}">Delete</a>
             {% endif %}
         </div>
-        {% else %}
+        {% elif is_member %}
         <div class="owner">
             <dfn>Owner</dfn>
             <p>{{ org.owner.get_full_name }}</p>
@@ -57,10 +60,55 @@
             <li class="tab" data-section="requests">Requests</li>
         </ul>
         <div class="tab-sections">
-            <section class="tab-section members">
-                <h1>Members</h1>
+            <section class="tab-section" id="members">
+            {% if is_owner or is_staff %}
+                {% if not organization.active %}
+                <div class="failure">
+                    <p>No members may be added until you activate this organization. <a href="{% url 'org-activate' slug=organization.slug %}">Activate it now.</a></p>
+                </div>
+                {% elif members|length >= organization.max_users %}
+                <div class="failure">
+                    <p>No members may be added until you update this organization with additional seats. <a href="{% url 'org-update' slug=organization.slug %}">Update it now.</a></p>
+                </div>
+                {% else %}
+                <form class="add-members" method="post">
+                    {% csrf_token %}
+                    <h3>Add Members</h3>
+                    <div class="add-members-input">
+                        <div class="user search input">
+                            <label for="{{ add_members_form.members.id_for_label}}">Search for MuckRock users</label>
+                            {{ add_members_form.members }}
+                        </div>
+                        <button class="primary" type="submit" name="action" value="add_members">Add</button>
+                    </div>
+                </form>
+                {% endif %}
+            {% endif %}
+            {% if members %}
+                <h3>{{members|length}} Member{{members|pluralize}}</h3>
+                <table class="members">
+                    <tbody>
+                        {% for member in members %}
+                        <tr class="member">
+                            <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.get_full_name}}</a></td>
+                            {% if is_owner or is_staff or request.user == member.user %}
+                            <td class="remove">
+                                <form class="remove-member" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="member" value="{{member.user.pk}}" />
+                                    <button class="failure" type="submit" name="action" value="remove_member">Remove</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No members in the organization.</p>
+            {% endif %}
             </section>
-            <section class="tab-section requests">
+            <section class="tab-section" id="requests">
                 <h1>Requests</h1>
             </section>
         </div>
@@ -69,6 +117,7 @@
 {% endblock content %}
 
 {% block scripts %}
+{% include 'autocomplete_light/static.html' %}
 <script type="text/javascript">
     function activate(element) {
         console.log(element);
@@ -77,7 +126,7 @@
     }
     $('.tab').click(function(){
         var sectionName = $(this).data('section');
-        var selector = '.' + sectionName;
+        var selector = '#' + sectionName;
         var section = $('.tab-sections').find(selector);
         activate(this);
         activate(section);

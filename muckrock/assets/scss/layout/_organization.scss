@@ -25,6 +25,12 @@ $request-breakpoint: 768px;
     @include flex-direction(column);
     @media all and (min-width: $request-breakpoint) {
         @include flex-direction(row);
+        & > * {
+            margin-left: $vertical-rhythm;
+            &:first-child {
+                margin-left: 0;
+            }
+        }
     }
     aside {
         @include flex(1);
@@ -35,11 +41,21 @@ $request-breakpoint: 768px;
 }
 
 .organization.detail .sidebar {
-
+    .status .badge {
+        padding-bottom: $vertical-rhythm/2;
+        border-bottom: 1px solid;
+        color: $color-grey;
+        &.active {
+            color: $color-green;
+        }
+        &.inactive {
+            color: $color-red;
+        }
+    }
 }
 
 .organization.detail .tabs {
-    $border-color: $color-blue-dark;
+    $border-color: $color-black;
     list-style: none;
     padding-left: 0;
     border-bottom: 1px solid $border-color;
@@ -60,7 +76,7 @@ $request-breakpoint: 768px;
     .active {
         border-color: $border-color;
         border-bottom-color: $color-white;
-        color: $color-blue-dark;
+        color: $border-color;
         &:hover {
             background: transparent;
         }
@@ -75,5 +91,71 @@ $request-breakpoint: 768px;
     }
     .active {
         display: block;
+    }
+}
+
+.organization.detail .add-members {
+    border: 1px solid $color-grey;
+    padding: $vertical-rhythm;
+    .add-members-input {
+        @include display(flex);
+        @include align-items(flex-end);
+    }
+    .user.search.input {
+        @include flex(3);
+        margin-bottom: 0;
+        & > span {
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: $vertical-rhythm/2;
+        }
+        label {
+            display: block;
+            font-size: $font-size-2;
+        }
+    }
+    button {
+        @include flex(1);
+        margin-left: $vertical-rhythm;
+    }
+    // overrides the autocomplete widget
+    .deck {
+        display: block;
+    }
+    span#id_members-deck .hilight {
+        background-color: $color-blue;
+        margin: 0 $vertical-rhythm/2 $vertical-rhythm/2 0;
+        padding: $vertical-rhythm/4 $vertical-rhythm/2;
+        color: $color-white;
+        &:hover {
+            background-color: $color-blue-dark;
+        }
+        .remove {
+            width: initial;
+            margin-right: $vertical-rhythm/2;
+            vertical-align: middle;
+            text-align: center;
+            font-size: $font-size-7;
+            text-indent: 0;
+            background: none;
+            color: $color-white;
+        }
+    }
+
+    @include media($medium-layout) {
+        .user.search.input {
+            @include flex(0 1 70%);
+        }
+    }
+}
+
+.organization.detail .member {
+    td {
+        vertical-align: middle;
+    }
+    .remove {
+        text-align: right;
     }
 }
