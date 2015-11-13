@@ -55,10 +55,13 @@
     </aside>
     <main>
         <ul class="tabs">
-            <li class="tab" data-section="members"><span class="counter">{{members|length}}</span> Member{{members|pluralize}}</li>
             <li class="tab" data-section="requests"><span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}</li>
+            <li class="tab" data-section="members"><span class="counter">{{members|length}}</span> Member{{members|pluralize}}</li>
         </ul>
         <div class="tab-sections">
+            <section class="tab-section" id="requests">
+                {% include 'lib/foia_table.html' %}
+            </section>
             <section class="tab-section" id="members">
             {% if members %}
                 <table class="members">
@@ -105,9 +108,6 @@
                 </form>
                 {% endif %}
             {% endif %}
-            </section>
-            <section class="tab-section" id="requests">
-                {% include 'lib/foia_table.html' %}
             </section>
         </div>
     </main>
