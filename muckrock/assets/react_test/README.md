@@ -1,5 +1,7 @@
 README for building react components
 
+Visit http://localhost:8000/project/ to test.
+
 ## Requirements
 Already have node.js and npm installed
 
@@ -10,7 +12,7 @@ Already have node.js and npm installed
 npm install -g watchify
 ```
 
-2. Run watchify
+2. Run watchify to build
 ```
 watchify -v -o dist/build.js src/js/App.js
 ```

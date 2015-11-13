@@ -1,4 +1,5 @@
 var SearchBox = require('./SearchBox');
+var React = require('react');
 
 var SearchContainer = React.createClass({ 
     render: function() {

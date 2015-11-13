@@ -2,10 +2,10 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var appConstants = require('../constants/appConstants');
 
 var searchActions = {
-	updateSearch: function(term) {
-		AppDispatcher.handleActions({
+	updateSearch: function(search) {
+		AppDispatcher.handleAction({
 			actionType: appConstants.UPDATE_SEARCH,
-			data:term
+			data:search
 		})
 	}
 };

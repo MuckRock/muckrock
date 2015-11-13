@@ -5,9 +5,9 @@ var searchActions = require('./actions/searchActions');
 
 var SearchBox = React.createClass({ 
 
-	getInitialSate: function() {
+	getInitialState: function() {
 		return {
-			term: searchStore.getSearch()
+			search: searchStore.getSearch()
 		}
 	},
 
@@ -23,6 +23,7 @@ var SearchBox = React.createClass({
 		this.setState({
 			term: searchStore.getSearch()
 		})
+		console.log(searchStore.returnSearchURL());
 	},
 
 	handleChange: function(event) {
@@ -31,9 +32,10 @@ var SearchBox = React.createClass({
 	},
 
     render: function() {
+    	console.log(this.state);
         return (
             <div>
-                <span>{this.props.name}:</span><input type="text"  value={term} onChange={this.handleChange} />
+                <span>{this.props.name}:</span><input type="text"  value={this.state.search} onChange={this.handleChange} />
             </div>
         )
     }
