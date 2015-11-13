@@ -41,15 +41,47 @@ $request-breakpoint: 768px;
 }
 
 .organization.detail .sidebar {
+    h1 {
+        // font-size: $font-size-6;
+        font-weight: $font-weight-bold;
+    }
     .status .badge {
-        padding-bottom: $vertical-rhythm/2;
-        border-bottom: 1px solid;
+        display: inline-block;
+        border: 2px solid;
+        border-radius: 4px;
+        padding: $vertical-rhythm/4;
         color: $color-grey;
+        line-height: 1em;
+        font-weight: $font-weight-bold;
+        text-align: center;
+        cursor: default;
         &.active {
             color: $color-green;
         }
         &.inactive {
             color: $color-red;
+        }
+    }
+    form {
+        display: inline-block;
+    }
+    .progress {
+        width: 100%;
+        border: 1px solid $color-grey;
+        @include border-radius;
+        overflow: hidden;
+        .meter {
+            display: block;
+            background: $color-green;
+            height: $vertical-rhythm;
+        }
+    }
+    .counter {
+        @include display(flex);
+        p {
+            @include flex(1 1 25%);
+            margin-left: $vertical-rhythm/2;
+            color: $color-grey-2;
         }
     }
 }

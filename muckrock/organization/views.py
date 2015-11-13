@@ -274,6 +274,10 @@ class OrganizationDetailView(DetailView):
             'requests': organization.monthly_requests - organization.num_requests,
             'seats': organization.max_users - organization.members.count()
         }
+        context['progress'] = {
+            'requests': (1.0 - (1.0 * organization.num_requests)/organization.monthly_requests) * 100,
+            'seats': (1.0 - (1.0 * organization.members.count())/organization.max_users) * 100
+        }
         context['add_members_form'] = AddMembersForm()
         context['sidebar_admin_url'] = reverse(
             'admin:organization_organization_change',

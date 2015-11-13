@@ -6,11 +6,7 @@
 {% block content %}
 <div class="organization detail">
     <aside class="sidebar">
-        <div class="details">
-            <h1>{{organization.name}}</h1>
-            <p>{{members|length}} member{{members|pluralize}}</p>
-            <p>{{requests|length}} request{{requests|pluralize}}</p>
-        </div>
+        <h1>{{organization.name}}</h1>
         {% if is_member or is_owner or is_staff %}
         <div class="status">
             {% if organization.active %}
@@ -18,14 +14,14 @@
             <div class="available seats">
                 <dfn>Available Seats</dfn>
                 <div class="counter">
-                    <div class="progress"></div>
+                    <div class="progress"><span class="meter" style="width: {{progress.seats}}%"></span></div>
                     <p>{{available.seats}}/{{organization.max_users}}</p>
                 </div>
             </div>
             <div class="available requests">
                 <dfn>Available Requests</dfn>
                 <div class="counter">
-                    <div class="progress"></div>
+                    <div class="progress"><span class="meter" style="width: {{progress.requests}}%"></span></div>
                     <p>{{available.requests}}/{{organization.monthly_requests}}</p>
                 </div>
             </div>
@@ -38,10 +34,10 @@
         {% if is_owner or is_staff %}
         <div class="actions">
             {% if organization.active %}
-            <a class="button" href="{% url 'org-update' slug=organization.slug %}">Update</a>
             <form method="post" class="actions" action="{% url 'org-deactivate' slug=organization.slug %}">
                 {% csrf_token %}
-                <button>Deactivate</button>
+                <a class="primary button" href="{% url 'org-update' slug=organization.slug %}">Update</a>
+                <button class="failure button">Deactivate</button>
             </form>
             {% else %}
             <a class="primary button" href="{% url 'org-activate' slug=organization.slug %}">Activate</a>
