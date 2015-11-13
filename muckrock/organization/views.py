@@ -276,8 +276,8 @@ class OrganizationDetailView(DetailView):
             'seats': organization.max_users - organization.members.count()
         }
         context['progress'] = {
-            'requests': (1.0 - (1.0 * organization.num_requests)/organization.monthly_requests) * 100,
-            'seats': (1.0 - (1.0 * organization.members.count())/organization.max_users) * 100
+            'requests': (1.0-(1.0*organization.num_requests)/organization.monthly_requests)*100,
+            'seats': (1.0-(1.0*organization.members.count())/organization.max_users)*100
         }
         try:
             date_update = organization.date_update
