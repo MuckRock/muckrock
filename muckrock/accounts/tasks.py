@@ -76,7 +76,7 @@ def store_statstics():
             date_submitted=yesterday
         ).count(),
         daily_articles=Article.objects.filter(pub_date__gte=yesterday,
-                                              pub_date__lte=date.today()).count(),
+                                              pub_date__lt=date.today()).count(),
         orphaned_communications=FOIACommunication.objects.filter(foia=None).count(),
         stale_agencies=Agency.objects.filter(stale=True).count(),
         unapproved_agencies=Agency.objects.filter(approved=False).count(),
@@ -107,7 +107,8 @@ def store_statstics():
         total_unresolved_crowdfundpayment_tasks=
             GenericCrowdfundTask.objects.filter(resolved=False).count(),
         daily_robot_response_tasks=ResponseTask.objects.filter(
-               date_done=yesterday,
+               date_done__gte=yesterday,
+               date_done__lt=date.today(),
                resolved_by__profile__acct_type='robot',
                ).count(),
         )
