@@ -269,7 +269,11 @@ class OrganizationDetailView(DetailView):
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
         context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)
-        context['members'] = organization.members
+        context['members'] = organization.members.select_related('user').all()
+        context['available'] = {
+            'requests': organization.monthly_requests - organization.num_requests,
+            'seats': organization.max_users - organization.members.count()
+        }
         context['add_members_form'] = AddMembersForm()
         context['sidebar_admin_url'] = reverse(
             'admin:organization_organization_change',
@@ -284,8 +288,8 @@ class OrganizationDetailView(DetailView):
         action = request.POST.get('action', '')
         if action == 'add_members':
             self.add_members(request)
-        elif action == 'remove_members':
-            self.remove_members(request)
+        elif action == 'remove_member':
+            self.remove_member(request)
         else:
             messages.error(request, 'This action is not available.')
         context = self.get_context_data()
@@ -332,22 +336,19 @@ class OrganizationDetailView(DetailView):
                 messages.success(request, 'You added %d members.' % members_added)
         return
 
-    def remove_members(self, request):
-        """Removes a list of members from an organization"""
+    def remove_member(self, request):
+        """Removes a single member from an organization"""
         organization = self.get_object()
-        members = request.POST.getlist('members')
-        members_removed = 0
-        if not organization.is_owned_by(request.user) and not request.user.is_staff:
-            # let members remove themselves from the organization, but nobody else
-            logging.debug(members)
-            logging.debug(request.user.pk)
-            members = [user_pk for user_pk in members if user_pk == unicode(request.user.pk)]
-            logging.debug(members)
-            if len(members) > 1:
-                messages.error(request, 'You cannot remove other members this organization.')
-        for user_pk in members:
-            user = User.objects.get(pk=user_pk)
-            logging.debug('remove %s', user)
+        try:
+            user_pk = request.POST['member']
+            user = User.objects.select_related('profile').get(pk=user_pk)
+        except (KeyError, User.DoesNotExist):
+            messages.error('No member selected to remove.')
+            return
+        # let members remove themselves from the organization, but nobody else
+        removing_self = user == request.user
+        user_is_owner = organization.owner == request.user
+        if removing_self or user_is_owner or request.user.is_staff:
             if organization.remove_member(user):
                 actstream.action.send(
                     request.user,
@@ -355,15 +356,12 @@ class OrganizationDetailView(DetailView):
                     action_object=user,
                     target=organization
                 )
-                logging.info('%s %s %s from %s.',
-                    request.user,
-                    'removed',
-                    user,
-                    organization
-                )
-                members_removed += 1
-        if members_removed > 0:
-            msg = 'You revoked membership from %s ' % members_removed
-            msg += 'person.' if members_removed == 1 else 'people.'
-            messages.success(request, msg)
+                logging.info('%s %s %s from %s.', request.user, 'removed', user, organization)
+                if removing_self:
+                    msg = 'You are no longer a member.'
+                else:
+                    msg = 'You removed membership from %s.' % remove_member
+                messages.success(request, msg)
+        else:
+            messages.error('You do not have permission to remove this member.')
         return
