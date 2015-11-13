@@ -5,22 +5,23 @@
     <header>
         <h1>Update your organization's plan</h1>
     </header>
+    <aside class="description">
+        <p>Base plan includes 3 seats, 50 requests/month, $100/month</p>
+        <p>Each additional seat adds 10 requests and $20 to your plan.</p>
+    </aside>
     <form method="post">
         {% csrf_token %}
         <label for="{{ form.max_users.id_for_label }}">Member Seats</label>
         {{ form.max_users }}
-        <button type="submit">Update</button>
-    </form>
-    <aside class="description">
-        <p>Base plan includes 3 seats, 50 requests/month, $100/month</p>
-        <p>Each additional seat adds 10 requests and $20 to your plan.</p>
         <h2>Your plan</h2>
         <ul class="custom-plan" data-users="{{ base_users}}" data-requests="{{ base_requests }}" data-price="{{ base_price|floatformat:2 }}">
             <li id="your-plan-users"><span class="value">{{ base_users}}</span> member seats</p>
             <li id="your-plan-requests"><span class="value">{{ base_requests }}</span> requests per month</li>
             <li id="your-plan-price">$<span class="value">{{ base_price|floatformat:2 }}</span> per month</li>
         </ul>
-    </aside>
+        <button type="submit">Update</button>
+    </form>
+
 </section>
 {% endblock content %}
 

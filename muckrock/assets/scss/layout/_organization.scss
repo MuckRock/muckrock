@@ -1,20 +1,30 @@
 
 
-.create.organization {
+.create.organization, .update.organization, .activate.organization {
     @include display(flex);
     @include flex-wrap(wrap);
     header {
         @include flex(0 1 100%);
     }
     aside {
-        @include flex(1 1 auto);
+        @include flex(1);
     }
     form {
-        @include flex(2 1 auto);
-        input {
-            display: block;
-            width: 100%;
-        }
+        @include flex(1);
+    }
+    aside {
+        @include border;
+        @include border-radius;
+        margin-right: $vertical-rhythm;
+        padding: $vertical-rhythm;
+    }
+    label {
+        @extend dfn;
+    }
+    form input {
+        display: block;
+        margin-bottom: $vertical-rhythm;
+        width: 100%;
     }
 }
 
