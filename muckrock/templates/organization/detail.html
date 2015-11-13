@@ -24,6 +24,7 @@
                     <div class="progress"><span class="meter" style="width: {{progress.requests}}%"></span></div>
                     <p>{{available.requests}}/{{organization.monthly_requests}}</p>
                 </div>
+                <p>Request count will refresh on {{refresh_date|date}}.</p>
             </div>
             {% else %}
             <p class="inactive badge">Inactive</p>

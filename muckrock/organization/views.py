@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
 import actstream
+import datetime
 import logging
 import stripe
 
@@ -278,6 +279,13 @@ class OrganizationDetailView(DetailView):
             'requests': (1.0 - (1.0 * organization.num_requests)/organization.monthly_requests) * 100,
             'seats': (1.0 - (1.0 * organization.members.count())/organization.max_users) * 100
         }
+        try:
+            date_update = organization.date_update
+            refresh_date = datetime.date(date_update.year, date_update.month + 1, 1)
+        except ValueError:
+            # ValueError should happen if the current month is December
+            refresh_date = datetime.date(date_update.year + 1, 1, 1)
+        context['refresh_date'] = refresh_date
         context['add_members_form'] = AddMembersForm()
         context['sidebar_admin_url'] = reverse(
             'admin:organization_organization_change',

@@ -84,6 +84,12 @@ $request-breakpoint: 768px;
             color: $color-grey-2;
         }
     }
+    .available.seats {
+        margin-bottom: 0;
+    }
+    .available.requests .counter {
+        margin-bottom: 0;
+    }
 }
 
 .organization.detail .tabs {
