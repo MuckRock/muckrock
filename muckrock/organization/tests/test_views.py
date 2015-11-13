@@ -180,7 +180,7 @@ class TestActivateView(TestCase):
     def test_post_ok(self, mock_activation):
         """Posting a valid Stripe token and the number of seats should activate the organization."""
         logging.debug(self.org.max_users)
-        data = {'token': 'test', 'max_users': self.org.max_users}
+        data = {'stripe_token': 'test', 'max_users': self.org.max_users}
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = self.org.owner
@@ -512,55 +512,49 @@ class TestDetailView(TestCase):
 
     def test_staff_remove(self):
         """A staff user should be able to remove members."""
-        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
-        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.factories.UserFactory(profile__organization=self.org)
         data = {
-            'action': 'remove_members',
-            'members': [member1.pk, member2.pk]
+            'action': 'remove_member',
+            'member': member.pk
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory(is_staff=True)
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(member1) and \
-            not self.org.has_member(member2))
+        ok_(not self.org.has_member(member))
 
     def test_owner_remove(self):
         """The owner should be able to remove members."""
-        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
-        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.factories.UserFactory(profile__organization=self.org)
         data = {
-            'action': 'remove_members',
-            'members': [member1.pk, member2.pk]
+            'action': 'remove_member',
+            'member': member.pk
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = self.org.owner
         self.view(request, slug=self.org.slug)
-        ok_(not self.org.has_member(member1) and \
-            not self.org.has_member(member2))
+        ok_(not self.org.has_member(member))
 
     def test_user_remove(self):
         """Regular user should not be able to remove members."""
-        member1 = muckrock.factories.UserFactory(profile__organization=self.org)
-        member2 = muckrock.factories.UserFactory(profile__organization=self.org)
+        member = muckrock.factories.UserFactory(profile__organization=self.org)
         data = {
-            'action': 'remove_members',
-            'members': [member1.pk, member2.pk]
+            'action': 'remove_member',
+            'member': member.pk
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)
         request.user = muckrock.factories.UserFactory()
         self.view(request, slug=self.org.slug)
-        ok_(self.org.has_member(member1) and \
-            self.org.has_member(member2))
+        ok_(self.org.has_member(member))
 
     def test_remove_self(self):
         """However, a member may remove themself from an org."""
         member = muckrock.factories.UserFactory(profile__organization=self.org)
         data = {
-            'action': 'remove_members',
-            'members': [member.pk]
+            'action': 'remove_member',
+            'member': member.pk
         }
         request = self.request_factory.post(self.url, data)
         request = mock_middleware(request)

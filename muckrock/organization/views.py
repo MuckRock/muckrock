@@ -343,7 +343,7 @@ class OrganizationDetailView(DetailView):
             user_pk = request.POST['member']
             user = User.objects.select_related('profile').get(pk=user_pk)
         except (KeyError, User.DoesNotExist):
-            messages.error('No member selected to remove.')
+            messages.error(request, 'No member selected to remove.')
             return
         # let members remove themselves from the organization, but nobody else
         removing_self = user == request.user
@@ -360,8 +360,8 @@ class OrganizationDetailView(DetailView):
                 if removing_self:
                     msg = 'You are no longer a member.'
                 else:
-                    msg = 'You removed membership from %s.' % remove_member
+                    msg = 'You removed membership from %s.' % user.first_name
                 messages.success(request, msg)
         else:
-            messages.error('You do not have permission to remove this member.')
+            messages.error(request, 'You do not have permission to remove this member.')
         return
