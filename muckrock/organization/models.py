@@ -135,7 +135,10 @@ class Organization(models.Model):
         if self.members.count() == self.max_users:
             raise AttributeError('No open seat for new members.')
         if user.profile.organization:
-            raise AttributeError('%s is already a member of a different organization.' % user)
+            which_org = 'this' if user.profile.organization == self else 'a different'
+            raise AttributeError('%s is already a member of %s organization.' %
+                (user.first_name, which_org)
+            )
         if Organization.objects.filter(owner=user).exists():
             raise AttributeError('%s is already an owner of a different organization.' % user)
         if not self.has_member(user):
