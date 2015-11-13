@@ -209,8 +209,8 @@ class FOIARequest(models.Model):
                 self.date_embargo = default_date if not existing_date else existing_date
             else:
                 self.date_embargo = None
-        if self.status == 'submitted' and date_processing is None:
-            date_processing = date.today()
+        if self.status == 'submitted' and self.date_processing is None:
+            self.date_processing = date.today()
         super(FOIARequest, self).save(*args, **kwargs)
 
     def is_editable(self):
