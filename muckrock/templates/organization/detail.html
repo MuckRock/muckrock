@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
 
+{% block title %}{{organization.name}}{% endblock %}
+
 {% block content %}
 <div class="organization detail">
     <aside class="sidebar">
@@ -56,11 +58,33 @@
     </aside>
     <main>
         <ul class="tabs">
-            <li class="tab" data-section="members">Members</li>
-            <li class="tab" data-section="requests">Requests</li>
+            <li class="tab" data-section="members"><span class="counter">{{members|length}}</span> Member{{members|pluralize}}</li>
+            <li class="tab" data-section="requests"><span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}</li>
         </ul>
         <div class="tab-sections">
             <section class="tab-section" id="members">
+            {% if members %}
+                <table class="members">
+                    <tbody>
+                        {% for member in members %}
+                        <tr class="member">
+                            <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.get_full_name}}</a></td>
+                            {% if is_owner or is_staff or request.user == member.user %}
+                            <td class="remove">
+                                <form class="remove-member" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="member" value="{{member.user.pk}}" />
+                                    <button class="simple failure" type="submit" name="action" value="remove_member">Remove</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty-members">No members in the organization.</p>
+            {% endif %}
             {% if is_owner or is_staff %}
                 {% if not organization.active %}
                 <div class="failure">
@@ -84,32 +108,9 @@
                 </form>
                 {% endif %}
             {% endif %}
-            {% if members %}
-                <h3>{{members|length}} Member{{members|pluralize}}</h3>
-                <table class="members">
-                    <tbody>
-                        {% for member in members %}
-                        <tr class="member">
-                            <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.get_full_name}}</a></td>
-                            {% if is_owner or is_staff or request.user == member.user %}
-                            <td class="remove">
-                                <form class="remove-member" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="member" value="{{member.user.pk}}" />
-                                    <button class="failure" type="submit" name="action" value="remove_member">Remove</button>
-                                </form>
-                            </td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No members in the organization.</p>
-            {% endif %}
             </section>
             <section class="tab-section" id="requests">
-                <h1>Requests</h1>
+                {% include 'lib/foia_table.html' %}
             </section>
         </div>
     </main>

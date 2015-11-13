@@ -63,7 +63,7 @@ $request-breakpoint: 768px;
     .tab {
         display: inline-block;
         margin-bottom: -1px;
-        padding: $vertical-rhythm/2 $vertical-rhythm;
+        padding: $vertical-rhythm/2;
         border: 1px solid transparent;
         border-bottom-color: $border-color;
         @include border-top-radius($base-border-radius/2);
@@ -72,16 +72,33 @@ $request-breakpoint: 768px;
         &:hover {
             background: $color-blue-light;
         }
+        .counter {
+            @include transition(background-color .25s linear);
+            margin-right: $vertical-rhythm/4;
+            padding: $vertical-rhythm/5 $vertical-rhythm/1.5;
+            // border: 1px solid;
+            @include border-radius;
+            // font-size: $font-size-2;
+            text-align: center;
+            background: $color-blue-light;
+        }
     }
     .active {
         border-color: $border-color;
         border-bottom-color: $color-white;
         color: $border-color;
+        cursor: default;
         &:hover {
             background: transparent;
         }
+        .counter {
+            background: $color-grey-7;
+        }
     }
+
 }
+
+
 
 .organization.detail .tab-sections {
     margin-bottom: $vertical-rhythm;
