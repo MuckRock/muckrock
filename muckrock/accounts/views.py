@@ -26,6 +26,7 @@ from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
+from muckrock.organization.models import Organization
 import muckrock.message
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
@@ -123,6 +124,7 @@ def subscribe(request):
     button_text = 'Subscribe'
     can_subscribe = True
     can_unsubscribe = not can_subscribe
+    owns_org = Organization.objects.filter(owner=request.user).exists()
 
     if request.user.is_authenticated():
         user_profile = request.user.profile
@@ -136,6 +138,11 @@ def subscribe(request):
         elif acct_type == 'proxy':
             msg = ('You have a proxy account. You receive 20 free '
                    'requests a month and do not need a subscription.')
+            messages.warning(request, msg)
+            return redirect('acct-my-profile')
+        elif owns_org:
+            msg = ('You are already paying for an organization account. '
+                   'Try making yourself a member of that org instead!')
             messages.warning(request, msg)
             return redirect('acct-my-profile')
         elif can_unsubscribe:
