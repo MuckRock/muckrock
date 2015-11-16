@@ -251,6 +251,16 @@ class TestMembership(TestCase):
         ok_(self.org.has_member(new_member),
             'The org should recognize the new member.')
 
+    def test_add_owner(self):
+        """An owner should be able to add themself as a member of their own organization."""
+        self.org.add_member(self.org.owner)
+        eq_(self.org, self.org.owner.profile.organization,
+            'The owner should be added as a member.')
+        ok_(self.org.has_member(self.owner),
+            'The org should recognize the owner as a member.')
+        ok_(self.org.is_owned_by(self.owner),
+            'The owner should also stay the owner.')
+
     def test_remove_member(self):
         """Test removing a member from the organization."""
         self.org.remove_member(self.member)
@@ -279,7 +289,7 @@ class TestMembership(TestCase):
         self.org.add_member(member)
 
     @nose.tools.raises(AttributeError)
-    def test_add_owner(self):
+    def test_add_other_owner(self):
         """Cannot add an owner of a different organization."""
         other_org = muckrock.factories.OrganizationFactory()
         self.org.add_member(other_org.owner)
