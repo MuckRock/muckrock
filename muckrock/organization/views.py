@@ -272,11 +272,11 @@ class OrganizationDetailView(DetailView):
         context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)[:99]
         context['members'] = organization.members.select_related('user').all()
         context['available'] = {
-            'requests': organization.monthly_requests - organization.num_requests,
+            'requests': organization.num_requests,
             'seats': organization.max_users - organization.members.count()
         }
         context['progress'] = {
-            'requests': (1.0-(1.0*organization.num_requests)/organization.monthly_requests)*100,
+            'requests': ((1.0*organization.num_requests)/organization.monthly_requests)*100,
             'seats': (1.0-(1.0*organization.members.count())/organization.max_users)*100
         }
         try:
