@@ -320,7 +320,8 @@ class OrganizationDetailView(DetailView):
             existing_member_count = organization.members.count()
             if new_member_count + existing_member_count > organization.max_users:
                 difference = (new_member_count + existing_member_count) - organization.max_users
-                messages.error(request, 'You will need to purchase %d seats.' % difference)
+                seat = 'seats' if difference > 1 else 'seat'
+                messages.error(request, 'You will need to purchase %d %s.' % (difference, seat))
                 return
             if not organization.active:
                 messages.error(request, 'You may not add members to an inactive organization.')
@@ -345,7 +346,8 @@ class OrganizationDetailView(DetailView):
                 except AttributeError as exception:
                     messages.error(request, exception)
             if members_added > 0:
-                messages.success(request, 'You added %d members.' % members_added)
+                members_plural = 'members' if members_added > 1 else 'member'
+                messages.success(request, 'You added %d %s.' % (members_added, members_plural))
         return
 
     def remove_member(self, request):

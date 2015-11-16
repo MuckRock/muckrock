@@ -139,8 +139,11 @@ class Organization(models.Model):
             raise AttributeError('%s is already a member of %s organization.' %
                 (user.first_name, which_org)
             )
-        if Organization.objects.filter(owner=user).exists():
-            raise AttributeError('%s is already an owner of a different organization.' % user)
+        is_an_owner = Organization.objects.filter(owner=user).exists()
+        owns_this_org = self.is_owned_by(user)
+        if is_an_owner and not owns_this_org:
+            user_name = user.first_name
+            raise AttributeError('%s is already an owner of a different organization.' % user_name)
         if not self.has_member(user):
             user.profile.organization = self
             user.profile.save()
