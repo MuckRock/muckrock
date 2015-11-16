@@ -269,7 +269,7 @@ class OrganizationDetailView(DetailView):
             context['is_staff'] = user.is_staff
             context['is_owner'] = organization.is_owned_by(user)
             context['is_member'] = user.profile.is_member_of(organization)
-        context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)
+        context['requests'] = FOIARequest.objects.organization(organization).get_viewable(user)[:99]
         context['members'] = organization.members.select_related('user').all()
         context['available'] = {
             'requests': organization.monthly_requests - organization.num_requests,
