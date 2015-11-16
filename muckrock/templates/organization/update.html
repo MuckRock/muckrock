@@ -11,8 +11,7 @@
     </aside>
     <form method="post">
         {% csrf_token %}
-        <label for="{{ form.max_users.id_for_label }}">Member Seats</label>
-        {{ form.max_users }}
+        {{ form }}
         <h2>Your plan</h2>
         <ul class="custom-plan" data-users="{{ base_users}}" data-requests="{{ base_requests }}" data-price="{{ base_price|floatformat:2 }}">
             <li id="your-plan-users"><span class="value">{{ base_users}}</span> member seats</p>

@@ -26,6 +26,20 @@
         margin-bottom: $vertical-rhythm;
         width: 100%;
     }
+    .errorlist {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+        color: $color-red;
+        li {
+            margin-bottom: $vertical-rhythm;
+        }
+        & + input {
+            color: $color-red-dark;
+            border-color: $color-red;
+            background: $color-red-light;
+        }
+    }
 }
 
 $request-breakpoint: 768px;

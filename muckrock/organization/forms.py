@@ -51,12 +51,17 @@ class UpdateForm(forms.ModelForm):
         model = Organization
         fields = ['max_users']
         widgets = {'max_users': forms.NumberInput(attrs={'min': ORG_MIN_SEATS})}
+        labels = {'max_users': 'Member Seats'}
 
     def clean_max_users(self):
         """Ensures that max_users is not below the minimum value."""
         max_users = self.cleaned_data['max_users']
         if max_users < ORG_MIN_SEATS:
             err_msg = 'Organizations have a %d-seat minimum' % ORG_MIN_SEATS
+            raise forms.ValidationError(err_msg)
+        if max_users < self.instance.members.count():
+            err_msg = ('Organizations cannot have fewer seats than members. ' +
+                       'Please remove members first.')
             raise forms.ValidationError(err_msg)
         return max_users
 
