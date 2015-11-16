@@ -60,7 +60,11 @@
         </ul>
         <div class="tab-sections">
             <section class="tab-section" id="requests">
+            {% if requests %}
                 {% include 'lib/foia_table.html' %}
+            {% else %}
+                <p class="empty">This organization has no associated requests.</p>
+            {% endif %}
             </section>
             <section class="tab-section" id="members">
             {% if members %}
@@ -83,7 +87,7 @@
                     </tbody>
                 </table>
             {% else %}
-                <p class="empty-members">No members in the organization.</p>
+                <p class="empty">This organization has no members.</p>
             {% endif %}
             {% if is_owner or is_staff %}
                 {% if not organization.active %}

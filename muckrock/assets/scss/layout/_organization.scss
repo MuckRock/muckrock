@@ -157,10 +157,7 @@ $request-breakpoint: 768px;
             background: $color-grey-7;
         }
     }
-
 }
-
-
 
 .organization.detail .tab-sections {
     margin-bottom: $vertical-rhythm;
@@ -170,6 +167,13 @@ $request-breakpoint: 768px;
     }
     .active {
         display: block;
+    }
+    .empty {
+        margin: 2*$vertical-rhythm auto;
+        color: $color-grey;
+        font-size: $font-size-5;
+        font-weight: $font-weight-bold;
+        text-align: center;
     }
 }
 
