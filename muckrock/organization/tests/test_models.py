@@ -113,6 +113,8 @@ class TestSubscriptions(TestCase):
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
             'The monthly requests should be updated.')
+        eq_(self.org.num_requests, self.org.monthly_requests,
+            'The org should be granted its monthly request allotment.')
         eq_(self.org.stripe_id, mock_subscription.id,
             'The subscription ID should be saved to the organization.')
         ok_(self.org.active,
@@ -155,6 +157,7 @@ class TestSubscriptions(TestCase):
         seat_increase = 2
         expected_cost_increase = self.org.monthly_cost + ORG_PRICE_PER_SEAT * seat_increase
         expected_request_increase = self.org.monthly_requests + ORG_REQUESTS_PER_SEAT * seat_increase
+        expected_request_count = self.org.num_requests + ORG_REQUESTS_PER_SEAT * seat_increase
         expected_quantity = expected_cost_increase / 100
         num_seats = self.org.max_users + seat_increase
         self.org.update_subscription(num_seats)
@@ -162,6 +165,8 @@ class TestSubscriptions(TestCase):
             'The monthly cost should be updated.')
         eq_(self.org.monthly_requests, expected_request_increase,
             'The monthly requests should be updated.')
+        eq_(self.org.num_requests, expected_request_count,
+            'The current request count should be increased.')
         eq_(self.org.max_users, num_seats,
             'The maximum number of users should be updated.')
         eq_(mock_subscription.quantity, expected_quantity,

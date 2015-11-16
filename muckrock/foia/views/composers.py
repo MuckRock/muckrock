@@ -337,6 +337,7 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
         'action': 'Draft',
         'form': form,
         'foia': foia,
+        'remaining': foia.user.profile.total_requests(),
         'stripe_pk': STRIPE_PUB_KEY,
         'sidebar_admin_url': reverse('admin:foia_foiarequest_change', args=(foia.pk,))
     }

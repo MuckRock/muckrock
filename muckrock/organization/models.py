@@ -98,7 +98,6 @@ class Organization(models.Model):
             bcc=['diagnostics@muckrock.com']
         )
         email.send(fail_silently=False)
-        return
 
     def update_num_seats(self, num_seats):
         """Updates the max users and adjusts the monthly cost and monthly requests in response."""
@@ -109,7 +108,6 @@ class Organization(models.Model):
         self.monthly_requests = new_requests
         self.max_users = num_seats
         self.save()
-        return
 
     def compute_monthly_cost(self, num_seats):
         """Computes the monthly cost given the number of seats, which can be negative."""
@@ -185,6 +183,7 @@ class Organization(models.Model):
             quantity=quantity
         )
         self.update_num_seats(num_seats)
+        self.num_requests = self.monthly_requests
         self.stripe_id = subscription.id
         self.active = True
         self.save()
@@ -220,7 +219,12 @@ class Organization(models.Model):
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)
             return
+        old_monthly_requests = self.monthly_requests
         self.update_num_seats(num_seats)
+        new_monthly_requests = self.monthly_requests
+        # if it goes up, let it go up. if it goes down, don't let it go down
+        if new_monthly_requests > old_monthly_requests:
+            self.num_requests += new_monthly_requests - old_monthly_requests
         self.save()
         self.owner.profile.save()
         return subscription
