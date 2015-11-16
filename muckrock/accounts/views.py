@@ -124,11 +124,11 @@ def subscribe(request):
     button_text = 'Subscribe'
     can_subscribe = True
     can_unsubscribe = not can_subscribe
-    owns_org = Organization.objects.filter(owner=request.user).exists()
 
     if request.user.is_authenticated():
         user_profile = request.user.profile
         acct_type = user_profile.acct_type
+        owns_org = Organization.objects.filter(owner=request.user).exists()
         can_subscribe = acct_type == 'community' or acct_type == 'beta'
         can_unsubscribe = acct_type == 'pro'
         if acct_type == 'admin':
