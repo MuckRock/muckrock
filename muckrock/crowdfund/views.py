@@ -121,7 +121,7 @@ class CrowdfundDetailView(DetailView):
         return a CrowdfundRequestPayment object.
         """
         token = request.POST.get('token')
-
+        email = request.POST.get('email')
         try:
             payment_form = self.get_form()
             # pylint:disable=not-callable
@@ -144,7 +144,7 @@ class CrowdfundDetailView(DetailView):
                 stripe.AuthenticationError
             )
             try:
-                payment = crowdfund.make_payment(token, amount, show, user)
+                payment = crowdfund.make_payment(token, email, amount, show, user)
                 actstream.action.send(
                     payment,
                     verb='contributed',

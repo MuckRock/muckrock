@@ -47,67 +47,6 @@
         max-width: 45em;
     }
 
-    &.organization {
-        .add-members, .members, .controls {
-            @include row;
-        }
-        .add-members {
-            @include row;
-            margin-bottom: $vertical-rhythm;
-            button {
-                @include quarter;
-                @include omega(n);
-                margin-top: 0;
-                padding: .5em 1em;
-            }
-            #id_add_members-wrapper {
-                @include three-quarters;
-                border: $base-border-width solid $color-grey;
-                border-radius: $base-border-radius;
-                background: white;
-                cursor: text;
-            }
-            input.autocomplete {
-                vertical-align: middle;
-                margin: .25em;
-                padding: .25em;
-                border: none;
-                border-radius: $base-border-radius;
-                background: none;
-            }
-            .deck .hilight {
-                margin: .25em;
-                border-radius: $base-border-radius;
-                padding: .25em;
-                padding-right: .75em;
-                background: $color-blue;
-                color: $color-white;
-            }
-        }
-        .members {
-            th:first-child, td:first-child {
-                width: 5%;
-            }
-            th:last-child, th:last-child {
-                width: 95%;
-            }
-        }
-        .controls {
-            @include panel;
-            .user-controls, .org-controls {
-                @include half;
-            }
-            .user-controls {
-                text-align: left;
-            }
-            @include media($medium-layout){
-                .user-controls + .org-controls {
-                    text-align: right;
-                }
-            }
-        }
-    }
-
     &.question {
         .messages-container {
             @include row;
