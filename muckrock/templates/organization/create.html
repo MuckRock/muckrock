@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block content %}
+<section class="create organization">
+    <header>
+        <h1>Create an organization</h1>
+    </header>
+    <aside class="description">
+        <p>Organization members can:</p>
+        <ul>
+            <li>Embargo permanently</li>
+            <li>Share a pool of requests</li>
+            <li>Save money on each request filed</li>
+        </ul>
+        <p>Once you create your organization, you will be asked to activate it.</p>
+    </aside>
+    {% include 'lib/form.html' with button_text="Create" %}
+</section>
+{% endblock content %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+    prettifyAmountInput('#id_monthly_cost');
+</script>
+{% endblock scripts %}

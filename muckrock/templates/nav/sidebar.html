@@ -16,6 +16,11 @@
     {% endif %}
 
     {% if user.is_authenticated %}
+        {% if organization %}
+    <section class="organization">
+        <a href="{{organization.get_absolute_url}}">My Organization</a>
+    </section>
+        {% endif %}
     <section class="requests">
         <a class="my-requests" href="{% url 'foia-mylist' %}">My Requests</a>
 

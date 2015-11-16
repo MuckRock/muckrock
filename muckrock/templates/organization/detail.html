@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block title %}{{organization.name}}{% endblock %}
+
+{% block content %}
+<div class="organization detail">
+    <aside class="sidebar">
+        <h1>{{organization.name}}</h1>
+        {% if is_member or is_owner or is_staff %}
+        <div class="status">
+            {% if organization.active %}
+            <p class="active badge">Active</p>
+            <div class="available seats">
+                <dfn>Available Seats</dfn>
+                <div class="counter">
+                    <div class="progress"><span class="meter" style="width: {{progress.seats}}%"></span></div>
+                    <p>{{available.seats}}/{{organization.max_users}}</p>
+                </div>
+            </div>
+            <div class="available requests">
+                <dfn>Available Requests</dfn>
+                <div class="counter">
+                    <div class="progress"><span class="meter" style="width: {{progress.requests}}%"></span></div>
+                    <p>{{available.requests}}/{{organization.monthly_requests}}</p>
+                </div>
+                <p>Request count will refresh on {{refresh_date|date}}.</p>
+            </div>
+            {% else %}
+            <p class="inactive badge">Inactive</p>
+            {% if is_owner %}<p>Activate your organization to add members and receive a monthly allotment of requests.</p>{% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if is_owner or is_staff %}
+        <div class="actions">
+            {% if organization.active %}
+            <form method="post" class="actions" action="{% url 'org-deactivate' slug=organization.slug %}">
+                {% csrf_token %}
+                <a class="primary button" href="{% url 'org-update' slug=organization.slug %}">Update</a>
+                <button class="failure button">Deactivate</button>
+            </form>
+            {% else %}
+            <a class="primary button" href="{% url 'org-activate' slug=organization.slug %}">Activate</a>
+            <a class="failure button" href="{% url 'org-delete' slug=organization.slug %}">Delete</a>
+            {% endif %}
+        </div>
+        {% elif is_member %}
+        <div class="owner">
+            <dfn>Owner</dfn>
+            <p>{{ org.owner.get_full_name }}</p>
+            <p>{{ org.owner.email }}</p>
+        </div>
+        {% endif %}
+    </aside>
+    <main>
+        <ul class="tabs">
+            <li class="tab" data-section="requests"><span class="counter">{{requests|length}}</span> Request{{requests|pluralize}}</li>
+            <li class="tab" data-section="members"><span class="counter">{{members|length}}</span> Member{{members|pluralize}}</li>
+        </ul>
+        <div class="tab-sections">
+            <section class="tab-section" id="requests">
+            {% if requests %}
+                {% include 'lib/foia_table.html' %}
+            {% else %}
+                <p class="empty">This organization has no associated requests.</p>
+            {% endif %}
+            </section>
+            <section class="tab-section" id="members">
+            {% if members %}
+                <table class="members">
+                    <tbody>
+                        {% for member in members %}
+                        <tr class="member">
+                            <td class="name"><a href="{{member.get_absolute_url}}">{{member.user.get_full_name}}</a></td>
+                            {% if is_owner or is_staff or request.user == member.user %}
+                            <td class="remove">
+                                <form class="remove-member" method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="member" value="{{member.user.pk}}" />
+                                    <button class="simple failure" type="submit" name="action" value="remove_member">Remove</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="empty">This organization has no members.</p>
+            {% endif %}
+            {% if is_owner or is_staff %}
+                {% if not organization.active %}
+                <div class="failure">
+                    <p>No members may be added until you activate this organization. <a href="{% url 'org-activate' slug=organization.slug %}">Activate it now.</a></p>
+                </div>
+                {% elif members|length >= organization.max_users %}
+                <div class="failure">
+                    <p>No members may be added until you update this organization with additional seats. <a href="{% url 'org-update' slug=organization.slug %}">Update it now.</a></p>
+                </div>
+                {% else %}
+                <form class="add-members" method="post">
+                    {% csrf_token %}
+                    <h3>Add Members</h3>
+                    <div class="add-members-input">
+                        <div class="user search input">
+                            <label for="{{ add_members_form.members.id_for_label}}">Search for MuckRock users</label>
+                            {{ add_members_form.members }}
+                        </div>
+                        <button class="primary" type="submit" name="action" value="add_members">Add</button>
+                    </div>
+                </form>
+                {% endif %}
+            {% endif %}
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+{% include 'autocomplete_light/static.html' %}
+<script type="text/javascript">
+    function activate(element) {
+        console.log(element);
+        $(element).addClass('active');
+        $(element).siblings().removeClass('active');
+    }
+    $('.tab').click(function(){
+        var sectionName = $(this).data('section');
+        var selector = '#' + sectionName;
+        var section = $('.tab-sections').find(selector);
+        activate(this);
+        activate(section);
+    });
+    $('.tabs').children().first().click();
+</script>
+{% endblock scripts %}

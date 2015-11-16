@@ -62,6 +62,21 @@
     }
 }
 
+.button.simple, button.simple, input[type='submit'].simple {
+    margin: 0;
+    padding: $vertical-rhythm/4 $vertical-rhythm/2;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-2;
+    box-shadow: none;
+    @include transform(none);
+    &:hover, &:active {
+        box-shadow: none;
+        @include transform(none);
+        background: $color-black;
+        border-color: $color-black;
+    }
+}
+
 .edit {
     display: inline-block;
     font-size: $font-size-2;

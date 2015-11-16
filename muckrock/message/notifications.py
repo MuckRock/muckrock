@@ -1,5 +1,5 @@
 """
-Message objects for the notifications app
+Notification objects for the messages app
 """
 
 from django.contrib.auth.models import User
@@ -36,8 +36,8 @@ def get_foia_activity(user, period):
 class DailyNotification(EmailMultiAlternatives):
     """Sends a daily email notification"""
 
-    text_template = 'notification/daily.txt'
-    html_template = 'notification/daily.html'
+    text_template = 'message/notification/daily.txt'
+    html_template = 'message/notification/daily.html'
 
     notification_count = 0
     since = 'yesterday'
@@ -104,3 +104,24 @@ class DailyNotification(EmailMultiAlternatives):
         noun = 'update' if self.notification_count == 1 else 'updates'
         subject = '%d %s %s' % (self.notification_count, noun, self.since)
         return subject
+
+
+class FailedPaymentNotification(EmailMultiAlternatives):
+    """Sends a failed payment notification"""
+    text_template = 'message/notification/failed_payment.txt'
+
+    def __init__(self, user, attempt, subscription, **kwargs):
+        """Initialize the notification"""
+        super(FailedPaymentNotification, self).__init__(**kwargs)
+        if isinstance(user, User):
+            self.user = user
+            self.to = [user.email]
+        else:
+            raise TypeError('Notification requires a User to recieve it.')
+        self.from_email = 'MuckRock <info@muckrock.com>'
+        self.bcc = ['diagnostics@muckrock.com']
+        self.subject = 'Payment Failed'
+        self.body = render_to_string(
+            self.text_template,
+            {'user': self.user, 'attempt': attempt, 'type': subscription}
+        )
