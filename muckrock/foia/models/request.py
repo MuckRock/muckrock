@@ -96,7 +96,7 @@ class FOIARequestQuerySet(models.QuerySet):
         """Get requests belonging to an organization's members."""
         members = organization.members.select_related('user').all()
         users = [member.user for member in members]
-        return self.prefetch_related('jurisdiction').filter(user__in=users)
+        return self.select_related('jurisdiction').filter(user__in=users)
 
 STATUS = (
     ('started', 'Draft'),
