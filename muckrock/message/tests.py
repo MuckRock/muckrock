@@ -16,6 +16,21 @@ ok_ = nose.tools.ok_
 eq_ = nose.tools.eq_
 raises = nose.tools.raises
 
+mock_subscription = mock.Mock()
+mock_subscription.id = 'test-pro-subscription'
+mock_subscription.save.return_value = mock_subscription
+mock_subscription.delete.return_value = mock_subscription
+mock_customer = mock.Mock()
+mock_customer.id = 'test-customer'
+mock_customer.save.return_value = mock_customer
+mock_customer.update_subscription.return_value = mock_subscription
+mock_customer.cancel_subscription.return_value = mock_subscription
+mock_customer.subscriptions.create.return_value = mock_subscription
+mock_customer.subscriptions.retrieve.return_value = mock_subscription
+MockCustomer = mock.Mock()
+MockCustomer.create.return_value = mock_customer
+MockCustomer.retrieve.return_value = mock_customer
+
 mock_charge = mock.Mock()
 mock_charge.id = 'test-charge'
 mock_charge.invoice = False
@@ -27,12 +42,12 @@ MockCharge.retrieve.return_value = mock_charge
 
 mock_invoice = mock.Mock()
 mock_invoice.id = 'test-invoice'
-mock_invoice.plan.id = 'pro'
 mock_invoice.attempt_count = 1
-mock_invoice.customer = 'test-customer'
+mock_invoice.customer = mock_customer.id
 mock_invoice.charge = mock_charge
 MockInvoice = mock.Mock()
 MockInvoice.retrieve.return_value = mock_invoice
+
 
 class TestDailyNotification(TestCase):
     """Tests the daily email notification object. It extends Django's built-in email classes."""
@@ -163,6 +178,7 @@ class TestSendChargeReceiptTask(TestCase):
 
 @mock.patch('stripe.Invoice', MockInvoice)
 @mock.patch('stripe.Charge', MockCharge)
+@mock.patch('stripe.Customer', MockCustomer)
 class TestSendInvoiceReceiptTask(TestCase):
     """Invoice receipts are send when an invoice payment succeeds."""
     # pylint: disable=no-self-use
