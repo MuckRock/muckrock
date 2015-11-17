@@ -3,12 +3,10 @@ Admin registration for organization models
 """
 
 from django import forms
-from django.contrib import admin, messages
 from django.contrib.auth.models import User
 
 import autocomplete_light
 from reversion import VersionAdmin
-import stripe
 
 from muckrock.organization.models import Organization
 
