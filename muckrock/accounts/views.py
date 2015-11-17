@@ -27,7 +27,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
-import muckrock.message
+from muckrock.message.tasks import send_charge_receipt, send_invoice_receipt, failed_payment
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -320,11 +320,11 @@ def stripe_webhook(request):
     }
     logger.info(success_msg)
     if event_type == 'charge.succeeded':
-        muckrock.message.tasks.send_charge_receipt.delay(event_object_id)
+        send_charge_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_succeeded':
-        muckrock.message.tasks.send_invoice_receipt.delay(event_object_id)
+        send_invoice_receipt.delay(event_object_id)
     elif event_type == 'invoice.payment_failed':
-        muckrock.message.tasks.failed_payment.delay(event_object_id)
+        failed_payment.delay(event_object_id)
     return HttpResponse()
 
 
