@@ -22,7 +22,7 @@
             @include flex(2);
             @include display(flex);
             @include flex-direction(column);
-            @justify-content(space-between);
+            @include justify-content(space-between);
             max-width:38rem;
             margin-bottom: 0;
             padding-right: $vertical-rhythm;
