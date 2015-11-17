@@ -41,19 +41,6 @@ class OrganizationAdmin(VersionAdmin):
     search_fields = ('name', 'owner')
     form = OrganizationAdminForm
 
-    def save_model(self, request, obj, form, change):
-        if not obj.stripe_id:
-            obj.create_plan()
-            obj.owner.profile.customer()
-        if change:
-            original = Organization.objects.get(pk=obj.pk)
-            if original.monthly_cost != obj.monthly_cost:
-                try:
-                    obj.update_plan()
-                except (stripe.InvalidRequestError, stripe.CardError, ValueError) as exception:
-                    messages.error(request, exception)
-                    return
-        obj.save()
 
 admin.site.register(Organization, OrganizationAdmin)
 
