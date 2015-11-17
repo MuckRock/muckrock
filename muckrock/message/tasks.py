@@ -32,18 +32,25 @@ def daily_notification():
 def send_invoice_receipt(invoice_id):
     """Send out a receipt for an invoiced charge"""
     invoice = stripe.Invoice.retrieve(invoice_id)
-    charge = stripe.Charge.retrieve(invoice.charge)
+    try:
+        charge = stripe.Charge.retrieve(invoice.charge)
+    except stripe.error.InvalidRequestError:
+        # a free subscription has no charge attached
+        # maybe send a notification about the renewal
+        # but for now just handle the error
+        return
     profile = Profile.objects.get(customer_id=invoice.customer)
     # send a receipt based on the plan
-    plan = invoice.plan
+    customer = profile.customer()
+    subscription = customer.subscriptions.retrieve(invoice.subscription)
     try:
         receipt_classes = {
             'pro': receipts.ProSubscriptionReceipt,
             'org': receipts.OrgSubscriptionReceipt
         }
-        receipt_class = receipt_classes[plan.id]
+        receipt_class = receipt_classes[subscription.plan.id]
     except KeyError:
-        logger.warning('Invoice charged for unrecognized plan: %s', plan.name)
+        logger.warning('Invoice charged for unrecognized plan: %s', subscription.plan.name)
         receipt_class = receipts.GenericReceipt
     receipt = receipt_class(profile.user, charge)
     receipt.send(fail_silently=False)
