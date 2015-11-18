@@ -116,7 +116,7 @@ def handle_request(request, mail_id):
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
         # resolve any stale agency tasks for this agency
         if foia.agency:
-            StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency).\
+            StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency)\
                                    .update(resolved=True)
 
 
