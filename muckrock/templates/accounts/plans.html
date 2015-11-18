@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<article class="account plans">
+    <header>
+        <h1>Pick a plan</h1>
+        <p>We offer a 30-day money-back guarantee for all purchases. Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></p>
+    </header>
+    <main>
+        <section class="community plan">
+            <h2>Community</h2>
+            <ul>
+                <li>Free to sign up, no credit card required.</li>
+                <li>File requests to any agency in the U.S.A.</li>
+                <li>Follow requests with email notifications.</li>
+                <li>Share requests with other MuckRock users.</li>
+                <li>Purchase bundles 4 requests for $20 each.</li>
+                <li>Create campaigns to crowdfund expensive request fees.</li>
+            </ul>
+            <button class="primary">Sign up for free</button>
+        </section>
+        <section class="professional plan">
+            <h2>Professional</h2>
+            <ul>
+                <li>All Community plan features.</li>
+                <li>Receive 20 requests per month.</li>
+                <li>Embargo requests for up to 30 days after they're completed.</li>
+            </ul>
+            <button class="primary">Subscribe for $40/month</button>
+        </section>
+        <section class="organization plan">
+            <h2>Organization</h2>
+            <ul>
+                <li>Share a pool of requests between organization members.</li>
+                <li>Follow the activity of other members in your organization.</li>
+                <li>Organization members may permanently embargo their requests.</li>
+                <li>Plan starts at $100 for up to 3 members and 50 requests per month.</li>
+                <li>Add members and receive 10 additional requests for $20 each.</li>
+            </ul>
+            <button class="primary">Start an organization</button>
+        </section>
+    </main>
+</article>
+{% endblock %}

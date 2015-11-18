@@ -17,7 +17,7 @@
             <form method="POST" class="hidden-stripe-handler" id="subscribe">{% csrf_token %}</form>
             {% if can_subscribe %}
                 {% if user.is_anonymous %}
-            <a href="{% url 'acct-register' %}?next=/accounts/subscribe/" class="button primary">{{ button_text }}</a>
+            <a href="{% url 'accounts' %}?next=/accounts/subscribe/" class="button primary">{{ button_text }}</a>
                 {% else %}
             <button
                 data-amount="0"
@@ -65,7 +65,7 @@
         </section>
         -->
     </section>
-    
+
 </div>
 {% endblock content %}
 

@@ -250,7 +250,7 @@ class TestAccountFunctional(TestCase):
             reverse('acct-login'),
             ['forms/account/login.html', 'forms/base_form.html'])
         get_allowed(self.client,
-            reverse('acct-register'),
+            reverse('accounts'),
             ['forms/account/register.html', 'forms/base_form.html'])
         get_allowed(self.client,
             reverse('acct-reset-pw'),

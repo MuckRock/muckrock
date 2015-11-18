@@ -13,6 +13,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView
 
 from datetime import date
 from rest_framework import viewsets
@@ -27,6 +28,7 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
+from muckrock.organization.forms import CreateForm as OrganizationCreateForm
 from muckrock.message.tasks import send_charge_receipt, send_invoice_receipt, failed_payment
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
@@ -38,6 +40,25 @@ def account_logout(request):
     logout(request)
     messages.success(request, 'You have successfully logged out.')
     return redirect('index')
+
+class AccountsView(TemplateView):
+    """
+    Displays the list of payment plans.
+    If user is logged out, it lets them register for any plan.
+    If user is logged in, it lets them up- or downgrade their account to any plan.
+    """
+    template_name = 'accounts/plans.html'
+
+    def get_context_data(self):
+        """Returns a context based on whether the user is logged in or logged out."""
+        context = super(AccountsView, self).get_context_data()
+        logged_in = self.request.user.is_authenticated
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['org_form'] = OrganizationCreateForm()
+        context['logged_in'] = logged_in
+        if not logged_in:
+            context['register_form'] = RegisterForm()
+
 
 def register(request):
     """Register for a community account"""

@@ -74,7 +74,7 @@
             {% if org and org.owner == user_obj %}
             <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
             {% else %}
-            <a href="{% url 'acct-register' %}" class="button">Manage Subscription</a>
+            <a href="{% url 'accounts' %}" class="button">Manage Subscription</a>
             {% endif %}
         {% endwith %}
         </div>

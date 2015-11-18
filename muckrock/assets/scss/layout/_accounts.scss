@@ -1,0 +1,22 @@
+.account.plans {
+    main {
+        @include display(flex);
+    }
+    .plan {
+        @include flex(1);
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include border;
+        @include border-radius;
+        margin-bottom: 0;
+        margin-right: $vertical-rhythm;
+        &:last-child {
+            margin-right: 0;
+        }
+        padding: $vertical-rhythm;
+        h2 {
+            text-align: center;
+        }
+    }
+}
