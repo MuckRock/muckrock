@@ -124,6 +124,8 @@ def handle_request(request, mail_id):
         if foia.agency:
             StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency)\
                                    .update(resolved=True)
+            foia.agency.stale = False
+            foia.agency.save()
 
 
         foia.email = from_email
