@@ -114,6 +114,11 @@ def handle_request(request, mail_id):
 
         task = ResponseTask.objects.create(communication=comm)
         classify_status.apply_async(args=(task.pk,), countdown=30 * 60)
+        # resolve any stale agency tasks for this agency
+        if foia.agency:
+            StaleAgencyTask.objects.filter(resolved=False, agency=foia.agency).\
+                                   .update(resolved=True)
+
 
         foia.email = from_email
         foia.other_emails = ','.join(email for name, email
@@ -127,8 +132,6 @@ def handle_request(request, mail_id):
             foia.status = 'processed'
         foia.save()
         foia.update(comm.anchor())
-
-        # NLTK
 
     except FOIARequest.DoesNotExist:
         logger.warning('Invalid Address: %s', mail_id)
