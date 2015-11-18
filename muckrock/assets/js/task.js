@@ -76,8 +76,6 @@ function getTaskID(taskFormData) {
 
 function markAsResolved(task) {
     $(task).addClass('resolved');
-    $(task).find(':input').attr('disabled', true).addClass('disabled');
-    $(task).find('.task-type').text('Resolved');
 }
 
 function formHasAction(taskForm, action) {

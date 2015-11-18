@@ -92,6 +92,14 @@ class FOIARequestQuerySet(models.QuerySet):
         """Get requests which have an undated file"""
         return self.filter(~Q(files=None) & Q(files__date=None)).distinct()
 
+    def organization(self, organization):
+        """Get requests belonging to an organization's members."""
+        members = organization.members.select_related('user').all()
+        users = [member.user for member in members]
+        return self.select_related('jurisdiction')\
+                   .select_related('jurisdiction__parent')\
+                   .select_related('jurisdiction__parent__parent')\
+                   .filter(user__in=users)
 
 STATUS = (
     ('started', 'Draft'),

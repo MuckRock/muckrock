@@ -14,6 +14,8 @@ import stripe
 from muckrock.foia.models import FOIARequest
 from muckrock import task
 
+stripe.api_version = '2015-10-16'
+
 class CrowdfundABC(models.Model):
     """Abstract base class for crowdfunding objects"""
     # pylint: disable=too-few-public-methods, model-missing-unicode
@@ -100,38 +102,33 @@ class CrowdfundABC(models.Model):
         # pylint:disable=no-self-use
         raise NotImplementedError
 
-    def make_payment(self, token, amount, show=False, user=None):
+    def make_payment(self, token, email, amount, show=False, user=None):
         """Creates a payment for the crowdfund"""
+        # pylint: disable=too-many-arguments
         amount = Decimal(amount)
         if self.payment_capped and amount > self.amount_remaining():
             amount = self.amount_remaining()
         # Try processing the payment using Stripe.
-        # If the payment fails, raise an error.
-        stripe_exceptions = (
-            stripe.InvalidRequestError,
-            stripe.CardError,
-            stripe.APIConnectionError,
-            stripe.AuthenticationError
+        # If the payment fails, do not catch the error.
+        # Stripe represents currency as smallest-unit integers.
+        stripe_amount = int(float(amount) * 100)
+        charge = stripe.Charge.create(
+            amount=stripe_amount,
+            source=token,
+            currency='usd',
+            metadata={
+                'email': email,
+                'action': 'crowdfund-payment'
+            }
         )
-        try:
-            # Stripe represents currency as integers
-            stripe_amount = int(float(amount) * 100)
-            stripe.Charge.create(
-                amount=stripe_amount,
-                source=token,
-                currency='usd',
-                description='Crowdfund contribution: %s' % self,
-            )
-        except stripe_exceptions as payment_error:
-            raise payment_error
         payment_object = self.get_crowdfund_payment_object()
         payment = payment_object.objects.create(
             amount=amount,
             crowdfund=self,
             user=user,
-            show=show
+            show=show,
+            charge_id=charge.id
         )
-        payment.save()
         logging.info(payment)
         self.update_payment_received()
         return payment
@@ -144,6 +141,7 @@ class CrowdfundPaymentABC(models.Model):
     amount = models.DecimalField(max_digits=14, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     show = models.BooleanField(default=False)
+    charge_id = models.CharField(max_length=255, blank=True)
 
     class Meta:
         abstract = True

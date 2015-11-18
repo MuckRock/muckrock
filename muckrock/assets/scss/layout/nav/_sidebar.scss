@@ -60,7 +60,7 @@ $sidebar-width: 250px;
 
     .account-links {
         width: 100%;
-        margin-bottom: 0;
+        // margin-bottom: 0;
         @include display(flex);
         a {
             @include flex(1);
@@ -104,7 +104,7 @@ $sidebar-width: 250px;
         }
     }
 
-    .my-requests, .admin {
+    .organization a, .my-requests, .admin {
         display: block;
         width: 100%;
         // padding: $vertical-rhythm/2;

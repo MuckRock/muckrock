@@ -15,7 +15,7 @@
 			"acct_type": "admin",
             "zip_code": "02140",
             "email_pref": "instant",
-			"stripe_id": "cus_RTW3KxBMCknuhB"
+			"customer_id": "cus_RTW3KxBMCknuhB"
         }
     },
     {

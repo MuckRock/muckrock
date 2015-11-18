@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="delete organization">
+    <header>
+        <h1>Delete your organization</h1>
+    </header>
+    <form method="post" id="delete-organization">
+        {% csrf_token %}
+        <button class="failure" type="submit">Delete my organization</button>
+    </form>
+</section>
+{% endblock content %}

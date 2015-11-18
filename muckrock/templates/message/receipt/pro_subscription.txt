@@ -1,0 +1,9 @@
+{% extends 'message/receipt/base.txt' %}
+
+{% block description %}
+This e-mail confirms a monthly payment for your professional subscription to MuckRock. Your subscription includes up to {{monthly_requests}} requests per month, the ability to embargo requests, and priority support.
+{% endblock %}
+
+{% block support %}
+This charge will recur monthly. For concerns or more information about this charge, please contact info@muckrock.com or call 1-857-488-3081. To manage your subscription, visit https://www.muckrock.com/accounts/manage_subsc/
+{% endblock %}
