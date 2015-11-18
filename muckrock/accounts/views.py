@@ -82,7 +82,7 @@ def register(request):
     )
 
 @login_required
-def update(request):
+def settings(request):
     """Update a users information"""
 
     if request.method == 'POST':
@@ -211,7 +211,7 @@ def subscribe(request):
     )
 
 @login_required
-def buy_requests(request):
+def buy_requests(request, username):
     """Buy more requests"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
     if request.POST.get('stripe_token', False):
@@ -238,7 +238,7 @@ def buy_requests(request):
     return redirect(url_redirect)
 
 @login_required
-def verify_email(request):
+def verify_email(request, username):
     """Verifies a user's email address"""
     user = request.user
     prof = user.profile
@@ -269,9 +269,9 @@ def verify_email(request):
         messages.warning(request, 'Your email is already confirmed, no need to verify again!')
     return redirect(prof)
 
-def profile(request, user_name=None):
+def profile(request, username=None):
     """View a user's profile"""
-    user = get_object_or_404(User, username=user_name) if user_name else request.user
+    user = get_object_or_404(User, username=username) if username else request.user
     requests = FOIARequest.objects.get_viewable(request.user).filter(user=user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]

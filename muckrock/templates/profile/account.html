@@ -57,7 +57,7 @@
 <main class="activity">
     {% if request.user == user_obj %}
     <section class="actions">
-        <form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+        <form action="{% url 'acct-buy-requests' user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
         <div class="controls">
             <button data-amount="2000"
                     data-description="4 requests ($20.00)"
@@ -68,13 +68,13 @@
             {% if not user_obj.profile.email_confirmed %}
             <a href="{% url 'acct-verify-email' %}" class="button">Verify Email</a>
             {% endif %}
-            <a href="{% url 'acct-update' %}" class="button">Settings</a>
+            <a href="{% url 'acct-settings' %}" class="button">Settings</a>
             <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
         {% with user_obj.profile.organization as org %}
             {% if org and org.owner == user_obj %}
             <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
             {% else %}
-            <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
+            <a href="{% url 'acct-register' %}" class="button">Manage Subscription</a>
             {% endif %}
         {% endwith %}
         </div>

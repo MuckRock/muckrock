@@ -253,12 +253,6 @@ class TestAccountFunctional(TestCase):
             reverse('acct-register'),
             ['forms/account/register.html', 'forms/base_form.html'])
         get_allowed(self.client,
-            reverse('acct-register-free'),
-            ['forms/account/register.html', 'forms/base_form.html'])
-        get_allowed(self.client,
-            reverse('acct-register-pro'),
-            ['forms/account/subscription.html'])
-        get_allowed(self.client,
             reverse('acct-reset-pw'),
             ['forms/account/pw_reset_part1.html', 'forms/base_form.html'])
         get_allowed(self.client,
@@ -269,10 +263,14 @@ class TestAccountFunctional(TestCase):
         """Test private views while not logged in"""
 
         # get/post authenticated pages while unauthenticated
-        url_names = ['acct-my-profile', 'acct-update', 'acct-change-pw',
-                     'acct-buy-requests']
-        for url_name in url_names:
-            get_post_unallowed(self.client, reverse(url_name))
+        url_list = [
+            reverse('acct-my-profile'),
+            reverse('acct-settings'),
+            reverse('acct-change-pw'),
+            reverse('acct-buy-requests', args=['test'])
+        ]
+        for each_url in url_list:
+            get_post_unallowed(self.client, each_url)
 
     def test_login_view(self):
         """Test the login view"""
@@ -305,13 +303,13 @@ class TestAccountFunctional(TestCase):
             reverse('acct-my-profile'),
             ['profile/account.html', 'base_profile.html'])
         get_allowed(self.client,
-            reverse('acct-update'),
+            reverse('acct-settings'),
             ['forms/account/update.html', 'forms/base_form.html'])
         get_allowed(self.client,
             reverse('acct-change-pw'),
             ['forms/account/pw_change.html', 'forms/base_form.html'])
         get_allowed(self.client,
-            reverse('acct-buy-requests'),
+            reverse('acct-buy-requests', args=['adam']),
             ['profile/account.html', 'base_profile.html'])
 
     def _test_post_view_helper(self, url, templates, data,
@@ -320,14 +318,12 @@ class TestAccountFunctional(TestCase):
         # pylint: disable=too-many-arguments
 
         self.client.login(username=username, password=password)
-        post_allowed_bad(self.client, reverse(url), templates)
-        post_allowed(self.client, reverse(url), data,
-                     reverse(redirect_url))
+        post_allowed_bad(self.client, url, templates)
+        post_allowed(self.client, url, data, reverse(redirect_url))
 
     def test_update_view(self):
         """Test the account update view"""
         # pylint: disable=bad-whitespace
-
         user = User.objects.get(username='adam')
         user_data = {'first_name': 'mitchell',        'last_name': 'kotler',
                      'email': 'mitch@muckrock.com',   'user': user,
@@ -335,11 +331,9 @@ class TestAccountFunctional(TestCase):
                      'city': 'boston', 'state': 'MA', 'zip_code': '02140',
                      'phone': '555-123-4567',         'email_pref': 'instant'}
 
-        self._test_post_view_helper(
-            'acct-update',
-            ['forms/account/update.html', 'forms/base_form.html'],
-            user_data)
-
+        update_url = reverse('acct-settings')
+        templates = ['forms/account/update.html', 'forms/base_form.html']
+        self._test_post_view_helper(update_url, templates, user_data)
         user = User.objects.get(username='adam')
         profile = user.profile
         for key, val in user_data.iteritems():
@@ -350,13 +344,19 @@ class TestAccountFunctional(TestCase):
 
     def test_change_pw_view(self):
         """Test the change pw view"""
+        change_pw_url = reverse('acct-change-pw')
+        templates = ['forms/account/pw_change.html', 'forms/base_form.html']
+        change_pw_data = {
+            'old_password': 'abc',
+            'new_password1': '123',
+            'new_password2': '123'
+        }
         self._test_post_view_helper(
-            'acct-change-pw',
-            ['forms/account/pw_change.html', 'forms/base_form.html'],
-            {'old_password': 'abc',
-             'new_password1': '123',
-             'new_password2': '123'},
-            redirect_url='acct-change-pw-done')
+            change_pw_url,
+            templates,
+            change_pw_data,
+            redirect_url='acct-change-pw-done'
+        )
         self.client.logout()
         nose.tools.assert_false(self.client.login(username='adam', password='abc'))
         nose.tools.assert_true(self.client.login(username='adam', password='123'))
