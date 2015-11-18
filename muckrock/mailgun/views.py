@@ -23,7 +23,13 @@ from muckrock.foia.models import FOIARequest, FOIACommunication, FOIAFile, RawEm
 from muckrock.foia.tasks import upload_document_cloud, classify_status
 from muckrock.mailgun.models import WhitelistDomain
 from muckrock.settings import MAILGUN_ACCESS_KEY
-from muckrock.task.models import OrphanTask, ResponseTask, RejectedEmailTask, FailedFaxTask
+from muckrock.task.models import (
+        FailedFaxTask,
+        OrphanTask,
+        RejectedEmailTask,
+        ResponseTask,
+        StaleAgencyTask,
+        )
 
 logger = logging.getLogger(__name__)
 
