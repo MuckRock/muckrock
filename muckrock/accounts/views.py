@@ -232,7 +232,7 @@ def subscribe(request):
     )
 
 @login_required
-def buy_requests(request, username):
+def buy_requests(request, username=None):
     """Buy more requests"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
     if request.POST.get('stripe_token', False):
@@ -292,6 +292,8 @@ def verify_email(request, username):
 
 def profile(request, username=None):
     """View a user's profile"""
+    if not username and request.user.is_anonymous():
+        return redirect('acct-login')
     user = get_object_or_404(User, username=username) if username else request.user
     requests = FOIARequest.objects.get_viewable(request.user).filter(user=user)
     recent_requests = requests.order_by('-date_submitted')[:5]
