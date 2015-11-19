@@ -59,7 +59,7 @@
                 <li>Purchase bundles 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
-            <button class="primary">Sign up for free</button>
+            <button class="primary" data-plan="community">Register for free</button>
         </section>
         <section class="professional plan">
             <h2>Professional</h2>
@@ -68,7 +68,7 @@
                 <li>Receive 20 requests per month.</li>
                 <li>Embargo requests for up to 30 days after they're completed.</li>
             </ul>
-            <button class="primary">Subscribe for $40/month</button>
+            <button class="primary" data-plan="professional">Subscribe for $40/month</button>
         </section>
         <section class="organization plan">
             <h2>Organization</h2>
@@ -79,29 +79,96 @@
                 <li>Plan starts at $100 for up to 3 members and 50 requests per month.</li>
                 <li>Add members and receive 10 additional requests for $20 each.</li>
             </ul>
-            <button class="primary">Start an organization</button>
+            <button class="primary" data-plan="organization">Create an organization</button>
         </section>
     </main>
     <div class="registration forms">
         <form method="post" class="community registration form">
             {% csrf_token %}
+            <h2>Register for a community account</h2>
             <input type="hidden" name="plan" value="community">
-            <button>Register</button>
-            <span>Pick a different plan</span>
+            <div class="fields">
+                {% for field in registration_form.visible_fields %}
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                    {{ field.errors }}
+                    {{ field }}
+                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+                </fieldset>
+                {% endfor %}
+            </div>
+            <footer>
+                <span class="cancel">Pick a different plan</span>
+                <button type="submit" class="primary">Register</button>
+            </footer>
         </form>
         <form method="post" class="professional registration form">
             {% csrf_token %}
+            <h2>Subscribe to a professional account</h2>
             <input type="hidden" name="plan" value="professional">
-            <button>Subscribe</button>
-            <span>Pick a different plan</span>
+            <div class="fields">
+                {% for field in registration_form.visible_fields %}
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                    {{ field.errors }}
+                    {{ field }}
+                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+                </fieldset>
+                {% endfor %}
+            </div>
+            <footer>
+                <span class="cancel">Pick a different plan</span>
+                <button type="submit" class="primary">Subscribe</button>
+            </footer>
         </form>
         <form method="post" class="organization registration form">
             {% csrf_token %}
+            <h2>Create an organization</h2>
             <input type="hidden" name="plan" value="organization">
-            <button>Create</button>
-            <span>Pick a different plan</span>
+            <h3>Profile</h3>
+            <div class="fields">
+                {% for field in registration_form.visible_fields %}
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                    {{ field.errors }}
+                    {{ field }}
+                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+                </fieldset>
+                {% endfor %}
+            </div>
+            <h3>Organization</h3>
+            <div class="fields">
+                {% for field in org_form.visible_fields %}
+                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                    {{ field.errors }}
+                    {{ field }}
+                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+                </fieldset>
+                {% endfor %}
+            </div>
+            <footer>
+                <span class="cancel">Pick a different plan</span>
+                <button type="submit" class="primary">Create</button>
+            </footer>
         </form>
     </div>
 </article>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript">
+    $('.plan button').click(function(){
+        var plan = $(this).data('plan');
+        var planFormClass = '.' + plan + '.registration.form'
+        $(planFormClass).addClass('visible').siblings().removeClass('visible');
+        $('.plans main').addClass('hidden');
+    });
+    $('.cancel').click(function(){
+        $(this).closest('.registration.form').removeClass('visible');
+        $('.plans main').removeClass('hidden');
+    });
+</script>
 {% endblock %}

@@ -57,15 +57,14 @@ class AccountsView(TemplateView):
             is_pro = self.request.user.profile.acct_type == 'pro'
             context['account_type'] = 'pro' if is_pro else 'community'
             try:
-                context['org'] = Organization.objects.get(owner=request.user)
-                context['org_form'] = None
-            except Organiation.DoesNotExist:
+                context['org'] = Organization.objects.get(owner=self.request.user)
+            except Organization.DoesNotExist:
                 context['org'] = None
-                context['org_form'] = OrganizationCreateForm()
         else:
-            context['register_form'] = RegisterForm()
+            context['registration_form'] = RegisterForm()
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['logged_in'] = logged_in
+        context['org_form'] = OrganizationCreateForm()
         return context
 
 def register(request):

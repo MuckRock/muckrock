@@ -1,6 +1,9 @@
 .account.plans {
     main {
         @include display(flex);
+        &.hidden {
+            display: none;
+        }
     }
     .plan {
         @include flex(1);
@@ -17,6 +20,43 @@
         padding: $vertical-rhythm;
         h2 {
             text-align: center;
+        }
+    }
+    .registration.form {
+        display: none;
+        margin-bottom: 0;
+        &.visible {
+            display: block;
+        }
+        .fields {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            .field {
+                @include flex(1 0 50%);
+                &:nth-child(odd) {
+                    padding-right: $vertical-rhythm;
+                }
+                &:last-child {
+                    padding-right: 0;
+                }
+            }
+            input {
+                width: 100%;
+            }
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .cancel {
+            cursor: pointer;
+            color: $color-blue;
+            border-bottom: 1px dotted;
+            &:hover {
+                color: $color-blue-dark;
+                border-bottom-style: solid;
+            }
         }
     }
 }
