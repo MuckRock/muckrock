@@ -141,7 +141,7 @@ class Profile(models.Model):
     def get_absolute_url(self):
         """The url for this object"""
         # pylint: disable=no-member
-        return ('acct-profile', [], {'user_name': self.user.username})
+        return ('acct-profile', [], {'username': self.user.username})
 
     def is_member_of(self, organization):
         """Answers whether the profile is a member of the passed organization"""

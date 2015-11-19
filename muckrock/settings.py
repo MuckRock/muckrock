@@ -310,7 +310,7 @@ AUTHENTICATION_BACKENDS = (
     'lot.auth_backend.LOTBackend',
     )
 ABSOLUTE_URL_OVERRIDES = {
-    'auth.user': lambda u: reverse('acct-profile', kwargs={'user_name': u.username}),
+    'auth.user': lambda u: reverse('acct-profile', kwargs={'username': u.username}),
 }
 
 DBSETTINGS_USE_SITES = True
