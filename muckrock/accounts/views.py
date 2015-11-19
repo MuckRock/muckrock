@@ -52,13 +52,21 @@ class AccountsView(TemplateView):
     def get_context_data(self):
         """Returns a context based on whether the user is logged in or logged out."""
         context = super(AccountsView, self).get_context_data()
-        logged_in = self.request.user.is_authenticated
-        context['stripe_pk'] = STRIPE_PUB_KEY
-        context['org_form'] = OrganizationCreateForm()
-        context['logged_in'] = logged_in
-        if not logged_in:
+        logged_in = self.request.user.is_authenticated()
+        if logged_in:
+            is_pro = self.request.user.profile.acct_type == 'pro'
+            context['account_type'] = 'pro' if is_pro else 'community'
+            try:
+                context['org'] = Organization.objects.get(owner=request.user)
+                context['org_form'] = None
+            except Organiation.DoesNotExist:
+                context['org'] = None
+                context['org_form'] = OrganizationCreateForm()
+        else:
             context['register_form'] = RegisterForm()
-
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        context['logged_in'] = logged_in
+        return context
 
 def register(request):
     """Register for a community account"""
