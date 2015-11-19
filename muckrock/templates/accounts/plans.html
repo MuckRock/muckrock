@@ -82,6 +82,26 @@
             <button class="primary">Start an organization</button>
         </section>
     </main>
+    <div class="registration forms">
+        <form method="post" class="community registration form">
+            {% csrf_token %}
+            <input type="hidden" name="plan" value="community">
+            <button>Register</button>
+            <span>Pick a different plan</span>
+        </form>
+        <form method="post" class="professional registration form">
+            {% csrf_token %}
+            <input type="hidden" name="plan" value="professional">
+            <button>Subscribe</button>
+            <span>Pick a different plan</span>
+        </form>
+        <form method="post" class="organization registration form">
+            {% csrf_token %}
+            <input type="hidden" name="plan" value="organization">
+            <button>Create</button>
+            <span>Pick a different plan</span>
+        </form>
+    </div>
 </article>
 {% endif %}
 {% endblock %}
