@@ -4,12 +4,9 @@ URL mappings for the accounts application
 
 from django.conf.urls import patterns, url
 from django.contrib.auth.decorators import login_required
-from django.views.generic.base import RedirectView
 import django.contrib.auth.views as auth_views
 
 import muckrock.accounts.views as views
-
-# pylint: disable=bad-whitespace
 
 urlpatterns = patterns(
     '',

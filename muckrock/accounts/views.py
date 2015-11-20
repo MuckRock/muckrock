@@ -112,7 +112,6 @@ def register(request):
 @login_required
 def settings(request):
     """Update a users information"""
-
     if request.method == 'POST':
         user_profile = request.user.profile
         form = UserChangeForm(request.POST, instance=user_profile)
@@ -241,6 +240,7 @@ def subscribe(request):
 @login_required
 def buy_requests(request, username=None):
     """Buy more requests"""
+    # pylint:disable=unused-argument
     url_redirect = request.GET.get('next', 'acct-my-profile')
     if request.POST.get('stripe_token', False):
         user_profile = request.user.profile
@@ -266,7 +266,7 @@ def buy_requests(request, username=None):
     return redirect(url_redirect)
 
 @login_required
-def verify_email(request, username):
+def verify_email(request):
     """Verifies a user's email address"""
     user = request.user
     prof = user.profile

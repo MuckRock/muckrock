@@ -2,9 +2,8 @@
 Tests using nose for the accounts application
 """
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.views import login
-from django.core import mail
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
 from django.test import TestCase, RequestFactory
@@ -16,9 +15,8 @@ from mock import Mock, patch
 import nose.tools
 
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
-from muckrock.accounts.views import stripe_webhook, profile, settings, buy_requests, AccountsView
+from muckrock.accounts import views as accounts_views
 from muckrock.factories import UserFactory, ProfileFactory
-from muckrock.tests import get_allowed, post_allowed, post_allowed_bad, get_post_unallowed
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token, mock_middleware
 
@@ -52,6 +50,7 @@ MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
 
 def http_get_response(url, view, user=AnonymousUser()):
+    """Handles making GET requests, returns the response."""
     request_factory = RequestFactory()
     request = request_factory.get(url)
     request = mock_middleware(request)
@@ -60,6 +59,7 @@ def http_get_response(url, view, user=AnonymousUser()):
     return response
 
 def http_post_response(url, view, data, user=AnonymousUser()):
+    """Handles making POST requests, returns the response."""
     request_factory = RequestFactory()
     request = request_factory.post(url, data)
     request = mock_middleware(request)
@@ -262,46 +262,50 @@ class TestAccountFunctional(TestCase):
         response = http_get_response(reverse('acct-login'), login)
         eq_(response.status_code, 200, 'Login page should be publicly visible.')
         # account overview page
-        response = http_get_response(reverse('accounts'), AccountsView.as_view())
+        response = http_get_response(reverse('accounts'), accounts_views.AccountsView.as_view())
         eq_(response.status_code, 200, 'Top level accounts page should be publicly visible.')
         # profile page
         request = self.request_factory.get(self.profile.get_absolute_url())
         request = mock_middleware(request)
         request.user = AnonymousUser()
-        response = profile(request, self.profile.user.username)
+        response = accounts_views.profile(request, self.profile.user.username)
         eq_(response.status_code, 200, 'User profiles should be publicly visible.')
 
     def test_unallowed_views(self):
         """Private URLs should redirect logged-out users to the log in page"""
         def test_get_post(url, view, data):
+            """Performs both a GET and a POST on the same url and view."""
             get_response = http_get_response(url, view)
             post_response = http_post_response(url, view, data)
             return (get_response, post_response)
         # my profile
-        get, post = test_get_post(reverse('acct-my-profile'), profile, {})
+        get, post = test_get_post(reverse('acct-my-profile'), accounts_views.profile, {})
         eq_(get.status_code, 302, 'My profile link reponds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST to my profile link responds with 302.')
         # settings
-        get, post = test_get_post(reverse('acct-settings'), settings, {})
+        get, post = test_get_post(reverse('acct-settings'), accounts_views.settings, {})
         eq_(get.status_code, 302, 'GET /profile responds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST /settings reponds with 302 to logged out user.')
         # buy requests
-        get, post = test_get_post(reverse('acct-buy-requests', args=['test']), buy_requests, {})
-        eq_(get.status_code, 302, 'GET /profile/*/buy_requests/ responds with 302 to logged out user.')
-        eq_(post.status_code, 302, 'POST /profile/*/buy_requests/ responds with 302 to logged out user.')
+        buy_requests_url = reverse('acct-buy-requests', args=['test'])
+        get, post = test_get_post(buy_requests_url, accounts_views.buy_requests, {})
+        eq_(get.status_code, 302,
+            'GET /profile/*/buy_requests/ responds with 302 to logged out user.')
+        eq_(post.status_code, 302,
+            'POST /profile/*/buy_requests/ responds with 302 to logged out user.')
 
     def test_auth_views(self):
         """Test private views while logged in"""
         user = self.profile.user
         # my profile
-        response = http_get_response(reverse('acct-my-profile'), profile, user)
+        response = http_get_response(reverse('acct-my-profile'), accounts_views.profile, user)
         eq_(response.status_code, 200, 'Logged in user may view their own profile.')
         # settings
-        response = http_get_response(reverse('acct-settings'), settings, user)
+        response = http_get_response(reverse('acct-settings'), accounts_views.settings, user)
         eq_(response.status_code, 200)
         # buy requests
         buy_requests_url = reverse('acct-buy-requests', args=[user.username])
-        response = http_get_response(buy_requests_url, buy_requests, user)
+        response = http_get_response(buy_requests_url, accounts_views.buy_requests, user)
         eq_(response.status_code, 302, 'Buying requests should respond with a redirect')
 
     def test_settings_view(self):
@@ -323,7 +327,7 @@ class TestAccountFunctional(TestCase):
             'email_pref': 'instant'
         }
         settings_url = reverse('acct-settings')
-        response = http_post_response(settings_url, settings, user_data, user)
+        http_post_response(settings_url, accounts_views.settings, user_data, user)
         self.profile.refresh_from_db()
         for key, val in user_data.iteritems():
             if key in ['first_name', 'last_name', 'email']:
@@ -351,14 +355,14 @@ class TestStripeWebhook(TestCase):
     def test_post_request(self):
         """Only POST requests should be allowed."""
         get_request = self.request_factory.get(self.url)
-        response = stripe_webhook(get_request)
+        response = accounts_views.stripe_webhook(get_request)
         eq_(response.status_code, 405, 'Should respond to GET request with 405')
         post_request = self.request_factory.post(
             self.url,
             data=self.data,
             content_type='application/json'
         )
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 200, 'Should respond to POST request with 200')
 
     def test_bad_json(self):
@@ -368,7 +372,7 @@ class TestStripeWebhook(TestCase):
             data=u'Not JSON',
             content_type='application/json'
         )
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 400)
 
     def test_missing_data(self):
@@ -379,7 +383,7 @@ class TestStripeWebhook(TestCase):
             data=bad_data,
             content_type='application/json'
         )
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 400)
 
     @patch('muckrock.message.tasks.send_charge_receipt.delay')
@@ -391,7 +395,7 @@ class TestStripeWebhook(TestCase):
             data=json.dumps(self.mock_event),
             content_type='application/json'
         )
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 200)
         mock_task.called_once()
 
@@ -403,7 +407,7 @@ class TestStripeWebhook(TestCase):
             self.url,
             data=json.dumps(self.mock_event),
             content_type='application/json')
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 200)
         mock_task.called_once()
 
@@ -416,6 +420,6 @@ class TestStripeWebhook(TestCase):
             data=json.dumps(self.mock_event),
             content_type='application/json'
         )
-        response = stripe_webhook(post_request)
+        response = accounts_views.stripe_webhook(post_request)
         eq_(response.status_code, 200)
         mock_task.called_once()
