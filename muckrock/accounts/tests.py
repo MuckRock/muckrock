@@ -83,6 +83,17 @@ class TestAccountsView(TestCase):
             'password2': 'password'
         }
 
+    def test_no_plan(self):
+        """Posting registation data without a plan should return 400."""
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 400)
+
+    def test_nonexistant_plan(self):
+        """Posting registation data with a nonexistant plan should return 400."""
+        self.data['plan'] = 'fartbutts'
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 400)
+
     def test_register_community_account(self):
         """Posting the registration data with a community plan should register the account."""
         self.data['plan'] = 'community'
@@ -92,6 +103,20 @@ class TestAccountsView(TestCase):
         user = User.objects.get(username=self.data['username'])
         ok_(user, 'The user should be created.')
         eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
+
+    def test_register_pro_account(self):
+        """
+        Posting the registration data with a professional plan should
+        register the account and start a pro subscription on their acccount.
+        """
+        ok_(False, 'Test unwritten.')
+
+    def test_register_org_account(self):
+        """
+        Posting the registation data with an organization plan should
+        register the account and create the organization.
+        """
+        ok_(False, 'Test unwritten.')
 
 
 class TestAccountFormsUnit(TestCase):
