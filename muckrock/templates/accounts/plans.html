@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
 
 {% block content %}
 {% if logged_in %}
@@ -104,7 +105,7 @@
         <form method="post" class="professional registration form">
             {% csrf_token %}
             <h2>Subscribe to a professional account</h2>
-            <input type="hidden" name="plan" value="professional">
+            <input type="hidden" name="plan" value="professional" id="subscribe">
             <div class="fields">
                 {% for field in registration_form.visible_fields %}
                 <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
@@ -117,7 +118,15 @@
             </div>
             <footer>
                 <span class="cancel">Pick a different plan</span>
-                <button type="submit" class="primary">Subscribe</button>
+                <button
+                    data-amount="0"
+                    data-description="Subscription ($40.00/month)"
+                    data-email=""
+                    data-label="Subscribe"
+                    data-form="#subscribe"
+                    class="checkout-button primary">
+                    Subscribe
+                </button>
             </footer>
         </form>
         <form method="post" class="organization registration form">
@@ -168,6 +177,22 @@
     $('.cancel').click(function(){
         $(this).closest('.registration.form').removeClass('visible');
         $('.plans main').removeClass('hidden');
+    });
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            var checkoutData = getCheckoutData($(this));
+            var userEmail = $('#subscribe #id_email');
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                userEmail,
+                checkoutData.label,
+                checkoutData.form
+            );
+        });
     });
 </script>
 {% endblock %}
