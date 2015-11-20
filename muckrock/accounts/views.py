@@ -120,7 +120,33 @@ class AccountsView(TemplateView):
         The second step is to begin the user's pro subscription using the provided Stripe token.
         Once that's done, we need to redirect the user to their account.
         """
-        pass
+        form = RegisterForm(request.POST)
+        if not form.is_valid():
+            # TODO we actually want to return the error-marked form
+            return HttpResponseBadRequest()
+        # allows us to redirect people past the registration page
+        url_redirect = request.GET.get('next', None)
+        new_user = self.create_new_user(form)
+        welcome.delay(new_user)
+        try:
+            profile.start_pro_subscription(request.POST['stripe_token'])
+            messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
+        except KeyError:
+            # no payment information provided
+            messages.error(request, ('Your account was successfully created, '
+                                     'but you did not provide payment information. '
+                                     'You can subscribe from the account management page.'))
+        except stripe.error.CardError:
+            # card declined
+            messages.error(request, ('Your account was successfully created, '
+                                     'but your card was declined. '
+                                     'You can subscribe from the account management page.'))
+        except (stripe.error.InvalidRequestError, stripe.error.APIError):
+            # invalid request made to stripe
+            messages.error(request, ('Your account was successfully created, '
+                                     'but we could not contact our payment provider. '
+                                     'You can subscribe from the account management page.'))
+        return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
 
     def register_organization(self, request):
         """
