@@ -74,7 +74,6 @@
             <h2>Organization</h2>
             <ul>
                 <li>Share a pool of requests between organization members.</li>
-                <li>Follow the activity of other members in your organization.</li>
                 <li>Organization members may permanently embargo their requests.</li>
                 <li>Plan starts at $100 for up to 3 members and 50 requests per month.</li>
                 <li>Add members and receive 10 additional requests for $20 each.</li>
@@ -125,7 +124,7 @@
             {% csrf_token %}
             <h2>Create an organization</h2>
             <input type="hidden" name="plan" value="organization">
-            <h3>Profile</h3>
+            <h3>First, create a profile</h3>
             <div class="fields">
                 {% for field in registration_form.visible_fields %}
                 <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
@@ -136,7 +135,7 @@
                 </fieldset>
                 {% endfor %}
             </div>
-            <h3>Organization</h3>
+            <h3>Next, name your organization</h3>
             <div class="fields">
                 {% for field in org_form.visible_fields %}
                 <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">

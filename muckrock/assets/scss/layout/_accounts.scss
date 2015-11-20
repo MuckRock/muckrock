@@ -1,8 +1,26 @@
 .account.plans {
+    header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($large-layout) {
+            @include flex-direction(row);
+        }
+        p {
+            max-width: 20em;
+        }
+    }
     main {
         @include display(flex);
         &.hidden {
             display: none;
+        }
+        @include flex-direction(column);
+        @include align-items(center);
+        @media all and (min-width: 768px) {
+            @include flex-direction(row);
+            @include align-items(stretch);
+            @include justify-content(space-around);
         }
     }
     .plan {
@@ -12,14 +30,17 @@
         @include justify-content(space-between);
         @include border;
         @include border-radius;
-        margin-bottom: 0;
-        margin-right: $vertical-rhythm;
-        &:last-child {
-            margin-right: 0;
-        }
+        max-width: 40em;
         padding: $vertical-rhythm;
         h2 {
             text-align: center;
+        }
+        @media all and (min-width: 768px) {
+            margin-bottom: 0;
+            margin-right: $vertical-rhythm;
+            &:last-child {
+                margin-right: 0;
+            }
         }
     }
     .registration.form {
@@ -32,12 +53,17 @@
             @include display(flex);
             @include flex-wrap(wrap);
             .field {
-                @include flex(1 0 50%);
-                &:nth-child(odd) {
-                    padding-right: $vertical-rhythm;
-                }
-                &:last-child {
-                    padding-right: 0;
+                @include flex(1 0 100%);
+            }
+            @include media($medium-layout) {
+                .field {
+                    @include flex(1 0 50%);
+                    &:nth-child(odd) {
+                        padding-right: $vertical-rhythm;
+                    }
+                    &:last-child {
+                        padding-right: 0;
+                    }
                 }
             }
             input {
