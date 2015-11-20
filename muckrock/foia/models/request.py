@@ -225,6 +225,18 @@ class FOIARequest(models.Model):
         """Can this request be updated?"""
         return self.status == 'started'
 
+    def is_thankable(self):
+        """Should we show a send thank you button for this request?"""
+        has_thanks = self.communications.filter(thanks=True).exists()
+        valid_status = self.status in [
+                'done',
+                'partial',
+                'rejected',
+                'abandoned',
+                'no_docs',
+                ]
+        return not has_thanks and valid_status
+
     def is_appealable(self):
         """Can this request be appealed by the user?"""
         if not self.jurisdiction.can_appeal():
@@ -458,7 +470,7 @@ class FOIARequest(models.Model):
         self._notify()
         self.update_dates()
 
-    def submit(self, appeal=False, snail=False):
+    def submit(self, appeal=False, snail=False, thanks=False):
         """The request has been submitted.  Notify admin and try to auto submit"""
         # pylint: disable=no-member
 
@@ -483,25 +495,28 @@ class FOIARequest(models.Model):
         comm = self.last_comm()
 
         # if the request can be emailed, email it, otherwise send a notice to the admin
+        # if this is a thanks, send it as normal but do not change the status
         if not snail and approved_agency and (can_email or can_email_appeal):
-            if appeal:
+            if appeal and not thanks:
                 self.status = 'appealing'
-            elif self.has_ack():
+            elif self.has_ack() and not thanks:
                 self.status = 'processed'
-            else:
+            elif not thanks:
                 self.status = 'ack'
             self._send_email()
             self.update_dates()
         elif approved_agency:
             # snail mail it
-            self.status = 'submitted'
-            self.date_processing = date.today()
+            if not thanks:
+                self.status = 'submitted'
+                self.date_processing = date.today()
             notice = 'n' if self.communications.count() == 1 else 'u'
             notice = 'a' if appeal else notice
             comm.delivered = 'mail'
             comm.save()
             task.models.SnailMailTask.objects.create(category=notice, communication=comm)
-        else:
+        elif not thanks:
+            # there should never be a thanks to an unapproved agency
             # not an approved agency, all we do is mark as submitted
             self.status = 'submitted'
             self.date_processing = date.today()
