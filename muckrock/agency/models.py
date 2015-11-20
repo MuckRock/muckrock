@@ -160,6 +160,13 @@ class Agency(models.Model, RequestHelper):
         if latest_responses:
             return max(latest_responses)
 
+    def count_thanks(self):
+        """Count how many thanks this agency has received"""
+        return (self.foiarequest_set
+                .filter(communications__thanks=True)
+                .distinct()
+                .count())
+
     class Meta:
         # pylint: disable=too-few-public-methods
         verbose_name_plural = 'agencies'
