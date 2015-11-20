@@ -113,3 +113,9 @@ def failed_payment(invoice_id):
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         notification = notifications.FailedPaymentNotification(user, attempt, invoice.plan.id)
         notification.send(fail_silently=False)
+
+@task(name='muckrock.message.tasks.welcome')
+def welcome(user):
+    """Send a welcome notification to a new user. Hello!"""
+    notification = notifications.WelcomeNotification(user)
+    notification.send(fail_silently=False)

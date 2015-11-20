@@ -2,7 +2,7 @@
 Tests using nose for the accounts application
 """
 
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
@@ -66,6 +66,32 @@ def http_post_response(url, view, data, user=AnonymousUser()):
     request.user = user
     response = view(request)
     return response
+
+
+class TestAccountsView(TestCase):
+    """The AccountsView handles the registration and modification of account plans."""
+    def setUp(self):
+        self.view = accounts_views.AccountsView.as_view()
+        self.url = reverse('accounts')
+        self.data = {
+            'plan': '',
+            'username': 'test-user',
+            'email': 'test@muckrock.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password1': 'password',
+            'password2': 'password'
+        }
+
+    def test_register_community_account(self):
+        """Posting the registration data with a community plan should register the account."""
+        self.data['plan'] = 'community'
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 302,
+            'Should redirect to the new account upon creation.')
+        user = User.objects.get(username=self.data['username'])
+        ok_(user, 'The user should be created.')
+        eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
 
 
 class TestAccountFormsUnit(TestCase):

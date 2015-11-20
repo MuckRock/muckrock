@@ -125,3 +125,29 @@ class FailedPaymentNotification(EmailMultiAlternatives):
             self.text_template,
             {'user': self.user, 'attempt': attempt, 'type': subscription}
         )
+
+
+class WelcomeNotification(EmailMultiAlternatives):
+    """Sends a welcome notification"""
+    text_template = 'text/user/welcome.txt'
+
+    def __init__(self, user, **kwargs):
+        """Initialize the notification"""
+        super(WelcomeNotification, self).__init__(**kwargs)
+        if isinstance(user, User):
+            self.user = user
+            self.to = [user.email]
+        else:
+            raise TypeError('Notification requires a User to receive it.')
+        self.from_email = 'MuckRock <info@muckrock.com>'
+        self.bcc = ['diagnostics@muckrock.com']
+        self.subject = 'Welcome to MuckRock'
+        self.body = render_to_string(self.text_template, self.get_context_data())
+
+    def get_context_data(self):
+        context = {}
+        context['user'] = self.user
+        verification_url = reverse('acct-verify-email')
+        key = self.user.profile.generate_confirmation_key()
+        context['verification_link'] = self.user.profile.wrap_url(verification_url, key=key)
+        return context

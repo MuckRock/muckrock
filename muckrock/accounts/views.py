@@ -29,7 +29,10 @@ from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
 from muckrock.organization.forms import CreateForm as OrganizationCreateForm
-from muckrock.message.tasks import send_charge_receipt, send_invoice_receipt, failed_payment
+from muckrock.message.tasks import send_charge_receipt,\
+                                   send_invoice_receipt,\
+                                   failed_payment,\
+                                   welcome
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -49,9 +52,9 @@ class AccountsView(TemplateView):
     """
     template_name = 'accounts/plans.html'
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
         """Returns a context based on whether the user is logged in or logged out."""
-        context = super(AccountsView, self).get_context_data()
+        context = super(AccountsView, self).get_context_data(**kwargs)
         logged_in = self.request.user.is_authenticated()
         if logged_in:
             is_pro = self.request.user.profile.acct_type == 'pro'
@@ -66,6 +69,80 @@ class AccountsView(TemplateView):
         context['logged_in'] = logged_in
         context['org_form'] = OrganizationCreateForm()
         return context
+
+    def post(self, request, **kwargs):
+        # is the user logged in or logged out?
+        logged_in = request.user.is_authenticated()
+        if not logged_in:
+            return self.register_account(request)
+
+    def register_community(self, request):
+        """
+        Registering a community account is easy.
+        Validate the form and save it to create the user.
+        Then log them in and create a profile.
+        Send them a welcome email, then redirect them to their account.
+        If the form is invalid, return the page with the invalid form.
+        """
+        form = RegisterForm(request.POST)
+        if not form.is_valid():
+            # TODO we actually want to return the error-marked form
+            print 'form is invalid: %s' % form
+            return HttpResponseBadRequest()
+        # allows us to redirect people past the registration page
+        url_redirect = request.GET.get('next', None)
+        form.save()
+        new_user = authenticate(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1']
+        )
+        login(request, new_user)
+        Profile.objects.create(
+            user=new_user,
+            acct_type='community',
+            monthly_requests=0,
+            date_update=date.today()
+        )
+        welcome.delay(new_user)
+        messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
+        return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
+
+    def register_professional(self, request):
+        """
+        Registering a professional account happens in two steps.
+        The first step is creating the new user, as long as the form is valid.
+        (If the form isn't valid, we return the page with the invalid form.)
+        The second step is to begin the user's pro subscription using the provided Stripe token.
+        Once that's done, we need to redirect the user to their account.
+        """
+        pass
+
+    def register_organization(self, request):
+        """
+        Registering an organization account is a little trickier.
+        First we have to make sure that _both_ the registration and organization forms are valid.
+        If either one isn't, we need to return the page with the invalid form(s).
+        Then, we have to create the new user.
+        After that, we need to create the new organization, setting the new user as the org's owner.
+        Finally, we redirect to the organization's activation page so that they can continue.
+        """
+        pass
+
+    def register_account(self, request):
+        """Register the account first, then handles plan-specific logic"""
+        plans = {
+            'community': self.register_community,
+            'professional': self.register_professional,
+            'organization': self.register_organization
+        }
+        try:
+            plan = request.POST['plan']
+            return plans[plan](request)
+        except KeyError:
+            # the plan wasn't specified or isn't supported
+            print 'bad plan: %s' % request.POST.get('plan')
+            return HttpResponseBadRequest()
+
 
 def register(request):
     """Register for a community account"""
