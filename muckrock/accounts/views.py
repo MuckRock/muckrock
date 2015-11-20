@@ -76,6 +76,22 @@ class AccountsView(TemplateView):
         if not logged_in:
             return self.register_account(request)
 
+    def create_new_user(self, valid_form):
+        """Create a user from the valid form, log them in, and give them a profile."""
+        form.save()
+        profile = Profile.objects.create(
+            user=new_user,
+            acct_type='community',
+            monthly_requests=0,
+            date_update=date.today()
+        )
+        new_user = authenticate(
+            username=form.cleaned_data['username'],
+            password=form.cleaned_data['password1']
+        )
+        login(request, new_user)
+        return new_user
+
     def register_community(self, request):
         """
         Registering a community account is easy.
@@ -91,18 +107,7 @@ class AccountsView(TemplateView):
             return HttpResponseBadRequest()
         # allows us to redirect people past the registration page
         url_redirect = request.GET.get('next', None)
-        form.save()
-        new_user = authenticate(
-            username=form.cleaned_data['username'],
-            password=form.cleaned_data['password1']
-        )
-        login(request, new_user)
-        Profile.objects.create(
-            user=new_user,
-            acct_type='community',
-            monthly_requests=0,
-            date_update=date.today()
-        )
+        new_user = self.create_new_user(form)
         welcome.delay(new_user)
         messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
         return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
