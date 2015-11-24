@@ -44,6 +44,7 @@ mock_customer.update_subscription.return_value = mock_subscription
 mock_customer.cancel_subscription.return_value = mock_subscription
 mock_customer.subscriptions.create.return_value = mock_subscription
 mock_customer.subscriptions.retrieve.return_value = mock_subscription
+mock_customer.subscriptions.data = [mock_subscription]
 MockCustomer = Mock()
 MockCustomer.create.return_value = mock_customer
 MockCustomer.retrieve.return_value = mock_customer
@@ -193,6 +194,15 @@ class TestProfileUnit(TestCase):
         eq_(self.profile.acct_type, 'community')
         ok_(not self.profile.subscription_id)
         eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('community'))
+
+    def test_cancel_legacy_subscription(self):
+        """Test ending a pro subscription when missing a subscription ID"""
+        pro_profile = ProfileFactory(acct_type='community',
+                                     monthly_requests=MONTHLY_REQUESTS.get('pro'))
+        ok_(not pro_profile.subscription_id)
+        pro_profile.cancel_pro_subscription()
+        eq_(pro_profile.acct_type, 'community')
+        eq_(pro_profile.monthly_requests, MONTHLY_REQUESTS.get('community'))
 
 
 class TestStripeIntegration(TestCase):
