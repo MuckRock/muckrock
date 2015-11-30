@@ -4,6 +4,7 @@ Notification objects for the messages app
 
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
+from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 
 import actstream
@@ -145,6 +146,7 @@ class WelcomeNotification(EmailMultiAlternatives):
         self.body = render_to_string(self.text_template, self.get_context_data())
 
     def get_context_data(self):
+        """Add the user and ask them to verify their email."""
         context = {}
         context['user'] = self.user
         verification_url = reverse('acct-verify-email')

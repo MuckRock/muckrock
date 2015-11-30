@@ -71,6 +71,7 @@ class AccountsView(TemplateView):
         return context
 
     def post(self, request, **kwargs):
+        """Allow a logged out user to register for an account"""
         # is the user logged in or logged out?
         logged_in = request.user.is_authenticated()
         if not logged_in:
@@ -78,8 +79,9 @@ class AccountsView(TemplateView):
 
     def create_new_user(self, request, valid_form):
         """Create a user from the valid form, log them in, and give them a profile."""
+        # pylint:disable=no-self-use
         new_user = valid_form.save()
-        profile = Profile.objects.create(
+        Profile.objects.create(
             user=new_user,
             acct_type='community',
             monthly_requests=0,
