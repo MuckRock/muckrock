@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -61,22 +61,25 @@ def account_logout(request):
     return redirect('index')
 
 
-class CommunitySignupView(FormView):
-    """Allows a logged-out user to register for a community account."""
-    template_name = 'accounts/signup/community.html'
-    form_class = RegisterForm
-
+class SignupView(FormView):
+    """Generic ancestor for all account signup views."""
     def dispatch(self, *args, **kwargs):
         """Prevent logged-in users from accessing this view."""
         if self.request.user.is_authenticated():
             messages.warning(self.request, 'Log out before signing up for another account.')
-            return redirect('acct-my-profile')
-        return super(CommunitySignupView, self).dispatch(*args, **kwargs)
+            return HttpResponseRedirect(self.get_success_url())
+        return super(SignupView, self).dispatch(*args, **kwargs)
 
     def get_success_url(self):
         """Allows the success URL to be overridden by a query parameter."""
         url_redirect = self.request.GET.get('next', None)
         return url_redirect if url_redirect else reverse('acct-my-profile')
+
+
+class CommunitySignupView(SignupView):
+    """Allows a logged-out user to register for a community account."""
+    template_name = 'accounts/signup/community.html'
+    form_class = RegisterForm
 
     def form_valid(self, form):
         """When form is valid, create the user."""
