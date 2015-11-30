@@ -88,6 +88,46 @@ class CommunitySignupView(SignupView):
         messages.success(self.request, 'Your account was successfully created. Welcome to MuckRock!')
         return super(CommunitySignupView, self).form_valid(form)
 
+
+class ProfessionalSignupView(SignupView):
+    """Allows a logged-out user to register for a professional account."""
+    template_name = 'accounts/signup/professional.html'
+    form_class = RegisterForm
+
+    def get_context_data(self, **kwargs):
+        """Adds Stripe PK to template context data."""
+        context = super(ProfessionalSignupView, self).get_context_data(**kwargs)
+        context['stripe_pk'] = STRIPE_PUB_KEY
+        return context
+
+    def form_valid(self, form):
+        """When form is valid, create the user and begin their professional subscription."""
+        new_user = create_new_user(self.request, form)
+        welcome.delay(new_user)
+        try:
+            new_user.profile.start_pro_subscription(self.request.POST['stripe_token'])
+            success_msg = 'Your professional account was successfully created. Welcome to MuckRock!'
+            messages.success(self.request, success_msg)
+        except KeyError:
+            # no payment information provided
+            error_msg = ('Your account was successfully created, '
+                         'but you did not provide payment information. '
+                         'You can subscribe from the account management page.')
+            messages.error(self.request, error_msg)
+        except stripe.error.CardError:
+            # card declined
+            error_msg = ('Your account was successfully created, but your card was declined. '
+                         'You can subscribe from the account management page.')
+            messages.error(self.request, error_msg)
+        except (stripe.error.InvalidRequestError, stripe.error.APIError):
+            # invalid request made to stripe
+            error_msg = ('Your account was successfully created, '
+                         'but we could not contact our payment provider. '
+                         'You can subscribe from the account management page.')
+            messages.error(self.request, error_msg)
+        return super(ProfessionalSignupView, self).form_valid(form)
+
+
 class AccountsView(TemplateView):
     """
     Displays the list of payment plans.

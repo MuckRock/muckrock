@@ -11,7 +11,12 @@ import muckrock.accounts.views as views
 urlpatterns = patterns(
     '',
     url(r'^$', views.AccountsView.as_view(), name='accounts'),
-    url(r'^signup/community/$', views.CommunitySignupView.as_view(), name='acct-signup-community'),
+    url(r'^signup/community/$',
+        views.CommunitySignupView.as_view(),
+        name='acct-signup-community'),
+    url(r'^signup/professional/$',
+        views.ProfessionalSignupView.as_view(),
+        name='acct-signup-professional'),
     url(r'^login/$',
         auth_views.login,
         {'template_name': 'forms/account/login.html'},

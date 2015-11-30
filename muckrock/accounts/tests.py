@@ -112,6 +112,52 @@ class TestCommunitySignupView(TestCase):
         eq_(response.status_code, 302)
         User.objects.get(username=self.data['username'])
 
+
+class TestProfessionalSignupView(TestCase):
+    """The ProfessionalSignupView handles registration and subscription of professional accounts."""
+    def setUp(self):
+        self.view = accounts_views.ProfessionalSignupView.as_view()
+        self.url = reverse('acct-signup-professional')
+        self.data = {
+            'username': 'test-user',
+            'email': 'test@muckrock.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password1': 'password',
+            'password2': 'password',
+            'token': 'test'
+        }
+
+    def test_logged_out_get(self):
+        """Getting the view while logged out should show the registration form."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 200)
+
+    def test_logged_in_get(self):
+        """Getting the view while logged in should redirect."""
+        user = UserFactory()
+        response = http_get_response(self.url, self.view, user)
+        eq_(response.status_code, 302)
+
+    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
+    def test_logged_out_post(self, mock_subscribe):
+        """Posting valid data while logged out should create a new professional account."""
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 302,
+            'Should redirect to the new account upon creation.')
+        user = User.objects.get(username=self.data['username'])
+        ok_(user, 'The user should be created.')
+        ok_(mock_subscribe.called_once)
+
+    @raises(User.DoesNotExist)
+    def test_logged_in_post(self):
+        """Posting valid data while logged in should redirect without creating a new user."""
+        user = UserFactory()
+        response = http_post_response(self.url, self.view, self.data, user)
+        eq_(response.status_code, 302)
+        User.objects.get(username=self.data['username'])
+
+
 class TestAccountsView(TestCase):
     """The AccountsView handles the registration and modification of account plans."""
     def setUp(self):
