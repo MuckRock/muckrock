@@ -206,6 +206,7 @@ class Detail(DetailView):
             'status': self._status,
             'tags': self._tags,
             'follow_up': self._follow_up,
+            'thanks': self._thank,
             'question': self._question,
             'add_note': self._add_note,
             'flag': self._flag,
@@ -252,22 +253,6 @@ class Detail(DetailView):
                 request.user,
                 verb='changed the status of',
                 action_object=foia
-            )
-        return redirect(foia)
-
-    def _follow_up(self, request, foia):
-        """Handle submitting follow ups"""
-        text = request.POST.get('text', False)
-        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
-        if can_follow_up and foia.status != 'started' and text:
-            save_foia_comm(foia, request.user.get_full_name(), text)
-            messages.success(request, 'Your follow up has been sent.')
-            # generate follow up action
-            actstream.action.send(
-                request.user,
-                verb='followed up',
-                action_object=foia,
-                target=foia.agency
             )
         return redirect(foia)
 
@@ -326,17 +311,60 @@ class Detail(DetailView):
             )
         return redirect(foia)
 
+    def _follow_up(self, request, foia):
+        """Handle submitting follow ups"""
+        can_follow_up = foia.editable_by(request.user) or request.user.is_staff
+        test = can_follow_up and foia.status != 'started'
+        success_msg = 'Your follow up has been sent.'
+        agency = foia.agency
+        verb = 'followed up'
+        return self._new_comm(request, foia, test, success_msg, agency, verb)
+
+    def _thank(self, request, foia):
+        """Handle submitting a thank you follow up"""
+        test = foia.editable_by(request.user) and foia.is_thankable()
+        success_msg = 'Your thank you has been sent.'
+        agency = foia.agency
+        verb = 'thanked'
+        return self._new_comm(
+                request, foia, test, success_msg, agency, verb, thanks=True)
+
     def _appeal(self, request, foia):
         """Handle submitting an appeal"""
+        test = foia.editable_by(request.user) and foia.is_appealable()
+        success_msg = 'Appeal successfully sent.'
+        agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
+        verb = 'appealed'
+        return self._new_comm(
+                request, foia, test, success_msg, agency, verb, appeal=True)
+
+    def _new_comm(
+            self,
+            request,
+            foia,
+            test,
+            success_msg,
+            agency,
+            verb,
+            appeal=False,
+            thanks=False,
+            ):
+        """Helper function for sending a new comm"""
+        # pylint: disable=too-many-arguments
         text = request.POST.get('text')
-        if foia.editable_by(request.user) and foia.is_appealable() and text:
-            save_foia_comm(foia, foia.user.get_full_name(), text, appeal=True)
-            messages.success(request, 'Appeal successfully sent.')
-            agency = foia.agency.appeal_agency if foia.agency.appeal_agency else foia.agency
+        if text and test:
+            save_foia_comm(
+                    foia,
+                    foia.user.get_full_name(),
+                    text,
+                    appeal=appeal,
+                    thanks=thanks,
+                    )
+            messages.success(request, success_msg)
             # generate appeal action
             actstream.action.send(
                 request.user,
-                verb='appealed',
+                verb=verb,
                 action_object=foia,
                 target=agency
             )

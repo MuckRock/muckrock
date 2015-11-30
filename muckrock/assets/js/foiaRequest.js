@@ -160,6 +160,11 @@ $('#follow-up').click(function(e){
     composeResponse(this, '.follow-up.composer-input');
 });
 
+$('#thanks').click(function(e){
+    e.preventDefault();
+    composeResponse(this, '.thanks.composer-input');
+});
+
 $('#appeal').click(function(e){
     e.preventDefault();
     composeResponse(this, '.appeal.composer-input');
