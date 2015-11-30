@@ -76,9 +76,9 @@ class AccountsView(TemplateView):
         if not logged_in:
             return self.register_account(request)
 
-    def create_new_user(self, valid_form):
+    def create_new_user(self, request, valid_form):
         """Create a user from the valid form, log them in, and give them a profile."""
-        form.save()
+        new_user = valid_form.save()
         profile = Profile.objects.create(
             user=new_user,
             acct_type='community',
@@ -86,8 +86,8 @@ class AccountsView(TemplateView):
             date_update=date.today()
         )
         new_user = authenticate(
-            username=form.cleaned_data['username'],
-            password=form.cleaned_data['password1']
+            username=valid_form.cleaned_data['username'],
+            password=valid_form.cleaned_data['password1']
         )
         login(request, new_user)
         return new_user
@@ -107,7 +107,7 @@ class AccountsView(TemplateView):
             return HttpResponseBadRequest()
         # allows us to redirect people past the registration page
         url_redirect = request.GET.get('next', None)
-        new_user = self.create_new_user(form)
+        new_user = self.create_new_user(request, form)
         welcome.delay(new_user)
         messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
         return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
@@ -126,7 +126,7 @@ class AccountsView(TemplateView):
             return HttpResponseBadRequest()
         # allows us to redirect people past the registration page
         url_redirect = request.GET.get('next', None)
-        new_user = self.create_new_user(form)
+        new_user = self.create_new_user(request, form)
         welcome.delay(new_user)
         try:
             profile.start_pro_subscription(request.POST['stripe_token'])
