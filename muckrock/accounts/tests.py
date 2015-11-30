@@ -70,6 +70,48 @@ def http_post_response(url, view, data, user=AnonymousUser()):
     return response
 
 
+class TestCommunitySignupView(TestCase):
+    """The CommunitySignupView handles registration of community accounts."""
+    def setUp(self):
+        self.view = accounts_views.CommunitySignupView.as_view()
+        self.url = reverse('acct-signup-community')
+        self.data = {
+            'username': 'test-user',
+            'email': 'test@muckrock.com',
+            'first_name': 'Test',
+            'last_name': 'User',
+            'password1': 'password',
+            'password2': 'password'
+        }
+
+    def test_logged_out_get(self):
+        """Getting the view while logged out should show the registration form."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 200)
+
+    def test_logged_in_get(self):
+        """Getting the view while logged in should redirect."""
+        user = UserFactory()
+        response = http_get_response(self.url, self.view, user)
+        eq_(response.status_code, 302)
+
+    def test_logged_out_post(self):
+        """Posting valid data while logged out should create a new community account."""
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 302,
+            'Should redirect to the new account upon creation.')
+        user = User.objects.get(username=self.data['username'])
+        ok_(user, 'The user should be created.')
+        eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
+
+    @raises(User.DoesNotExist)
+    def test_logged_in_post(self):
+        """Posting valid data while logged in should redirect without creating a new user."""
+        user = UserFactory()
+        response = http_post_response(self.url, self.view, self.data, user)
+        eq_(response.status_code, 302)
+        User.objects.get(username=self.data['username'])
+
 class TestAccountsView(TestCase):
     """The AccountsView handles the registration and modification of account plans."""
     def setUp(self):
@@ -105,6 +147,7 @@ class TestAccountsView(TestCase):
         user = User.objects.get(username=self.data['username'])
         ok_(user, 'The user should be created.')
         eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
+
 
     @patch('muckrock.accounts.models.Profile.start_pro_subscription')
     def test_register_pro_account(self, mock_subscribe):

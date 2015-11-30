@@ -13,7 +13,7 @@ from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, FormView
 
 from datetime import date
 from rest_framework import viewsets
@@ -38,11 +38,52 @@ from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
 
+def create_new_user(request, valid_form):
+    """Create a user from the valid form, give them a profile, and log them in."""
+    new_user = valid_form.save()
+    Profile.objects.create(
+        user=new_user,
+        acct_type='community',
+        monthly_requests=0,
+        date_update=date.today()
+    )
+    new_user = authenticate(
+        username=valid_form.cleaned_data['username'],
+        password=valid_form.cleaned_data['password1']
+    )
+    login(request, new_user)
+    return new_user
+
 def account_logout(request):
     """Logs a user out of their account and redirects to index page"""
     logout(request)
     messages.success(request, 'You have successfully logged out.')
     return redirect('index')
+
+
+class CommunitySignupView(FormView):
+    """Allows a logged-out user to register for a community account."""
+    template_name = 'accounts/signup/community.html'
+    form_class = RegisterForm
+
+    def dispatch(self, *args, **kwargs):
+        """Prevent logged-in users from accessing this view."""
+        if self.request.user.is_authenticated():
+            messages.warning(self.request, 'Log out before signing up for another account.')
+            return redirect('acct-my-profile')
+        return super(CommunitySignupView, self).dispatch(*args, **kwargs)
+
+    def get_success_url(self):
+        """Allows the success URL to be overridden by a query parameter."""
+        url_redirect = self.request.GET.get('next', None)
+        return url_redirect if url_redirect else reverse('acct-my-profile')
+
+    def form_valid(self, form):
+        """When form is valid, create the user."""
+        new_user = create_new_user(self.request, form)
+        welcome.delay(new_user)
+        messages.success(self.request, 'Your account was successfully created. Welcome to MuckRock!')
+        return super(CommunitySignupView, self).form_valid(form)
 
 class AccountsView(TemplateView):
     """

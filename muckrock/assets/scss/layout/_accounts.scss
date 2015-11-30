@@ -43,17 +43,21 @@
             }
         }
     }
-    .registration.form {
-        display: none;
+}
+
+.account.signup {
+    .form {
         margin-bottom: 0;
-        &.visible {
-            display: block;
-        }
         .fields {
             @include display(flex);
             @include flex-wrap(wrap);
             .field {
                 @include flex(1 0 100%);
+            }
+            .errorlist {
+                list-style: none;
+                margin-bottom: 0;
+                padding-left: 0;
             }
             @include media($medium-layout) {
                 .field {
@@ -75,14 +79,16 @@
             @include justify-content(space-between);
             @include align-items(center);
         }
-        .cancel {
-            cursor: pointer;
-            color: $color-blue;
-            border-bottom: 1px dotted;
-            &:hover {
-                color: $color-blue-dark;
-                border-bottom-style: solid;
-            }
+
+    }
+    .cancel {
+        cursor: pointer;
+        color: $color-blue;
+        border-bottom: 1px dotted;
+        &:hover {
+            text-decoration: none;
+            color: $color-blue-dark;
+            border-bottom-style: solid;
         }
     }
 }

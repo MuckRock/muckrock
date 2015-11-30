@@ -60,7 +60,7 @@
                 <li>Purchase bundles 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
-            <button class="primary" data-plan="community">Register for free</button>
+            <a class="primary button" href="{% url 'acct-signup-community' %}">Register for free</a>
         </section>
         <section class="professional plan">
             <h2>Professional</h2>
@@ -83,25 +83,6 @@
         </section>
     </main>
     <div class="registration forms">
-        <form method="post" class="community registration form">
-            {% csrf_token %}
-            <h2>Register for a community account</h2>
-            <input type="hidden" name="plan" value="community">
-            <div class="fields">
-                {% for field in registration_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field.errors }}
-                    {{ field }}
-                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                </fieldset>
-                {% endfor %}
-            </div>
-            <footer>
-                <span class="cancel">Pick a different plan</span>
-                <button type="submit" class="primary">Register</button>
-            </footer>
-        </form>
         <form method="post" class="professional registration form">
             {% csrf_token %}
             <h2>Subscribe to a professional account</h2>
