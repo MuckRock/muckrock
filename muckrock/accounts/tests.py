@@ -105,12 +105,20 @@ class TestAccountsView(TestCase):
         ok_(user, 'The user should be created.')
         eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
 
-    def test_register_pro_account(self):
+    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
+    def test_register_pro_account(self, mock_subscribe):
         """
         Posting the registration data with a professional plan should
         register the account and start a pro subscription on their acccount.
         """
-        ok_(False, 'Test unwritten.')
+        self.data['plan'] = 'professional'
+        self.data['token'] = 'test'
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 302,
+            'Should redirect to the new account upon creation.')
+        user = User.objects.get(username=self.data['username'])
+        ok_(user, 'The user should be created.')
+        ok_(mock_subscribe.called_once, 'The user should be subscribed to a pro account.')
 
     def test_register_org_account(self):
         """

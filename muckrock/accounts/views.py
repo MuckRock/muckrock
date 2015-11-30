@@ -129,7 +129,7 @@ class AccountsView(TemplateView):
         new_user = self.create_new_user(request, form)
         welcome.delay(new_user)
         try:
-            profile.start_pro_subscription(request.POST['stripe_token'])
+            new_user.profile.start_pro_subscription(request.POST['stripe_token'])
             messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
         except KeyError:
             # no payment information provided
