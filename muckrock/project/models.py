@@ -28,6 +28,7 @@ class ProjectQuerySet(models.QuerySet):
         if not user.is_staff:
             # show public projects and projects the user is a contributor to
             projects = projects.filter(models.Q(private=False)|models.Q(contributors=user))
+            projects = projects.distinct()
         return projects
 
 class Project(models.Model):
