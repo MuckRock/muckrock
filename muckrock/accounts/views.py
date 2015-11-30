@@ -157,7 +157,20 @@ class AccountsView(TemplateView):
         After that, we need to create the new organization, setting the new user as the org's owner.
         Finally, we redirect to the organization's activation page so that they can continue.
         """
-        pass
+        user_form = RegisterForm(request.POST)
+        org_form = OrganizationCreateForm(request.POST)
+        if not user_form.is_valid() or not org_form.is_valid():
+            # TODO we actually want to return the error-marked form
+            return HttpResponseBadRequest()
+        # create the new user
+        new_user = self.create_new_user(request, user_form)
+        # create the new org and save the user as the owner
+        new_org = org_form.save(commit=False)
+        new_org.owner = new_user
+        new_org.save()
+        # welcome the user! hello!
+        welcome.delay(new_user)
+        return redirect('org-activate', slug=new_org.slug)
 
     def register_account(self, request):
         """Register the account first, then handles plan-specific logic"""

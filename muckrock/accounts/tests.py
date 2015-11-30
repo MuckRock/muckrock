@@ -17,6 +17,7 @@ import nose.tools
 from muckrock.accounts.forms import UserChangeForm, RegisterForm
 from muckrock.accounts import views as accounts_views
 from muckrock.factories import UserFactory, ProfileFactory
+from muckrock.organization.models import Organization
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token, mock_middleware
 
@@ -125,8 +126,16 @@ class TestAccountsView(TestCase):
         Posting the registation data with an organization plan should
         register the account and create the organization.
         """
-        ok_(False, 'Test unwritten.')
-
+        self.data['plan'] = 'organization'
+        self.data['name'] = 'Test Org'
+        response = http_post_response(self.url, self.view, self.data)
+        eq_(response.status_code, 302,
+            'Shoould redirect to the new org\'s activation page upon creation.')
+        user = User.objects.get(username=self.data['username'])
+        org = Organization.objects.get(name=self.data['name'])
+        ok_(user, 'The user should be created.')
+        ok_(org, 'The organization should be created.')
+        eq_(org.owner, user, 'The user should be made the owner of the organization.')
 
 class TestAccountFormsUnit(TestCase):
     """Unit tests for account forms"""
