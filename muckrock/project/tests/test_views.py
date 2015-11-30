@@ -125,7 +125,7 @@ def staff_and_contributors_only(project, project_url, action='load'):
     client = Client()
     staff_user = User.objects.get(username='adam')
     contributor_user = User.objects.get(username='bob')
-    nonstaff_noncontributor_user = User.objects.get(username='community')
+    nonstaff_noncontributor_user = User.objects.get(username='basic')
     # set the contributor as a contributor
     project.contributors.add(contributor_user)
     # test that all users have the expected permissions
@@ -144,7 +144,7 @@ def staff_and_contributors_only(project, project_url, action='load'):
     ok_(response.status_code is 200, 'Contributors should be able to ' + action + ' the project.')
     client.logout()
     # try accessing as a nonstaff noncontributor
-    client.login(username='community', password='abc')
+    client.login(username='basic', password='abc')
     response = client.get(project_url)
     ok_(response.status_code is not 200,
         'Nonstaff-noncontributors should not be able to ' + action + ' the project.')

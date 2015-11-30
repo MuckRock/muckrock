@@ -70,11 +70,11 @@ def http_post_response(url, view, data, user=AnonymousUser()):
     return response
 
 
-class TestCommunitySignupView(TestCase):
-    """The CommunitySignupView handles registration of community accounts."""
+class TestBasicSignupView(TestCase):
+    """The BasicSignupView handles registration of basic accounts."""
     def setUp(self):
-        self.view = accounts_views.CommunitySignupView.as_view()
-        self.url = reverse('acct-signup-community')
+        self.view = accounts_views.BasicSignupView.as_view()
+        self.url = reverse('accounts-signup-basic')
         self.data = {
             'username': 'test-user',
             'email': 'test@muckrock.com',
@@ -96,13 +96,13 @@ class TestCommunitySignupView(TestCase):
         eq_(response.status_code, 302)
 
     def test_logged_out_post(self):
-        """Posting valid data while logged out should create a new community account."""
+        """Posting valid data while logged out should create a new basic account."""
         response = http_post_response(self.url, self.view, self.data)
         eq_(response.status_code, 302,
             'Should redirect to the new account upon creation.')
         user = User.objects.get(username=self.data['username'])
         ok_(user, 'The user should be created.')
-        eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
+        eq_(user.profile.acct_type, 'basic', 'The user should be given a basic plan.')
 
     @raises(User.DoesNotExist)
     def test_logged_in_post(self):
@@ -117,7 +117,7 @@ class TestProfessionalSignupView(TestCase):
     """The ProfessionalSignupView handles registration and subscription of professional accounts."""
     def setUp(self):
         self.view = accounts_views.ProfessionalSignupView.as_view()
-        self.url = reverse('acct-signup-professional')
+        self.url = reverse('accounts-signup-professional')
         self.data = {
             'username': 'test-user',
             'email': 'test@muckrock.com',
@@ -184,15 +184,15 @@ class TestAccountsView(TestCase):
         response = http_post_response(self.url, self.view, self.data)
         eq_(response.status_code, 400)
 
-    def test_register_community_account(self):
-        """Posting the registration data with a community plan should register the account."""
-        self.data['plan'] = 'community'
+    def test_register_basic_account(self):
+        """Posting the registration data with a basic plan should register the account."""
+        self.data['plan'] = 'basic'
         response = http_post_response(self.url, self.view, self.data)
         eq_(response.status_code, 302,
             'Should redirect to the new account upon creation.')
         user = User.objects.get(username=self.data['username'])
         ok_(user, 'The user should be created.')
-        eq_(user.profile.acct_type, 'community', 'The user should be given a community plan.')
+        eq_(user.profile.acct_type, 'basic', 'The user should be given a basic plan.')
 
 
     @patch('muckrock.accounts.models.Profile.start_pro_subscription')
@@ -368,18 +368,18 @@ class TestProfileUnit(TestCase):
         self.profile.cancel_pro_subscription()
         self.profile.refresh_from_db()
         ok_(mock_subscription.delete.called)
-        eq_(self.profile.acct_type, 'community')
+        eq_(self.profile.acct_type, 'basic')
         ok_(not self.profile.subscription_id)
-        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('community'))
+        eq_(self.profile.monthly_requests, MONTHLY_REQUESTS.get('basic'))
 
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
-        pro_profile = ProfileFactory(acct_type='community',
+        pro_profile = ProfileFactory(acct_type='basic',
                                      monthly_requests=MONTHLY_REQUESTS.get('pro'))
         ok_(not pro_profile.subscription_id)
         pro_profile.cancel_pro_subscription()
-        eq_(pro_profile.acct_type, 'community')
-        eq_(pro_profile.monthly_requests, MONTHLY_REQUESTS.get('community'))
+        eq_(pro_profile.acct_type, 'basic')
+        eq_(pro_profile.monthly_requests, MONTHLY_REQUESTS.get('basic'))
 
 
 class TestStripeIntegration(TestCase):

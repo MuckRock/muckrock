@@ -67,8 +67,8 @@ def store_statstics():
             user__profile__acct_type='pro',
             date_submitted=yesterday
         ).count(),
-        daily_requests_community=FOIARequest.objects.filter(
-            user__profile__acct_type='community',
+        daily_requests_basic=FOIARequest.objects.filter(
+            user__profile__acct_type='basic',
             date_submitted=yesterday
         ).count(),
         daily_requests_beta=FOIARequest.objects.filter(

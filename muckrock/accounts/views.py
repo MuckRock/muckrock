@@ -43,7 +43,7 @@ def create_new_user(request, valid_form):
     new_user = valid_form.save()
     Profile.objects.create(
         user=new_user,
-        acct_type='community',
+        acct_type='basic',
         monthly_requests=0,
         date_update=date.today()
     )
@@ -76,17 +76,18 @@ class SignupView(FormView):
         return url_redirect if url_redirect else reverse('acct-my-profile')
 
 
-class CommunitySignupView(SignupView):
-    """Allows a logged-out user to register for a community account."""
-    template_name = 'accounts/signup/community.html'
+class BasicSignupView(SignupView):
+    """Allows a logged-out user to register for a basic account."""
+    template_name = 'accounts/signup/basic.html'
     form_class = RegisterForm
 
     def form_valid(self, form):
         """When form is valid, create the user."""
         new_user = create_new_user(self.request, form)
         welcome.delay(new_user)
-        messages.success(self.request, 'Your account was successfully created. Welcome to MuckRock!')
-        return super(CommunitySignupView, self).form_valid(form)
+        success_msg = 'Your account was successfully created. Welcome to MuckRock!'
+        messages.success(self.request, success_msg)
+        return super(BasicSignupView, self).form_valid(form)
 
 
 class ProfessionalSignupView(SignupView):
@@ -142,7 +143,7 @@ class AccountsView(TemplateView):
         logged_in = self.request.user.is_authenticated()
         if logged_in:
             is_pro = self.request.user.profile.acct_type == 'pro'
-            context['account_type'] = 'pro' if is_pro else 'community'
+            context['account_type'] = 'pro' if is_pro else 'basic'
             try:
                 context['org'] = Organization.objects.get(owner=self.request.user)
             except Organization.DoesNotExist:
@@ -167,7 +168,7 @@ class AccountsView(TemplateView):
         new_user = valid_form.save()
         Profile.objects.create(
             user=new_user,
-            acct_type='community',
+            acct_type='basic',
             monthly_requests=0,
             date_update=date.today()
         )
@@ -178,9 +179,9 @@ class AccountsView(TemplateView):
         login(request, new_user)
         return new_user
 
-    def register_community(self, request):
+    def register_basic(self, request):
         """
-        Registering a community account is easy.
+        Registering a basic account is easy.
         Validate the form and save it to create the user.
         Then log them in and create a profile.
         Send them a welcome email, then redirect them to their account.
@@ -261,7 +262,7 @@ class AccountsView(TemplateView):
     def register_account(self, request):
         """Register the account first, then handles plan-specific logic"""
         plans = {
-            'community': self.register_community,
+            'basic': self.register_basic,
             'professional': self.register_professional,
             'organization': self.register_organization
         }

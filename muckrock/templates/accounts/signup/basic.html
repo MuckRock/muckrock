@@ -3,11 +3,10 @@
 {% block content %}
 <article class="account signup">
     <header>
-        <h1>Sign up for a community account</h1>
+        <h1>Sign up for a basic account</h1>
     </header>
-    <form method="post" class="community form">
+    <form method="post" class="basic form">
         {% csrf_token %}
-        <input type="hidden" name="plan" value="community">
         <div class="fields">
             {% for field in form.visible_fields %}
             <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
@@ -20,7 +19,7 @@
         </div>
         <footer>
             <a href="{% url 'accounts' %}" class="cancel">Pick a different plan</a>
-            <button type="submit" class="primary">Register</button>
+            <button type="submit" class="primary">Sign Up</button>
         </footer>
     </form>
 </article>

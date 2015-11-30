@@ -34,8 +34,8 @@ options = EmailOptions()
 
 ACCT_TYPES = [
     ('admin', 'Admin'),
+    ('basic', 'Basic'),
     ('beta', 'Beta'),
-    ('community', 'Community'),
     ('pro', 'Professional'),
     ('proxy', 'Proxy'),
     ('robot', 'Robot'),
@@ -272,8 +272,8 @@ class Profile(models.Model):
         subscription = subscription.delete()
         customer = customer.save()
         self.subscription_id = ''
-        self.acct_type = 'community'
-        self.monthly_requests = settings.MONTHLY_REQUESTS.get('community', 0)
+        self.acct_type = 'basic'
+        self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
         self.save()
         return subscription
 
@@ -439,7 +439,7 @@ class Statistics(models.Model):
     pro_user_names = models.TextField(blank=True)
     total_page_views = models.IntegerField(null=True, blank=True)
     daily_requests_pro = models.IntegerField(null=True, blank=True)
-    daily_requests_community = models.IntegerField(null=True, blank=True)
+    daily_requests_basic = models.IntegerField(null=True, blank=True)
     daily_requests_beta = models.IntegerField(null=True, blank=True)
     daily_articles = models.IntegerField(null=True, blank=True)
 

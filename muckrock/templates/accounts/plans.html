@@ -9,8 +9,8 @@
         <p>We offer a 30-day money-back guarantee for all purchases. Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></p>
     </header>
     <main>
-        <section class="community plan">
-            <h2>Community</h2>
+        <section class="basic plan">
+            <h2>Basic</h2>
             <ul>
                 <li>Free to sign up, no credit card required.</li>
                 <li>File requests to any agency in the U.S.A.</li>
@@ -24,9 +24,10 @@
         <section class="professional plan">
             <h2>Professional</h2>
             <ul>
-                <li>All Community plan features.</li>
+                <li>All basic features.</li>
                 <li>Receive 20 requests per month.</li>
                 <li>Embargo requests for up to 30 days after they're completed.</li>
+                <li>File the same request to multiple agencies at once.</li>
             </ul>
             <button class="primary">Subscribe for $40/month</button>
         </section>
@@ -50,8 +51,8 @@
         <p>We offer a 30-day money-back guarantee for all purchases. Questions or concerns? <a href="mailto:info@muckrock.com">Contact us.</a></p>
     </header>
     <main>
-        <section class="community plan">
-            <h2>Community</h2>
+        <section class="basic plan">
+            <h2>Basic</h2>
             <ul>
                 <li>Free to sign up, no credit card required.</li>
                 <li>File requests to any agency in the U.S.A.</li>
@@ -60,26 +61,27 @@
                 <li>Purchase bundles 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
-            <a class="primary button" href="{% url 'acct-signup-community' %}">Register for free</a>
+            <a class="primary button" href="{% url 'accounts-signup-basic' %}">Sign up for free</a>
         </section>
         <section class="professional plan">
             <h2>Professional</h2>
             <ul>
-                <li>All Community plan features.</li>
+                <li>All basic features.</li>
                 <li>Receive 20 requests per month.</li>
                 <li>Embargo requests for up to 30 days after they're completed.</li>
+                <li>File the same request to multiple agencies at once.</li>
             </ul>
-            <button class="primary" data-plan="professional">Subscribe for $40/month</button>
+            <a class="primary button" href="{% url 'accounts-signup-professional' %}">Subscribe for $40/month</a>
         </section>
         <section class="organization plan">
             <h2>Organization</h2>
             <ul>
-                <li>Share a pool of requests between organization members.</li>
-                <li>Organization members may permanently embargo their requests.</li>
-                <li>Plan starts at $100 for up to 3 members and 50 requests per month.</li>
+                <li>All basic features.</li>
+                <li>Share 50 requests per month between up to 3 members.</li>
                 <li>Add members and receive 10 additional requests for $20 each.</li>
+                <li>Members can permanently embargo requests.</li>
             </ul>
-            <button class="primary" data-plan="organization">Create an organization</button>
+            <button class="primary" data-plan="organization">Subscribe from $100/month</button>
         </section>
     </main>
     <div class="registration forms">

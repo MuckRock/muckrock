@@ -47,7 +47,7 @@ class UserChangeForm(ProfileForm):
 
 
 class RegisterForm(UserCreationForm):
-    """Register for a community account"""
+    """Register for a basic account"""
 
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))

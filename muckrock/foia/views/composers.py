@@ -123,8 +123,8 @@ def _make_user(request, data):
     # create a new profile
     Profile.objects.create(
         user=user,
-        acct_type='community',
-        monthly_requests=MONTHLY_REQUESTS.get('community', 0),
+        acct_type='basic',
+        monthly_requests=MONTHLY_REQUESTS.get('basic', 0),
         date_update=datetime.now()
     )
     # send the new user a welcome email

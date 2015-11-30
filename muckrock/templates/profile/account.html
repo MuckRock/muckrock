@@ -34,7 +34,7 @@
             {% endif %}
         {% endif %}
 
-        {% if user.profile.get_acct_type_display != 'Community' %}
+        {% if user.profile.acct_type != 'basic' %}
         <dt>Monthly Requests</dt>
             {% if user_obj.profile.get_monthly_requests %}
         <dd>{{ user_obj.profile.get_monthly_requests }}</dd>

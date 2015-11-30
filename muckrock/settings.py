@@ -356,8 +356,8 @@ ASSETS_DEBUG = False
 
 MONTHLY_REQUESTS = {
     'admin': 20,
+    'basic': 0,
     'beta': 5,
-    'community': 0,
     'pro': 20,
     'proxy': 20,
     'org': 50,
