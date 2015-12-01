@@ -75,7 +75,7 @@
         "pk": 5,
         "model": "auth.user",
         "fields": {
-            "username": "community",
+            "username": "basic",
             "first_name": "Charles",
             "last_name": "Smith",
             "is_active": true,
