@@ -23,7 +23,7 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import UserChangeForm, RegisterForm
+from muckrock.accounts.forms import UserChangeForm, RegisterForm, RegisterOrganizationForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
@@ -127,6 +127,23 @@ class ProfessionalSignupView(SignupView):
                          'You can subscribe from the account management page.')
             messages.error(self.request, error_msg)
         return super(ProfessionalSignupView, self).form_valid(form)
+
+
+class OrganizationSignupView(SignupView):
+    """Allows a logged-out user to register for an account and an organization."""
+    template_name = 'accounts/signup/organization.html'
+    form_class = RegisterOrganizationForm
+
+    def form_valid(self, form):
+        """
+        When form is valid, create the user and the organization.
+        Then redirect to the organization activation page.
+        """
+        new_user = create_new_user(self.request, form)
+        new_org = form.create_organization(new_user)
+        welcome.delay(new_user)
+        messages.success(self.request, 'Your account and organization were successfully created.')
+        return HttpResponseRedirect(reverse('org-activate', kwargs={'slug': new_org.slug}))
 
 
 class AccountsView(TemplateView):

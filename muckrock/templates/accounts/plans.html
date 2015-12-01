@@ -81,42 +81,9 @@
                 <li>Add members and receive 10 additional requests for $20 each.</li>
                 <li>Members can permanently embargo requests.</li>
             </ul>
-            <button class="primary" data-plan="organization">Subscribe from $100/month</button>
+            <a class="primary button" href="{% url 'accounts-signup-organization' %}">Subscribe from $100/month</a>
         </section>
     </main>
-    <div class="registration forms">
-        <form method="post" class="organization registration form">
-            {% csrf_token %}
-            <h2>Create an organization</h2>
-            <input type="hidden" name="plan" value="organization">
-            <h3>First, create a profile</h3>
-            <div class="fields">
-                {% for field in registration_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field.errors }}
-                    {{ field }}
-                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                </fieldset>
-                {% endfor %}
-            </div>
-            <h3>Next, name your organization</h3>
-            <div class="fields">
-                {% for field in org_form.visible_fields %}
-                <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
-                    <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
-                    {{ field.errors }}
-                    {{ field }}
-                    {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
-                </fieldset>
-                {% endfor %}
-            </div>
-            <footer>
-                <span class="cancel">Pick a different plan</span>
-                <button type="submit" class="primary">Create</button>
-            </footer>
-        </form>
-    </div>
 </article>
 {% endif %}
 {% endblock %}

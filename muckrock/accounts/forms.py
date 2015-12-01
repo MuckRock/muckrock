@@ -5,11 +5,13 @@ Forms for accounts application
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 from localflavor.us.forms import USZipCodeField
 import re
 
 from muckrock.accounts.models import Profile
+from muckrock.organization.models import Organization
 
 
 class ProfileForm(forms.ModelForm):
@@ -72,3 +74,22 @@ class RegisterForm(UserCreationForm):
         if User.objects.filter(email__iexact=email):
             raise forms.ValidationError("An account with this email already exists.")
         return email
+
+
+class RegisterOrganizationForm(RegisterForm):
+    """Register for an organization account"""
+    organization_name = forms.CharField()
+
+    def clean_organization_name(self):
+        """Check for an existing organizaiton."""
+        organization_name = self.cleaned_data['organization_name']
+        slug = slugify(organization_name)
+        try:
+            Organization.objects.get(slug=slug)
+        except Organization.DoesNotExist:
+            return organization_name
+        raise forms.ValidationError('Organization already exists with this name.')
+
+    def create_organization(self, owner):
+        """Creates and returns an organization from the form data"""
+        return Organization.objects.create(name=self.cleaned_data['organization_name'], owner=owner)
