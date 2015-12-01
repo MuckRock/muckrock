@@ -25,28 +25,43 @@
                 <li>Purchase bundles 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
-            <button class="primary">Sign up for free</button>
+            {% if org %}
+            <button disabled>You own an organization</button>
+            {% elif acct_type == 'pro' %}
+            <button>Downgrade to Basic</button>
+            {% else %}
+            <p class="current-plan">Your Current Plan</p>
+            {% endif %}
         </section>
         <section class="professional plan">
             <h2>Professional</h2>
             <ul>
-                <li>All basic features.</li>
+                <li>All Basic features.</li>
                 <li>Receive 20 requests per month.</li>
                 <li>Embargo requests for up to 30 days after they're completed.</li>
                 <li>File the same request to multiple agencies at once.</li>
             </ul>
+            {% if org %}
+            <button disabled>You own an organization</button>
+            {% elif acct_type == 'pro' %}
+            <p class="current-plan">Your Current Plan</p>
+            {% else %}
             <button class="primary">Subscribe for $40/month</button>
+            {% endif %}
         </section>
         <section class="organization plan">
             <h2>Organization</h2>
             <ul>
-                <li>Share a pool of requests between organization members.</li>
-                <li>Follow the activity of other members in your organization.</li>
-                <li>Organization members may permanently embargo their requests.</li>
-                <li>Plan starts at $100 for up to 3 members and 50 requests per month.</li>
+                <li>All Basic features.</li>
+                <li>Share 50 requests per month between up to 3 members.</li>
                 <li>Add members and receive 10 additional requests for $20 each.</li>
+                <li>Members can permanently embargo requests.</li>
             </ul>
-            <button class="primary">Start an organization</button>
+            {% if org %}
+            <p class="current-plan">Your Current Plan</p>
+            {% else %}
+            <a class="primary button" href="{% url 'org-create' %}">Subscribe from $100/month</a>
+            {% endif %}
         </section>
     </main>
 </article>
@@ -72,7 +87,7 @@
         <section class="professional plan">
             <h2>Professional</h2>
             <ul>
-                <li>All basic features.</li>
+                <li>All Basic features.</li>
                 <li>Receive 20 requests per month.</li>
                 <li>Embargo requests for up to 30 days after they're completed.</li>
                 <li>File the same request to multiple agencies at once.</li>
@@ -82,7 +97,7 @@
         <section class="organization plan">
             <h2>Organization</h2>
             <ul>
-                <li>All basic features.</li>
+                <li>All Basic features.</li>
                 <li>Share 50 requests per month between up to 3 members.</li>
                 <li>Add members and receive 10 additional requests for $20 each.</li>
                 <li>Members can permanently embargo requests.</li>

@@ -43,6 +43,14 @@
             }
         }
     }
+    .current-plan {
+        color: $color-green;
+        border: 2px solid;
+        @include border-radius;
+        padding: $vertical-rhythm/4;
+        font-weight: $font-weight-bold;
+        text-align: center;
+    }
 }
 
 .account.signup {
