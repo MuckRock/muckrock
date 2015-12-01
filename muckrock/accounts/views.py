@@ -8,7 +8,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseRedirect
+from django.http import HttpResponse,\
+                        HttpResponseBadRequest,\
+                        HttpResponseNotAllowed,\
+                        HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -28,7 +31,6 @@ from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
-from muckrock.organization.forms import CreateForm as OrganizationCreateForm
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
                                    failed_payment,\
@@ -159,137 +161,14 @@ class AccountsView(TemplateView):
         context = super(AccountsView, self).get_context_data(**kwargs)
         logged_in = self.request.user.is_authenticated()
         if logged_in:
-            is_pro = self.request.user.profile.acct_type == 'pro'
-            context['account_type'] = 'pro' if is_pro else 'basic'
+            context['acct_type'] = self.request.user.profile.acct_type
             try:
                 context['org'] = Organization.objects.get(owner=self.request.user)
             except Organization.DoesNotExist:
                 context['org'] = None
-        else:
-            context['registration_form'] = RegisterForm()
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['logged_in'] = logged_in
-        context['org_form'] = OrganizationCreateForm()
         return context
-
-    def post(self, request, **kwargs):
-        """Allow a logged out user to register for an account"""
-        # is the user logged in or logged out?
-        logged_in = request.user.is_authenticated()
-        if not logged_in:
-            return self.register_account(request)
-
-    def create_new_user(self, request, valid_form):
-        """Create a user from the valid form, log them in, and give them a profile."""
-        # pylint:disable=no-self-use
-        new_user = valid_form.save()
-        Profile.objects.create(
-            user=new_user,
-            acct_type='basic',
-            monthly_requests=0,
-            date_update=date.today()
-        )
-        new_user = authenticate(
-            username=valid_form.cleaned_data['username'],
-            password=valid_form.cleaned_data['password1']
-        )
-        login(request, new_user)
-        return new_user
-
-    def register_basic(self, request):
-        """
-        Registering a basic account is easy.
-        Validate the form and save it to create the user.
-        Then log them in and create a profile.
-        Send them a welcome email, then redirect them to their account.
-        If the form is invalid, return the page with the invalid form.
-        """
-        form = RegisterForm(request.POST)
-        if not form.is_valid():
-            # TODO we actually want to return the error-marked form
-            print 'form is invalid: %s' % form
-            return HttpResponseBadRequest()
-        # allows us to redirect people past the registration page
-        url_redirect = request.GET.get('next', None)
-        new_user = self.create_new_user(request, form)
-        welcome.delay(new_user)
-        messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
-        return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
-
-    def register_professional(self, request):
-        """
-        Registering a professional account happens in two steps.
-        The first step is creating the new user, as long as the form is valid.
-        (If the form isn't valid, we return the page with the invalid form.)
-        The second step is to begin the user's pro subscription using the provided Stripe token.
-        Once that's done, we need to redirect the user to their account.
-        """
-        form = RegisterForm(request.POST)
-        if not form.is_valid():
-            # TODO we actually want to return the error-marked form
-            return HttpResponseBadRequest()
-        # allows us to redirect people past the registration page
-        url_redirect = request.GET.get('next', None)
-        new_user = self.create_new_user(request, form)
-        welcome.delay(new_user)
-        try:
-            new_user.profile.start_pro_subscription(request.POST['stripe_token'])
-            messages.success(request, 'Your account was successfully created. Welcome to MuckRock!')
-        except KeyError:
-            # no payment information provided
-            messages.error(request, ('Your account was successfully created, '
-                                     'but you did not provide payment information. '
-                                     'You can subscribe from the account management page.'))
-        except stripe.error.CardError:
-            # card declined
-            messages.error(request, ('Your account was successfully created, '
-                                     'but your card was declined. '
-                                     'You can subscribe from the account management page.'))
-        except (stripe.error.InvalidRequestError, stripe.error.APIError):
-            # invalid request made to stripe
-            messages.error(request, ('Your account was successfully created, '
-                                     'but we could not contact our payment provider. '
-                                     'You can subscribe from the account management page.'))
-        return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
-
-    def register_organization(self, request):
-        """
-        Registering an organization account is a little trickier.
-        First we have to make sure that _both_ the registration and organization forms are valid.
-        If either one isn't, we need to return the page with the invalid form(s).
-        Then, we have to create the new user.
-        After that, we need to create the new organization, setting the new user as the org's owner.
-        Finally, we redirect to the organization's activation page so that they can continue.
-        """
-        user_form = RegisterForm(request.POST)
-        org_form = OrganizationCreateForm(request.POST)
-        if not user_form.is_valid() or not org_form.is_valid():
-            # TODO we actually want to return the error-marked form
-            return HttpResponseBadRequest()
-        # create the new user
-        new_user = self.create_new_user(request, user_form)
-        # create the new org and save the user as the owner
-        new_org = org_form.save(commit=False)
-        new_org.owner = new_user
-        new_org.save()
-        # welcome the user! hello!
-        welcome.delay(new_user)
-        return redirect('org-activate', slug=new_org.slug)
-
-    def register_account(self, request):
-        """Register the account first, then handles plan-specific logic"""
-        plans = {
-            'basic': self.register_basic,
-            'professional': self.register_professional,
-            'organization': self.register_organization
-        }
-        try:
-            plan = request.POST['plan']
-            return plans[plan](request)
-        except KeyError:
-            # the plan wasn't specified or isn't supported
-            print 'bad plan: %s' % request.POST.get('plan')
-            return HttpResponseBadRequest()
 
 
 def register(request):
