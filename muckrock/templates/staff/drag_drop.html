@@ -2,11 +2,11 @@
 
 {% load static from staticfiles %}
 
-{% block title %}MuckRock &bull; Drag n' Drop{% endblock %}
+{% block title %}Drag n' Drop{% endblock %}
 
-{% block preload %}
+{% block styles %}
   <link href="{% static 'drag_drop/css/main.css' %}" type="text/css" rel="stylesheet" />
-{% endblock preload %}
+{% endblock %}
 
 {% block content %}
   <section class="drop-here">

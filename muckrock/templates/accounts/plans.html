@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load static from staticfiles %}
 
+{% block prefetch %}
+    <link rel="prefetch" href="{% url 'accounts-signup-basic' %}" />
+    <link rel="prefetch" href="{% url 'accounts-signup-professional' %}" />
+    <link rel="prefetch" href="{% url 'accounts-signup-organization' %}" />
+{% endblock %}
+
 {% block content %}
 {% if logged_in %}
 <article class="logged-in account plans">
