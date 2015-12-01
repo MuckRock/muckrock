@@ -98,6 +98,7 @@ class TestDailyNotification(TestCase):
         email = notifications.DailyNotification(self.user)
         logging.info(email.message())
 
+
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
@@ -115,6 +116,18 @@ class TestDailyTask(TestCase):
         tasks.daily_notification()
         mock_send.assert_called_once_with(self.staff_user)
         mock_profile_send.assert_called_once()
+
+
+class TestWelcomeTask(TestCase):
+    """Tests the welcome email notification sent to new users."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+
+    @mock.patch('muckrock.message.notifications.WelcomeNotification.send')
+    def test_welcome_notification_task(self, mock_send):
+        """Make sure the notification is actually sent!"""
+        tasks.welcome(self.user)
+        mock_send.assert_called_once()
 
 
 @mock.patch('stripe.Charge', MockCharge)
