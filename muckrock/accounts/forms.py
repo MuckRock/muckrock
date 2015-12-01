@@ -48,31 +48,27 @@ class UserChangeForm(ProfileForm):
 
 class RegisterForm(UserCreationForm):
     """Register for a basic account"""
-
-    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
-    email = forms.EmailField(widget=forms.TextInput(attrs={'class': 'required'}))
-    first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
-    last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'required'}))
-    password1 = forms.CharField(label='Password',
-                                widget=forms.PasswordInput(attrs={'class': 'required'}))
-    password2 = forms.CharField(label='Password Confirmation',
-                                widget=forms.PasswordInput(attrs={'class': 'required'}))
-
     class Meta(UserCreationForm.Meta):
-        # pylint: disable=too-few-public-methods
         fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+
+    username = forms.CharField()
+    email = forms.EmailField()
+    first_name = forms.CharField()
+    last_name = forms.CharField()
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput())
+    password2 = forms.CharField(label='Password Confirmation', widget=forms.PasswordInput())
 
     def clean_username(self):
         """Do a case insensitive uniqueness check and clean username input"""
         username = self.cleaned_data['username']
         username = re.sub(r'[^\w\-.@ ]', '', username) # strips illegal characters from username
         if User.objects.filter(username__iexact=username):
-            raise forms.ValidationError("User with this Username already exists.")
+            raise forms.ValidationError("This username is taken.")
         return username
 
     def clean_email(self):
         """Do a case insensitive uniqueness check"""
         email = self.cleaned_data['email']
         if User.objects.filter(email__iexact=email):
-            raise forms.ValidationError("User with this Email already exists.")
+            raise forms.ValidationError("An account with this email already exists.")
         return email
