@@ -10,6 +10,7 @@ import re
 import StringIO
 import sys
 import tempfile
+from urllib import urlencode
 
 from muckrock import settings
 
@@ -19,7 +20,10 @@ class RemoveTokenMiddleware(object):
     def process_request(self, request):
         """Remove login token from URL"""
         if settings.LOT_MIDDLEWARE_PARAM_NAME in request.GET:
-            return HttpResponseRedirect(request.path)
+            params = request.GET.copy()
+            params.pop(settings.LOT_MIDDLEWARE_PARAM_NAME)
+            return HttpResponseRedirect(
+                    '%s?%s' % (request.path, urlencode(params)))
 
 # Orignal version taken from http://www.djangosnippets.org/snippets/186/
 # Original author: udfalkso
