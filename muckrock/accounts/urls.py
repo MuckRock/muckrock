@@ -11,6 +11,9 @@ import muckrock.accounts.views as views
 urlpatterns = patterns(
     '',
     url(r'^$', views.AccountsView.as_view(), name='accounts'),
+    url(r'^signup/$',
+        views.AccountsView.as_view(),
+        name='accounts-signup'),
     url(r'^signup/basic/$',
         views.BasicSignupView.as_view(),
         name='accounts-signup-basic'),
