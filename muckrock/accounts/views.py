@@ -68,7 +68,6 @@ class SignupView(FormView):
     def dispatch(self, *args, **kwargs):
         """Prevent logged-in users from accessing this view."""
         if self.request.user.is_authenticated():
-            messages.warning(self.request, 'Log out before signing up for another account.')
             return HttpResponseRedirect(self.get_success_url())
         return super(SignupView, self).dispatch(*args, **kwargs)
 
