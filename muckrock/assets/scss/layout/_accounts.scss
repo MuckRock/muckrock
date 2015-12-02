@@ -1,5 +1,5 @@
 .account.plans {
-    header {
+    & > header {
         @include display(flex);
         @include justify-content(space-between);
         @include flex-direction(column);
@@ -10,7 +10,7 @@
             max-width: 20em;
         }
     }
-    main {
+    & > main {
         @include display(flex);
         &.hidden {
             display: none;
@@ -30,13 +30,24 @@
         @include justify-content(space-between);
         @include border;
         @include border-radius;
+        overflow: hidden;
         max-width: 40em;
-        padding: $vertical-rhythm;
         background: #fff;
-        h2 {
+        main, footer {
+            padding: $vertical-rhythm;
+        }
+        header {
+            padding-top: $vertical-rhythm;
             text-align: center;
         }
-        button {
+        .superlative {
+            @extend dfn;
+            padding: 2px;
+            background: $color-grey-7;
+            // margin-bottom: 0;
+            text-align: center;
+        }
+        .button, button {
             width: 100%;
         }
         @media all and (min-width: 768px) {
