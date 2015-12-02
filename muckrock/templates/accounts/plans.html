@@ -22,11 +22,15 @@
                 <li>File requests to any agency in the U.S.A.</li>
                 <li>Follow requests with email notifications.</li>
                 <li>Share requests with other MuckRock users.</li>
-                <li>Purchase bundles 4 requests for $20 each.</li>
+                <li>Purchase bundles of 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
             {% if org %}
             <button disabled>You own an organization</button>
+            {% elif acct_type == 'proxy' %}
+            <button disabled>You are a proxy requester</button>
+            {% elif acct_type == 'admin' %}
+            <button disabled>You are staff</button>
             {% elif acct_type == 'pro' %}
             <form method="post">
                 {% csrf_token %}
@@ -47,7 +51,9 @@
             </ul>
             {% if org %}
             <button disabled>You own an organization</button>
-            {% elif acct_type == 'pro' %}
+            {% elif acct_type == 'admin' %}
+            <button disabled>You are staff</button>
+            {% elif acct_type == 'pro' or acct_type == 'proxy' %}
             <p class="current-plan">Your Current Plan</p>
             {% else %}
             <form method="post" id="subscribe">
@@ -95,7 +101,7 @@
                 <li>File requests to any agency in the U.S.A.</li>
                 <li>Follow requests with email notifications.</li>
                 <li>Share requests with other MuckRock users.</li>
-                <li>Purchase bundles 4 requests for $20 each.</li>
+                <li>Purchase bundles of 4 requests for $20 each.</li>
                 <li>Create campaigns to crowdfund expensive request fees.</li>
             </ul>
             <a class="primary button" href="{% url 'accounts-signup-basic' %}">Sign up for free</a>
