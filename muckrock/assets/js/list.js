@@ -27,8 +27,24 @@ var sortListByHeader = function() {
         if (!order) {
             order = 'asc';
         }
-        var sort_url = '?sort=' + sort + '&order=' + order + '{{ filter_url|safe }}';
-        window.location = window.location.origin + window.location.pathname + sort_url;
+        var existing = window.location.search;
+        // check for existing sort and remove it if it exists
+        // there will always be "?" or "&" before "sort"
+        var existingSort = existing.indexOf('sort');
+        if (existingSort > 0) {
+            existing = existing.substring(0, existingSort - 1);
+        }
+        // check for filter
+        var filterExists = false;
+        if (existing.length > 0) {
+            filterExists = true;
+        }
+        // add new sort and order
+        // if adding to a filter use "&", otherwise use "?"
+        var newSearch = existing.length > 0 ? existing + "&" : existing + "?";
+        newSearch += "sort=" + sort;
+        newSearch += "&order=" + order;
+        window.location = window.location.origin + window.location.pathname + newSearch;
     }
 }
 

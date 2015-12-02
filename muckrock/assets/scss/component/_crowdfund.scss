@@ -16,6 +16,10 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
 
     a {
         color: $color-green-dark;
+    }
+
+    .action {
+        display: inline-block;
         text-decoration: none;
         border-bottom: 1px dotted;
         &:hover {
@@ -24,17 +28,14 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         }
     }
 
+    header .action {
+        font-size: $font-size-2;
+    }
+
     header, footer {
         padding: $vertical-rhythm/2;
         color: $crowdfund-color-dark;
         background-color: $crowdfund-color-light;
-        a {
-            display: inline-block;
-            &:hover {
-                color: $color-black;
-                border-bottom: 1px solid;
-            }
-        }
     }
 
     header {
@@ -50,15 +51,9 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             font-weight: $font-weight-bold;
             margin: 0;
         }
-        a {
-            font-size: $font-size-2;
-        }
         @include media($medium-layout) {
             @include flex-direction(row);
             @include align-items(center);
-            a {
-                text-align: right;
-            }
         }
     }
 
@@ -82,7 +77,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         }
         margin-bottom: 0;
         border-top: $crowdfund-border;
-        text-align: left;
+        text-align: center;
         & > * {
             @include flex(1);
             @include media($medium-layout) {
@@ -122,11 +117,11 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
     .anonymity input {
         margin: $vertical-rhythm/4;
     }
-    .action button, .amount input {
+    .donate button, .amount input {
         display: block;
         width: 100%;
     }
-    .action button {
+    .donate button {
         @extend .success.button;
     }
     .amount input {
@@ -140,7 +135,7 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
         text-align: center;
     }
     @include media($medium-layout) {
-        .action { padding-left: $vertical-rhythm/2; }
+        .donate { padding-left: $vertical-rhythm/2; }
     }
 }
 
@@ -234,4 +229,25 @@ $crowdfund-border: $base-border-width solid $crowdfund-color-dark;
             }
         }
     }
+}
+
+.help {
+    border: 1px solid;
+    border-bottom-style: solid;
+    border-radius: 100%;
+    display: inline-block;
+    height: $font-size-4;
+    width: $font-size-4;
+    margin-left: $vertical-rhythm/2;
+    font-weight: $font-weight-bold;
+    line-height: $font-size-4;
+    text-align: center;
+    &:hover {
+        text-decoration: none;
+    }
+}
+
+.crowdfund.widget .help:hover {
+    background: $crowdfund-color-dark;
+    color: $crowdfund-color-light;
 }
