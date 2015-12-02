@@ -196,7 +196,7 @@ class AccountsView(TemplateView):
         # pylint:disable=no-self-use
         if not request.user.is_authenticated():
             raise AttributeError('Cannot upgrade an anonymous user.')
-        is_pro_user = request.user.profile.acct_type == 'pro'
+        is_pro_user = request.user.profile.acct_type in ['pro', 'proxy']
         is_org_owner = Organization.objects.filter(owner=request.user).exists()
         if is_pro_user:
             raise ValueError('Cannot upgrade this account, it is already Professional.')

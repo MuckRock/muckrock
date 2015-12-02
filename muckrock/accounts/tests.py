@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 # allow long names, methods that could be functions and too many public methods in tests
 # pylint: disable=invalid-name
 # pylint: disable=no-self-use
-# pylint: disable=too-many-public-methods
 # pylint: disable=no-member
 
 # Creates mock items for testing methods that involve Stripe
@@ -203,6 +202,65 @@ class TestOrganizationSignupView(TestCase):
         eq_(response.status_code, 302)
         User.objects.get(username=self.data['username'])
 
+
+class TestAccountsView(TestCase):
+    """The AccountsView allows users to choose an account plan that is right for them."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.view = accounts_views.AccountsView.as_view()
+        self.url = reverse('accounts')
+
+    def test_get(self):
+        """Getting the view should show the available plans."""
+        response = http_get_response(self.url, self.view)
+        eq_(response.status_code, 200, 'Should be visible to anyone')
+
+    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
+    def test_upgrade(self, mock_subscribe):
+        """Logged in users should be able to upgrade to Pro accounts."""
+        data = {
+            'action': 'upgrade',
+            'stripe_token': 'test'
+        }
+        response = http_post_response(self.url, self.view, data, self.user)
+        eq_(response.status_code, 200)
+        mock_subscribe.assert_called_once_with(data['stripe_token'])
+
+    @patch('muckrock.accounts.models.Profile.start_pro_subscription')
+    def test_upgrade_logged_out(self, mock_subscribe):
+        """Logged out users should not be able to upgrade."""
+        data = {
+            'action': 'upgrade',
+            'stripe_token': 'test'
+        }
+        response = http_post_response(self.url, self.view, data)
+        eq_(response.status_code, 200)
+        ok_(not mock_subscribe.called)
+
+    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
+    def test_downgrade(self, mock_unsubscribe):
+        """Logged in pro users should be able to downgrade to a Basic account."""
+        data = {'action': 'downgrade'}
+        pro_user = UserFactory(profile__acct_type='pro')
+        response = http_post_response(self.url, self.view, data, pro_user)
+        eq_(response.status_code, 200)
+        ok_(mock_unsubscribe.called)
+
+    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
+    def test_downgrade_not_pro(self, mock_unsubscribe):
+        """A user who is not a pro cannot downgrade."""
+        data = {'action': 'downgrade'}
+        response = http_post_response(self.url, self.view, data, self.user)
+        eq_(response.status_code, 200)
+        ok_(not mock_unsubscribe.called)
+
+    @patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
+    def test_downgrade_logged_out(self, mock_unsubscribe):
+        """Logged out users cannot downgrade."""
+        data = {'action': 'downgrade'}
+        response = http_post_response(self.url, self.view, data)
+        eq_(response.status_code, 200)
+        ok_(not mock_unsubscribe.called)
 
 class TestAccountFormsUnit(TestCase):
     """Unit tests for account forms"""
