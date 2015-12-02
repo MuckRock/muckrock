@@ -353,6 +353,11 @@ def draft_request(request, jurisdiction, jidx, slug, idx):
 @login_required
 def create_multirequest(request):
     """A view for composing multirequests"""
+    # limit multirequest feature to Pro users
+    if not request.user.profile.can_multirequest():
+        messages.warning(request, 'Multirequesting is a Pro feature.')
+        return redirect('accounts')
+
     if request.method == 'GET' and request.is_ajax():
         agency_queries = request.GET.get('query', '').split(' ')
         agencies = {}

@@ -26,7 +26,11 @@
             Out of ideas? <a href="#clone">Try cloning a request.</a>
             <br>
             Want to send a multirequest?
+            {% if request.user.is_authenticated and request.user.profile.can_multirequest %}
             <a href="{% url 'foia-create-multi' %}">Click here.</a>
+            {% else %}
+            <a href="{% url 'accounts' %}">Go Pro!</a>
+            {% endif %}
             <br>
             <noscript>It looks like you have JavaScript turned off. This page requires JavaScript to function. If you are not willing to enable JavaScript, please send an email containing all necessary information to file and we will create your request for you.</noscript>
         <summary>

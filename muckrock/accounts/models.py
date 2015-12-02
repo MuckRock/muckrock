@@ -216,6 +216,10 @@ class Profile(models.Model):
         """Is this user allowed to embargo?"""
         return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
 
+    def can_multirequest(self):
+        """Is this user allowed to multirequest?"""
+        return self.acct_type in ['admin', 'beta', 'pro', 'proxy'] or self.organization != None
+
     def can_embargo_permanently(self):
         """Is this user allowed to permanently embargo?"""
         return self.acct_type in ['admin'] or self.organization != None
