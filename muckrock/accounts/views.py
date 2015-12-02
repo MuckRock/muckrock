@@ -214,49 +214,6 @@ def downgrade(request):
         raise ValueError('Cannot downgrade this account, it is not Professional.')
     request.user.profile.cancel_pro_subscription()
 
-
-def register(request):
-    """Register for a community account"""
-    url_redirect = request.GET.get('next', None)
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            new_user = authenticate(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password1']
-            )
-            login(request, new_user)
-            Profile.objects.create(
-                user=new_user,
-                acct_type='community',
-                monthly_requests=0,
-                date_update=date.today()
-            )
-            send_mail(
-                'Welcome to MuckRock',
-                render_to_string('text/user/welcome.txt', {
-                    'user': new_user,
-                    'verification_link': new_user.profile.wrap_url(
-                        reverse('acct-verify-email'),
-                        key=new_user.profile.generate_confirmation_key())
-                    }),
-                'info@muckrock.com',
-                [new_user.email],
-                fail_silently=False
-            )
-            msg = 'Your account was successfully created. '
-            msg += 'Welcome to MuckRock!'
-            messages.success(request, msg)
-            return redirect(url_redirect) if url_redirect else redirect('acct-my-profile')
-    else:
-        form = RegisterForm()
-    return render_to_response(
-        'forms/account/register.html',
-        {'form': form},
-        context_instance=RequestContext(request)
-    )
-
 @login_required
 def settings(request):
     """Update a users information"""
@@ -285,105 +242,6 @@ def settings(request):
 
     return render_to_response('forms/account/update.html', {'form': form},
                               context_instance=RequestContext(request))
-
-def subscribe(request):
-    # pylint: disable=too-many-statements
-    # pylint: disable=too-many-branches
-    # pylint: disable=too-many-locals
-    # this needs to be refactored
-    """Subscribe or unsubscribe from a pro account"""
-
-    call_to_action = 'Go Pro!'
-    description = ('Are you a journalist, activist, or just planning on filing '
-                   'a lot of requests? A Pro subscription might be right for you.')
-    button_text = 'Subscribe'
-    can_subscribe = True
-    can_unsubscribe = not can_subscribe
-
-    if request.user.is_authenticated():
-        user_profile = request.user.profile
-        acct_type = user_profile.acct_type
-        owns_org = Organization.objects.filter(owner=request.user).exists()
-        can_subscribe = acct_type == 'community' or acct_type == 'beta'
-        can_unsubscribe = acct_type == 'pro'
-        if acct_type == 'admin':
-            msg = 'You are on staff, you don\'t need a subscription.'
-            messages.warning(request, msg)
-            return redirect('acct-my-profile')
-        elif acct_type == 'proxy':
-            msg = ('You have a proxy account. You receive 20 free '
-                   'requests a month and do not need a subscription.')
-            messages.warning(request, msg)
-            return redirect('acct-my-profile')
-        elif owns_org:
-            msg = ('You are already paying for an organization account. '
-                   'Try making yourself a member of that org instead!')
-            messages.warning(request, msg)
-            return redirect('acct-my-profile')
-        elif can_unsubscribe:
-            call_to_action = 'Manage Subscription'
-            description = ''
-            button_text = 'Unsubscribe'
-    else:
-        description = ('First you will create an account, then be redirected '
-                       'back to this page to subscribe.')
-        button_text = 'Create Account'
-
-    if request.method == 'POST':
-        stripe_token = request.POST.get('stripe_token')
-        customer = user_profile.customer()
-        error = False
-        user_msg = ''
-        logger_msg = ''
-
-        if stripe_token:
-            try:
-                customer.card = stripe_token
-                customer.save()
-                user_msg = 'Your payment information has been updated.'
-                logger_msg = '%s has updated their payment information.' % request.user.username
-                if can_subscribe:
-                    user_profile.start_pro_subscription()
-                    request.session['ga'] = 'pro_started'
-                    user_msg = 'Congratulations, you are now subscribed as a pro user!'
-                    logger_msg = '%s has subscribed to a pro account.' % request.user.username
-            except (stripe.CardError, stripe.InvalidRequestError, ValueError) as exc:
-                error = True
-                user_msg = 'Payment error. Your card has not been charged.'
-                logger_msg = 'Payment error: %s' % exc
-        elif can_unsubscribe:
-            try:
-                user_profile.cancel_pro_subscription()
-                request.session['ga'] = 'pro_cancelled'
-                user_msg = 'Your user_profileessional subscription has been cancelled.'
-                logger_msg = '%s has cancelled their pro subscription.' % request.user.username
-            except (stripe.CardError, stripe.InvalidRequestError) as exc:
-                error = True
-                user_msg = exc
-                logger_msg = exc
-
-        if not error:
-            messages.success(request, user_msg)
-            logger.info(logger_msg)
-        else:
-            messages.error(request, user_msg)
-
-        return redirect('acct-my-profile')
-
-    context = {
-        'can_subscribe': can_subscribe,
-        'can_unsubscribe': can_unsubscribe,
-        'call_to_action': call_to_action,
-        'description': description,
-        'button_text': button_text,
-        'stripe_pk': STRIPE_PUB_KEY
-    }
-
-    return render_to_response(
-        'forms/account/subscription.html',
-        context,
-        context_instance=RequestContext(request)
-    )
 
 @login_required
 def buy_requests(request, username=None):
@@ -450,7 +308,7 @@ def profile(request, username=None):
     if not username and request.user.is_anonymous():
         return redirect('acct-login')
     user = get_object_or_404(User, username=username) if username else request.user
-    requests = FOIARequest.objects.get_viewable(request.user).filter(user=user)
+    requests = FOIARequest.objects.filter(user=user).get_viewable(request.user)
     recent_requests = requests.order_by('-date_submitted')[:5]
     recent_completed = requests.filter(status='done').order_by('-date_done')[:5]
     context = {
