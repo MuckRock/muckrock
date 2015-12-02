@@ -162,6 +162,7 @@ class AccountsView(TemplateView):
         logged_in = self.request.user.is_authenticated()
         if logged_in:
             context['acct_type'] = self.request.user.profile.acct_type
+            context['email'] = self.request.user.email
             try:
                 context['org'] = Organization.objects.get(owner=self.request.user)
             except Organization.DoesNotExist:
@@ -169,6 +170,52 @@ class AccountsView(TemplateView):
         context['stripe_pk'] = STRIPE_PUB_KEY
         context['logged_in'] = logged_in
         return context
+
+    def post(self, request, **kwargs):
+        """Handle upgrades and downgrades of accounts"""
+        try:
+            action = request.POST['action']
+            account_actions = {
+                'downgrade': self.downgrade,
+                'upgrade': self.upgrade
+            }
+            account_actions[action](request)
+        except KeyError as exception:
+            logger.error(exception)
+            messages.error(request, 'No available action was specified.')
+        except AttributeError as exception:
+            logger.error(exception)
+            error_msg = 'You cannot be logged out and modify your account.'
+            messages.error(request, error_msg)
+        except ValueError as exception:
+            logger.error(exception)
+            messages.error(request, exception)
+        return self.render_to_response(self.get_context_data())
+
+    def upgrade(self, request):
+        """Upgrades the user from a Basic to a Professional account."""
+        # pylint:disable=no-self-use
+        if not request.user.is_authenticated():
+            raise AttributeError('Cannot upgrade an anonymous user.')
+        is_pro_user = request.user.profile.acct_type == 'pro'
+        is_org_owner = Organization.objects.filter(owner=request.user).exists()
+        if is_pro_user:
+            raise ValueError('Cannot upgrade this account, it is already Professional.')
+        if is_org_owner:
+            raise ValueError('Cannot upgrade this account, it owns an organization.')
+        token = request.POST.get('stripe_token')
+        if not token:
+            raise ValueError('Cannot upgrade this account, no Stripe token provided.')
+        request.user.profile.start_pro_subscription(token)
+
+    def downgrade(self, request):
+        """Downgrades the user from a Professional to a Basic account."""
+        # pylint:disable=no-self-use
+        if not request.user.is_authenticated():
+            raise AttributeError('Cannot downgrade an anonymous user.')
+        if request.user.profile.acct_type != 'pro':
+            raise ValueError('Cannot downgrade this account, it is not Professional.')
+        request.user.profile.cancel_pro_subscription()
 
 
 def register(request):

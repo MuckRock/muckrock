@@ -32,8 +32,12 @@
         @include border-radius;
         max-width: 40em;
         padding: $vertical-rhythm;
+        background: #fff;
         h2 {
             text-align: center;
+        }
+        button {
+            width: 100%;
         }
         @media all and (min-width: 768px) {
             margin-bottom: 0;

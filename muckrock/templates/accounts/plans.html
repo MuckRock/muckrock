@@ -28,7 +28,11 @@
             {% if org %}
             <button disabled>You own an organization</button>
             {% elif acct_type == 'pro' %}
-            <button>Downgrade to Basic</button>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="downgrade" />
+                <button type="submit">Downgrade to Basic</button>
+            </form>
             {% else %}
             <p class="current-plan">Your Current Plan</p>
             {% endif %}
@@ -46,7 +50,19 @@
             {% elif acct_type == 'pro' %}
             <p class="current-plan">Your Current Plan</p>
             {% else %}
-            <button class="primary">Subscribe for $40/month</button>
+            <form method="post" id="subscribe">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="upgrade" />
+                <button
+                    data-amount="0"
+                    data-description="Subscription ($40.00/month)"
+                    data-email="{{email}}"
+                    data-label="Subscribe"
+                    data-form="#subscribe"
+                    class="checkout-button primary">
+                    Subscribe for $40/month
+                </button>
+            </form>
             {% endif %}
         </section>
         <section class="organization plan">
@@ -107,4 +123,25 @@
     </main>
 </article>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            var checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.label,
+                checkoutData.form
+            );
+        });
+    });
+</script>
 {% endblock %}
