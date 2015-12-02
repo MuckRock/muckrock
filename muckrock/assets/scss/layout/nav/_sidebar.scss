@@ -58,6 +58,31 @@ $sidebar-width: 250px;
         }
     }
 
+    .quick-log-in {
+        position: absolute;
+        margin: 0;
+        padding: $vertical-rhythm;
+        background: $color-grey-2;
+        h1 {
+            font-size: $font-size-5;
+            font-weight: $font-weight-bold;
+        }
+        input {
+            width: 100%;
+            margin-bottom: $vertical-rhythm;
+            color: $color-black;
+        }
+        .row {
+            @include display(flex);
+            @include justify-content(space-between);
+        }
+        @include transition(transform .25s ease-in-out);
+        @include transform(translateY(-100%));
+        &.visible {
+            @include transform(translateY(0));
+        }
+    }
+
     .account-links {
         width: 100%;
         // margin-bottom: 0;

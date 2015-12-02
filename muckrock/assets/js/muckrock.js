@@ -214,3 +214,13 @@ $('#show-search').click(function(){
         $(search).removeClass('visible');
     });
 });
+
+$('#quick-log-in').click(function(e){
+    e.preventDefault();
+    var quickLogin = $('#quick-log-in-form');
+    quickLogin.addClass('visible');
+    quickLogin.find('input[type=text]')[0].focus();
+    quickLogin.find('.cancel').click(function(){
+        quickLogin.removeClass('visible');
+    });
+});
