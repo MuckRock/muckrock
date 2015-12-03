@@ -7,9 +7,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
+import autocomplete_light
 import re
 
 from muckrock.accounts.models import Profile
+from muckrock.jurisdiction.models import Jurisdiction
 from muckrock.organization.models import Organization
 
 
@@ -18,10 +20,14 @@ class ProfileSettingsForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.EmailField()
+    location = forms.ModelChoiceField(
+        required=False,
+        queryset=Jurisdiction.objects.all(),
+        widget=autocomplete_light.ChoiceWidget('JurisdictionLocalAutocomplete'))
 
     class Meta():
         model = Profile
-        fields = ['first_name', 'last_name', 'email', 'twitter']
+        fields = ['first_name', 'last_name', 'email', 'twitter', 'location']
 
     def clean_email(self):
         """Validates that a user does not exist with the given e-mail address"""
