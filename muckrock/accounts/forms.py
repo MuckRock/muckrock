@@ -19,7 +19,7 @@ class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
-    email = forms.EmailField()
+
     location = forms.ModelChoiceField(
         required=False,
         queryset=Jurisdiction.objects.all(),
@@ -27,7 +27,31 @@ class ProfileSettingsForm(forms.ModelForm):
 
     class Meta():
         model = Profile
-        fields = ['first_name', 'last_name', 'email', 'twitter', 'location']
+        fields = ['first_name', 'last_name', 'twitter', 'location']
+
+
+
+    def clean_twitter(self):
+        """Stripe @ from beginning of Twitter name, if it exists."""
+        twitter = self.cleaned_data['twitter']
+        return twitter.split('@')[-1]
+
+    def save(self, commit=True):
+        """Modifies associated User model."""
+        profile = super(ProfileSettingsForm, self).save(commit)
+        profile.user.first_name = self.cleaned_data['first_name']
+        profile.user.last_name = self.cleaned_data['last_name']
+        profile.user.save()
+        return profile
+
+
+class EmailSettingsForm(forms.ModelForm):
+    """A form for updating user email preferences."""
+    email = forms.EmailField()
+
+    class Meta():
+        model = Profile
+        fields = ['email', 'email_pref', 'use_autologin']
 
     def clean_email(self):
         """Validates that a user does not exist with the given e-mail address"""
@@ -40,16 +64,9 @@ class ProfileSettingsForm(forms.ModelForm):
             raise forms.ValidationError('A user with that e-mail address already exists.')
         return email
 
-    def clean_twitter(self):
-        """Stripe @ from beginning of Twitter name, if it exists."""
-        twitter = self.cleaned_data['twitter']
-        return twitter.split('@')[-1]
-
     def save(self, commit=True):
-        """Modifies asscoiated User and Stripe.Customer models."""
-        profile = super(ProfileSettingsForm, self).save(commit)
-        profile.user.first_name = self.cleaned_data['first_name']
-        profile.user.last_name = self.cleaned_data['last_name']
+        """Modifies associated User and Stripe.Customer models"""
+        profile = super(EmailSettingsForm, self).save(commit)
         profile.user.email = self.cleaned_data['email']
         profile.user.save()
         customer = profile.customer()

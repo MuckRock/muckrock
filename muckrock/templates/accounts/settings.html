@@ -3,11 +3,20 @@
 
 {% block content %}
 <article class="account settings">
-    <h1>Settings</h1>
-    <form method="post" class="form">
+    <header>
+        <h1>Settings</h1>
+        <ul>
+            <li><a href="#profile">Profile</a></li>
+            <li><a href="#email">Email</a></li>
+            <li><a href="#billing">Billing</a></li>
+        </ul>
+    </header>
+    <form method="post" action="?type=profile" class="profile form" id="profile">
         {% csrf_token %}
+        <h2>Profile</h2>
+        <input type="hidden" name="action" value="profile" />
         <div class="fields">
-        {% for field in form.visible_fields %}
+        {% for field in profile_form.visible_fields %}
             <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
                 <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
                 {{ field.errors }}
@@ -20,6 +29,33 @@
             <button type="submit" class="primary">Save</button>
         </footer>
     </form>
+
+    <form method="post" class="email form" id="email">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="email" />
+        <h2>Email</h2>
+        <div class="fields">
+        {% for field in email_form.visible_fields %}
+            <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                {{ field.errors }}
+                {{ field }}
+                {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+                {% if field == form.email %}
+                {% if email.confirmed %}
+                <span>Verified</span>
+                {% else %}
+                <a href="{% url 'acct-verify-email' %}">Verify your email</a>
+                {% endif %}
+                {% endif %}
+            </fieldset>
+        {% endfor %}
+        </div>
+        <footer>
+            <button type="submit" class="primary">Save</button>
+        </footer>
+    </form>
+
 </article>
 {% endblock %}
 

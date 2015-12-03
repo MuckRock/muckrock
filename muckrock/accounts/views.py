@@ -26,7 +26,10 @@ import logging
 import stripe
 import sys
 
-from muckrock.accounts.forms import ProfileSettingsForm, RegisterForm, RegisterOrganizationForm
+from muckrock.accounts.forms import ProfileSettingsForm,\
+                                    EmailSettingsForm,\
+                                    RegisterForm,\
+                                    RegisterOrganizationForm
 from muckrock.accounts.models import Profile, Statistics
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
@@ -217,23 +220,33 @@ def downgrade(request):
 @login_required
 def settings(request):
     """Update a users information"""
-    form_class = ProfileSettingsForm
     user_profile = request.user.profile
+    settings_forms = {
+        'profile': ProfileSettingsForm,
+        'email': EmailSettingsForm
+    }
     if request.method == 'POST':
-        form = form_class(request.POST, instance=user_profile)
+        form = settings_forms[request.POST.get('action')](request.POST, instance=user_profile)
         if form.is_valid():
             form.save()
             messages.success(request, 'Your settings have been updated.')
-    else:
-        initial = {
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email
-        }
-        form = form_class(initial=initial, instance=user_profile)
+
+    profile_initial = {
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+    }
+    email_initial = {
+        'email': request.user.email
+    }
+    profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
+    email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
+    context = {
+        'profile_form': profile_form,
+        'email_form': email_form
+    }
     return render_to_response(
         'accounts/settings.html',
-        {'form': form},
+        context,
         context_instance=RequestContext(request))
 
 @login_required

@@ -84,10 +84,6 @@ class Profile(models.Model):
         related_name='members',
         on_delete=models.SET_NULL)
 
-    # email confirmation
-    email_confirmed = models.BooleanField(default=False)
-    confirmation_key = models.CharField(max_length=24, blank=True)
-
     # extended information
     profile = models.TextField(blank=True)
     location = models.ForeignKey(Jurisdiction, blank=True, null=True)
@@ -110,7 +106,10 @@ class Profile(models.Model):
         resize_source={'size': (200, 200), 'crop': 'smart'}
     )
 
-    # prefrences
+    # email confirmation
+    email_confirmed = models.BooleanField(default=False)
+    confirmation_key = models.CharField(max_length=24, blank=True)
+    # email preferences
     email_pref = models.CharField(
         max_length=10,
         choices=email_prefs,
