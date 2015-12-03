@@ -7,33 +7,21 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.text import slugify
 
-from localflavor.us.forms import USZipCodeField
 import re
 
 from muckrock.accounts.models import Profile
 from muckrock.organization.models import Organization
 
 
-class ProfileForm(forms.ModelForm):
-    """A form for a user profile"""
-    zip_code = USZipCodeField(required=False)
-
-    class Meta:
-        # pylint: disable=too-few-public-methods
-        model = Profile
-        fields = '__all__'
-
-
-class UserChangeForm(ProfileForm):
+class ProfileSettingsForm(forms.ModelForm):
     """A form for updating user information"""
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.EmailField()
 
-    class Meta(ProfileForm.Meta):
-        # pylint: disable=too-few-public-methods
-        fields = ['first_name', 'last_name', 'email', 'address1', 'address2', 'city', 'state',
-                  'zip_code', 'phone', 'email_pref', 'use_autologin']
+    class Meta():
+        model = Profile
+        fields = ['first_name', 'last_name', 'email', 'twitter']
 
     def clean_email(self):
         """Validates that a user does not exist with the given e-mail address"""
@@ -44,8 +32,24 @@ class UserChangeForm(ProfileForm):
         if len(users) > 1: # pragma: no cover
             # this should never happen
             raise forms.ValidationError('A user with that e-mail address already exists.')
-
         return email
+
+    def clean_twitter(self):
+        """Stripe @ from beginning of Twitter name, if it exists."""
+        twitter = self.cleaned_data['twitter']
+        return twitter.split('@')[-1]
+
+    def save(self, commit=True):
+        """Modifies asscoiated User and Stripe.Customer models."""
+        profile = super(ProfileSettingsForm, self).save(commit)
+        profile.user.first_name = self.cleaned_data['first_name']
+        profile.user.last_name = self.cleaned_data['last_name']
+        profile.user.email = self.cleaned_data['email']
+        profile.user.save()
+        customer = profile.customer()
+        customer.email = profile.user.email
+        customer.save()
+        return profile
 
 
 class RegisterForm(UserCreationForm):
