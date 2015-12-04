@@ -28,6 +28,7 @@ import sys
 
 from muckrock.accounts.forms import ProfileSettingsForm,\
                                     EmailSettingsForm,\
+                                    BillingPreferencesForm,\
                                     RegisterForm,\
                                     RegisterOrganizationForm
 from muckrock.accounts.models import Profile, Statistics
@@ -223,13 +224,16 @@ def settings(request):
     user_profile = request.user.profile
     settings_forms = {
         'profile': ProfileSettingsForm,
-        'email': EmailSettingsForm
+        'email': EmailSettingsForm,
+        'billing': BillingPreferencesForm
     }
     if request.method == 'POST':
-        form = settings_forms[request.POST.get('action')](request.POST, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your settings have been updated.')
+        action = request.POST.get('action')
+        if action:
+            form = settings_forms[action](request.POST, instance=user_profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your settings have been updated.')
 
     profile_initial = {
         'first_name': request.user.first_name,
@@ -241,6 +245,7 @@ def settings(request):
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
     context = {
+        'stripe_pk': STRIPE_PUB_KEY,
         'profile_form': profile_form,
         'email_form': email_form
     }

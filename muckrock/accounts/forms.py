@@ -75,6 +75,24 @@ class EmailSettingsForm(forms.ModelForm):
         return profile
 
 
+class BillingPreferencesForm(forms.ModelForm):
+    """A form for updating billing preferences."""
+    stripe_token = forms.CharField()
+
+    class Meta():
+        model = Profile
+        fields = ['stripe_token']
+
+    def save(self, commit=True):
+        """Modifies associated Stripe.Customer model"""
+        profile = super(BillingPreferencesForm, self).save(commit)
+        token = self.cleaned_data['stripe_token']
+        customer = profile.customer()
+        customer.source = token
+        customer.save()
+        return profile
+
+
 class RegisterForm(UserCreationForm):
     """Register for a basic account"""
     class Meta(UserCreationForm.Meta):

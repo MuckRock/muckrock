@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static from staticfiles %}
+
 {% block title %}MuckRock &bull; Settings{% endblock title %}
 
 {% block content %}
@@ -56,9 +58,44 @@
         </footer>
     </form>
 
+    <form method="post" class="billing form" id="billing">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="billing" />
+        <h2>Billing</h2>
+        <button
+            data-amount="0"
+            data-description="Update Credit Card"
+            data-email="{{ request.user.email }}"
+            data-label="Update"
+            data-form="#billing"
+            class="checkout-button primary">
+            Update Credit Card
+        </button>
+        <a href="{% url 'accounts' %}" class="button">Change Plan</a>
+    </form>
 </article>
 {% endblock %}
 
 {% block scripts %}
     {% include 'autocomplete_light/static.html' %}
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('.checkout-button').click(function(e){
+            e.preventDefault();
+            var checkoutData = getCheckoutData($(this));
+            checkout(
+                "{{ stripe_pk }}",
+                "{% static 'apple-touch-icon.png' %}",
+                checkoutData.description,
+                checkoutData.amount,
+                checkoutData.email,
+                checkoutData.label,
+                checkoutData.form,
+                true,
+                false
+            );
+        });
+    });
+</script>
 {% endblock %}
