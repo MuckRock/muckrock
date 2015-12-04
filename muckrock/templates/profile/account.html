@@ -57,7 +57,7 @@
 <main class="activity">
     {% if request.user == user_obj %}
     <section class="actions">
-        <form action="{% url 'acct-buy-requests' user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+        <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
         <div class="controls">
             <button data-amount="2000"
                     data-description="4 requests ($20.00)"
