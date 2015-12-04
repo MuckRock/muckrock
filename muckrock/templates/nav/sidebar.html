@@ -27,11 +27,11 @@
     {% if user.is_authenticated %}
         {% if organization %}
     <section class="organization">
-        <a href="{{organization.get_absolute_url}}">My Organization</a>
+        <a href="{{organization.get_absolute_url}}">Your Organization</a>
     </section>
         {% endif %}
     <section class="requests">
-        <a class="my-requests" href="{% url 'foia-mylist' %}">My Requests</a>
+        <a class="my-requests" href="{% url 'foia-mylist' %}">Your Requests</a>
 
         {% if actionable_requests %}
             {% if actionable_requests.payments %}
