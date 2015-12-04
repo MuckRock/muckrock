@@ -11,6 +11,7 @@
             <li><a href="#profile">Profile</a></li>
             <li><a href="#email">Email</a></li>
             <li><a href="#billing">Billing</a></li>
+            <li><a href="#password">Change Password</a></li>
         </ul>
     </header>
     <form method="post" action="?type=profile" class="profile form" id="profile">
@@ -44,7 +45,7 @@
                 {{ field }}
                 {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
                 {% if field == form.email %}
-                {% if email.confirmed %}
+                {% if request.user.profile.email_confirmed %}
                 <span>Verified</span>
                 {% else %}
                 <a href="{% url 'acct-verify-email' %}">Verify your email</a>
@@ -72,6 +73,25 @@
             Update Credit Card
         </button>
         <a href="{% url 'accounts' %}" class="button">Change Plan</a>
+    </form>
+
+    <form method="post" class="password form" id="password">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="password" />
+        <h2>Change Password</h2>
+        <div class="fields">
+        {% for field in password_form.visible_fields %}
+            <fieldset class="{{ field.label|lower }} field{% if field.field.required %} required{% endif %}">
+                <label {% if field.errors %}class="failure"{% endif %} for="{{ field.auto_id }}">{{ field.label}}</label>
+                {{ field.errors }}
+                {{ field }}
+                {% if field.help_text %}<p class="default"><small>{{ field.help_text }}</small></p>{% endif %}
+            </fieldset>
+        {% endfor %}
+        </div>
+        <footer>
+            <button type="submit" class="primary">Save</button>
+        </footer>
     </form>
 </article>
 {% endblock %}

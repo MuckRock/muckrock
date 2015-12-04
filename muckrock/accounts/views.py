@@ -2,12 +2,15 @@
 Views for the accounts application
 """
 
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
+
 from django.http import HttpResponse,\
                         HttpResponseBadRequest,\
                         HttpResponseNotAllowed,\
@@ -221,16 +224,22 @@ def downgrade(request):
 @login_required
 def settings(request):
     """Update a users information"""
+    # TODO display form errors!
     user_profile = request.user.profile
     settings_forms = {
         'profile': ProfileSettingsForm,
         'email': EmailSettingsForm,
-        'billing': BillingPreferencesForm
+        'billing': BillingPreferencesForm,
+        'password': PasswordChangeForm
     }
     if request.method == 'POST':
         action = request.POST.get('action')
         if action:
-            form = settings_forms[action](request.POST, instance=user_profile)
+            form = settings_forms[action]
+            if isinstance(form, forms.ModelForm):
+                form = form(request.POST, instance=user_profile)
+            else:
+                form = form(request.POST)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Your settings have been updated.')
@@ -244,10 +253,12 @@ def settings(request):
     }
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
+    password_form = PasswordChangeForm(request.user)
     context = {
         'stripe_pk': STRIPE_PUB_KEY,
         'profile_form': profile_form,
-        'email_form': email_form
+        'email_form': email_form,
+        'password_form': password_form
     }
     return render_to_response(
         'accounts/settings.html',
