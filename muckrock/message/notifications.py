@@ -107,34 +107,13 @@ class DailyNotification(EmailMultiAlternatives):
         return subject
 
 
-class FailedPaymentNotification(EmailMultiAlternatives):
-    """Sends a failed payment notification"""
-    text_template = 'message/notification/failed_payment.txt'
-
-    def __init__(self, user, attempt, subscription, **kwargs):
-        """Initialize the notification"""
-        super(FailedPaymentNotification, self).__init__(**kwargs)
-        if isinstance(user, User):
-            self.user = user
-            self.to = [user.email]
-        else:
-            raise TypeError('Notification requires a User to recieve it.')
-        self.from_email = 'MuckRock <info@muckrock.com>'
-        self.bcc = ['diagnostics@muckrock.com']
-        self.subject = 'Payment Failed'
-        self.body = render_to_string(
-            self.text_template,
-            {'user': self.user, 'attempt': attempt, 'type': subscription}
-        )
-
-
-class WelcomeNotification(EmailMultiAlternatives):
-    """Sends a welcome notification"""
-    text_template = 'text/user/welcome.txt'
+class Notification(EmailMultiAlternatives):
+    text_template = None
+    subject = None
 
     def __init__(self, user, **kwargs):
         """Initialize the notification"""
-        super(WelcomeNotification, self).__init__(**kwargs)
+        super(Notification, self).__init__()
         if isinstance(user, User):
             self.user = user
             self.to = [user.email]
@@ -142,13 +121,44 @@ class WelcomeNotification(EmailMultiAlternatives):
             raise TypeError('Notification requires a User to receive it.')
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
-        self.subject = 'Welcome to MuckRock'
-        self.body = render_to_string(self.text_template, self.get_context_data())
+        self.subject = self.get_subject()
+        self.body = render_to_string(self.get_text_template(), self.get_context_data(**kwargs))
 
-    def get_context_data(self):
-        """Add the user and ask them to verify their email."""
-        context = {}
+    def get_context_data(self, **kwargs):
+        """Return init keywords and the user-to-notify as context."""
+        context = kwargs
         context['user'] = self.user
+        return context
+
+    def get_subject(self):
+        """Every notification should have a subject."""
+        if self.subject == None:
+            raise NotImplementedError('Notification requires a subject.')
+        else:
+            return self.subject
+
+    def get_text_template(self):
+        """Every notification should have a text template."""
+        if self.text_template == None:
+            raise NotImplementedError('Notification requires a text template.')
+        else:
+            return self.text_template
+
+
+class FailedPaymentNotification(Notification):
+    """Sends a failed payment notification"""
+    text_template = 'message/notification/failed_payment.txt'
+    subject = 'Payment Failed'
+
+
+class WelcomeNotification(Notification):
+    """Sends a welcome notification"""
+    text_template = 'text/user/welcome.txt'
+    subject = 'Welcome to MuckRock'
+
+    def get_context_data(self, **kwargs):
+        """Add the email verification link to context."""
+        context = super(WelcomeNotification, self).get_context_data(**kwargs)
         verification_url = reverse('acct-verify-email')
         key = self.user.profile.generate_confirmation_key()
         context['verification_link'] = self.user.profile.wrap_url(verification_url, key=key)

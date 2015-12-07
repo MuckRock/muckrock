@@ -107,11 +107,17 @@ def failed_payment(invoice_id):
             org = Organization.objects.get(owner=user)
             org.cancel_subscription()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
-        notification = notifications.FailedPaymentNotification(user, 'final', invoice.plan.id)
+        notification = notifications.FailedPaymentNotification(user, kwargs={
+            'attempt': 'final',
+            'type': invoice.plan.id
+        })
         notification.send(fail_silently=False)
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
-        notification = notifications.FailedPaymentNotification(user, attempt, invoice.plan.id)
+        notification = notifications.FailedPaymentNotification(user, kwargs={
+            'attempt': attempt,
+            'type': invoice.plan.id
+        })
         notification.send(fail_silently=False)
 
 @task(name='muckrock.message.tasks.welcome')
