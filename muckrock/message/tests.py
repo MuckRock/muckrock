@@ -130,6 +130,20 @@ class TestWelcomeTask(TestCase):
         mock_send.assert_called_once()
 
 
+class TestGiftTask(TestCase):
+    """Tests the gift email notification sent to gift recipients."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+        self.sender = factories.UserFactory()
+        self.gift = '4 requests'
+
+    @mock.patch('muckrock.message.notifications.GiftNotification.send')
+    def test_gift_notification_task(self, mock_send):
+        """Make sure the notification is actually sent."""
+        tasks.gift(self.user, self.sender, self.gift)
+        mock_send.assert_called_once()
+
+
 @mock.patch('stripe.Charge', MockCharge)
 class TestSendChargeReceiptTask(TestCase):
     """Tests the send charge receipt task."""
