@@ -61,7 +61,8 @@ def sidebar_info(request):
         # content for logged in users
         sidebar_info_dict.update({
             'actionable_requests': get_actionable_requests(request.user),
-            'organization': get_organization(request.user)
+            'organization': get_organization(request.user),
+            'payment_failed': request.user.profile.payment_failed
         })
     else:
         # content for logged out users

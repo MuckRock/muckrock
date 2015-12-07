@@ -45,10 +45,18 @@ $sidebar-width: 250px;
     -webkit-overflow-scrolling: touch;
     border-left: 1px solid $color-grey-0;
     background-color: $color-grey-1;
-    color: $color-white;
-
+    color: $color-grey-5;
     dfn {
         color: $color-white;
+    }
+
+    a {
+        color: $color-white;
+        &:hover {
+            color: $color-blue;
+            text-decoration: none;
+        }
+        @include transition(color .25s linear);
     }
 
     & > * {
@@ -94,13 +102,13 @@ $sidebar-width: 250px;
             border-bottom: 1px solid $color-black;
             border-right: 1px solid $color-black;
             background-color: $color-grey-2;
-            color: $color-white;
             font-weight: $font-weight-bold;
             text-align: center;
-            @include transition(background-color .25s linear);
+            @include transition(all .25s linear);
             &:hover {
                 text-decoration: none;
                 background-color: $color-blue;
+                color: $color-white;
             }
             &:last-child {
                 border-right: 0;
@@ -115,6 +123,7 @@ $sidebar-width: 250px;
         }
     }
 
+
     section {
         width: 100%;
         padding: $vertical-rhythm/2 $vertical-rhythm;
@@ -127,21 +136,22 @@ $sidebar-width: 250px;
         p {
             margin-bottom: $vertical-rhythm/2;
         }
+
+
+        &.failure {
+            strong {
+                color: $color-red;
+            }
+            p:last-child {
+                margin-bottom: 0;
+            }
+        }
     }
 
     .organization a, .my-requests, .admin {
         display: block;
         width: 100%;
-        // padding: $vertical-rhythm/2;
-        color: $color-white;
-        font-size: $font-size-3;
         font-weight: $font-weight-bold;
-        @include border-radius;
-        @include transition(color .25s linear);
-        &:hover {
-            color: $color-blue;
-            text-decoration: none;
-        }
     }
 
     .requests {
@@ -199,11 +209,6 @@ $sidebar-width: 250px;
             a {
                 display: block;
                 color: $color-grey-6;
-                @include transition(color .25s linear);
-                &:hover {
-                    color: $color-blue;
-                    text-decoration: none;
-                }
             }
         }
     }

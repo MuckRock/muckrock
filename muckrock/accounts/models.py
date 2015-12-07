@@ -132,6 +132,7 @@ class Profile(models.Model):
     # for Stripe
     customer_id = models.CharField(max_length=255, blank=True)
     subscription_id = models.CharField(max_length=255, blank=True)
+    payment_failed = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"%s's Profile" % unicode(self.user).capitalize()
@@ -284,6 +285,7 @@ class Profile(models.Model):
         self.subscription_id = ''
         self.acct_type = 'basic'
         self.monthly_requests = settings.MONTHLY_REQUESTS.get('basic', 0)
+        self.payment_failed = False
         self.save()
         return subscription
 

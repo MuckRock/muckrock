@@ -84,8 +84,10 @@ class BillingPreferencesForm(forms.ModelForm):
         fields = ['stripe_token']
 
     def save(self, commit=True):
-        """Modifies associated Stripe.Customer model"""
+        """Modifies associated Profile and Stripe.Customer model"""
         profile = super(BillingPreferencesForm, self).save(commit)
+        profile.payment_failed = False
+        profile.save()
         token = self.cleaned_data['stripe_token']
         customer = profile.customer()
         customer.source = token

@@ -243,23 +243,35 @@ class TestFailedPaymentTask(TestCase):
         """Make sure the send method is called for a failed payment notification"""
         tasks.failed_payment(mock_invoice.id)
         mock_send.assert_called_once_with(self.profile.user)
+        self.profile.refresh_from_db()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
     def test_last_attempt_pro(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's pro subscription"""
+        self.profile.payment_failed = True
+        self.profile.save()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         mock_invoice.attempt_count = 4
         tasks.failed_payment(mock_invoice.id)
+        self.profile.refresh_from_db()
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
+        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_last_attempt_org(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's org subscription"""
+        self.profile.payment_failed = True
+        self.profile.save()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         factories.OrganizationFactory(owner=self.profile.user)
         mock_invoice.attempt_count = 4
         mock_invoice.plan.id = 'org'
         tasks.failed_payment(mock_invoice.id)
+        self.profile.refresh_from_db()
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
+        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')

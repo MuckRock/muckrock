@@ -99,13 +99,18 @@ def failed_payment(invoice_id):
     logger.debug(invoice.customer)
     profile = Profile.objects.get(customer_id=invoice.customer)
     user = profile.user
+    # raise the failed payment flag on the profile
+    profile.payment_failed = True
+    profile.save()
     if attempt == 4:
-        # on last attempt, cancel the user's subscription
+        # on last attempt, cancel the user's subscription and lower the failed payment flag
         if invoice.plan.id == 'pro':
             profile.cancel_pro_subscription()
         elif invoice.plan.id == 'org':
             org = Organization.objects.get(owner=user)
             org.cancel_subscription()
+        profile.payment_failed = False
+        profile.save()
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
         notification = notifications.FailedPaymentNotification(user, kwargs={
             'attempt': 'final',

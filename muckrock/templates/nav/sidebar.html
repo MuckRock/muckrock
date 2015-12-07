@@ -18,6 +18,13 @@
         {% endif %}
     </header>
 
+    {% if payment_failed %}
+    <section class="payment failure">
+        <p><strong>Your payment failed!</strong></p>
+        <p>A recent charge made against your credit card has failed. You can <a href="{% url 'acct-settings' %}#billing">update your billing information</a> from your account settings.</p>
+    </section>
+    {% endif %}
+
     {% if user.is_staff %}
     <section>
         <a class="admin" href="{% if sidebar_admin_url %}{{ sidebar_admin_url }}{% else %}/admin/{% endif %}" >Admin</a>
