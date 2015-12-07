@@ -232,18 +232,6 @@ def settings(request):
         'billing': BillingPreferencesForm,
         'password': PasswordChangeForm
     }
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action:
-            form = settings_forms[action]
-            if isinstance(form, forms.ModelForm):
-                form = form(request.POST, instance=user_profile)
-            else:
-                form = form(request.POST)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Your settings have been updated.')
-
     profile_initial = {
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
@@ -260,6 +248,24 @@ def settings(request):
         'email_form': email_form,
         'password_form': password_form
     }
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        print action
+        if action:
+            form = settings_forms[action]
+            if isinstance(form, forms.ModelForm):
+                form = form(request.POST, instance=user_profile)
+            else:
+                form = form(request.POST)
+            print form
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your settings have been updated.')
+            else:
+                context_form = action + '_form'
+                context[context_form] = form
+
     return render_to_response(
         'accounts/settings.html',
         context,

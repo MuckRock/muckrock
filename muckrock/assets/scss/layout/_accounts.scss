@@ -115,3 +115,22 @@
         }
     }
 }
+
+.account.settings {
+    $breakpoint: 768px;
+    @include display(flex);
+    @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: $breakpoint) {
+        @include flex-direction(row);
+        .request.main {
+            margin-left: $vertical-rhythm * 2;
+        }
+    }
+    header {
+        @include flex(1);
+    }
+    main {
+        @include flex(3);
+    }
+}
