@@ -34,7 +34,7 @@ from muckrock.accounts.forms import ProfileSettingsForm,\
                                     BillingPreferencesForm,\
                                     RegisterForm,\
                                     RegisterOrganizationForm
-from muckrock.accounts.models import Profile, Statistics
+from muckrock.accounts.models import Profile, Statistics, ACCT_TYPES
 from muckrock.accounts.serializers import UserSerializer, StatisticsSerializer
 from muckrock.foia.models import FOIARequest
 from muckrock.organization.models import Organization
@@ -243,11 +243,14 @@ def settings(request):
     profile_form = ProfileSettingsForm(initial=profile_initial, instance=user_profile)
     email_form = EmailSettingsForm(initial=email_initial, instance=user_profile)
     password_form = PasswordChangeForm(request.user)
+    current_plan = dict(ACCT_TYPES)[user_profile.acct_type]
     context = {
         'stripe_pk': STRIPE_PUB_KEY,
         'profile_form': profile_form,
         'email_form': email_form,
-        'password_form': password_form
+        'password_form': password_form,
+        'current_plan': current_plan,
+        'credit_card': user_profile.card()
     }
 
     if request.method == 'POST':

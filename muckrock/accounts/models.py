@@ -250,6 +250,14 @@ class Profile(models.Model):
             self.save()
         return customer
 
+    def card(self):
+        """Retrieve the default credit card from Stripe, if one exists."""
+        card = None
+        customer = self.customer()
+        if customer.default_source:
+            card = customer.sources.retrieve(customer.default_source)
+        return card
+
     def start_pro_subscription(self, token=None):
         """Subscribe this profile to a professional plan. Return the subscription."""
         # create the stripe subscription

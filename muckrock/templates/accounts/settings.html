@@ -6,7 +6,6 @@
 {% block content %}
 <article class="account settings">
     <header>
-        <a href="{% url 'acct-my-profile' %}">Back to your profile</a>
         <h1>Settings</h1>
         <ul>
             <li><a href="#profile">Profile</a></li>
@@ -31,7 +30,7 @@
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Save</button>
+                <button type="submit" class="primary">Update profile</button>
             </footer>
         </form>
         <form method="post" class="email form" id="email">
@@ -56,23 +55,44 @@
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Save</button>
+                <button type="submit" class="primary">Save preferences</button>
             </footer>
         </form>
         <form method="post" class="billing form" id="billing">
             {% csrf_token %}
             <input type="hidden" name="action" value="billing" />
             <h2>Billing</h2>
-            <button
-                data-amount="0"
-                data-description="Update Credit Card"
-                data-email="{{ request.user.email }}"
-                data-label="Update"
-                data-form="#billing"
-                class="checkout-button primary">
-                Update Credit Card
-            </button>
-            <a href="{% url 'accounts' %}" class="button">Change Plan</a>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>
+                            <dfn>Current plan</dfn>
+                            <p>{{current_plan}}</p>
+                        </td>
+                        <td><a href="{% url 'accounts' %}" class="button">Change Plan</a></td>
+                    </tr>
+                    {% if credit_card %}
+                    <tr>
+                        <td>
+                            <dfn>Card on file</dfn>
+                            <p>{{credit_card.brand}} ending in {{credit_card.last4}}</p>
+                            <p>Expires {{credit_card.exp_month}}/{{credit_card.exp_year}}</p>
+                        </td>
+                        <td>
+                            <button
+                                data-amount="0"
+                                data-description="Update Credit Card"
+                                data-email="{{ request.user.email }}"
+                                data-label="Update"
+                                data-form="#billing"
+                                class="checkout-button primary">
+                                Update Credit Card
+                            </button>
+                        </td>
+                    <tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </form>
         <form method="post" class="password form" id="password">
             {% csrf_token %}
@@ -89,7 +109,7 @@
             {% endfor %}
             </div>
             <footer>
-                <button type="submit" class="primary">Save</button>
+                <button type="submit" class="primary">Change Password</button>
                 <a href="{% url 'acct-reset-pw' %}">Forgot your password?</a>
             </footer>
         </form>
