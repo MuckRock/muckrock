@@ -41,7 +41,8 @@ from muckrock.organization.models import Organization
 from muckrock.message.tasks import send_charge_receipt,\
                                    send_invoice_receipt,\
                                    failed_payment,\
-                                   welcome
+                                   welcome,\
+                                   gift
 from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
@@ -273,31 +274,53 @@ def settings(request):
 
 @login_required
 def buy_requests(request, username=None):
-    """Buy more requests"""
-    # pylint:disable=unused-argument
+    """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
-    if request.POST.get('stripe_token', False):
-        user_profile = request.user.profile
-        try:
-            stripe_token = request.POST['stripe_token']
-            stripe_email = request.POST['stripe_email']
-            metadata = {
-                'email': stripe_email,
-                'action': 'request-purchase',
-            }
-            user_profile.pay(stripe_token, 2000, metadata)
-        except (stripe.CardError, ValueError) as exc:
-            msg = 'Payment error: %s Your card has not been charged.' % exc
-            messages.error(request, msg)
-            logger.warn('Payment error: %s', exc, exc_info=sys.exc_info())
-            return redirect(url_redirect)
-        user_profile.num_requests += 4
-        user_profile.save()
-        request.session['ga'] = 'request_purchase'
-        msg = 'Purchase successful. 4 requests have been added to your account.'
-        messages.success(request, msg)
-        logger.info('%s has purchased requests', request.user.username)
+    recipient = get_object_or_404(User, username=username)
+    purchaser = request.user
+    # hardcoded for now, but the amount of requests should derive from account type
+    # {pro: 5, proxy: 5, beta: 5, basic: 4}
+    request_price = 2000
+    request_count = 4
+    try:
+        if request.POST:
+            stripe_token = request.POST.get('stripe_token')
+            stripe_email = request.POST.get('stripe_email')
+            if not stripe_token and not stripe_email:
+                raise KeyError('Missing Stripe payment data.')
+            # take from the purchaser
+            stripe.Charge.create(
+                amount=request_price,
+                currency='usd',
+                source=stripe_token,
+                metadata={
+                    'email': stripe_email,
+                    'action': 'request-purchase',
+                }
+            )
+            # and give to the recipient
+            recipient.profile.num_requests += request_count
+            recipient.profile.save()
+            # record the purchase
+            request.session['ga'] = 'request_purchase'
+            if recipient == purchaser:
+                msg = 'Purchase successful. %d requests have been added to your account.' % request_count
+            else:
+                msg = 'Purchase successful. %d requests have been gifted to %s' % (request_count, recipient.first_name)
+                gift_description = '%d requests' % request_count
+                gift.delay(recipient, purchaser, gift_description) # notify the recipient with an email
+            messages.success(request, msg)
+            logger.info('%s purchased %d requests', purchaser.username, request_count)
+    except KeyError as exception:
+        msg = 'Payment error: %s' % exception
+        messages.error(request, msg)
+        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
+    except stripe.CardError as exception:
+        msg = 'Payment error: %s Your card has not been charged.' % exception
+        messages.error(request, msg)
+        logger.warn('Payment error: %s', exception, exc_info=sys.exc_info())
     return redirect(url_redirect)
+
 
 @login_required
 def verify_email(request):

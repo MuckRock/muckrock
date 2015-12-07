@@ -6,6 +6,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.auth.views import login
 from django.core.urlresolvers import reverse
 from django.forms import ValidationError
+from django.http import Http404
 from django.test import TestCase, RequestFactory
 
 from datetime import datetime, date, timedelta
@@ -14,7 +15,7 @@ import logging
 from mock import Mock, patch
 import nose.tools
 
-from muckrock.accounts.forms import UserChangeForm, RegisterForm
+from muckrock.accounts.forms import ProfileSettingsForm, RegisterForm
 from muckrock.accounts import views as accounts_views
 from muckrock.factories import UserFactory, ProfileFactory
 from muckrock.organization.models import Organization
@@ -267,7 +268,7 @@ class TestAccountFormsUnit(TestCase):
     def setUp(self):
         """Set up tests"""
         self.profile = ProfileFactory()
-        self.form = UserChangeForm(instance=self.profile)
+        self.form = ProfileSettingsForm(instance=self.profile)
 
     def test_user_change_form_email_normal(self):
         """Changing email normally should succeed"""
@@ -538,6 +539,65 @@ class TestAccountFunctional(TestCase):
             else:
                 eq_(val, getattr(self.profile, key))
 
+
+@patch('stripe.Charge', mock_charge)
+class TestBuyRequests(TestCase):
+    """The buy requests view allows one user to buy requests for another, including themselves."""
+    def setUp(self):
+        self.user = UserFactory()
+        self.factory = RequestFactory()
+        self.url = reverse('acct-buy-requests', kwargs={'username': self.user.username})
+        self.view = accounts_views.buy_requests
+        self.data = {
+            'stripe_token': 'test',
+            'stripe_email': self.user.email
+        }
+
+    def test_buy_requests(self):
+        """A user should be able to buy themselves requests."""
+        existing_request_count = self.user.profile.num_requests
+        post_request = self.factory.post(self.url, self.data)
+        post_request = mock_middleware(post_request)
+        post_request.user = self.user
+        post_response = self.view(post_request, self.user.username)
+        self.user.profile.refresh_from_db()
+        eq_(self.user.profile.num_requests, existing_request_count + 4)
+
+    @patch('muckrock.message.tasks.gift.delay')
+    def test_buy_requests_for_another(self, mock_notify):
+        """A user should be able to buy someone else requests."""
+        other_user = UserFactory()
+        existing_request_count = other_user.profile.num_requests
+        post_request = self.factory.post(self.url, self.data)
+        post_request = mock_middleware(post_request)
+        # here is the cool part: the request user is the buyer and the URL user is the recipient
+        post_request.user = self.user
+        post_response = self.view(post_request, other_user.username)
+        other_user.profile.refresh_from_db()
+        eq_(other_user.profile.num_requests, existing_request_count + 4)
+        ok_(mock_notify.called, 'The recipient should be notified of their gift by email.')
+
+    @raises(Http404)
+    def test_nonexistant_user(self):
+        """Buying requests for nonexistant user should return a 404."""
+        post_request = self.factory.post(self.url, self.data)
+        post_request = mock_middleware(post_request)
+        # here is the cool part: the request user is the buyer and the URL user is the recipient
+        post_request.user = self.user
+        post_response = self.view(post_request, 'nonexistant_user')
+
+    def test_bad_post_data(self):
+        """Bad post data should cancel the transaction."""
+        existing_request_count = self.user.profile.num_requests
+        bad_data = {
+            'tok': 'bad'
+        }
+        post_request = self.factory.post(self.url, bad_data)
+        post_request = mock_middleware(post_request)
+        post_request.user = self.user
+        post_response = self.view(post_request, self.user.username)
+        self.user.profile.refresh_from_db()
+        eq_(self.user.profile.num_requests, existing_request_count)
 
 class TestStripeWebhook(TestCase):
     """The Stripe webhook listens for events in order to issue receipts."""
