@@ -163,3 +163,9 @@ class WelcomeNotification(Notification):
         key = self.user.profile.generate_confirmation_key()
         context['verification_link'] = self.user.profile.wrap_url(verification_url, key=key)
         return context
+
+
+class GiftNotification(Notification):
+    """Sends a gift notification to the receipient"""
+    text_template = 'message/notification/gift.txt'
+    subject = 'You have a gift!'
