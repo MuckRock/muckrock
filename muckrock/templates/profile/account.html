@@ -59,8 +59,9 @@
     <section class="actions">
         <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
         <div class="controls">
+            {% if request.user.is_authenticated %}
             <button data-amount="2000"
-                    data-description="4 requests ($20.00)"
+                    data-description="{{request.user.profile.bundled_requests}} requests ($20.00)"
                     data-email="{{ request.user.email }}"
                     data-form="#buy-requests"
                     data-label=""
@@ -68,6 +69,16 @@
                     {% if request.user == user_obj %}Buy Requests{% else %}&hearts; Gift Requests{% endif %}
             </button>
             {% if request.user == user_obj %}<a href="{% url 'acct-settings' %}" class="button">Settings</a>{% endif %}
+            {% else %}
+            <button data-amount="2000"
+                    data-description="4 requests ($20.00)"
+                    data-email=""
+                    data-form="#buy-requests"
+                    data-label=""
+                    class="checkout-button primary">
+                    &hearts; Gift Requests
+            </button>
+            {% endif %}
         </div>
     </section>
     {% if recent_requests or recent_completed %}

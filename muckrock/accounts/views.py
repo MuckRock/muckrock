@@ -43,7 +43,7 @@ from muckrock.message.tasks import send_charge_receipt,\
                                    failed_payment,\
                                    welcome,\
                                    gift
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY, BUNDLED_REQUESTS
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -272,16 +272,16 @@ def settings(request):
         context,
         context_instance=RequestContext(request))
 
-@login_required
 def buy_requests(request, username=None):
     """A purchaser buys requests for a recipient. The recipient can even be themselves!"""
     url_redirect = request.GET.get('next', 'acct-my-profile')
     recipient = get_object_or_404(User, username=username)
     purchaser = request.user
-    # hardcoded for now, but the amount of requests should derive from account type
-    # {pro: 5, proxy: 5, beta: 5, basic: 4}
     request_price = 2000
-    request_count = 4
+    if purchaser.is_authenticated():
+        request_count = purchaser.profile.bundled_requests()
+    else:
+        request_count = 4
     try:
         if request.POST:
             stripe_token = request.POST.get('stripe_token')

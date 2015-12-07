@@ -227,6 +227,13 @@ class Profile(models.Model):
         """Is this user allowed to view all emails and private contact information?"""
         return self.acct_type in ['admin', 'pro']
 
+    def bundled_requests(self):
+        """Returns the number of requests the user gets when they buy a bundle."""
+        how_many = settings.BUNDLED_REQUESTS[self.acct_type]
+        if self.organization:
+            how_many = 5
+        return how_many
+
     def customer(self):
         """Retrieve the customer from Stripe or create one if it doesn't exist. Then return it."""
         try:

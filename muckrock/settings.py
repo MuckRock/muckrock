@@ -364,6 +364,16 @@ MONTHLY_REQUESTS = {
     'robot': 0,
 }
 
+BUNDLED_REQUESTS = {
+    'admin': 5,
+    'basic': 4,
+    'beta': 4,
+    'pro': 5,
+    'proxy': 5,
+    'org': 5,
+    'robot': 0,
+}
+
 MARKDOWN_DEUX_STYLES = {
     "default": {
         "extras": {
