@@ -91,12 +91,23 @@ def send_charge_receipt(charge_id):
     receipt = receipt_class(user, charge)
     receipt.send(fail_silently=False)
 
+def get_subscription_type(invoice):
+    """Gets the subscription type from the invoice."""
+    # get the first line of the invoice
+    lines = invoice.lines
+    subscription_type = 'unknown'
+    if lines.total_count > 0:
+        data = lines.data
+        plan = data[0].plan
+        subscription_type = plan.id
+    return subscription_type
+
 @task(name='muckrock.message.tasks.failed_payment')
 def failed_payment(invoice_id):
     """Notify a customer about a failed subscription invoice."""
     invoice = stripe.Invoice.retrieve(invoice_id)
     attempt = invoice.attempt_count
-    logger.debug(invoice.customer)
+    subscription_type = get_subscription_type(invoice)
     profile = Profile.objects.get(customer_id=invoice.customer)
     user = profile.user
     # raise the failed payment flag on the profile
@@ -104,9 +115,9 @@ def failed_payment(invoice_id):
     profile.save()
     if attempt == 4:
         # on last attempt, cancel the user's subscription and lower the failed payment flag
-        if invoice.plan.id == 'pro':
+        if subscription_type == 'pro':
             profile.cancel_pro_subscription()
-        elif invoice.plan.id == 'org':
+        elif subscription_type == 'org':
             org = Organization.objects.get(owner=user)
             org.cancel_subscription()
         profile.payment_failed = False
@@ -114,14 +125,14 @@ def failed_payment(invoice_id):
         logger.info('%s subscription has been cancelled due to failed payment', user.username)
         notification = notifications.FailedPaymentNotification(user, kwargs={
             'attempt': 'final',
-            'type': invoice.plan.id
+            'type': subscription_type
         })
         notification.send(fail_silently=False)
     else:
         logger.info('Failed payment by %s, attempt %s', user.username, attempt)
         notification = notifications.FailedPaymentNotification(user, kwargs={
             'attempt': attempt,
-            'type': invoice.plan.id
+            'type': subscription_type
         })
         notification.send(fail_silently=False)
 
