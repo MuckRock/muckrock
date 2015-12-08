@@ -4,10 +4,10 @@ Dear {{user.get_full_name}},
 
 This mail is to let you know that your recurring payment for MuckRock has failed.
 {% if attempt == "final" %}
-This was the final attempt and your account has been reverted back to a free community account.  If you would like to restore your professional account status, please register again here:
-http://www.muckrock.com{% url 'acct-subscribe' %}
+This was the final attempt and your account has been reverted back to a free Basic account.  If you would like to restore your Professional account status, please register again here:
+http://www.muckrock.com{% url 'accounts' %}
 {% else %}
-This is the {{attempt|ordinal}} attempt.  The payment will be retried up to 3 times.  Please update your credit card information so we can continue your professional MuckRock account.
+This is the {{attempt|ordinal}} attempt. The payment will be retried up to 3 times. Please update your credit card information so we can continue your Professional MuckRock account.
 {% endif %}
 
 Sincerely,

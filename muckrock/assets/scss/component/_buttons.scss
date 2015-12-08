@@ -54,10 +54,11 @@
     &.failure   { @include button($color-red);      }
     &.warning   { @include button($color-yellow);   }
     &.disabled, &:disabled  {
-        @include button($color-white);
-        color: darken($color-white, $color-darken-amount);
+        @include button($color-disabled);
+        background: $color-white;
+        color: $color-grey-5;
         &:hover {
-            color: darken($color-white, $color-darken-amount);
+            color: $color-grey-5;
         }
     }
 }

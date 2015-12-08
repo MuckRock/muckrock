@@ -128,7 +128,7 @@ class TestSubscriptions(TestCase):
         self.org.owner = pro.user
         self.org.activate_subscription('test', self.org.max_users)
         pro.refresh_from_db()
-        eq_(pro.acct_type, 'community', 'The pro account should be downgraded.')
+        eq_(pro.acct_type, 'basic', 'The pro account should be downgraded.')
         eq_(pro.subscription_id, mock_subscription.id, 'The subscription should be changed.')
 
     @nose.tools.raises(ValueError)

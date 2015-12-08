@@ -44,7 +44,7 @@
                 {{ payment_form.show }}
                 <label for="id_show">List me as a backer.</label>
                 {% else %}
-                <p>To be listed as a backer,<br>please <a class="action" href="{% url 'acct-login' %}">log in</a> or <a class="action" href="{% url 'acct-register' %}">sign up</a>.</p>
+                <p>To be listed as a backer,<br>please <a class="action" href="{% url 'acct-login' %}">log in</a> or <a class="action" href="{% url 'accounts' %}">sign up</a>.</p>
                 <input name="show" value="False" hidden>
                 {% endif %}
             </section>

@@ -13,11 +13,11 @@
 {% for agency in foia.agencies.all %}
 {% if forloop.last %}
 {% if not forloop.first %}
-and 
+and
 {% endif %}
 {{ agency.name }}.
 {% else %}
-{{ agency.name }}, 
+{{ agency.name }},
 {% endif %}
 {% endfor %}</p>
 {% endwith %}
@@ -66,7 +66,7 @@ and
         {% endif %}
     {% endfor %}
     {% if not balance.extra_requests %}
-    <section class="buttons">    
+    <section class="buttons">
         <input type="submit" name="submit" value="Submit" class="primary button" />
         <input type="submit" name="submit" value="Delete" class="failure button" />
     </section>
@@ -74,7 +74,7 @@ and
 </form>
 
 {% if balance.extra_requests %}
-<form action="{% url 'acct-buy-requests' %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+<form action="{% url 'acct-buy-requests' username=request.user.username %}?next={{ foia.get_absolute_url }}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
 <p>You will be submitting {{ requests }} request{{ requests|pluralize }}, but {% if not remaining %}have no requests{% else %}only have {{ remaining }} remaining{%endif%}. You must purchase {{ bundles }} request bundle{{ bundles|pluralize }} before you can submit your request.</p>
 <button data-amount="{{ bundles|mul:'2000' }}"
         data-description="{{ bundles|mul:'5' }} request{{ bundles|mul:'5'|pluralize }} (${{ bundles|mul:'20' }}.00)"

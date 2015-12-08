@@ -98,6 +98,7 @@ class TestDailyNotification(TestCase):
         email = notifications.DailyNotification(self.user)
         logging.info(email.message())
 
+
 class TestDailyTask(TestCase):
     """Tests the daily email notification task."""
     def setUp(self):
@@ -115,6 +116,32 @@ class TestDailyTask(TestCase):
         tasks.daily_notification()
         mock_send.assert_called_once_with(self.staff_user)
         mock_profile_send.assert_called_once()
+
+
+class TestWelcomeTask(TestCase):
+    """Tests the welcome email notification sent to new users."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+
+    @mock.patch('muckrock.message.notifications.WelcomeNotification.send')
+    def test_welcome_notification_task(self, mock_send):
+        """Make sure the notification is actually sent!"""
+        tasks.welcome(self.user)
+        mock_send.assert_called_once()
+
+
+class TestGiftTask(TestCase):
+    """Tests the gift email notification sent to gift recipients."""
+    def setUp(self):
+        self.user = factories.UserFactory()
+        self.sender = factories.UserFactory()
+        self.gift = '4 requests'
+
+    @mock.patch('muckrock.message.notifications.GiftNotification.send')
+    def test_gift_notification_task(self, mock_send):
+        """Make sure the notification is actually sent."""
+        tasks.gift(self.user, self.sender, self.gift)
+        mock_send.assert_called_once()
 
 
 @mock.patch('stripe.Charge', MockCharge)
@@ -206,6 +233,8 @@ class TestSendInvoiceReceiptTask(TestCase):
 @mock.patch('stripe.Invoice', MockInvoice)
 class TestFailedPaymentTask(TestCase):
     """Tests the failed payment task."""
+    # pylint:disable=no-member
+
     def setUp(self):
         mock_invoice.plan.id = 'pro'
         mock_invoice.attempt_count = 1
@@ -216,23 +245,35 @@ class TestFailedPaymentTask(TestCase):
         """Make sure the send method is called for a failed payment notification"""
         tasks.failed_payment(mock_invoice.id)
         mock_send.assert_called_once_with(self.profile.user)
+        self.profile.refresh_from_db()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.accounts.models.Profile.cancel_pro_subscription')
     def test_last_attempt_pro(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's pro subscription"""
+        self.profile.payment_failed = True
+        self.profile.save()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         mock_invoice.attempt_count = 4
         tasks.failed_payment(mock_invoice.id)
+        self.profile.refresh_from_db()
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
+        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')
 
     @mock.patch('muckrock.message.notifications.FailedPaymentNotification.send')
     @mock.patch('muckrock.organization.models.Organization.cancel_subscription')
     def test_last_attempt_org(self, mock_send, mock_cancel):
         """After the last attempt at payment, cancel the user's org subscription"""
+        self.profile.payment_failed = True
+        self.profile.save()
+        ok_(self.profile.payment_failed, 'The payment failed flag should be raised.')
         factories.OrganizationFactory(owner=self.profile.user)
         mock_invoice.attempt_count = 4
         mock_invoice.plan.id = 'org'
         tasks.failed_payment(mock_invoice.id)
+        self.profile.refresh_from_db()
         mock_send.assert_called_once_with(self.profile.user)
         mock_cancel.assert_called_once()
+        ok_(not self.profile.payment_failed, 'The payment failed flag should be lowered.')

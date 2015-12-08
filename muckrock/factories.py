@@ -21,7 +21,7 @@ class ProfileFactory(factory.django.DjangoModelFactory):
         model = Profile
 
     user = factory.SubFactory('muckrock.factories.UserFactory', profile=None)
-    acct_type = 'community'
+    acct_type = 'basic'
     date_update = datetime.datetime.now()
 
 

@@ -240,6 +240,7 @@ class Organization(models.Model):
             subscription = subscription.delete()
             self.stripe_id = ''
             self.owner.profile.subscription_id = ''
+            self.owner.profile.payment_failed = False
         except stripe.InvalidRequestError:
             logger.error(('No subscription is associated with organization '
                          'owner %s.'), self.owner.username)

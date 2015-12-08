@@ -1,0 +1,185 @@
+.account.plans {
+    & > header {
+        @include display(flex);
+        @include justify-content(space-between);
+        @include flex-direction(column);
+        @include media($large-layout) {
+            @include flex-direction(row);
+        }
+        p {
+            max-width: 20em;
+        }
+    }
+    & > main {
+        @include display(flex);
+        &.hidden {
+            display: none;
+        }
+        @include flex-direction(column);
+        @include align-items(center);
+        @media all and (min-width: 768px) {
+            @include flex-direction(row);
+            @include align-items(stretch);
+            @include justify-content(space-around);
+        }
+    }
+    .plan {
+        @include flex(1);
+        @include display(flex);
+        @include flex-direction(column);
+        @include justify-content(space-between);
+        @include border;
+        @include border-radius;
+        overflow: hidden;
+        max-width: 40em;
+        background: #fff;
+        border-color: $color-blue-dark;
+        main, footer {
+            padding: $vertical-rhythm;
+        }
+        header {
+            padding-top: $vertical-rhythm;
+            text-align: center;
+            background: $color-blue-light;
+            color: $color-blue-dark;
+            h2 {
+                font-weight: $font-weight-bold;
+            }
+        }
+        .superlative {
+            @extend dfn;
+            padding: 2px;
+            background: $color-grey-7;
+            // margin-bottom: 0;
+            text-align: center;
+        }
+        .button, button {
+            width: 100%;
+        }
+        @media all and (min-width: 768px) {
+            margin-bottom: 0;
+            margin-right: $vertical-rhythm;
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+    .current-plan {
+        color: $color-green;
+        border: 2px solid;
+        @include border-radius;
+        padding: $vertical-rhythm/4;
+        font-weight: $font-weight-bold;
+        text-align: center;
+    }
+}
+
+.account.signup {
+    .form {
+        margin-bottom: 0;
+        .fields {
+            @include display(flex);
+            @include flex-wrap(wrap);
+            .field {
+                @include flex(1 0 100%);
+            }
+            .errorlist {
+                list-style: none;
+                margin-bottom: 0;
+                padding-left: 0;
+            }
+            @include media($medium-layout) {
+                .field {
+                    @include flex(1 0 50%);
+                    &:nth-child(odd) {
+                        padding-right: $vertical-rhythm;
+                    }
+                    &:last-child {
+                        padding-right: 0;
+                    }
+                }
+            }
+            input {
+                width: 100%;
+            }
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+
+    }
+    .cancel {
+        cursor: pointer;
+        color: $color-blue;
+        border-bottom: 1px dotted;
+        &:hover {
+            text-decoration: none;
+            color: $color-blue-dark;
+            border-bottom-style: solid;
+        }
+    }
+}
+
+.account.settings {
+    $breakpoint: 768px;
+    @include display(flex);
+    @include align-items(stretch);
+    @include flex-direction(column);
+    @media all and (min-width: $breakpoint) {
+        @include flex-direction(row);
+        .request.main {
+            margin-left: $vertical-rhythm * 2;
+        }
+    }
+    header {
+        @include flex(1);
+    }
+    main {
+        @include flex(3);
+    }
+    .form {
+        border-radius: 0;
+        max-width: 40em;
+        input {
+            width: 100%;
+        }
+        table {
+            p {
+                margin-bottom: 0;
+            }
+        }
+        footer {
+            @include display(flex);
+            @include justify-content(space-between);
+            @include align-items(center);
+        }
+        .required label::after {
+            content: 'Required';
+            color: $color-blue;
+            margin-left: $vertical-rhythm/4;
+        }
+        .errors {
+            .errorlist {
+                margin-bottom: 0;
+                padding-left: 0;
+                list-style: none;
+                float: right;
+            }
+            label {
+                float: left;
+            }
+            label::after {
+                color: $color-red;
+            }
+            input {
+                background: $color-red-light;
+                color: $color-red-dark;
+            }
+        }
+    }
+    .billing td:nth-child(2n) {
+        text-align: right;
+    }
+}

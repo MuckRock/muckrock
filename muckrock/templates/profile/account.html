@@ -2,7 +2,7 @@
 {% load markdown_deux_tags %}
 {% load static from staticfiles %}
 
-{% block title %}MuckRock &bull; {{ user_obj.username|capfirst }}{% endblock title %}
+{% block title %}{{ user_obj.username|capfirst }}{% endblock title %}
 {% block type %}account{% endblock type %}
 
 {% block metadata %}
@@ -34,7 +34,7 @@
             {% endif %}
         {% endif %}
 
-        {% if user.profile.get_acct_type_display != 'Community' %}
+        {% if user.profile.acct_type != 'basic' %}
         <dt>Monthly Requests</dt>
             {% if user_obj.profile.get_monthly_requests %}
         <dd>{{ user_obj.profile.get_monthly_requests }}</dd>
@@ -55,31 +55,32 @@
 
 {% block activity %}
 <main class="activity">
-    {% if request.user == user_obj %}
+
     <section class="actions">
-        <form action="{% url 'acct-buy-requests' %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
+        <form action="{% url 'acct-buy-requests' username=user_obj.username %}" method="POST" class="hidden-stripe-handler" id="buy-requests">{% csrf_token %}</form>
         <div class="controls">
+            {% if request.user.is_authenticated %}
             <button data-amount="2000"
-                    data-description="4 requests ($20.00)"
+                    data-description="{{request.user.profile.bundled_requests}} requests ($20.00)"
                     data-email="{{ request.user.email }}"
                     data-form="#buy-requests"
                     data-label=""
-                    class="checkout-button primary">Buy Requests</button>
-            {% if not user_obj.profile.email_confirmed %}
-            <a href="{% url 'acct-verify-email' %}" class="button">Verify Email</a>
-            {% endif %}
-            <a href="{% url 'acct-update' %}" class="button">Settings</a>
-            <a href="{% url 'acct-change-pw' %}" class="button">Change Password</a>
-        {% with user_obj.profile.organization as org %}
-            {% if org and org.owner == user_obj %}
-            <a href="{% url 'org-detail' org.slug %}" class="button" title="{{org}}'s organization page">Manage Organization</a>
+                    class="checkout-button primary">
+                    {% if request.user == user_obj %}Buy Requests{% else %}&hearts; Gift Requests{% endif %}
+            </button>
+            {% if request.user == user_obj %}<a href="{% url 'acct-settings' %}" class="button">Settings</a>{% endif %}
             {% else %}
-            <a href="{% url 'acct-subscribe' %}" class="button">Manage Subscription</a>
+            <button data-amount="2000"
+                    data-description="4 requests ($20.00)"
+                    data-email=""
+                    data-form="#buy-requests"
+                    data-label=""
+                    class="checkout-button primary">
+                    &hearts; Gift Requests
+            </button>
             {% endif %}
-        {% endwith %}
         </div>
     </section>
-    {% endif %}
     {% if recent_requests or recent_completed %}
     <section class="requests">
         {% if recent_requests %}
@@ -114,7 +115,6 @@
 {% endblock activity %}
 
 {% block scripts %}
-{% if request.user == user_obj %}
 <script src="https://checkout.stripe.com/checkout.js"></script>
 <script>
     $(document).ready(function() {
@@ -133,5 +133,4 @@
         });
     });
 </script>
-{% endif %}
 {% endblock scripts %}

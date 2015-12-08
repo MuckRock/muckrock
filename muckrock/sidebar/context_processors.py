@@ -1,6 +1,6 @@
-"""
-Context processors to ensure data is displayed in sidebar for all views
-"""
+"""Context processors to ensure data is displayed in sidebar for all views"""
+
+from django.contrib.auth.forms import AuthenticationForm
 
 from muckrock.accounts.models import Profile
 from muckrock.foia.models import FOIARequest
@@ -54,13 +54,15 @@ def sidebar_info(request):
     # content for all users
     sidebar_info_dict = {
         'recent_articles': get_recent_articles(),
-        'broadcast': sidebar_broadcast(request.user)
+        'broadcast': sidebar_broadcast(request.user),
+        'login_form': AuthenticationForm()
     }
     if request.user.is_authenticated():
         # content for logged in users
         sidebar_info_dict.update({
             'actionable_requests': get_actionable_requests(request.user),
-            'organization': get_organization(request.user)
+            'organization': get_organization(request.user),
+            'payment_failed': request.user.profile.payment_failed
         })
     else:
         # content for logged out users
