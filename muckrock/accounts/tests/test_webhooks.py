@@ -7,7 +7,7 @@ from django.test import TestCase, RequestFactory
 
 import json
 from mock import patch
-from nose.tools import ok_, eq_
+from nose.tools import eq_
 
 from muckrock.accounts.views import stripe_webhook
 

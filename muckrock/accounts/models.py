@@ -44,6 +44,7 @@ ACCT_TYPES = [
 class Profile(models.Model):
     """User profile information for muckrock"""
     # pylint: disable=too-many-public-methods
+    # pylint: disable=too-many-instance-attributes
 
     email_prefs = (
         ('instant', 'Instant'),
@@ -258,7 +259,7 @@ class Profile(models.Model):
             card = customer.sources.retrieve(customer.default_source)
         return card
 
-    def has_subscription(self, token=None):
+    def has_subscription(self):
         """Check Stripe to see if this user has any active subscriptions."""
         customer = self.customer()
         if customer.subscriptions.total_count > 0:

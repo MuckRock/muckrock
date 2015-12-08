@@ -12,10 +12,12 @@ from mock import Mock, patch
 from nose.tools import eq_, ok_, raises
 
 from muckrock.accounts import views
-from muckrock.factories import UserFactory, ProfileFactory, OrganizationFactory
+from muckrock.factories import UserFactory, OrganizationFactory
 from muckrock.organization.models import Organization
 from muckrock.settings import BUNDLED_REQUESTS
 from muckrock.utils import mock_middleware
+
+# pylint:disable=no-member
 
 def http_get_response(url, view, user=AnonymousUser()):
     """Handles making GET requests, returns the response."""
@@ -34,6 +36,12 @@ def http_post_response(url, view, data, user=AnonymousUser()):
     request.user = user
     response = view(request)
     return response
+
+def http_get_post(url, view, data):
+    """Performs both a GET and a POST on the same url and view."""
+    get_response = http_get_response(url, view)
+    post_response = http_post_response(url, view, data)
+    return (get_response, post_response)
 
 class TestBasicSignupView(TestCase):
     """The BasicSignupView handles registration of basic accounts."""
@@ -248,7 +256,7 @@ class TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        post_response = self.view(post_request, self.user.username)
+        self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(self.user.profile.num_requests, existing_request_count + requests_to_add)
@@ -261,7 +269,7 @@ class TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        post_response = self.view(post_request, self.user.username)
+        self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(self.user.profile.num_requests, existing_request_count + requests_to_add)
@@ -274,7 +282,7 @@ class TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        post_response = self.view(post_request, self.user.username)
+        self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         requests_to_add = 5
         eq_(self.user.profile.num_requests, existing_request_count + requests_to_add)
@@ -288,7 +296,7 @@ class TestBuyRequestsView(TestCase):
         post_request = mock_middleware(post_request)
         # here is the cool part: the request user is the buyer and the URL user is the recipient
         post_request.user = self.user
-        post_response = self.view(post_request, other_user.username)
+        self.view(post_request, other_user.username)
         other_user.profile.refresh_from_db()
         requests_to_add = BUNDLED_REQUESTS[self.user.profile.acct_type]
         eq_(other_user.profile.num_requests, existing_request_count + requests_to_add)
@@ -301,7 +309,7 @@ class TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, self.data)
         post_request = mock_middleware(post_request)
         post_request.user = AnonymousUser()
-        post_response = self.view(post_request, other_user.username)
+        self.view(post_request, other_user.username)
         other_user.profile.refresh_from_db()
         requests_to_add = 4
         eq_(other_user.profile.num_requests, existing_request_count + requests_to_add)
@@ -313,7 +321,7 @@ class TestBuyRequestsView(TestCase):
         post_request = mock_middleware(post_request)
         # here is the cool part: the request user is the buyer and the URL user is the recipient
         post_request.user = self.user
-        post_response = self.view(post_request, 'nonexistant_user')
+        self.view(post_request, 'nonexistant_user')
 
     def test_bad_post_data(self):
         """Bad post data should cancel the transaction."""
@@ -324,7 +332,7 @@ class TestBuyRequestsView(TestCase):
         post_request = self.factory.post(self.url, bad_data)
         post_request = mock_middleware(post_request)
         post_request.user = self.user
-        post_response = self.view(post_request, self.user.username)
+        self.view(post_request, self.user.username)
         self.user.profile.refresh_from_db()
         eq_(self.user.profile.num_requests, existing_request_count)
 
@@ -353,17 +361,13 @@ class TestAccountFunctional(TestCase):
 
     def test_unallowed_views(self):
         """Private URLs should redirect logged-out users to the log in page"""
-        def test_get_post(url, view, data):
-            """Performs both a GET and a POST on the same url and view."""
-            get_response = http_get_response(url, view)
-            post_response = http_post_response(url, view, data)
-            return (get_response, post_response)
+        # pylint:disable=no-self-use
         # my profile
-        get, post = test_get_post(reverse('acct-my-profile'), views.profile, {})
+        get, post = http_get_post(reverse('acct-my-profile'), views.profile, {})
         eq_(get.status_code, 302, 'My profile link reponds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST to my profile link responds with 302.')
         # settings
-        get, post = test_get_post(reverse('acct-settings'), views.settings, {})
+        get, post = http_get_post(reverse('acct-settings'), views.settings, {})
         eq_(get.status_code, 302, 'GET /profile responds with 302 to logged out user.')
         eq_(post.status_code, 302, 'POST /settings reponds with 302 to logged out user.')
 

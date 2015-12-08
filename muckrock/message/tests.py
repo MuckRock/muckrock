@@ -233,6 +233,8 @@ class TestSendInvoiceReceiptTask(TestCase):
 @mock.patch('stripe.Invoice', MockInvoice)
 class TestFailedPaymentTask(TestCase):
     """Tests the failed payment task."""
+    # pylint:disable=no-member
+
     def setUp(self):
         mock_invoice.plan.id = 'pro'
         mock_invoice.attempt_count = 1

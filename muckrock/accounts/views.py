@@ -2,7 +2,6 @@
 Views for the accounts application
 """
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -42,7 +41,7 @@ from muckrock.message.tasks import send_charge_receipt,\
                                    failed_payment,\
                                    welcome,\
                                    gift
-from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY, BUNDLED_REQUESTS
+from muckrock.settings import STRIPE_SECRET_KEY, STRIPE_PUB_KEY
 
 logger = logging.getLogger(__name__)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -224,7 +223,6 @@ def downgrade(request):
 @login_required
 def settings(request):
     """Update a users information"""
-    # TODO display form errors!
     user_profile = request.user.profile
     settings_forms = {
         'profile': ProfileSettingsForm,
@@ -297,12 +295,14 @@ def buy_requests(request, username=None):
             recipient.profile.save()
             # record the purchase
             request.session['ga'] = 'request_purchase'
+            msg = 'Purchase successful. '
             if recipient == purchaser:
-                msg = 'Purchase successful. %d requests have been added to your account.' % request_count
+                msg += '%d requests have been added to your account.' % request_count
             else:
-                msg = 'Purchase successful. %d requests have been gifted to %s' % (request_count, recipient.first_name)
+                msg += '%d requests have been gifted to %s' % (request_count, recipient.first_name)
                 gift_description = '%d requests' % request_count
-                gift.delay(recipient, purchaser, gift_description) # notify the recipient with an email
+                # notify the recipient with an email
+                gift.delay(recipient, purchaser, gift_description)
             messages.success(request, msg)
             logger.info('%s purchased %d requests', purchaser.username, request_count)
     except KeyError as exception:

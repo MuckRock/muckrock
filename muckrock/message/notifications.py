@@ -108,6 +108,7 @@ class DailyNotification(EmailMultiAlternatives):
 
 
 class Notification(EmailMultiAlternatives):
+    """A generic base class for composing notification emails."""
     text_template = None
     subject = None
 

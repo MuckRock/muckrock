@@ -134,5 +134,8 @@ def welcome(user):
 @task(name='muckrock.message.tasks.gift')
 def gift(to_user, from_user, gift_description):
     """Notify the user when they have been gifted requests."""
-    notification = notifications.GiftNotification(to_user, kwargs={'from': from_user, 'gift': gift_description})
+    notification = notifications.GiftNotification(to_user, kwargs={
+        'from': from_user,
+        'gift': gift_description
+    })
     notification.send(fail_silently=False)

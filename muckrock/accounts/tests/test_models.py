@@ -7,11 +7,12 @@ from django.test import TestCase
 from datetime import datetime, date, timedelta
 from mock import Mock, patch
 from nose.tools import ok_, eq_, assert_true, assert_false, raises, nottest
-import stripe
 
 from muckrock.factories import ProfileFactory
 from muckrock.settings import MONTHLY_REQUESTS
 from muckrock.utils import get_stripe_token
+
+# pylint:disable=no-member
 
 # Creates Mock items for testing methods that involve Stripe
 #
@@ -53,11 +54,11 @@ class TestProfileUnit(TestCase):
         expected = "%s's Profile" % unicode(self.profile.user).capitalize()
         eq_(unicode(self.profile), expected)
 
-    def test_get_monthly_requests(self):
+    def test_monthly_requests(self):
         """Normal get number requests just returns the current value"""
         eq_(self.profile.get_monthly_requests(), self.profile.monthly_requests)
 
-    def test_get_monthly_requests_refresh(self):
+    def test_monthly_requests_refresh(self):
         """Get number requests resets the number of requests if its been over a month"""
         self.profile.date_update = datetime.now() - timedelta(32)
         monthly_requests = MONTHLY_REQUESTS[self.profile.acct_type]
@@ -77,6 +78,7 @@ class TestProfileUnit(TestCase):
 
     def test_make_request_pass(self):
         """Make request call decrements number of requests if out of monthly requests"""
+        # pylint:disable=no-self-use
         num_requests = 10
         profile = ProfileFactory(num_requests=num_requests)
         profile.make_request()
@@ -84,6 +86,7 @@ class TestProfileUnit(TestCase):
 
     def test_make_request_fail(self):
         """If out of requests, make request returns false"""
+        # pylint:disable=no-self-use
         profile = ProfileFactory(num_requests=0)
         profile.date_update = datetime.now()
         assert_false(profile.make_request())
@@ -138,6 +141,7 @@ class TestProfileUnit(TestCase):
 
     def test_cancel_legacy_subscription(self):
         """Test ending a pro subscription when missing a subscription ID"""
+        # pylint:disable=no-self-use
         pro_profile = ProfileFactory(acct_type='basic',
                                      monthly_requests=MONTHLY_REQUESTS.get('pro'))
         ok_(not pro_profile.subscription_id)
