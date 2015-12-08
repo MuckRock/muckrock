@@ -112,7 +112,7 @@ class Notification(EmailMultiAlternatives):
     text_template = None
     subject = None
 
-    def __init__(self, user, **kwargs):
+    def __init__(self, user, context={}):
         """Initialize the notification"""
         super(Notification, self).__init__()
         if isinstance(user, User):
@@ -123,11 +123,10 @@ class Notification(EmailMultiAlternatives):
         self.from_email = 'MuckRock <info@muckrock.com>'
         self.bcc = ['diagnostics@muckrock.com']
         self.subject = self.get_subject()
-        self.body = render_to_string(self.get_text_template(), self.get_context_data(**kwargs))
+        self.body = render_to_string(self.get_text_template(), self.get_context_data(context))
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, context):
         """Return init keywords and the user-to-notify as context."""
-        context = kwargs
         context['user'] = self.user
         return context
 
@@ -157,9 +156,9 @@ class WelcomeNotification(Notification):
     text_template = 'text/user/welcome.txt'
     subject = 'Welcome to MuckRock'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, context):
         """Add the email verification link to context."""
-        context = super(WelcomeNotification, self).get_context_data(**kwargs)
+        context = super(WelcomeNotification, self).get_context_data(context)
         verification_url = reverse('acct-verify-email')
         key = self.user.profile.generate_confirmation_key()
         context['verification_link'] = self.user.profile.wrap_url(verification_url, key=key)
